@@ -1,0 +1,7 @@
+# deploy.sh
+
+deploy script for .github/workflows/deploy.yml
+
+```bash
+chmod +x /var/www/shadowapi/deploy.sh
+```
