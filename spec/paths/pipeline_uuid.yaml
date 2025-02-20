@@ -1,0 +1,92 @@
+get:
+  description: Get pipeline
+  operationId: pipeline-get
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Pipeline"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+put:
+  description: Update pipeline
+  operationId: pipeline-update
+  parameters:
+    - description: UUID of the pipeline object.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline object.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              description: Name of the client.
+              type: string
+            flow:
+              description: Flow JSON to draw.
+              type: object
+              additionalProperties: true
+          required:
+            - name
+            - flow
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Pipeline"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+delete:
+  description: Delete a pipeline
+  operationId: pipeline-delete
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+  responses:
+    "200":
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline

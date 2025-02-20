@@ -1,0 +1,30 @@
+get:
+  description: List OAuth2 client tokens
+  operationId: oauth2-client-token-list
+  parameters:
+    - description: UUID of the datasource base object.
+      in: path
+      name: datasource_uuid
+      required: true
+      schema:
+        description: UUID of the datasource base object.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            description: List of OAuth2 tokens.
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Oauth2ClientToken"
+            type: array
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth
+    - token

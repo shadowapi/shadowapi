@@ -1,0 +1,25 @@
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+  pipeline_uuid:
+    type: string
+  parent_uuid:
+    type: string
+  type:
+    type: string
+  params:
+    type: object
+    additionalProperties: true
+  created_at:
+    format: date-time
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+required:
+  - uuid
+  - pipeline_uuid
+  - type
+  - params

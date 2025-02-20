@@ -1,0 +1,31 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "./sql"
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "query"
+        out: "../pkg/query"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        rename:
+          uuid: "UUID"
+          user_uuid: "UserUUID"
+          datasource_uuid: "DatasourceUUID"
+          oauth2_token_uuid: "OAuth2TokenUUID"
+          imap_server: "IMAPServer"
+          smtp_server: "SMTPServer"
+          smtp_tls: "SMTPTLS"
+        overrides:
+          - column: "*.uuid"
+            go_type:
+              import: "github.com/gofrs/uuid"
+              type: "UUID"
+          - column: "*.*uuid"
+            go_type:
+              import: "github.com/gofrs/uuid"
+              type: "UUID"
+              pointer: true
+          - column: "*.created_at"
+            go_type: time.Time

@@ -1,0 +1,37 @@
+type: object
+description: Data storage settings object.
+additionalProperties: false
+properties:
+  uuid:
+    description: Unique identifier for the storage object.
+    type: string
+    readOnly: true
+  user_uuid:
+    description: Unique identifier for the user associated with the storage object.
+    type: string
+    readOnly: true
+  name:
+    description: Name of the storage object.
+    type: string
+  type:
+    description: Type of the storage object.
+    type: string
+  is_enabled:
+    description: Indicates whether the storage object is enabled.
+    type: boolean
+  updated_at:
+    description: The date and time when the storage object was last updated.
+    format: date-time
+    readOnly: true
+    type: string
+  created_at:
+    description: The date and time when the storage object was created.
+    format: date-time
+    readOnly: true
+    type: string
+required:
+  - uuid
+  - type
+  - is_enabled
+  - created_at
+  - updated_at

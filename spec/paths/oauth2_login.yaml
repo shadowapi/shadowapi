@@ -1,0 +1,46 @@
+post:
+  description: Start OAuth2 login flow
+  operationId: oauth2-client-login
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            client_id:
+              description: Client ID.
+              type: string
+            query:
+              type: object
+              additionalProperties:
+                items:
+                  type: string
+                type: array
+              description: Query parameters.
+          required:
+            - client_id
+            - query
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              auth_code_url:
+                description: Auth code URL.
+                type: string
+            required:
+              - auth_code_url
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth

@@ -1,0 +1,27 @@
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    readOnly: true
+    type: string
+  user:
+    description: "The username used to connect to the PostgreSQL database."
+    type: string
+  password:
+    description: "The password used to connect to the PostgreSQL database."
+    type: string
+  name:
+    description: "The name of the PostgreSQL database."
+    type: string
+  host:
+    description: "The hostname or IP address of the PostgreSQL database server."
+    type: string
+  port:
+    description: "The port number on which the PostgreSQL database server is listening."
+    type: string
+  options:
+    description: "Additional connection options in URL query format."
+    type: string
+required:
+  - name
+  - host

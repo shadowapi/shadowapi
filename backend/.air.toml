@@ -1,0 +1,8 @@
+root = "."
+
+[build]
+cmd = "CGO_ENABLED=0 go build -ldflags '-extldflags \"-static\"' -buildvcs=false -o /tmp/shadowapi ./cmd/shadowapi"
+bin = "/tmp/shadowapi"
+# full_bin = "dlv exec --accept-multiclient --log --headless --listen :2345 --api-version 2 bin/shadowapi --"
+exclude_dir = ["bin", "ui", "cmd/shadowapi/cmd/static"]
+args_bin = ["serve"]

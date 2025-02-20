@@ -1,0 +1,30 @@
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    filename: /opt/traefik/dynamic.yml
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+api:
+  dashboard: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: 1@ilya1.com
+      storage: /opt/traefik/acme.json
+      httpChallenge:
+        entryPoint: web
+
+log:
+  level: INFO
+  filePath: /var/log/traefik/error.log
+
+accessLog:
+  filePath: /var/log/traefik/access.log

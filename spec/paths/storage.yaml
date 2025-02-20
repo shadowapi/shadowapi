@@ -1,0 +1,38 @@
+get:
+  description: Retrieve a list of data storage objects.
+  operationId: storage-list
+  parameters:
+    - description: The number of records to skip for pagination.
+      explode: false
+      in: query
+      name: offset
+      schema:
+        description: The number of records to skip for pagination.
+        format: int32
+        type: integer
+    - description: The maximum number of records to return.
+      explode: false
+      in: query
+      name: limit
+      schema:
+        description: The maximum number of records to return.
+        format: int32
+        type: integer
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            description: A list of data storage objects.
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Storage"
+            type: array
+      description: Request was successful.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred.
+  tags:
+    - storage

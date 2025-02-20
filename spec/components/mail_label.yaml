@@ -1,0 +1,45 @@
+type: object
+additionalProperties: false
+properties:
+  HTTPStatusCode:
+    format: int64
+    type: integer
+  Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  id:
+    type: string
+  color:
+    type: object
+    additionalProperties: false
+    properties:
+      backgroundColor:
+        type: string
+      textColor:
+        type: string
+  labelListVisibility:
+    type: string
+  messageListVisibility:
+    type: string
+  messagesTotal:
+    format: int64
+    type: integer
+  messagesUnread:
+    format: int64
+    type: integer
+  name:
+    type: string
+  threadsTotal:
+    format: int64
+    type: integer
+  threadsUnread:
+    format: int64
+    type: integer
+  type:
+    type: string
+required:
+  - HTTPStatusCode
+  - Header

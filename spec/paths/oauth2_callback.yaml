@@ -1,0 +1,36 @@
+get:
+  description: Serve OAuth2 client callback
+  operationId: oauth2-client-callback
+  parameters:
+    - description: State UUID.
+      explode: false
+      in: query
+      name: state
+      schema:
+        description: State UUID.
+        type: string
+    - description: OAuth2 code.
+      explode: false
+      in: query
+      name: code
+      schema:
+        description: OAuth2 code.
+        type: string
+  responses:
+    "302":
+      description: Found
+      headers:
+        Location:
+          description: Redirect URL for the browser
+          schema:
+            type: string
+            format: uri
+            example: https://example.com/redirect
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth

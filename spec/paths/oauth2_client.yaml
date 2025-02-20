@@ -1,0 +1,87 @@
+get:
+  description: List OAuth2 clients
+  operationId: oauth2-client-list
+  parameters:
+    - description: Offset records.
+      explode: false
+      in: query
+      name: offset
+      schema:
+        description: Offset records.
+        format: int32
+        type: integer
+    - description: Limit records.
+      explode: false
+      in: query
+      name: limit
+      schema:
+        description: Limit records.
+        format: int32
+        type: integer
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              clients:
+                description: List of OAuth2 clients.
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/Oauth2Client"
+                type: array
+            required:
+              - clients
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth
+post:
+  description: Create OAuth2 client
+  operationId: oauth2-client-create
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              description: ID of the client.
+              type: string
+            name:
+              description: Name of the client.
+              type: string
+            provider:
+              description: Provider of the client.
+              type: string
+            secret:
+              description: Secret of the client.
+              type: string
+          required:
+            - id
+            - name
+            - secret
+            - provider
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Oauth2Client"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth

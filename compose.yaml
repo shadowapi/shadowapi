@@ -1,0 +1,164 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: sa-traefik
+    command:
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.web.address=:80
+    ports:
+      - 80:80
+      - 8800:8080
+    depends_on:
+      - frontend
+    networks:
+      - shadowapi
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  frontend:
+    build:
+      context: front
+      dockerfile: ../devops/frontend.Dockerfile
+    container_name: sa-frontend
+    networks:
+      - shadowapi
+    develop:
+      watch:
+        - action: sync
+          path: ./front
+          target: /app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: ./front/package.json
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shadowapi-front.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.shadowapi-front.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
+  backend:
+    build:
+      context: .
+      dockerfile: devops/backend.Dockerfile
+    container_name: sa-backend
+    working_dir: /app
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      - SA_HOST=0.0.0.0
+      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
+      - SA_LOG_LEVEL=DEBUG
+    networks:
+      - shadowapi
+    volumes:
+      - ./backend:/app/
+      - ./spec:/spec/
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`)&&PathPrefix(`/api/`)||PathPrefix(`/assets/`)
+      - traefik.http.routers.shadowapi-api.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
+  kratos:
+    container_name: sa-kratos
+    restart: always
+    networks:
+      - shadowapi
+    image: oryd/kratos:v1.2.0
+    command: serve --dev --watch-courier --config /home/ory/kratos.yaml
+    environment:
+      - DSN=postgres://shadowapi:shadowapi@sa-db:5432/kratos
+      - SECRETS_DEFAULT=02947bd6d3a2453e53640a9a05ff69b6
+    depends_on:
+      db:
+        condition: service_healthy
+      kratos-migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ./devops/ory/kratos/kratos.yaml:/home/ory/kratos.yaml
+      - ./devops/ory/kratos/identity.schema.json:/home/ory/identity.schema.json
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.middlewares.shadowapi-kratos-stripprefix.stripprefix.prefixes=/auth/user,/auth/admin
+
+      - traefik.http.routers.shadowapi-kratos-user.rule=PathPrefix(`/auth/user`)
+      - traefik.http.routers.shadowapi-kratos-user.middlewares=shadowapi-kratos-stripprefix@docker
+      - traefik.http.routers.shadowapi-kratos-user.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-kratos-user.service=shadowapi-kratos-user
+      - traefik.http.services.shadowapi-kratos-user.loadbalancer.server.port=4433
+
+      - traefik.http.routers.shadowapi-kratos-admin.rule=PathPrefix(`/auth/admin`)
+      - traefik.http.routers.shadowapi-kratos-admin.middlewares=shadowapi-kratos-stripprefix@docker
+      - traefik.http.routers.shadowapi-kratos-admin.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-kratos-admin.service=shadowapi-kratos-admin
+      - traefik.http.services.shadowapi-kratos-admin.loadbalancer.server.port=4434
+  kratos-migrate:
+    container_name: sa-kratos-migrate
+    networks:
+      - shadowapi
+    image: oryd/kratos:v1.2.0
+    command: migrate -c /home/ory/kratos.yaml sql -e --yes
+    environment:
+      - DSN=postgres://shadowapi:shadowapi@sa-db:5432/kratos
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./devops/ory/kratos/kratos.yaml:/home/ory/kratos.yaml
+  db:
+    image: postgres:16-alpine
+    container_name: sa-db
+    restart: always
+    command: ["postgres", "-c", "log_statement=all"]
+    networks:
+      - shadowapi
+    volumes:
+      - ./devops/db-init.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=shadowapi
+      - POSTGRES_USER=shadowapi
+      - POSTGRES_DB=shadowapi
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "shadowapi"]
+      interval: "10s"
+      timeout: "30s"
+      retries: 5
+      start_period: "20s"
+  db-migrate:
+    container_name: sa-db-migrate
+    image: arigaio/atlas:0.30.0
+    networks:
+      - shadowapi
+    command: >
+      schema apply
+      --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable
+      --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable
+      --to file://schema.sql
+      --auto-approve
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./db/schema.sql:/schema.sql
+  nats:
+    image: nats:2.10.23
+    container_name: sa-nats
+    command: ["-js", "--http_port=8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - shadowapi
+volumes:
+  postgres_data:
+    driver: local
+  node_modules:
+    driver: local
+networks:
+  shadowapi:

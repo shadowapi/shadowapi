@@ -1,0 +1,36 @@
+put:
+  description: Set OAuth2 client to the datasource
+  operationId: datasource-set-oauth2-client
+  parameters:
+    - description: UUID of the email datasource.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the email datasource.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            client_id:
+              description: OAuth2 client ID.
+              type: string
+          required:
+            - client_id
+    required: true
+  responses:
+    "204":
+      description: No Content
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - datasource
+    - oauth2

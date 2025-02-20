@@ -1,0 +1,86 @@
+get:
+  description: Get pipeline entry
+  operationId: pipeline-entry-list
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            description: List of pipelines entries.
+            items:
+              $ref: "../openapi.yaml#/components/schemas/PipelineEntry"
+            type: array
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+    - pipeline-entry
+post:
+  description: Create a pipeline entry
+  operationId: pipeline-entry-create
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            uuid:
+              description: UUID of the pipeline entry.
+              type: string
+            pipeline_uuid:
+              description: Pipeline UUID.
+              type: string
+            parent_uuid:
+              description: Parent pipeline entry UUID.
+              type: string
+            type:
+              description: Type of pipeline entry.
+              type: string
+            params:
+              description: Params of the Entry.
+              type: object
+              additionalProperties: true
+          required:
+            - uuid
+            - pipeline_uuid
+            - type
+            - params
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/PipelineEntry"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+    - pipeline-entry

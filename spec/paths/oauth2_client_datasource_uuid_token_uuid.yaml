@@ -1,0 +1,30 @@
+delete:
+  description: Delete OAuth2 client token
+  operationId: oauth2-client-token-delete
+  parameters:
+    - description: UUID of the token to delete.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the token to delete.
+        type: string
+    - description: datasource UUID to get tokens for.
+      in: path
+      name: datasource_uuid
+      required: true
+      schema:
+        description: datasource UUID to get tokens for.
+        type: string
+  responses:
+    "200":
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth
+    - token

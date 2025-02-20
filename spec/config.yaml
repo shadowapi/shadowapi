@@ -1,0 +1,4 @@
+parser:
+  # enables type inference for schemas. Schema parser will try to detect schema type by its properties.
+  infer_types: true
+  allow_remote: true

@@ -1,0 +1,25 @@
+post:
+  description: Create a new PostgreSQL storage instance.
+  operationId: storage-postgres-create
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/StoragePostgres"
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StoragePostgres"
+      description: PostgreSQL storage instance created successfully.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while creating the PostgreSQL storage instance.
+  tags:
+    - storage
+    - storage-postgres

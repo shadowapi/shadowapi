@@ -1,0 +1,112 @@
+get:
+  description: Get pipeline entry
+  operationId: pipeline-entry-get
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+    - description: Entry UUID of the pipeline.
+      in: path
+      name: entry_uuid
+      required: true
+      schema:
+        description: Entry UUID of the pipeline.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/PipelineEntry"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+    - pipeline-entry
+put:
+  description: Update a pipeline entry
+  operationId: pipeline-entry-update
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+    - description: Entry UUID of the pipeline.
+      in: path
+      name: entry_uuid
+      required: true
+      schema:
+        description: Entry UUID of the pipeline.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            params:
+              description: Params of the Entry.
+              type: object
+              additionalProperties: true
+          required:
+            - params
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/PipelineEntry"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+    - pipeline-entry
+delete:
+  description: Delete pipeline entry
+  operationId: pipeline-entry-delete
+  parameters:
+    - description: UUID of the pipeline.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the pipeline.
+        type: string
+    - description: Entry UUID of the pipeline.
+      in: path
+      name: entry_uuid
+      required: true
+      schema:
+        description: Entry UUID of the pipeline.
+        type: string
+  responses:
+    "200":
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+    - pipeline-entry

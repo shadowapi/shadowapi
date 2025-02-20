@@ -1,0 +1,32 @@
+version: v0.13.0
+
+serve:
+  public:
+    base_url: https://demo.shadowapi.com/auth/user/
+  admin:
+    base_url: https://demo.shadowapi.com/auth/admin/
+selfservice:
+  default_browser_return_url: https://demo.shadowapi.com/
+  allowed_return_urls:
+    - https://demo.shadowapi.com/
+    - https://demo.shadowapi.com/callback
+  flows:
+    error:
+      ui_url: https://demo.shadowapi.com/error
+
+    settings:
+      ui_url: https://demo.shadowapi.com/settings
+    recovery:
+      ui_url: https://demo.shadowapi.com/recovery
+    verification:
+      ui_url: https://demo.shadowapi.com/verification
+      after:
+        default_browser_return_url: https://demo.shadowapi.com/
+    logout:
+      after:
+        default_browser_return_url: https://demo.shadowapi.com/login
+    login:
+      ui_url: https://demo.shadowapi.com/login
+
+    registration:
+      ui_url: https://demo.shadowapi.com/signup

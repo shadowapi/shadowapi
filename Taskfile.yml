@@ -1,0 +1,76 @@
+version: "3"
+
+tasks:
+  init:
+    desc: Check if precondition is functioning correctly
+    deps:
+      - front-init
+    cmds:
+      - docker build -t sa-sqlc -f ./devops/sqlc.Dockerfile .
+  clean:
+    desc: Clean docker compose and volumes
+    cmds:
+      - docker compose down -v --rmi all --remove-orphans
+  build-api:
+    desc: Build API backend binary
+    cmds:
+      - go build -o ./bin/shadowapi ./cmd/shadowapi
+  shell:
+    desc: Open dev shell in the container
+    cmds:
+      - docker compose exec backend bash -l
+  db-shell:
+    desc: Open Postgres shell in the container...
+    cmds:
+      - docker compose exec db su - postgres -c "psql -U shadowapi shadowapi"
+  sync-db:
+    desc: migrate database to latest changes in the schema.sql
+    cmds:
+      - |2
+        docker run --rm \
+          --network shadowapi_shadowapi \
+          -v ./db/schema.sql:/schema.sql \
+          --name sa-atlas arigaio/atlas \
+          schema apply \
+            --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable \
+            --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable \
+            --to file://schema.sql \
+            --auto-approve
+  sqlc:
+    desc: regenerate SQL queries package
+    cmds:
+      - |2
+        docker run --rm \
+        -v ./db:/db -v ./backend/pkg:/pkg -w /db \
+        --name sa-sqlc sa-sqlc generate
+    preconditions:
+      - sh: docker images | grep sa-sqlc
+  api-gen-backend:
+    desc: generate API specification
+    dir: ./backend
+    cmds:
+      - go generate
+  api-gen-frontend:
+    desc: generate TypeScript client
+    dir: ./front
+    cmds:
+      - npm run generate-api-client
+  api-gen:
+    deps:
+      - api-gen-backend
+      - api-gen-frontend
+  front-init:
+    desc: Install front dependencies
+    dir: ./front
+    cmds:
+      - npm install
+  playwright-run:
+    desc: Run Playwright tests
+    dir: ./front
+    cmds:
+      - npx playwright test
+  playwright-report:
+    desc: Generate and open Playwright test report
+    dir: ./front
+    cmds:
+      - npx playwright show-report

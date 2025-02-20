@@ -1,0 +1,46 @@
+{
+  "name": "front",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "generate-api-client": "openapi-typescript ../spec/openapi.yaml -o ./src/api/v1.d.ts",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.38.1",
+    "@ory/client": "^1.15.16",
+    "@react-spectrum/tree": "^3.0.0-beta.2",
+    "@spectrum-icons/illustrations": "^3.6.17",
+    "@tanstack/react-query": "^5.62.15",
+    "@xyflow/react": "^12.3.6",
+    "openapi-fetch": "^0.13.4",
+    "path": "^0.12.7",
+    "react": "^18.3.1",
+    "react-aria": "^3.36.0",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "react-router-dom": "^7.1.0",
+    "spectrum-icons": "^0.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@playwright/test": "^1.49.1",
+    "@tanstack/eslint-plugin-query": "^5.62.15",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.13.0",
+    "openapi-typescript": "^7.5.1",
+    "playwright": "^1.49.1",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "^8.18.1",
+    "vite": "^6.0.3"
+  }
+}

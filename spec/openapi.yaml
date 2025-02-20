@@ -1,0 +1,93 @@
+---
+openapi: 3.1.0
+info:
+  title: ShadowAPI
+  version: 0.0.2
+  description: ShadowAPI server
+
+components:
+  schemas:
+    Datasource:
+      $ref: "components/datasource.yaml"
+    DatasourceEmailCreate:
+      $ref: "components/datasource_email_create.yaml"
+    DatasourceEmailUpdate:
+      $ref: "components/datasource_email_update.yaml"
+    Error:
+      $ref: "components/error.yaml"
+    MailLabel:
+      $ref: "components/mail_label.yaml"
+    Oauth2Client:
+      $ref: "components/oauth2_client.yaml"
+    Oauth2ClientToken:
+      $ref: "components/oauth2_client_token.yaml"
+    Pipeline:
+      $ref: "components/pipeline.yaml"
+    PipelineEntry:
+      $ref: "components/pipeline_entry.yaml"
+    PipelineEntryType:
+      $ref: "components/pipeline_entry_type.yaml"
+    Storage:
+      $ref: "components/storage.yaml"
+    StoragePostgres:
+      $ref: "components/storage_postgres.yaml"
+
+  securitySchemes:
+    # Session cookie-based auth (for Ory Kratos sessions)
+    SessionCookieAuth:
+      type: apiKey
+      in: cookie
+      name: ory_kratos_session
+
+    # Bearer token-based auth
+    BearerAuth:
+      type: http
+      scheme: bearer
+      # optional field: bearerFormat: JWT
+
+paths:
+  /datasource/email:
+    $ref: "paths/datasource_email.yaml"
+  /datasource/email/{uuid}:
+    $ref: "paths/datasource_email_uuid.yaml"
+  /datasource/{uuid}/oauth2/client:
+    $ref: "paths/datasource_uuid_oauth2_client.yaml"
+  /datasource/email/{uuid}/run/pipeline:
+    $ref: "paths/datasource_email_uuid_run_pipeline.yaml"
+  /oauth2/callback:
+    $ref: "paths/oauth2_callback.yaml"
+  /oauth2/client:
+    $ref: "paths/oauth2_client.yaml"
+  /oauth2/client/{id}:
+    $ref: "paths/oauth2_client_id.yaml"
+  /oauth2/client/{datasource_uuid}/token:
+    $ref: "paths/oauth2_client_datasource_uuid_token.yaml"
+  /oauth2/client/{datasource_uuid}/token/{uuid}:
+    $ref: "paths/oauth2_client_datasource_uuid_token_uuid.yaml"
+  /oauth2/login:
+    $ref: "paths/oauth2_login.yaml"
+  /pipeline:
+    $ref: "paths/pipeline.yaml"
+  /pipeline/entry/types:
+    $ref: "paths/pipeline_entry_types.yaml"
+  /pipeline/{uuid}:
+    $ref: "paths/pipeline_uuid.yaml"
+  /pipeline/{uuid}/entry:
+    $ref: "paths/pipeline_uuid_entry.yaml"
+  /pipeline/{uuid}/entry/{entry_uuid}:
+    $ref: "paths/pipeline_uuid_entry_uuid.yaml"
+  /storage:
+    $ref: "paths/storage.yaml"
+  /storage/postgres:
+    $ref: "paths/storage_postgres.yaml"
+  /storage/postgres/{uuid}:
+    $ref: "paths/storage_postgres_uuid.yaml"
+
+servers:
+  - description: Local development server
+    url: "http://localtest.me/api/v1"
+
+security:
+  # Logical OR of SessionCookieAuth and BearerAuth
+  - SessionCookieAuth: []
+  - BearerAuth: []

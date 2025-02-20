@@ -1,0 +1,66 @@
+get:
+  description: List email datasources
+  operationId: datasource-email-list
+  security:
+    - SessionCookieAuth: []
+  parameters:
+    - description: Offset records.
+      explode: false
+      in: query
+      name: offset
+      schema:
+        description: Offset records.
+        format: int32
+        type: integer
+    - description: Limit records.
+      explode: false
+      in: query
+      name: limit
+      schema:
+        description: Limit records.
+        format: int32
+        type: integer
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            description: List of datasources.
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Datasource"
+            type: array
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - datasource
+    - datasource-email
+post:
+  description: Create a new email datasource
+  operationId: datasource-email-create
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceEmailCreate"
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Datasource"
+      description: Created
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - datasource
+    - datasource-email

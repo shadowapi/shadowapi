@@ -1,0 +1,83 @@
+get:
+  description: Get email datasources
+  operationId: datasource-email-get
+  parameters:
+    - description: UUID of the email datasource.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the email datasource.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Datasource"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - datasource
+    - datasource-email
+put:
+  description: Update an email datasource
+  operationId: datasource-email-update
+  parameters:
+    - description: UUID of the datasource base object.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the datasource base object.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceEmailUpdate"
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Datasource"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - datasource
+    - datasource-email
+delete:
+  description: Delete an email datasource
+  operationId: datasource-email-delete
+  parameters:
+    - description: UUID of the email datasource.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: UUID of the email datasource.
+        type: string
+  responses:
+    "200":
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - datasource
+    - datasource-email

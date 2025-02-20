@@ -1,0 +1,80 @@
+get:
+  description: Create Pipeline Object
+  operationId: pipeline-list
+  parameters:
+    - description: Offset records.
+      explode: false
+      in: query
+      name: offset
+      schema:
+        description: Offset records.
+        format: int32
+        type: integer
+    - description: Limit records.
+      explode: false
+      in: query
+      name: limit
+      schema:
+        description: Limit records.
+        format: int32
+        type: integer
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              pipelines:
+                description: List of Pipelines.
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/Pipeline"
+                type: array
+            required:
+              - pipelines
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline
+post:
+  description: Create Pipeline
+  operationId: pipeline-create
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              description: Name of the pipeline.
+              type: string
+            flow:
+              description: Flow JSON to draw.
+              type: object
+              additionalProperties: true
+          required:
+            - name
+            - flow
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Pipeline"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - pipeline

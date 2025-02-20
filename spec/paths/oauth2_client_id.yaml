@@ -1,0 +1,95 @@
+get:
+  description: Get OAuth2 client details
+  operationId: oauth2-client-get
+  parameters:
+    - description: ClientID of the OAuth2 client.
+      in: path
+      name: id
+      required: true
+      schema:
+        description: ClientID of the OAuth2 client.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Oauth2Client"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth
+put:
+  description: Update OAuth2 client
+  operationId: oauth2-client-update
+  parameters:
+    - description: ClientID of the OAuth2 client details.
+      in: path
+      name: id
+      required: true
+      schema:
+        description: ClientID of the OAuth2 client details.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              description: Name of the client.
+              type: string
+            provider:
+              description: Provider of the client.
+              type: string
+            secret:
+              description: Secret of the client.
+              type: string
+          required:
+            - name
+            - provider
+            - secret
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Oauth2Client"
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth
+delete:
+  description: Delete OAuth2 client
+  operationId: oauth2-client-delete
+  parameters:
+    - description: ID of the connection base object.
+      in: path
+      name: id
+      required: true
+      schema:
+        description: ID of the connection base object.
+        type: string
+  responses:
+    "200":
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - oauth2-auth

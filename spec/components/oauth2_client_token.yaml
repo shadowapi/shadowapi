@@ -1,0 +1,24 @@
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+  client_id:
+    type: string
+  name:
+    type: string
+  token:
+    type: string
+  created_at:
+    format: date-time
+    type: string
+  updated_at:
+    format: date-time
+    type: string
+required:
+  - uuid
+  - client_id
+  - token
+  - created_at
+  - updated_at
+  - name

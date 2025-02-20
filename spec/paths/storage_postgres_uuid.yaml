@@ -1,0 +1,85 @@
+get:
+  description: Retrieve details of a specific PostgreSQL storage instance by UUID.
+  operationId: storage-postgres-get
+  parameters:
+    - description: The UUID of the PostgreSQL storage instance to retrieve.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: The UUID of the PostgreSQL storage instance.
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StoragePostgres"
+      description: PostgreSQL storage instance details retrieved successfully.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while retrieving the PostgreSQL storage instance details.
+  tags:
+    - storage
+    - storage-postgres
+
+put:
+  description: Update details of a specific PostgreSQL storage instance by UUID.
+  operationId: storage-postgres-update
+  parameters:
+    - description: The UUID of the PostgreSQL storage instance to update.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: The UUID of the PostgreSQL storage instance.
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/StoragePostgres"
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StoragePostgres"
+      description: PostgreSQL storage instance updated successfully.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while updating the PostgreSQL storage instance.
+  tags:
+    - storage
+    - storage-postgres
+
+delete:
+  description: Delete a specific PostgreSQL storage instance by UUID.
+  operationId: storage-postgres-delete
+  parameters:
+    - description: The UUID of the PostgreSQL storage instance to delete.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        description: The UUID of the PostgreSQL storage instance.
+        type: string
+  responses:
+    "200":
+      description: PostgreSQL storage instance deleted successfully.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while deleting the PostgreSQL storage instance.
+  tags:
+    - storage
+    - storage-postgres
