@@ -7,7 +7,7 @@ import (
 type identityKey string
 
 type Identity struct {
-	Id string `json:"id"`
+	ID string `json:"id"`
 }
 
 // WithIdentity stores the identity in the context

@@ -50,7 +50,7 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		// Proceed to the next middleware/handler
 
 		// TODO find machine user
-		newCtx := WithIdentity(req.Context, Identity{Id: "0"})
+		newCtx := WithIdentity(req.Context, Identity{ID: "0"})
 		req.SetContext(newCtx)
 
 		return next(req)
@@ -75,7 +75,7 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		return middleware.Response{}, errors.New("no Identity Id")
 	}
 
-	newCtx := WithIdentity(req.Context, Identity{Id: identity.Id})
+	newCtx := WithIdentity(req.Context, Identity{ID: identity.Id})
 	req.SetContext(newCtx)
 
 	return next(req)

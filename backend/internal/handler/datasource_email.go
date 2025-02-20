@@ -22,7 +22,7 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 		return nil, ErrWithCode(http.StatusUnauthorized, E("not authenticated"))
 	}
 
-	userUUID, err := uuid.FromString(identity.Id)
+	userUUID, err := uuid.FromString(identity.ID)
 	if err != nil {
 		log.Error("failed to parse user uuid", "error", err.Error())
 		return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse user uuid"))
@@ -153,7 +153,7 @@ func (h *Handler) DatasourceEmailUpdate(
 		return nil, ErrWithCode(http.StatusUnauthorized, E("not authenticated"))
 	}
 
-	userUUID, err := uuid.FromString(identity.Id)
+	userUUID, err := uuid.FromString(identity.ID)
 	if err != nil {
 		log.Error("failed to parse user uuid", "error", err.Error())
 		return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse user uuid"))
