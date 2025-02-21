@@ -17,29 +17,29 @@ tasks:
   clean:
     desc: "Clean docker compose and volumes"
     cmds:
-      - docker compose -f docker-compose.dev.yaml down -v --rmi all --remove-orphans
-      - docker compose -f docker-compose.prod.yaml down -v --rmi all --remove-orphans
+      - docker compose down -v --rmi all --remove-orphans
+      - docker compose down -v --rmi all --remove-orphans
 
   dev-up:
     desc: "Spin up all services in development mode"
     cmds:
-      - docker compose -f docker-compose.dev.yaml up -d
+      - docker compose up -d
 
   dev-down:
     desc: "Take down development services"
     cmds:
-      - docker compose -f docker-compose.dev.yaml down
+      - docker compose down
 
   prod-up:
     desc: "Spin up all services in production mode"
     cmds:
-      - docker compose -f docker-compose.prod.yaml build
-      - docker compose -f docker-compose.prod.yaml up -d
+      - docker compose -f ./docker-compose.prod.yaml build
+      - docker compose -f ./docker-compose.prod.yaml up -d
 
   prod-down:
     desc: "Take down production services"
     cmds:
-      - docker compose -f docker-compose.prod.yaml down
+      - docker compose -f ./docker-compose.prod.yaml down
 
   build-api:
     desc: "Build API backend binary locally"
@@ -49,12 +49,12 @@ tasks:
   shell:
     desc: "Open a development shell in the backend container"
     cmds:
-      - docker compose -f docker-compose.dev.yaml exec backend bash -l
+      - docker compose exec backend bash -l
 
   db-shell:
     desc: "Open Postgres shell in the container"
     cmds:
-      - docker compose -f docker-compose.dev.yaml exec db su - postgres -c "psql -U shadowapi shadowapi"
+      - docker compose exec db su - postgres -c "psql -U shadowapi shadowapi"
 
   sync-db:
     desc: "Migrate database to latest changes using Atlas in the dev environment"
