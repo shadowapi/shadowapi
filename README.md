@@ -1,32 +1,80 @@
 # ShadowAPI
 
-ShadowAPI is a versatile tool designed to fetch, store, and search data from various sources, all while providing an intuitive API interface to manage these operations. It simplifies the interaction with data streams, enabling developers to build scalable and robust applications with ease.
+ShadowAPI is a versatile tool designed to fetch, store, and search data from various sources while providing an intuitive API interface to manage these operations. It simplifies data stream interaction and enables developers to build scalable, robust applications with ease.
 
-## Running the Development Server
+## Development Setup
 
-First, you need to install the [task](https://taskfile.dev/installation/) tool, which we use instead of Makefiles. Then, please follow these steps:
+We use [Task](https://taskfile.dev/installation/) instead of traditional Makefiles to manage the project. Make sure Task and Docker Compose are both installed.
 
-- Run the init process with `task init`. It will build Docker images for this project.
-- Run `docker compose watch`. It will start all necessary containers. Please leave the terminal open; DO NOT CLOSE IT.
-- In a new terminal window, run `task sync-db`. It will apply all migrations and sync the development database.
-- open in the browser `http://localtest.me`, and click to [Signup](http://localtest.me/signup) link.
-
-To start the development server, ensure you have Docker Compose installed. Then, use the following command:
-
-Next time, you only need to run this:
+### 1. Initialize
 
 ```bash
-docker compose watch
+task init
 ```
 
-NOTE: sa-backend requires some time to up (air tool inside it installs all dependencies), check logs when it filishes works.
+- Builds necessary images (including an image for SQLC).
+- Installs frontend dependencies.
+
+### 2. Start Development Environment
+
+```bash
+task dev-up
+```
+
+- Spins up all services in development mode (frontend, backend with hot reload, database, etc.).
+
+### 3. Apply Database Migrations
+
+```bash
+task sync-db
+```
+
+- Applies migrations against the development database.
+
+### 4. Access the App
+
+- Open your browser at [http://localtest.me](http://localtest.me).
+- You can sign up via [http://localtest.me/signup](http://localtest.me/signup).
+
+### 5. Stopping the Development Environment
+
+```bash
+task dev-down
+```
+
+---
+
+## Additional Commands
 
 ### Resetting the Development Environment
 
-It is recommended to reset the development environment when significant changes have been made to the code or the Compose file. To wipe out the data and images, run the following command:
-
 ```bash
-docker compose down -v --rmi all --remove-orphans
+task clean
 ```
 
-**Warning:** This command will remove the PostgreSQL database and all associated data.
+- Brings down the dev environment, removes volumes, images, and orphan containers.
+- **Warning:** This permanently deletes all data in the development PostgreSQL database.
+
+### Production Build and Run
+
+```bash
+task prod-up
+```
+
+- Builds optimized production images and spins up containers using `docker-compose.prod.yaml`.
+
+```bash
+task prod-down
+```
+
+- Stops and removes the production environment containers.
+
+---
+
+## Common Tasks
+
+- **Open Shell in Backend Container:** `task shell`
+- **Open Postgres Shell:** `task db-shell`
+- **Regenerate SQL Queries (SQLC):** `task sqlc`
+- **Generate API Specs (Backend + Frontend):** `task api-gen`
+- **Run Playwright Tests (Frontend):** `task playwright-run`

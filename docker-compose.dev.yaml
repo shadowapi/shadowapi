@@ -20,7 +20,7 @@ services:
   frontend:
     build:
       context: front
-      dockerfile: ../devops/frontend.Dockerfile
+      dockerfile: ../devops/frontend.dev.Dockerfile
     container_name: sa-frontend
     networks:
       - shadowapi
@@ -41,7 +41,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: devops/backend.Dockerfile
+      dockerfile: devops/backend.dev.Dockerfile
     container_name: sa-backend
     working_dir: /app
     depends_on:

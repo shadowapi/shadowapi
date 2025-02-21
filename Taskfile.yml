@@ -2,29 +2,62 @@ version: "3"
 
 tasks:
   init:
-    desc: Check if precondition is functioning correctly
+    desc: "Check if precondition is functioning correctly, install frontend deps, build sqlc image"
     deps:
       - front-init
     cmds:
       - docker build -t sa-sqlc -f ./devops/sqlc.Dockerfile .
-  clean:
-    desc: Clean docker compose and volumes
+
+  front-init:
+    desc: "Install frontend dependencies"
+    dir: ./front
     cmds:
-      - docker compose down -v --rmi all --remove-orphans
+      - npm install
+
+  clean:
+    desc: "Clean docker compose and volumes"
+    cmds:
+      - docker compose -f docker-compose.dev.yaml down -v --rmi all --remove-orphans
+      - docker compose -f docker-compose.prod.yaml down -v --rmi all --remove-orphans
+
+  dev-up:
+    desc: "Spin up all services in development mode"
+    cmds:
+      - docker compose -f docker-compose.dev.yaml up -d
+
+  dev-down:
+    desc: "Take down development services"
+    cmds:
+      - docker compose -f docker-compose.dev.yaml down
+
+  prod-up:
+    desc: "Spin up all services in production mode"
+    cmds:
+      - docker compose -f docker-compose.prod.yaml build
+      - docker compose -f docker-compose.prod.yaml up -d
+
+  prod-down:
+    desc: "Take down production services"
+    cmds:
+      - docker compose -f docker-compose.prod.yaml down
+
   build-api:
-    desc: Build API backend binary
+    desc: "Build API backend binary locally"
     cmds:
       - go build -o ./bin/shadowapi ./cmd/shadowapi
+
   shell:
-    desc: Open dev shell in the container
+    desc: "Open a development shell in the backend container"
     cmds:
-      - docker compose exec backend bash -l
+      - docker compose -f docker-compose.dev.yaml exec backend bash -l
+
   db-shell:
-    desc: Open Postgres shell in the container...
+    desc: "Open Postgres shell in the container"
     cmds:
-      - docker compose exec db su - postgres -c "psql -U shadowapi shadowapi"
+      - docker compose -f docker-compose.dev.yaml exec db su - postgres -c "psql -U shadowapi shadowapi"
+
   sync-db:
-    desc: migrate database to latest changes in the schema.sql
+    desc: "Migrate database to latest changes using Atlas in the dev environment"
     cmds:
       - |2
         docker run --rm \
@@ -36,8 +69,9 @@ tasks:
             --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable \
             --to file://schema.sql \
             --auto-approve
+
   sqlc:
-    desc: regenerate SQL queries package
+    desc: "Regenerate SQL queries package"
     cmds:
       - |2
         docker run --rm \
@@ -45,32 +79,33 @@ tasks:
         --name sa-sqlc sa-sqlc generate
     preconditions:
       - sh: docker images | grep sa-sqlc
+
   api-gen-backend:
-    desc: generate API specification
+    desc: "Generate API specification in backend"
     dir: ./backend
     cmds:
       - go generate
+
   api-gen-frontend:
-    desc: generate TypeScript client
+    desc: "Generate TypeScript API client in frontend"
     dir: ./front
     cmds:
       - npm run generate-api-client
+
   api-gen:
+    desc: "Generate API specs (backend & frontend)"
     deps:
       - api-gen-backend
       - api-gen-frontend
-  front-init:
-    desc: Install front dependencies
-    dir: ./front
-    cmds:
-      - npm install
+
   playwright-run:
-    desc: Run Playwright tests
+    desc: "Run Playwright tests"
     dir: ./front
     cmds:
       - npx playwright test
+
   playwright-report:
-    desc: Generate and open Playwright test report
+    desc: "Generate and open Playwright test report"
     dir: ./front
     cmds:
       - npx playwright show-report
