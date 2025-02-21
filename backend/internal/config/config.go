@@ -18,6 +18,8 @@ import (
 
 // Config is the main configuration structure
 type Config struct {
+	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
+
 	// Log settings
 	Log struct {
 		// Level is the log level. Valid values are "debug", "info", "warn", "error".

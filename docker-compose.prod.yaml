@@ -52,6 +52,7 @@ services:
     networks:
       - shadowapi
     volumes:
+      - ./backend:/app/
       - ./spec:/spec/
     labels:
       - traefik.enable=true

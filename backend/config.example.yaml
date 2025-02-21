@@ -1,0 +1,19 @@
+frontend_assets_dir: "./dist"
+log:
+    level: ""
+server:
+    host: ""
+    port: 0
+db: {}
+api:
+    specs_dir: ""
+jwt: {}
+auth:
+    ory:
+        frontend_api: ""
+    bearer_token: ""
+worker:
+    max_count: 0
+queue:
+    url: ""
+    prefix: ""

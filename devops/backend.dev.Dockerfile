@@ -1,18 +1,12 @@
-# --- Build Stage ---
-FROM golang:1.23.1-alpine AS builder
-
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-RUN go build -o /shadowapi ./cmd/shadowapi
-
-# --- Final Stage ---
 FROM golang:1.23.1-alpine
 
 WORKDIR /app
-COPY --from=builder /shadowapi ./shadowapi
 
-EXPOSE 8080
-CMD ["./shadowapi"]
+# install bash in alpine without update
+RUN apk add --no-cache bash
+
+RUN \
+  go install github.com/air-verse/air@v1.52.3 && \
+  go install github.com/go-delve/delve/cmd/dlv@v1.22.1
+
+CMD ["air", "-c", ".air.toml"]

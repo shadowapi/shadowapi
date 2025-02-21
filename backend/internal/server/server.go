@@ -24,6 +24,7 @@ type Server struct {
 	api          *api.Server
 	listener     net.Listener
 	specsHandler http.Handler
+	//frontendHandler http.Handler
 }
 
 // Provide server instance for the dependency injector
@@ -55,11 +56,20 @@ func Provide(i do.Injector) (*Server, error) {
 		specsHandler = http.StripPrefix("/assets/docs/api", http.FileServer(http.Dir(cfg.API.SpecsDir)))
 	}
 
+	// Set the frontend assets directory.
+	//frontendAssetsDir := "./dist"
+	//if cfg.FrontendAssetsDir != "" {
+	//	frontendAssetsDir = cfg.FrontendAssetsDir
+	//}
+	//log.Info("serving frontend assets", "dir", frontendAssetsDir)
+	//frontendHandler := http.FileServer(http.Dir(frontendAssetsDir))
+
 	return &Server{
 		cfg:          cfg,
 		log:          do.MustInvoke[*slog.Logger](i),
 		api:          srv,
 		specsHandler: specsHandler,
+		//frontendHandler: frontendHandler,
 	}, nil
 }
 
