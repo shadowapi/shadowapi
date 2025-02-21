@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "generate-api-client": "openapi-typescript ../spec/openapi.yaml -o ./src/api/v1.d.ts",
     "preview": "vite preview"
@@ -39,7 +39,7 @@
     "globals": "^15.13.0",
     "openapi-typescript": "^7.5.1",
     "playwright": "^1.49.1",
-    "typescript": "~5.6.2",
+    "typescript": "^5.7.3",
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.3"
   }

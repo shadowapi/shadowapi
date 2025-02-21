@@ -31,7 +31,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-front.rule=Host(`${DOMAIN}`)
       - traefik.http.routers.shadowapi-front.entrypoints=${TRAEFIK_ENTRYPOINT}
-      - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
+      - traefik.http.services.shadowapi-front.loadbalancer.server.port=3000
 
   backend:
     build:
@@ -52,7 +52,6 @@ services:
     networks:
       - shadowapi
     volumes:
-      - ./backend:/app/
       - ./spec:/spec/
     labels:
       - traefik.enable=true
