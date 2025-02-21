@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
+    "build:tscheck": "tsc -b && vite build",
     "lint": "eslint .",
     "generate-api-client": "openapi-typescript ../spec/openapi.yaml -o ./src/api/v1.d.ts",
     "preview": "vite preview"
