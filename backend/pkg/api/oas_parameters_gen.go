@@ -2201,3 +2201,35 @@ func decodeStoragePostgresUpdateParams(args [1]string, argsEscaped bool, r *http
 	}
 	return params, nil
 }
+
+// TgSessionVerifyParams is parameters of tg-session-verify operation.
+type TgSessionVerifyParams struct {
+	// Session ID.
+	ID int
+}
+
+func unpackTgSessionVerifyParams(packed middleware.Parameters) (params TgSessionVerifyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "id",
+			In:   "path",
+		}
+		params.ID = packed[key].(int)
+	}
+	return params
+}
+
+func decodeTgSessionVerifyParams(args [0]string, argsEscaped bool, r *http.Request) (params TgSessionVerifyParams, _ error) {
+	// Decode path: id.
+	if err := func() error {
+		// Not used.
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}

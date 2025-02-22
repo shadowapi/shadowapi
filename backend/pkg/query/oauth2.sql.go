@@ -203,12 +203,12 @@ WHERE
 `
 
 type GetOauth2ClientTokensRow struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	ClientID  string             `json:"client_id"`
-	Token     []byte             `json:"token"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	Name      pgtype.Text        `json:"name"`
+	UUID      uuid.UUID   `json:"uuid"`
+	ClientID  string      `json:"client_id"`
+	Token     []byte      `json:"token"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
+	Name      pgtype.Text `json:"name"`
 }
 
 func (q *Queries) GetOauth2ClientTokens(ctx context.Context, clientID string) ([]GetOauth2ClientTokensRow, error) {

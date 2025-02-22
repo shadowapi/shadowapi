@@ -12,37 +12,37 @@ import (
 )
 
 type Datasource struct {
-	UUID            uuid.UUID          `json:"uuid"`
-	UserUUID        *uuid.UUID         `json:"user_uuid"`
-	Name            string             `json:"name"`
-	Type            string             `json:"type"`
-	IsEnabled       bool               `json:"is_enabled"`
-	Oauth2ClientID  pgtype.Text        `json:"oauth2_client_id"`
-	OAuth2TokenUUID *uuid.UUID         `json:"oauth2_token_uuid"`
-	CreatedAt       time.Time          `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	UUID            uuid.UUID   `json:"uuid"`
+	UserUUID        *uuid.UUID  `json:"user_uuid"`
+	Name            string      `json:"name"`
+	Type            string      `json:"type"`
+	IsEnabled       bool        `json:"is_enabled"`
+	Oauth2ClientID  pgtype.Text `json:"oauth2_client_id"`
+	OAuth2TokenUUID *uuid.UUID  `json:"oauth2_token_uuid"`
+	CreatedAt       time.Time   `json:"created_at"`
+	UpdatedAt       time.Time   `json:"updated_at"`
 }
 
 type DatasourceEmail struct {
-	UUID           uuid.UUID          `json:"uuid"`
-	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
-	Email          string             `json:"email"`
-	Password       pgtype.Text        `json:"password"`
-	IMAPServer     pgtype.Text        `json:"imap_server"`
-	SMTPServer     pgtype.Text        `json:"smtp_server"`
-	SMTPTLS        pgtype.Bool        `json:"smtp_tls"`
-	Provider       string             `json:"provider"`
-	CreatedAt      time.Time          `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	UUID           uuid.UUID   `json:"uuid"`
+	DatasourceUUID *uuid.UUID  `json:"datasource_uuid"`
+	Email          string      `json:"email"`
+	Password       pgtype.Text `json:"password"`
+	IMAPServer     pgtype.Text `json:"imap_server"`
+	SMTPServer     pgtype.Text `json:"smtp_server"`
+	SMTPTLS        pgtype.Bool `json:"smtp_tls"`
+	Provider       string      `json:"provider"`
+	CreatedAt      time.Time   `json:"created_at"`
+	UpdatedAt      time.Time   `json:"updated_at"`
 }
 
 type Oauth2Client struct {
-	ID        string             `json:"id"`
-	Name      string             `json:"name"`
-	Provider  string             `json:"provider"`
-	Secret    string             `json:"secret"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Provider  string    `json:"provider"`
+	Secret    string    `json:"secret"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Oauth2State struct {
@@ -51,7 +51,7 @@ type Oauth2State struct {
 	ClientID   string             `json:"client_id"`
 	State      []byte             `json:"state"`
 	CreatedAt  time.Time          `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	UpdatedAt  time.Time          `json:"updated_at"`
 	ExpiredAt  pgtype.Timestamptz `json:"expired_at"`
 }
 
@@ -62,55 +62,129 @@ type Oauth2Subject struct {
 	ClientID   string             `json:"client_id"`
 	Token      []byte             `json:"token"`
 	CreatedAt  time.Time          `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	UpdatedAt  time.Time          `json:"updated_at"`
 	ExpiredAt  pgtype.Timestamptz `json:"expired_at"`
 }
 
 type Oauth2Token struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	ClientID  string             `json:"client_id"`
-	Token     []byte             `json:"token"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID      uuid.UUID `json:"uuid"`
+	ClientID  string    `json:"client_id"`
+	Token     []byte    `json:"token"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Pipeline struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Name      string             `json:"name"`
-	Flow      []byte             `json:"flow"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID      uuid.UUID `json:"uuid"`
+	Name      string    `json:"name"`
+	Flow      []byte    `json:"flow"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type PipelineEntry struct {
-	UUID         uuid.UUID          `json:"uuid"`
-	PipelineUuid *uuid.UUID         `json:"pipeline_uuid"`
-	ParentUuid   *uuid.UUID         `json:"parent_uuid"`
-	Type         string             `json:"type"`
-	Params       []byte             `json:"params"`
-	CreatedAt    time.Time          `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	UUID         uuid.UUID  `json:"uuid"`
+	PipelineUuid *uuid.UUID `json:"pipeline_uuid"`
+	ParentUuid   *uuid.UUID `json:"parent_uuid"`
+	Type         string     `json:"type"`
+	Params       []byte     `json:"params"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 type Storage struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	UserUUID  *uuid.UUID         `json:"user_uuid"`
-	Name      string             `json:"name"`
-	Type      string             `json:"type"`
-	IsEnabled bool               `json:"is_enabled"`
-	Settings  []byte             `json:"settings"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID      uuid.UUID  `json:"uuid"`
+	UserUUID  *uuid.UUID `json:"user_uuid"`
+	Name      string     `json:"name"`
+	Type      string     `json:"type"`
+	IsEnabled bool       `json:"is_enabled"`
+	Settings  []byte     `json:"settings"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+}
+
+type TgAccount struct {
+	ID       int64       `json:"id"`
+	Username pgtype.Text `json:"username"`
+}
+
+type TgCachedChannel struct {
+	ID          int64       `json:"id"`
+	Title       pgtype.Text `json:"title"`
+	Username    pgtype.Text `json:"username"`
+	Broadcast   pgtype.Bool `json:"broadcast"`
+	Forum       pgtype.Bool `json:"forum"`
+	Megagroup   pgtype.Bool `json:"megagroup"`
+	Raw         []byte      `json:"raw"`
+	RawFull     []byte      `json:"raw_full"`
+	FkSessionID int64       `json:"fk_session_id"`
+}
+
+type TgCachedChat struct {
+	ID          int64       `json:"id"`
+	Title       pgtype.Text `json:"title"`
+	Raw         []byte      `json:"raw"`
+	RawFull     []byte      `json:"raw_full"`
+	FkSessionID int64       `json:"fk_session_id"`
+}
+
+type TgCachedUser struct {
+	ID          int64       `json:"id"`
+	FirstName   pgtype.Text `json:"first_name"`
+	LastName    pgtype.Text `json:"last_name"`
+	Username    pgtype.Text `json:"username"`
+	Phone       pgtype.Text `json:"phone"`
+	Raw         []byte      `json:"raw"`
+	RawFull     []byte      `json:"raw_full"`
+	FkSessionID int64       `json:"fk_session_id"`
+}
+
+type TgPeer struct {
+	ID          int64       `json:"id"`
+	FkSessionID int64       `json:"fk_session_id"`
+	PeerType    string      `json:"peer_type"`
+	AccessHash  pgtype.Int8 `json:"access_hash"`
+}
+
+type TgPeersChannel struct {
+	ID          int64 `json:"id"`
+	FkSessionID int64 `json:"fk_session_id"`
+	Pts         int64 `json:"pts"`
+}
+
+type TgPeersUser struct {
+	ID          int64       `json:"id"`
+	FkSessionID int64       `json:"fk_session_id"`
+	Phone       pgtype.Text `json:"phone"`
+}
+
+type TgSession struct {
+	ID           int64       `json:"id"`
+	Phone        string      `json:"phone"`
+	AccountID    int64       `json:"account_id"`
+	Session      []byte      `json:"session"`
+	ContactsHash pgtype.Int8 `json:"contacts_hash"`
+	Description  pgtype.Text `json:"description"`
+	CreatedAt    time.Time   `json:"created_at"`
+	UpdatedAt    time.Time   `json:"updated_at"`
+}
+
+type TgSessionsState struct {
+	ID   int64 `json:"id"`
+	Pts  int64 `json:"pts"`
+	Qts  int64 `json:"qts"`
+	Date int64 `json:"date"`
+	Seq  int64 `json:"seq"`
 }
 
 type User struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Email     string             `json:"email"`
-	Password  string             `json:"password"`
-	FirstName string             `json:"first_name"`
-	LastName  string             `json:"last_name"`
-	IsEnabled bool               `json:"is_enabled"`
-	IsAdmin   bool               `json:"is_admin"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID      uuid.UUID `json:"uuid"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	IsEnabled bool      `json:"is_enabled"`
+	IsAdmin   bool      `json:"is_admin"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -200,6 +200,24 @@ type Handler interface {
 	//
 	// PUT /storage/postgres/{uuid}
 	StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (*StoragePostgres, error)
+	// TgSessionCreate implements tg-session-create operation.
+	//
+	// Create a new Telegram session.
+	//
+	// POST /tg
+	TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (*TG, error)
+	// TgSessionList implements tg-session-list operation.
+	//
+	// List all Telegram sessions for the authenticated user.
+	//
+	// GET /tg
+	TgSessionList(ctx context.Context) (*TgSessionListOK, error)
+	// TgSessionVerify implements tg-session-verify operation.
+	//
+	// Complete the session creation process by verifying the code.
+	//
+	// PUT /tg
+	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

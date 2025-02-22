@@ -324,6 +324,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tg": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all Telegram sessions for the authenticated user. */
+        get: operations["tg-session-list"];
+        /** @description Complete the session creation process by verifying the code. */
+        put: operations["tg-session-verify"];
+        /** @description Create a new Telegram session. */
+        post: operations["tg-session-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -340,6 +359,7 @@ export interface components {
         PipelineEntryType: components["schemas"]["pipeline_entry_type"];
         Storage: components["schemas"]["storage"];
         StoragePostgres: components["schemas"]["storage_postgres"];
+        TG: components["schemas"]["tg"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -512,6 +532,70 @@ export interface components {
             port?: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
+        };
+        /** @description Telegram API session and user representation */
+        "TG-2": {
+            /** @description Session ID */
+            id: number;
+            /** @description Session phone number */
+            phone: string;
+            /** @description Optional description */
+            description?: string | null;
+            /**
+             * Format: date-time
+             * @description Last update time
+             */
+            updated_at: string;
+            /**
+             * Format: date-time
+             * @description Session creation time
+             */
+            created_at: string;
+            /** @description User details */
+            user: {
+                /** @description User ID in Telegram */
+                id?: number;
+                /** @description Username in Telegram */
+                username?: string;
+                /** @description First name */
+                first_name?: string;
+                /** @description Last name */
+                last_name?: string;
+                /** @description User's phone number */
+                phone?: string;
+            };
+        };
+        /** @description Telegram API session and user representation */
+        tg: {
+            /** @description Session ID */
+            id: number;
+            /** @description Session phone number */
+            phone: string;
+            /** @description Optional description */
+            description?: string | null;
+            /**
+             * Format: date-time
+             * @description Last update time
+             */
+            updated_at: string;
+            /**
+             * Format: date-time
+             * @description Session creation time
+             */
+            created_at: string;
+            /** @description User details */
+            user: {
+                /** @description User ID in Telegram */
+                id?: number;
+                /** @description Username in Telegram */
+                username?: string;
+                /** @description First name */
+                first_name?: string;
+                /** @description Last name */
+                last_name?: string;
+                /** @description User's phone number */
+                phone?: string;
+            };
         };
     };
     responses: never;
@@ -1643,6 +1727,121 @@ export interface operations {
                 content?: never;
             };
             /** @description An error occurred while deleting the PostgreSQL storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "tg-session-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of Telegram sessions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Total number of sessions */
+                        total?: number;
+                        sessions?: components["schemas"]["TG-2"][];
+                    };
+                };
+            };
+            /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "tg-session-verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Session ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Hash of the phone code */
+                    phone_code_hash?: string;
+                    /** @description Verification code */
+                    code?: string;
+                    /** @description Optional password for 2FA */
+                    password?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Session verified successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tg"];
+                };
+            };
+            /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "tg-session-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Phone number in international format
+                     * @example +16505551234
+                     */
+                    phone: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Session created successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TG-2"];
+                };
+            };
+            /** @description Error response. */
             default: {
                 headers: {
                     [name: string]: unknown;

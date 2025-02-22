@@ -629,6 +629,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 't': // Prefix: "tg"
+				origElem := elem
+				if l := len("tg"); len(elem) >= l && elem[0:l] == "tg" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
+					case "POST":
+						s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
+					case "PUT":
+						s.handleTgSessionVerifyRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET,POST,PUT")
+					}
+
+					return
+				}
+
+				elem = origElem
 			}
 
 			elem = origElem
@@ -1399,6 +1424,47 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
+				}
+
+				elem = origElem
+			case 't': // Prefix: "tg"
+				origElem := elem
+				if l := len("tg"); len(elem) >= l && elem[0:l] == "tg" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = TgSessionListOperation
+						r.summary = ""
+						r.operationID = "tg-session-list"
+						r.pathPattern = "/tg"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "POST":
+						r.name = TgSessionCreateOperation
+						r.summary = ""
+						r.operationID = "tg-session-create"
+						r.pathPattern = "/tg"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "PUT":
+						r.name = TgSessionVerifyOperation
+						r.summary = ""
+						r.operationID = "tg-session-verify"
+						r.pathPattern = "/tg"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
 				}
 
 				elem = origElem

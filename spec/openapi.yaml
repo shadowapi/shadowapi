@@ -31,6 +31,8 @@ components:
       $ref: "components/storage.yaml"
     StoragePostgres:
       $ref: "components/storage_postgres.yaml"
+    TG:
+      $ref: "components/tg.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -82,6 +84,8 @@ paths:
     $ref: "paths/storage_postgres.yaml"
   /storage/postgres/{uuid}:
     $ref: "paths/storage_postgres_uuid.yaml"
+  /tg:
+    $ref: "paths/tg.yaml"
 
 servers:
   - description: Local development server

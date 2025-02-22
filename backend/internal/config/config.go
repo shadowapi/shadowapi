@@ -73,6 +73,12 @@ type Config struct {
 		Prefix string `yaml:"prefix" json:"prefix" env:"SA_QUEUE_PREFIX" envDefault:"shadowapi"`
 	} `yaml:"queue" json:"queue"`
 
+	// Add cfg.Telegram.AppID, cfg.Telegram.AppHash
+	Telegram struct {
+		AppHash string `yaml:"app_hash" json:"app_hash" env:"TG_APP_HASH" envDefault:""`
+		AppID   int    `yaml:"app_id" json:"app_id" env:"TG_APP_ID" envDefault:""`
+	}
+
 	configPath string
 	ext        string
 }

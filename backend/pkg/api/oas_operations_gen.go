@@ -38,4 +38,7 @@ const (
 	StoragePostgresDeleteOperation      OperationName = "StoragePostgresDelete"
 	StoragePostgresGetOperation         OperationName = "StoragePostgresGet"
 	StoragePostgresUpdateOperation      OperationName = "StoragePostgresUpdate"
+	TgSessionCreateOperation            OperationName = "TgSessionCreate"
+	TgSessionListOperation              OperationName = "TgSessionList"
+	TgSessionVerifyOperation            OperationName = "TgSessionVerify"
 )

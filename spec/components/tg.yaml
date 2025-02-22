@@ -1,0 +1,48 @@
+# spec/components/TG.yaml
+type: object
+description: Telegram API session and user representation
+additionalProperties: false
+properties:
+  id:
+    type: integer
+    description: Session ID
+  phone:
+    type: string
+    description: Session phone number
+  description:
+    type: string
+    nullable: true
+    description: Optional description
+  updated_at:
+    type: string
+    format: date-time
+    description: Last update time
+  created_at:
+    type: string
+    format: date-time
+    description: Session creation time
+  user:
+    type: object
+    description: User details
+    properties:
+      id:
+        type: integer
+        description: User ID in Telegram
+      username:
+        type: string
+        description: Username in Telegram
+      first_name:
+        type: string
+        description: First name
+      last_name:
+        type: string
+        description: Last name
+      phone:
+        type: string
+        description: User's phone number
+required:
+  - id
+  - phone
+  - updated_at
+  - created_at
+  - user

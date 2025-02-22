@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createStorage = `-- name: CreateStorage :one
@@ -96,15 +95,15 @@ type GetStoragesParams struct {
 }
 
 type GetStoragesRow struct {
-	UUID       uuid.UUID          `json:"uuid"`
-	UserUUID   *uuid.UUID         `json:"user_uuid"`
-	Name       string             `json:"name"`
-	Type       string             `json:"type"`
-	IsEnabled  bool               `json:"is_enabled"`
-	Settings   []byte             `json:"settings"`
-	CreatedAt  time.Time          `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	TotalCount int64              `json:"total_count"`
+	UUID       uuid.UUID  `json:"uuid"`
+	UserUUID   *uuid.UUID `json:"user_uuid"`
+	Name       string     `json:"name"`
+	Type       string     `json:"type"`
+	IsEnabled  bool       `json:"is_enabled"`
+	Settings   []byte     `json:"settings"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+	TotalCount int64      `json:"total_count"`
 }
 
 func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]GetStoragesRow, error) {

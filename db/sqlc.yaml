@@ -2,7 +2,9 @@ version: "2"
 sql:
   - engine: "postgresql"
     queries: "./sql"
-    schema: "schema.sql"
+    schema:
+      - "schema.sql"
+      - "tg.sql"
     gen:
       go:
         package: "query"
@@ -18,6 +20,10 @@ sql:
           smtp_server: "SMTPServer"
           smtp_tls: "SMTPTLS"
         overrides:
+          - db_type: BIGINT
+            go_type: int64
+          - db_type: BIGSERIAL
+            go_type: int64
           - column: "*.uuid"
             go_type:
               import: "github.com/gofrs/uuid"
@@ -28,4 +34,6 @@ sql:
               type: "UUID"
               pointer: true
           - column: "*.created_at"
+            go_type: time.Time
+          - column: "*.updated_at"
             go_type: time.Time

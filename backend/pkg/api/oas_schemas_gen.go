@@ -1137,6 +1137,52 @@ func (o OptDateTime) Or(d time.Time) time.Time {
 	return d
 }
 
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptInt32 returns new OptInt32 with value set to v.
 func NewOptInt32(v int32) OptInt32 {
 	return OptInt32{
@@ -1269,6 +1315,69 @@ func (o OptMailLabelColor) Get() (v MailLabelColor, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMailLabelColor) Or(d MailLabelColor) MailLabelColor {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilString returns new OptNilString with value set to v.
+func NewOptNilString(v string) OptNilString {
+	return OptNilString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilString is optional nullable string.
+type OptNilString struct {
+	Value string
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilString was set.
+func (o OptNilString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilString) SetTo(v string) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o OptNilString) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilString) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilString) Or(d string) string {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1985,3 +2094,365 @@ func (s *StoragePostgres) SetOptions(val OptString) {
 
 // StoragePostgresDeleteOK is response for StoragePostgresDelete operation.
 type StoragePostgresDeleteOK struct{}
+
+// Telegram API session and user representation.
+// Ref: #
+type TG struct {
+	// Session ID.
+	ID int `json:"id"`
+	// Session phone number.
+	Phone string `json:"phone"`
+	// Optional description.
+	Description OptNilString `json:"description"`
+	// Last update time.
+	UpdatedAt time.Time `json:"updated_at"`
+	// Session creation time.
+	CreatedAt time.Time `json:"created_at"`
+	// User details.
+	User TGUser `json:"user"`
+}
+
+// GetID returns the value of ID.
+func (s *TG) GetID() int {
+	return s.ID
+}
+
+// GetPhone returns the value of Phone.
+func (s *TG) GetPhone() string {
+	return s.Phone
+}
+
+// GetDescription returns the value of Description.
+func (s *TG) GetDescription() OptNilString {
+	return s.Description
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *TG) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *TG) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUser returns the value of User.
+func (s *TG) GetUser() TGUser {
+	return s.User
+}
+
+// SetID sets the value of ID.
+func (s *TG) SetID(val int) {
+	s.ID = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *TG) SetPhone(val string) {
+	s.Phone = val
+}
+
+// SetDescription sets the value of Description.
+func (s *TG) SetDescription(val OptNilString) {
+	s.Description = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *TG) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *TG) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUser sets the value of User.
+func (s *TG) SetUser(val TGUser) {
+	s.User = val
+}
+
+// User details.
+type TGUser struct {
+	// User ID in Telegram.
+	ID OptInt `json:"id"`
+	// Username in Telegram.
+	Username OptString `json:"username"`
+	// First name.
+	FirstName OptString `json:"first_name"`
+	// Last name.
+	LastName OptString `json:"last_name"`
+	// User's phone number.
+	Phone OptString `json:"phone"`
+}
+
+// GetID returns the value of ID.
+func (s *TGUser) GetID() OptInt {
+	return s.ID
+}
+
+// GetUsername returns the value of Username.
+func (s *TGUser) GetUsername() OptString {
+	return s.Username
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *TGUser) GetFirstName() OptString {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *TGUser) GetLastName() OptString {
+	return s.LastName
+}
+
+// GetPhone returns the value of Phone.
+func (s *TGUser) GetPhone() OptString {
+	return s.Phone
+}
+
+// SetID sets the value of ID.
+func (s *TGUser) SetID(val OptInt) {
+	s.ID = val
+}
+
+// SetUsername sets the value of Username.
+func (s *TGUser) SetUsername(val OptString) {
+	s.Username = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *TGUser) SetFirstName(val OptString) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *TGUser) SetLastName(val OptString) {
+	s.LastName = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *TGUser) SetPhone(val OptString) {
+	s.Phone = val
+}
+
+// Telegram API session and user representation.
+// Ref: #
+type Tg struct {
+	// Session ID.
+	ID int `json:"id"`
+	// Session phone number.
+	Phone string `json:"phone"`
+	// Optional description.
+	Description OptNilString `json:"description"`
+	// Last update time.
+	UpdatedAt time.Time `json:"updated_at"`
+	// Session creation time.
+	CreatedAt time.Time `json:"created_at"`
+	// User details.
+	User TgUser `json:"user"`
+}
+
+// GetID returns the value of ID.
+func (s *Tg) GetID() int {
+	return s.ID
+}
+
+// GetPhone returns the value of Phone.
+func (s *Tg) GetPhone() string {
+	return s.Phone
+}
+
+// GetDescription returns the value of Description.
+func (s *Tg) GetDescription() OptNilString {
+	return s.Description
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Tg) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Tg) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUser returns the value of User.
+func (s *Tg) GetUser() TgUser {
+	return s.User
+}
+
+// SetID sets the value of ID.
+func (s *Tg) SetID(val int) {
+	s.ID = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *Tg) SetPhone(val string) {
+	s.Phone = val
+}
+
+// SetDescription sets the value of Description.
+func (s *Tg) SetDescription(val OptNilString) {
+	s.Description = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Tg) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Tg) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUser sets the value of User.
+func (s *Tg) SetUser(val TgUser) {
+	s.User = val
+}
+
+type TgSessionCreateReq struct {
+	// Phone number in international format.
+	Phone string `json:"phone"`
+}
+
+// GetPhone returns the value of Phone.
+func (s *TgSessionCreateReq) GetPhone() string {
+	return s.Phone
+}
+
+// SetPhone sets the value of Phone.
+func (s *TgSessionCreateReq) SetPhone(val string) {
+	s.Phone = val
+}
+
+type TgSessionListOK struct {
+	// Total number of sessions.
+	Total    OptInt `json:"total"`
+	Sessions []TG   `json:"sessions"`
+}
+
+// GetTotal returns the value of Total.
+func (s *TgSessionListOK) GetTotal() OptInt {
+	return s.Total
+}
+
+// GetSessions returns the value of Sessions.
+func (s *TgSessionListOK) GetSessions() []TG {
+	return s.Sessions
+}
+
+// SetTotal sets the value of Total.
+func (s *TgSessionListOK) SetTotal(val OptInt) {
+	s.Total = val
+}
+
+// SetSessions sets the value of Sessions.
+func (s *TgSessionListOK) SetSessions(val []TG) {
+	s.Sessions = val
+}
+
+type TgSessionVerifyReq struct {
+	// Hash of the phone code.
+	PhoneCodeHash OptString `json:"phone_code_hash"`
+	// Verification code.
+	Code OptString `json:"code"`
+	// Optional password for 2FA.
+	Password OptString `json:"password"`
+}
+
+// GetPhoneCodeHash returns the value of PhoneCodeHash.
+func (s *TgSessionVerifyReq) GetPhoneCodeHash() OptString {
+	return s.PhoneCodeHash
+}
+
+// GetCode returns the value of Code.
+func (s *TgSessionVerifyReq) GetCode() OptString {
+	return s.Code
+}
+
+// GetPassword returns the value of Password.
+func (s *TgSessionVerifyReq) GetPassword() OptString {
+	return s.Password
+}
+
+// SetPhoneCodeHash sets the value of PhoneCodeHash.
+func (s *TgSessionVerifyReq) SetPhoneCodeHash(val OptString) {
+	s.PhoneCodeHash = val
+}
+
+// SetCode sets the value of Code.
+func (s *TgSessionVerifyReq) SetCode(val OptString) {
+	s.Code = val
+}
+
+// SetPassword sets the value of Password.
+func (s *TgSessionVerifyReq) SetPassword(val OptString) {
+	s.Password = val
+}
+
+// User details.
+type TgUser struct {
+	// User ID in Telegram.
+	ID OptInt `json:"id"`
+	// Username in Telegram.
+	Username OptString `json:"username"`
+	// First name.
+	FirstName OptString `json:"first_name"`
+	// Last name.
+	LastName OptString `json:"last_name"`
+	// User's phone number.
+	Phone OptString `json:"phone"`
+}
+
+// GetID returns the value of ID.
+func (s *TgUser) GetID() OptInt {
+	return s.ID
+}
+
+// GetUsername returns the value of Username.
+func (s *TgUser) GetUsername() OptString {
+	return s.Username
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *TgUser) GetFirstName() OptString {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *TgUser) GetLastName() OptString {
+	return s.LastName
+}
+
+// GetPhone returns the value of Phone.
+func (s *TgUser) GetPhone() OptString {
+	return s.Phone
+}
+
+// SetID sets the value of ID.
+func (s *TgUser) SetID(val OptInt) {
+	s.ID = val
+}
+
+// SetUsername sets the value of Username.
+func (s *TgUser) SetUsername(val OptString) {
+	s.Username = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *TgUser) SetFirstName(val OptString) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *TgUser) SetLastName(val OptString) {
+	s.LastName = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *TgUser) SetPhone(val OptString) {
+	s.Phone = val
+}

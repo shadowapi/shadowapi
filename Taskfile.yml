@@ -60,15 +60,17 @@ tasks:
     desc: "Migrate database to latest changes using Atlas in the dev environment"
     cmds:
       - |2
+        cat ./db/schema.sql ./db/tg.sql > ./db/combined.sql
         docker run --rm \
           --network shadowapi_shadowapi \
-          -v ./db/schema.sql:/schema.sql \
+          -v ./db/combined.sql:/combined.sql \
           --name sa-atlas arigaio/atlas \
           schema apply \
             --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable \
             --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable \
-            --to file://schema.sql \
+            --to file://combined.sql \
             --auto-approve
+        rm ./db/combined.sql
 
   sqlc:
     desc: "Regenerate SQL queries package"
