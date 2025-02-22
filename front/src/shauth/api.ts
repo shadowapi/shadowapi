@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { FrontendApi, Configuration } from '@ory/client'
+import { Configuration, FrontendApi } from '@ory/client'
 
 export const FrontendAPI = new FrontendApi(
   new Configuration({
@@ -7,14 +7,27 @@ export const FrontendAPI = new FrontendApi(
     baseOptions: {
       withCredentials: true,
     },
-  }),
-);
+  })
+)
 
-export const useLogout = () => {
-  const logout = useCallback(async () => {
-    const { data } = await FrontendAPI.createBrowserLogoutFlow();
-    window.location.href = data.logout_url;
-  }, []);
+export const useLogout = () =>
+  useCallback(async () => {
+    try {
+      const response = await FrontendAPI.createBrowserLogoutFlow()
+      const logoutUrl = response?.data?.logout_url
 
-  return logout;
-};
+      if (logoutUrl) {
+        window.location.href = logoutUrl
+      } else {
+        console.warn('Logout URL not provided, falling back to manual session cleanup.')
+        localStorage.clear()
+        sessionStorage.clear()
+        window.location.href = '/login' // Fallback redirect
+      }
+    } catch (error) {
+      console.error('Logout failed:', error)
+      localStorage.clear()
+      sessionStorage.clear()
+      window.location.href = '/login' // Fallback in case of API failure
+    }
+  }, [])

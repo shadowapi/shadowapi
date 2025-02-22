@@ -8,42 +8,54 @@
     }
   ],
   "compilerOptions": {
+    /* Module and Target */
     "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ESNext",
+
+    /* Performance and Compatibility */
     "skipLibCheck": true,
-    "target": "esnext",
     "useDefineForClassFields": false,
     "resolveJsonModule": true,
-    "sourceMap": true,
+    "downlevelIteration": true,
 
-    /* Bundler mode */
-    "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    /* Debugging and Output */
+    "sourceMap": true,
+    "pretty": true,
+    "removeComments": false,
+    "stripInternal": true,
+
+    /* JSX and React Support */
     "jsx": "preserve",
     "jsxFactory": "React.createElement",
     "jsxFragmentFactory": "React.Fragment",
 
-    /* Linting */
+    /* Interop and Imports */
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+
+    /* Type Checking and Linting */
+    // TODO make stricter, turn on "tsc -b" in "npm run build", and fix all errors
     "strict": true,
+    "strictNullChecks": false,
     "noImplicitReturns": false,
     "noImplicitAny": false,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "noFallthroughCasInSwitch": true,
-    "downlevelIteration": true,
     "suppressImplicitAnyIndexErrors": true,
-    "strictNullChecks": false,
+
+    /* Experimental and Decorators */
+    "experimentalDecorators": true,
     "emitDecoratorMetadata": false,
-    "pretty": true,
-    "removeComments": false,
-    "stripInternal": true,
+
+    /* Other Options */
+    "noFallthroughCasesInSwitch": true,
+
+    /* Declaration and Type Definitions */
     "declaration": false,
     "declarationMap": false,
-
 
     "baseUrl": ".",
     "paths": {

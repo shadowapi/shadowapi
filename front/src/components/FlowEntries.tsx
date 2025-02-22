@@ -1,27 +1,22 @@
-import {
-  Item,
-  ListView,
-  DragAndDropOptions,
-  Heading,
-} from '@adobe/react-spectrum'
 import type { ListData } from '@adobe/react-spectrum'
-import DragHandle from '@spectrum-icons/workflow/DragHandle';
+import { DragAndDropOptions, Heading, Item, ListView } from '@adobe/react-spectrum'
+import DragHandle from '@spectrum-icons/workflow/DragHandle'
 
 interface Item {
-  id: number;
-  uuid?: string;
-  type?: string;
-  title: string;
-  parent?: number;
+  id: number
+  uuid?: string
+  type?: string
+  title: string
+  parent?: number
 }
 
 export interface FlowEntriesProp {
-  list: ListData<Item>;
-  dragAndDropOptions?: DragAndDropOptions;
+  list: ListData<Item>
+  dragAndDropOptions?: DragAndDropOptions
 }
 
 export const FlowEntries = (props: FlowEntriesProp) => {
-  const { list } = props;
+  const { list } = props
   const renderList: {
     [key: number]: Item & { children: Item[] }
   } = {}
@@ -45,10 +40,15 @@ export const FlowEntries = (props: FlowEntriesProp) => {
             aria-label={`Flow entry ${item.title}`}
             dragAndDropHooks={props.dragAndDropOptions}
           >
-            {(item: Item) => (<Item textValue={item.title}><DragHandle />{item.title}</Item>)}
+            {(item: Item) => (
+              <Item textValue={item.title}>
+                <DragHandle />
+                {item.title}
+              </Item>
+            )}
           </ListView>
         </div>
       ))}
     </>
-  );
+  )
 }

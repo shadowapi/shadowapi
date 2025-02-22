@@ -7,7 +7,7 @@
 #  shadowapi-backend:latest
 
 # Stage 1: Build the Go backend
-FROM golang:1.23.1-alpine AS backend-builder
+FROM golang:1.23.3-alpine AS backend-builder
 WORKDIR /app
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download
@@ -23,7 +23,7 @@ COPY front .
 RUN npm run build
 
 # Stage 3: Final stage - combine both builds into one image
-FROM golang:1.23.1-alpine
+FROM golang:1.23.3-alpine
 WORKDIR /app
 COPY --from=backend-builder /shadowapi /app/shadowapi
 COPY --from=frontend-builder /app/dist /app/dist

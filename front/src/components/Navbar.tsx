@@ -1,17 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  ActionButton,
-  Text,
-  View,
-  Flex,
-} from '@adobe/react-spectrum'
-
+import { ActionButton, Flex, Text, View } from '@adobe/react-spectrum'
 
 interface NavbarProps {
-  Label: string;
-  AriaLabel: string;
-  Icon: React.JSX.Element;
-  URL: string;
+  Label: string
+  AriaLabel: string
+  Icon: React.JSX.Element
+  URL: string
 }
 
 export function Navbar(props: { elements: NavbarProps[] }) {
@@ -19,22 +13,25 @@ export function Navbar(props: { elements: NavbarProps[] }) {
   const navigate = useNavigate()
 
   const isDisabled = (url: string) => {
-    if (url === "/") {
-      return location.pathname === "/"
+    if (url === '/') {
+      return location.pathname === '/'
     }
     return location.pathname.startsWith(url)
   }
 
   return (
-    <View
-      width={{ base: '100%', M: 'size-2400' }}
-      backgroundColor="gray-200"
-      padding="size-200"
-    >
+    <View width={{ base: '100%', M: 'size-2400' }} backgroundColor="gray-200" padding="size-200">
       <Flex direction="column" gap="size-100" alignItems="start">
         {props.elements.map((i: NavbarProps) => (
-          <ActionButton key={i.Label} isQuiet isDisabled={isDisabled(i.URL)} onPress={() => (navigate(i.URL))} aria-label={i.AriaLabel}>
-            {i.Icon && i.Icon}<Text>{i.Label}</Text>
+          <ActionButton
+            key={i.Label}
+            isQuiet
+            isDisabled={isDisabled(i.URL)}
+            onPress={() => navigate(i.URL)}
+            aria-label={i.AriaLabel}
+          >
+            {i.Icon && i.Icon}
+            <Text>{i.Label}</Text>
           </ActionButton>
         ))}
       </Flex>

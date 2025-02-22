@@ -1,6 +1,5 @@
 import { FC, ReactNode } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-
 import { useQuery } from '@tanstack/react-query'
 import { sessionOptions } from './query'
 
@@ -17,7 +16,11 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
     }
   } else if (isError) {
     console.error('error fetching session from auth server', error)
-    return <div>Error '{error.name}': {error.message}</div>
+    return (
+      <div>
+        Error '{error.name}': {error.message}
+      </div>
+    )
   } else {
     return <></>
   }

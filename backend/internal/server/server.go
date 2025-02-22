@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net"
@@ -88,6 +89,13 @@ func (s *Server) Run(ctx context.Context) error {
 
 // ServeHTTP implements the http.Handler interface to wrap the API server
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"message": "ok"})
+		return
+	}
+
 	// catch the API static specs requests, handle them separately
 	if s.specsHandler != nil && strings.HasPrefix(r.URL.Path, "/assets/docs/api") {
 		s.specsHandler.ServeHTTP(w, r)

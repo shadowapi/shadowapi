@@ -1,13 +1,9 @@
-import {
-  Breadcrumbs,
-  Item,
-} from '@adobe/react-spectrum'
-import { FullLayout } from '@/layouts/FullLayout'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 import { ReactFlowProvider } from '@xyflow/react'
 
-import { useNavigate, useParams } from "react-router-dom"
-
-import { Pipeline as PipelineForm } from "@/forms"
+import { Pipeline as PipelineForm } from '@/forms'
+import { FullLayout } from '@/layouts/FullLayout'
 
 export function PipelineEdit() {
   const navigate = useNavigate()
@@ -18,10 +14,12 @@ export function PipelineEdit() {
       <Breadcrumbs
         marginTop="size-200"
         marginStart="size-300"
-        onAction={(key) => { navigate(key.toString()) }}
+        onAction={(key) => {
+          navigate(key.toString())
+        }}
       >
         <Item key="/pipelines">Pipelines</Item>
-        <Item key="march 2020 assets">{uuid === "add" ? "Add" : "Edit"} Pipeline</Item>
+        <Item key="march 2020 assets">{uuid === 'add' ? 'Add' : 'Edit'} Pipeline</Item>
       </Breadcrumbs>
       <ReactFlowProvider>
         <PipelineForm pipelineUUID={uuid!} />

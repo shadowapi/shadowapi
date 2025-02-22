@@ -1,30 +1,16 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  Form,
-  Header,
-  Item,
-  Picker,
-  Switch,
-  TextField,
-  View,
-} from '@adobe/react-spectrum';
-
-import { useState, useEffect, ReactElement } from 'react'
-import { useForm, useWatch, Controller } from "react-hook-form"
+import { ReactElement, useEffect, useState } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-
-import type { components } from '@/api/v1'
-import client from '@/api/client'
-
+import { Button, Divider, Flex, Form, Header, Item, Picker, Switch, TextField, View } from '@adobe/react-spectrum'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DataSourceGrant as DataSourceGrantForm } from './DataSourceGrant'
 
+import client from '@/api/client'
+import type { components } from '@/api/v1'
 
 export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: string }): ReactElement {
   const navigate = useNavigate()
-  const form = useForm<components["schemas"]["storage"]>({})
+  const form = useForm<components['schemas']['storage']>({})
 
   const queryClient = useQueryClient()
   const query = useQuery({
@@ -36,13 +22,13 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
       })
       return data
     },
-    enabled: storageUUID !== "add",
+    enabled: storageUUID !== 'add',
   })
   const modifyMutation = useMutation({
-    mutationFn: async (data: components["schemas"]["storage"]) => {
+    mutationFn: async (data: components['schemas']['storage']) => {
       let resp
-      if (storageUUID === "add") {
-        resp = await client.POST("/storage/postgres", {
+      if (storageUUID === 'add') {
+        resp = await client.POST('/storage/postgres', {
           body: {
             // is_enabled: data.is_enabled || true,
             // name: data.name || '',
@@ -52,7 +38,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
             // provider: data.provider,
             // smtp_server: data.smtp_server,
             // smtp_tls: data.smtp_tls,
-          }
+          },
         })
       } else {
         resp = await client.PUT(`/storage/postgres/{uuid}`, {
@@ -64,7 +50,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
             // password: data.password,
             // smtp_server: data.smtp_server,
             // smtp_tls: data.smtp_tls,
-          }
+          },
         })
       }
       if (resp.error) {
@@ -73,17 +59,17 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
       }
     },
     onSuccess: (data, variable) => {
-      if (storageUUID === "add") {
+      if (storageUUID === 'add') {
         queryClient.invalidateQueries({ queryKey: '/datasource/email' })
       } else {
         queryClient.setQueryData(['/datasource/email/{uuid}', { uuid: variable.uuid }], data)
       }
-    }
+    },
   })
   const deleteMutation = useMutation({
     mutationFn: async (uuid: string) => {
       const resp = await client.DELETE(`/datasource/email/{uuid}`, {
-        params: { path: { uuid: uuid } }
+        params: { path: { uuid: uuid } },
       })
       if (resp.error) {
         form.setError('name', { message: resp.error.detail })
@@ -92,7 +78,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: '/datasource/email' })
-    }
+    },
   })
 
   const datasourceType = useWatch({ control: form.control, name: 'type', defaultValue: '' })
@@ -126,19 +112,19 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
     deleteMutation.mutate(storageUUID, {
       onSuccess: () => {
         navigate('/datasources')
-      }
+      },
     })
   }
 
-  const onSubmit = async (data: components["schemas"]["datasource"]) => {
+  const onSubmit = async (data: components['schemas']['datasource']) => {
     modifyMutation.mutate(data, {
       onSuccess: () => {
         navigate('/datasources')
-      }
+      },
     })
   }
 
-  if (query.isPending && storageUUID !== "add") {
+  if (query.isPending && storageUUID !== 'add') {
     return <></>
   }
 
@@ -153,7 +139,10 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
             rules={{ required: 'Name is required' }}
             render={({ field, fieldState }) => (
               <TextField
-                label="Name" type="text" width="100%" isRequired
+                label="Name"
+                type="text"
+                width="100%"
+                isRequired
                 validationState={fieldState.invalid ? 'invalid' : undefined}
                 errorMessage={fieldState.error?.message}
                 {...field}
@@ -169,7 +158,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
               <Picker
                 label="Type"
                 isRequired
-                isDisabled={storageUUID !== "add"}
+                isDisabled={storageUUID !== 'add'}
                 selectedKey={field.value}
                 onSelectionChange={(key) => form.setValue('type', key.toString())}
                 errorMessage={fieldState.error?.message}
@@ -192,9 +181,13 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                   type="text"
                   isRequired
                   width="100%"
-                  isDisabled={storageUUID !== "add"}
+                  isDisabled={storageUUID !== 'add'}
                   validationState={fieldState.invalid ? 'invalid' : undefined}
                   errorMessage={fieldState.error?.message}
+                  // TODO remove ...spread?
+                  // value={field.value || ''} // Ensure value is always a string
+                  // onChange={(value) => field.onChange(value)} // Explicitly handle change event
+                  // onBlur={field.onBlur}
                   {...field}
                 />
               )}
@@ -208,7 +201,10 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <TextField
-                    label="IMAP Server" type="text" width="100%" isRequired
+                    label="IMAP Server"
+                    type="text"
+                    width="100%"
+                    isRequired
                     validationState={fieldState.invalid ? 'invalid' : undefined}
                     errorMessage={fieldState.error?.message}
                     {...field}
@@ -220,7 +216,10 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <TextField
-                    label="Password" type="password" width="100%" isRequired
+                    label="Password"
+                    type="password"
+                    width="100%"
+                    isRequired
                     validationState={fieldState.invalid ? 'invalid' : undefined}
                     errorMessage={fieldState.error?.message}
                     {...field}
@@ -232,7 +231,10 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <TextField
-                    label="SMTP Server" type="text" width="100%" isRequired
+                    label="SMTP Server"
+                    type="text"
+                    width="100%"
+                    isRequired
                     validationState={fieldState.invalid ? 'invalid' : undefined}
                     errorMessage={fieldState.error?.message}
                     {...field}
@@ -243,34 +245,24 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                 name="smtp_tls"
                 control={form.control}
                 render={({ field }) => (
-                  <Switch
-                    width="100%"
-                    name={field.name}
-                    isSelected={field.value}
-                    onChange={field.onChange}
-                  >Use TLS</Switch>
+                  <Switch width="100%" name={field.name} isSelected={field.value} onChange={field.onChange}>
+                    Use TLS
+                  </Switch>
                 )}
               />
             </>
           )}
           <Flex direction="row" gap="size-100" marginTop="size-300" justifyContent="center">
-            <Button
-              type="submit"
-              variant="cta"
-            >
-              {storageUUID === "add" ? "Create" : "Update"}
+            <Button type="submit" variant="cta">
+              {storageUUID === 'add' ? 'Create' : 'Update'}
             </Button>
-            {storageUUID !== "add" && (
-              <Button
-                type="button"
-                variant="negative"
-                onPress={onDelete}
-              >
+            {storageUUID !== 'add' && (
+              <Button type="button" variant="negative" onPress={onDelete}>
                 Delete
               </Button>
             )}
           </Flex>
-          {showOAuth2Token && storageUUID !== "add" && (
+          {showOAuth2Token && storageUUID !== 'add' && (
             <View marginTop="size-300">
               <Divider marginBottom="size-300" size="S" />
               <DataSourceGrantForm datasourceUUID={storageUUID} tokenUUID={query.data?.oauth2_token_uuid} />

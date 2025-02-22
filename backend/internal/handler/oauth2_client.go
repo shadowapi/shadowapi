@@ -85,9 +85,7 @@ func (h *Handler) OAuth2ClientCreate(
 		Name:      obj.Name,
 		Provider:  obj.Provider,
 		CreatedAt: obj.CreatedAt,
-	}
-	if obj.UpdatedAt.Valid {
-		out.UpdatedAt = obj.UpdatedAt.Time
+		UpdatedAt: obj.UpdatedAt,
 	}
 	return &out, nil
 }
@@ -118,9 +116,7 @@ func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGe
 		Name:      details.Name,
 		Provider:  details.Provider,
 		CreatedAt: details.CreatedAt,
-	}
-	if details.UpdatedAt.Valid {
-		result.UpdatedAt = details.UpdatedAt.Time
+		UpdatedAt: details.UpdatedAt,
 	}
 	return result, nil
 }
@@ -144,10 +140,9 @@ func (h *Handler) OAuth2ClientList(
 			Name:      c.Name,
 			Provider:  c.Provider,
 			CreatedAt: c.CreatedAt,
+			UpdatedAt: c.UpdatedAt,
 		}
-		if c.UpdatedAt.Valid {
-			a.UpdatedAt = c.UpdatedAt.Time
-		}
+
 		out.Clients = append(out.Clients, a)
 	}
 	return out, nil
@@ -234,10 +229,9 @@ func (h *Handler) OAuth2ClientTokenList(
 			Name:      t.Name.String,
 			Token:     string(t.Token),
 			CreatedAt: t.CreatedAt,
+			UpdatedAt: t.UpdatedAt,
 		}
-		if t.UpdatedAt.Valid {
-			a.UpdatedAt = t.UpdatedAt.Time
-		}
+
 		out = append(out, a)
 	}
 	return out, nil
@@ -271,9 +265,8 @@ func (h *Handler) OAuth2ClientUpdate(
 		Name:      raw.Name,
 		Provider:  raw.Provider,
 		CreatedAt: raw.CreatedAt,
+		UpdatedAt: raw.UpdatedAt,
 	}
-	if raw.UpdatedAt.Valid {
-		out.UpdatedAt = raw.UpdatedAt.Time
-	}
+
 	return &out, nil
 }

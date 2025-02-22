@@ -1,21 +1,13 @@
-import {
-  Button,
-  Flex,
-  Form,
-  Header,
-  Item,
-  Picker,
-} from '@adobe/react-spectrum';
-
 import { ReactElement, useEffect, useState } from 'react'
-import { useForm, useWatch, Controller } from "react-hook-form"
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Button, Flex, Form, Header, Item, Picker } from '@adobe/react-spectrum'
 
-import type { components } from '@/api/v1'
 import client from '@/api/client'
+import type { components } from '@/api/v1'
 
 export interface FormData {
-  oauth2_clients: components["schemas"]["Oauth2Client"][]
+  oauth2_clients: components['schemas']['Oauth2Client'][]
   id: string
   name: string
   provider: string
@@ -28,7 +20,7 @@ export function DataSourceAuth({ datasourceUUID: datasourceUUID }: { datasourceU
   const [searchParams] = useSearchParams()
   const methods = useForm<FormData>({
     defaultValues: {
-      'oauth2_clients': [],
+      oauth2_clients: [],
     },
   })
 
@@ -37,7 +29,7 @@ export function DataSourceAuth({ datasourceUUID: datasourceUUID }: { datasourceU
   useEffect(() => {
     const getClients = async () => {
       const resp = await client.GET('/oauth2/client', {
-        params: { query: { "limit": 1000 } },
+        params: { query: { limit: 1000 } },
       })
       methods.setValue('oauth2_clients', resp.data?.clients || [])
     }
@@ -77,15 +69,14 @@ export function DataSourceAuth({ datasourceUUID: datasourceUUID }: { datasourceU
     const loginResp = await client.POST('/oauth2/login', {
       body: {
         client_id: clientID,
-        query: { "datasource_uuid": [datasourceUUID] },
+        query: { datasource_uuid: [datasourceUUID] },
       },
     })
     if (loginResp.error) {
       methods.setError('id', { type: 'manual', message: 'Failed to perform login' })
       return
     }
-    if (loginResp.data?.auth_code_url)
-      window.location.href = loginResp.data?.auth_code_url
+    if (loginResp.data?.auth_code_url) window.location.href = loginResp.data?.auth_code_url
     return
   }
 
@@ -125,12 +116,8 @@ export function DataSourceAuth({ datasourceUUID: datasourceUUID }: { datasourceU
             >
               Add New
             </Button>
-            {clientID !== "add" && (
-              <Button
-                type="submit"
-                variant="cta"
-                isDisabled={clientsCount === 0 || clientID == ""}
-              >
+            {clientID !== 'add' && (
+              <Button type="submit" variant="cta" isDisabled={clientsCount === 0 || clientID == ''}>
                 Authenticate
               </Button>
             )}

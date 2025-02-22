@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import {
   ActionButton,
   Badge,
@@ -9,27 +10,26 @@ import {
   TableHeader,
   TableView,
   Text,
+  View,
 } from '@adobe/react-spectrum'
-import Add from '@spectrum-icons/workflow/Add';
-import Email from '@spectrum-icons/workflow/Email';
-import Edit from '@spectrum-icons/workflow/Edit';
-import { useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
+import Add from '@spectrum-icons/workflow/Add'
+import Edit from '@spectrum-icons/workflow/Edit'
+import Email from '@spectrum-icons/workflow/Email'
+import { useQuery } from '@tanstack/react-query'
 
-import client from "@/api/client"
-
+import client from '@/api/client'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function DataSources() {
   const navigate = useNavigate()
   const query = useQuery({
-    queryKey: ["/datasource/email"],
+    queryKey: ['/datasource/email'],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET("/datasource/email", { signal });
+      const { data } = await client.GET('/datasource/email', { signal })
       return data || []
     },
     retry: false,
-    throwOnError: true,
+    throwOnError: false,
   })
 
   const rows = query.data?.map((item) => {
@@ -44,13 +44,17 @@ export function DataSources() {
   })
 
   const typeRender = (type: string) => {
-    if (type === "email") {
-      return <Badge variant="neutral"><Email /> <Text>Email</Text></Badge>
+    if (type === 'email') {
+      return (
+        <Badge variant="neutral">
+          <Email /> <Text>Email</Text>
+        </Badge>
+      )
     }
     return type
   }
 
-  const stateRedner = ({ state, authFailed }: { state: boolean, authFailed: boolean }) => {
+  const stateRedner = ({ state, authFailed }: { state: boolean; authFailed: boolean }) => {
     if (state) {
       if (authFailed) {
         return <Badge variant="negative">Not Authenticated</Badge>
@@ -60,6 +64,16 @@ export function DataSources() {
     return <Badge variant="negative">Disabled</Badge>
   }
 
+  if (query.isError) {
+    return (
+      <FullLayout>
+        <View padding="size-500">
+          <Text>Failed to load data sources. Please try again later.</Text>
+        </View>
+      </FullLayout>
+    )
+  }
+
   if (query.isPending) {
     return <></>
   }
@@ -67,18 +81,23 @@ export function DataSources() {
   return (
     <FullLayout>
       <Flex direction="column" margin="size-500" gap="size-100" minWidth={0} minHeight={0}>
-        <ActionButton alignSelf="start" onPress={() => navigate("/datasources/add")}><Add /><Text>Add Data Source</Text></ActionButton>
-        <TableView
-          aria-label="Example table with dynamic content"
-          overflowMode="wrap"
-          maxWidth={1000}
-        >
+        <ActionButton alignSelf="start" onPress={() => navigate('/datasources/add')}>
+          <Add />
+          <Text>Add Data Source</Text>
+        </ActionButton>
+        <TableView aria-label="Example table with dynamic content" overflowMode="wrap" maxWidth={1000}>
           <TableHeader>
             <Column key="name">Name</Column>
             <Column key="accountId">Account ID</Column>
-            <Column key="type" maxWidth={130}>Type</Column>
-            <Column key="state" maxWidth={160}>State</Column>
-            <Column key="actions" width={50} hideHeader>Actions</Column>
+            <Column key="type" maxWidth={130}>
+              Type
+            </Column>
+            <Column key="state" maxWidth={160}>
+              State
+            </Column>
+            <Column key="actions" width={50} hideHeader>
+              Actions
+            </Column>
           </TableHeader>
           <TableBody items={rows}>
             {(item) => (
@@ -88,7 +107,7 @@ export function DataSources() {
                 <Cell>{typeRender(item.type)}</Cell>
                 <Cell>{stateRedner(item)}</Cell>
                 <Cell>
-                  <ActionButton onPress={() => navigate("/datasources/" + item.key)}>
+                  <ActionButton onPress={() => navigate('/datasources/' + item.key)}>
                     <Edit />
                   </ActionButton>
                 </Cell>

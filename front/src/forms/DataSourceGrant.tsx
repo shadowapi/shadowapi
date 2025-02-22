@@ -1,14 +1,9 @@
-import {
-  Button,
-  Flex,
-  StatusLight,
-} from '@adobe/react-spectrum';
-
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Button, Flex, StatusLight } from '@adobe/react-spectrum'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { components } from '@/api/v1'
 import client from '@/api/client'
+import type { components } from '@/api/v1'
 
 interface DataSourceGrantProps {
   datasourceUUID: string
@@ -35,7 +30,7 @@ export const DataSourceGrant = (props: DataSourceGrantProps) => {
     ],
     mutationFn: async () => {
       const resp = await client.DELETE('/oauth2/client/{datasource_uuid}/token/{uuid}', {
-        params: { path: { datasource_uuid: props.datasourceUUID, uuid: props.tokenUUID! } }
+        params: { path: { datasource_uuid: props.datasourceUUID, uuid: props.tokenUUID! } },
       })
       if (resp.error) {
         throw new Error(resp.error.detail)
@@ -43,11 +38,12 @@ export const DataSourceGrant = (props: DataSourceGrantProps) => {
     },
     onSuccess: () => {
       // Update the datasource to remove the token
-      const datasource = queryClient.getQueryData<components["schemas"]["datasource"]>(
-        ['/datasource/email/{uuid}', { uuid: props.datasourceUUID }],
-      )
+      const datasource = queryClient.getQueryData<components['schemas']['datasource']>([
+        '/datasource/email/{uuid}',
+        { uuid: props.datasourceUUID },
+      ])
       if (datasource) {
-        datasource.oauth2_token_uuid = ""
+        datasource.oauth2_token_uuid = ''
       }
       queryClient.setQueryData(['/datasource/email/{uuid}', { uuid: props.datasourceUUID }], datasource)
     },
@@ -55,8 +51,8 @@ export const DataSourceGrant = (props: DataSourceGrantProps) => {
 
   return (
     <Flex direction="column" gap="size-200" alignItems="center">
-      <StatusLight variant={query.data?.oauth2_token_uuid ? "positive" : "negative"}>
-        {query.data?.oauth2_token_uuid ? "Connection Is Authenticated" : "Connection Is Not Authenticated"}
+      <StatusLight variant={query.data?.oauth2_token_uuid ? 'positive' : 'negative'}>
+        {query.data?.oauth2_token_uuid ? 'Connection Is Authenticated' : 'Connection Is Not Authenticated'}
       </StatusLight>
       <Flex direction="row" gap="size-100">
         <Button
@@ -64,7 +60,7 @@ export const DataSourceGrant = (props: DataSourceGrantProps) => {
           isDisabled={query.isFetching || mutation.isPending}
           onPress={() => navigate(`/datasources/${query.data?.uuid}/auth`)}
         >
-          {query.data?.oauth2_token_uuid ? "Re-Auth" : "Authenticate"}
+          {query.data?.oauth2_token_uuid ? 'Re-Auth' : 'Authenticate'}
         </Button>
         {query.data?.oauth2_token_uuid && (
           <Button

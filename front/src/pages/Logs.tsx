@@ -1,7 +1,4 @@
-import {
-  Flex,
-  Text,
-} from '@adobe/react-spectrum'
+import { Flex, Text } from '@adobe/react-spectrum'
 
 import { FullLayout } from '@/layouts/FullLayout'
 

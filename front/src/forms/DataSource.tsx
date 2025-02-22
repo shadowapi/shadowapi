@@ -1,30 +1,16 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  Form,
-  Header,
-  Item,
-  Picker,
-  Switch,
-  TextField,
-  View,
-} from '@adobe/react-spectrum';
-
-import { useState, useEffect, ReactElement } from 'react'
-import { useForm, useWatch, Controller } from "react-hook-form"
+import { ReactElement, useEffect, useState } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-
-import type { components } from '@/api/v1'
-import client from '@/api/client'
-
+import { Button, Divider, Flex, Form, Header, Item, Picker, Switch, TextField, View } from '@adobe/react-spectrum'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DataSourceGrant as DataSourceGrantForm } from './DataSourceGrant'
 
+import client from '@/api/client'
+import type { components } from '@/api/v1'
 
 export function DataSource({ datasourceUUID }: { datasourceUUID: string }): ReactElement {
   const navigate = useNavigate()
-  const form = useForm<components["schemas"]["datasource"]>({})
+  const form = useForm<components['schemas']['datasource']>({})
 
   const queryClient = useQueryClient()
   const query = useQuery({
@@ -36,13 +22,13 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
       })
       return data
     },
-    enabled: datasourceUUID !== "add",
+    enabled: datasourceUUID !== 'add',
   })
   const modifyMutation = useMutation({
-    mutationFn: async (data: components["schemas"]["datasource"]) => {
+    mutationFn: async (data: components['schemas']['datasource']) => {
       let resp
-      if (datasourceUUID === "add") {
-        resp = await client.POST("/datasource/email", {
+      if (datasourceUUID === 'add') {
+        resp = await client.POST('/datasource/email', {
           body: {
             is_enabled: data.is_enabled || true,
             name: data.name || '',
@@ -52,7 +38,7 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
             provider: data.provider,
             smtp_server: data.smtp_server,
             smtp_tls: data.smtp_tls,
-          }
+          },
         })
       } else {
         resp = await client.PUT(`/datasource/email/{uuid}`, {
@@ -64,7 +50,7 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
             password: data.password,
             smtp_server: data.smtp_server,
             smtp_tls: data.smtp_tls,
-          }
+          },
         })
       }
       if (resp.error) {
@@ -73,17 +59,17 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
       }
     },
     onSuccess: (data, variable) => {
-      if (datasourceUUID === "add") {
+      if (datasourceUUID === 'add') {
         queryClient.invalidateQueries({ queryKey: '/datasource/email' })
       } else {
         queryClient.setQueryData(['/datasource/email/{uuid}', { uuid: variable.uuid }], data)
       }
-    }
+    },
   })
   const deleteMutation = useMutation({
     mutationFn: async (uuid: string) => {
       const resp = await client.DELETE(`/datasource/email/{uuid}`, {
-        params: { path: { uuid: uuid } }
+        params: { path: { uuid: uuid } },
       })
       if (resp.error) {
         form.setError('name', { message: resp.error.detail })
@@ -92,7 +78,7 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: '/datasource/email' })
-    }
+    },
   })
 
   const datasourceType = useWatch({ control: form.control, name: 'type', defaultValue: '' })
@@ -126,19 +112,19 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
     deleteMutation.mutate(datasourceUUID, {
       onSuccess: () => {
         navigate('/datasources')
-      }
+      },
     })
   }
 
-  const onSubmit = async (data: components["schemas"]["datasource"]) => {
+  const onSubmit = async (data: components['schemas']['datasource']) => {
     modifyMutation.mutate(data, {
       onSuccess: () => {
         navigate('/datasources')
-      }
+      },
     })
   }
 
-  if (query.isPending && datasourceUUID !== "add") {
+  if (query.isPending && datasourceUUID !== 'add') {
     return <></>
   }
 
@@ -153,7 +139,10 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
             rules={{ required: 'Name is required' }}
             render={({ field, fieldState }) => (
               <TextField
-                label="Name" type="text" width="100%" isRequired
+                label="Name"
+                type="text"
+                width="100%"
+                isRequired
                 validationState={fieldState.invalid ? 'invalid' : undefined}
                 errorMessage={fieldState.error?.message}
                 {...field}
@@ -169,7 +158,7 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
               <Picker
                 label="Type"
                 isRequired
-                isDisabled={datasourceUUID !== "add"}
+                isDisabled={datasourceUUID !== 'add'}
                 selectedKey={field.value}
                 onSelectionChange={(key) => form.setValue('type', key.toString())}
                 errorMessage={fieldState.error?.message}
@@ -192,7 +181,7 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
                   type="text"
                   isRequired
                   width="100%"
-                  isDisabled={datasourceUUID !== "add"}
+                  isDisabled={datasourceUUID !== 'add'}
                   validationState={fieldState.invalid ? 'invalid' : undefined}
                   errorMessage={fieldState.error?.message}
                   {...field}
@@ -208,7 +197,10 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <TextField
-                    label="IMAP Server" type="text" width="100%" isRequired
+                    label="IMAP Server"
+                    type="text"
+                    width="100%"
+                    isRequired
                     validationState={fieldState.invalid ? 'invalid' : undefined}
                     errorMessage={fieldState.error?.message}
                     {...field}
@@ -220,7 +212,10 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <TextField
-                    label="Password" type="password" width="100%" isRequired
+                    label="Password"
+                    type="password"
+                    width="100%"
+                    isRequired
                     validationState={fieldState.invalid ? 'invalid' : undefined}
                     errorMessage={fieldState.error?.message}
                     {...field}
@@ -232,7 +227,10 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <TextField
-                    label="SMTP Server" type="text" width="100%" isRequired
+                    label="SMTP Server"
+                    type="text"
+                    width="100%"
+                    isRequired
                     validationState={fieldState.invalid ? 'invalid' : undefined}
                     errorMessage={fieldState.error?.message}
                     {...field}
@@ -243,34 +241,24 @@ export function DataSource({ datasourceUUID }: { datasourceUUID: string }): Reac
                 name="smtp_tls"
                 control={form.control}
                 render={({ field }) => (
-                  <Switch
-                    width="100%"
-                    name={field.name}
-                    isSelected={field.value}
-                    onChange={field.onChange}
-                  >Use TLS</Switch>
+                  <Switch width="100%" name={field.name} isSelected={field.value} onChange={field.onChange}>
+                    Use TLS
+                  </Switch>
                 )}
               />
             </>
           )}
           <Flex direction="row" gap="size-100" marginTop="size-300" justifyContent="center">
-            <Button
-              type="submit"
-              variant="cta"
-            >
-              {datasourceUUID === "add" ? "Create" : "Update"}
+            <Button type="submit" variant="cta">
+              {datasourceUUID === 'add' ? 'Create' : 'Update'}
             </Button>
-            {datasourceUUID !== "add" && (
-              <Button
-                type="button"
-                variant="negative"
-                onPress={onDelete}
-              >
+            {datasourceUUID !== 'add' && (
+              <Button type="button" variant="negative" onPress={onDelete}>
                 Delete
               </Button>
             )}
           </Flex>
-          {showOAuth2Token && datasourceUUID !== "add" && (
+          {showOAuth2Token && datasourceUUID !== 'add' && (
             <View marginTop="size-300">
               <Divider marginBottom="size-300" size="S" />
               <DataSourceGrantForm datasourceUUID={datasourceUUID} tokenUUID={query.data?.oauth2_token_uuid} />
