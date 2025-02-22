@@ -13,10 +13,6 @@ export default defineConfig({
     sourcemap: true,
   },
   server: {
-    host: '0.0.0.0',
-    port: 5173,
-    allowedHosts: ['localtest.me', 'localtest.me:5173', 'localtest.me:3000'],
-    strictPort: true,
-    cors: true,
+    allowedHosts: true,
   },
 })
