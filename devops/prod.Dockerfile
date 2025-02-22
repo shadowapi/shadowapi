@@ -18,7 +18,7 @@ RUN go build -o /shadowapi ./cmd/shadowapi
 FROM node:20.10.0-alpine AS frontend-builder
 WORKDIR /app
 COPY front/package*.json ./
-RUN npm ci
+RUN npm ci --force
 COPY front .
 RUN npm run build
 

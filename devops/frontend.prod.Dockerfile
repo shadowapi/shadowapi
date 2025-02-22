@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy package files and install dependencies
 COPY front/package*.json ./
-RUN npm ci
+RUN npm ci --force
 
 # Copy the rest of the frontend source
 COPY front .
