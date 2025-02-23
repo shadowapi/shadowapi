@@ -1,6 +1,12 @@
 # ShadowAPI
 
-ShadowAPI is a versatile tool designed to fetch, store, and search data from various sources while providing an intuitive API interface to manage these operations. It simplifies data stream interaction and enables developers to build scalable, robust applications with ease.
+ShadowAPI is a spin-off of Reactima CRM (https://reactima.com/).
+
+If you're interested in streaming all your communications from IMAP, Telegram, WhatsApp, and Signal into your system—tagging, processing, and making them available for LLM usage—let's develop it together.
+
+Your feature requests will be prioritized if you can sponsor 20 hours of development per week. Project ownership, licences, and other details can be discussed.
+
+Please contact [@reactima](https://github.com/reactima) for details.
 
 ## Development Setup
 
