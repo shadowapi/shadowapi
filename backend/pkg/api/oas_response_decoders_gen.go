@@ -2560,7 +2560,7 @@ func decodeStoragePostgresUpdateResponse(resp *http.Response) (res *StoragePostg
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeTgSessionCreateResponse(resp *http.Response) (res *TG, _ error) {
+func decodeTgSessionCreateResponse(resp *http.Response) (res *Tg, _ error) {
 	switch resp.StatusCode {
 	case 201:
 		// Code 201.
@@ -2576,7 +2576,7 @@ func decodeTgSessionCreateResponse(resp *http.Response) (res *TG, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response TG
+			var response Tg
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

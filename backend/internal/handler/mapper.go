@@ -16,6 +16,7 @@ func QToDatasource(row query.Datasource) api.Datasource {
 		Type:      row.Type,
 		IsEnabled: row.IsEnabled,
 		CreatedAt: row.CreatedAt,
+		UpdatedAt: row.UpdatedAt,
 	}
 	if row.UserUUID != nil {
 		c.UserUUID = api.OptString{Value: row.UserUUID.String(), Set: true}
@@ -26,9 +27,7 @@ func QToDatasource(row query.Datasource) api.Datasource {
 	if row.Oauth2ClientID.Valid {
 		c.OAuth2ClientID = api.OptString{Value: row.Oauth2ClientID.String, Set: true}
 	}
-	if row.UpdatedAt.Valid {
-		c.UpdatedAt = row.UpdatedAt.Time
-	}
+
 	return c
 }
 
@@ -54,7 +53,7 @@ func QToStorage(row query.GetStoragesRow) api.Storage {
 		Type:      row.Type,
 		IsEnabled: row.IsEnabled,
 		CreatedAt: row.CreatedAt,
-		UpdatedAt: row.UpdatedAt.Time,
+		UpdatedAt: row.UpdatedAt,
 	}
 }
 

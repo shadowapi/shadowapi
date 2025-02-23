@@ -2097,147 +2097,6 @@ type StoragePostgresDeleteOK struct{}
 
 // Telegram API session and user representation.
 // Ref: #
-type TG struct {
-	// Session ID.
-	ID int `json:"id"`
-	// Session phone number.
-	Phone string `json:"phone"`
-	// Optional description.
-	Description OptNilString `json:"description"`
-	// Last update time.
-	UpdatedAt time.Time `json:"updated_at"`
-	// Session creation time.
-	CreatedAt time.Time `json:"created_at"`
-	// User details.
-	User TGUser `json:"user"`
-}
-
-// GetID returns the value of ID.
-func (s *TG) GetID() int {
-	return s.ID
-}
-
-// GetPhone returns the value of Phone.
-func (s *TG) GetPhone() string {
-	return s.Phone
-}
-
-// GetDescription returns the value of Description.
-func (s *TG) GetDescription() OptNilString {
-	return s.Description
-}
-
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *TG) GetUpdatedAt() time.Time {
-	return s.UpdatedAt
-}
-
-// GetCreatedAt returns the value of CreatedAt.
-func (s *TG) GetCreatedAt() time.Time {
-	return s.CreatedAt
-}
-
-// GetUser returns the value of User.
-func (s *TG) GetUser() TGUser {
-	return s.User
-}
-
-// SetID sets the value of ID.
-func (s *TG) SetID(val int) {
-	s.ID = val
-}
-
-// SetPhone sets the value of Phone.
-func (s *TG) SetPhone(val string) {
-	s.Phone = val
-}
-
-// SetDescription sets the value of Description.
-func (s *TG) SetDescription(val OptNilString) {
-	s.Description = val
-}
-
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *TG) SetUpdatedAt(val time.Time) {
-	s.UpdatedAt = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *TG) SetCreatedAt(val time.Time) {
-	s.CreatedAt = val
-}
-
-// SetUser sets the value of User.
-func (s *TG) SetUser(val TGUser) {
-	s.User = val
-}
-
-// User details.
-type TGUser struct {
-	// User ID in Telegram.
-	ID OptInt `json:"id"`
-	// Username in Telegram.
-	Username OptString `json:"username"`
-	// First name.
-	FirstName OptString `json:"first_name"`
-	// Last name.
-	LastName OptString `json:"last_name"`
-	// User's phone number.
-	Phone OptString `json:"phone"`
-}
-
-// GetID returns the value of ID.
-func (s *TGUser) GetID() OptInt {
-	return s.ID
-}
-
-// GetUsername returns the value of Username.
-func (s *TGUser) GetUsername() OptString {
-	return s.Username
-}
-
-// GetFirstName returns the value of FirstName.
-func (s *TGUser) GetFirstName() OptString {
-	return s.FirstName
-}
-
-// GetLastName returns the value of LastName.
-func (s *TGUser) GetLastName() OptString {
-	return s.LastName
-}
-
-// GetPhone returns the value of Phone.
-func (s *TGUser) GetPhone() OptString {
-	return s.Phone
-}
-
-// SetID sets the value of ID.
-func (s *TGUser) SetID(val OptInt) {
-	s.ID = val
-}
-
-// SetUsername sets the value of Username.
-func (s *TGUser) SetUsername(val OptString) {
-	s.Username = val
-}
-
-// SetFirstName sets the value of FirstName.
-func (s *TGUser) SetFirstName(val OptString) {
-	s.FirstName = val
-}
-
-// SetLastName sets the value of LastName.
-func (s *TGUser) SetLastName(val OptString) {
-	s.LastName = val
-}
-
-// SetPhone sets the value of Phone.
-func (s *TGUser) SetPhone(val OptString) {
-	s.Phone = val
-}
-
-// Telegram API session and user representation.
-// Ref: #
 type Tg struct {
 	// Session ID.
 	ID int `json:"id"`
@@ -2331,7 +2190,7 @@ func (s *TgSessionCreateReq) SetPhone(val string) {
 type TgSessionListOK struct {
 	// Total number of sessions.
 	Total    OptInt `json:"total"`
-	Sessions []TG   `json:"sessions"`
+	Sessions []Tg   `json:"sessions"`
 }
 
 // GetTotal returns the value of Total.
@@ -2340,7 +2199,7 @@ func (s *TgSessionListOK) GetTotal() OptInt {
 }
 
 // GetSessions returns the value of Sessions.
-func (s *TgSessionListOK) GetSessions() []TG {
+func (s *TgSessionListOK) GetSessions() []Tg {
 	return s.Sessions
 }
 
@@ -2350,7 +2209,7 @@ func (s *TgSessionListOK) SetTotal(val OptInt) {
 }
 
 // SetSessions sets the value of Sessions.
-func (s *TgSessionListOK) SetSessions(val []TG) {
+func (s *TgSessionListOK) SetSessions(val []Tg) {
 	s.Sessions = val
 }
 

@@ -6989,14 +6989,14 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 //
 // Create a new Telegram session.
 //
-// POST /tg
+// POST /telegram
 func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/tg"),
+		semconv.HTTPRouteKey.String("/telegram"),
 	}
 
 	// Start a span for this request.
@@ -7140,7 +7140,7 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 		}
 	}()
 
-	var response *TG
+	var response *Tg
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -7155,7 +7155,7 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 		type (
 			Request  = *TgSessionCreateReq
 			Params   = struct{}
-			Response = *TG
+			Response = *Tg
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -7203,14 +7203,14 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 //
 // List all Telegram sessions for the authenticated user.
 //
-// GET /tg
+// GET /telegram
 func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/tg"),
+		semconv.HTTPRouteKey.String("/telegram"),
 	}
 
 	// Start a span for this request.
@@ -7383,14 +7383,14 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 //
 // Complete the session creation process by verifying the code.
 //
-// PUT /tg
+// PUT /telegram
 func (s *Server) handleTgSessionVerifyRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-verify"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/tg"),
+		semconv.HTTPRouteKey.String("/telegram"),
 	}
 
 	// Start a span for this request.

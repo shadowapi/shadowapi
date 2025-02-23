@@ -305,8 +305,8 @@ func (UnimplementedHandler) StoragePostgresUpdate(ctx context.Context, req *Stor
 //
 // Create a new Telegram session.
 //
-// POST /tg
-func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (r *TG, _ error) {
+// POST /telegram
+func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (r *Tg, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -314,7 +314,7 @@ func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionC
 //
 // List all Telegram sessions for the authenticated user.
 //
-// GET /tg
+// GET /telegram
 func (UnimplementedHandler) TgSessionList(ctx context.Context) (r *TgSessionListOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -323,7 +323,7 @@ func (UnimplementedHandler) TgSessionList(ctx context.Context) (r *TgSessionList
 //
 // Complete the session creation process by verifying the code.
 //
-// PUT /tg
+// PUT /telegram
 func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (r *Tg, _ error) {
 	return r, ht.ErrNotImplemented
 }

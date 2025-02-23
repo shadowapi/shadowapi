@@ -204,19 +204,19 @@ type Handler interface {
 	//
 	// Create a new Telegram session.
 	//
-	// POST /tg
-	TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (*TG, error)
+	// POST /telegram
+	TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (*Tg, error)
 	// TgSessionList implements tg-session-list operation.
 	//
 	// List all Telegram sessions for the authenticated user.
 	//
-	// GET /tg
+	// GET /telegram
 	TgSessionList(ctx context.Context) (*TgSessionListOK, error)
 	// TgSessionVerify implements tg-session-verify operation.
 	//
 	// Complete the session creation process by verifying the code.
 	//
-	// PUT /tg
+	// PUT /telegram
 	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//

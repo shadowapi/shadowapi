@@ -225,19 +225,19 @@ type Invoker interface {
 	//
 	// Create a new Telegram session.
 	//
-	// POST /tg
-	TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (*TG, error)
+	// POST /telegram
+	TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (*Tg, error)
 	// TgSessionList invokes tg-session-list operation.
 	//
 	// List all Telegram sessions for the authenticated user.
 	//
-	// GET /tg
+	// GET /telegram
 	TgSessionList(ctx context.Context) (*TgSessionListOK, error)
 	// TgSessionVerify invokes tg-session-verify operation.
 	//
 	// Complete the session creation process by verifying the code.
 	//
-	// PUT /tg
+	// PUT /telegram
 	TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
 }
 
@@ -4711,17 +4711,17 @@ func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *Storage
 //
 // Create a new Telegram session.
 //
-// POST /tg
-func (c *Client) TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (*TG, error) {
+// POST /telegram
+func (c *Client) TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (*Tg, error) {
 	res, err := c.sendTgSessionCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (res *TG, err error) {
+func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (res *Tg, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/tg"),
+		semconv.HTTPRouteKey.String("/telegram"),
 	}
 
 	// Run stopwatch.
@@ -4754,7 +4754,7 @@ func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCrea
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/tg"
+	pathParts[0] = "/telegram"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -4831,7 +4831,7 @@ func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCrea
 //
 // List all Telegram sessions for the authenticated user.
 //
-// GET /tg
+// GET /telegram
 func (c *Client) TgSessionList(ctx context.Context) (*TgSessionListOK, error) {
 	res, err := c.sendTgSessionList(ctx)
 	return res, err
@@ -4841,7 +4841,7 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/tg"),
+		semconv.HTTPRouteKey.String("/telegram"),
 	}
 
 	// Run stopwatch.
@@ -4874,7 +4874,7 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/tg"
+	pathParts[0] = "/telegram"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -4936,7 +4936,7 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 //
 // Complete the session creation process by verifying the code.
 //
-// PUT /tg
+// PUT /telegram
 func (c *Client) TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error) {
 	res, err := c.sendTgSessionVerify(ctx, request, params)
 	return res, err
@@ -4946,7 +4946,7 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-verify"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/tg"),
+		semconv.HTTPRouteKey.String("/telegram"),
 	}
 
 	// Run stopwatch.
@@ -4979,7 +4979,7 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/tg"
+	pathParts[0] = "/telegram"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"

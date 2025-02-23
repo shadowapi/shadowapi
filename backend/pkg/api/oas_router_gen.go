@@ -629,9 +629,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "tg"
+			case 't': // Prefix: "telegram"
 				origElem := elem
-				if l := len("tg"); len(elem) >= l && elem[0:l] == "tg" {
+				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
 					elem = elem[l:]
 				} else {
 					break
@@ -1427,9 +1427,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "tg"
+			case 't': // Prefix: "telegram"
 				origElem := elem
-				if l := len("tg"); len(elem) >= l && elem[0:l] == "tg" {
+				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
 					elem = elem[l:]
 				} else {
 					break
@@ -1442,7 +1442,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.name = TgSessionListOperation
 						r.summary = ""
 						r.operationID = "tg-session-list"
-						r.pathPattern = "/tg"
+						r.pathPattern = "/telegram"
 						r.args = args
 						r.count = 0
 						return r, true
@@ -1450,7 +1450,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.name = TgSessionCreateOperation
 						r.summary = ""
 						r.operationID = "tg-session-create"
-						r.pathPattern = "/tg"
+						r.pathPattern = "/telegram"
 						r.args = args
 						r.count = 0
 						return r, true
@@ -1458,7 +1458,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.name = TgSessionVerifyOperation
 						r.summary = ""
 						r.operationID = "tg-session-verify"
-						r.pathPattern = "/tg"
+						r.pathPattern = "/telegram"
 						r.args = args
 						r.count = 0
 						return r, true

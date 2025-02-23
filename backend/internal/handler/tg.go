@@ -36,8 +36,8 @@ func (h *Handler) TgDummy(
 // Create a new Telegram session.
 //
 // POST /tg
-func (h *Handler) TgSessionCreate(ctx context.Context, req *api.TgSessionCreateReq) (r *api.TG, _ error) {
-	return r, ht.ErrNotImplemented
+func (h *Handler) TgSessionCreate(ctx context.Context, req *api.TgSessionCreateReq) (*api.Tg, error) {
+	return nil, ht.ErrNotImplemented
 }
 
 // TgSessionList implements tg-session-list operation.
@@ -45,8 +45,8 @@ func (h *Handler) TgSessionCreate(ctx context.Context, req *api.TgSessionCreateR
 // List all Telegram sessions for the authenticated user.
 //
 // GET /tg
-func (h *Handler) TgSessionList(ctx context.Context) (r *api.TgSessionListOK, _ error) {
-	return r, ht.ErrNotImplemented
+func (h *Handler) TgSessionList(ctx context.Context) (*api.TgSessionListOK, error) {
+	return nil, ht.ErrNotImplemented
 }
 
 // TgSessionVerify implements tg-session-verify operation.
@@ -54,6 +54,7 @@ func (h *Handler) TgSessionList(ctx context.Context) (r *api.TgSessionListOK, _ 
 // Complete the session creation process by verifying the code.
 //
 // PUT /tg
-func (h *Handler) TgSessionVerify(ctx context.Context, req *api.TgSessionVerifyReq, params api.TgSessionVerifyParams) (r *api.TG, _ error) {
-	return r, ht.ErrNotImplemented
+func (h *Handler) TgSessionVerify(ctx context.Context, req *api.TgSessionVerifyReq, params api.TgSessionVerifyParams) (*api.Tg, error) {
+
+	return nil, ht.ErrNotImplemented
 }

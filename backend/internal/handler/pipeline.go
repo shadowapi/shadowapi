@@ -175,6 +175,6 @@ func (h *Handler) pipelineQueryToAPI(from query.Pipeline) (to api.Pipeline, err 
 		Name:      from.Name,
 		Flow:      flow,
 		CreatedAt: api.NewOptDateTime(from.CreatedAt),
-		UpdatedAt: api.NewOptDateTime(from.UpdatedAt.Time),
+		UpdatedAt: api.NewOptDateTime(from.UpdatedAt),
 	}, nil
 }

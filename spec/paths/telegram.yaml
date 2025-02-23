@@ -1,4 +1,4 @@
-# spec/paths/TG.yaml
+# spec/paths/tg.yaml
 get:
   description: List all Telegram sessions for the authenticated user.
   operationId: tg-session-list
@@ -18,7 +18,7 @@ get:
               sessions:
                 type: array
                 items:
-                  $ref: "../components/TG.yaml"
+                  $ref: "../components/tg.yaml"
     default:
       description: Error response.
       content:
@@ -49,7 +49,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../components/TG.yaml"
+            $ref: "../components/tg.yaml"
     default:
       description: Error response.
       content:

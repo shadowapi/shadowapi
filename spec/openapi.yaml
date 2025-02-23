@@ -84,8 +84,8 @@ paths:
     $ref: "paths/storage_postgres.yaml"
   /storage/postgres/{uuid}:
     $ref: "paths/storage_postgres_uuid.yaml"
-  /tg:
-    $ref: "paths/tg.yaml"
+  /telegram:
+    $ref: "paths/telegram.yaml"
 
 servers:
   - description: Local development server

@@ -324,7 +324,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tg": {
+    "/telegram": {
         parameters: {
             query?: never;
             header?: never;
@@ -532,38 +532,6 @@ export interface components {
             port?: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
-        };
-        /** @description Telegram API session and user representation */
-        "TG-2": {
-            /** @description Session ID */
-            id: number;
-            /** @description Session phone number */
-            phone: string;
-            /** @description Optional description */
-            description?: string | null;
-            /**
-             * Format: date-time
-             * @description Last update time
-             */
-            updated_at: string;
-            /**
-             * Format: date-time
-             * @description Session creation time
-             */
-            created_at: string;
-            /** @description User details */
-            user: {
-                /** @description User ID in Telegram */
-                id?: number;
-                /** @description Username in Telegram */
-                username?: string;
-                /** @description First name */
-                first_name?: string;
-                /** @description Last name */
-                last_name?: string;
-                /** @description User's phone number */
-                phone?: string;
-            };
         };
         /** @description Telegram API session and user representation */
         tg: {
@@ -1755,7 +1723,7 @@ export interface operations {
                     "application/json": {
                         /** @description Total number of sessions */
                         total?: number;
-                        sessions?: components["schemas"]["TG-2"][];
+                        sessions?: components["schemas"]["tg"][];
                     };
                 };
             };
@@ -1838,7 +1806,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TG-2"];
+                    "application/json": components["schemas"]["tg"];
                 };
             };
             /** @description Error response. */
