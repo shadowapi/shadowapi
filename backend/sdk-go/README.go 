@@ -1,0 +1,10 @@
+# Step 1
+- Generate sdk with "tasks api-gen"
+
+# Step 2
+- Copy backend/pkg/api into your golang app
+
+# Step 3
+modify backend/sdk-go/example/sdk_example.go
+
+
