@@ -82,7 +82,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"message": "ok"})
+		if err := json.NewEncoder(w).Encode(map[string]string{"message": "ok"}); err != nil {
+			s.log.Error("failed to encode JSON response", "error", err.Error())
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
 		return
 	}
 
@@ -91,6 +96,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.specsHandler.ServeHTTP(w, r)
 		return
 	}
+
+	s.log.Info("@reactima is very close ServeHTTP")
 	s.log.Debug("request", "method", r.Method, "url", r.URL.Path)
 	s.api.ServeHTTP(w, r)
 }

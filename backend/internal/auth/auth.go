@@ -24,11 +24,12 @@ func Provide(i do.Injector) (*Auth, error) {
 // HandleBearerAuth checks the Bearer token
 // this is just a passthrough as we use session middleware instead
 // keep it so default HandleBearerAuth wont be triggered
-func (s *Auth) HandleBearerAuth(
+func (a *Auth) HandleBearerAuth(
 	ctx context.Context,
 	op api.OperationName,
 	t api.BearerAuth,
 ) (context.Context, error) {
+	a.log.Info("@reactima in validateSession")
 	return ctx, nil
 }
 
@@ -38,5 +39,6 @@ func (s *Auth) HandleBearerAuth(
 func (a *Auth) HandleSessionCookieAuth(
 	ctx context.Context, operationName api.OperationName, t api.SessionCookieAuth,
 ) (context.Context, error) {
+	a.log.Info("@reactima in HandleSessionCookieAuth ")
 	return ctx, nil
 }

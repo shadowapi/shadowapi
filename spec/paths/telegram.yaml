@@ -2,8 +2,6 @@
 get:
   description: List all Telegram sessions for the authenticated user.
   operationId: tg-session-list
-  security:
-    - SessionCookieAuth: []
   responses:
     "200":
       description: A list of Telegram sessions.

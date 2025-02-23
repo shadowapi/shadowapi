@@ -1,8 +1,6 @@
 get:
   description: List email datasources
   operationId: datasource-email-list
-  security:
-    - SessionCookieAuth: []
   parameters:
     - description: Offset records.
       explode: false
