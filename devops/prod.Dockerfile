@@ -28,4 +28,4 @@ WORKDIR /app
 COPY --from=backend-builder /shadowapi /app/shadowapi
 COPY --from=frontend-builder /app/dist /app/dist
 EXPOSE 8080
-CMD ["/app/shadowapi"]
+CMD ["/app/shadowapi", "serve"]

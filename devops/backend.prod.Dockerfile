@@ -19,6 +19,6 @@ WORKDIR /app
 COPY --from=builder /shadowapi ./shadowapi
 
 EXPOSE 8080
-CMD ["/app/shadowapi"]
+CMD ["/app/shadowapi", "serve"]
 
 
