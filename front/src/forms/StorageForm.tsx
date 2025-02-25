@@ -147,7 +147,7 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
               >
                 <Item key="s3">S3</Item>
                 <Item key="file_system">File System</Item>
-                <Item key="database">Database</Item>
+                <Item key="postgresql">PostgreSQL</Item>
               </Picker>
             )}
           />
@@ -203,12 +203,12 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
             </Flex>
           )}
 
-          {storageType === 'database' && (
+          {storageType === 'postgresql' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="host"
                 control={form.control}
-                render={({ field }) => <TextField label="Database Host" {...field} width="100%" type="text" />}
+                render={({ field }) => <TextField label="PostgreSQL Host" {...field} width="100%" type="text" />}
               />
               <Controller
                 name="port"

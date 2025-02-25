@@ -9,7 +9,7 @@ export function StorageEdit() {
   const navigate = useNavigate()
   const { uuid } = useParams()
 
-  const pageTitle = uuid === 'add' ? 'Add Storage!' : 'Edit Storage'
+  const pageTitle = uuid === 'add' ? 'Add Storage###' : 'Edit Storage'
   useTitle(pageTitle)
 
   return (

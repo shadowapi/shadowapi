@@ -13,6 +13,10 @@ export default defineConfig({
     sourcemap: true,
   },
   server: {
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
     allowedHosts: true,
   },
 })
