@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 
-import { DataSource as DataSourceForm } from '@/forms'
+import { DataSourceForm } from '@/forms'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function DataSourceEdit() {

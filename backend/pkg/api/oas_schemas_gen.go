@@ -2006,6 +2006,36 @@ func (s *Storage) SetCreatedAt(val time.Time) {
 }
 
 // Ref: #
+type StorageHostfiles struct {
+	UUID OptString `json:"uuid"`
+	// The absolute or relative path on the server's file system where files will be stored.
+	Path string `json:"path"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *StorageHostfiles) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetPath returns the value of Path.
+func (s *StorageHostfiles) GetPath() string {
+	return s.Path
+}
+
+// SetUUID sets the value of UUID.
+func (s *StorageHostfiles) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetPath sets the value of Path.
+func (s *StorageHostfiles) SetPath(val string) {
+	s.Path = val
+}
+
+// StorageHostfilesDeleteOK is response for StorageHostfilesDelete operation.
+type StorageHostfilesDeleteOK struct{}
+
+// Ref: #
 type StoragePostgres struct {
 	UUID OptString `json:"uuid"`
 	// The username used to connect to the PostgreSQL database.
@@ -2094,6 +2124,84 @@ func (s *StoragePostgres) SetOptions(val OptString) {
 
 // StoragePostgresDeleteOK is response for StoragePostgresDelete operation.
 type StoragePostgresDeleteOK struct{}
+
+// Ref: #
+type StorageS3 struct {
+	UUID OptString `json:"uuid"`
+	// The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint).
+	Provider string `json:"provider"`
+	// The region where the bucket is located.
+	Region string `json:"region"`
+	// The bucket name.
+	Bucket string `json:"bucket"`
+	// The access key ID.
+	AccessKeyID string `json:"access_key_id"`
+	// The secret access key.
+	SecretAccessKey string `json:"secret_access_key"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *StorageS3) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetProvider returns the value of Provider.
+func (s *StorageS3) GetProvider() string {
+	return s.Provider
+}
+
+// GetRegion returns the value of Region.
+func (s *StorageS3) GetRegion() string {
+	return s.Region
+}
+
+// GetBucket returns the value of Bucket.
+func (s *StorageS3) GetBucket() string {
+	return s.Bucket
+}
+
+// GetAccessKeyID returns the value of AccessKeyID.
+func (s *StorageS3) GetAccessKeyID() string {
+	return s.AccessKeyID
+}
+
+// GetSecretAccessKey returns the value of SecretAccessKey.
+func (s *StorageS3) GetSecretAccessKey() string {
+	return s.SecretAccessKey
+}
+
+// SetUUID sets the value of UUID.
+func (s *StorageS3) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetProvider sets the value of Provider.
+func (s *StorageS3) SetProvider(val string) {
+	s.Provider = val
+}
+
+// SetRegion sets the value of Region.
+func (s *StorageS3) SetRegion(val string) {
+	s.Region = val
+}
+
+// SetBucket sets the value of Bucket.
+func (s *StorageS3) SetBucket(val string) {
+	s.Bucket = val
+}
+
+// SetAccessKeyID sets the value of AccessKeyID.
+func (s *StorageS3) SetAccessKeyID(val string) {
+	s.AccessKeyID = val
+}
+
+// SetSecretAccessKey sets the value of SecretAccessKey.
+func (s *StorageS3) SetSecretAccessKey(val string) {
+	s.SecretAccessKey = val
+}
+
+// StorageS3DeleteOK is response for StorageS3Delete operation.
+type StorageS3DeleteOK struct{}
 
 // Telegram API session and user representation.
 // Ref: #

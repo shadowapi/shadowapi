@@ -97,7 +97,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.log.Info("@reactima is very close ServeHTTP")
 	s.log.Debug("request", "method", r.Method, "url", r.URL.Path)
 	s.api.ServeHTTP(w, r)
 }

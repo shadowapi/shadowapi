@@ -31,8 +31,10 @@ components:
       $ref: "components/storage.yaml"
     StoragePostgres:
       $ref: "components/storage_postgres.yaml"
-    TG:
-      $ref: "components/tg.yaml"
+    StorageS3:
+      $ref: "components/storage_s3.yaml"
+    StorageHostFiles:
+      $ref: "components/storage_hostfiles.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -86,6 +88,14 @@ paths:
     $ref: "paths/storage_postgres_uuid.yaml"
   /telegram:
     $ref: "paths/telegram.yaml"
+  /storage/s3:
+    $ref: "paths/storage_s3.yaml"
+  /storage/s3/{uuid}:
+    $ref: "paths/storage_s3_uuid.yaml"
+  /storage/hostfiles:
+    $ref: "paths/storage_hostfiles.yaml"
+  /storage/hostfiles/{uuid}:
+    $ref: "paths/storage_hostfiles_uuid.yaml"
 
 servers:
   - description: Local development server

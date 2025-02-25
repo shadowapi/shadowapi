@@ -256,6 +256,42 @@ func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *PipelineUpd
 	return r, ht.ErrNotImplemented
 }
 
+// StorageHostfilesCreate implements storage-hostfiles-create operation.
+//
+// Create a new Host Files storage instance.
+//
+// POST /storage/hostfiles
+func (UnimplementedHandler) StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (r *StorageHostfiles, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StorageHostfilesDelete implements storage-hostfiles-delete operation.
+//
+// Delete a specific Host Files storage instance by UUID.
+//
+// DELETE /storage/hostfiles/{uuid}
+func (UnimplementedHandler) StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// StorageHostfilesGet implements storage-hostfiles-get operation.
+//
+// Retrieve details of a specific Host Files storage instance by UUID.
+//
+// GET /storage/hostfiles/{uuid}
+func (UnimplementedHandler) StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (r *StorageHostfiles, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StorageHostfilesUpdate implements storage-hostfiles-update operation.
+//
+// Update details of a specific Host Files storage instance by UUID.
+//
+// PUT /storage/hostfiles/{uuid}
+func (UnimplementedHandler) StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (r *StorageHostfiles, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StorageList implements storage-list operation.
 //
 // Retrieve a list of data storage objects.
@@ -298,6 +334,42 @@ func (UnimplementedHandler) StoragePostgresGet(ctx context.Context, params Stora
 //
 // PUT /storage/postgres/{uuid}
 func (UnimplementedHandler) StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (r *StoragePostgres, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StorageS3Create implements storage-s3-create operation.
+//
+// Create a new S3 storage instance.
+//
+// POST /storage/s3
+func (UnimplementedHandler) StorageS3Create(ctx context.Context, req *StorageS3) (r *StorageS3, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StorageS3Delete implements storage-s3-delete operation.
+//
+// Delete a specific S3 storage instance by UUID.
+//
+// DELETE /storage/s3/{uuid}
+func (UnimplementedHandler) StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// StorageS3Get implements storage-s3-get operation.
+//
+// Retrieve details of a specific S3 storage instance by UUID.
+//
+// GET /storage/s3/{uuid}
+func (UnimplementedHandler) StorageS3Get(ctx context.Context, params StorageS3GetParams) (r *StorageS3, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StorageS3Update implements storage-s3-update operation.
+//
+// Update details of a specific S3 storage instance by UUID.
+//
+// PUT /storage/s3/{uuid}
+func (UnimplementedHandler) StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (r *StorageS3, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -40,7 +40,6 @@ func Provide(i do.Injector) (*Middleware, error) {
 
 // OgenMiddleware satisfies Ogen's middleware.Middleware signature
 func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
-	m.log.Info("@reactima enter OgenMiddleware")
 
 	// 'req.Raw' is the original *http.Request
 	r := req.Raw
@@ -56,7 +55,6 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 
 		return next(req)
 	}
-	m.log.Info("@reactima enter OgenMiddleware validateSession")
 
 	// 2) Fallback to session validation
 	session, err := m.validateSession(r)

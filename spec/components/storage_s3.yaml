@@ -1,0 +1,27 @@
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    readOnly: true
+  provider:
+    type: string
+    description: "The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint)."
+  region:
+    type: string
+    description: "The region where the bucket is located."
+  bucket:
+    type: string
+    description: "The bucket name."
+  access_key_id:
+    type: string
+    description: "The access key ID."
+  secret_access_key:
+    type: string
+    description: "The secret access key."
+required:
+  - provider
+  - region
+  - bucket
+  - access_key_id
+  - secret_access_key

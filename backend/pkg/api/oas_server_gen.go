@@ -170,6 +170,30 @@ type Handler interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, req *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error)
+	// StorageHostfilesCreate implements storage-hostfiles-create operation.
+	//
+	// Create a new Host Files storage instance.
+	//
+	// POST /storage/hostfiles
+	StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (*StorageHostfiles, error)
+	// StorageHostfilesDelete implements storage-hostfiles-delete operation.
+	//
+	// Delete a specific Host Files storage instance by UUID.
+	//
+	// DELETE /storage/hostfiles/{uuid}
+	StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) error
+	// StorageHostfilesGet implements storage-hostfiles-get operation.
+	//
+	// Retrieve details of a specific Host Files storage instance by UUID.
+	//
+	// GET /storage/hostfiles/{uuid}
+	StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (*StorageHostfiles, error)
+	// StorageHostfilesUpdate implements storage-hostfiles-update operation.
+	//
+	// Update details of a specific Host Files storage instance by UUID.
+	//
+	// PUT /storage/hostfiles/{uuid}
+	StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (*StorageHostfiles, error)
 	// StorageList implements storage-list operation.
 	//
 	// Retrieve a list of data storage objects.
@@ -200,6 +224,30 @@ type Handler interface {
 	//
 	// PUT /storage/postgres/{uuid}
 	StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (*StoragePostgres, error)
+	// StorageS3Create implements storage-s3-create operation.
+	//
+	// Create a new S3 storage instance.
+	//
+	// POST /storage/s3
+	StorageS3Create(ctx context.Context, req *StorageS3) (*StorageS3, error)
+	// StorageS3Delete implements storage-s3-delete operation.
+	//
+	// Delete a specific S3 storage instance by UUID.
+	//
+	// DELETE /storage/s3/{uuid}
+	StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) error
+	// StorageS3Get implements storage-s3-get operation.
+	//
+	// Retrieve details of a specific S3 storage instance by UUID.
+	//
+	// GET /storage/s3/{uuid}
+	StorageS3Get(ctx context.Context, params StorageS3GetParams) (*StorageS3, error)
+	// StorageS3Update implements storage-s3-update operation.
+	//
+	// Update details of a specific S3 storage instance by UUID.
+	//
+	// PUT /storage/s3/{uuid}
+	StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (*StorageS3, error)
 	// TgSessionCreate implements tg-session-create operation.
 	//
 	// Create a new Telegram session.

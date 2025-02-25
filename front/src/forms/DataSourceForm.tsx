@@ -3,53 +3,53 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { Button, Divider, Flex, Form, Header, Item, Picker, Switch, TextField, View } from '@adobe/react-spectrum'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { DataSourceGrant as DataSourceGrantForm } from './DataSourceGrant'
+import { DataSourceGrantForm as DataSourceGrantForm } from './DataSourceGrantForm'
 
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 
-export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: string }): ReactElement {
+export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): ReactElement {
   const navigate = useNavigate()
-  const form = useForm<components['schemas']['storage']>({})
+  const form = useForm<components['schemas']['datasource']>({})
 
   const queryClient = useQueryClient()
   const query = useQuery({
-    queryKey: ['/storage/postgres/{uuid}', { uuid: storageUUID }],
+    queryKey: ['/datasource/email/{uuid}', { uuid: datasourceUUID }],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET(`/storage/postgres/{uuid}`, {
-        params: { path: { uuid: storageUUID } },
+      const { data } = await client.GET(`/datasource/email/{uuid}`, {
+        params: { path: { uuid: datasourceUUID } },
         signal,
       })
       return data
     },
-    enabled: storageUUID !== 'add',
+    enabled: datasourceUUID !== 'add',
   })
   const modifyMutation = useMutation({
-    mutationFn: async (data: components['schemas']['storage']) => {
+    mutationFn: async (data: components['schemas']['datasource']) => {
       let resp
-      if (storageUUID === 'add') {
-        resp = await client.POST('/storage/postgres', {
+      if (datasourceUUID === 'add') {
+        resp = await client.POST('/datasource/email', {
           body: {
-            // is_enabled: data.is_enabled || true,
-            // name: data.name || '',
-            // email: data.email || '',
-            // imap_server: data.imap_server,
-            // password: data.password,
-            // provider: data.provider,
-            // smtp_server: data.smtp_server,
-            // smtp_tls: data.smtp_tls,
+            is_enabled: data.is_enabled || true,
+            name: data.name || '',
+            email: data.email || '',
+            imap_server: data.imap_server,
+            password: data.password,
+            provider: data.provider,
+            smtp_server: data.smtp_server,
+            smtp_tls: data.smtp_tls,
           },
         })
       } else {
-        resp = await client.PUT(`/storage/postgres/{uuid}`, {
-          params: { path: { uuid: storageUUID } },
+        resp = await client.PUT(`/datasource/email/{uuid}`, {
+          params: { path: { uuid: datasourceUUID } },
           body: {
-            // is_enabled: data.is_enabled,
-            // imap_server: data.imap_server,
-            // name: data.name,
-            // password: data.password,
-            // smtp_server: data.smtp_server,
-            // smtp_tls: data.smtp_tls,
+            is_enabled: data.is_enabled,
+            imap_server: data.imap_server,
+            name: data.name,
+            password: data.password,
+            smtp_server: data.smtp_server,
+            smtp_tls: data.smtp_tls,
           },
         })
       }
@@ -59,7 +59,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
       }
     },
     onSuccess: (data, variable) => {
-      if (storageUUID === 'add') {
+      if (datasourceUUID === 'add') {
         queryClient.invalidateQueries({ queryKey: '/datasource/email' })
       } else {
         queryClient.setQueryData(['/datasource/email/{uuid}', { uuid: variable.uuid }], data)
@@ -109,7 +109,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
   }, [datasourceType, datasourceEmail, form])
 
   const onDelete = () => {
-    deleteMutation.mutate(storageUUID, {
+    deleteMutation.mutate(datasourceUUID, {
       onSuccess: () => {
         navigate('/datasources')
       },
@@ -124,7 +124,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
     })
   }
 
-  if (query.isPending && storageUUID !== 'add') {
+  if (query.isPending && datasourceUUID !== 'add') {
     return <></>
   }
 
@@ -158,7 +158,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
               <Picker
                 label="Type"
                 isRequired
-                isDisabled={storageUUID !== 'add'}
+                isDisabled={datasourceUUID !== 'add'}
                 selectedKey={field.value}
                 onSelectionChange={(key) => form.setValue('type', key.toString())}
                 errorMessage={fieldState.error?.message}
@@ -175,22 +175,18 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
               name="email"
               control={form.control}
               rules={{ required: 'Email is required' }}
-              render={({ field, fieldState }) => (
+              render={({ field, fieldState }) => 
                 <TextField
                   label="Email"
                   type="text"
                   isRequired
                   width="100%"
-                  isDisabled={storageUUID !== 'add'}
+                  isDisabled={datasourceUUID !== 'add'}
                   validationState={fieldState.invalid ? 'invalid' : undefined}
                   errorMessage={fieldState.error?.message}
-                  // TODO remove ...spread?
-                  // value={field.value || ''} // Ensure value is always a string
-                  // onChange={(value) => field.onChange(value)} // Explicitly handle change event
-                  // onBlur={field.onBlur}
                   {...field}
                 />
-              )}
+              }
             />
           )}
 
@@ -199,7 +195,7 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
               <Controller
                 name="imap_server"
                 control={form.control}
-                render={({ field, fieldState }) => (
+                render={({ field, fieldState }) => 
                   <TextField
                     label="IMAP Server"
                     type="text"
@@ -209,12 +205,12 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                     errorMessage={fieldState.error?.message}
                     {...field}
                   />
-                )}
+                }
               />
               <Controller
                 name="password"
                 control={form.control}
-                render={({ field, fieldState }) => (
+                render={({ field, fieldState }) => 
                   <TextField
                     label="Password"
                     type="password"
@@ -224,12 +220,12 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                     errorMessage={fieldState.error?.message}
                     {...field}
                   />
-                )}
+                }
               />
               <Controller
                 name="smtp_server"
                 control={form.control}
-                render={({ field, fieldState }) => (
+                render={({ field, fieldState }) => 
                   <TextField
                     label="SMTP Server"
                     type="text"
@@ -239,33 +235,33 @@ export function Storage({ datasourceUUID: storageUUID }: { datasourceUUID: strin
                     errorMessage={fieldState.error?.message}
                     {...field}
                   />
-                )}
+                }
               />
               <Controller
                 name="smtp_tls"
                 control={form.control}
-                render={({ field }) => (
+                render={({ field }) => 
                   <Switch width="100%" name={field.name} isSelected={field.value} onChange={field.onChange}>
                     Use TLS
                   </Switch>
-                )}
+                }
               />
             </>
           )}
           <Flex direction="row" gap="size-100" marginTop="size-300" justifyContent="center">
             <Button type="submit" variant="cta">
-              {storageUUID === 'add' ? 'Create' : 'Update'}
+              {datasourceUUID === 'add' ? 'Create' : 'Update'}
             </Button>
-            {storageUUID !== 'add' && (
+            {datasourceUUID !== 'add' && (
               <Button type="button" variant="negative" onPress={onDelete}>
                 Delete
               </Button>
             )}
           </Flex>
-          {showOAuth2Token && storageUUID !== 'add' && (
+          {showOAuth2Token && datasourceUUID !== 'add' && (
             <View marginTop="size-300">
               <Divider marginBottom="size-300" size="S" />
-              <DataSourceGrantForm datasourceUUID={storageUUID} tokenUUID={query.data?.oauth2_token_uuid} />
+              <DataSourceGrantForm datasourceUUID={datasourceUUID} tokenUUID={query.data?.oauth2_token_uuid} />
             </View>
           )}
         </Flex>

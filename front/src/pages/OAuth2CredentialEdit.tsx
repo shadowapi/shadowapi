@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 
-import { OAuth2Credential as OAuth2CredentialForm } from '@/forms'
+import { OAuth2CredentialForm as OAuth2CredentialForm } from '@/forms'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function OAuth2CredentialEdit() {

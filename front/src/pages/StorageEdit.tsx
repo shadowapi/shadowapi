@@ -1,12 +1,16 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 
-import { DataSource as StorageForm } from '@/forms'
+import { StorageForm } from '@/forms'
+import { useTitle } from '@/hooks'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function StorageEdit() {
   const navigate = useNavigate()
   const { uuid } = useParams()
+
+  const pageTitle = uuid === 'add' ? 'Add Storage!' : 'Edit Storage'
+  useTitle(pageTitle)
 
   return (
     <FullLayout>
@@ -20,7 +24,7 @@ export function StorageEdit() {
         <Item key="/storages">Storages</Item>
         <Item key="march 2020 assets">{uuid === 'add' ? 'Add' : 'Edit'} Storage</Item>
       </Breadcrumbs>
-      <StorageForm datasourceUUID={uuid!} />
+      <StorageForm storageUUID={uuid!} />
     </FullLayout>
   )
 }

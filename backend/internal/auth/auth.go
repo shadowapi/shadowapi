@@ -29,7 +29,6 @@ func (a *Auth) HandleBearerAuth(
 	op api.OperationName,
 	t api.BearerAuth,
 ) (context.Context, error) {
-	a.log.Info("@reactima in validateSession")
 	return ctx, nil
 }
 
@@ -39,6 +38,5 @@ func (a *Auth) HandleBearerAuth(
 func (a *Auth) HandleSessionCookieAuth(
 	ctx context.Context, operationName api.OperationName, t api.SessionCookieAuth,
 ) (context.Context, error) {
-	a.log.Info("@reactima in HandleSessionCookieAuth ")
 	return ctx, nil
 }

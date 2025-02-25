@@ -14,7 +14,7 @@ export interface FormData {
   secret: string
 }
 
-export function DataSourceAuth({ datasourceUUID: datasourceUUID }: { datasourceUUID: string }): ReactElement {
+export function DataSourceAuthForm({ datasourceUUID: datasourceUUID }: { datasourceUUID: string }): ReactElement {
   const navigate = useNavigate()
   const [isLoaded, setIsLoaded] = useState(false)
   const [searchParams] = useSearchParams()
@@ -102,9 +102,9 @@ export function DataSourceAuth({ datasourceUUID: datasourceUUID }: { datasourceU
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {methods.watch('oauth2_clients').map((client) => (
+                {methods.watch('oauth2_clients').map((client) => 
                   <Item key={client.id}>{client.name}</Item>
-                ))}
+                )}
               </Picker>
             )}
           />

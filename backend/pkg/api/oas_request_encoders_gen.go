@@ -151,6 +151,34 @@ func encodePipelineUpdateRequest(
 	return nil
 }
 
+func encodeStorageHostfilesCreateRequest(
+	req *StorageHostfiles,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeStorageHostfilesUpdateRequest(
+	req *StorageHostfiles,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeStoragePostgresCreateRequest(
 	req *StoragePostgres,
 	r *http.Request,
@@ -167,6 +195,34 @@ func encodeStoragePostgresCreateRequest(
 
 func encodeStoragePostgresUpdateRequest(
 	req *StoragePostgres,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeStorageS3CreateRequest(
+	req *StorageS3,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeStorageS3UpdateRequest(
+	req *StorageS3,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

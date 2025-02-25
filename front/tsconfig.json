@@ -59,7 +59,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/api/client": ["./src/api/client.ts"],
+      "@/*": ["./src/*"],
     }
   },
   "include": [

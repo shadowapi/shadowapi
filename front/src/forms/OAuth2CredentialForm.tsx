@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 
-export function OAuth2Credential({ clientID: clientID }: { clientID: string }): ReactElement {
+export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string }): ReactElement {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()

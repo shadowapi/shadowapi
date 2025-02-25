@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 
-import { DataSourceAuth as DataSourceAuthForm } from '@/forms'
+import { DataSourceAuthForm } from '@/forms'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function DataSourceAuth() {

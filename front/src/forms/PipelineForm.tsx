@@ -40,7 +40,7 @@ interface FlowEntryItem {
   title: string
 }
 
-export const Pipeline = ({ pipelineUUID }: PipelineProps) => {
+export const PipelineForm = ({ pipelineUUID }: PipelineProps) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const form = useForm<components['schemas']['pipeline']>({})

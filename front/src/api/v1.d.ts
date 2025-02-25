@@ -343,6 +343,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/s3": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Create a new S3 storage instance. */
+        post: operations["storage-s3-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/s3/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve details of a specific S3 storage instance by UUID. */
+        get: operations["storage-s3-get"];
+        /** @description Update details of a specific S3 storage instance by UUID. */
+        put: operations["storage-s3-update"];
+        post?: never;
+        /** @description Delete a specific S3 storage instance by UUID. */
+        delete: operations["storage-s3-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/hostfiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Create a new Host Files storage instance. */
+        post: operations["storage-hostfiles-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/hostfiles/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve details of a specific Host Files storage instance by UUID. */
+        get: operations["storage-hostfiles-get"];
+        /** @description Update details of a specific Host Files storage instance by UUID. */
+        put: operations["storage-hostfiles-update"];
+        post?: never;
+        /** @description Delete a specific Host Files storage instance by UUID. */
+        delete: operations["storage-hostfiles-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -359,7 +431,8 @@ export interface components {
         PipelineEntryType: components["schemas"]["pipeline_entry_type"];
         Storage: components["schemas"]["storage"];
         StoragePostgres: components["schemas"]["storage_postgres"];
-        TG: components["schemas"]["tg"];
+        StorageS3: components["schemas"]["storage_s3"];
+        StorageHostFiles: components["schemas"]["storage_hostfiles"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -564,6 +637,24 @@ export interface components {
                 /** @description User's phone number */
                 phone?: string;
             };
+        };
+        storage_s3: {
+            readonly uuid?: string;
+            /** @description The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint). */
+            provider: string;
+            /** @description The region where the bucket is located. */
+            region: string;
+            /** @description The bucket name. */
+            bucket: string;
+            /** @description The access key ID. */
+            access_key_id: string;
+            /** @description The secret access key. */
+            secret_access_key: string;
+        };
+        storage_hostfiles: {
+            readonly uuid?: string;
+            /** @description The absolute or relative path on the server's file system where files will be stored. */
+            path: string;
         };
     };
     responses: never;
@@ -1810,6 +1901,268 @@ export interface operations {
                 };
             };
             /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-s3-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["storage_s3"];
+            };
+        };
+        responses: {
+            /** @description S3 storage instance created successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_s3"];
+                };
+            };
+            /** @description An error occurred while creating the S3 storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-s3-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the S3 storage instance to retrieve. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description S3 storage instance details retrieved successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_s3"];
+                };
+            };
+            /** @description An error occurred while retrieving the S3 storage instance details. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-s3-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the S3 storage instance to update. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["storage_s3"];
+            };
+        };
+        responses: {
+            /** @description S3 storage instance updated successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_s3"];
+                };
+            };
+            /** @description An error occurred while updating the S3 storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-s3-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the S3 storage instance to delete. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description S3 storage instance deleted successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An error occurred while deleting the S3 storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-hostfiles-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["storage_hostfiles"];
+            };
+        };
+        responses: {
+            /** @description Host Files storage instance created successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_hostfiles"];
+                };
+            };
+            /** @description An error occurred while creating the host files storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-hostfiles-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the Host Files storage instance to retrieve. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Host Files storage instance details retrieved successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_hostfiles"];
+                };
+            };
+            /** @description An error occurred while retrieving the Host Files storage instance details. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-hostfiles-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the Host Files storage instance to update. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["storage_hostfiles"];
+            };
+        };
+        responses: {
+            /** @description Host Files storage instance updated successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_hostfiles"];
+                };
+            };
+            /** @description An error occurred while updating the Host Files storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-hostfiles-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the Host Files storage instance to delete. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Host Files storage instance deleted successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An error occurred while deleting the Host Files storage instance. */
             default: {
                 headers: {
                     [name: string]: unknown;

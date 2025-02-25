@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 import { ReactFlowProvider } from '@xyflow/react'
 
-import { Pipeline as PipelineForm } from '@/forms'
+import { PipelineForm } from '@/forms'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function PipelineEdit() {

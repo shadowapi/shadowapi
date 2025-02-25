@@ -10,7 +10,7 @@ interface DataSourceGrantProps {
   tokenUUID?: string
 }
 
-export const DataSourceGrant = (props: DataSourceGrantProps) => {
+export const DataSourceGrantForm = (props: DataSourceGrantProps) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const query = useQuery({

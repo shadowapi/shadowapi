@@ -1,0 +1,82 @@
+get:
+  description: Retrieve details of a specific S3 storage instance by UUID.
+  operationId: storage-s3-get
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: The UUID of the S3 storage instance to retrieve.
+      schema:
+        type: string
+  responses:
+    "200":
+      description: S3 storage instance details retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StorageS3"
+    default:
+      description: An error occurred while retrieving the S3 storage instance details.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage
+    - storage-s3
+
+put:
+  description: Update details of a specific S3 storage instance by UUID.
+  operationId: storage-s3-update
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: The UUID of the S3 storage instance to update.
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/StorageS3"
+  responses:
+    "200":
+      description: S3 storage instance updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StorageS3"
+    default:
+      description: An error occurred while updating the S3 storage instance.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage
+    - storage-s3
+
+delete:
+  description: Delete a specific S3 storage instance by UUID.
+  operationId: storage-s3-delete
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: The UUID of the S3 storage instance to delete.
+      schema:
+        type: string
+  responses:
+    "200":
+      description: S3 storage instance deleted successfully.
+    default:
+      description: An error occurred while deleting the S3 storage instance.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage
+    - storage-s3

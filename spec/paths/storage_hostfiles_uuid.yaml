@@ -1,0 +1,82 @@
+get:
+  description: Retrieve details of a specific Host Files storage instance by UUID.
+  operationId: storage-hostfiles-get
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: The UUID of the Host Files storage instance to retrieve.
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Host Files storage instance details retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StorageHostFiles"
+    default:
+      description: An error occurred while retrieving the Host Files storage instance details.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage
+    - storage-hostfiles
+
+put:
+  description: Update details of a specific Host Files storage instance by UUID.
+  operationId: storage-hostfiles-update
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: The UUID of the Host Files storage instance to update.
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/StorageHostFiles"
+  responses:
+    "200":
+      description: Host Files storage instance updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/StorageHostFiles"
+    default:
+      description: An error occurred while updating the Host Files storage instance.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage
+    - storage-hostfiles
+
+delete:
+  description: Delete a specific Host Files storage instance by UUID.
+  operationId: storage-hostfiles-delete
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: The UUID of the Host Files storage instance to delete.
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Host Files storage instance deleted successfully.
+    default:
+      description: An error occurred while deleting the Host Files storage instance.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage
+    - storage-hostfiles

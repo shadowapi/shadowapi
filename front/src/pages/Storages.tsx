@@ -17,10 +17,15 @@ import Edit from '@spectrum-icons/workflow/Edit'
 import { useQuery } from '@tanstack/react-query'
 
 import client from '@/api/client'
+import { useTitle } from '@/hooks'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function Storages() {
   const navigate = useNavigate()
+
+  const pageTitle = 'Storages'
+  useTitle(pageTitle)
+
   const query = useQuery({
     queryKey: ['/storages'],
     queryFn: async ({ signal }) => {

@@ -568,58 +568,189 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/postgres"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("/postgres"); len(elem) >= l && elem[0:l] == "/postgres" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch r.Method {
-						case "POST":
-							s.handleStoragePostgresCreateRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'h': // Prefix: "hostfiles"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "uuid"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
 						if len(elem) == 0 {
-							// Leaf node.
 							switch r.Method {
-							case "DELETE":
-								s.handleStoragePostgresDeleteRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "GET":
-								s.handleStoragePostgresGetRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "PUT":
-								s.handleStoragePostgresUpdateRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleStorageHostfilesCreateRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "DELETE,GET,PUT")
+								s.notAllowed(w, r, "POST")
 							}
 
 							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleStorageHostfilesDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleStorageHostfilesGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleStorageHostfilesUpdateRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET,PUT")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'p': // Prefix: "postgres"
+						origElem := elem
+						if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "POST":
+								s.handleStoragePostgresCreateRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleStoragePostgresDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleStoragePostgresGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleStoragePostgresUpdateRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET,PUT")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 's': // Prefix: "s3"
+						origElem := elem
+						if l := len("s3"); len(elem) >= l && elem[0:l] == "s3" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "POST":
+								s.handleStorageS3CreateRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleStorageS3DeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleStorageS3GetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleStorageS3UpdateRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET,PUT")
+								}
+
+								return
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
@@ -1352,72 +1483,231 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/postgres"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("/postgres"); len(elem) >= l && elem[0:l] == "/postgres" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "POST":
-							r.name = StoragePostgresCreateOperation
-							r.summary = ""
-							r.operationID = "storage-postgres-create"
-							r.pathPattern = "/storage/postgres"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'h': // Prefix: "hostfiles"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "uuid"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
 						if len(elem) == 0 {
-							// Leaf node.
 							switch method {
-							case "DELETE":
-								r.name = StoragePostgresDeleteOperation
+							case "POST":
+								r.name = StorageHostfilesCreateOperation
 								r.summary = ""
-								r.operationID = "storage-postgres-delete"
-								r.pathPattern = "/storage/postgres/{uuid}"
+								r.operationID = "storage-hostfiles-create"
+								r.pathPattern = "/storage/hostfiles"
 								r.args = args
-								r.count = 1
-								return r, true
-							case "GET":
-								r.name = StoragePostgresGetOperation
-								r.summary = ""
-								r.operationID = "storage-postgres-get"
-								r.pathPattern = "/storage/postgres/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "PUT":
-								r.name = StoragePostgresUpdateOperation
-								r.summary = ""
-								r.operationID = "storage-postgres-update"
-								r.pathPattern = "/storage/postgres/{uuid}"
-								r.args = args
-								r.count = 1
+								r.count = 0
 								return r, true
 							default:
 								return
 							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = StorageHostfilesDeleteOperation
+									r.summary = ""
+									r.operationID = "storage-hostfiles-delete"
+									r.pathPattern = "/storage/hostfiles/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = StorageHostfilesGetOperation
+									r.summary = ""
+									r.operationID = "storage-hostfiles-get"
+									r.pathPattern = "/storage/hostfiles/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = StorageHostfilesUpdateOperation
+									r.summary = ""
+									r.operationID = "storage-hostfiles-update"
+									r.pathPattern = "/storage/hostfiles/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'p': // Prefix: "postgres"
+						origElem := elem
+						if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								r.name = StoragePostgresCreateOperation
+								r.summary = ""
+								r.operationID = "storage-postgres-create"
+								r.pathPattern = "/storage/postgres"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = StoragePostgresDeleteOperation
+									r.summary = ""
+									r.operationID = "storage-postgres-delete"
+									r.pathPattern = "/storage/postgres/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = StoragePostgresGetOperation
+									r.summary = ""
+									r.operationID = "storage-postgres-get"
+									r.pathPattern = "/storage/postgres/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = StoragePostgresUpdateOperation
+									r.summary = ""
+									r.operationID = "storage-postgres-update"
+									r.pathPattern = "/storage/postgres/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 's': // Prefix: "s3"
+						origElem := elem
+						if l := len("s3"); len(elem) >= l && elem[0:l] == "s3" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								r.name = StorageS3CreateOperation
+								r.summary = ""
+								r.operationID = "storage-s3-create"
+								r.pathPattern = "/storage/s3"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = StorageS3DeleteOperation
+									r.summary = ""
+									r.operationID = "storage-s3-delete"
+									r.pathPattern = "/storage/s3/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = StorageS3GetOperation
+									r.summary = ""
+									r.operationID = "storage-s3-get"
+									r.pathPattern = "/storage/s3/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = StorageS3UpdateOperation
+									r.summary = ""
+									r.operationID = "storage-s3-update"
+									r.pathPattern = "/storage/s3/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
