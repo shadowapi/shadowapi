@@ -49,4 +49,10 @@ const (
 	TgSessionCreateOperation            OperationName = "TgSessionCreate"
 	TgSessionListOperation              OperationName = "TgSessionList"
 	TgSessionVerifyOperation            OperationName = "TgSessionVerify"
+	WhatsappContactsOperation           OperationName = "WhatsappContacts"
+	WhatsappDownloadAttachmentOperation OperationName = "WhatsappDownloadAttachment"
+	WhatsappDownloadMessageOperation    OperationName = "WhatsappDownloadMessage"
+	WhatsappLoginOperation              OperationName = "WhatsappLogin"
+	WhatsappStatusOperation             OperationName = "WhatsappStatus"
+	WhatsappSyncOperation               OperationName = "WhatsappSync"
 )

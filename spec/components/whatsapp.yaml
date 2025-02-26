@@ -1,0 +1,37 @@
+WhatsAppLoginResponse:
+  type: object
+  additionalProperties: false
+  properties:
+    qr_code:
+      type: string
+      description: "The QR code in a format that can be rendered by the client."
+    expires_in:
+      type: integer
+      description: "Time in seconds before the QR code expires."
+  required:
+    - qr_code
+    - expires_in
+
+WhatsAppStatusResponse:
+  type: object
+  additionalProperties: false
+  properties:
+    status:
+      type: string
+      description: "The current login status. Possible values: pending, logged_in, error."
+    session:
+      type: object
+      description: "WhatsApp session details, if logged in."
+      properties:
+        id:
+          type: string
+        phone:
+          type: string
+      required:
+        - id
+        - phone
+    message:
+      type: string
+      description: "Additional information."
+  required:
+    - status

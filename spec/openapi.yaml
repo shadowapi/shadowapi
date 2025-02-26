@@ -35,6 +35,10 @@ components:
       $ref: "components/storage_s3.yaml"
     StorageHostFiles:
       $ref: "components/storage_hostfiles.yaml"
+    WhatsAppLoginResponse:
+      $ref: "components/whatsapp.yaml#/WhatsAppLoginResponse"
+    WhatsAppStatusResponse:
+      $ref: "components/whatsapp.yaml#/WhatsAppStatusResponse"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -96,6 +100,18 @@ paths:
     $ref: "paths/storage_hostfiles.yaml"
   /storage/hostfiles/{uuid}:
     $ref: "paths/storage_hostfiles_uuid.yaml"
+  /whatsapp/login:
+    $ref: "paths/whatsapp_login.yaml"
+  /whatsapp/status:
+    $ref: "paths/whatsapp_status.yaml"
+  /whatsapp/sync:
+    $ref: "paths/whatsapp_sync.yaml"
+  /whatsapp/contacts:
+    $ref: "paths/whatsapp_contacts.yaml"
+  /whatsapp/attachments/download:
+    $ref: "paths/whatsapp_attachments_download.yaml"
+  /whatsapp/messages/download:
+    $ref: "paths/whatsapp_messages_download.yaml"
 
 servers:
   - description: Local development server

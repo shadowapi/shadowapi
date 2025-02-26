@@ -400,6 +400,60 @@ func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionV
 	return r, ht.ErrNotImplemented
 }
 
+// WhatsappContacts implements whatsapp-contacts operation.
+//
+// Retrieve WhatsApp contacts.
+//
+// GET /whatsapp/contacts
+func (UnimplementedHandler) WhatsappContacts(ctx context.Context) (r *WhatsappContactsOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// WhatsappDownloadAttachment implements whatsapp-download-attachment operation.
+//
+// Download WhatsApp attachment into storage.
+//
+// POST /whatsapp/attachments/download
+func (UnimplementedHandler) WhatsappDownloadAttachment(ctx context.Context, req *WhatsappDownloadAttachmentReq) (r *WhatsappDownloadAttachmentOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// WhatsappDownloadMessage implements whatsapp-download-message operation.
+//
+// Download message content including media.
+//
+// POST /whatsapp/messages/download
+func (UnimplementedHandler) WhatsappDownloadMessage(ctx context.Context, req *WhatsappDownloadMessageReq) (r *WhatsappDownloadMessageOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// WhatsappLogin implements whatsapp-login operation.
+//
+// Initiate WhatsApp login flow via QR code scanning.
+//
+// POST /whatsapp/login
+func (UnimplementedHandler) WhatsappLogin(ctx context.Context) (r *WhatsAppLoginResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// WhatsappStatus implements whatsapp-status operation.
+//
+// Retrieve WhatsApp login status.
+//
+// GET /whatsapp/status
+func (UnimplementedHandler) WhatsappStatus(ctx context.Context) (r *WhatsAppStatusResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// WhatsappSync implements whatsapp-sync operation.
+//
+// Sync messages for selected users or all users.
+//
+// POST /whatsapp/sync
+func (UnimplementedHandler) WhatsappSync(ctx context.Context, req *WhatsappSyncReq) (r *WhatsappSyncOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // NewError creates *ErrorStatusCode from error returned by handler.
 //
 // Used for common default response.

@@ -1476,6 +1476,52 @@ func (o OptURI) Or(d url.URL) url.URL {
 	return d
 }
 
+// NewOptWhatsAppStatusResponseSession returns new OptWhatsAppStatusResponseSession with value set to v.
+func NewOptWhatsAppStatusResponseSession(v WhatsAppStatusResponseSession) OptWhatsAppStatusResponseSession {
+	return OptWhatsAppStatusResponseSession{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWhatsAppStatusResponseSession is optional WhatsAppStatusResponseSession.
+type OptWhatsAppStatusResponseSession struct {
+	Value WhatsAppStatusResponseSession
+	Set   bool
+}
+
+// IsSet returns true if OptWhatsAppStatusResponseSession was set.
+func (o OptWhatsAppStatusResponseSession) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWhatsAppStatusResponseSession) Reset() {
+	var v WhatsAppStatusResponseSession
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWhatsAppStatusResponseSession) SetTo(v WhatsAppStatusResponseSession) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWhatsAppStatusResponseSession) Get() (v WhatsAppStatusResponseSession, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWhatsAppStatusResponseSession) Or(d WhatsAppStatusResponseSession) WhatsAppStatusResponseSession {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #
 type Pipeline struct {
 	UUID      string       `json:"uuid"`
@@ -2422,4 +2468,266 @@ func (s *TgUser) SetLastName(val OptString) {
 // SetPhone sets the value of Phone.
 func (s *TgUser) SetPhone(val OptString) {
 	s.Phone = val
+}
+
+// Ref: #/WhatsAppLoginResponse
+type WhatsAppLoginResponse struct {
+	// The QR code in a format that can be rendered by the client.
+	QrCode string `json:"qr_code"`
+	// Time in seconds before the QR code expires.
+	ExpiresIn int `json:"expires_in"`
+}
+
+// GetQrCode returns the value of QrCode.
+func (s *WhatsAppLoginResponse) GetQrCode() string {
+	return s.QrCode
+}
+
+// GetExpiresIn returns the value of ExpiresIn.
+func (s *WhatsAppLoginResponse) GetExpiresIn() int {
+	return s.ExpiresIn
+}
+
+// SetQrCode sets the value of QrCode.
+func (s *WhatsAppLoginResponse) SetQrCode(val string) {
+	s.QrCode = val
+}
+
+// SetExpiresIn sets the value of ExpiresIn.
+func (s *WhatsAppLoginResponse) SetExpiresIn(val int) {
+	s.ExpiresIn = val
+}
+
+// Ref: #/WhatsAppStatusResponse
+type WhatsAppStatusResponse struct {
+	// The current login status. Possible values: pending, logged_in, error.
+	Status string `json:"status"`
+	// WhatsApp session details, if logged in.
+	Session OptWhatsAppStatusResponseSession `json:"session"`
+	// Additional information.
+	Message OptString `json:"message"`
+}
+
+// GetStatus returns the value of Status.
+func (s *WhatsAppStatusResponse) GetStatus() string {
+	return s.Status
+}
+
+// GetSession returns the value of Session.
+func (s *WhatsAppStatusResponse) GetSession() OptWhatsAppStatusResponseSession {
+	return s.Session
+}
+
+// GetMessage returns the value of Message.
+func (s *WhatsAppStatusResponse) GetMessage() OptString {
+	return s.Message
+}
+
+// SetStatus sets the value of Status.
+func (s *WhatsAppStatusResponse) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetSession sets the value of Session.
+func (s *WhatsAppStatusResponse) SetSession(val OptWhatsAppStatusResponseSession) {
+	s.Session = val
+}
+
+// SetMessage sets the value of Message.
+func (s *WhatsAppStatusResponse) SetMessage(val OptString) {
+	s.Message = val
+}
+
+// WhatsApp session details, if logged in.
+type WhatsAppStatusResponseSession struct {
+	ID    string `json:"id"`
+	Phone string `json:"phone"`
+}
+
+// GetID returns the value of ID.
+func (s *WhatsAppStatusResponseSession) GetID() string {
+	return s.ID
+}
+
+// GetPhone returns the value of Phone.
+func (s *WhatsAppStatusResponseSession) GetPhone() string {
+	return s.Phone
+}
+
+// SetID sets the value of ID.
+func (s *WhatsAppStatusResponseSession) SetID(val string) {
+	s.ID = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *WhatsAppStatusResponseSession) SetPhone(val string) {
+	s.Phone = val
+}
+
+type WhatsappContactsOK struct {
+	Contacts []WhatsappContactsOKContactsItem `json:"contacts"`
+}
+
+// GetContacts returns the value of Contacts.
+func (s *WhatsappContactsOK) GetContacts() []WhatsappContactsOKContactsItem {
+	return s.Contacts
+}
+
+// SetContacts sets the value of Contacts.
+func (s *WhatsappContactsOK) SetContacts(val []WhatsappContactsOKContactsItem) {
+	s.Contacts = val
+}
+
+type WhatsappContactsOKContactsItem struct {
+	ID    OptString `json:"id"`
+	Name  OptString `json:"name"`
+	Phone OptString `json:"phone"`
+}
+
+// GetID returns the value of ID.
+func (s *WhatsappContactsOKContactsItem) GetID() OptString {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *WhatsappContactsOKContactsItem) GetName() OptString {
+	return s.Name
+}
+
+// GetPhone returns the value of Phone.
+func (s *WhatsappContactsOKContactsItem) GetPhone() OptString {
+	return s.Phone
+}
+
+// SetID sets the value of ID.
+func (s *WhatsappContactsOKContactsItem) SetID(val OptString) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *WhatsappContactsOKContactsItem) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *WhatsappContactsOKContactsItem) SetPhone(val OptString) {
+	s.Phone = val
+}
+
+type WhatsappDownloadAttachmentOK struct {
+	// URL to access the stored attachment.
+	FileURL OptString `json:"file_url"`
+}
+
+// GetFileURL returns the value of FileURL.
+func (s *WhatsappDownloadAttachmentOK) GetFileURL() OptString {
+	return s.FileURL
+}
+
+// SetFileURL sets the value of FileURL.
+func (s *WhatsappDownloadAttachmentOK) SetFileURL(val OptString) {
+	s.FileURL = val
+}
+
+type WhatsappDownloadAttachmentReq struct {
+	// The ID of the attachment to download.
+	AttachmentID string `json:"attachment_id"`
+	// The target storage ID.
+	StorageID string `json:"storage_id"`
+}
+
+// GetAttachmentID returns the value of AttachmentID.
+func (s *WhatsappDownloadAttachmentReq) GetAttachmentID() string {
+	return s.AttachmentID
+}
+
+// GetStorageID returns the value of StorageID.
+func (s *WhatsappDownloadAttachmentReq) GetStorageID() string {
+	return s.StorageID
+}
+
+// SetAttachmentID sets the value of AttachmentID.
+func (s *WhatsappDownloadAttachmentReq) SetAttachmentID(val string) {
+	s.AttachmentID = val
+}
+
+// SetStorageID sets the value of StorageID.
+func (s *WhatsappDownloadAttachmentReq) SetStorageID(val string) {
+	s.StorageID = val
+}
+
+type WhatsappDownloadMessageOK struct {
+	// Message details with media content.
+	Message *WhatsappDownloadMessageOKMessage `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *WhatsappDownloadMessageOK) GetMessage() *WhatsappDownloadMessageOKMessage {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *WhatsappDownloadMessageOK) SetMessage(val *WhatsappDownloadMessageOKMessage) {
+	s.Message = val
+}
+
+// Message details with media content.
+type WhatsappDownloadMessageOKMessage struct{}
+
+type WhatsappDownloadMessageReq struct {
+	// The ID of the message to download.
+	MessageID string `json:"message_id"`
+}
+
+// GetMessageID returns the value of MessageID.
+func (s *WhatsappDownloadMessageReq) GetMessageID() string {
+	return s.MessageID
+}
+
+// SetMessageID sets the value of MessageID.
+func (s *WhatsappDownloadMessageReq) SetMessageID(val string) {
+	s.MessageID = val
+}
+
+type WhatsappSyncOK struct {
+	SyncedCount OptInt                       `json:"synced_count"`
+	Messages    []WhatsappSyncOKMessagesItem `json:"messages"`
+}
+
+// GetSyncedCount returns the value of SyncedCount.
+func (s *WhatsappSyncOK) GetSyncedCount() OptInt {
+	return s.SyncedCount
+}
+
+// GetMessages returns the value of Messages.
+func (s *WhatsappSyncOK) GetMessages() []WhatsappSyncOKMessagesItem {
+	return s.Messages
+}
+
+// SetSyncedCount sets the value of SyncedCount.
+func (s *WhatsappSyncOK) SetSyncedCount(val OptInt) {
+	s.SyncedCount = val
+}
+
+// SetMessages sets the value of Messages.
+func (s *WhatsappSyncOK) SetMessages(val []WhatsappSyncOKMessagesItem) {
+	s.Messages = val
+}
+
+// Message details.
+type WhatsappSyncOKMessagesItem struct{}
+
+type WhatsappSyncReq struct {
+	// List of user IDs to sync messages for. If empty, sync all messages.
+	UserIds []string `json:"user_ids"`
+}
+
+// GetUserIds returns the value of UserIds.
+func (s *WhatsappSyncReq) GetUserIds() []string {
+	return s.UserIds
+}
+
+// SetUserIds sets the value of UserIds.
+func (s *WhatsappSyncReq) SetUserIds(val []string) {
+	s.UserIds = val
 }

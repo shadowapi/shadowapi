@@ -1,0 +1,18 @@
+get:
+  description: Retrieve WhatsApp login status.
+  operationId: whatsapp-status
+  responses:
+    "200":
+      description: Login status retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WhatsAppStatusResponse"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - whatsapp

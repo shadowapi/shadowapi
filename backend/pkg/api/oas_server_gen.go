@@ -266,6 +266,42 @@ type Handler interface {
 	//
 	// PUT /telegram
 	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
+	// WhatsappContacts implements whatsapp-contacts operation.
+	//
+	// Retrieve WhatsApp contacts.
+	//
+	// GET /whatsapp/contacts
+	WhatsappContacts(ctx context.Context) (*WhatsappContactsOK, error)
+	// WhatsappDownloadAttachment implements whatsapp-download-attachment operation.
+	//
+	// Download WhatsApp attachment into storage.
+	//
+	// POST /whatsapp/attachments/download
+	WhatsappDownloadAttachment(ctx context.Context, req *WhatsappDownloadAttachmentReq) (*WhatsappDownloadAttachmentOK, error)
+	// WhatsappDownloadMessage implements whatsapp-download-message operation.
+	//
+	// Download message content including media.
+	//
+	// POST /whatsapp/messages/download
+	WhatsappDownloadMessage(ctx context.Context, req *WhatsappDownloadMessageReq) (*WhatsappDownloadMessageOK, error)
+	// WhatsappLogin implements whatsapp-login operation.
+	//
+	// Initiate WhatsApp login flow via QR code scanning.
+	//
+	// POST /whatsapp/login
+	WhatsappLogin(ctx context.Context) (*WhatsAppLoginResponse, error)
+	// WhatsappStatus implements whatsapp-status operation.
+	//
+	// Retrieve WhatsApp login status.
+	//
+	// GET /whatsapp/status
+	WhatsappStatus(ctx context.Context) (*WhatsAppStatusResponse, error)
+	// WhatsappSync implements whatsapp-sync operation.
+	//
+	// Sync messages for selected users or all users.
+	//
+	// POST /whatsapp/sync
+	WhatsappSync(ctx context.Context, req *WhatsappSyncReq) (*WhatsappSyncOK, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

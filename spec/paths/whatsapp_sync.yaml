@@ -1,0 +1,40 @@
+post:
+  description: Sync messages for selected users or all users.
+  operationId: whatsapp-sync
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            user_ids:
+              type: array
+              items:
+                type: string
+              description: List of user IDs to sync messages for. If empty, sync all messages.
+  responses:
+    "200":
+      description: Messages synchronized successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              synced_count:
+                type: integer
+              messages:
+                type: array
+                items:
+                  type: object
+                  description: Message details.
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - whatsapp
