@@ -1,8 +1,9 @@
+import React, { useMemo } from 'react'
 import type { ListData } from '@adobe/react-spectrum'
-import { DragAndDropOptions, Heading, Item, ListView } from '@adobe/react-spectrum'
+import { DragAndDropOptions, Heading, Item as SpectrumItem, ListView } from '@adobe/react-spectrum'
 import DragHandle from '@spectrum-icons/workflow/DragHandle'
 
-interface Item {
+interface FlowItem {
   id: number
   uuid?: string
   type?: string
@@ -11,44 +12,64 @@ interface Item {
 }
 
 export interface FlowEntriesProp {
-  list: ListData<Item>
+  list: ListData<FlowItem>
   dragAndDropOptions?: DragAndDropOptions
 }
 
-export const FlowEntries = (props: FlowEntriesProp) => {
-  const { list } = props
-  const renderList: {
-    [key: number]: Item & { children: Item[] }
-  } = {}
-  for (const item of list.items) {
-    if (item.parent) {
-      renderList[item.parent].children.push(item)
-    } else {
-      renderList[item.id] = { ...item, children: [] }
+type RenderList = {
+  [key: number]: FlowItem & { children: FlowItem[] }
+}
+
+// TODO @reactima research on React.memo use here
+export const FlowEntries = React.memo(function FlowEntries(props: FlowEntriesProp) {
+  const { list, dragAndDropOptions } = props
+
+  // 1) Always call hooks unconditionally (before any 'return').
+  //    If list or list.items is empty, `tmp` will remain empty.
+  const renderList = useMemo<RenderList>(() => {
+    const tmp: RenderList = {}
+    if (!list?.items) return tmp
+
+    for (const item of list.items) {
+      if (item.parent) {
+        if (!tmp[item.parent]) {
+          tmp[item.parent] = { id: item.parent, title: '', children: [] }
+        }
+        tmp[item.parent].children.push(item)
+      } else {
+        tmp[item.id] = { ...item, children: [] }
+      }
     }
+    return tmp
+  }, [list])
+
+  // 2) Now do the early return based on `list.items`.
+  if (!list?.items || list.items.length === 0) {
+    return <>No FlowEntries or empty</>
   }
+
   return (
     <>
-      {Object.values(renderList).map((item: Item & { children: Item[] }) => (
-        <div key={item.id}>
-          <Heading level={5}>{item.title}</Heading>
+      {Object.values(renderList).map((node) => (
+        <div key={node.id}>
+          <Heading level={5}>{node.title}</Heading>
           <ListView
-            key={item.id}
+            key={node.id}
             density="compact"
-            items={item.children}
+            items={node.children}
             selectionMode="none"
-            aria-label={`Flow entry ${item.title}`}
-            dragAndDropHooks={props.dragAndDropOptions}
+            aria-label={`Flow entry ${node.title}`}
+            dragAndDropHooks={dragAndDropOptions}
           >
-            {(item: Item) => (
-              <Item textValue={item.title}>
+            {(child: FlowItem) => 
+              <SpectrumItem textValue={child.title}>
                 <DragHandle />
-                {item.title}
-              </Item>
-            )}
+                {child.title}
+              </SpectrumItem>
+            }
           </ListView>
         </div>
       ))}
     </>
   )
-}
+})
