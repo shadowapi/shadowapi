@@ -93,3 +93,24 @@ func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) 
 
 	return ret, nil
 }
+
+func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
+	var s3 api.StorageS3
+	if err := json.Unmarshal(row.Settings, &s3); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal s3 settings: %w", err)
+	}
+	s3.UUID = api.NewOptString(row.UUID.String())
+	return &s3, nil
+}
+
+func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error) {
+	var raw map[string]string
+	if err := json.Unmarshal(row.Settings, &raw); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal hostfiles settings: %w", err)
+	}
+	ret := &api.StorageHostfiles{
+		UUID: api.NewOptString(row.UUID.String()),
+		Path: raw["path"],
+	}
+	return ret, nil
+}

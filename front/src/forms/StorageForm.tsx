@@ -5,21 +5,64 @@ import { Button, Flex, Form, Header, Item, Picker, Switch, TextField } from '@ad
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import client from '@/api/client'
-import type { components } from '@/api/v1'
+import type { components, paths } from '@/api/v1'
 
-export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElement {
+type StorageBase = {
+  name: string
+  type: string
+  is_enabled: boolean
+}
+
+type StorageFormData =
+  | (StorageBase & { type: 's3' } & components['schemas']['storage_s3'])
+  | (StorageBase & { type: 'hostfiles' } & components['schemas']['storage_hostfiles'])
+  | (StorageBase & { type: 'postgres' } & components['schemas']['storage_postgres'])
+
+export type StorageKind = 's3' | 'hostfiles' | 'postgres'
+
+const createEndpoints: Record<StorageKind, keyof paths> = {
+  s3: '/storage/s3',
+  hostfiles: '/storage/hostfiles',
+  postgres: '/storage/postgres',
+}
+
+const updateEndpoints: Record<StorageKind, keyof paths> = {
+  s3: '/storage/s3/{uuid}',
+  hostfiles: '/storage/hostfiles/{uuid}',
+  postgres: '/storage/postgres/{uuid}',
+}
+
+const deleteEndpoints: Record<StorageKind, keyof paths> = {
+  s3: '/storage/s3/{uuid}',
+  hostfiles: '/storage/hostfiles/{uuid}',
+  postgres: '/storage/postgres/{uuid}',
+}
+
+export function StorageForm({
+  storageUUID,
+  storageKind,
+}: {
+  storageUUID: string
+  storageKind?: StorageKind
+}): ReactElement {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const form = useForm<StorageFormData>({})
 
-  // This form is based on the base storage schema
-  const form = useForm<components['schemas']['storage']>({})
+  // For existing storage, require storageKind to be provided.
+  const getEndpoint = (): keyof paths => {
+    if (!storageKind) {
+      throw new Error('storageKind is required for editing storage')
+    }
+    return updateEndpoints[storageKind]
+  }
 
-  // Fetch existing storage details if not adding
   const query = useQuery({
-    queryKey: ['/storage/{uuid}', { uuid: storageUUID }],
+    queryKey: [getEndpoint(), { uuid: storageUUID }],
     queryFn: async ({ signal }) => {
       if (storageUUID === 'add') return {}
-      const { data } = await client.GET(`/storage/{uuid}`, {
+      const endpoint = getEndpoint()
+      const { data } = await client.GET(endpoint, {
         params: { path: { uuid: storageUUID } },
         signal,
       })
@@ -28,21 +71,17 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
     enabled: storageUUID !== 'add',
   })
 
-  // Depending on the "type", we can show different sub-fields below
   const storageType = useWatch({ control: form.control, name: 'type' })
 
-  // Either create or update storage
   const modifyMutation = useMutation({
-    mutationFn: async (data: components['schemas']['storage']) => {
+    mutationFn: async (data: StorageFormData) => {
       if (storageUUID === 'add') {
-        const resp = await client.POST('/storage', {
-          body: {
-            name: data.name,
-            type: data.type,
-            is_enabled: data.is_enabled,
-            // Additional sub-fields can be included here if your backend expects them
-            // for specific storage types (S3, file_system, database).
-          },
+        if (!storageKind) {
+          throw new Error('storageKind is required for creation')
+        }
+        const endpoint = createEndpoints[storageKind]
+        const resp = await client.POST(endpoint, {
+          body: { name: data.name, type: data.type, is_enabled: data.is_enabled },
         })
         if (resp.error) {
           form.setError('name', { message: resp.error.detail })
@@ -50,14 +89,13 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
         }
         return resp
       } else {
-        const resp = await client.PUT(`/storage/{uuid}`, {
+        if (!storageKind) {
+          throw new Error('storageKind is required for update')
+        }
+        const endpoint = updateEndpoints[storageKind]
+        const resp = await client.PUT(endpoint, {
           params: { path: { uuid: storageUUID } },
-          body: {
-            name: data.name,
-            type: data.type,
-            is_enabled: data.is_enabled,
-            // Additional sub-fields for updates
-          },
+          body: { name: data.name, type: data.type, is_enabled: data.is_enabled },
         })
         if (resp.error) {
           form.setError('name', { message: resp.error.detail })
@@ -72,10 +110,13 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
     },
   })
 
-  // Delete the storage
   const deleteMutation = useMutation({
     mutationFn: async (uuid: string) => {
-      const resp = await client.DELETE(`/storage/{uuid}`, {
+      if (!storageKind) {
+        throw new Error('storageKind is required for delete')
+      }
+      const endpoint = deleteEndpoints[storageKind]
+      const resp = await client.DELETE(endpoint, {
         params: { path: { uuid } },
       })
       if (resp.error) {
@@ -100,20 +141,17 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
     deleteMutation.mutate(storageUUID)
   }
 
-  const onSubmit = (data: components['schemas']['storage']) => {
+  const onSubmit = (data: StorageFormData) => {
     modifyMutation.mutate(data)
   }
 
-  if (query.isPending && storageUUID !== 'add') {
-    return <></>
-  }
+  if (query.isPending && storageUUID !== 'add') return <></>
 
   return (
     <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600">
           <Header marginBottom="size-160">Storage</Header>
-
           <Controller
             name="name"
             control={form.control}
@@ -122,7 +160,6 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
               <TextField
                 label="Name"
                 isRequired
-                type="text"
                 width="100%"
                 validationState={fieldState.invalid ? 'invalid' : undefined}
                 errorMessage={fieldState.error?.message}
@@ -130,7 +167,6 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
               />
             )}
           />
-
           <Controller
             name="type"
             control={form.control}
@@ -146,12 +182,11 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
                 width="100%"
               >
                 <Item key="s3">S3</Item>
-                <Item key="file_system">File System</Item>
-                <Item key="postgresql">PostgreSQL</Item>
+                <Item key="hostfiles">File System</Item>
+                <Item key="postgres">PostgreSQL</Item>
               </Picker>
             )}
           />
-
           <Controller
             name="is_enabled"
             control={form.control}
@@ -161,83 +196,48 @@ export function StorageForm({ storageUUID }: { storageUUID: string }): ReactElem
               </Switch>
             )}
           />
-
-          {/* Optional sub-forms based on type */}
           {storageType === 's3' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="provider"
                 control={form.control}
-                render={({ field }) => <TextField label="S3 Provider" {...field} width="100%" type="text" />}
+                render={({ field }) => <TextField label="S3 Provider" {...field} width="100%" />}
               />
               <Controller
                 name="region"
                 control={form.control}
-                render={({ field }) => <TextField label="Region" {...field} width="100%" type="text" />}
+                render={({ field }) => <TextField label="Region" {...field} width="100%" />}
               />
               <Controller
                 name="bucket"
                 control={form.control}
-                render={({ field }) => <TextField label="Bucket Name" {...field} width="100%" type="text" />}
-              />
-              <Controller
-                name="access_key_id"
-                control={form.control}
-                render={({ field }) => <TextField label="Access Key ID" {...field} width="100%" type="text" />}
-              />
-              <Controller
-                name="secret_access_key"
-                control={form.control}
-                render={({ field }) => <TextField label="Secret Access Key" {...field} width="100%" type="password" />}
+                render={({ field }) => <TextField label="Bucket Name" {...field} width="100%" />}
               />
             </Flex>
           )}
-
-          {storageType === 'file_system' && (
+          {storageType === 'hostfiles' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="path"
                 control={form.control}
-                render={({ field }) => <TextField label="File System Path" {...field} width="100%" type="text" />}
+                render={({ field }) => <TextField label="File System Path" {...field} width="100%" />}
               />
             </Flex>
           )}
-
-          {storageType === 'postgresql' && (
+          {storageType === 'postgres' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="host"
                 control={form.control}
-                render={({ field }) => <TextField label="PostgreSQL Host" {...field} width="100%" type="text" />}
+                render={({ field }) => <TextField label="PostgreSQL Host" {...field} width="100%" />}
               />
               <Controller
                 name="port"
                 control={form.control}
-                render={({ field }) => <TextField label="Port" {...field} width="100%" type="text" />}
-              />
-              <Controller
-                name="user"
-                control={form.control}
-                render={({ field }) => <TextField label="User" {...field} width="100%" type="text" />}
-              />
-              <Controller
-                name="password"
-                control={form.control}
-                render={({ field }) => <TextField label="Password" {...field} width="100%" type="password" />}
-              />
-              <Controller
-                name="name"
-                control={form.control}
-                render={({ field }) => <TextField label="DB Name" {...field} width="100%" type="text" />}
-              />
-              <Controller
-                name="options"
-                control={form.control}
-                render={({ field }) => <TextField label="Options" {...field} width="100%" type="text" />}
+                render={({ field }) => <TextField label="Port" {...field} width="100%" />}
               />
             </Flex>
           )}
-
           <Flex direction="row" gap="size-100" marginTop="size-300" justifyContent="center">
             <Button type="submit" variant="cta">
               {storageUUID === 'add' ? 'Create' : 'Update'}
