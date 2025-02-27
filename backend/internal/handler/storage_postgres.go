@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -59,8 +60,14 @@ func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StorageP
 func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePostgresGetParams) (*api.StoragePostgres, error) {
 	log := h.log.With("handler", "StoragePostgresGet")
 
+	id, err := uuid.FromString(params.UUID)
+	if err != nil {
+		log.Error("failed to parse storage uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
+	}
+
 	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:  params.UUID,
+		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes())},
 		Limit: 1,
 	})
 	if err != nil {
@@ -90,7 +97,7 @@ func (h *Handler) StoragePostgresUpdate(
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StoragePostgres, error) {
 		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  storageUUID.String(),
+			UUID:  pgtype.UUID{Bytes: [16]byte(storageUUID.Bytes())},
 			Limit: 1,
 		})
 		if err != nil {

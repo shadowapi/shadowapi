@@ -7,15 +7,15 @@ package query
 
 import (
 	"context"
-	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createStorage = `-- name: CreateStorage :one
 INSERT INTO storage (
   uuid,
-  type,
+  "type",
   settings,
   created_at,
   updated_at
@@ -62,10 +62,10 @@ func (q *Queries) DeleteStorage(ctx context.Context, argUuid uuid.UUID) error {
 const getStorages = `-- name: GetStorages :many
 WITH filtered_storages AS (
   SELECT d.uuid, d.user_uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE 
-    ($5::text IS NULL OR type = $5) AND
-    ($6::text IS NULL OR type = $6) AND
-    ($7::text IS NULL OR user_uuid = $7) AND
-    ($8 IS NULL OR is_enabled = $8) AND
+    ($5::text IS NULL OR "type" = $5) AND
+    ($6::uuid IS NULL OR "uuid" = $6) AND
+    ($7::uuid IS NULL OR user_uuid = $7) AND
+    ($8::bool IS NULL OR is_enabled = $8) AND
     ($9::text IS NULL OR d.name ILIKE $9))
 SELECT
   uuid, user_uuid, name, type, is_enabled, settings, created_at, updated_at,
@@ -88,22 +88,22 @@ type GetStoragesParams struct {
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
 	Type           string      `json:"type"`
-	UUID           string      `json:"uuid"`
-	UserUUID       string      `json:"user_uuid"`
-	IsEnabled      interface{} `json:"is_enabled"`
+	UUID           pgtype.UUID `json:"uuid"`
+	UserUUID       pgtype.UUID `json:"user_uuid"`
+	IsEnabled      bool        `json:"is_enabled"`
 	Name           string      `json:"name"`
 }
 
 type GetStoragesRow struct {
-	UUID       uuid.UUID  `json:"uuid"`
-	UserUUID   *uuid.UUID `json:"user_uuid"`
-	Name       string     `json:"name"`
-	Type       string     `json:"type"`
-	IsEnabled  bool       `json:"is_enabled"`
-	Settings   []byte     `json:"settings"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
-	TotalCount int64      `json:"total_count"`
+	UUID       uuid.UUID          `json:"uuid"`
+	UserUUID   *uuid.UUID         `json:"user_uuid"`
+	Name       string             `json:"name"`
+	Type       string             `json:"type"`
+	IsEnabled  bool               `json:"is_enabled"`
+	Settings   []byte             `json:"settings"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	TotalCount int64              `json:"total_count"`
 }
 
 func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]GetStoragesRow, error) {

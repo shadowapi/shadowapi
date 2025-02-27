@@ -15,7 +15,6 @@ import (
 
 // handleListSessions handles the GET /v1/sessions endpoint
 func (h *Handler) handleListSessions(ctx context.Context, _ *Empty) (*SessionListResponse, error) {
-
 	var accountID int64 = 1
 
 	tx := query.New(h.dbp)
@@ -44,8 +43,12 @@ func (h *Handler) handleListSessions(ctx context.Context, _ *Empty) (*SessionLis
 			ID:          item.ID,
 			Phone:       item.Phone,
 			Description: item.Description.String,
-			UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
-			CreatedAt:   item.CreatedAt.Format(time.RFC3339),
+		}
+		if item.CreatedAt.Valid {
+			session.CreatedAt = item.CreatedAt.Time.Format(time.RFC3339)
+		}
+		if item.UpdatedAt.Valid {
+			session.UpdatedAt = item.UpdatedAt.Time.Format(time.RFC3339)
 		}
 
 		response.Body.Sessions = append(response.Body.Sessions, session)
@@ -66,7 +69,6 @@ func (h *Handler) handleCreateSessionStart(ctx context.Context, req *SignInReque
 		AccountID: accountID,
 		Phone:     req.Body.Phone,
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +122,6 @@ func (h *Handler) handleCreateSessionFin(ctx context.Context, req *SendCodeReque
 
 // handleSelf handles the GET /v1/sessions/{id}/self endpoint
 func (h *Handler) handleSelf(ctx context.Context, req *SelfRequest) (*SelfResponse, error) {
-
 	tx := query.New(h.dbp)
 	if _, err := tx.TgGetSession(ctx, req.ID); err != nil {
 		return nil, err

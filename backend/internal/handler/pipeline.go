@@ -170,11 +170,16 @@ func (h *Handler) pipelineQueryToAPI(from query.Pipeline) (to api.Pipeline, err 
 	if err = flow.UnmarshalJSON(from.Flow); err != nil {
 		return
 	}
-	return api.Pipeline{
-		UUID:      from.UUID.String(),
-		Name:      from.Name,
-		Flow:      flow,
-		CreatedAt: api.NewOptDateTime(from.CreatedAt),
-		UpdatedAt: api.NewOptDateTime(from.UpdatedAt),
-	}, nil
+	p := api.Pipeline{
+		UUID: from.UUID.String(),
+		Name: from.Name,
+		Flow: flow,
+	}
+	if from.CreatedAt.Valid {
+		p.CreatedAt = api.NewOptDateTime(from.CreatedAt.Time)
+	}
+	if from.UpdatedAt.Valid {
+		p.UpdatedAt = api.NewOptDateTime(from.UpdatedAt.Time)
+	}
+	return p, nil
 }

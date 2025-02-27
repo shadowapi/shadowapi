@@ -1,7 +1,7 @@
 -- name: CreateStorage :one
 INSERT INTO storage (
   uuid,
-  type,
+  "type",
   settings,
   created_at,
   updated_at
@@ -16,10 +16,10 @@ INSERT INTO storage (
 -- name: GetStorages :many
 WITH filtered_storages AS (
   SELECT d.* FROM storage d WHERE 
-    (@type::text IS NULL OR type = @type) AND
-    (@uuid::text IS NULL OR type = @uuid) AND
-    (@user_uuid::text IS NULL OR user_uuid = @user_uuid) AND
-    (@is_enabled IS NULL OR is_enabled = @is_enabled) AND
+    (@type::text IS NULL OR "type" = @type) AND
+    (@uuid::uuid IS NULL OR "uuid" = @uuid) AND
+    (@user_uuid::uuid IS NULL OR user_uuid = @user_uuid) AND
+    (@is_enabled::bool IS NULL OR is_enabled = @is_enabled) AND
     (@name::text IS NULL OR d.name ILIKE @name))
 SELECT
   *,

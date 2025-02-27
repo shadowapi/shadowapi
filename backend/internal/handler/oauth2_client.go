@@ -81,11 +81,15 @@ func (h *Handler) OAuth2ClientCreate(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 	out := api.OAuth2Client{
-		ID:        obj.ID,
-		Name:      obj.Name,
-		Provider:  obj.Provider,
-		CreatedAt: obj.CreatedAt,
-		UpdatedAt: obj.UpdatedAt,
+		ID:       obj.ID,
+		Name:     obj.Name,
+		Provider: obj.Provider,
+	}
+	if obj.CreatedAt.Valid {
+		out.CreatedAt = obj.CreatedAt.Time
+	}
+	if obj.UpdatedAt.Valid {
+		out.UpdatedAt = obj.UpdatedAt.Time
 	}
 	return &out, nil
 }
@@ -112,11 +116,15 @@ func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGe
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client details"))
 	}
 	result := &api.OAuth2Client{
-		ID:        details.ID,
-		Name:      details.Name,
-		Provider:  details.Provider,
-		CreatedAt: details.CreatedAt,
-		UpdatedAt: details.UpdatedAt,
+		ID:       details.ID,
+		Name:     details.Name,
+		Provider: details.Provider,
+	}
+	if details.CreatedAt.Valid {
+		result.CreatedAt = details.CreatedAt.Time
+	}
+	if details.UpdatedAt.Valid {
+		result.UpdatedAt = details.UpdatedAt.Time
 	}
 	return result, nil
 }
@@ -136,11 +144,15 @@ func (h *Handler) OAuth2ClientList(
 	out := &api.OAuth2ClientListOK{}
 	for _, c := range clients {
 		a := api.OAuth2Client{
-			ID:        c.ID,
-			Name:      c.Name,
-			Provider:  c.Provider,
-			CreatedAt: c.CreatedAt,
-			UpdatedAt: c.UpdatedAt,
+			ID:       c.ID,
+			Name:     c.Name,
+			Provider: c.Provider,
+		}
+		if c.CreatedAt.Valid {
+			a.CreatedAt = c.CreatedAt.Time
+		}
+		if c.UpdatedAt.Valid {
+			a.UpdatedAt = c.UpdatedAt.Time
 		}
 
 		out.Clients = append(out.Clients, a)
@@ -224,12 +236,16 @@ func (h *Handler) OAuth2ClientTokenList(
 	out := []api.OAuth2ClientToken{}
 	for _, t := range tokens {
 		a := api.OAuth2ClientToken{
-			UUID:      t.UUID.String(),
-			ClientID:  t.ClientID,
-			Name:      t.Name.String,
-			Token:     string(t.Token),
-			CreatedAt: t.CreatedAt,
-			UpdatedAt: t.UpdatedAt,
+			UUID:     t.UUID.String(),
+			ClientID: t.ClientID,
+			Name:     t.Name.String,
+			Token:    string(t.Token),
+		}
+		if t.CreatedAt.Valid {
+			a.CreatedAt = t.CreatedAt.Time
+		}
+		if t.UpdatedAt.Valid {
+			a.UpdatedAt = t.UpdatedAt.Time
 		}
 
 		out = append(out, a)
@@ -261,11 +277,15 @@ func (h *Handler) OAuth2ClientUpdate(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 	out := api.OAuth2Client{
-		ID:        raw.ID,
-		Name:      raw.Name,
-		Provider:  raw.Provider,
-		CreatedAt: raw.CreatedAt,
-		UpdatedAt: raw.UpdatedAt,
+		ID:       raw.ID,
+		Name:     raw.Name,
+		Provider: raw.Provider,
+	}
+	if raw.CreatedAt.Valid {
+		out.CreatedAt = raw.CreatedAt.Time
+	}
+	if raw.UpdatedAt.Valid {
+		out.UpdatedAt = raw.UpdatedAt.Time
 	}
 
 	return &out, nil

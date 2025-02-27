@@ -33,7 +33,3 @@ sql:
               import: "github.com/gofrs/uuid"
               type: "UUID"
               pointer: true
-          - column: "*.created_at"
-            go_type: time.Time
-          - column: "*.updated_at"
-            go_type: time.Time

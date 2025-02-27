@@ -2,6 +2,7 @@ package workers
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
@@ -32,7 +33,7 @@ func NewWorker(sessionID int32, pg *pgxpool.Pool, cfg config.Config) *Worker {
 	dispatcher := tg.NewUpdateDispatcher()
 
 	var h telegram.UpdateHandler
-	var w = &Worker{
+	w := &Worker{
 		sessionID:  sessionID,
 		cfg:        &cfg,
 		db:         pg,
@@ -41,7 +42,7 @@ func NewWorker(sessionID int32, pg *pgxpool.Pool, cfg config.Config) *Worker {
 
 	w.tc = telegram.NewClient(cfg.Telegram.AppID, cfg.Telegram.AppHash, telegram.Options{
 		Logger:         logger,
-		SessionStorage: storages.NewSessionStorage(pg, sessionID),
+		SessionStorage: storages.NewSessionStorage(pg, int64(sessionID)),
 		UpdateHandler: telegram.UpdateHandlerFunc(func(ctx context.Context, u tg.UpdatesClass) error {
 			return h.Handle(ctx, u)
 		}),
@@ -49,14 +50,14 @@ func NewWorker(sessionID int32, pg *pgxpool.Pool, cfg config.Config) *Worker {
 
 	w.peersManager = peers.Options{
 		Logger:  logger,
-		Storage: storages.NewPeerStorage(sessionID, pg),
-		Cache:   storages.NewCacheStorage(sessionID, pg),
+		Storage: storages.NewPeerStorage(int64(sessionID), pg),
+		Cache:   storages.NewCacheStorage(int64(sessionID), pg),
 	}.Build(w.tc.API())
 
 	w.gaps = updates.New(updates.Config{
 		Handler: dispatcher,
 		Logger:  logger.Named("gaps"),
-		Storage: storages.NewStateStorage(w.db, sessionID),
+		Storage: storages.NewStateStorage(w.db, int64(sessionID)),
 	})
 	h = w.peersManager.UpdateHook(w.gaps)
 

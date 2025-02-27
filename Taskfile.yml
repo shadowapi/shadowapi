@@ -81,6 +81,15 @@ tasks:
         --name sa-sqlc sa-sqlc generate
     preconditions:
       - sh: docker images | grep sa-sqlc
+  sqlc-vet:
+    desc: "Validate SQL queries"
+    cmds:
+      - |2
+        docker run --rm \
+        -v ./db:/db -v ./backend/pkg:/pkg -w /db \
+        --name sa-sqlc sa-sqlc vet
+    preconditions:
+      - sh: docker images | grep sa-sqlc
 
   api-gen-backend:
     desc: "Generate API specification in backend"

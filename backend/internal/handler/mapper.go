@@ -15,8 +15,6 @@ func QToDatasource(row query.Datasource) api.Datasource {
 		Name:      row.Name,
 		Type:      row.Type,
 		IsEnabled: row.IsEnabled,
-		CreatedAt: row.CreatedAt,
-		UpdatedAt: row.UpdatedAt,
 	}
 	if row.UserUUID != nil {
 		c.UserUUID = api.OptString{Value: row.UserUUID.String(), Set: true}
@@ -27,7 +25,12 @@ func QToDatasource(row query.Datasource) api.Datasource {
 	if row.Oauth2ClientID.Valid {
 		c.OAuth2ClientID = api.OptString{Value: row.Oauth2ClientID.String, Set: true}
 	}
-
+	if row.CreatedAt.Valid {
+		c.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		c.UpdatedAt = row.UpdatedAt.Time
+	}
 	return c
 }
 
@@ -47,14 +50,19 @@ func QToDatasourceEmail(c *api.Datasource, row query.DatasourceEmail) {
 }
 
 func QToStorage(row query.GetStoragesRow) api.Storage {
-	return api.Storage{
+	r := api.Storage{
 		UUID:      row.UUID.String(),
 		Name:      api.NewOptString(row.Name),
 		Type:      row.Type,
 		IsEnabled: row.IsEnabled,
-		CreatedAt: row.CreatedAt,
-		UpdatedAt: row.UpdatedAt,
 	}
+	if row.CreatedAt.Valid {
+		r.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		r.UpdatedAt = row.UpdatedAt.Time
+	}
+	return r
 }
 
 func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) {
