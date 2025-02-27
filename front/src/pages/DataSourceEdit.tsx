@@ -2,11 +2,15 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 
 import { DataSourceForm } from '@/forms'
+import { useTitle } from '@/hooks'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function DataSourceEdit() {
   const navigate = useNavigate()
   const { uuid } = useParams()
+
+  const pageTitle = uuid === 'add' ? 'Add Data Source' : 'Edit Data Source'
+  useTitle(pageTitle)
 
   return (
     <FullLayout>

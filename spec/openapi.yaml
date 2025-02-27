@@ -90,8 +90,6 @@ paths:
     $ref: "paths/storage_postgres.yaml"
   /storage/postgres/{uuid}:
     $ref: "paths/storage_postgres_uuid.yaml"
-  /telegram:
-    $ref: "paths/telegram.yaml"
   /storage/s3:
     $ref: "paths/storage_s3.yaml"
   /storage/s3/{uuid}:
@@ -100,6 +98,8 @@ paths:
     $ref: "paths/storage_hostfiles.yaml"
   /storage/hostfiles/{uuid}:
     $ref: "paths/storage_hostfiles_uuid.yaml"
+  /telegram:
+    $ref: "paths/telegram.yaml"
   /whatsapp/login:
     $ref: "paths/whatsapp_login.yaml"
   /whatsapp/status:

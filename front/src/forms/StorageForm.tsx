@@ -7,6 +7,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import client from '@/api/client'
 import type { components, paths } from '@/api/v1'
 
+export type StorageKind = 's3' | 'hostfiles' | 'postgres'
+
 type StorageBase = {
   name: string
   type: string
@@ -17,8 +19,6 @@ type StorageFormData =
   | (StorageBase & { type: 's3' } & components['schemas']['storage_s3'])
   | (StorageBase & { type: 'hostfiles' } & components['schemas']['storage_hostfiles'])
   | (StorageBase & { type: 'postgres' } & components['schemas']['storage_postgres'])
-
-export type StorageKind = 's3' | 'hostfiles' | 'postgres'
 
 const createEndpoints: Record<StorageKind, keyof paths> = {
   s3: '/storage/s3',
@@ -49,19 +49,19 @@ export function StorageForm({
   const queryClient = useQueryClient()
   const form = useForm<StorageFormData>({})
 
-  // For existing storage, require storageKind to be provided.
-  const getEndpoint = (): keyof paths => {
-    if (!storageKind) {
-      throw new Error('storageKind is required for editing storage')
-    }
-    return updateEndpoints[storageKind]
+  if (storageUUID !== 'add' && !storageKind) {
+    throw new Error('storageKind is required for editing storage')
+  }
+
+  const getEndpoint = (kind: StorageKind, isCreate: boolean): keyof paths => {
+    return isCreate ? createEndpoints[kind] : updateEndpoints[kind]
   }
 
   const query = useQuery({
-    queryKey: [getEndpoint(), { uuid: storageUUID }],
+    queryKey: storageUUID === 'add' ? ['/storage', 'add'] : [getEndpoint(storageKind!, false), { uuid: storageUUID }],
     queryFn: async ({ signal }) => {
       if (storageUUID === 'add') return {}
-      const endpoint = getEndpoint()
+      const endpoint = getEndpoint(storageKind!, false)
       const { data } = await client.GET(endpoint, {
         params: { path: { uuid: storageUUID } },
         signal,
@@ -76,32 +76,115 @@ export function StorageForm({
   const modifyMutation = useMutation({
     mutationFn: async (data: StorageFormData) => {
       if (storageUUID === 'add') {
-        if (!storageKind) {
-          throw new Error('storageKind is required for creation')
+        const currentKind = data.type as StorageKind
+        const endpoint = createEndpoints[currentKind]
+        if (data.type === 's3') {
+          const resp = await client.POST(endpoint, {
+            body: {
+              name: data.name,
+              type: data.type,
+              is_enabled: data.is_enabled,
+              provider: data.provider,
+              region: data.region,
+              bucket: data.bucket,
+              access_key_id: data.access_key_id,
+              secret_access_key: data.secret_access_key,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
+        } else if (data.type === 'hostfiles') {
+          const resp = await client.POST(endpoint, {
+            body: {
+              name: data.name,
+              type: data.type,
+              is_enabled: data.is_enabled,
+              path: data.path,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
+        } else {
+          const resp = await client.POST(endpoint, {
+            body: {
+              name: data.name,
+              type: data.type,
+              is_enabled: data.is_enabled,
+              host: data.host,
+              port: data.port,
+              user: data.user,
+              password: data.password,
+              options: data.options,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
         }
-        const endpoint = createEndpoints[storageKind]
-        const resp = await client.POST(endpoint, {
-          body: { name: data.name, type: data.type, is_enabled: data.is_enabled },
-        })
-        if (resp.error) {
-          form.setError('name', { message: resp.error.detail })
-          throw new Error(resp.error.detail)
-        }
-        return resp
       } else {
-        if (!storageKind) {
-          throw new Error('storageKind is required for update')
+        const endpoint = getEndpoint(storageKind!, false)
+        if (data.type === 's3') {
+          const resp = await client.PUT(endpoint, {
+            params: { path: { uuid: storageUUID } },
+            body: {
+              name: data.name,
+              type: data.type,
+              is_enabled: data.is_enabled,
+              provider: data.provider,
+              region: data.region,
+              bucket: data.bucket,
+              access_key_id: data.access_key_id,
+              secret_access_key: data.secret_access_key,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
+        } else if (data.type === 'hostfiles') {
+          const resp = await client.PUT(endpoint, {
+            params: { path: { uuid: storageUUID } },
+            body: {
+              name: data.name,
+              type: data.type,
+              is_enabled: data.is_enabled,
+              path: data.path,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
+        } else {
+          const resp = await client.PUT(endpoint, {
+            params: { path: { uuid: storageUUID } },
+            body: {
+              name: data.name,
+              type: data.type,
+              is_enabled: data.is_enabled,
+              host: data.host,
+              port: data.port,
+              user: data.user,
+              password: data.password,
+              options: data.options,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
         }
-        const endpoint = updateEndpoints[storageKind]
-        const resp = await client.PUT(endpoint, {
-          params: { path: { uuid: storageUUID } },
-          body: { name: data.name, type: data.type, is_enabled: data.is_enabled },
-        })
-        if (resp.error) {
-          form.setError('name', { message: resp.error.detail })
-          throw new Error(resp.error.detail)
-        }
-        return resp
       }
     },
     onSuccess: () => {
@@ -112,10 +195,7 @@ export function StorageForm({
 
   const deleteMutation = useMutation({
     mutationFn: async (uuid: string) => {
-      if (!storageKind) {
-        throw new Error('storageKind is required for delete')
-      }
-      const endpoint = deleteEndpoints[storageKind]
+      const endpoint = deleteEndpoints[storageKind!]
       const resp = await client.DELETE(endpoint, {
         params: { path: { uuid } },
       })
@@ -160,6 +240,7 @@ export function StorageForm({
               <TextField
                 label="Name"
                 isRequired
+                type="text"
                 width="100%"
                 validationState={fieldState.invalid ? 'invalid' : undefined}
                 errorMessage={fieldState.error?.message}
@@ -211,7 +292,17 @@ export function StorageForm({
               <Controller
                 name="bucket"
                 control={form.control}
-                render={({ field }) => <TextField label="Bucket Name" {...field} width="100%" />}
+                render={({ field }) => <TextField label="Bucket Name" {...field} width="100%" type="text" />}
+              />
+              <Controller
+                name="access_key_id"
+                control={form.control}
+                render={({ field }) => <TextField label="Access Key ID" {...field} width="100%" type="text" />}
+              />
+              <Controller
+                name="secret_access_key"
+                control={form.control}
+                render={({ field }) => <TextField label="Secret Access Key" {...field} width="100%" type="password" />}
               />
             </Flex>
           )}
@@ -234,7 +325,27 @@ export function StorageForm({
               <Controller
                 name="port"
                 control={form.control}
-                render={({ field }) => <TextField label="Port" {...field} width="100%" />}
+                render={({ field }) => <TextField label="Port" {...field} width="100%" type="text" />}
+              />
+              <Controller
+                name="user"
+                control={form.control}
+                render={({ field }) => <TextField label="User" {...field} width="100%" type="text" />}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field }) => <TextField label="Password" {...field} width="100%" type="password" />}
+              />
+              <Controller
+                name="name"
+                control={form.control}
+                render={({ field }) => <TextField label="DB Name" {...field} width="100%" type="text" />}
+              />
+              <Controller
+                name="options"
+                control={form.control}
+                render={({ field }) => <TextField label="Options" {...field} width="100%" type="text" />}
               />
             </Flex>
           )}

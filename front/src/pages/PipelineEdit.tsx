@@ -3,11 +3,15 @@ import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 import { ReactFlowProvider } from '@xyflow/react'
 
 import { PipelineForm } from '@/forms'
+import { useTitle } from '@/hooks'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function PipelineEdit() {
   const navigate = useNavigate()
   const { uuid } = useParams()
+
+  const pageTitle = uuid === 'add' ? 'Add Pipeline' : 'Edit Pipeline'
+  useTitle(pageTitle)
 
   return (
     <FullLayout>
