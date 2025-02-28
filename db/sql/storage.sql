@@ -1,24 +1,35 @@
 -- name: CreateStorage :one
 INSERT INTO storage (
   uuid,
+  name,
   "type",
+  is_enabled,
   settings,
   created_at,
   updated_at
 ) VALUES (
   @uuid,
+  @name,
   @type,
+  @is_enabled,
   @settings,
   NOW(),
   NOW()
 ) RETURNING *;
+
+-- name: ListStorages :many
+SELECT
+    sqlc.embed(storage)
+FROM storage
+ORDER BY created_at DESC
+LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
+    OFFSET @offset_records::int;
 
 -- name: GetStorages :many
 WITH filtered_storages AS (
   SELECT d.* FROM storage d WHERE 
     (@type::text IS NULL OR "type" = @type) AND
     (@uuid::uuid IS NULL OR "uuid" = @uuid) AND
-    (@user_uuid::uuid IS NULL OR user_uuid = @user_uuid) AND
     (@is_enabled::bool IS NULL OR is_enabled = @is_enabled) AND
     (@name::text IS NULL OR d.name ILIKE @name))
 SELECT
@@ -39,6 +50,7 @@ LIMIT NULLIF(sqlc.arg('limit')::int, 0) OFFSET sqlc.arg('offset');
 UPDATE storage SET
   "type" = @type,
   name = @name,
+  is_enabled = @is_enabled,
   settings = @settings,
   updated_at = NOW()
 WHERE uuid = @uuid;

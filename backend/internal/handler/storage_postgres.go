@@ -25,10 +25,20 @@ func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePos
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 
+	// Extract underlying values from optional fields.
+	var isEnabled bool
+	if req.IsEnabled.IsSet() {
+		isEnabled = req.IsEnabled.Value
+	} else {
+		isEnabled = false
+	}
+
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:     storageUUID,
-		Type:     "postgres",
-		Settings: settings,
+		UUID:      storageUUID,
+		Name:      req.Name,
+		Type:      "postgres",
+		IsEnabled: isEnabled,
+		Settings:  settings,
 	})
 	if err != nil {
 		log.Error("failed to create storage", "error", err)
@@ -105,20 +115,30 @@ func (h *Handler) StoragePostgresUpdate(
 			log.Error("failed to get storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
 		}
+		if len(storages) == 0 {
+			return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
+		}
 
-		update := storages[0]
-		update.Name = req.Name
-		update.Settings, err = json.Marshal(req)
+		// For update, use new values if provided; otherwise fall back to current DB values.
+		var isEnabled bool
+		if req.IsEnabled.IsSet() {
+			isEnabled = req.IsEnabled.Value
+		} else {
+			isEnabled = storages[0].IsEnabled
+		}
+
+		newSettings, err := json.Marshal(req)
 		if err != nil {
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
 
 		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:     storageUUID,
-			Type:     "postgres",
-			Name:     update.Name,
-			Settings: update.Settings,
+			UUID:      storageUUID,
+			Type:      "postgres",
+			Name:      req.Name,
+			IsEnabled: isEnabled,
+			Settings:  newSettings,
 		}); err != nil {
 			log.Error("failed to update storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update storage"))

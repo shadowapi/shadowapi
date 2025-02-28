@@ -36,6 +36,7 @@ export function Storages() {
       }
       return data
     },
+    throwOnError: false,
   })
 
   const rows = query.data?.map((item) => {

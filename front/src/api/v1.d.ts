@@ -733,20 +733,20 @@ export interface components {
             /** @description Indicates whether this storage is enabled. */
             is_enabled?: boolean;
             /** @description The username used to connect to the PostgreSQL database. */
-            user?: string;
+            user: string;
             /** @description The password used to connect to the PostgreSQL database. */
-            password?: string;
+            password: string;
             /** @description The hostname or IP address of the PostgreSQL database server. */
             host: string;
             /** @description The port number on which the PostgreSQL database server is listening. */
-            port?: string;
+            port: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
         };
         storage_s3: {
             readonly uuid?: string;
             /** @description The descriptive name for this storage entry. */
-            name?: string;
+            name: string;
             /** @description Indicates whether this storage is enabled. */
             is_enabled?: boolean;
             /** @description The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint). */
@@ -763,7 +763,7 @@ export interface components {
         storage_hostfiles: {
             readonly uuid?: string;
             /** @description The descriptive name for this storage entry. */
-            name?: string;
+            name: string;
             /** @description Indicates whether this storage is enabled. */
             is_enabled?: boolean;
             /** @description The absolute or relative path on the server's file system where files will be stored. */

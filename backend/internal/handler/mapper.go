@@ -49,6 +49,22 @@ func QToDatasourceEmail(c *api.Datasource, row query.DatasourceEmail) {
 	}
 }
 
+func QToStorageOld(row query.GetStoragesRow) api.Storage {
+	r := api.Storage{
+		UUID:      row.UUID.String(),
+		Name:      api.NewOptString(row.Name),
+		Type:      row.Type,
+		IsEnabled: row.IsEnabled,
+	}
+	if row.CreatedAt.Valid {
+		r.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		r.UpdatedAt = row.UpdatedAt.Time
+	}
+	return r
+}
+
 func QToStorage(row query.GetStoragesRow) api.Storage {
 	r := api.Storage{
 		UUID:      row.UUID.String(),
@@ -76,7 +92,7 @@ func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) 
 	}
 
 	if v, ok := raw["user"]; ok {
-		ret.User = api.NewOptString(v)
+		ret.User = v
 	}
 	if v, ok := raw["name"]; ok {
 		ret.Name = v
@@ -85,7 +101,7 @@ func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) 
 		ret.Host = v
 	}
 	if v, ok := raw["port"]; ok {
-		ret.Port = api.NewOptString(v)
+		ret.Port = v
 	}
 	if v, ok := raw["options"]; ok {
 		ret.Options = api.NewOptString(v)
@@ -103,7 +119,7 @@ func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
 
 	stored.UUID = api.NewOptString(row.UUID.String())
 	// If you want to reflect the DB name/is_enabled, override here:
-	stored.Name = api.NewOptString(row.Name)
+	stored.Name = row.Name
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
 
 	return &stored, nil
@@ -120,7 +136,7 @@ func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error
 	stored.UUID = api.NewOptString(row.UUID.String())
 
 	// If we want to use the name/is_enabled from the top-level columns, we can overwrite here:
-	stored.Name = api.NewOptString(row.Name)
+	stored.Name = row.Name
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
 
 	return &stored, nil

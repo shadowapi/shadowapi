@@ -26,6 +26,7 @@ properties:
     type: string
     description: "The secret access key."
 required:
+  - name
   - provider
   - region
   - bucket

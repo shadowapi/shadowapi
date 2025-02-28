@@ -27,4 +27,7 @@ properties:
     type: string
 required:
   - name
+  - user
+  - password
   - host
+  - port

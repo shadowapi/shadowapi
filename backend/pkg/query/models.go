@@ -92,7 +92,6 @@ type PipelineEntry struct {
 
 type Storage struct {
 	UUID      uuid.UUID          `json:"uuid"`
-	UserUUID  *uuid.UUID         `json:"user_uuid"`
 	Name      string             `json:"name"`
 	Type      string             `json:"type"`
 	IsEnabled bool               `json:"is_enabled"`

@@ -2055,7 +2055,7 @@ func (s *Storage) SetCreatedAt(val time.Time) {
 type StorageHostfiles struct {
 	UUID OptString `json:"uuid"`
 	// The descriptive name for this storage entry.
-	Name OptString `json:"name"`
+	Name string `json:"name"`
 	// Indicates whether this storage is enabled.
 	IsEnabled OptBool `json:"is_enabled"`
 	// The absolute or relative path on the server's file system where files will be stored.
@@ -2068,7 +2068,7 @@ func (s *StorageHostfiles) GetUUID() OptString {
 }
 
 // GetName returns the value of Name.
-func (s *StorageHostfiles) GetName() OptString {
+func (s *StorageHostfiles) GetName() string {
 	return s.Name
 }
 
@@ -2088,7 +2088,7 @@ func (s *StorageHostfiles) SetUUID(val OptString) {
 }
 
 // SetName sets the value of Name.
-func (s *StorageHostfiles) SetName(val OptString) {
+func (s *StorageHostfiles) SetName(val string) {
 	s.Name = val
 }
 
@@ -2113,13 +2113,13 @@ type StoragePostgres struct {
 	// Indicates whether this storage is enabled.
 	IsEnabled OptBool `json:"is_enabled"`
 	// The username used to connect to the PostgreSQL database.
-	User OptString `json:"user"`
+	User string `json:"user"`
 	// The password used to connect to the PostgreSQL database.
-	Password OptString `json:"password"`
+	Password string `json:"password"`
 	// The hostname or IP address of the PostgreSQL database server.
 	Host string `json:"host"`
 	// The port number on which the PostgreSQL database server is listening.
-	Port OptString `json:"port"`
+	Port string `json:"port"`
 	// Additional connection options in URL query format.
 	Options OptString `json:"options"`
 }
@@ -2140,12 +2140,12 @@ func (s *StoragePostgres) GetIsEnabled() OptBool {
 }
 
 // GetUser returns the value of User.
-func (s *StoragePostgres) GetUser() OptString {
+func (s *StoragePostgres) GetUser() string {
 	return s.User
 }
 
 // GetPassword returns the value of Password.
-func (s *StoragePostgres) GetPassword() OptString {
+func (s *StoragePostgres) GetPassword() string {
 	return s.Password
 }
 
@@ -2155,7 +2155,7 @@ func (s *StoragePostgres) GetHost() string {
 }
 
 // GetPort returns the value of Port.
-func (s *StoragePostgres) GetPort() OptString {
+func (s *StoragePostgres) GetPort() string {
 	return s.Port
 }
 
@@ -2180,12 +2180,12 @@ func (s *StoragePostgres) SetIsEnabled(val OptBool) {
 }
 
 // SetUser sets the value of User.
-func (s *StoragePostgres) SetUser(val OptString) {
+func (s *StoragePostgres) SetUser(val string) {
 	s.User = val
 }
 
 // SetPassword sets the value of Password.
-func (s *StoragePostgres) SetPassword(val OptString) {
+func (s *StoragePostgres) SetPassword(val string) {
 	s.Password = val
 }
 
@@ -2195,7 +2195,7 @@ func (s *StoragePostgres) SetHost(val string) {
 }
 
 // SetPort sets the value of Port.
-func (s *StoragePostgres) SetPort(val OptString) {
+func (s *StoragePostgres) SetPort(val string) {
 	s.Port = val
 }
 
@@ -2211,7 +2211,7 @@ type StoragePostgresDeleteOK struct{}
 type StorageS3 struct {
 	UUID OptString `json:"uuid"`
 	// The descriptive name for this storage entry.
-	Name OptString `json:"name"`
+	Name string `json:"name"`
 	// Indicates whether this storage is enabled.
 	IsEnabled OptBool `json:"is_enabled"`
 	// The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint).
@@ -2232,7 +2232,7 @@ func (s *StorageS3) GetUUID() OptString {
 }
 
 // GetName returns the value of Name.
-func (s *StorageS3) GetName() OptString {
+func (s *StorageS3) GetName() string {
 	return s.Name
 }
 
@@ -2272,7 +2272,7 @@ func (s *StorageS3) SetUUID(val OptString) {
 }
 
 // SetName sets the value of Name.
-func (s *StorageS3) SetName(val OptString) {
+func (s *StorageS3) SetName(val string) {
 	s.Name = val
 }
 

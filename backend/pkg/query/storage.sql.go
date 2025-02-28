@@ -15,7 +15,9 @@ import (
 const createStorage = `-- name: CreateStorage :one
 INSERT INTO storage (
   uuid,
+  name,
   "type",
+  is_enabled,
   settings,
   created_at,
   updated_at
@@ -23,23 +25,32 @@ INSERT INTO storage (
   $1,
   $2,
   $3,
+  $4,
+  $5,
   NOW(),
   NOW()
-) RETURNING uuid, user_uuid, name, type, is_enabled, settings, created_at, updated_at
+) RETURNING uuid, name, type, is_enabled, settings, created_at, updated_at
 `
 
 type CreateStorageParams struct {
-	UUID     uuid.UUID `json:"uuid"`
-	Type     string    `json:"type"`
-	Settings []byte    `json:"settings"`
+	UUID      uuid.UUID `json:"uuid"`
+	Name      string    `json:"name"`
+	Type      string    `json:"type"`
+	IsEnabled bool      `json:"is_enabled"`
+	Settings  []byte    `json:"settings"`
 }
 
 func (q *Queries) CreateStorage(ctx context.Context, arg CreateStorageParams) (Storage, error) {
-	row := q.db.QueryRow(ctx, createStorage, arg.UUID, arg.Type, arg.Settings)
+	row := q.db.QueryRow(ctx, createStorage,
+		arg.UUID,
+		arg.Name,
+		arg.Type,
+		arg.IsEnabled,
+		arg.Settings,
+	)
 	var i Storage
 	err := row.Scan(
 		&i.UUID,
-		&i.UserUUID,
 		&i.Name,
 		&i.Type,
 		&i.IsEnabled,
@@ -61,14 +72,13 @@ func (q *Queries) DeleteStorage(ctx context.Context, argUuid uuid.UUID) error {
 
 const getStorages = `-- name: GetStorages :many
 WITH filtered_storages AS (
-  SELECT d.uuid, d.user_uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE 
+  SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE 
     ($5::text IS NULL OR "type" = $5) AND
     ($6::uuid IS NULL OR "uuid" = $6) AND
-    ($7::uuid IS NULL OR user_uuid = $7) AND
-    ($8::bool IS NULL OR is_enabled = $8) AND
-    ($9::text IS NULL OR d.name ILIKE $9))
+    ($7::bool IS NULL OR is_enabled = $7) AND
+    ($8::text IS NULL OR d.name ILIKE $8))
 SELECT
-  uuid, user_uuid, name, type, is_enabled, settings, created_at, updated_at,
+  uuid, name, type, is_enabled, settings, created_at, updated_at,
   (SELECT count(*) FROM filtered_storages) as total_count
 FROM filtered_storages
 ORDER BY 
@@ -89,14 +99,12 @@ type GetStoragesParams struct {
 	Limit          int32       `json:"limit"`
 	Type           string      `json:"type"`
 	UUID           pgtype.UUID `json:"uuid"`
-	UserUUID       pgtype.UUID `json:"user_uuid"`
 	IsEnabled      bool        `json:"is_enabled"`
 	Name           string      `json:"name"`
 }
 
 type GetStoragesRow struct {
 	UUID       uuid.UUID          `json:"uuid"`
-	UserUUID   *uuid.UUID         `json:"user_uuid"`
 	Name       string             `json:"name"`
 	Type       string             `json:"type"`
 	IsEnabled  bool               `json:"is_enabled"`
@@ -114,7 +122,6 @@ func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]Get
 		arg.Limit,
 		arg.Type,
 		arg.UUID,
-		arg.UserUUID,
 		arg.IsEnabled,
 		arg.Name,
 	)
@@ -127,7 +134,6 @@ func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]Get
 		var i GetStoragesRow
 		if err := rows.Scan(
 			&i.UUID,
-			&i.UserUUID,
 			&i.Name,
 			&i.Type,
 			&i.IsEnabled,
@@ -146,26 +152,75 @@ func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]Get
 	return items, nil
 }
 
+const listStorages = `-- name: ListStorages :many
+SELECT
+    storage.uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
+FROM storage
+ORDER BY created_at DESC
+LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
+    OFFSET $1::int
+`
+
+type ListStoragesParams struct {
+	OffsetRecords int32 `json:"offset_records"`
+	LimitRecords  int32 `json:"limit_records"`
+}
+
+type ListStoragesRow struct {
+	Storage Storage `json:"storage"`
+}
+
+func (q *Queries) ListStorages(ctx context.Context, arg ListStoragesParams) ([]ListStoragesRow, error) {
+	rows, err := q.db.Query(ctx, listStorages, arg.OffsetRecords, arg.LimitRecords)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListStoragesRow
+	for rows.Next() {
+		var i ListStoragesRow
+		if err := rows.Scan(
+			&i.Storage.UUID,
+			&i.Storage.Name,
+			&i.Storage.Type,
+			&i.Storage.IsEnabled,
+			&i.Storage.Settings,
+			&i.Storage.CreatedAt,
+			&i.Storage.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateStorage = `-- name: UpdateStorage :exec
 UPDATE storage SET
   "type" = $1,
   name = $2,
-  settings = $3,
+  is_enabled = $3,
+  settings = $4,
   updated_at = NOW()
-WHERE uuid = $4
+WHERE uuid = $5
 `
 
 type UpdateStorageParams struct {
-	Type     string    `json:"type"`
-	Name     string    `json:"name"`
-	Settings []byte    `json:"settings"`
-	UUID     uuid.UUID `json:"uuid"`
+	Type      string    `json:"type"`
+	Name      string    `json:"name"`
+	IsEnabled bool      `json:"is_enabled"`
+	Settings  []byte    `json:"settings"`
+	UUID      uuid.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateStorage(ctx context.Context, arg UpdateStorageParams) error {
 	_, err := q.db.Exec(ctx, updateStorage,
 		arg.Type,
 		arg.Name,
+		arg.IsEnabled,
 		arg.Settings,
 		arg.UUID,
 	)

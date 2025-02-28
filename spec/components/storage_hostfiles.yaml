@@ -14,4 +14,5 @@ properties:
     type: string
     description: "The absolute or relative path on the server's file system where files will be stored."
 required:
+  - name
   - path

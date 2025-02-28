@@ -25,10 +25,19 @@ func (h *Handler) StorageS3Create(ctx context.Context, req *api.StorageS3) (*api
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal s3 settings"))
 	}
 
+	var isEnabled bool
+	if req.IsEnabled.IsSet() {
+		isEnabled = req.IsEnabled.Value
+	} else {
+		isEnabled = false
+	}
+
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:     storageUUID,
-		Type:     "s3",
-		Settings: settings,
+		UUID:      storageUUID,
+		Name:      req.Name,
+		Type:      "s3",
+		IsEnabled: isEnabled,
+		Settings:  settings,
 	})
 	if err != nil {
 		log.Error("failed to create s3 storage", "error", err)
@@ -102,32 +111,31 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 			return nil, ErrWithCode(http.StatusNotFound, E("s3 storage not found"))
 		}
 
-		update := storages[0]
-		// If we want to update the top-level name column from the request:
-		updateName := update.Name
-		if req.Name.IsSet() {
-			updateName = req.Name.Or(update.Name)
+		// For update, use new values if provided; fallback to existing DB values.
+		var isEnabled bool
+		if req.IsEnabled.IsSet() {
+			isEnabled = req.IsEnabled.Value
+		} else {
+			isEnabled = storages[0].IsEnabled
 		}
 
-		// We store the entire S3 object in the settings field.
 		newSettings, err := json.Marshal(req)
 		if err != nil {
 			log.Error("failed to marshal s3 updated settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal s3 updated settings"))
 		}
 
-		err = query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			Type:     "s3",
-			Name:     updateName,
-			Settings: newSettings,
-			UUID:     s3UUID,
-		})
-		if err != nil {
+		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
+			UUID:      s3UUID,
+			Type:      "s3",
+			Name:      req.Name,
+			IsEnabled: isEnabled,
+			Settings:  newSettings,
+		}); err != nil {
 			log.Error("failed to update s3 storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update s3 storage"))
 		}
 
-		// Must pass a proper api.StorageS3GetParams instead of `params` to fix the type error.
 		return h.StorageS3Get(ctx, api.StorageS3GetParams{UUID: params.UUID})
 	})
 }

@@ -19,17 +19,26 @@ func (h *Handler) StorageHostfilesCreate(ctx context.Context, req *api.StorageHo
 	log := h.log.With("handler", "StorageHostfilesCreate")
 
 	storageUUID := uuid.Must(uuid.NewV7())
-	// We store the entire request in the "settings" JSON blob.
 	settings, err := json.Marshal(req)
 	if err != nil {
 		log.Error("failed to marshal hostfiles settings", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal hostfiles settings"))
 	}
 
+	// Extract underlying values from the optional types.
+	var isEnabled bool
+	if req.IsEnabled.IsSet() {
+		isEnabled = req.IsEnabled.Value
+	} else {
+		isEnabled = false
+	}
+
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:     storageUUID,
-		Type:     "hostfiles",
-		Settings: settings,
+		UUID:      storageUUID,
+		Name:      req.Name,
+		Type:      "hostfiles",
+		IsEnabled: isEnabled,
+		Settings:  settings,
 	})
 	if err != nil {
 		log.Error("failed to create hostfiles storage", "error", err)
@@ -106,28 +115,27 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 			return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
 		}
 
-		// The row from the DB; we'll only update .Name field if we want to store it in the column.
-		update := storages[0]
-		// If you want to reflect "req.Name" in the top-level "name" column, do something like:
-		updateName := update.Name
-		if req.Name.IsSet() {
-			updateName = req.Name.Or(update.Name)
+		// For update, use new values if provided; otherwise fallback to current DB value.
+		var isEnabled bool
+		if req.IsEnabled.IsSet() {
+			isEnabled = req.IsEnabled.Value
+		} else {
+			isEnabled = storages[0].IsEnabled
 		}
 
-		// Store entire request in settings JSON
 		updatedSettings, err := json.Marshal(req)
 		if err != nil {
 			log.Error("failed to marshal updated hostfiles settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal hostfiles updated settings"))
 		}
 
-		err = query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			Type:     "hostfiles",
-			Name:     updateName,
-			Settings: updatedSettings,
-			UUID:     hostfilesUUID,
-		})
-		if err != nil {
+		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
+			UUID:      hostfilesUUID,
+			Type:      "hostfiles",
+			Name:      req.Name,
+			IsEnabled: isEnabled,
+			Settings:  updatedSettings,
+		}); err != nil {
 			log.Error("failed to update hostfiles storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update storage"))
 		}
