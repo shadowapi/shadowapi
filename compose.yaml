@@ -24,18 +24,18 @@ services:
     container_name: sa-frontend
     networks:
       - shadowapi
-    volumes:
-      - ./front:/app
-      - /app/node_modules
-#    develop:
-#      watch:
-#        - action: sync
-#          path: ./front
-#          target: /app
-#          ignore:
-#            - node_modules
-#        - action: rebuild
-#          path: ./front/package.json
+#    volumes:
+#      - ./front:/app
+#      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./front
+          target: /app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: ./front/package.json
     labels:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-front.rule=Host(`${DOMAIN}`)
