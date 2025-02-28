@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS tg_sessions
     created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at    TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT created_at_non_negative CHECK (created_at >= 0),
-    CONSTRAINT updated_at_non_negative CHECK (updated_at >= 0)
+    CONSTRAINT created_at_non_negative CHECK (created_at >= '1970-01-01 00:00:00 UTC'),
+    CONSTRAINT updated_at_non_negative CHECK (updated_at >= '1970-01-01 00:00:00 UTC')
 );
 
 -- tg_sessions_states table, stores state for each session

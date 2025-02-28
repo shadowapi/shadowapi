@@ -121,15 +121,11 @@ CREATE TABLE pipeline_entry(
 
 CREATE TABLE storage(
   "uuid"            UUID PRIMARY KEY,
-  user_uuid         UUID NOT NULL,
   name              VARCHAR NOT NULL,
   "type"            VARCHAR NOT NULL,
   is_enabled        BOOLEAN NOT NULL DEFAULT TRUE,
   settings          JSONB,
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE,
-
-  CONSTRAINT fk_storage_user_uuid
-  FOREIGN KEY(user_uuid) REFERENCES "user"("uuid") ON DELETE CASCADE
+  updated_at TIMESTAMP WITH TIME ZONE
 );
