@@ -82,7 +82,6 @@ export function StorageForm({
           const resp = await client.POST(endpoint, {
             body: {
               name: data.name,
-              type: data.type,
               is_enabled: data.is_enabled,
               provider: data.provider,
               region: data.region,
@@ -100,7 +99,6 @@ export function StorageForm({
           const resp = await client.POST(endpoint, {
             body: {
               name: data.name,
-              type: data.type,
               is_enabled: data.is_enabled,
               path: data.path,
             },
@@ -114,7 +112,6 @@ export function StorageForm({
           const resp = await client.POST(endpoint, {
             body: {
               name: data.name,
-              type: data.type,
               is_enabled: data.is_enabled,
               host: data.host,
               port: data.port,
@@ -136,7 +133,6 @@ export function StorageForm({
             params: { path: { uuid: storageUUID } },
             body: {
               name: data.name,
-              type: data.type,
               is_enabled: data.is_enabled,
               provider: data.provider,
               region: data.region,
@@ -155,7 +151,6 @@ export function StorageForm({
             params: { path: { uuid: storageUUID } },
             body: {
               name: data.name,
-              type: data.type,
               is_enabled: data.is_enabled,
               path: data.path,
             },
@@ -170,7 +165,6 @@ export function StorageForm({
             params: { path: { uuid: storageUUID } },
             body: {
               name: data.name,
-              type: data.type,
               is_enabled: data.is_enabled,
               host: data.host,
               port: data.port,

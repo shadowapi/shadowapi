@@ -4,6 +4,12 @@ properties:
   uuid:
     type: string
     readOnly: true
+  name:
+    type: string
+    description: "The descriptive name for this storage entry."
+  is_enabled:
+    type: boolean
+    description: "Indicates whether this storage is enabled."
   path:
     type: string
     description: "The absolute or relative path on the server's file system where files will be stored."

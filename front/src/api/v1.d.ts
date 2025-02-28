@@ -324,25 +324,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/telegram": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description List all Telegram sessions for the authenticated user. */
-        get: operations["tg-session-list"];
-        /** @description Complete the session creation process by verifying the code. */
-        put: operations["tg-session-verify"];
-        /** @description Create a new Telegram session. */
-        post: operations["tg-session-create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/storage/s3": {
         parameters: {
             query?: never;
@@ -410,6 +391,25 @@ export interface paths {
         post?: never;
         /** @description Delete a specific Host Files storage instance by UUID. */
         delete: operations["storage-hostfiles-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all Telegram sessions for the authenticated user. */
+        get: operations["tg-session-list"];
+        /** @description Complete the session creation process by verifying the code. */
+        put: operations["tg-session-verify"];
+        /** @description Create a new Telegram session. */
+        post: operations["tg-session-create"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -712,18 +712,46 @@ export interface components {
         };
         storage_postgres: {
             readonly uuid?: string;
+            /** @description The descriptive name for this storage entry. */
+            name: string;
+            /** @description Indicates whether this storage is enabled. */
+            is_enabled?: boolean;
             /** @description The username used to connect to the PostgreSQL database. */
             user?: string;
             /** @description The password used to connect to the PostgreSQL database. */
             password?: string;
-            /** @description The name of the PostgreSQL database. */
-            name: string;
             /** @description The hostname or IP address of the PostgreSQL database server. */
             host: string;
             /** @description The port number on which the PostgreSQL database server is listening. */
             port?: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
+        };
+        storage_s3: {
+            readonly uuid?: string;
+            /** @description The descriptive name for this storage entry. */
+            name?: string;
+            /** @description Indicates whether this storage is enabled. */
+            is_enabled?: boolean;
+            /** @description The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint). */
+            provider: string;
+            /** @description The region where the bucket is located. */
+            region: string;
+            /** @description The bucket name. */
+            bucket: string;
+            /** @description The access key ID. */
+            access_key_id: string;
+            /** @description The secret access key. */
+            secret_access_key: string;
+        };
+        storage_hostfiles: {
+            readonly uuid?: string;
+            /** @description The descriptive name for this storage entry. */
+            name?: string;
+            /** @description Indicates whether this storage is enabled. */
+            is_enabled?: boolean;
+            /** @description The absolute or relative path on the server's file system where files will be stored. */
+            path: string;
         };
         /** @description Telegram API session and user representation */
         tg: {
@@ -756,24 +784,6 @@ export interface components {
                 /** @description User's phone number */
                 phone?: string;
             };
-        };
-        storage_s3: {
-            readonly uuid?: string;
-            /** @description The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint). */
-            provider: string;
-            /** @description The region where the bucket is located. */
-            region: string;
-            /** @description The bucket name. */
-            bucket: string;
-            /** @description The access key ID. */
-            access_key_id: string;
-            /** @description The secret access key. */
-            secret_access_key: string;
-        };
-        storage_hostfiles: {
-            readonly uuid?: string;
-            /** @description The absolute or relative path on the server's file system where files will be stored. */
-            path: string;
         };
     };
     responses: never;
@@ -1915,121 +1925,6 @@ export interface operations {
             };
         };
     };
-    "tg-session-list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description A list of Telegram sessions. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Total number of sessions */
-                        total?: number;
-                        sessions?: components["schemas"]["tg"][];
-                    };
-                };
-            };
-            /** @description Error response. */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "tg-session-verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description Hash of the phone code */
-                    phone_code_hash?: string;
-                    /** @description Verification code */
-                    code?: string;
-                    /** @description Optional password for 2FA */
-                    password?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Session verified successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["tg"];
-                };
-            };
-            /** @description Error response. */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "tg-session-create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Phone number in international format
-                     * @example +16505551234
-                     */
-                    phone: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Session created successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["tg"];
-                };
-            };
-            /** @description Error response. */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
     "storage-s3-create": {
         parameters: {
             query?: never;
@@ -2282,6 +2177,121 @@ export interface operations {
                 content?: never;
             };
             /** @description An error occurred while deleting the Host Files storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "tg-session-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of Telegram sessions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Total number of sessions */
+                        total?: number;
+                        sessions?: components["schemas"]["tg"][];
+                    };
+                };
+            };
+            /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "tg-session-verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Session ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Hash of the phone code */
+                    phone_code_hash?: string;
+                    /** @description Verification code */
+                    code?: string;
+                    /** @description Optional password for 2FA */
+                    password?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Session verified successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tg"];
+                };
+            };
+            /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "tg-session-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Phone number in international format
+                     * @example +16505551234
+                     */
+                    phone: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Session created successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tg"];
+                };
+            };
+            /** @description Error response. */
             default: {
                 headers: {
                     [name: string]: unknown;

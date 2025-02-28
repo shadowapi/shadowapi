@@ -3,9 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
+	"net/http"
 )
 
 // QToDatasource converts a query.Datasource to an api.Datasource
@@ -95,22 +95,33 @@ func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) 
 }
 
 func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
-	var s3 api.StorageS3
-	if err := json.Unmarshal(row.Settings, &s3); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal s3 settings: %w", err)
+	// The JSON in row.Settings has the entire S3 object
+	var stored api.StorageS3
+	if err := json.Unmarshal(row.Settings, &stored); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings"))
 	}
-	s3.UUID = api.NewOptString(row.UUID.String())
-	return &s3, nil
+
+	stored.UUID = api.NewOptString(row.UUID.String())
+	// If you want to reflect the DB name/is_enabled, override here:
+	stored.Name = api.NewOptString(row.Name)
+	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
+
+	return &stored, nil
 }
 
 func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error) {
-	var raw map[string]string
-	if err := json.Unmarshal(row.Settings, &raw); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal hostfiles settings: %w", err)
+	// The JSON stored in row.Settings has the entire original api.StorageHostfiles object.
+	var stored api.StorageHostfiles
+	if err := json.Unmarshal(row.Settings, &stored); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings"))
 	}
-	ret := &api.StorageHostfiles{
-		UUID: api.NewOptString(row.UUID.String()),
-		Path: raw["path"],
-	}
-	return ret, nil
+
+	// Overwrite the UUID from the DB, just in case
+	stored.UUID = api.NewOptString(row.UUID.String())
+
+	// If we want to use the name/is_enabled from the top-level columns, we can overwrite here:
+	stored.Name = api.NewOptString(row.Name)
+	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
+
+	return &stored, nil
 }

@@ -4,14 +4,17 @@ properties:
   uuid:
     readOnly: true
     type: string
+  name:
+    description: "The descriptive name for this storage entry."
+    type: string
+  is_enabled:
+    type: boolean
+    description: "Indicates whether this storage is enabled."
   user:
     description: "The username used to connect to the PostgreSQL database."
     type: string
   password:
     description: "The password used to connect to the PostgreSQL database."
-    type: string
-  name:
-    description: "The name of the PostgreSQL database."
     type: string
   host:
     description: "The hostname or IP address of the PostgreSQL database server."

@@ -4,6 +4,12 @@ properties:
   uuid:
     type: string
     readOnly: true
+  name:
+    type: string
+    description: "The descriptive name for this storage entry."
+  is_enabled:
+    type: boolean
+    description: "Indicates whether this storage is enabled."
   provider:
     type: string
     description: "The S3-compatible provider (e.g., AWS, Azure, or a custom endpoint)."
