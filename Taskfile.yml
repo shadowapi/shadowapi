@@ -25,6 +25,11 @@ tasks:
     cmds:
       - docker compose up -d
 
+  no-cache:
+    desc: "Rebuild container with no cache"
+    cmds:
+      - docker-compose build --no-cache
+
   dev-down:
     desc: "Take down development services"
     cmds:

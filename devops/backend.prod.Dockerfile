@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM golang:1.23.3-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY backend/ ./
 RUN go build -o /shadowapi ./cmd/shadowapi
 
 # Final Stage
-FROM golang:1.23.3-alpine
+FROM golang:1.24-alpine
 WORKDIR /app
 COPY --from=builder /shadowapi ./shadowapi
 
