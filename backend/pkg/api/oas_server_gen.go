@@ -264,7 +264,7 @@ type Handler interface {
 	//
 	// Complete the session creation process by verifying the code.
 	//
-	// PUT /telegram
+	// PUT /telegram/{id}
 	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
 	// WhatsappContacts implements whatsapp-contacts operation.
 	//

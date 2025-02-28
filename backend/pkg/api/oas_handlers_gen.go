@@ -9163,14 +9163,14 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 //
 // Complete the session creation process by verifying the code.
 //
-// PUT /telegram
-func (s *Server) handleTgSessionVerifyRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// PUT /telegram/{id}
+func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-verify"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/telegram"),
+		semconv.HTTPRouteKey.String("/telegram/{id}"),
 	}
 
 	// Start a span for this request.

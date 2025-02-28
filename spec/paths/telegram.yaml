@@ -1,99 +1,102 @@
-# spec/paths/tg.yaml
-get:
-  description: List all Telegram sessions for the authenticated user.
-  operationId: tg-session-list
-  responses:
-    "200":
-      description: A list of Telegram sessions.
+# spec/paths/telegram.yaml
+telegram:
+  get:
+    description: List all Telegram sessions for the authenticated user.
+    operationId: tg-session-list
+    responses:
+      "200":
+        description: A list of Telegram sessions.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total:
+                  type: integer
+                  description: Total number of sessions
+                sessions:
+                  type: array
+                  items:
+                    $ref: "../components/tg.yaml"
+      default:
+        description: Error response.
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yaml#/components/schemas/Error"
+    tags:
+      - telegram
+  post:
+    description: Create a new Telegram session.
+    operationId: tg-session-create
+    requestBody:
       content:
         application/json:
           schema:
             type: object
             properties:
-              total:
-                type: integer
-                description: Total number of sessions
-              sessions:
-                type: array
-                items:
-                  $ref: "../components/tg.yaml"
-    default:
-      description: Error response.
-      content:
-        application/json:
-          schema:
-            $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - telegram
-post:
-  description: Create a new Telegram session.
-  operationId: tg-session-create
-  requestBody:
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            phone:
-              type: string
-              description: Phone number in international format
-              example: "+16505551234"
-          required:
-            - phone
-    required: true
-  responses:
-    "201":
-      description: Session created successfully.
-      content:
-        application/json:
-          schema:
-            $ref: "../components/tg.yaml"
-    default:
-      description: Error response.
-      content:
-        application/json:
-          schema:
-            $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - telegram
-put:
-  description: Complete the session creation process by verifying the code.
-  operationId: tg-session-verify
-  parameters:
-    - name: id
-      in: path
+              phone:
+                type: string
+                description: Phone number in international format
+                example: "+16505551234"
+            required:
+              - phone
       required: true
-      schema:
-        type: integer
-      description: Session ID
-  requestBody:
-    content:
-      application/json:
+    responses:
+      "201":
+        description: Session created successfully.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/tg.yaml"
+      default:
+        description: Error response.
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yaml#/components/schemas/Error"
+    tags:
+      - telegram
+
+telegramId:
+  put:
+    description: Complete the session creation process by verifying the code.
+    operationId: tg-session-verify
+    parameters:
+      - name: id
+        in: path
+        required: true
         schema:
-          type: object
-          properties:
-            phone_code_hash:
-              type: string
-              description: Hash of the phone code
-            code:
-              type: string
-              description: Verification code
-            password:
-              type: string
-              description: Optional password for 2FA
-    required: true
-  responses:
-    "200":
-      description: Session verified successfully.
+          type: integer
+        description: Session ID
+    requestBody:
       content:
         application/json:
           schema:
-            $ref: "../components/tg.yaml"
-    default:
-      description: Error response.
-      content:
-        application/json:
-          schema:
-            $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - telegram
+            type: object
+            properties:
+              phone_code_hash:
+                type: string
+                description: Hash of the phone code
+              code:
+                type: string
+                description: Verification code
+              password:
+                type: string
+                description: Optional password for 2FA
+      required: true
+    responses:
+      "200":
+        description: Session verified successfully.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/tg.yaml"
+      default:
+        description: Error response.
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yaml#/components/schemas/Error"
+    tags:
+      - telegram

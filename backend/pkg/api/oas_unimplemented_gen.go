@@ -395,7 +395,7 @@ func (UnimplementedHandler) TgSessionList(ctx context.Context) (r *TgSessionList
 //
 // Complete the session creation process by verifying the code.
 //
-// PUT /telegram
+// PUT /telegram/{id}
 func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (r *Tg, _ error) {
 	return r, ht.ErrNotImplemented
 }

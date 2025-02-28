@@ -405,10 +405,26 @@ export interface paths {
         };
         /** @description List all Telegram sessions for the authenticated user. */
         get: operations["tg-session-list"];
-        /** @description Complete the session creation process by verifying the code. */
-        put: operations["tg-session-verify"];
+        put?: never;
         /** @description Create a new Telegram session. */
         post: operations["tg-session-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Complete the session creation process by verifying the code. */
+        put: operations["tg-session-verify"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2220,6 +2236,45 @@ export interface operations {
             };
         };
     };
+    "tg-session-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Phone number in international format
+                     * @example +16505551234
+                     */
+                    phone: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Session created successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tg"];
+                };
+            };
+            /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
     "tg-session-verify": {
         parameters: {
             query?: never;
@@ -2245,45 +2300,6 @@ export interface operations {
         responses: {
             /** @description Session verified successfully. */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["tg"];
-                };
-            };
-            /** @description Error response. */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "tg-session-create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Phone number in international format
-                     * @example +16505551234
-                     */
-                    phone: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Session created successfully. */
-            201: {
                 headers: {
                     [name: string]: unknown;
                 };

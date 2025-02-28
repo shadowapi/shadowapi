@@ -99,7 +99,9 @@ paths:
   /storage/hostfiles/{uuid}:
     $ref: "paths/storage_hostfiles_uuid.yaml"
   /telegram:
-    $ref: "paths/telegram.yaml"
+    $ref: "paths/telegram.yaml#/telegram"
+  /telegram/{id}:
+    $ref: "paths/telegram.yaml#/telegramId"
   /whatsapp/login:
     $ref: "paths/whatsapp_login.yaml"
   /whatsapp/status:

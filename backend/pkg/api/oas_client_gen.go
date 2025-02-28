@@ -285,7 +285,7 @@ type Invoker interface {
 	//
 	// Complete the session creation process by verifying the code.
 	//
-	// PUT /telegram
+	// PUT /telegram/{id}
 	TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
 	// WhatsappContacts invokes whatsapp-contacts operation.
 	//
@@ -6100,7 +6100,7 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 //
 // Complete the session creation process by verifying the code.
 //
-// PUT /telegram
+// PUT /telegram/{id}
 func (c *Client) TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error) {
 	res, err := c.sendTgSessionVerify(ctx, request, params)
 	return res, err
@@ -6110,7 +6110,7 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-verify"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/telegram"),
+		semconv.HTTPRouteKey.String("/telegram/{id}"),
 	}
 
 	// Run stopwatch.
@@ -6142,8 +6142,26 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/telegram"
+	var pathParts [2]string
+	pathParts[0] = "/telegram/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.IntToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
