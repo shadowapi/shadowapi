@@ -72,35 +72,18 @@ func (q *Queries) DeleteStorage(ctx context.Context, argUuid uuid.UUID) error {
 
 const getStorages = `-- name: GetStorages :many
 WITH filtered_storages AS (
-  SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE 
-    ($5::text IS NULL OR "type" = $5) AND
-    ($6::uuid IS NULL OR "uuid" = $6) AND
-    ($7::bool IS NULL OR is_enabled = $7) AND
-    ($8::text IS NULL OR d.name ILIKE $8))
+  SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE ($3::uuid IS NULL OR "uuid" = $3))
 SELECT
   uuid, name, type, is_enabled, settings, created_at, updated_at,
   (SELECT count(*) FROM filtered_storages) as total_count
 FROM filtered_storages
-ORDER BY 
-  CASE WHEN $1 = 'created_at' AND $2::text = 'asc' THEN created_at END ASC,
-  CASE WHEN $1 = 'created_at' AND $2::text = 'desc' THEN created_at END DESC,
-  CASE WHEN $1 = 'updated_at' AND $2::text = 'asc' THEN updated_at END ASC,
-  CASE WHEN $1 = 'updated_at' AND $2::text = 'desc' THEN updated_at END DESC,
-  CASE WHEN $1 = 'name' AND $2::text = 'asc' THEN name END ASC,
-  CASE WHEN $1 = 'name' AND $2::text = 'desc' THEN name END DESC,
-  created_at DESC
-LIMIT NULLIF($4::int, 0) OFFSET $3
+LIMIT NULLIF($2::int, 0) OFFSET $1
 `
 
 type GetStoragesParams struct {
-	OrderBy        interface{} `json:"order_by"`
-	OrderDirection string      `json:"order_direction"`
-	Offset         int32       `json:"offset"`
-	Limit          int32       `json:"limit"`
-	Type           string      `json:"type"`
-	UUID           pgtype.UUID `json:"uuid"`
-	IsEnabled      bool        `json:"is_enabled"`
-	Name           string      `json:"name"`
+	Offset int32       `json:"offset"`
+	Limit  int32       `json:"limit"`
+	UUID   pgtype.UUID `json:"uuid"`
 }
 
 type GetStoragesRow struct {
@@ -115,16 +98,7 @@ type GetStoragesRow struct {
 }
 
 func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]GetStoragesRow, error) {
-	rows, err := q.db.Query(ctx, getStorages,
-		arg.OrderBy,
-		arg.OrderDirection,
-		arg.Offset,
-		arg.Limit,
-		arg.Type,
-		arg.UUID,
-		arg.IsEnabled,
-		arg.Name,
-	)
+	rows, err := q.db.Query(ctx, getStorages, arg.Offset, arg.Limit, arg.UUID)
 	if err != nil {
 		return nil, err
 	}

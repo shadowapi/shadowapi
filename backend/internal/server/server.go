@@ -85,9 +85,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewEncoder(w).Encode(map[string]string{"message": "ok"}); err != nil {
 			s.log.Error("failed to encode JSON response", "error", err.Error())
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
 		}
-
 		return
 	}
 

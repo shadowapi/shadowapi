@@ -40,7 +40,6 @@ func Provide(i do.Injector) (*Middleware, error) {
 
 // OgenMiddleware satisfies Ogen's middleware.Middleware signature
 func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
-
 	// 'req.Raw' is the original *http.Request
 	r := req.Raw
 
@@ -57,7 +56,7 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 	}
 
 	// 2) Fallback to session validation
-	session, err := m.validateSession(r)
+	session, err := m.validateSession(req)
 	if err != nil {
 		m.log.Debug("session validation failed", "error", err)
 		// Return an error to Ogen (could also return a redirect error if desired)
@@ -95,9 +94,8 @@ func (m *Middleware) validateBearer(r *http.Request) bool {
 }
 
 // validateSession ensures we have a valid cookie-based Ory Kratos session
-func (m *Middleware) validateSession(r *http.Request) (*ory.Session, error) {
-
-	cookie, err := r.Cookie("ory_kratos_session")
+func (m *Middleware) validateSession(req middleware.Request) (*ory.Session, error) {
+	cookie, err := req.Raw.Cookie("ory_kratos_session")
 	if err != nil {
 		m.log.Debug("error getting cookie", "error", err)
 		return nil, err
@@ -105,7 +103,7 @@ func (m *Middleware) validateSession(r *http.Request) (*ory.Session, error) {
 	if cookie == nil {
 		return nil, errors.New("no session found in cookie")
 	}
-	resp, _, err := m.ory.FrontendAPI.ToSession(r.Context()).Cookie(r.Header.Get("Cookie")).Execute()
+	resp, _, err := m.ory.FrontendAPI.ToSession(req.Context).Cookie(req.Raw.Header.Get("Cookie")).Execute()
 	if err != nil {
 		m.log.Debug("error validating session", "error", err)
 		return nil, err
