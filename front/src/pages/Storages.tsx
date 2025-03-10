@@ -39,13 +39,12 @@ export function Storages() {
     throwOnError: false,
   })
 
-  const rows = query.data?.map((item) => {
-    return {
-      key: item.uuid,
+  const rows =
+    query.data?.map((item) => ({
+      id: item.uuid,
       type: item.type,
-      state: item.is_enabled,
-    }
-  })
+      state: item.is_enabled ? 'Enabled' : 'Disabled',
+    })) ?? [] // fallback to empty array
 
   const typeRender = (type: string) => {
     if (type === 'postgres') {
@@ -55,7 +54,7 @@ export function Storages() {
         </Badge>
       )
     }
-    return type
+    return <Badge variant="neutral">... missing type</Badge>
   }
 
   if (query.isPending) {
@@ -83,10 +82,13 @@ export function Storages() {
           </TableHeader>
           <TableBody items={rows}>
             {(item) => (
-              <Row>
+              <Row key={item.id}>
                 <Cell>{typeRender(item.type)}</Cell>
                 <Cell>
-                  <ActionButton onPress={() => navigate('/storages/' + item.key)}>
+                  <Badge variant={item.state === 'Enabled' ? 'positive' : 'negative'}>{item.state}</Badge>
+                </Cell>
+                <Cell>
+                  <ActionButton onPress={() => navigate('/storages/' + item.id)}>
                     <Edit />
                   </ActionButton>
                 </Cell>
