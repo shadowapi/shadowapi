@@ -79,7 +79,7 @@ func (h *Handler) StorageHostfilesGet(ctx context.Context, params api.StorageHos
 	}
 
 	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes())},
+		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
 		Limit: 1,
 	})
 	if err != nil {
@@ -104,7 +104,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageHostfiles, error) {
 		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(hostfilesUUID.Bytes())},
+			UUID:  pgtype.UUID{Bytes: [16]byte(hostfilesUUID.Bytes()), Valid: true},
 			Limit: 1,
 		})
 		if err != nil {

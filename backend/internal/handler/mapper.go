@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 	"net/http"
@@ -82,43 +81,25 @@ func QToStorage(row query.GetStoragesRow) api.Storage {
 }
 
 func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) {
-	raw := map[string]string{}
-	if err := json.Unmarshal(row.Settings, &raw); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal settings: %w", err)
+	// The JSON in row.Settings has the entire Postgres object
+	var s api.StoragePostgres
+	if err := json.Unmarshal(row.Settings, &s); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings", err.Error()))
 	}
-
-	ret := &api.StoragePostgres{
-		UUID: api.NewOptString(row.UUID.String()),
-	}
-
-	if v, ok := raw["user"]; ok {
-		ret.User = v
-	}
-	if v, ok := raw["name"]; ok {
-		ret.Name = v
-	}
-	if v, ok := raw["host"]; ok {
-		ret.Host = v
-	}
-	if v, ok := raw["port"]; ok {
-		ret.Port = v
-	}
-	if v, ok := raw["options"]; ok {
-		ret.Options = api.NewOptString(v)
-	}
-
-	return ret, nil
+	s.UUID = api.NewOptString(row.UUID.String())
+	s.Name = row.Name
+	s.IsEnabled = api.NewOptBool(row.IsEnabled)
+	return &s, nil
 }
 
 func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
 	// The JSON in row.Settings has the entire S3 object
 	var stored api.StorageS3
 	if err := json.Unmarshal(row.Settings, &stored); err != nil {
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings", err.Error()))
 	}
 
 	stored.UUID = api.NewOptString(row.UUID.String())
-	// If you want to reflect the DB name/is_enabled, override here:
 	stored.Name = row.Name
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
 
@@ -129,13 +110,9 @@ func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error
 	// The JSON stored in row.Settings has the entire original api.StorageHostfiles object.
 	var stored api.StorageHostfiles
 	if err := json.Unmarshal(row.Settings, &stored); err != nil {
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings", err.Error()))
 	}
-
-	// Overwrite the UUID from the DB, just in case
 	stored.UUID = api.NewOptString(row.UUID.String())
-
-	// If we want to use the name/is_enabled from the top-level columns, we can overwrite here:
 	stored.Name = row.Name
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
 

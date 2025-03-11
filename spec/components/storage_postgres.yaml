@@ -2,11 +2,11 @@ type: object
 additionalProperties: false
 properties:
   uuid:
+    type: string
     readOnly: true
-    type: string
   name:
-    description: "The descriptive name for this storage entry."
     type: string
+    description: "The descriptive name for this storage entry."
   is_enabled:
     type: boolean
     description: "Indicates whether this storage is enabled."

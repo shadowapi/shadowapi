@@ -43,6 +43,7 @@ export function Storages() {
     query.data?.map((item) => ({
       id: item.uuid,
       type: item.type,
+      name: item.name,
       state: item.is_enabled ? 'Enabled' : 'Disabled',
     })) ?? [] // fallback to empty array
 
@@ -51,6 +52,20 @@ export function Storages() {
       return (
         <Badge variant="neutral">
           <Data /> <Text>PostgreSQL</Text>
+        </Badge>
+      )
+    }
+    if (type === 's3') {
+      return (
+        <Badge variant="neutral">
+          <Data /> <Text>S3</Text>
+        </Badge>
+      )
+    }
+    if (type === 'hostfiles') {
+      return (
+        <Badge variant="neutral">
+          <Data /> <Text>Hostfiles</Text>
         </Badge>
       )
     }
@@ -70,8 +85,11 @@ export function Storages() {
         </ActionButton>
         <TableView aria-label="Example table with dynamic content" overflowMode="wrap" maxWidth={1000}>
           <TableHeader>
-            <Column key="type" maxWidth={130}>
+            <Column key="type" maxWidth={160}>
               Type
+            </Column>
+            <Column key="name" maxWidth={160}>
+              Name
             </Column>
             <Column key="state" maxWidth={160}>
               State
@@ -84,11 +102,12 @@ export function Storages() {
             {(item) => (
               <Row key={item.id}>
                 <Cell>{typeRender(item.type)}</Cell>
+                <Cell>{item.name}</Cell>
                 <Cell>
                   <Badge variant={item.state === 'Enabled' ? 'positive' : 'negative'}>{item.state}</Badge>
                 </Cell>
                 <Cell>
-                  <ActionButton onPress={() => navigate('/storages/' + item.id)}>
+                  <ActionButton onPress={() => navigate('/storages/' + item.id + '/storageKind/' + item.type)}>
                     <Edit />
                   </ActionButton>
                 </Cell>

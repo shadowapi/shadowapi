@@ -120,6 +120,14 @@ function App() {
           }
         />
         <Route
+          path="/storages/:uuid/storageKind/:storageKind"
+          element={
+            <ProtectedRoute>
+              <StorageEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/storages/:uuid"
           element={
             <ProtectedRoute>

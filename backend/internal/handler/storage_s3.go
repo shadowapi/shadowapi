@@ -75,7 +75,7 @@ func (h *Handler) StorageS3Get(ctx context.Context, params api.StorageS3GetParam
 	}
 
 	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes())},
+		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
 		Limit: 1,
 	})
 	if err != nil {
@@ -100,7 +100,7 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageS3, error) {
 		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(s3UUID.Bytes())},
+			UUID:  pgtype.UUID{Bytes: [16]byte(s3UUID.Bytes()), Valid: true},
 			Limit: 1,
 		})
 		if err != nil {

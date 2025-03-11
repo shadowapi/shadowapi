@@ -71,6 +71,17 @@ export function StorageForm({
     enabled: storageUUID !== 'add',
   })
 
+  useEffect(() => {
+    if (query.data) {
+      form.reset({
+        ...query.data,
+        type: storageKind ?? (query.data as Partial<StorageFormData>).type,
+      } as StorageFormData)
+    } else if (storageKind) {
+      form.setValue('type', storageKind)
+    }
+  }, [query.data, storageKind, form])
+
   const storageType = useWatch({ control: form.control, name: 'type' })
 
   const modifyMutation = useMutation({
@@ -205,12 +216,6 @@ export function StorageForm({
     },
   })
 
-  useEffect(() => {
-    if (query.data) {
-      form.reset(query.data)
-    }
-  }, [query.data, form])
-
   const onDelete = () => {
     deleteMutation.mutate(storageUUID)
   }
@@ -219,7 +224,18 @@ export function StorageForm({
     modifyMutation.mutate(data)
   }
 
-  if (query.isPending && storageUUID !== 'add') return <></>
+  if (query.isPending && storageUUID !== 'add') {
+    return <></>
+  }
+
+  console.log('@reactima remove StorageForm', {
+    storageUUID,
+    storageKind,
+    query,
+    form,
+    storageType,
+    queryData: query.data,
+  })
 
   return (
     <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
@@ -250,8 +266,8 @@ export function StorageForm({
               <Picker
                 label="Type"
                 isRequired
-                isDisabled={storageUUID !== 'add'}
-                selectedKey={field.value}
+                isDisabled={!!storageKind || storageUUID !== 'add'} // Disable if storageKind is set or not adding
+                selectedKey={storageKind ?? field.value} // Use storageKind if available
                 onSelectionChange={(key) => field.onChange(key.toString())}
                 errorMessage={fieldState.error?.message}
                 width="100%"

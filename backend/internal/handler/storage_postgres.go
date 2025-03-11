@@ -4,6 +4,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -76,10 +77,12 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 		log.Error("failed to parse storage uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
+	fmt.Println("id", id)
 
 	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes())},
-		Limit: 1,
+		UUID:   pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
+		Limit:  1,
+		Offset: 0,
 	})
 	if err != nil {
 		log.Error("failed to get storage", "error", err)
@@ -93,11 +96,7 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 	return QToStoragePostgres(storages[0])
 }
 
-func (h *Handler) StoragePostgresUpdate(
-	ctx context.Context,
-	req *api.StoragePostgres,
-	params api.StoragePostgresUpdateParams,
-) (*api.StoragePostgres, error) {
+func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePostgres, params api.StoragePostgresUpdateParams) (*api.StoragePostgres, error) {
 	log := h.log.With("handler", "StoragePostgresUpdate")
 
 	storageUUID, err := uuid.FromString(params.UUID)
@@ -108,7 +107,7 @@ func (h *Handler) StoragePostgresUpdate(
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StoragePostgres, error) {
 		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(storageUUID.Bytes())},
+			UUID:  pgtype.UUID{Bytes: [16]byte(storageUUID.Bytes()), Valid: true},
 			Limit: 1,
 		})
 		if err != nil {
