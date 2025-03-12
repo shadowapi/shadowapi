@@ -39,6 +39,10 @@ components:
       $ref: "components/whatsapp.yaml#/WhatsAppLoginResponse"
     WhatsAppStatusResponse:
       $ref: "components/whatsapp.yaml#/WhatsAppStatusResponse"
+    Message:
+      $ref: "components/message.yaml"
+    MessageQuery:
+      $ref: "components/message_query.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -114,6 +118,14 @@ paths:
     $ref: "paths/whatsapp_attachments_download.yaml"
   /whatsapp/messages/download:
     $ref: "paths/whatsapp_messages_download.yaml"
+  /message/email/query:
+    $ref: "paths/message_email_query.yaml"
+  /message/whatsapp/query:
+    $ref: "paths/message_whatsapp_query.yaml"
+  /message/telegram/query:
+    $ref: "paths/message_telegram_query.yaml"
+  /message/linkedin/query:
+    $ref: "paths/message_linkedin_query.yaml"
 
 servers:
   - description: Local development server

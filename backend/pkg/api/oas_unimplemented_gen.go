@@ -76,6 +76,42 @@ func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *
 	return ht.ErrNotImplemented
 }
 
+// MessageEmailQuery implements messageEmailQuery operation.
+//
+// Execute a search query on email messages.
+//
+// POST /message/email/query
+func (UnimplementedHandler) MessageEmailQuery(ctx context.Context, req *MessageQuery) (r *MessageEmailQueryOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MessageLinkedinQuery implements messageLinkedinQuery operation.
+//
+// Execute a search query on LinkedIn messages.
+//
+// POST /message/linkedin/query
+func (UnimplementedHandler) MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (r *MessageLinkedinQueryOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MessageTelegramQuery implements messageTelegramQuery operation.
+//
+// Execute a search query on Telegram messages.
+//
+// POST /message/telegram/query
+func (UnimplementedHandler) MessageTelegramQuery(ctx context.Context, req *MessageQuery) (r *MessageTelegramQueryOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MessageWhatsappQuery implements messageWhatsappQuery operation.
+//
+// Execute a search query on WhatsApp messages.
+//
+// POST /message/whatsapp/query
+func (UnimplementedHandler) MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (r *MessageWhatsappQueryOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // OAuth2ClientCallback implements oauth2-client-callback operation.
 //
 // Serve OAuth2 client callback.

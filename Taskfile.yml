@@ -23,7 +23,7 @@ tasks:
   dev-up:
     desc: "Spin up all services in development mode"
     cmds:
-      - docker compose up -d
+      - docker compose watch
 
   no-cache:
     desc: "Rebuild container with no cache"

@@ -76,5 +76,5 @@ func (t *tokenRefresherWorker) Work(ctx context.Context, b *Broker, args *tokenR
 
 	log.Debug("token refreshed successfully, ready to schedule next refresh")
 	// reschedule the worker
-	return b.SchedulRefresh(ctx, args.TokenUUID, token.Expiry)
+	return b.ScheduleRefresh(ctx, args.TokenUUID, token.Expiry)
 }

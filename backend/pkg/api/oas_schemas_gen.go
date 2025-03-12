@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 )
 
@@ -726,6 +727,457 @@ func (s *MailLabelHeader) init() MailLabelHeader {
 }
 
 // Ref: #
+type Message struct {
+	// Unique identifier for the message.
+	ID string `json:"id"`
+	// Data source the message belongs to.
+	Source MessageSource `json:"source"`
+	// Sender of the message.
+	Sender string `json:"sender"`
+	// Recipients of the message (TO, CC, etc.).
+	Recipients []string `json:"recipients"`
+	// Message subject (if applicable).
+	Subject OptString `json:"subject"`
+	// Text content of the message.
+	Content string `json:"content"`
+	// Timestamp when the message was sent.
+	Timestamp time.Time `json:"timestamp"`
+	// List of attachment file URLs.
+	Attachments []string `json:"attachments"`
+}
+
+// GetID returns the value of ID.
+func (s *Message) GetID() string {
+	return s.ID
+}
+
+// GetSource returns the value of Source.
+func (s *Message) GetSource() MessageSource {
+	return s.Source
+}
+
+// GetSender returns the value of Sender.
+func (s *Message) GetSender() string {
+	return s.Sender
+}
+
+// GetRecipients returns the value of Recipients.
+func (s *Message) GetRecipients() []string {
+	return s.Recipients
+}
+
+// GetSubject returns the value of Subject.
+func (s *Message) GetSubject() OptString {
+	return s.Subject
+}
+
+// GetContent returns the value of Content.
+func (s *Message) GetContent() string {
+	return s.Content
+}
+
+// GetTimestamp returns the value of Timestamp.
+func (s *Message) GetTimestamp() time.Time {
+	return s.Timestamp
+}
+
+// GetAttachments returns the value of Attachments.
+func (s *Message) GetAttachments() []string {
+	return s.Attachments
+}
+
+// SetID sets the value of ID.
+func (s *Message) SetID(val string) {
+	s.ID = val
+}
+
+// SetSource sets the value of Source.
+func (s *Message) SetSource(val MessageSource) {
+	s.Source = val
+}
+
+// SetSender sets the value of Sender.
+func (s *Message) SetSender(val string) {
+	s.Sender = val
+}
+
+// SetRecipients sets the value of Recipients.
+func (s *Message) SetRecipients(val []string) {
+	s.Recipients = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *Message) SetSubject(val OptString) {
+	s.Subject = val
+}
+
+// SetContent sets the value of Content.
+func (s *Message) SetContent(val string) {
+	s.Content = val
+}
+
+// SetTimestamp sets the value of Timestamp.
+func (s *Message) SetTimestamp(val time.Time) {
+	s.Timestamp = val
+}
+
+// SetAttachments sets the value of Attachments.
+func (s *Message) SetAttachments(val []string) {
+	s.Attachments = val
+}
+
+type MessageEmailQueryOK struct {
+	// List of messages matching the query.
+	Messages []Message `json:"messages"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *MessageEmailQueryOK) GetMessages() []Message {
+	return s.Messages
+}
+
+// SetMessages sets the value of Messages.
+func (s *MessageEmailQueryOK) SetMessages(val []Message) {
+	s.Messages = val
+}
+
+type MessageLinkedinQueryOK struct {
+	// List of messages matching the query.
+	Messages []Message `json:"messages"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *MessageLinkedinQueryOK) GetMessages() []Message {
+	return s.Messages
+}
+
+// SetMessages sets the value of Messages.
+func (s *MessageLinkedinQueryOK) SetMessages(val []Message) {
+	s.Messages = val
+}
+
+// Ref: #
+type MessageQuery struct {
+	// The data source to query from.
+	Source MessageQuerySource `json:"source"`
+	// Query string using operators like 'from:', 'to:', 'subject:', 'after:', 'before:', etc.
+	Query string `json:"query"`
+	// Start date for filtering messages.
+	StartDate OptDateTime `json:"start_date"`
+	// End date for filtering messages.
+	EndDate OptDateTime `json:"end_date"`
+	// Sort order: 'asc' for oldest first, 'desc' for newest first.
+	Order OptMessageQueryOrder `json:"order"`
+	// Maximum number of messages to fetch.
+	Limit OptInt `json:"limit"`
+	// Storage type for persisting fetched messages.
+	StorageType OptMessageQueryStorageType `json:"storage_type"`
+}
+
+// GetSource returns the value of Source.
+func (s *MessageQuery) GetSource() MessageQuerySource {
+	return s.Source
+}
+
+// GetQuery returns the value of Query.
+func (s *MessageQuery) GetQuery() string {
+	return s.Query
+}
+
+// GetStartDate returns the value of StartDate.
+func (s *MessageQuery) GetStartDate() OptDateTime {
+	return s.StartDate
+}
+
+// GetEndDate returns the value of EndDate.
+func (s *MessageQuery) GetEndDate() OptDateTime {
+	return s.EndDate
+}
+
+// GetOrder returns the value of Order.
+func (s *MessageQuery) GetOrder() OptMessageQueryOrder {
+	return s.Order
+}
+
+// GetLimit returns the value of Limit.
+func (s *MessageQuery) GetLimit() OptInt {
+	return s.Limit
+}
+
+// GetStorageType returns the value of StorageType.
+func (s *MessageQuery) GetStorageType() OptMessageQueryStorageType {
+	return s.StorageType
+}
+
+// SetSource sets the value of Source.
+func (s *MessageQuery) SetSource(val MessageQuerySource) {
+	s.Source = val
+}
+
+// SetQuery sets the value of Query.
+func (s *MessageQuery) SetQuery(val string) {
+	s.Query = val
+}
+
+// SetStartDate sets the value of StartDate.
+func (s *MessageQuery) SetStartDate(val OptDateTime) {
+	s.StartDate = val
+}
+
+// SetEndDate sets the value of EndDate.
+func (s *MessageQuery) SetEndDate(val OptDateTime) {
+	s.EndDate = val
+}
+
+// SetOrder sets the value of Order.
+func (s *MessageQuery) SetOrder(val OptMessageQueryOrder) {
+	s.Order = val
+}
+
+// SetLimit sets the value of Limit.
+func (s *MessageQuery) SetLimit(val OptInt) {
+	s.Limit = val
+}
+
+// SetStorageType sets the value of StorageType.
+func (s *MessageQuery) SetStorageType(val OptMessageQueryStorageType) {
+	s.StorageType = val
+}
+
+// Sort order: 'asc' for oldest first, 'desc' for newest first.
+type MessageQueryOrder string
+
+const (
+	MessageQueryOrderAsc  MessageQueryOrder = "asc"
+	MessageQueryOrderDesc MessageQueryOrder = "desc"
+)
+
+// AllValues returns all MessageQueryOrder values.
+func (MessageQueryOrder) AllValues() []MessageQueryOrder {
+	return []MessageQueryOrder{
+		MessageQueryOrderAsc,
+		MessageQueryOrderDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageQueryOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageQueryOrderAsc:
+		return []byte(s), nil
+	case MessageQueryOrderDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageQueryOrder) UnmarshalText(data []byte) error {
+	switch MessageQueryOrder(data) {
+	case MessageQueryOrderAsc:
+		*s = MessageQueryOrderAsc
+		return nil
+	case MessageQueryOrderDesc:
+		*s = MessageQueryOrderDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// The data source to query from.
+type MessageQuerySource string
+
+const (
+	MessageQuerySourceEmail    MessageQuerySource = "email"
+	MessageQuerySourceWhatsapp MessageQuerySource = "whatsapp"
+	MessageQuerySourceTelegram MessageQuerySource = "telegram"
+	MessageQuerySourceLinkedin MessageQuerySource = "linkedin"
+)
+
+// AllValues returns all MessageQuerySource values.
+func (MessageQuerySource) AllValues() []MessageQuerySource {
+	return []MessageQuerySource{
+		MessageQuerySourceEmail,
+		MessageQuerySourceWhatsapp,
+		MessageQuerySourceTelegram,
+		MessageQuerySourceLinkedin,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageQuerySource) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageQuerySourceEmail:
+		return []byte(s), nil
+	case MessageQuerySourceWhatsapp:
+		return []byte(s), nil
+	case MessageQuerySourceTelegram:
+		return []byte(s), nil
+	case MessageQuerySourceLinkedin:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageQuerySource) UnmarshalText(data []byte) error {
+	switch MessageQuerySource(data) {
+	case MessageQuerySourceEmail:
+		*s = MessageQuerySourceEmail
+		return nil
+	case MessageQuerySourceWhatsapp:
+		*s = MessageQuerySourceWhatsapp
+		return nil
+	case MessageQuerySourceTelegram:
+		*s = MessageQuerySourceTelegram
+		return nil
+	case MessageQuerySourceLinkedin:
+		*s = MessageQuerySourceLinkedin
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Storage type for persisting fetched messages.
+type MessageQueryStorageType string
+
+const (
+	MessageQueryStorageTypePostgres  MessageQueryStorageType = "postgres"
+	MessageQueryStorageTypeS3        MessageQueryStorageType = "s3"
+	MessageQueryStorageTypeHostfiles MessageQueryStorageType = "hostfiles"
+)
+
+// AllValues returns all MessageQueryStorageType values.
+func (MessageQueryStorageType) AllValues() []MessageQueryStorageType {
+	return []MessageQueryStorageType{
+		MessageQueryStorageTypePostgres,
+		MessageQueryStorageTypeS3,
+		MessageQueryStorageTypeHostfiles,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageQueryStorageType) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageQueryStorageTypePostgres:
+		return []byte(s), nil
+	case MessageQueryStorageTypeS3:
+		return []byte(s), nil
+	case MessageQueryStorageTypeHostfiles:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageQueryStorageType) UnmarshalText(data []byte) error {
+	switch MessageQueryStorageType(data) {
+	case MessageQueryStorageTypePostgres:
+		*s = MessageQueryStorageTypePostgres
+		return nil
+	case MessageQueryStorageTypeS3:
+		*s = MessageQueryStorageTypeS3
+		return nil
+	case MessageQueryStorageTypeHostfiles:
+		*s = MessageQueryStorageTypeHostfiles
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Data source the message belongs to.
+type MessageSource string
+
+const (
+	MessageSourceEmail    MessageSource = "email"
+	MessageSourceWhatsapp MessageSource = "whatsapp"
+	MessageSourceTelegram MessageSource = "telegram"
+	MessageSourceLinkedin MessageSource = "linkedin"
+)
+
+// AllValues returns all MessageSource values.
+func (MessageSource) AllValues() []MessageSource {
+	return []MessageSource{
+		MessageSourceEmail,
+		MessageSourceWhatsapp,
+		MessageSourceTelegram,
+		MessageSourceLinkedin,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageSource) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageSourceEmail:
+		return []byte(s), nil
+	case MessageSourceWhatsapp:
+		return []byte(s), nil
+	case MessageSourceTelegram:
+		return []byte(s), nil
+	case MessageSourceLinkedin:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageSource) UnmarshalText(data []byte) error {
+	switch MessageSource(data) {
+	case MessageSourceEmail:
+		*s = MessageSourceEmail
+		return nil
+	case MessageSourceWhatsapp:
+		*s = MessageSourceWhatsapp
+		return nil
+	case MessageSourceTelegram:
+		*s = MessageSourceTelegram
+		return nil
+	case MessageSourceLinkedin:
+		*s = MessageSourceLinkedin
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MessageTelegramQueryOK struct {
+	// List of messages matching the query.
+	Messages []Message `json:"messages"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *MessageTelegramQueryOK) GetMessages() []Message {
+	return s.Messages
+}
+
+// SetMessages sets the value of Messages.
+func (s *MessageTelegramQueryOK) SetMessages(val []Message) {
+	s.Messages = val
+}
+
+type MessageWhatsappQueryOK struct {
+	// List of messages matching the query.
+	Messages []Message `json:"messages"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *MessageWhatsappQueryOK) GetMessages() []Message {
+	return s.Messages
+}
+
+// SetMessages sets the value of Messages.
+func (s *MessageWhatsappQueryOK) SetMessages(val []Message) {
+	s.Messages = val
+}
+
+// Ref: #
 type OAuth2Client struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
@@ -1315,6 +1767,98 @@ func (o OptMailLabelColor) Get() (v MailLabelColor, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMailLabelColor) Or(d MailLabelColor) MailLabelColor {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageQueryOrder returns new OptMessageQueryOrder with value set to v.
+func NewOptMessageQueryOrder(v MessageQueryOrder) OptMessageQueryOrder {
+	return OptMessageQueryOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageQueryOrder is optional MessageQueryOrder.
+type OptMessageQueryOrder struct {
+	Value MessageQueryOrder
+	Set   bool
+}
+
+// IsSet returns true if OptMessageQueryOrder was set.
+func (o OptMessageQueryOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageQueryOrder) Reset() {
+	var v MessageQueryOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageQueryOrder) SetTo(v MessageQueryOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageQueryOrder) Get() (v MessageQueryOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageQueryOrder) Or(d MessageQueryOrder) MessageQueryOrder {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageQueryStorageType returns new OptMessageQueryStorageType with value set to v.
+func NewOptMessageQueryStorageType(v MessageQueryStorageType) OptMessageQueryStorageType {
+	return OptMessageQueryStorageType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageQueryStorageType is optional MessageQueryStorageType.
+type OptMessageQueryStorageType struct {
+	Value MessageQueryStorageType
+	Set   bool
+}
+
+// IsSet returns true if OptMessageQueryStorageType was set.
+func (o OptMessageQueryStorageType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageQueryStorageType) Reset() {
+	var v MessageQueryStorageType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageQueryStorageType) SetTo(v MessageQueryStorageType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageQueryStorageType) Get() (v MessageQueryStorageType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageQueryStorageType) Or(d MessageQueryStorageType) MessageQueryStorageType {
 	if v, ok := o.Get(); ok {
 		return v
 	}

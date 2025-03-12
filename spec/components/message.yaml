@@ -1,0 +1,41 @@
+# spec/components/message.yaml
+type: object
+additionalProperties: false
+properties:
+  id:
+    type: string
+    description: "Unique identifier for the message."
+  source:
+    type: string
+    enum: ["email", "whatsapp", "telegram", "linkedin"]
+    description: "Data source the message belongs to."
+  sender:
+    type: string
+    description: "Sender of the message."
+  recipients:
+    type: array
+    items:
+      type: string
+    description: "Recipients of the message (TO, CC, etc.)."
+  subject:
+    type: string
+    description: "Message subject (if applicable)."
+  content:
+    type: string
+    description: "Text content of the message."
+  timestamp:
+    type: string
+    format: date-time
+    description: "Timestamp when the message was sent."
+  attachments:
+    type: array
+    items:
+      type: string
+    description: "List of attachment file URLs."
+required:
+  - id
+  - source
+  - sender
+  - recipients
+  - content
+  - timestamp

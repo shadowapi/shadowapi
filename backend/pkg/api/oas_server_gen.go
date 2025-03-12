@@ -50,6 +50,30 @@ type Handler interface {
 	//
 	// PUT /datasource/{uuid}/oauth2/client
 	DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error
+	// MessageEmailQuery implements messageEmailQuery operation.
+	//
+	// Execute a search query on email messages.
+	//
+	// POST /message/email/query
+	MessageEmailQuery(ctx context.Context, req *MessageQuery) (*MessageEmailQueryOK, error)
+	// MessageLinkedinQuery implements messageLinkedinQuery operation.
+	//
+	// Execute a search query on LinkedIn messages.
+	//
+	// POST /message/linkedin/query
+	MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (*MessageLinkedinQueryOK, error)
+	// MessageTelegramQuery implements messageTelegramQuery operation.
+	//
+	// Execute a search query on Telegram messages.
+	//
+	// POST /message/telegram/query
+	MessageTelegramQuery(ctx context.Context, req *MessageQuery) (*MessageTelegramQueryOK, error)
+	// MessageWhatsappQuery implements messageWhatsappQuery operation.
+	//
+	// Execute a search query on WhatsApp messages.
+	//
+	// POST /message/whatsapp/query
+	MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (*MessageWhatsappQueryOK, error)
 	// OAuth2ClientCallback implements oauth2-client-callback operation.
 	//
 	// Serve OAuth2 client callback.

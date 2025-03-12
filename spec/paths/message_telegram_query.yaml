@@ -1,0 +1,34 @@
+post:
+  description: Execute a search query on Telegram messages.
+  operationId: messageTelegramQuery
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/MessageQuery"
+  responses:
+    "200":
+      description: List of matching Telegram messages.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              messages:
+                type: array
+                description: "List of messages matching the query."
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/Message"
+            required:
+              - messages
+    default:
+      description: Query execution error.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - messages
+    - telegram

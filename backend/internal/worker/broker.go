@@ -85,8 +85,8 @@ func (b *Broker) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// SchedulRefresh runs the token refresh worker after 30% of the expiration time
-func (b *Broker) SchedulRefresh(ctx context.Context, tokenUUID uuid.UUID, expiresAt time.Time) error {
+// ScheduleRefresh runs the token refresh worker after 30% of the expiration time
+func (b *Broker) ScheduleRefresh(ctx context.Context, tokenUUID uuid.UUID, expiresAt time.Time) error {
 	log := b.log.With("token_uuid", tokenUUID, "action", "scheduleTokenRefresh")
 	duration := expiresAt.Sub(time.Now().UTC())
 	duration = time.Duration(float64(duration) * 0.1)

@@ -1,0 +1,33 @@
+# spec/components/message_query.yaml
+type: object
+additionalProperties: false
+properties:
+  source:
+    type: string
+    enum: ["email", "whatsapp", "telegram", "linkedin"]
+    description: "The data source to query from."
+  query:
+    type: string
+    description: "Query string using operators like 'from:', 'to:', 'subject:', 'after:', 'before:', etc."
+  start_date:
+    type: string
+    format: date-time
+    description: "Start date for filtering messages."
+  end_date:
+    type: string
+    format: date-time
+    description: "End date for filtering messages."
+  order:
+    type: string
+    enum: ["asc", "desc"]
+    description: "Sort order: 'asc' for oldest first, 'desc' for newest first."
+  limit:
+    type: integer
+    description: "Maximum number of messages to fetch."
+  storage_type:
+    type: string
+    enum: ["postgres", "s3", "hostfiles"]
+    description: "Storage type for persisting fetched messages."
+required:
+  - source
+  - query

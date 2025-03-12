@@ -533,6 +533,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/message/email/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Execute a search query on email messages. */
+        post: operations["messageEmailQuery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/whatsapp/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Execute a search query on WhatsApp messages. */
+        post: operations["messageWhatsappQuery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/telegram/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Execute a search query on Telegram messages. */
+        post: operations["messageTelegramQuery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/linkedin/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Execute a search query on LinkedIn messages. */
+        post: operations["messageLinkedinQuery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -568,6 +636,8 @@ export interface components {
             /** @description Additional information. */
             message?: string;
         };
+        Message: components["schemas"]["message"];
+        MessageQuery: components["schemas"]["message_query"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -800,6 +870,61 @@ export interface components {
                 /** @description User's phone number */
                 phone?: string;
             };
+        };
+        message_query: {
+            /**
+             * @description The data source to query from.
+             * @enum {string}
+             */
+            source: "email" | "whatsapp" | "telegram" | "linkedin";
+            /** @description Query string using operators like 'from:', 'to:', 'subject:', 'after:', 'before:', etc. */
+            query: string;
+            /**
+             * Format: date-time
+             * @description Start date for filtering messages.
+             */
+            start_date?: string;
+            /**
+             * Format: date-time
+             * @description End date for filtering messages.
+             */
+            end_date?: string;
+            /**
+             * @description Sort order: 'asc' for oldest first, 'desc' for newest first.
+             * @enum {string}
+             */
+            order?: "asc" | "desc";
+            /** @description Maximum number of messages to fetch. */
+            limit?: number;
+            /**
+             * @description Storage type for persisting fetched messages.
+             * @enum {string}
+             */
+            storage_type?: "postgres" | "s3" | "hostfiles";
+        };
+        message: {
+            /** @description Unique identifier for the message. */
+            id: string;
+            /**
+             * @description Data source the message belongs to.
+             * @enum {string}
+             */
+            source: "email" | "whatsapp" | "telegram" | "linkedin";
+            /** @description Sender of the message. */
+            sender: string;
+            /** @description Recipients of the message (TO, CC, etc.). */
+            recipients: string[];
+            /** @description Message subject (if applicable). */
+            subject?: string;
+            /** @description Text content of the message. */
+            content: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the message was sent.
+             */
+            timestamp: string;
+            /** @description List of attachment file URLs. */
+            attachments?: string[];
         };
     };
     responses: never;
@@ -2520,6 +2645,150 @@ export interface operations {
                 };
             };
             /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    messageEmailQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["message_query"];
+            };
+        };
+        responses: {
+            /** @description List of matching email messages. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description List of messages matching the query. */
+                        messages: components["schemas"]["message"][];
+                    };
+                };
+            };
+            /** @description Query execution error. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    messageWhatsappQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["message_query"];
+            };
+        };
+        responses: {
+            /** @description List of matching WhatsApp messages. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description List of messages matching the query. */
+                        messages: components["schemas"]["message"][];
+                    };
+                };
+            };
+            /** @description Query execution error. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    messageTelegramQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["message_query"];
+            };
+        };
+        responses: {
+            /** @description List of matching Telegram messages. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description List of messages matching the query. */
+                        messages: components["schemas"]["message"][];
+                    };
+                };
+            };
+            /** @description Query execution error. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    messageLinkedinQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["message_query"];
+            };
+        };
+        responses: {
+            /** @description List of matching LinkedIn messages. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description List of messages matching the query. */
+                        messages: components["schemas"]["message"][];
+                    };
+                };
+            };
+            /** @description Query execution error. */
             default: {
                 headers: {
                     [name: string]: unknown;

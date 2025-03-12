@@ -67,7 +67,7 @@ func (h *Handler) handleGmailToken(
 		}
 
 		log.Info("add token refresh job to worker pool", "token_uuid", tokenUUID, "expiry", token.Expiry)
-		if err = h.wbr.SchedulRefresh(ctx, tokenUUID, token.Expiry); err != nil {
+		if err = h.wbr.ScheduleRefresh(ctx, tokenUUID, token.Expiry); err != nil {
 			log.Error("fail add job to worker pool", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("fail add job to worker pool"))
 		}

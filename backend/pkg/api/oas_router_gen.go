@@ -201,6 +201,105 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'm': // Prefix: "message/"
+				origElem := elem
+				if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'e': // Prefix: "email/query"
+					origElem := elem
+					if l := len("email/query"); len(elem) >= l && elem[0:l] == "email/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleMessageEmailQueryRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'l': // Prefix: "linkedin/query"
+					origElem := elem
+					if l := len("linkedin/query"); len(elem) >= l && elem[0:l] == "linkedin/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleMessageLinkedinQueryRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 't': // Prefix: "telegram/query"
+					origElem := elem
+					if l := len("telegram/query"); len(elem) >= l && elem[0:l] == "telegram/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleMessageTelegramQueryRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'w': // Prefix: "whatsapp/query"
+					origElem := elem
+					if l := len("whatsapp/query"); len(elem) >= l && elem[0:l] == "whatsapp/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleMessageWhatsappQueryRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'o': // Prefix: "oauth2/"
 				origElem := elem
 				if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
@@ -1217,6 +1316,121 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.pathPattern = "/datasource/{uuid}/oauth2/client"
 							r.args = args
 							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'm': // Prefix: "message/"
+				origElem := elem
+				if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'e': // Prefix: "email/query"
+					origElem := elem
+					if l := len("email/query"); len(elem) >= l && elem[0:l] == "email/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = MessageEmailQueryOperation
+							r.summary = ""
+							r.operationID = "messageEmailQuery"
+							r.pathPattern = "/message/email/query"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'l': // Prefix: "linkedin/query"
+					origElem := elem
+					if l := len("linkedin/query"); len(elem) >= l && elem[0:l] == "linkedin/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = MessageLinkedinQueryOperation
+							r.summary = ""
+							r.operationID = "messageLinkedinQuery"
+							r.pathPattern = "/message/linkedin/query"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 't': // Prefix: "telegram/query"
+					origElem := elem
+					if l := len("telegram/query"); len(elem) >= l && elem[0:l] == "telegram/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = MessageTelegramQueryOperation
+							r.summary = ""
+							r.operationID = "messageTelegramQuery"
+							r.pathPattern = "/message/telegram/query"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'w': // Prefix: "whatsapp/query"
+					origElem := elem
+					if l := len("whatsapp/query"); len(elem) >= l && elem[0:l] == "whatsapp/query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = MessageWhatsappQueryOperation
+							r.summary = ""
+							r.operationID = "messageWhatsappQuery"
+							r.pathPattern = "/message/whatsapp/query"
+							r.args = args
+							r.count = 0
 							return r, true
 						default:
 							return
