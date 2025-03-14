@@ -1,0 +1,14 @@
+# spec/components/account_participants.yaml
+type: array
+description: List of account participants
+items:
+  type: object
+  additionalProperties: false
+  properties:
+    participantId:
+      type: string
+      description: Unique identifier of the participant (e.g. user ID)
+    meta:
+      type: object
+      additionalProperties: true
+      description: Arbitrary key-value metadata about the participant

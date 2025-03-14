@@ -431,108 +431,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/whatsapp/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Initiate WhatsApp login flow via QR code scanning. */
-        post: operations["whatsapp-login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/whatsapp/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Retrieve WhatsApp login status. */
-        get: operations["whatsapp-status"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/whatsapp/sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Sync messages for selected users or all users. */
-        post: operations["whatsapp-sync"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/whatsapp/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Retrieve WhatsApp contacts. */
-        get: operations["whatsapp-contacts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/whatsapp/attachments/download": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Download WhatsApp attachment into storage. */
-        post: operations["whatsapp-download-attachment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/whatsapp/messages/download": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Download message content including media. */
-        post: operations["whatsapp-download-message"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/message/email/query": {
         parameters: {
             query?: never;
@@ -601,6 +499,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a file */
+        post: operations["uploadFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate a pre-signed URL for file upload */
+        post: operations["generatePresignedUploadUrl"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/file-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate a download link for a stored file */
+        post: operations["generateDownloadLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -619,25 +568,77 @@ export interface components {
         StoragePostgres: components["schemas"]["storage_postgres"];
         StorageS3: components["schemas"]["storage_s3"];
         StorageHostFiles: components["schemas"]["storage_hostfiles"];
-        WhatsAppLoginResponse: {
-            /** @description The QR code in a format that can be rendered by the client. */
-            qr_code: string;
-            /** @description Time in seconds before the QR code expires. */
-            expires_in: number;
-        };
-        WhatsAppStatusResponse: {
-            /** @description The current login status. Possible values: pending, logged_in, error. */
-            status: string;
-            /** @description WhatsApp session details, if logged in. */
-            session?: {
-                id: string;
-                phone: string;
-            };
-            /** @description Additional information. */
-            message?: string;
-        };
         Message: components["schemas"]["message"];
         MessageQuery: components["schemas"]["message_query"];
+        /** @description Represents a stored file, independent of the storage backend. */
+        FileObject: {
+            /** @description Unique identifier for the file. */
+            uuid?: string;
+            /**
+             * @description The type of storage backend.
+             * @enum {string}
+             */
+            storage_type?: "s3" | "postgres" | "hostfiles";
+            /** @description Reference ID within the respective storage backend. */
+            storage_ref?: string;
+            /** @description Original filename. */
+            name?: string;
+            /** @description MIME type of the file. */
+            mime_type?: string;
+            /** @description Size of the file in bytes. */
+            size?: number;
+            /**
+             * Format: date-time
+             * @description Timestamp when the file was created.
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the file was last modified.
+             */
+            updated_at?: string;
+        };
+        /** @description File upload request metadata. */
+        UploadFileRequest: {
+            name?: string;
+            mime_type?: string;
+            /**
+             * @description The storage backend where the file should be uploaded.
+             * @enum {string}
+             */
+            storage_type?: "s3" | "postgres" | "hostfiles";
+        };
+        /** @description Response after uploading a file. */
+        UploadFileResponse: {
+            file?: components["schemas"]["FileObject"];
+        };
+        /** @description Request to generate a pre-signed URL for upload. */
+        UploadPresignedUrlRequest: {
+            name?: string;
+            mime_type?: string;
+            /**
+             * @description The target storage backend.
+             * @enum {string}
+             */
+            storage_type?: "s3" | "postgres" | "hostfiles";
+        };
+        /** @description Response with a pre-signed URL for upload. */
+        UploadPresignedUrlResponse: {
+            /** @description Pre-signed URL for uploading the file. */
+            upload_url?: string;
+            file?: components["schemas"]["FileObject"];
+        };
+        /** @description Request to generate a download link. */
+        GenerateDownloadLinkRequest: {
+            file_uuid?: string;
+            /** @description Expiration time in seconds for the download link. */
+            expiration?: number;
+        };
+        /** @description Response containing a signed download link. */
+        GenerateDownloadLinkResponse: {
+            /** @description Signed URL for downloading the file. */
+            url?: string;
+        };
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -873,58 +874,76 @@ export interface components {
         };
         message_query: {
             /**
-             * @description The data source to query from.
+             * @description Platform or data source to query from.
              * @enum {string}
              */
-            source: "email" | "whatsapp" | "telegram" | "linkedin";
-            /** @description Query string using operators like 'from:', 'to:', 'subject:', 'after:', 'before:', etc. */
-            query: string;
+            source: "email" | "whatsapp" | "telegram" | "linkedin" | "custom";
+            /** @description Free-text or advanced operator query. E.g., 'from:', 'to:', 'subject:', 'after:', 'before:'. */
+            query?: string;
+            /** @description ID of the chat/conversation to filter messages from. */
+            chat_id?: string;
+            /** @description ID of a sub-thread within the conversation. */
+            thread_id?: string;
             /**
              * Format: date-time
-             * @description Start date for filtering messages.
+             * @description Filter messages sent after this date/time.
              */
             start_date?: string;
             /**
              * Format: date-time
-             * @description End date for filtering messages.
+             * @description Filter messages sent before this date/time.
              */
             end_date?: string;
             /**
-             * @description Sort order: 'asc' for oldest first, 'desc' for newest first.
+             * @description Sort order by timestamp ('asc' or 'desc').
              * @enum {string}
              */
             order?: "asc" | "desc";
-            /** @description Maximum number of messages to fetch. */
+            /** @description Maximum number of messages to return. */
             limit?: number;
+            /** @description Number of records to skip for pagination. */
+            offset?: number;
             /**
-             * @description Storage type for persisting fetched messages.
+             * @description Specifies the storage backend for message data.
              * @enum {string}
              */
             storage_type?: "postgres" | "s3" | "hostfiles";
+            /** @description Enable fuzzy matching if true. */
+            fuzzy?: boolean;
         };
         message: {
             /** @description Unique identifier for the message. */
             id: string;
             /**
-             * @description Data source the message belongs to.
+             * @description Data source or platform the message originated from.
              * @enum {string}
              */
-            source: "email" | "whatsapp" | "telegram" | "linkedin";
-            /** @description Sender of the message. */
+            source: "email" | "whatsapp" | "telegram" | "linkedin" | "custom";
+            /** @description ID of the chat/conversation this message belongs to. */
+            chat_id?: string;
+            /** @description ID of a sub-thread if this message is part of a threaded conversation. */
+            thread_id?: string;
+            /** @description Identifier of the user or account sending the message. */
             sender: string;
-            /** @description Recipients of the message (TO, CC, etc.). */
+            /** @description List of users or accounts receiving the message (e.g., To, CC). */
             recipients: string[];
-            /** @description Message subject (if applicable). */
+            /** @description Subject or title of the message (applicable to emails or similar). */
             subject?: string;
-            /** @description Text content of the message. */
+            /** @description Text content or body of the message. */
             content: string;
+            /** @description List of file attachments associated with this message. */
+            attachments?: components["schemas"]["FileObject"][];
             /**
              * Format: date-time
              * @description Timestamp when the message was sent.
              */
             timestamp: string;
-            /** @description List of attachment file URLs. */
-            attachments?: string[];
+            /** @description ID or handle of the original sender if this message is forwarded. */
+            forwardFrom?: string;
+            /** @description Additional metadata relevant to the message. */
+            meta?: {
+                [key: string]: unknown;
+            };
         };
     };
     responses: never;
@@ -2443,218 +2462,6 @@ export interface operations {
             };
         };
     };
-    "whatsapp-login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description QR code generated successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WhatsAppLoginResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "whatsapp-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Login status retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WhatsAppStatusResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "whatsapp-sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description List of user IDs to sync messages for. If empty, sync all messages. */
-                    user_ids?: string[];
-                };
-            };
-        };
-        responses: {
-            /** @description Messages synchronized successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        synced_count?: number;
-                        messages?: Record<string, never>[];
-                    };
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "whatsapp-contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Contacts retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        contacts?: {
-                            id?: string;
-                            name?: string;
-                            phone?: string;
-                        }[];
-                    };
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "whatsapp-download-attachment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The ID of the attachment to download. */
-                    attachment_id: string;
-                    /** @description The target storage ID. */
-                    storage_id: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Attachment downloaded and stored successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description URL to access the stored attachment. */
-                        file_url?: string;
-                    };
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "whatsapp-download-message": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The ID of the message to download. */
-                    message_id: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Message downloaded successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Message details with media content. */
-                        message?: Record<string, never>;
-                    };
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
     messageEmailQuery: {
         parameters: {
             query?: never;
@@ -2795,6 +2602,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    uploadFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadFileRequest"];
+            };
+        };
+        responses: {
+            /** @description File uploaded successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadFileResponse"];
+                };
+            };
+        };
+    };
+    generatePresignedUploadUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadPresignedUrlRequest"];
+            };
+        };
+        responses: {
+            /** @description Pre-signed upload URL generated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadPresignedUrlResponse"];
+                };
+            };
+        };
+    };
+    generateDownloadLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateDownloadLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Download link generated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateDownloadLinkResponse"];
                 };
             };
         };

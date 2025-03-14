@@ -1,0 +1,33 @@
+# spec/components/user.yaml
+# Defines the schema for a User in the system
+type: object
+additionalProperties: false
+properties:
+  id:
+    type: string
+    description: Unique identifier for the user
+    readOnly: true
+  email:
+    type: string
+    format: email
+    description: User’s primary email address
+  name:
+    type: string
+    description: Full name of the user
+  meta:
+    type: object
+    additionalProperties: true
+    description: Arbitrary key-value metadata about the user
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of user creation
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - email
+  - name

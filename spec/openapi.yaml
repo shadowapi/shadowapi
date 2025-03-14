@@ -35,14 +35,24 @@ components:
       $ref: "components/storage_s3.yaml"
     StorageHostFiles:
       $ref: "components/storage_hostfiles.yaml"
-    WhatsAppLoginResponse:
-      $ref: "components/whatsapp.yaml#/WhatsAppLoginResponse"
-    WhatsAppStatusResponse:
-      $ref: "components/whatsapp.yaml#/WhatsAppStatusResponse"
     Message:
       $ref: "components/message.yaml"
     MessageQuery:
       $ref: "components/message_query.yaml"
+    FileObject:
+      $ref: "components/file.yaml#/FileObject"
+    UploadFileRequest:
+      $ref: "components/file.yaml#/UploadFileRequest"
+    UploadFileResponse:
+      $ref: "components/file.yaml#/UploadFileResponse"
+    UploadPresignedUrlRequest:
+      $ref: "components/file.yaml#/UploadPresignedUrlRequest"
+    UploadPresignedUrlResponse:
+      $ref: "components/file.yaml#/UploadPresignedUrlResponse"
+    GenerateDownloadLinkRequest:
+      $ref: "components/file.yaml#/GenerateDownloadLinkRequest"
+    GenerateDownloadLinkResponse:
+      $ref: "components/file.yaml#/GenerateDownloadLinkResponse"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -106,18 +116,6 @@ paths:
     $ref: "paths/telegram.yaml#/telegram"
   /telegram/{id}:
     $ref: "paths/telegram.yaml#/telegramId"
-  /whatsapp/login:
-    $ref: "paths/whatsapp_login.yaml"
-  /whatsapp/status:
-    $ref: "paths/whatsapp_status.yaml"
-  /whatsapp/sync:
-    $ref: "paths/whatsapp_sync.yaml"
-  /whatsapp/contacts:
-    $ref: "paths/whatsapp_contacts.yaml"
-  /whatsapp/attachments/download:
-    $ref: "paths/whatsapp_attachments_download.yaml"
-  /whatsapp/messages/download:
-    $ref: "paths/whatsapp_messages_download.yaml"
   /message/email/query:
     $ref: "paths/message_email_query.yaml"
   /message/whatsapp/query:
@@ -126,6 +124,13 @@ paths:
     $ref: "paths/message_telegram_query.yaml"
   /message/linkedin/query:
     $ref: "paths/message_linkedin_query.yaml"
+  /storage/upload:
+    $ref: "paths/storage_upload.yaml"
+  /storage/upload-url:
+    $ref: "paths/storage_upload_url.yaml"
+  /storage/file-link:
+    $ref: "paths/storage_file_link.yaml"
+
 
 servers:
   - description: Local development server

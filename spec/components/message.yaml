@@ -7,31 +7,44 @@ properties:
     description: "Unique identifier for the message."
   source:
     type: string
-    enum: ["email", "whatsapp", "telegram", "linkedin"]
-    description: "Data source the message belongs to."
+    enum: ["email", "whatsapp", "telegram", "linkedin", "custom"]
+    description: "Data source or platform the message originated from."
+  chat_id:
+    type: string
+    description: "ID of the chat/conversation this message belongs to."
+  thread_id:
+    type: string
+    description: "ID of a sub-thread if this message is part of a threaded conversation."
   sender:
     type: string
-    description: "Sender of the message."
+    description: "Identifier of the user or account sending the message."
   recipients:
     type: array
+    description: "List of users or accounts receiving the message (e.g., To, CC)."
     items:
       type: string
-    description: "Recipients of the message (TO, CC, etc.)."
   subject:
     type: string
-    description: "Message subject (if applicable)."
+    description: "Subject or title of the message (applicable to emails or similar)."
   content:
     type: string
-    description: "Text content of the message."
+    description: "Text content or body of the message."
+  attachments:
+    type: array
+    description: "List of file attachments associated with this message."
+    items:
+      $ref: "../openapi.yaml#/components/schemas/FileObject"
   timestamp:
     type: string
     format: date-time
     description: "Timestamp when the message was sent."
-  attachments:
-    type: array
-    items:
-      type: string
-    description: "List of attachment file URLs."
+  forwardFrom:
+    type: string
+    description: "ID or handle of the original sender if this message is forwarded."
+  meta:
+    type: object
+    additionalProperties: true
+    description: "Additional metadata relevant to the message."
 required:
   - id
   - source

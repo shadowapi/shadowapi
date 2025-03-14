@@ -679,6 +679,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
+					case 'f': // Prefix: "file-link"
+						origElem := elem
+						if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleGenerateDownloadLinkRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
 					case 'h': // Prefix: "hostfiles"
 						origElem := elem
 						if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
@@ -853,6 +874,49 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						elem = origElem
+					case 'u': // Prefix: "upload"
+						origElem := elem
+						if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "POST":
+								s.handleUploadFileRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '-': // Prefix: "-url"
+							origElem := elem
+							if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleGeneratePresignedUploadUrlRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -905,162 +969,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
-			case 'w': // Prefix: "whatsapp/"
-				origElem := elem
-				if l := len("whatsapp/"); len(elem) >= l && elem[0:l] == "whatsapp/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'a': // Prefix: "attachments/download"
-					origElem := elem
-					if l := len("attachments/download"); len(elem) >= l && elem[0:l] == "attachments/download" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleWhatsappDownloadAttachmentRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'c': // Prefix: "contacts"
-					origElem := elem
-					if l := len("contacts"); len(elem) >= l && elem[0:l] == "contacts" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleWhatsappContactsRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'l': // Prefix: "login"
-					origElem := elem
-					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleWhatsappLoginRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'm': // Prefix: "messages/download"
-					origElem := elem
-					if l := len("messages/download"); len(elem) >= l && elem[0:l] == "messages/download" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleWhatsappDownloadMessageRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 's': // Prefix: "s"
-					origElem := elem
-					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 't': // Prefix: "tatus"
-						origElem := elem
-						if l := len("tatus"); len(elem) >= l && elem[0:l] == "tatus" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleWhatsappStatusRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 'y': // Prefix: "ync"
-						origElem := elem
-						if l := len("ync"); len(elem) >= l && elem[0:l] == "ync" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleWhatsappSyncRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
@@ -1892,6 +1800,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
+					case 'f': // Prefix: "file-link"
+						origElem := elem
+						if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = GenerateDownloadLinkOperation
+								r.summary = "Generate a download link for a stored file"
+								r.operationID = "generateDownloadLink"
+								r.pathPattern = "/storage/file-link"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					case 'h': // Prefix: "hostfiles"
 						origElem := elem
 						if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
@@ -2108,6 +2041,57 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					case 'u': // Prefix: "upload"
+						origElem := elem
+						if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "POST":
+								r.name = UploadFileOperation
+								r.summary = "Upload a file"
+								r.operationID = "uploadFile"
+								r.pathPattern = "/storage/upload"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '-': // Prefix: "-url"
+							origElem := elem
+							if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = GeneratePresignedUploadUrlOperation
+									r.summary = "Generate a pre-signed URL for file upload"
+									r.operationID = "generatePresignedUploadUrl"
+									r.pathPattern = "/storage/upload-url"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -2172,186 +2156,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						default:
 							return
 						}
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
-			case 'w': // Prefix: "whatsapp/"
-				origElem := elem
-				if l := len("whatsapp/"); len(elem) >= l && elem[0:l] == "whatsapp/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'a': // Prefix: "attachments/download"
-					origElem := elem
-					if l := len("attachments/download"); len(elem) >= l && elem[0:l] == "attachments/download" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = WhatsappDownloadAttachmentOperation
-							r.summary = ""
-							r.operationID = "whatsapp-download-attachment"
-							r.pathPattern = "/whatsapp/attachments/download"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'c': // Prefix: "contacts"
-					origElem := elem
-					if l := len("contacts"); len(elem) >= l && elem[0:l] == "contacts" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = WhatsappContactsOperation
-							r.summary = ""
-							r.operationID = "whatsapp-contacts"
-							r.pathPattern = "/whatsapp/contacts"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'l': // Prefix: "login"
-					origElem := elem
-					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = WhatsappLoginOperation
-							r.summary = ""
-							r.operationID = "whatsapp-login"
-							r.pathPattern = "/whatsapp/login"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'm': // Prefix: "messages/download"
-					origElem := elem
-					if l := len("messages/download"); len(elem) >= l && elem[0:l] == "messages/download" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = WhatsappDownloadMessageOperation
-							r.summary = ""
-							r.operationID = "whatsapp-download-message"
-							r.pathPattern = "/whatsapp/messages/download"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 's': // Prefix: "s"
-					origElem := elem
-					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 't': // Prefix: "tatus"
-						origElem := elem
-						if l := len("tatus"); len(elem) >= l && elem[0:l] == "tatus" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = WhatsappStatusOperation
-								r.summary = ""
-								r.operationID = "whatsapp-status"
-								r.pathPattern = "/whatsapp/status"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 'y': // Prefix: "ync"
-						origElem := elem
-						if l := len("ync"); len(elem) >= l && elem[0:l] == "ync" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = WhatsappSyncOperation
-								r.summary = ""
-								r.operationID = "whatsapp-sync"
-								r.pathPattern = "/whatsapp/sync"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem

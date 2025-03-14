@@ -3,17 +3,12 @@
 package api
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 )
-
-func (s *ErrorStatusCode) Error() string {
-	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
-}
 
 type BearerAuth struct {
 	Token string
@@ -198,6 +193,10 @@ func (s *Datasource) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
+func (*Datasource) datasourceEmailCreateRes() {}
+func (*Datasource) datasourceEmailGetRes()    {}
+func (*Datasource) datasourceEmailUpdateRes() {}
+
 // Ref: #
 type DatasourceEmailCreate struct {
 	// Email address of the user.
@@ -320,6 +319,12 @@ func (s *DatasourceEmailCreate) SetSMTPTLS(val OptBool) {
 // DatasourceEmailDeleteOK is response for DatasourceEmailDelete operation.
 type DatasourceEmailDeleteOK struct{}
 
+func (*DatasourceEmailDeleteOK) datasourceEmailDeleteRes() {}
+
+type DatasourceEmailListOKApplicationJSON []Datasource
+
+func (*DatasourceEmailListOKApplicationJSON) datasourceEmailListRes() {}
+
 type DatasourceEmailRunPipelineOK struct {
 	// List of labels.
 	Labels []MailLabel `json:"labels"`
@@ -334,6 +339,8 @@ func (s *DatasourceEmailRunPipelineOK) GetLabels() []MailLabel {
 func (s *DatasourceEmailRunPipelineOK) SetLabels(val []MailLabel) {
 	s.Labels = val
 }
+
+func (*DatasourceEmailRunPipelineOK) datasourceEmailRunPipelineRes() {}
 
 // Ref: #
 type DatasourceEmailUpdate struct {
@@ -433,6 +440,8 @@ func (s *DatasourceEmailUpdate) SetSMTPTLS(val OptBool) {
 
 // DatasourceSetOAuth2ClientNoContent is response for DatasourceSetOAuth2Client operation.
 type DatasourceSetOAuth2ClientNoContent struct{}
+
+func (*DatasourceSetOAuth2ClientNoContent) datasourceSetOAuth2ClientRes() {}
 
 type DatasourceSetOAuth2ClientReq struct {
 	// OAuth2 client ID.
@@ -552,6 +561,249 @@ func (s *ErrorStatusCode) SetStatusCode(val int) {
 // SetResponse sets the value of Response.
 func (s *ErrorStatusCode) SetResponse(val Error) {
 	s.Response = val
+}
+
+func (*ErrorStatusCode) datasourceEmailCreateRes()      {}
+func (*ErrorStatusCode) datasourceEmailDeleteRes()      {}
+func (*ErrorStatusCode) datasourceEmailGetRes()         {}
+func (*ErrorStatusCode) datasourceEmailListRes()        {}
+func (*ErrorStatusCode) datasourceEmailRunPipelineRes() {}
+func (*ErrorStatusCode) datasourceEmailUpdateRes()      {}
+func (*ErrorStatusCode) datasourceSetOAuth2ClientRes()  {}
+func (*ErrorStatusCode) messageEmailQueryRes()          {}
+func (*ErrorStatusCode) messageLinkedinQueryRes()       {}
+func (*ErrorStatusCode) messageTelegramQueryRes()       {}
+func (*ErrorStatusCode) messageWhatsappQueryRes()       {}
+func (*ErrorStatusCode) oAuth2ClientCallbackRes()       {}
+func (*ErrorStatusCode) oAuth2ClientCreateRes()         {}
+func (*ErrorStatusCode) oAuth2ClientDeleteRes()         {}
+func (*ErrorStatusCode) oAuth2ClientGetRes()            {}
+func (*ErrorStatusCode) oAuth2ClientListRes()           {}
+func (*ErrorStatusCode) oAuth2ClientLoginRes()          {}
+func (*ErrorStatusCode) oAuth2ClientTokenDeleteRes()    {}
+func (*ErrorStatusCode) oAuth2ClientTokenListRes()      {}
+func (*ErrorStatusCode) oAuth2ClientUpdateRes()         {}
+func (*ErrorStatusCode) pipelineCreateRes()             {}
+func (*ErrorStatusCode) pipelineDeleteRes()             {}
+func (*ErrorStatusCode) pipelineEntryCreateRes()        {}
+func (*ErrorStatusCode) pipelineEntryDeleteRes()        {}
+func (*ErrorStatusCode) pipelineEntryGetRes()           {}
+func (*ErrorStatusCode) pipelineEntryListRes()          {}
+func (*ErrorStatusCode) pipelineEntryTypeListRes()      {}
+func (*ErrorStatusCode) pipelineEntryUpdateRes()        {}
+func (*ErrorStatusCode) pipelineGetRes()                {}
+func (*ErrorStatusCode) pipelineListRes()               {}
+func (*ErrorStatusCode) pipelineUpdateRes()             {}
+func (*ErrorStatusCode) storageHostfilesCreateRes()     {}
+func (*ErrorStatusCode) storageHostfilesDeleteRes()     {}
+func (*ErrorStatusCode) storageHostfilesGetRes()        {}
+func (*ErrorStatusCode) storageHostfilesUpdateRes()     {}
+func (*ErrorStatusCode) storageListRes()                {}
+func (*ErrorStatusCode) storagePostgresCreateRes()      {}
+func (*ErrorStatusCode) storagePostgresDeleteRes()      {}
+func (*ErrorStatusCode) storagePostgresGetRes()         {}
+func (*ErrorStatusCode) storagePostgresUpdateRes()      {}
+func (*ErrorStatusCode) storageS3CreateRes()            {}
+func (*ErrorStatusCode) storageS3DeleteRes()            {}
+func (*ErrorStatusCode) storageS3GetRes()               {}
+func (*ErrorStatusCode) storageS3UpdateRes()            {}
+func (*ErrorStatusCode) tgSessionCreateRes()            {}
+func (*ErrorStatusCode) tgSessionListRes()              {}
+func (*ErrorStatusCode) tgSessionVerifyRes()            {}
+
+// Represents a stored file, independent of the storage backend.
+// Ref: #/FileObject
+type FileObject struct {
+	// Unique identifier for the file.
+	UUID OptString `json:"uuid"`
+	// The type of storage backend.
+	StorageType OptFileObjectStorageType `json:"storage_type"`
+	// Reference ID within the respective storage backend.
+	StorageRef OptString `json:"storage_ref"`
+	// Original filename.
+	Name OptString `json:"name"`
+	// MIME type of the file.
+	MimeType OptString `json:"mime_type"`
+	// Size of the file in bytes.
+	Size OptInt `json:"size"`
+	// Timestamp when the file was created.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp when the file was last modified.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *FileObject) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetStorageType returns the value of StorageType.
+func (s *FileObject) GetStorageType() OptFileObjectStorageType {
+	return s.StorageType
+}
+
+// GetStorageRef returns the value of StorageRef.
+func (s *FileObject) GetStorageRef() OptString {
+	return s.StorageRef
+}
+
+// GetName returns the value of Name.
+func (s *FileObject) GetName() OptString {
+	return s.Name
+}
+
+// GetMimeType returns the value of MimeType.
+func (s *FileObject) GetMimeType() OptString {
+	return s.MimeType
+}
+
+// GetSize returns the value of Size.
+func (s *FileObject) GetSize() OptInt {
+	return s.Size
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *FileObject) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *FileObject) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *FileObject) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetStorageType sets the value of StorageType.
+func (s *FileObject) SetStorageType(val OptFileObjectStorageType) {
+	s.StorageType = val
+}
+
+// SetStorageRef sets the value of StorageRef.
+func (s *FileObject) SetStorageRef(val OptString) {
+	s.StorageRef = val
+}
+
+// SetName sets the value of Name.
+func (s *FileObject) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetMimeType sets the value of MimeType.
+func (s *FileObject) SetMimeType(val OptString) {
+	s.MimeType = val
+}
+
+// SetSize sets the value of Size.
+func (s *FileObject) SetSize(val OptInt) {
+	s.Size = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *FileObject) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *FileObject) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// The type of storage backend.
+type FileObjectStorageType string
+
+const (
+	FileObjectStorageTypeS3        FileObjectStorageType = "s3"
+	FileObjectStorageTypePostgres  FileObjectStorageType = "postgres"
+	FileObjectStorageTypeHostfiles FileObjectStorageType = "hostfiles"
+)
+
+// AllValues returns all FileObjectStorageType values.
+func (FileObjectStorageType) AllValues() []FileObjectStorageType {
+	return []FileObjectStorageType{
+		FileObjectStorageTypeS3,
+		FileObjectStorageTypePostgres,
+		FileObjectStorageTypeHostfiles,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FileObjectStorageType) MarshalText() ([]byte, error) {
+	switch s {
+	case FileObjectStorageTypeS3:
+		return []byte(s), nil
+	case FileObjectStorageTypePostgres:
+		return []byte(s), nil
+	case FileObjectStorageTypeHostfiles:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FileObjectStorageType) UnmarshalText(data []byte) error {
+	switch FileObjectStorageType(data) {
+	case FileObjectStorageTypeS3:
+		*s = FileObjectStorageTypeS3
+		return nil
+	case FileObjectStorageTypePostgres:
+		*s = FileObjectStorageTypePostgres
+		return nil
+	case FileObjectStorageTypeHostfiles:
+		*s = FileObjectStorageTypeHostfiles
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Request to generate a download link.
+// Ref: #/GenerateDownloadLinkRequest
+type GenerateDownloadLinkRequest struct {
+	FileUUID OptString `json:"file_uuid"`
+	// Expiration time in seconds for the download link.
+	Expiration OptInt `json:"expiration"`
+}
+
+// GetFileUUID returns the value of FileUUID.
+func (s *GenerateDownloadLinkRequest) GetFileUUID() OptString {
+	return s.FileUUID
+}
+
+// GetExpiration returns the value of Expiration.
+func (s *GenerateDownloadLinkRequest) GetExpiration() OptInt {
+	return s.Expiration
+}
+
+// SetFileUUID sets the value of FileUUID.
+func (s *GenerateDownloadLinkRequest) SetFileUUID(val OptString) {
+	s.FileUUID = val
+}
+
+// SetExpiration sets the value of Expiration.
+func (s *GenerateDownloadLinkRequest) SetExpiration(val OptInt) {
+	s.Expiration = val
+}
+
+// Response containing a signed download link.
+// Ref: #/GenerateDownloadLinkResponse
+type GenerateDownloadLinkResponse struct {
+	// Signed URL for downloading the file.
+	URL OptString `json:"url"`
+}
+
+// GetURL returns the value of URL.
+func (s *GenerateDownloadLinkResponse) GetURL() OptString {
+	return s.URL
+}
+
+// SetURL sets the value of URL.
+func (s *GenerateDownloadLinkResponse) SetURL(val OptString) {
+	s.URL = val
 }
 
 // Ref: #
@@ -730,20 +982,28 @@ func (s *MailLabelHeader) init() MailLabelHeader {
 type Message struct {
 	// Unique identifier for the message.
 	ID string `json:"id"`
-	// Data source the message belongs to.
+	// Data source or platform the message originated from.
 	Source MessageSource `json:"source"`
-	// Sender of the message.
+	// ID of the chat/conversation this message belongs to.
+	ChatID OptString `json:"chat_id"`
+	// ID of a sub-thread if this message is part of a threaded conversation.
+	ThreadID OptString `json:"thread_id"`
+	// Identifier of the user or account sending the message.
 	Sender string `json:"sender"`
-	// Recipients of the message (TO, CC, etc.).
+	// List of users or accounts receiving the message (e.g., To, CC).
 	Recipients []string `json:"recipients"`
-	// Message subject (if applicable).
+	// Subject or title of the message (applicable to emails or similar).
 	Subject OptString `json:"subject"`
-	// Text content of the message.
+	// Text content or body of the message.
 	Content string `json:"content"`
+	// List of file attachments associated with this message.
+	Attachments []FileObject `json:"attachments"`
 	// Timestamp when the message was sent.
 	Timestamp time.Time `json:"timestamp"`
-	// List of attachment file URLs.
-	Attachments []string `json:"attachments"`
+	// ID or handle of the original sender if this message is forwarded.
+	ForwardFrom OptString `json:"forwardFrom"`
+	// Additional metadata relevant to the message.
+	Meta OptMessageMeta `json:"meta"`
 }
 
 // GetID returns the value of ID.
@@ -754,6 +1014,16 @@ func (s *Message) GetID() string {
 // GetSource returns the value of Source.
 func (s *Message) GetSource() MessageSource {
 	return s.Source
+}
+
+// GetChatID returns the value of ChatID.
+func (s *Message) GetChatID() OptString {
+	return s.ChatID
+}
+
+// GetThreadID returns the value of ThreadID.
+func (s *Message) GetThreadID() OptString {
+	return s.ThreadID
 }
 
 // GetSender returns the value of Sender.
@@ -776,14 +1046,24 @@ func (s *Message) GetContent() string {
 	return s.Content
 }
 
+// GetAttachments returns the value of Attachments.
+func (s *Message) GetAttachments() []FileObject {
+	return s.Attachments
+}
+
 // GetTimestamp returns the value of Timestamp.
 func (s *Message) GetTimestamp() time.Time {
 	return s.Timestamp
 }
 
-// GetAttachments returns the value of Attachments.
-func (s *Message) GetAttachments() []string {
-	return s.Attachments
+// GetForwardFrom returns the value of ForwardFrom.
+func (s *Message) GetForwardFrom() OptString {
+	return s.ForwardFrom
+}
+
+// GetMeta returns the value of Meta.
+func (s *Message) GetMeta() OptMessageMeta {
+	return s.Meta
 }
 
 // SetID sets the value of ID.
@@ -794,6 +1074,16 @@ func (s *Message) SetID(val string) {
 // SetSource sets the value of Source.
 func (s *Message) SetSource(val MessageSource) {
 	s.Source = val
+}
+
+// SetChatID sets the value of ChatID.
+func (s *Message) SetChatID(val OptString) {
+	s.ChatID = val
+}
+
+// SetThreadID sets the value of ThreadID.
+func (s *Message) SetThreadID(val OptString) {
+	s.ThreadID = val
 }
 
 // SetSender sets the value of Sender.
@@ -816,14 +1106,24 @@ func (s *Message) SetContent(val string) {
 	s.Content = val
 }
 
+// SetAttachments sets the value of Attachments.
+func (s *Message) SetAttachments(val []FileObject) {
+	s.Attachments = val
+}
+
 // SetTimestamp sets the value of Timestamp.
 func (s *Message) SetTimestamp(val time.Time) {
 	s.Timestamp = val
 }
 
-// SetAttachments sets the value of Attachments.
-func (s *Message) SetAttachments(val []string) {
-	s.Attachments = val
+// SetForwardFrom sets the value of ForwardFrom.
+func (s *Message) SetForwardFrom(val OptString) {
+	s.ForwardFrom = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *Message) SetMeta(val OptMessageMeta) {
+	s.Meta = val
 }
 
 type MessageEmailQueryOK struct {
@@ -841,6 +1141,8 @@ func (s *MessageEmailQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
+func (*MessageEmailQueryOK) messageEmailQueryRes() {}
+
 type MessageLinkedinQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -856,22 +1158,44 @@ func (s *MessageLinkedinQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
+func (*MessageLinkedinQueryOK) messageLinkedinQueryRes() {}
+
+// Additional metadata relevant to the message.
+type MessageMeta map[string]jx.Raw
+
+func (s *MessageMeta) init() MessageMeta {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #
 type MessageQuery struct {
-	// The data source to query from.
+	// Platform or data source to query from.
 	Source MessageQuerySource `json:"source"`
-	// Query string using operators like 'from:', 'to:', 'subject:', 'after:', 'before:', etc.
-	Query string `json:"query"`
-	// Start date for filtering messages.
+	// Free-text or advanced operator query. E.g., 'from:', 'to:', 'subject:', 'after:', 'before:'.
+	Query OptString `json:"query"`
+	// ID of the chat/conversation to filter messages from.
+	ChatID OptString `json:"chat_id"`
+	// ID of a sub-thread within the conversation.
+	ThreadID OptString `json:"thread_id"`
+	// Filter messages sent after this date/time.
 	StartDate OptDateTime `json:"start_date"`
-	// End date for filtering messages.
+	// Filter messages sent before this date/time.
 	EndDate OptDateTime `json:"end_date"`
-	// Sort order: 'asc' for oldest first, 'desc' for newest first.
+	// Sort order by timestamp ('asc' or 'desc').
 	Order OptMessageQueryOrder `json:"order"`
-	// Maximum number of messages to fetch.
+	// Maximum number of messages to return.
 	Limit OptInt `json:"limit"`
-	// Storage type for persisting fetched messages.
+	// Number of records to skip for pagination.
+	Offset OptInt `json:"offset"`
+	// Specifies the storage backend for message data.
 	StorageType OptMessageQueryStorageType `json:"storage_type"`
+	// Enable fuzzy matching if true.
+	Fuzzy OptBool `json:"fuzzy"`
 }
 
 // GetSource returns the value of Source.
@@ -880,8 +1204,18 @@ func (s *MessageQuery) GetSource() MessageQuerySource {
 }
 
 // GetQuery returns the value of Query.
-func (s *MessageQuery) GetQuery() string {
+func (s *MessageQuery) GetQuery() OptString {
 	return s.Query
+}
+
+// GetChatID returns the value of ChatID.
+func (s *MessageQuery) GetChatID() OptString {
+	return s.ChatID
+}
+
+// GetThreadID returns the value of ThreadID.
+func (s *MessageQuery) GetThreadID() OptString {
+	return s.ThreadID
 }
 
 // GetStartDate returns the value of StartDate.
@@ -904,9 +1238,19 @@ func (s *MessageQuery) GetLimit() OptInt {
 	return s.Limit
 }
 
+// GetOffset returns the value of Offset.
+func (s *MessageQuery) GetOffset() OptInt {
+	return s.Offset
+}
+
 // GetStorageType returns the value of StorageType.
 func (s *MessageQuery) GetStorageType() OptMessageQueryStorageType {
 	return s.StorageType
+}
+
+// GetFuzzy returns the value of Fuzzy.
+func (s *MessageQuery) GetFuzzy() OptBool {
+	return s.Fuzzy
 }
 
 // SetSource sets the value of Source.
@@ -915,8 +1259,18 @@ func (s *MessageQuery) SetSource(val MessageQuerySource) {
 }
 
 // SetQuery sets the value of Query.
-func (s *MessageQuery) SetQuery(val string) {
+func (s *MessageQuery) SetQuery(val OptString) {
 	s.Query = val
+}
+
+// SetChatID sets the value of ChatID.
+func (s *MessageQuery) SetChatID(val OptString) {
+	s.ChatID = val
+}
+
+// SetThreadID sets the value of ThreadID.
+func (s *MessageQuery) SetThreadID(val OptString) {
+	s.ThreadID = val
 }
 
 // SetStartDate sets the value of StartDate.
@@ -939,12 +1293,22 @@ func (s *MessageQuery) SetLimit(val OptInt) {
 	s.Limit = val
 }
 
+// SetOffset sets the value of Offset.
+func (s *MessageQuery) SetOffset(val OptInt) {
+	s.Offset = val
+}
+
 // SetStorageType sets the value of StorageType.
 func (s *MessageQuery) SetStorageType(val OptMessageQueryStorageType) {
 	s.StorageType = val
 }
 
-// Sort order: 'asc' for oldest first, 'desc' for newest first.
+// SetFuzzy sets the value of Fuzzy.
+func (s *MessageQuery) SetFuzzy(val OptBool) {
+	s.Fuzzy = val
+}
+
+// Sort order by timestamp ('asc' or 'desc').
 type MessageQueryOrder string
 
 const (
@@ -986,7 +1350,7 @@ func (s *MessageQueryOrder) UnmarshalText(data []byte) error {
 	}
 }
 
-// The data source to query from.
+// Platform or data source to query from.
 type MessageQuerySource string
 
 const (
@@ -994,6 +1358,7 @@ const (
 	MessageQuerySourceWhatsapp MessageQuerySource = "whatsapp"
 	MessageQuerySourceTelegram MessageQuerySource = "telegram"
 	MessageQuerySourceLinkedin MessageQuerySource = "linkedin"
+	MessageQuerySourceCustom   MessageQuerySource = "custom"
 )
 
 // AllValues returns all MessageQuerySource values.
@@ -1003,6 +1368,7 @@ func (MessageQuerySource) AllValues() []MessageQuerySource {
 		MessageQuerySourceWhatsapp,
 		MessageQuerySourceTelegram,
 		MessageQuerySourceLinkedin,
+		MessageQuerySourceCustom,
 	}
 }
 
@@ -1016,6 +1382,8 @@ func (s MessageQuerySource) MarshalText() ([]byte, error) {
 	case MessageQuerySourceTelegram:
 		return []byte(s), nil
 	case MessageQuerySourceLinkedin:
+		return []byte(s), nil
+	case MessageQuerySourceCustom:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -1037,12 +1405,15 @@ func (s *MessageQuerySource) UnmarshalText(data []byte) error {
 	case MessageQuerySourceLinkedin:
 		*s = MessageQuerySourceLinkedin
 		return nil
+	case MessageQuerySourceCustom:
+		*s = MessageQuerySourceCustom
+		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
 
-// Storage type for persisting fetched messages.
+// Specifies the storage backend for message data.
 type MessageQueryStorageType string
 
 const (
@@ -1091,7 +1462,7 @@ func (s *MessageQueryStorageType) UnmarshalText(data []byte) error {
 	}
 }
 
-// Data source the message belongs to.
+// Data source or platform the message originated from.
 type MessageSource string
 
 const (
@@ -1099,6 +1470,7 @@ const (
 	MessageSourceWhatsapp MessageSource = "whatsapp"
 	MessageSourceTelegram MessageSource = "telegram"
 	MessageSourceLinkedin MessageSource = "linkedin"
+	MessageSourceCustom   MessageSource = "custom"
 )
 
 // AllValues returns all MessageSource values.
@@ -1108,6 +1480,7 @@ func (MessageSource) AllValues() []MessageSource {
 		MessageSourceWhatsapp,
 		MessageSourceTelegram,
 		MessageSourceLinkedin,
+		MessageSourceCustom,
 	}
 }
 
@@ -1121,6 +1494,8 @@ func (s MessageSource) MarshalText() ([]byte, error) {
 	case MessageSourceTelegram:
 		return []byte(s), nil
 	case MessageSourceLinkedin:
+		return []byte(s), nil
+	case MessageSourceCustom:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -1142,6 +1517,9 @@ func (s *MessageSource) UnmarshalText(data []byte) error {
 	case MessageSourceLinkedin:
 		*s = MessageSourceLinkedin
 		return nil
+	case MessageSourceCustom:
+		*s = MessageSourceCustom
+		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
@@ -1162,6 +1540,8 @@ func (s *MessageTelegramQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
+func (*MessageTelegramQueryOK) messageTelegramQueryRes() {}
+
 type MessageWhatsappQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -1176,6 +1556,8 @@ func (s *MessageWhatsappQueryOK) GetMessages() []Message {
 func (s *MessageWhatsappQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
+
+func (*MessageWhatsappQueryOK) messageWhatsappQueryRes() {}
 
 // Ref: #
 type OAuth2Client struct {
@@ -1247,6 +1629,10 @@ func (s *OAuth2Client) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
+func (*OAuth2Client) oAuth2ClientCreateRes() {}
+func (*OAuth2Client) oAuth2ClientGetRes()    {}
+func (*OAuth2Client) oAuth2ClientUpdateRes() {}
+
 // OAuth2ClientCallbackFound is response for OAuth2ClientCallback operation.
 type OAuth2ClientCallbackFound struct {
 	Location OptURI
@@ -1261,6 +1647,8 @@ func (s *OAuth2ClientCallbackFound) GetLocation() OptURI {
 func (s *OAuth2ClientCallbackFound) SetLocation(val OptURI) {
 	s.Location = val
 }
+
+func (*OAuth2ClientCallbackFound) oAuth2ClientCallbackRes() {}
 
 type OAuth2ClientCreateReq struct {
 	// ID of the client.
@@ -1316,6 +1704,8 @@ func (s *OAuth2ClientCreateReq) SetSecret(val string) {
 // OAuth2ClientDeleteOK is response for OAuth2ClientDelete operation.
 type OAuth2ClientDeleteOK struct{}
 
+func (*OAuth2ClientDeleteOK) oAuth2ClientDeleteRes() {}
+
 type OAuth2ClientListOK struct {
 	// List of OAuth2 clients.
 	Clients []OAuth2Client `json:"clients"`
@@ -1331,6 +1721,8 @@ func (s *OAuth2ClientListOK) SetClients(val []OAuth2Client) {
 	s.Clients = val
 }
 
+func (*OAuth2ClientListOK) oAuth2ClientListRes() {}
+
 type OAuth2ClientLoginOK struct {
 	// Auth code URL.
 	AuthCodeURL string `json:"auth_code_url"`
@@ -1345,6 +1737,8 @@ func (s *OAuth2ClientLoginOK) GetAuthCodeURL() string {
 func (s *OAuth2ClientLoginOK) SetAuthCodeURL(val string) {
 	s.AuthCodeURL = val
 }
+
+func (*OAuth2ClientLoginOK) oAuth2ClientLoginRes() {}
 
 type OAuth2ClientLoginReq struct {
 	// Client ID.
@@ -1457,6 +1851,12 @@ func (s *OAuth2ClientToken) SetUpdatedAt(val time.Time) {
 
 // OAuth2ClientTokenDeleteOK is response for OAuth2ClientTokenDelete operation.
 type OAuth2ClientTokenDeleteOK struct{}
+
+func (*OAuth2ClientTokenDeleteOK) oAuth2ClientTokenDeleteRes() {}
+
+type OAuth2ClientTokenListOKApplicationJSON []OAuth2ClientToken
+
+func (*OAuth2ClientTokenListOKApplicationJSON) oAuth2ClientTokenListRes() {}
 
 type OAuth2ClientUpdateReq struct {
 	// Name of the client.
@@ -1583,6 +1983,98 @@ func (o OptDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFileObject returns new OptFileObject with value set to v.
+func NewOptFileObject(v FileObject) OptFileObject {
+	return OptFileObject{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFileObject is optional FileObject.
+type OptFileObject struct {
+	Value FileObject
+	Set   bool
+}
+
+// IsSet returns true if OptFileObject was set.
+func (o OptFileObject) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFileObject) Reset() {
+	var v FileObject
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFileObject) SetTo(v FileObject) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFileObject) Get() (v FileObject, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFileObject) Or(d FileObject) FileObject {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFileObjectStorageType returns new OptFileObjectStorageType with value set to v.
+func NewOptFileObjectStorageType(v FileObjectStorageType) OptFileObjectStorageType {
+	return OptFileObjectStorageType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFileObjectStorageType is optional FileObjectStorageType.
+type OptFileObjectStorageType struct {
+	Value FileObjectStorageType
+	Set   bool
+}
+
+// IsSet returns true if OptFileObjectStorageType was set.
+func (o OptFileObjectStorageType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFileObjectStorageType) Reset() {
+	var v FileObjectStorageType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFileObjectStorageType) SetTo(v FileObjectStorageType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFileObjectStorageType) Get() (v FileObjectStorageType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFileObjectStorageType) Or(d FileObjectStorageType) FileObjectStorageType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1767,6 +2259,52 @@ func (o OptMailLabelColor) Get() (v MailLabelColor, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMailLabelColor) Or(d MailLabelColor) MailLabelColor {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageMeta returns new OptMessageMeta with value set to v.
+func NewOptMessageMeta(v MessageMeta) OptMessageMeta {
+	return OptMessageMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageMeta is optional MessageMeta.
+type OptMessageMeta struct {
+	Value MessageMeta
+	Set   bool
+}
+
+// IsSet returns true if OptMessageMeta was set.
+func (o OptMessageMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageMeta) Reset() {
+	var v MessageMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageMeta) SetTo(v MessageMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageMeta) Get() (v MessageMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageMeta) Or(d MessageMeta) MessageMeta {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2020,38 +2558,38 @@ func (o OptURI) Or(d url.URL) url.URL {
 	return d
 }
 
-// NewOptWhatsAppStatusResponseSession returns new OptWhatsAppStatusResponseSession with value set to v.
-func NewOptWhatsAppStatusResponseSession(v WhatsAppStatusResponseSession) OptWhatsAppStatusResponseSession {
-	return OptWhatsAppStatusResponseSession{
+// NewOptUploadFileRequestStorageType returns new OptUploadFileRequestStorageType with value set to v.
+func NewOptUploadFileRequestStorageType(v UploadFileRequestStorageType) OptUploadFileRequestStorageType {
+	return OptUploadFileRequestStorageType{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptWhatsAppStatusResponseSession is optional WhatsAppStatusResponseSession.
-type OptWhatsAppStatusResponseSession struct {
-	Value WhatsAppStatusResponseSession
+// OptUploadFileRequestStorageType is optional UploadFileRequestStorageType.
+type OptUploadFileRequestStorageType struct {
+	Value UploadFileRequestStorageType
 	Set   bool
 }
 
-// IsSet returns true if OptWhatsAppStatusResponseSession was set.
-func (o OptWhatsAppStatusResponseSession) IsSet() bool { return o.Set }
+// IsSet returns true if OptUploadFileRequestStorageType was set.
+func (o OptUploadFileRequestStorageType) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptWhatsAppStatusResponseSession) Reset() {
-	var v WhatsAppStatusResponseSession
+func (o *OptUploadFileRequestStorageType) Reset() {
+	var v UploadFileRequestStorageType
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptWhatsAppStatusResponseSession) SetTo(v WhatsAppStatusResponseSession) {
+func (o *OptUploadFileRequestStorageType) SetTo(v UploadFileRequestStorageType) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptWhatsAppStatusResponseSession) Get() (v WhatsAppStatusResponseSession, ok bool) {
+func (o OptUploadFileRequestStorageType) Get() (v UploadFileRequestStorageType, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -2059,7 +2597,53 @@ func (o OptWhatsAppStatusResponseSession) Get() (v WhatsAppStatusResponseSession
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptWhatsAppStatusResponseSession) Or(d WhatsAppStatusResponseSession) WhatsAppStatusResponseSession {
+func (o OptUploadFileRequestStorageType) Or(d UploadFileRequestStorageType) UploadFileRequestStorageType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUploadPresignedUrlRequestStorageType returns new OptUploadPresignedUrlRequestStorageType with value set to v.
+func NewOptUploadPresignedUrlRequestStorageType(v UploadPresignedUrlRequestStorageType) OptUploadPresignedUrlRequestStorageType {
+	return OptUploadPresignedUrlRequestStorageType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUploadPresignedUrlRequestStorageType is optional UploadPresignedUrlRequestStorageType.
+type OptUploadPresignedUrlRequestStorageType struct {
+	Value UploadPresignedUrlRequestStorageType
+	Set   bool
+}
+
+// IsSet returns true if OptUploadPresignedUrlRequestStorageType was set.
+func (o OptUploadPresignedUrlRequestStorageType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUploadPresignedUrlRequestStorageType) Reset() {
+	var v UploadPresignedUrlRequestStorageType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUploadPresignedUrlRequestStorageType) SetTo(v UploadPresignedUrlRequestStorageType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUploadPresignedUrlRequestStorageType) Get() (v UploadPresignedUrlRequestStorageType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUploadPresignedUrlRequestStorageType) Or(d UploadPresignedUrlRequestStorageType) UploadPresignedUrlRequestStorageType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2125,6 +2709,10 @@ func (s *Pipeline) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*Pipeline) pipelineCreateRes() {}
+func (*Pipeline) pipelineGetRes()    {}
+func (*Pipeline) pipelineUpdateRes() {}
+
 type PipelineCreateReq struct {
 	// Name of the pipeline.
 	Name string `json:"name"`
@@ -2166,6 +2754,8 @@ func (s *PipelineCreateReqFlow) init() PipelineCreateReqFlow {
 
 // PipelineDeleteOK is response for PipelineDelete operation.
 type PipelineDeleteOK struct{}
+
+func (*PipelineDeleteOK) pipelineDeleteRes() {}
 
 // Ref: #
 type PipelineEntry struct {
@@ -2248,6 +2838,10 @@ func (s *PipelineEntry) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*PipelineEntry) pipelineEntryCreateRes() {}
+func (*PipelineEntry) pipelineEntryGetRes()    {}
+func (*PipelineEntry) pipelineEntryUpdateRes() {}
+
 type PipelineEntryCreateReq struct {
 	// UUID of the pipeline entry.
 	UUID string `json:"uuid"`
@@ -2326,6 +2920,12 @@ func (s *PipelineEntryCreateReqParams) init() PipelineEntryCreateReqParams {
 // PipelineEntryDeleteOK is response for PipelineEntryDelete operation.
 type PipelineEntryDeleteOK struct{}
 
+func (*PipelineEntryDeleteOK) pipelineEntryDeleteRes() {}
+
+type PipelineEntryListOKApplicationJSON []PipelineEntry
+
+func (*PipelineEntryListOKApplicationJSON) pipelineEntryListRes() {}
+
 type PipelineEntryParams map[string]jx.Raw
 
 func (s *PipelineEntryParams) init() PipelineEntryParams {
@@ -2400,6 +3000,8 @@ func (s *PipelineEntryTypeListOK) SetEntries(val []PipelineEntryType) {
 	s.Entries = val
 }
 
+func (*PipelineEntryTypeListOK) pipelineEntryTypeListRes() {}
+
 type PipelineEntryUpdateReq struct {
 	// Params of the Entry.
 	Params PipelineEntryUpdateReqParams `json:"params"`
@@ -2452,6 +3054,8 @@ func (s *PipelineListOK) GetPipelines() []Pipeline {
 func (s *PipelineListOK) SetPipelines(val []Pipeline) {
 	s.Pipelines = val
 }
+
+func (*PipelineListOK) pipelineListRes() {}
 
 type PipelineUpdateReq struct {
 	// Name of the client.
@@ -2646,8 +3250,18 @@ func (s *StorageHostfiles) SetPath(val string) {
 	s.Path = val
 }
 
+func (*StorageHostfiles) storageHostfilesCreateRes() {}
+func (*StorageHostfiles) storageHostfilesGetRes()    {}
+func (*StorageHostfiles) storageHostfilesUpdateRes() {}
+
 // StorageHostfilesDeleteOK is response for StorageHostfilesDelete operation.
 type StorageHostfilesDeleteOK struct{}
+
+func (*StorageHostfilesDeleteOK) storageHostfilesDeleteRes() {}
+
+type StorageListOKApplicationJSON []Storage
+
+func (*StorageListOKApplicationJSON) storageListRes() {}
 
 // Ref: #
 type StoragePostgres struct {
@@ -2748,8 +3362,14 @@ func (s *StoragePostgres) SetOptions(val OptString) {
 	s.Options = val
 }
 
+func (*StoragePostgres) storagePostgresCreateRes() {}
+func (*StoragePostgres) storagePostgresGetRes()    {}
+func (*StoragePostgres) storagePostgresUpdateRes() {}
+
 // StoragePostgresDeleteOK is response for StoragePostgresDelete operation.
 type StoragePostgresDeleteOK struct{}
+
+func (*StoragePostgresDeleteOK) storagePostgresDeleteRes() {}
 
 // Ref: #
 type StorageS3 struct {
@@ -2850,8 +3470,14 @@ func (s *StorageS3) SetSecretAccessKey(val string) {
 	s.SecretAccessKey = val
 }
 
+func (*StorageS3) storageS3CreateRes() {}
+func (*StorageS3) storageS3GetRes()    {}
+func (*StorageS3) storageS3UpdateRes() {}
+
 // StorageS3DeleteOK is response for StorageS3Delete operation.
 type StorageS3DeleteOK struct{}
+
+func (*StorageS3DeleteOK) storageS3DeleteRes() {}
 
 // Telegram API session and user representation.
 // Ref: #
@@ -2930,6 +3556,9 @@ func (s *Tg) SetUser(val TgUser) {
 	s.User = val
 }
 
+func (*Tg) tgSessionCreateRes() {}
+func (*Tg) tgSessionVerifyRes() {}
+
 type TgSessionCreateReq struct {
 	// Phone number in international format.
 	Phone string `json:"phone"`
@@ -2970,6 +3599,8 @@ func (s *TgSessionListOK) SetTotal(val OptInt) {
 func (s *TgSessionListOK) SetSessions(val []Tg) {
 	s.Sessions = val
 }
+
+func (*TgSessionListOK) tgSessionListRes() {}
 
 type TgSessionVerifyReq struct {
 	// Hash of the phone code.
@@ -3074,264 +3705,222 @@ func (s *TgUser) SetPhone(val OptString) {
 	s.Phone = val
 }
 
-// Ref: #/WhatsAppLoginResponse
-type WhatsAppLoginResponse struct {
-	// The QR code in a format that can be rendered by the client.
-	QrCode string `json:"qr_code"`
-	// Time in seconds before the QR code expires.
-	ExpiresIn int `json:"expires_in"`
-}
-
-// GetQrCode returns the value of QrCode.
-func (s *WhatsAppLoginResponse) GetQrCode() string {
-	return s.QrCode
-}
-
-// GetExpiresIn returns the value of ExpiresIn.
-func (s *WhatsAppLoginResponse) GetExpiresIn() int {
-	return s.ExpiresIn
-}
-
-// SetQrCode sets the value of QrCode.
-func (s *WhatsAppLoginResponse) SetQrCode(val string) {
-	s.QrCode = val
-}
-
-// SetExpiresIn sets the value of ExpiresIn.
-func (s *WhatsAppLoginResponse) SetExpiresIn(val int) {
-	s.ExpiresIn = val
-}
-
-// Ref: #/WhatsAppStatusResponse
-type WhatsAppStatusResponse struct {
-	// The current login status. Possible values: pending, logged_in, error.
-	Status string `json:"status"`
-	// WhatsApp session details, if logged in.
-	Session OptWhatsAppStatusResponseSession `json:"session"`
-	// Additional information.
-	Message OptString `json:"message"`
-}
-
-// GetStatus returns the value of Status.
-func (s *WhatsAppStatusResponse) GetStatus() string {
-	return s.Status
-}
-
-// GetSession returns the value of Session.
-func (s *WhatsAppStatusResponse) GetSession() OptWhatsAppStatusResponseSession {
-	return s.Session
-}
-
-// GetMessage returns the value of Message.
-func (s *WhatsAppStatusResponse) GetMessage() OptString {
-	return s.Message
-}
-
-// SetStatus sets the value of Status.
-func (s *WhatsAppStatusResponse) SetStatus(val string) {
-	s.Status = val
-}
-
-// SetSession sets the value of Session.
-func (s *WhatsAppStatusResponse) SetSession(val OptWhatsAppStatusResponseSession) {
-	s.Session = val
-}
-
-// SetMessage sets the value of Message.
-func (s *WhatsAppStatusResponse) SetMessage(val OptString) {
-	s.Message = val
-}
-
-// WhatsApp session details, if logged in.
-type WhatsAppStatusResponseSession struct {
-	ID    string `json:"id"`
-	Phone string `json:"phone"`
-}
-
-// GetID returns the value of ID.
-func (s *WhatsAppStatusResponseSession) GetID() string {
-	return s.ID
-}
-
-// GetPhone returns the value of Phone.
-func (s *WhatsAppStatusResponseSession) GetPhone() string {
-	return s.Phone
-}
-
-// SetID sets the value of ID.
-func (s *WhatsAppStatusResponseSession) SetID(val string) {
-	s.ID = val
-}
-
-// SetPhone sets the value of Phone.
-func (s *WhatsAppStatusResponseSession) SetPhone(val string) {
-	s.Phone = val
-}
-
-type WhatsappContactsOK struct {
-	Contacts []WhatsappContactsOKContactsItem `json:"contacts"`
-}
-
-// GetContacts returns the value of Contacts.
-func (s *WhatsappContactsOK) GetContacts() []WhatsappContactsOKContactsItem {
-	return s.Contacts
-}
-
-// SetContacts sets the value of Contacts.
-func (s *WhatsappContactsOK) SetContacts(val []WhatsappContactsOKContactsItem) {
-	s.Contacts = val
-}
-
-type WhatsappContactsOKContactsItem struct {
-	ID    OptString `json:"id"`
-	Name  OptString `json:"name"`
-	Phone OptString `json:"phone"`
-}
-
-// GetID returns the value of ID.
-func (s *WhatsappContactsOKContactsItem) GetID() OptString {
-	return s.ID
+// File upload request metadata.
+// Ref: #/UploadFileRequest
+type UploadFileRequest struct {
+	Name     OptString `json:"name"`
+	MimeType OptString `json:"mime_type"`
+	// The storage backend where the file should be uploaded.
+	StorageType OptUploadFileRequestStorageType `json:"storage_type"`
 }
 
 // GetName returns the value of Name.
-func (s *WhatsappContactsOKContactsItem) GetName() OptString {
+func (s *UploadFileRequest) GetName() OptString {
 	return s.Name
 }
 
-// GetPhone returns the value of Phone.
-func (s *WhatsappContactsOKContactsItem) GetPhone() OptString {
-	return s.Phone
+// GetMimeType returns the value of MimeType.
+func (s *UploadFileRequest) GetMimeType() OptString {
+	return s.MimeType
 }
 
-// SetID sets the value of ID.
-func (s *WhatsappContactsOKContactsItem) SetID(val OptString) {
-	s.ID = val
+// GetStorageType returns the value of StorageType.
+func (s *UploadFileRequest) GetStorageType() OptUploadFileRequestStorageType {
+	return s.StorageType
 }
 
 // SetName sets the value of Name.
-func (s *WhatsappContactsOKContactsItem) SetName(val OptString) {
+func (s *UploadFileRequest) SetName(val OptString) {
 	s.Name = val
 }
 
-// SetPhone sets the value of Phone.
-func (s *WhatsappContactsOKContactsItem) SetPhone(val OptString) {
-	s.Phone = val
+// SetMimeType sets the value of MimeType.
+func (s *UploadFileRequest) SetMimeType(val OptString) {
+	s.MimeType = val
 }
 
-type WhatsappDownloadAttachmentOK struct {
-	// URL to access the stored attachment.
-	FileURL OptString `json:"file_url"`
+// SetStorageType sets the value of StorageType.
+func (s *UploadFileRequest) SetStorageType(val OptUploadFileRequestStorageType) {
+	s.StorageType = val
 }
 
-// GetFileURL returns the value of FileURL.
-func (s *WhatsappDownloadAttachmentOK) GetFileURL() OptString {
-	return s.FileURL
+// The storage backend where the file should be uploaded.
+type UploadFileRequestStorageType string
+
+const (
+	UploadFileRequestStorageTypeS3        UploadFileRequestStorageType = "s3"
+	UploadFileRequestStorageTypePostgres  UploadFileRequestStorageType = "postgres"
+	UploadFileRequestStorageTypeHostfiles UploadFileRequestStorageType = "hostfiles"
+)
+
+// AllValues returns all UploadFileRequestStorageType values.
+func (UploadFileRequestStorageType) AllValues() []UploadFileRequestStorageType {
+	return []UploadFileRequestStorageType{
+		UploadFileRequestStorageTypeS3,
+		UploadFileRequestStorageTypePostgres,
+		UploadFileRequestStorageTypeHostfiles,
+	}
 }
 
-// SetFileURL sets the value of FileURL.
-func (s *WhatsappDownloadAttachmentOK) SetFileURL(val OptString) {
-	s.FileURL = val
+// MarshalText implements encoding.TextMarshaler.
+func (s UploadFileRequestStorageType) MarshalText() ([]byte, error) {
+	switch s {
+	case UploadFileRequestStorageTypeS3:
+		return []byte(s), nil
+	case UploadFileRequestStorageTypePostgres:
+		return []byte(s), nil
+	case UploadFileRequestStorageTypeHostfiles:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
 }
 
-type WhatsappDownloadAttachmentReq struct {
-	// The ID of the attachment to download.
-	AttachmentID string `json:"attachment_id"`
-	// The target storage ID.
-	StorageID string `json:"storage_id"`
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UploadFileRequestStorageType) UnmarshalText(data []byte) error {
+	switch UploadFileRequestStorageType(data) {
+	case UploadFileRequestStorageTypeS3:
+		*s = UploadFileRequestStorageTypeS3
+		return nil
+	case UploadFileRequestStorageTypePostgres:
+		*s = UploadFileRequestStorageTypePostgres
+		return nil
+	case UploadFileRequestStorageTypeHostfiles:
+		*s = UploadFileRequestStorageTypeHostfiles
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
-// GetAttachmentID returns the value of AttachmentID.
-func (s *WhatsappDownloadAttachmentReq) GetAttachmentID() string {
-	return s.AttachmentID
+// Response after uploading a file.
+// Ref: #/UploadFileResponse
+type UploadFileResponse struct {
+	File OptFileObject `json:"file"`
 }
 
-// GetStorageID returns the value of StorageID.
-func (s *WhatsappDownloadAttachmentReq) GetStorageID() string {
-	return s.StorageID
+// GetFile returns the value of File.
+func (s *UploadFileResponse) GetFile() OptFileObject {
+	return s.File
 }
 
-// SetAttachmentID sets the value of AttachmentID.
-func (s *WhatsappDownloadAttachmentReq) SetAttachmentID(val string) {
-	s.AttachmentID = val
+// SetFile sets the value of File.
+func (s *UploadFileResponse) SetFile(val OptFileObject) {
+	s.File = val
 }
 
-// SetStorageID sets the value of StorageID.
-func (s *WhatsappDownloadAttachmentReq) SetStorageID(val string) {
-	s.StorageID = val
+// Request to generate a pre-signed URL for upload.
+// Ref: #/UploadPresignedUrlRequest
+type UploadPresignedUrlRequest struct {
+	Name     OptString `json:"name"`
+	MimeType OptString `json:"mime_type"`
+	// The target storage backend.
+	StorageType OptUploadPresignedUrlRequestStorageType `json:"storage_type"`
 }
 
-type WhatsappDownloadMessageOK struct {
-	// Message details with media content.
-	Message *WhatsappDownloadMessageOKMessage `json:"message"`
+// GetName returns the value of Name.
+func (s *UploadPresignedUrlRequest) GetName() OptString {
+	return s.Name
 }
 
-// GetMessage returns the value of Message.
-func (s *WhatsappDownloadMessageOK) GetMessage() *WhatsappDownloadMessageOKMessage {
-	return s.Message
+// GetMimeType returns the value of MimeType.
+func (s *UploadPresignedUrlRequest) GetMimeType() OptString {
+	return s.MimeType
 }
 
-// SetMessage sets the value of Message.
-func (s *WhatsappDownloadMessageOK) SetMessage(val *WhatsappDownloadMessageOKMessage) {
-	s.Message = val
+// GetStorageType returns the value of StorageType.
+func (s *UploadPresignedUrlRequest) GetStorageType() OptUploadPresignedUrlRequestStorageType {
+	return s.StorageType
 }
 
-// Message details with media content.
-type WhatsappDownloadMessageOKMessage struct{}
-
-type WhatsappDownloadMessageReq struct {
-	// The ID of the message to download.
-	MessageID string `json:"message_id"`
+// SetName sets the value of Name.
+func (s *UploadPresignedUrlRequest) SetName(val OptString) {
+	s.Name = val
 }
 
-// GetMessageID returns the value of MessageID.
-func (s *WhatsappDownloadMessageReq) GetMessageID() string {
-	return s.MessageID
+// SetMimeType sets the value of MimeType.
+func (s *UploadPresignedUrlRequest) SetMimeType(val OptString) {
+	s.MimeType = val
 }
 
-// SetMessageID sets the value of MessageID.
-func (s *WhatsappDownloadMessageReq) SetMessageID(val string) {
-	s.MessageID = val
+// SetStorageType sets the value of StorageType.
+func (s *UploadPresignedUrlRequest) SetStorageType(val OptUploadPresignedUrlRequestStorageType) {
+	s.StorageType = val
 }
 
-type WhatsappSyncOK struct {
-	SyncedCount OptInt                       `json:"synced_count"`
-	Messages    []WhatsappSyncOKMessagesItem `json:"messages"`
+// The target storage backend.
+type UploadPresignedUrlRequestStorageType string
+
+const (
+	UploadPresignedUrlRequestStorageTypeS3        UploadPresignedUrlRequestStorageType = "s3"
+	UploadPresignedUrlRequestStorageTypePostgres  UploadPresignedUrlRequestStorageType = "postgres"
+	UploadPresignedUrlRequestStorageTypeHostfiles UploadPresignedUrlRequestStorageType = "hostfiles"
+)
+
+// AllValues returns all UploadPresignedUrlRequestStorageType values.
+func (UploadPresignedUrlRequestStorageType) AllValues() []UploadPresignedUrlRequestStorageType {
+	return []UploadPresignedUrlRequestStorageType{
+		UploadPresignedUrlRequestStorageTypeS3,
+		UploadPresignedUrlRequestStorageTypePostgres,
+		UploadPresignedUrlRequestStorageTypeHostfiles,
+	}
 }
 
-// GetSyncedCount returns the value of SyncedCount.
-func (s *WhatsappSyncOK) GetSyncedCount() OptInt {
-	return s.SyncedCount
+// MarshalText implements encoding.TextMarshaler.
+func (s UploadPresignedUrlRequestStorageType) MarshalText() ([]byte, error) {
+	switch s {
+	case UploadPresignedUrlRequestStorageTypeS3:
+		return []byte(s), nil
+	case UploadPresignedUrlRequestStorageTypePostgres:
+		return []byte(s), nil
+	case UploadPresignedUrlRequestStorageTypeHostfiles:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
 }
 
-// GetMessages returns the value of Messages.
-func (s *WhatsappSyncOK) GetMessages() []WhatsappSyncOKMessagesItem {
-	return s.Messages
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UploadPresignedUrlRequestStorageType) UnmarshalText(data []byte) error {
+	switch UploadPresignedUrlRequestStorageType(data) {
+	case UploadPresignedUrlRequestStorageTypeS3:
+		*s = UploadPresignedUrlRequestStorageTypeS3
+		return nil
+	case UploadPresignedUrlRequestStorageTypePostgres:
+		*s = UploadPresignedUrlRequestStorageTypePostgres
+		return nil
+	case UploadPresignedUrlRequestStorageTypeHostfiles:
+		*s = UploadPresignedUrlRequestStorageTypeHostfiles
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
-// SetSyncedCount sets the value of SyncedCount.
-func (s *WhatsappSyncOK) SetSyncedCount(val OptInt) {
-	s.SyncedCount = val
+// Response with a pre-signed URL for upload.
+// Ref: #/UploadPresignedUrlResponse
+type UploadPresignedUrlResponse struct {
+	// Pre-signed URL for uploading the file.
+	UploadURL OptString     `json:"upload_url"`
+	File      OptFileObject `json:"file"`
 }
 
-// SetMessages sets the value of Messages.
-func (s *WhatsappSyncOK) SetMessages(val []WhatsappSyncOKMessagesItem) {
-	s.Messages = val
+// GetUploadURL returns the value of UploadURL.
+func (s *UploadPresignedUrlResponse) GetUploadURL() OptString {
+	return s.UploadURL
 }
 
-// Message details.
-type WhatsappSyncOKMessagesItem struct{}
-
-type WhatsappSyncReq struct {
-	// List of user IDs to sync messages for. If empty, sync all messages.
-	UserIds []string `json:"user_ids"`
+// GetFile returns the value of File.
+func (s *UploadPresignedUrlResponse) GetFile() OptFileObject {
+	return s.File
 }
 
-// GetUserIds returns the value of UserIds.
-func (s *WhatsappSyncReq) GetUserIds() []string {
-	return s.UserIds
+// SetUploadURL sets the value of UploadURL.
+func (s *UploadPresignedUrlResponse) SetUploadURL(val OptString) {
+	s.UploadURL = val
 }
 
-// SetUserIds sets the value of UserIds.
-func (s *WhatsappSyncReq) SetUserIds(val []string) {
-	s.UserIds = val
+// SetFile sets the value of File.
+func (s *UploadPresignedUrlResponse) SetFile(val OptFileObject) {
+	s.File = val
 }

@@ -1,3 +1,4 @@
+# spec/components/storage_postgres.yaml
 type: object
 additionalProperties: false
 properties:

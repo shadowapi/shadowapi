@@ -115,9 +115,8 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -133,9 +132,8 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -163,9 +161,8 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -185,7 +182,7 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 		}
 	}()
 
-	var response *Datasource
+	var response DatasourceEmailCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -200,7 +197,7 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 		type (
 			Request  = *DatasourceEmailCreate
 			Params   = struct{}
-			Response = *Datasource
+			Response = DatasourceEmailCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -219,19 +216,8 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 		response, err = s.h.DatasourceEmailCreate(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -329,9 +315,8 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -347,9 +332,8 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -377,9 +361,8 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -394,7 +377,7 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 		return
 	}
 
-	var response *DatasourceEmailDeleteOK
+	var response DatasourceEmailDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -414,7 +397,7 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 		type (
 			Request  = struct{}
 			Params   = DatasourceEmailDeleteParams
-			Response = *DatasourceEmailDeleteOK
+			Response = DatasourceEmailDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -425,27 +408,16 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 			mreq,
 			unpackDatasourceEmailDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.DatasourceEmailDelete(ctx, params)
+				response, err = s.h.DatasourceEmailDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.DatasourceEmailDelete(ctx, params)
+		response, err = s.h.DatasourceEmailDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -543,9 +515,8 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -561,9 +532,8 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -591,9 +561,8 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -608,7 +577,7 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 		return
 	}
 
-	var response *Datasource
+	var response DatasourceEmailGetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -628,7 +597,7 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 		type (
 			Request  = struct{}
 			Params   = DatasourceEmailGetParams
-			Response = *Datasource
+			Response = DatasourceEmailGetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -647,19 +616,8 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 		response, err = s.h.DatasourceEmailGet(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -757,9 +715,8 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -775,9 +732,8 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -805,9 +761,8 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -822,7 +777,7 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 		return
 	}
 
-	var response []Datasource
+	var response DatasourceEmailListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -846,7 +801,7 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 		type (
 			Request  = struct{}
 			Params   = DatasourceEmailListParams
-			Response = []Datasource
+			Response = DatasourceEmailListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -865,19 +820,8 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 		response, err = s.h.DatasourceEmailList(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -975,9 +919,8 @@ func (s *Server) handleDatasourceEmailRunPipelineRequest(args [1]string, argsEsc
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -993,9 +936,8 @@ func (s *Server) handleDatasourceEmailRunPipelineRequest(args [1]string, argsEsc
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1023,9 +965,8 @@ func (s *Server) handleDatasourceEmailRunPipelineRequest(args [1]string, argsEsc
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -1040,7 +981,7 @@ func (s *Server) handleDatasourceEmailRunPipelineRequest(args [1]string, argsEsc
 		return
 	}
 
-	var response *DatasourceEmailRunPipelineOK
+	var response DatasourceEmailRunPipelineRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1060,7 +1001,7 @@ func (s *Server) handleDatasourceEmailRunPipelineRequest(args [1]string, argsEsc
 		type (
 			Request  = struct{}
 			Params   = DatasourceEmailRunPipelineParams
-			Response = *DatasourceEmailRunPipelineOK
+			Response = DatasourceEmailRunPipelineRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1079,19 +1020,8 @@ func (s *Server) handleDatasourceEmailRunPipelineRequest(args [1]string, argsEsc
 		response, err = s.h.DatasourceEmailRunPipeline(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -1189,9 +1119,8 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1207,9 +1136,8 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1237,9 +1165,8 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -1269,7 +1196,7 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 		}
 	}()
 
-	var response *Datasource
+	var response DatasourceEmailUpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1289,7 +1216,7 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 		type (
 			Request  = *DatasourceEmailUpdate
 			Params   = DatasourceEmailUpdateParams
-			Response = *Datasource
+			Response = DatasourceEmailUpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1308,19 +1235,8 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 		response, err = s.h.DatasourceEmailUpdate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -1418,9 +1334,8 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1436,9 +1351,8 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1466,9 +1380,8 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -1498,7 +1411,7 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 		}
 	}()
 
-	var response *DatasourceSetOAuth2ClientNoContent
+	var response DatasourceSetOAuth2ClientRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1518,7 +1431,7 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 		type (
 			Request  = *DatasourceSetOAuth2ClientReq
 			Params   = DatasourceSetOAuth2ClientParams
-			Response = *DatasourceSetOAuth2ClientNoContent
+			Response = DatasourceSetOAuth2ClientRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1529,31 +1442,420 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 			mreq,
 			unpackDatasourceSetOAuth2ClientParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.DatasourceSetOAuth2Client(ctx, request, params)
+				response, err = s.h.DatasourceSetOAuth2Client(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.DatasourceSetOAuth2Client(ctx, request, params)
+		response, err = s.h.DatasourceSetOAuth2Client(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
 	if err := encodeDatasourceSetOAuth2ClientResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleGenerateDownloadLinkRequest handles generateDownloadLink operation.
+//
+// Generate a download link for a stored file.
+//
+// POST /storage/file-link
+func (s *Server) handleGenerateDownloadLinkRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("generateDownloadLink"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/file-link"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GenerateDownloadLinkOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code >= 100 && code < 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: GenerateDownloadLinkOperation,
+			ID:   "generateDownloadLink",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securitySessionCookieAuth(ctx, GenerateDownloadLinkOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "SessionCookieAuth",
+					Err:              err,
+				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, GenerateDownloadLinkOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+	}
+	request, close, err := s.decodeGenerateDownloadLinkRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *GenerateDownloadLinkResponse
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    GenerateDownloadLinkOperation,
+			OperationSummary: "Generate a download link for a stored file",
+			OperationID:      "generateDownloadLink",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
+		}
+
+		type (
+			Request  = *GenerateDownloadLinkRequest
+			Params   = struct{}
+			Response = *GenerateDownloadLinkResponse
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GenerateDownloadLink(ctx, request)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GenerateDownloadLink(ctx, request)
+	}
+	if err != nil {
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGenerateDownloadLinkResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleGeneratePresignedUploadUrlRequest handles generatePresignedUploadUrl operation.
+//
+// Generate a pre-signed URL for file upload.
+//
+// POST /storage/upload-url
+func (s *Server) handleGeneratePresignedUploadUrlRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("generatePresignedUploadUrl"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/upload-url"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GeneratePresignedUploadUrlOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code >= 100 && code < 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: GeneratePresignedUploadUrlOperation,
+			ID:   "generatePresignedUploadUrl",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securitySessionCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "SessionCookieAuth",
+					Err:              err,
+				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, GeneratePresignedUploadUrlOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+	}
+	request, close, err := s.decodeGeneratePresignedUploadUrlRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *UploadPresignedUrlResponse
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    GeneratePresignedUploadUrlOperation,
+			OperationSummary: "Generate a pre-signed URL for file upload",
+			OperationID:      "generatePresignedUploadUrl",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
+		}
+
+		type (
+			Request  = *UploadPresignedUrlRequest
+			Params   = struct{}
+			Response = *UploadPresignedUrlResponse
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GeneratePresignedUploadUrl(ctx, request)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GeneratePresignedUploadUrl(ctx, request)
+	}
+	if err != nil {
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGeneratePresignedUploadUrlResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -1647,9 +1949,8 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1665,9 +1966,8 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1695,9 +1995,8 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -1717,7 +2016,7 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 		}
 	}()
 
-	var response *MessageEmailQueryOK
+	var response MessageEmailQueryRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1732,7 +2031,7 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 		type (
 			Request  = *MessageQuery
 			Params   = struct{}
-			Response = *MessageEmailQueryOK
+			Response = MessageEmailQueryRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1751,19 +2050,8 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 		response, err = s.h.MessageEmailQuery(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -1861,9 +2149,8 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1879,9 +2166,8 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -1909,9 +2195,8 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -1931,7 +2216,7 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 		}
 	}()
 
-	var response *MessageLinkedinQueryOK
+	var response MessageLinkedinQueryRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1946,7 +2231,7 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 		type (
 			Request  = *MessageQuery
 			Params   = struct{}
-			Response = *MessageLinkedinQueryOK
+			Response = MessageLinkedinQueryRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1965,19 +2250,8 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 		response, err = s.h.MessageLinkedinQuery(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -2075,9 +2349,8 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2093,9 +2366,8 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2123,9 +2395,8 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -2145,7 +2416,7 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 		}
 	}()
 
-	var response *MessageTelegramQueryOK
+	var response MessageTelegramQueryRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -2160,7 +2431,7 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 		type (
 			Request  = *MessageQuery
 			Params   = struct{}
-			Response = *MessageTelegramQueryOK
+			Response = MessageTelegramQueryRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2179,19 +2450,8 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 		response, err = s.h.MessageTelegramQuery(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -2289,9 +2549,8 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2307,9 +2566,8 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2337,9 +2595,8 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -2359,7 +2616,7 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 		}
 	}()
 
-	var response *MessageWhatsappQueryOK
+	var response MessageWhatsappQueryRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -2374,7 +2631,7 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 		type (
 			Request  = *MessageQuery
 			Params   = struct{}
-			Response = *MessageWhatsappQueryOK
+			Response = MessageWhatsappQueryRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2393,19 +2650,8 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 		response, err = s.h.MessageWhatsappQuery(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -2503,9 +2749,8 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2521,9 +2766,8 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2551,9 +2795,8 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -2568,7 +2811,7 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 		return
 	}
 
-	var response *OAuth2ClientCallbackFound
+	var response OAuth2ClientCallbackRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -2592,7 +2835,7 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 		type (
 			Request  = struct{}
 			Params   = OAuth2ClientCallbackParams
-			Response = *OAuth2ClientCallbackFound
+			Response = OAuth2ClientCallbackRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2611,19 +2854,8 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 		response, err = s.h.OAuth2ClientCallback(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -2721,9 +2953,8 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2739,9 +2970,8 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2769,9 +2999,8 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -2791,7 +3020,7 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 		}
 	}()
 
-	var response *OAuth2Client
+	var response OAuth2ClientCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -2806,7 +3035,7 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 		type (
 			Request  = *OAuth2ClientCreateReq
 			Params   = struct{}
-			Response = *OAuth2Client
+			Response = OAuth2ClientCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2825,19 +3054,8 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 		response, err = s.h.OAuth2ClientCreate(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -2935,9 +3153,8 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2953,9 +3170,8 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -2983,9 +3199,8 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -3000,7 +3215,7 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 		return
 	}
 
-	var response *OAuth2ClientDeleteOK
+	var response OAuth2ClientDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3020,7 +3235,7 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 		type (
 			Request  = struct{}
 			Params   = OAuth2ClientDeleteParams
-			Response = *OAuth2ClientDeleteOK
+			Response = OAuth2ClientDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3031,27 +3246,16 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 			mreq,
 			unpackOAuth2ClientDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.OAuth2ClientDelete(ctx, params)
+				response, err = s.h.OAuth2ClientDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.OAuth2ClientDelete(ctx, params)
+		response, err = s.h.OAuth2ClientDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -3149,9 +3353,8 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3167,9 +3370,8 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3197,9 +3399,8 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -3214,7 +3415,7 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 		return
 	}
 
-	var response *OAuth2Client
+	var response OAuth2ClientGetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3234,7 +3435,7 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 		type (
 			Request  = struct{}
 			Params   = OAuth2ClientGetParams
-			Response = *OAuth2Client
+			Response = OAuth2ClientGetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3253,19 +3454,8 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 		response, err = s.h.OAuth2ClientGet(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -3363,9 +3553,8 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3381,9 +3570,8 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3411,9 +3599,8 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -3428,7 +3615,7 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 		return
 	}
 
-	var response *OAuth2ClientListOK
+	var response OAuth2ClientListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3452,7 +3639,7 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 		type (
 			Request  = struct{}
 			Params   = OAuth2ClientListParams
-			Response = *OAuth2ClientListOK
+			Response = OAuth2ClientListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3471,19 +3658,8 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 		response, err = s.h.OAuth2ClientList(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -3581,9 +3757,8 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3599,9 +3774,8 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3629,9 +3803,8 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -3651,7 +3824,7 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 		}
 	}()
 
-	var response *OAuth2ClientLoginOK
+	var response OAuth2ClientLoginRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3666,7 +3839,7 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 		type (
 			Request  = *OAuth2ClientLoginReq
 			Params   = struct{}
-			Response = *OAuth2ClientLoginOK
+			Response = OAuth2ClientLoginRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3685,19 +3858,8 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 		response, err = s.h.OAuth2ClientLogin(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -3795,9 +3957,8 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3813,9 +3974,8 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -3843,9 +4003,8 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -3860,7 +4019,7 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 		return
 	}
 
-	var response *OAuth2ClientTokenDeleteOK
+	var response OAuth2ClientTokenDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -3884,7 +4043,7 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 		type (
 			Request  = struct{}
 			Params   = OAuth2ClientTokenDeleteParams
-			Response = *OAuth2ClientTokenDeleteOK
+			Response = OAuth2ClientTokenDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3895,27 +4054,16 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 			mreq,
 			unpackOAuth2ClientTokenDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.OAuth2ClientTokenDelete(ctx, params)
+				response, err = s.h.OAuth2ClientTokenDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.OAuth2ClientTokenDelete(ctx, params)
+		response, err = s.h.OAuth2ClientTokenDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -4013,9 +4161,8 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4031,9 +4178,8 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4061,9 +4207,8 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -4078,7 +4223,7 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 		return
 	}
 
-	var response []OAuth2ClientToken
+	var response OAuth2ClientTokenListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -4098,7 +4243,7 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 		type (
 			Request  = struct{}
 			Params   = OAuth2ClientTokenListParams
-			Response = []OAuth2ClientToken
+			Response = OAuth2ClientTokenListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4117,19 +4262,8 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 		response, err = s.h.OAuth2ClientTokenList(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -4227,9 +4361,8 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4245,9 +4378,8 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4275,9 +4407,8 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -4307,7 +4438,7 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 		}
 	}()
 
-	var response *OAuth2Client
+	var response OAuth2ClientUpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -4327,7 +4458,7 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 		type (
 			Request  = *OAuth2ClientUpdateReq
 			Params   = OAuth2ClientUpdateParams
-			Response = *OAuth2Client
+			Response = OAuth2ClientUpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4346,19 +4477,8 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 		response, err = s.h.OAuth2ClientUpdate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -4456,9 +4576,8 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4474,9 +4593,8 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4504,9 +4622,8 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -4526,7 +4643,7 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 		}
 	}()
 
-	var response *Pipeline
+	var response PipelineCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -4541,7 +4658,7 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 		type (
 			Request  = *PipelineCreateReq
 			Params   = struct{}
-			Response = *Pipeline
+			Response = PipelineCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4560,19 +4677,8 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 		response, err = s.h.PipelineCreate(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -4670,9 +4776,8 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4688,9 +4793,8 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4718,9 +4822,8 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -4735,7 +4838,7 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 		return
 	}
 
-	var response *PipelineDeleteOK
+	var response PipelineDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -4755,7 +4858,7 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 		type (
 			Request  = struct{}
 			Params   = PipelineDeleteParams
-			Response = *PipelineDeleteOK
+			Response = PipelineDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -4766,27 +4869,16 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 			mreq,
 			unpackPipelineDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.PipelineDelete(ctx, params)
+				response, err = s.h.PipelineDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.PipelineDelete(ctx, params)
+		response, err = s.h.PipelineDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -4884,9 +4976,8 @@ func (s *Server) handlePipelineEntryCreateRequest(args [1]string, argsEscaped bo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4902,9 +4993,8 @@ func (s *Server) handlePipelineEntryCreateRequest(args [1]string, argsEscaped bo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -4932,9 +5022,8 @@ func (s *Server) handlePipelineEntryCreateRequest(args [1]string, argsEscaped bo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -4964,7 +5053,7 @@ func (s *Server) handlePipelineEntryCreateRequest(args [1]string, argsEscaped bo
 		}
 	}()
 
-	var response *PipelineEntry
+	var response PipelineEntryCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -4984,7 +5073,7 @@ func (s *Server) handlePipelineEntryCreateRequest(args [1]string, argsEscaped bo
 		type (
 			Request  = *PipelineEntryCreateReq
 			Params   = PipelineEntryCreateParams
-			Response = *PipelineEntry
+			Response = PipelineEntryCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5003,19 +5092,8 @@ func (s *Server) handlePipelineEntryCreateRequest(args [1]string, argsEscaped bo
 		response, err = s.h.PipelineEntryCreate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -5113,9 +5191,8 @@ func (s *Server) handlePipelineEntryDeleteRequest(args [2]string, argsEscaped bo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5131,9 +5208,8 @@ func (s *Server) handlePipelineEntryDeleteRequest(args [2]string, argsEscaped bo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5161,9 +5237,8 @@ func (s *Server) handlePipelineEntryDeleteRequest(args [2]string, argsEscaped bo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -5178,7 +5253,7 @@ func (s *Server) handlePipelineEntryDeleteRequest(args [2]string, argsEscaped bo
 		return
 	}
 
-	var response *PipelineEntryDeleteOK
+	var response PipelineEntryDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -5202,7 +5277,7 @@ func (s *Server) handlePipelineEntryDeleteRequest(args [2]string, argsEscaped bo
 		type (
 			Request  = struct{}
 			Params   = PipelineEntryDeleteParams
-			Response = *PipelineEntryDeleteOK
+			Response = PipelineEntryDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5213,27 +5288,16 @@ func (s *Server) handlePipelineEntryDeleteRequest(args [2]string, argsEscaped bo
 			mreq,
 			unpackPipelineEntryDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.PipelineEntryDelete(ctx, params)
+				response, err = s.h.PipelineEntryDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.PipelineEntryDelete(ctx, params)
+		response, err = s.h.PipelineEntryDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -5331,9 +5395,8 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5349,9 +5412,8 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5379,9 +5441,8 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -5396,7 +5457,7 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 		return
 	}
 
-	var response *PipelineEntry
+	var response PipelineEntryGetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -5420,7 +5481,7 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 		type (
 			Request  = struct{}
 			Params   = PipelineEntryGetParams
-			Response = *PipelineEntry
+			Response = PipelineEntryGetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5439,19 +5500,8 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 		response, err = s.h.PipelineEntryGet(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -5549,9 +5599,8 @@ func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5567,9 +5616,8 @@ func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5597,9 +5645,8 @@ func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -5614,7 +5661,7 @@ func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool
 		return
 	}
 
-	var response []PipelineEntry
+	var response PipelineEntryListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -5634,7 +5681,7 @@ func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool
 		type (
 			Request  = struct{}
 			Params   = PipelineEntryListParams
-			Response = []PipelineEntry
+			Response = PipelineEntryListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5653,19 +5700,8 @@ func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool
 		response, err = s.h.PipelineEntryList(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -5763,9 +5799,8 @@ func (s *Server) handlePipelineEntryTypeListRequest(args [0]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5781,9 +5816,8 @@ func (s *Server) handlePipelineEntryTypeListRequest(args [0]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5811,14 +5845,13 @@ func (s *Server) handlePipelineEntryTypeListRequest(args [0]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
 
-	var response *PipelineEntryTypeListOK
+	var response PipelineEntryTypeListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -5833,7 +5866,7 @@ func (s *Server) handlePipelineEntryTypeListRequest(args [0]string, argsEscaped 
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = *PipelineEntryTypeListOK
+			Response = PipelineEntryTypeListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -5852,19 +5885,8 @@ func (s *Server) handlePipelineEntryTypeListRequest(args [0]string, argsEscaped 
 		response, err = s.h.PipelineEntryTypeList(ctx)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -5962,9 +5984,8 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -5980,9 +6001,8 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6010,9 +6030,8 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -6042,7 +6061,7 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 		}
 	}()
 
-	var response *PipelineEntry
+	var response PipelineEntryUpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -6066,7 +6085,7 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 		type (
 			Request  = *PipelineEntryUpdateReq
 			Params   = PipelineEntryUpdateParams
-			Response = *PipelineEntry
+			Response = PipelineEntryUpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6085,19 +6104,8 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 		response, err = s.h.PipelineEntryUpdate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -6195,9 +6203,8 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6213,9 +6220,8 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6243,9 +6249,8 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -6260,7 +6265,7 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 		return
 	}
 
-	var response *Pipeline
+	var response PipelineGetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -6280,7 +6285,7 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 		type (
 			Request  = struct{}
 			Params   = PipelineGetParams
-			Response = *Pipeline
+			Response = PipelineGetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6299,19 +6304,8 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 		response, err = s.h.PipelineGet(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -6409,9 +6403,8 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6427,9 +6420,8 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6457,9 +6449,8 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -6474,7 +6465,7 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 		return
 	}
 
-	var response *PipelineListOK
+	var response PipelineListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -6498,7 +6489,7 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 		type (
 			Request  = struct{}
 			Params   = PipelineListParams
-			Response = *PipelineListOK
+			Response = PipelineListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6517,19 +6508,8 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 		response, err = s.h.PipelineList(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -6627,9 +6607,8 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6645,9 +6624,8 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6675,9 +6653,8 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -6707,7 +6684,7 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 		}
 	}()
 
-	var response *Pipeline
+	var response PipelineUpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -6727,7 +6704,7 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 		type (
 			Request  = *PipelineUpdateReq
 			Params   = PipelineUpdateParams
-			Response = *Pipeline
+			Response = PipelineUpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6746,19 +6723,8 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 		response, err = s.h.PipelineUpdate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -6856,9 +6822,8 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6874,9 +6839,8 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -6904,9 +6868,8 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -6926,7 +6889,7 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 		}
 	}()
 
-	var response *StorageHostfiles
+	var response StorageHostfilesCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -6941,7 +6904,7 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 		type (
 			Request  = *StorageHostfiles
 			Params   = struct{}
-			Response = *StorageHostfiles
+			Response = StorageHostfilesCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -6960,19 +6923,8 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 		response, err = s.h.StorageHostfilesCreate(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -7070,9 +7022,8 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7088,9 +7039,8 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7118,9 +7068,8 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -7135,7 +7084,7 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 		return
 	}
 
-	var response *StorageHostfilesDeleteOK
+	var response StorageHostfilesDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -7155,7 +7104,7 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 		type (
 			Request  = struct{}
 			Params   = StorageHostfilesDeleteParams
-			Response = *StorageHostfilesDeleteOK
+			Response = StorageHostfilesDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -7166,27 +7115,16 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 			mreq,
 			unpackStorageHostfilesDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.StorageHostfilesDelete(ctx, params)
+				response, err = s.h.StorageHostfilesDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.StorageHostfilesDelete(ctx, params)
+		response, err = s.h.StorageHostfilesDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -7284,9 +7222,8 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7302,9 +7239,8 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7332,9 +7268,8 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -7349,7 +7284,7 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 		return
 	}
 
-	var response *StorageHostfiles
+	var response StorageHostfilesGetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -7369,7 +7304,7 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 		type (
 			Request  = struct{}
 			Params   = StorageHostfilesGetParams
-			Response = *StorageHostfiles
+			Response = StorageHostfilesGetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -7388,19 +7323,8 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 		response, err = s.h.StorageHostfilesGet(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -7498,9 +7422,8 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7516,9 +7439,8 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7546,9 +7468,8 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -7578,7 +7499,7 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 		}
 	}()
 
-	var response *StorageHostfiles
+	var response StorageHostfilesUpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -7598,7 +7519,7 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 		type (
 			Request  = *StorageHostfiles
 			Params   = StorageHostfilesUpdateParams
-			Response = *StorageHostfiles
+			Response = StorageHostfilesUpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -7617,19 +7538,8 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 		response, err = s.h.StorageHostfilesUpdate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -7727,9 +7637,8 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7745,9 +7654,8 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7775,9 +7683,8 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -7792,7 +7699,7 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 		return
 	}
 
-	var response []Storage
+	var response StorageListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -7816,7 +7723,7 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 		type (
 			Request  = struct{}
 			Params   = StorageListParams
-			Response = []Storage
+			Response = StorageListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -7835,19 +7742,8 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 		response, err = s.h.StorageList(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -7945,9 +7841,8 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7963,9 +7858,8 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -7993,9 +7887,8 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -8015,7 +7908,7 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 		}
 	}()
 
-	var response *StoragePostgres
+	var response StoragePostgresCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -8030,7 +7923,7 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 		type (
 			Request  = *StoragePostgres
 			Params   = struct{}
-			Response = *StoragePostgres
+			Response = StoragePostgresCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -8049,19 +7942,8 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 		response, err = s.h.StoragePostgresCreate(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -8159,9 +8041,8 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8177,9 +8058,8 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8207,9 +8087,8 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -8224,7 +8103,7 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 		return
 	}
 
-	var response *StoragePostgresDeleteOK
+	var response StoragePostgresDeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -8244,7 +8123,7 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 		type (
 			Request  = struct{}
 			Params   = StoragePostgresDeleteParams
-			Response = *StoragePostgresDeleteOK
+			Response = StoragePostgresDeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -8255,27 +8134,16 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 			mreq,
 			unpackStoragePostgresDeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.StoragePostgresDelete(ctx, params)
+				response, err = s.h.StoragePostgresDelete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.StoragePostgresDelete(ctx, params)
+		response, err = s.h.StoragePostgresDelete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -8373,9 +8241,8 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8391,9 +8258,8 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8421,9 +8287,8 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -8438,7 +8303,7 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 		return
 	}
 
-	var response *StoragePostgres
+	var response StoragePostgresGetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -8458,7 +8323,7 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 		type (
 			Request  = struct{}
 			Params   = StoragePostgresGetParams
-			Response = *StoragePostgres
+			Response = StoragePostgresGetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -8477,19 +8342,8 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 		response, err = s.h.StoragePostgresGet(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -8587,9 +8441,8 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8605,9 +8458,8 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8635,9 +8487,8 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -8667,7 +8518,7 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 		}
 	}()
 
-	var response *StoragePostgres
+	var response StoragePostgresUpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -8687,7 +8538,7 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 		type (
 			Request  = *StoragePostgres
 			Params   = StoragePostgresUpdateParams
-			Response = *StoragePostgres
+			Response = StoragePostgresUpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -8706,19 +8557,8 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 		response, err = s.h.StoragePostgresUpdate(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -8816,9 +8656,8 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8834,9 +8673,8 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -8864,9 +8702,8 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -8886,7 +8723,7 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 		}
 	}()
 
-	var response *StorageS3
+	var response StorageS3CreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -8901,7 +8738,7 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 		type (
 			Request  = *StorageS3
 			Params   = struct{}
-			Response = *StorageS3
+			Response = StorageS3CreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -8920,19 +8757,8 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 		response, err = s.h.StorageS3Create(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -9030,9 +8856,8 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9048,9 +8873,8 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9078,9 +8902,8 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -9095,7 +8918,7 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 		return
 	}
 
-	var response *StorageS3DeleteOK
+	var response StorageS3DeleteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -9115,7 +8938,7 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 		type (
 			Request  = struct{}
 			Params   = StorageS3DeleteParams
-			Response = *StorageS3DeleteOK
+			Response = StorageS3DeleteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -9126,27 +8949,16 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 			mreq,
 			unpackStorageS3DeleteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.StorageS3Delete(ctx, params)
+				response, err = s.h.StorageS3Delete(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.StorageS3Delete(ctx, params)
+		response, err = s.h.StorageS3Delete(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -9244,9 +9056,8 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9262,9 +9073,8 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9292,9 +9102,8 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -9309,7 +9118,7 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 		return
 	}
 
-	var response *StorageS3
+	var response StorageS3GetRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -9329,7 +9138,7 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 		type (
 			Request  = struct{}
 			Params   = StorageS3GetParams
-			Response = *StorageS3
+			Response = StorageS3GetRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -9348,19 +9157,8 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 		response, err = s.h.StorageS3Get(ctx, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -9458,9 +9256,8 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9476,9 +9273,8 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9506,9 +9302,8 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -9538,7 +9333,7 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 		}
 	}()
 
-	var response *StorageS3
+	var response StorageS3UpdateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -9558,7 +9353,7 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 		type (
 			Request  = *StorageS3
 			Params   = StorageS3UpdateParams
-			Response = *StorageS3
+			Response = StorageS3UpdateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -9577,19 +9372,8 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 		response, err = s.h.StorageS3Update(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -9687,9 +9471,8 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9705,9 +9488,8 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9735,9 +9517,8 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -9757,7 +9538,7 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 		}
 	}()
 
-	var response *Tg
+	var response TgSessionCreateRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -9772,7 +9553,7 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 		type (
 			Request  = *TgSessionCreateReq
 			Params   = struct{}
-			Response = *Tg
+			Response = TgSessionCreateRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -9791,19 +9572,8 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 		response, err = s.h.TgSessionCreate(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -9901,9 +9671,8 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9919,9 +9688,8 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -9949,14 +9717,13 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
 
-	var response *TgSessionListOK
+	var response TgSessionListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -9971,7 +9738,7 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = *TgSessionListOK
+			Response = TgSessionListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -9990,19 +9757,8 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 		response, err = s.h.TgSessionList(ctx)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -10100,9 +9856,8 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -10118,9 +9873,8 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -10148,9 +9902,8 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
@@ -10180,7 +9933,7 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 		}
 	}()
 
-	var response *Tg
+	var response TgSessionVerifyRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -10200,7 +9953,7 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 		type (
 			Request  = *TgSessionVerifyReq
 			Params   = TgSessionVerifyParams
-			Response = *Tg
+			Response = TgSessionVerifyRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -10219,19 +9972,8 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 		response, err = s.h.TgSessionVerify(ctx, request, params)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
 
@@ -10244,221 +9986,22 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 	}
 }
 
-// handleWhatsappContactsRequest handles whatsapp-contacts operation.
+// handleUploadFileRequest handles uploadFile operation.
 //
-// Retrieve WhatsApp contacts.
+// Upload a file.
 //
-// GET /whatsapp/contacts
-func (s *Server) handleWhatsappContactsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /storage/upload
+func (s *Server) handleUploadFileRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-contacts"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/whatsapp/contacts"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), WhatsappContactsOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code >= 100 && code < 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: WhatsappContactsOperation,
-			ID:   "whatsapp-contacts",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WhatsappContactsOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, WhatsappContactsOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-
-	var response *WhatsappContactsOK
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    WhatsappContactsOperation,
-			OperationSummary: "",
-			OperationID:      "whatsapp-contacts",
-			Body:             nil,
-			Params:           middleware.Parameters{},
-			Raw:              r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = struct{}
-			Response = *WhatsappContactsOK
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			nil,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.WhatsappContacts(ctx)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.WhatsappContacts(ctx)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeWhatsappContactsResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
-// handleWhatsappDownloadAttachmentRequest handles whatsapp-download-attachment operation.
-//
-// Download WhatsApp attachment into storage.
-//
-// POST /whatsapp/attachments/download
-func (s *Server) handleWhatsappDownloadAttachmentRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-download-attachment"),
+		otelogen.OperationID("uploadFile"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/attachments/download"),
+		semconv.HTTPRouteKey.String("/storage/upload"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), WhatsappDownloadAttachmentOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UploadFileOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -10513,24 +10056,23 @@ func (s *Server) handleWhatsappDownloadAttachmentRequest(args [0]string, argsEsc
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: WhatsappDownloadAttachmentOperation,
-			ID:   "whatsapp-download-attachment",
+			Name: UploadFileOperation,
+			ID:   "uploadFile",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WhatsappDownloadAttachmentOperation, r)
+			sctx, ok, err := s.securitySessionCookieAuth(ctx, UploadFileOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
 					Security:         "SessionCookieAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
+				defer recordError("Security:SessionCookieAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -10539,16 +10081,15 @@ func (s *Server) handleWhatsappDownloadAttachmentRequest(args [0]string, argsEsc
 			}
 		}
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, WhatsappDownloadAttachmentOperation, r)
+			sctx, ok, err := s.securityBearerAuth(ctx, UploadFileOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
 					Security:         "BearerAuth",
 					Err:              err,
 				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
+				defer recordError("Security:BearerAuth", err)
+				s.cfg.ErrorHandler(ctx, w, r, err)
 				return
 			}
 			if ok {
@@ -10576,13 +10117,12 @@ func (s *Server) handleWhatsappDownloadAttachmentRequest(args [0]string, argsEsc
 				OperationContext: opErrContext,
 				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
 			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
+			defer recordError("Security", err)
+			s.cfg.ErrorHandler(ctx, w, r, err)
 			return
 		}
 	}
-	request, close, err := s.decodeWhatsappDownloadAttachmentRequest(r)
+	request, close, err := s.decodeUploadFileRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -10598,22 +10138,22 @@ func (s *Server) handleWhatsappDownloadAttachmentRequest(args [0]string, argsEsc
 		}
 	}()
 
-	var response *WhatsappDownloadAttachmentOK
+	var response *UploadFileResponse
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    WhatsappDownloadAttachmentOperation,
-			OperationSummary: "",
-			OperationID:      "whatsapp-download-attachment",
+			OperationName:    UploadFileOperation,
+			OperationSummary: "Upload a file",
+			OperationID:      "uploadFile",
 			Body:             request,
 			Params:           middleware.Parameters{},
 			Raw:              r,
 		}
 
 		type (
-			Request  = *WhatsappDownloadAttachmentReq
+			Request  = *UploadFileRequest
 			Params   = struct{}
-			Response = *WhatsappDownloadAttachmentOK
+			Response = *UploadFileResponse
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -10624,857 +10164,20 @@ func (s *Server) handleWhatsappDownloadAttachmentRequest(args [0]string, argsEsc
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.WhatsappDownloadAttachment(ctx, request)
+				response, err = s.h.UploadFile(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.WhatsappDownloadAttachment(ctx, request)
+		response, err = s.h.UploadFile(ctx, request)
 	}
 	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeWhatsappDownloadAttachmentResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
-// handleWhatsappDownloadMessageRequest handles whatsapp-download-message operation.
-//
-// Download message content including media.
-//
-// POST /whatsapp/messages/download
-func (s *Server) handleWhatsappDownloadMessageRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-download-message"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/messages/download"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), WhatsappDownloadMessageOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code >= 100 && code < 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: WhatsappDownloadMessageOperation,
-			ID:   "whatsapp-download-message",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WhatsappDownloadMessageOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, WhatsappDownloadMessageOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	request, close, err := s.decodeWhatsappDownloadMessageRequest(r)
-	if err != nil {
-		err = &ogenerrors.DecodeRequestError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeRequest", err)
+		defer recordError("Internal", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	defer func() {
-		if err := close(); err != nil {
-			recordError("CloseRequest", err)
-		}
-	}()
 
-	var response *WhatsappDownloadMessageOK
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    WhatsappDownloadMessageOperation,
-			OperationSummary: "",
-			OperationID:      "whatsapp-download-message",
-			Body:             request,
-			Params:           middleware.Parameters{},
-			Raw:              r,
-		}
-
-		type (
-			Request  = *WhatsappDownloadMessageReq
-			Params   = struct{}
-			Response = *WhatsappDownloadMessageOK
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			nil,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.WhatsappDownloadMessage(ctx, request)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.WhatsappDownloadMessage(ctx, request)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeWhatsappDownloadMessageResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
-// handleWhatsappLoginRequest handles whatsapp-login operation.
-//
-// Initiate WhatsApp login flow via QR code scanning.
-//
-// POST /whatsapp/login
-func (s *Server) handleWhatsappLoginRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-login"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/login"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), WhatsappLoginOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code >= 100 && code < 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: WhatsappLoginOperation,
-			ID:   "whatsapp-login",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WhatsappLoginOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, WhatsappLoginOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-
-	var response *WhatsAppLoginResponse
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    WhatsappLoginOperation,
-			OperationSummary: "",
-			OperationID:      "whatsapp-login",
-			Body:             nil,
-			Params:           middleware.Parameters{},
-			Raw:              r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = struct{}
-			Response = *WhatsAppLoginResponse
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			nil,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.WhatsappLogin(ctx)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.WhatsappLogin(ctx)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeWhatsappLoginResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
-// handleWhatsappStatusRequest handles whatsapp-status operation.
-//
-// Retrieve WhatsApp login status.
-//
-// GET /whatsapp/status
-func (s *Server) handleWhatsappStatusRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-status"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/whatsapp/status"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), WhatsappStatusOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code >= 100 && code < 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: WhatsappStatusOperation,
-			ID:   "whatsapp-status",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WhatsappStatusOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, WhatsappStatusOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-
-	var response *WhatsAppStatusResponse
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    WhatsappStatusOperation,
-			OperationSummary: "",
-			OperationID:      "whatsapp-status",
-			Body:             nil,
-			Params:           middleware.Parameters{},
-			Raw:              r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = struct{}
-			Response = *WhatsAppStatusResponse
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			nil,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.WhatsappStatus(ctx)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.WhatsappStatus(ctx)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeWhatsappStatusResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
-// handleWhatsappSyncRequest handles whatsapp-sync operation.
-//
-// Sync messages for selected users or all users.
-//
-// POST /whatsapp/sync
-func (s *Server) handleWhatsappSyncRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-sync"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/sync"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), WhatsappSyncOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code >= 100 && code < 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: WhatsappSyncOperation,
-			ID:   "whatsapp-sync",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WhatsappSyncOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, WhatsappSyncOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	request, close, err := s.decodeWhatsappSyncRequest(r)
-	if err != nil {
-		err = &ogenerrors.DecodeRequestError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeRequest", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-	defer func() {
-		if err := close(); err != nil {
-			recordError("CloseRequest", err)
-		}
-	}()
-
-	var response *WhatsappSyncOK
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    WhatsappSyncOperation,
-			OperationSummary: "",
-			OperationID:      "whatsapp-sync",
-			Body:             request,
-			Params:           middleware.Parameters{},
-			Raw:              r,
-		}
-
-		type (
-			Request  = *WhatsappSyncReq
-			Params   = struct{}
-			Response = *WhatsappSyncOK
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			nil,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.WhatsappSync(ctx, request)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.WhatsappSync(ctx, request)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeWhatsappSyncResponse(response, w, span); err != nil {
+	if err := encodeUploadFileResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

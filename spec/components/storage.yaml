@@ -1,3 +1,4 @@
+# spec/components/storage.yaml
 type: object
 description: Data storage settings object.
 additionalProperties: false

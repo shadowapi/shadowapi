@@ -1,0 +1,16 @@
+post:
+  summary: Generate a pre-signed URL for file upload
+  operationId: generatePresignedUploadUrl
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UploadPresignedUrlRequest"
+  responses:
+    "200":
+      description: Pre-signed upload URL generated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UploadPresignedUrlResponse"

@@ -53,6 +53,34 @@ func encodeDatasourceSetOAuth2ClientRequest(
 	return nil
 }
 
+func encodeGenerateDownloadLinkRequest(
+	req *GenerateDownloadLinkRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeGeneratePresignedUploadUrlRequest(
+	req *UploadPresignedUrlRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeMessageEmailQueryRequest(
 	req *MessageQuery,
 	r *http.Request,
@@ -319,36 +347,8 @@ func encodeTgSessionVerifyRequest(
 	return nil
 }
 
-func encodeWhatsappDownloadAttachmentRequest(
-	req *WhatsappDownloadAttachmentReq,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
-func encodeWhatsappDownloadMessageRequest(
-	req *WhatsappDownloadMessageReq,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
-func encodeWhatsappSyncRequest(
-	req *WhatsappSyncReq,
+func encodeUploadFileRequest(
+	req *UploadFileRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

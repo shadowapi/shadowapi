@@ -4,30 +4,41 @@ additionalProperties: false
 properties:
   source:
     type: string
-    enum: ["email", "whatsapp", "telegram", "linkedin"]
-    description: "The data source to query from."
+    enum: ["email", "whatsapp", "telegram", "linkedin", "custom"]
+    description: "Platform or data source to query from."
   query:
     type: string
-    description: "Query string using operators like 'from:', 'to:', 'subject:', 'after:', 'before:', etc."
+    description: "Free-text or advanced operator query. E.g., 'from:', 'to:', 'subject:', 'after:', 'before:'."
+  chat_id:
+    type: string
+    description: "ID of the chat/conversation to filter messages from."
+  thread_id:
+    type: string
+    description: "ID of a sub-thread within the conversation."
   start_date:
     type: string
     format: date-time
-    description: "Start date for filtering messages."
+    description: "Filter messages sent after this date/time."
   end_date:
     type: string
     format: date-time
-    description: "End date for filtering messages."
+    description: "Filter messages sent before this date/time."
   order:
     type: string
     enum: ["asc", "desc"]
-    description: "Sort order: 'asc' for oldest first, 'desc' for newest first."
+    description: "Sort order by timestamp ('asc' or 'desc')."
   limit:
     type: integer
-    description: "Maximum number of messages to fetch."
+    description: "Maximum number of messages to return."
+  offset:
+    type: integer
+    description: "Number of records to skip for pagination."
   storage_type:
     type: string
     enum: ["postgres", "s3", "hostfiles"]
-    description: "Storage type for persisting fetched messages."
+    description: "Specifies the storage backend for message data."
+  fuzzy:
+    type: boolean
+    description: "Enable fuzzy matching if true."
 required:
   - source
-  - query

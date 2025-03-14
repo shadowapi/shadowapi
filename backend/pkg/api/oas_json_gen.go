@@ -599,6 +599,56 @@ func (s *DatasourceEmailCreate) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes DatasourceEmailListOKApplicationJSON as json.
+func (s DatasourceEmailListOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []Datasource(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes DatasourceEmailListOKApplicationJSON from json.
+func (s *DatasourceEmailListOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DatasourceEmailListOKApplicationJSON to nil")
+	}
+	var unwrapped []Datasource
+	if err := func() error {
+		unwrapped = make([]Datasource, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem Datasource
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = DatasourceEmailListOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DatasourceEmailListOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DatasourceEmailListOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *DatasourceEmailRunPipelineOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -1189,6 +1239,373 @@ func (s *ErrorErrorsItem) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *FileObject) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *FileObject) encodeFields(e *jx.Encoder) {
+	{
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
+	}
+	{
+		if s.StorageType.Set {
+			e.FieldStart("storage_type")
+			s.StorageType.Encode(e)
+		}
+	}
+	{
+		if s.StorageRef.Set {
+			e.FieldStart("storage_ref")
+			s.StorageRef.Encode(e)
+		}
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.MimeType.Set {
+			e.FieldStart("mime_type")
+			s.MimeType.Encode(e)
+		}
+	}
+	{
+		if s.Size.Set {
+			e.FieldStart("size")
+			s.Size.Encode(e)
+		}
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfFileObject = [8]string{
+	0: "uuid",
+	1: "storage_type",
+	2: "storage_ref",
+	3: "name",
+	4: "mime_type",
+	5: "size",
+	6: "created_at",
+	7: "updated_at",
+}
+
+// Decode decodes FileObject from json.
+func (s *FileObject) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FileObject to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			if err := func() error {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "storage_type":
+			if err := func() error {
+				s.StorageType.Reset()
+				if err := s.StorageType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"storage_type\"")
+			}
+		case "storage_ref":
+			if err := func() error {
+				s.StorageRef.Reset()
+				if err := s.StorageRef.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"storage_ref\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "mime_type":
+			if err := func() error {
+				s.MimeType.Reset()
+				if err := s.MimeType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mime_type\"")
+			}
+		case "size":
+			if err := func() error {
+				s.Size.Reset()
+				if err := s.Size.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"size\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "updated_at":
+			if err := func() error {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode FileObject")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *FileObject) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FileObject) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FileObjectStorageType as json.
+func (s FileObjectStorageType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes FileObjectStorageType from json.
+func (s *FileObjectStorageType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FileObjectStorageType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch FileObjectStorageType(v) {
+	case FileObjectStorageTypeS3:
+		*s = FileObjectStorageTypeS3
+	case FileObjectStorageTypePostgres:
+		*s = FileObjectStorageTypePostgres
+	case FileObjectStorageTypeHostfiles:
+		*s = FileObjectStorageTypeHostfiles
+	default:
+		*s = FileObjectStorageType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s FileObjectStorageType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FileObjectStorageType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GenerateDownloadLinkRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GenerateDownloadLinkRequest) encodeFields(e *jx.Encoder) {
+	{
+		if s.FileUUID.Set {
+			e.FieldStart("file_uuid")
+			s.FileUUID.Encode(e)
+		}
+	}
+	{
+		if s.Expiration.Set {
+			e.FieldStart("expiration")
+			s.Expiration.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfGenerateDownloadLinkRequest = [2]string{
+	0: "file_uuid",
+	1: "expiration",
+}
+
+// Decode decodes GenerateDownloadLinkRequest from json.
+func (s *GenerateDownloadLinkRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GenerateDownloadLinkRequest to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "file_uuid":
+			if err := func() error {
+				s.FileUUID.Reset()
+				if err := s.FileUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"file_uuid\"")
+			}
+		case "expiration":
+			if err := func() error {
+				s.Expiration.Reset()
+				if err := s.Expiration.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"expiration\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GenerateDownloadLinkRequest")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GenerateDownloadLinkRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GenerateDownloadLinkRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GenerateDownloadLinkResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GenerateDownloadLinkResponse) encodeFields(e *jx.Encoder) {
+	{
+		if s.URL.Set {
+			e.FieldStart("url")
+			s.URL.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfGenerateDownloadLinkResponse = [1]string{
+	0: "url",
+}
+
+// Decode decodes GenerateDownloadLinkResponse from json.
+func (s *GenerateDownloadLinkResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GenerateDownloadLinkResponse to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "url":
+			if err := func() error {
+				s.URL.Reset()
+				if err := s.URL.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"url\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GenerateDownloadLinkResponse")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GenerateDownloadLinkResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GenerateDownloadLinkResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *MailLabel) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -1636,6 +2053,18 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		s.Source.Encode(e)
 	}
 	{
+		if s.ChatID.Set {
+			e.FieldStart("chat_id")
+			s.ChatID.Encode(e)
+		}
+	}
+	{
+		if s.ThreadID.Set {
+			e.FieldStart("thread_id")
+			s.ThreadID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("sender")
 		e.Str(s.Sender)
 	}
@@ -1658,30 +2087,46 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		e.Str(s.Content)
 	}
 	{
-		e.FieldStart("timestamp")
-		json.EncodeDateTime(e, s.Timestamp)
-	}
-	{
 		if s.Attachments != nil {
 			e.FieldStart("attachments")
 			e.ArrStart()
 			for _, elem := range s.Attachments {
-				e.Str(elem)
+				elem.Encode(e)
 			}
 			e.ArrEnd()
 		}
 	}
+	{
+		e.FieldStart("timestamp")
+		json.EncodeDateTime(e, s.Timestamp)
+	}
+	{
+		if s.ForwardFrom.Set {
+			e.FieldStart("forwardFrom")
+			s.ForwardFrom.Encode(e)
+		}
+	}
+	{
+		if s.Meta.Set {
+			e.FieldStart("meta")
+			s.Meta.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfMessage = [8]string{
-	0: "id",
-	1: "source",
-	2: "sender",
-	3: "recipients",
-	4: "subject",
-	5: "content",
-	6: "timestamp",
-	7: "attachments",
+var jsonFieldsNameOfMessage = [12]string{
+	0:  "id",
+	1:  "source",
+	2:  "chat_id",
+	3:  "thread_id",
+	4:  "sender",
+	5:  "recipients",
+	6:  "subject",
+	7:  "content",
+	8:  "attachments",
+	9:  "timestamp",
+	10: "forwardFrom",
+	11: "meta",
 }
 
 // Decode decodes Message from json.
@@ -1689,7 +2134,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Message to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -1715,8 +2160,28 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"source\"")
 			}
+		case "chat_id":
+			if err := func() error {
+				s.ChatID.Reset()
+				if err := s.ChatID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"chat_id\"")
+			}
+		case "thread_id":
+			if err := func() error {
+				s.ThreadID.Reset()
+				if err := s.ThreadID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"thread_id\"")
+			}
 		case "sender":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.Sender = string(v)
@@ -1728,7 +2193,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sender\"")
 			}
 		case "recipients":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Recipients = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -1758,7 +2223,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"subject\"")
 			}
 		case "content":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.Content = string(v)
@@ -1769,26 +2234,12 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"content\"")
 			}
-		case "timestamp":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.Timestamp = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"timestamp\"")
-			}
 		case "attachments":
 			if err := func() error {
-				s.Attachments = make([]string, 0)
+				s.Attachments = make([]FileObject, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
+					var elem FileObject
+					if err := elem.Decode(d); err != nil {
 						return err
 					}
 					s.Attachments = append(s.Attachments, elem)
@@ -1800,6 +2251,38 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"attachments\"")
 			}
+		case "timestamp":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.Timestamp = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"timestamp\"")
+			}
+		case "forwardFrom":
+			if err := func() error {
+				s.ForwardFrom.Reset()
+				if err := s.ForwardFrom.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"forwardFrom\"")
+			}
+		case "meta":
+			if err := func() error {
+				s.Meta.Reset()
+				if err := s.Meta.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"meta\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
@@ -1809,8 +2292,9 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b01101111,
+	for i, mask := range [2]uint8{
+		0b10110011,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2069,6 +2553,64 @@ func (s *MessageLinkedinQueryOK) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s MessageMeta) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MessageMeta) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes MessageMeta from json.
+func (s *MessageMeta) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageMeta to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MessageMeta")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageMeta) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageMeta) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *MessageQuery) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -2082,8 +2624,22 @@ func (s *MessageQuery) encodeFields(e *jx.Encoder) {
 		s.Source.Encode(e)
 	}
 	{
-		e.FieldStart("query")
-		e.Str(s.Query)
+		if s.Query.Set {
+			e.FieldStart("query")
+			s.Query.Encode(e)
+		}
+	}
+	{
+		if s.ChatID.Set {
+			e.FieldStart("chat_id")
+			s.ChatID.Encode(e)
+		}
+	}
+	{
+		if s.ThreadID.Set {
+			e.FieldStart("thread_id")
+			s.ThreadID.Encode(e)
+		}
 	}
 	{
 		if s.StartDate.Set {
@@ -2110,21 +2666,37 @@ func (s *MessageQuery) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Offset.Set {
+			e.FieldStart("offset")
+			s.Offset.Encode(e)
+		}
+	}
+	{
 		if s.StorageType.Set {
 			e.FieldStart("storage_type")
 			s.StorageType.Encode(e)
 		}
 	}
+	{
+		if s.Fuzzy.Set {
+			e.FieldStart("fuzzy")
+			s.Fuzzy.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfMessageQuery = [7]string{
-	0: "source",
-	1: "query",
-	2: "start_date",
-	3: "end_date",
-	4: "order",
-	5: "limit",
-	6: "storage_type",
+var jsonFieldsNameOfMessageQuery = [11]string{
+	0:  "source",
+	1:  "query",
+	2:  "chat_id",
+	3:  "thread_id",
+	4:  "start_date",
+	5:  "end_date",
+	6:  "order",
+	7:  "limit",
+	8:  "offset",
+	9:  "storage_type",
+	10: "fuzzy",
 }
 
 // Decode decodes MessageQuery from json.
@@ -2132,7 +2704,7 @@ func (s *MessageQuery) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode MessageQuery to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -2147,16 +2719,34 @@ func (s *MessageQuery) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"source\"")
 			}
 		case "query":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Query = string(v)
-				if err != nil {
+				s.Query.Reset()
+				if err := s.Query.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"query\"")
+			}
+		case "chat_id":
+			if err := func() error {
+				s.ChatID.Reset()
+				if err := s.ChatID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"chat_id\"")
+			}
+		case "thread_id":
+			if err := func() error {
+				s.ThreadID.Reset()
+				if err := s.ThreadID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"thread_id\"")
 			}
 		case "start_date":
 			if err := func() error {
@@ -2198,6 +2788,16 @@ func (s *MessageQuery) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"limit\"")
 			}
+		case "offset":
+			if err := func() error {
+				s.Offset.Reset()
+				if err := s.Offset.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"offset\"")
+			}
 		case "storage_type":
 			if err := func() error {
 				s.StorageType.Reset()
@@ -2208,6 +2808,16 @@ func (s *MessageQuery) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"storage_type\"")
 			}
+		case "fuzzy":
+			if err := func() error {
+				s.Fuzzy.Reset()
+				if err := s.Fuzzy.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"fuzzy\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
@@ -2217,8 +2827,9 @@ func (s *MessageQuery) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
+	for i, mask := range [2]uint8{
+		0b00000001,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2328,6 +2939,8 @@ func (s *MessageQuerySource) Decode(d *jx.Decoder) error {
 		*s = MessageQuerySourceTelegram
 	case MessageQuerySourceLinkedin:
 		*s = MessageQuerySourceLinkedin
+	case MessageQuerySourceCustom:
+		*s = MessageQuerySourceCustom
 	default:
 		*s = MessageQuerySource(v)
 	}
@@ -2414,6 +3027,8 @@ func (s *MessageSource) Decode(d *jx.Decoder) error {
 		*s = MessageSourceTelegram
 	case MessageSourceLinkedin:
 		*s = MessageSourceLinkedin
+	case MessageSourceCustom:
+		*s = MessageSourceCustom
 	default:
 		*s = MessageSource(v)
 	}
@@ -3536,6 +4151,56 @@ func (s *OAuth2ClientToken) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes OAuth2ClientTokenListOKApplicationJSON as json.
+func (s OAuth2ClientTokenListOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []OAuth2ClientToken(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes OAuth2ClientTokenListOKApplicationJSON from json.
+func (s *OAuth2ClientTokenListOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OAuth2ClientTokenListOKApplicationJSON to nil")
+	}
+	var unwrapped []OAuth2ClientToken
+	if err := func() error {
+		unwrapped = make([]OAuth2ClientToken, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem OAuth2ClientToken
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = OAuth2ClientTokenListOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OAuth2ClientTokenListOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OAuth2ClientTokenListOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *OAuth2ClientUpdateReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -3736,6 +4401,72 @@ func (s *OptDateTime) UnmarshalJSON(data []byte) error {
 	return s.Decode(d, json.DecodeDateTime)
 }
 
+// Encode encodes FileObject as json.
+func (o OptFileObject) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes FileObject from json.
+func (o *OptFileObject) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptFileObject to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptFileObject) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptFileObject) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FileObjectStorageType as json.
+func (o OptFileObjectStorageType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes FileObjectStorageType from json.
+func (o *OptFileObjectStorageType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptFileObjectStorageType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptFileObjectStorageType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptFileObjectStorageType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes int as json.
 func (o OptInt) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -3835,6 +4566,40 @@ func (s OptMailLabelColor) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMailLabelColor) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageMeta as json.
+func (o OptMessageMeta) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes MessageMeta from json.
+func (o *OptMessageMeta) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMessageMeta to nil")
+	}
+	o.Set = true
+	o.Value = make(MessageMeta)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMessageMeta) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMessageMeta) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3991,18 +4756,18 @@ func (s *OptString) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes WhatsAppStatusResponseSession as json.
-func (o OptWhatsAppStatusResponseSession) Encode(e *jx.Encoder) {
+// Encode encodes UploadFileRequestStorageType as json.
+func (o OptUploadFileRequestStorageType) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
-	o.Value.Encode(e)
+	e.Str(string(o.Value))
 }
 
-// Decode decodes WhatsAppStatusResponseSession from json.
-func (o *OptWhatsAppStatusResponseSession) Decode(d *jx.Decoder) error {
+// Decode decodes UploadFileRequestStorageType from json.
+func (o *OptUploadFileRequestStorageType) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptWhatsAppStatusResponseSession to nil")
+		return errors.New("invalid: unable to decode OptUploadFileRequestStorageType to nil")
 	}
 	o.Set = true
 	if err := o.Value.Decode(d); err != nil {
@@ -4012,14 +4777,47 @@ func (o *OptWhatsAppStatusResponseSession) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptWhatsAppStatusResponseSession) MarshalJSON() ([]byte, error) {
+func (s OptUploadFileRequestStorageType) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptWhatsAppStatusResponseSession) UnmarshalJSON(data []byte) error {
+func (s *OptUploadFileRequestStorageType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UploadPresignedUrlRequestStorageType as json.
+func (o OptUploadPresignedUrlRequestStorageType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes UploadPresignedUrlRequestStorageType from json.
+func (o *OptUploadPresignedUrlRequestStorageType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUploadPresignedUrlRequestStorageType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUploadPresignedUrlRequestStorageType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUploadPresignedUrlRequestStorageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -4767,6 +5565,56 @@ func (s PipelineEntryCreateReqParams) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *PipelineEntryCreateReqParams) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PipelineEntryListOKApplicationJSON as json.
+func (s PipelineEntryListOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []PipelineEntry(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes PipelineEntryListOKApplicationJSON from json.
+func (s *PipelineEntryListOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PipelineEntryListOKApplicationJSON to nil")
+	}
+	var unwrapped []PipelineEntry
+	if err := func() error {
+		unwrapped = make([]PipelineEntry, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem PipelineEntry
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = PipelineEntryListOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PipelineEntryListOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PipelineEntryListOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -5912,6 +6760,56 @@ func (s *StorageHostfiles) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes StorageListOKApplicationJSON as json.
+func (s StorageListOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []Storage(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes StorageListOKApplicationJSON from json.
+func (s *StorageListOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StorageListOKApplicationJSON to nil")
+	}
+	var unwrapped []Storage
+	if err := func() error {
+		unwrapped = make([]Storage, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem Storage
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = StorageListOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s StorageListOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StorageListOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *StoragePostgres) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -6937,450 +7835,14 @@ func (s *TgUser) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *WhatsAppLoginResponse) Encode(e *jx.Encoder) {
+func (s *UploadFileRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *WhatsAppLoginResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("qr_code")
-		e.Str(s.QrCode)
-	}
-	{
-		e.FieldStart("expires_in")
-		e.Int(s.ExpiresIn)
-	}
-}
-
-var jsonFieldsNameOfWhatsAppLoginResponse = [2]string{
-	0: "qr_code",
-	1: "expires_in",
-}
-
-// Decode decodes WhatsAppLoginResponse from json.
-func (s *WhatsAppLoginResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsAppLoginResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "qr_code":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.QrCode = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"qr_code\"")
-			}
-		case "expires_in":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Int()
-				s.ExpiresIn = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"expires_in\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsAppLoginResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfWhatsAppLoginResponse) {
-					name = jsonFieldsNameOfWhatsAppLoginResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsAppLoginResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsAppLoginResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsAppStatusResponse) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsAppStatusResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("status")
-		e.Str(s.Status)
-	}
-	{
-		if s.Session.Set {
-			e.FieldStart("session")
-			s.Session.Encode(e)
-		}
-	}
-	{
-		if s.Message.Set {
-			e.FieldStart("message")
-			s.Message.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfWhatsAppStatusResponse = [3]string{
-	0: "status",
-	1: "session",
-	2: "message",
-}
-
-// Decode decodes WhatsAppStatusResponse from json.
-func (s *WhatsAppStatusResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsAppStatusResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "status":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Status = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"status\"")
-			}
-		case "session":
-			if err := func() error {
-				s.Session.Reset()
-				if err := s.Session.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"session\"")
-			}
-		case "message":
-			if err := func() error {
-				s.Message.Reset()
-				if err := s.Message.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"message\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsAppStatusResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfWhatsAppStatusResponse) {
-					name = jsonFieldsNameOfWhatsAppStatusResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsAppStatusResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsAppStatusResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsAppStatusResponseSession) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsAppStatusResponseSession) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		e.Str(s.ID)
-	}
-	{
-		e.FieldStart("phone")
-		e.Str(s.Phone)
-	}
-}
-
-var jsonFieldsNameOfWhatsAppStatusResponseSession = [2]string{
-	0: "id",
-	1: "phone",
-}
-
-// Decode decodes WhatsAppStatusResponseSession from json.
-func (s *WhatsAppStatusResponseSession) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsAppStatusResponseSession to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "phone":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Phone = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsAppStatusResponseSession")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfWhatsAppStatusResponseSession) {
-					name = jsonFieldsNameOfWhatsAppStatusResponseSession[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsAppStatusResponseSession) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsAppStatusResponseSession) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappContactsOK) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappContactsOK) encodeFields(e *jx.Encoder) {
-	{
-		if s.Contacts != nil {
-			e.FieldStart("contacts")
-			e.ArrStart()
-			for _, elem := range s.Contacts {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
-		}
-	}
-}
-
-var jsonFieldsNameOfWhatsappContactsOK = [1]string{
-	0: "contacts",
-}
-
-// Decode decodes WhatsappContactsOK from json.
-func (s *WhatsappContactsOK) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappContactsOK to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "contacts":
-			if err := func() error {
-				s.Contacts = make([]WhatsappContactsOKContactsItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem WhatsappContactsOKContactsItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Contacts = append(s.Contacts, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"contacts\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappContactsOK")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappContactsOK) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappContactsOK) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappContactsOKContactsItem) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappContactsOKContactsItem) encodeFields(e *jx.Encoder) {
-	{
-		if s.ID.Set {
-			e.FieldStart("id")
-			s.ID.Encode(e)
-		}
-	}
+func (s *UploadFileRequest) encodeFields(e *jx.Encoder) {
 	{
 		if s.Name.Set {
 			e.FieldStart("name")
@@ -7388,37 +7850,33 @@ func (s *WhatsappContactsOKContactsItem) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Phone.Set {
-			e.FieldStart("phone")
-			s.Phone.Encode(e)
+		if s.MimeType.Set {
+			e.FieldStart("mime_type")
+			s.MimeType.Encode(e)
+		}
+	}
+	{
+		if s.StorageType.Set {
+			e.FieldStart("storage_type")
+			s.StorageType.Encode(e)
 		}
 	}
 }
 
-var jsonFieldsNameOfWhatsappContactsOKContactsItem = [3]string{
-	0: "id",
-	1: "name",
-	2: "phone",
+var jsonFieldsNameOfUploadFileRequest = [3]string{
+	0: "name",
+	1: "mime_type",
+	2: "storage_type",
 }
 
-// Decode decodes WhatsappContactsOKContactsItem from json.
-func (s *WhatsappContactsOKContactsItem) Decode(d *jx.Decoder) error {
+// Decode decodes UploadFileRequest from json.
+func (s *UploadFileRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappContactsOKContactsItem to nil")
+		return errors.New("invalid: unable to decode UploadFileRequest to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
-			if err := func() error {
-				s.ID.Reset()
-				if err := s.ID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
 		case "name":
 			if err := func() error {
 				s.Name.Reset()
@@ -7429,628 +7887,370 @@ func (s *WhatsappContactsOKContactsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "phone":
+		case "mime_type":
 			if err := func() error {
-				s.Phone.Reset()
-				if err := s.Phone.Decode(d); err != nil {
+				s.MimeType.Reset()
+				if err := s.MimeType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone\"")
+				return errors.Wrap(err, "decode field \"mime_type\"")
 			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappContactsOKContactsItem")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappContactsOKContactsItem) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappContactsOKContactsItem) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappDownloadAttachmentOK) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappDownloadAttachmentOK) encodeFields(e *jx.Encoder) {
-	{
-		if s.FileURL.Set {
-			e.FieldStart("file_url")
-			s.FileURL.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfWhatsappDownloadAttachmentOK = [1]string{
-	0: "file_url",
-}
-
-// Decode decodes WhatsappDownloadAttachmentOK from json.
-func (s *WhatsappDownloadAttachmentOK) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappDownloadAttachmentOK to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "file_url":
+		case "storage_type":
 			if err := func() error {
-				s.FileURL.Reset()
-				if err := s.FileURL.Decode(d); err != nil {
+				s.StorageType.Reset()
+				if err := s.StorageType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"file_url\"")
+				return errors.Wrap(err, "decode field \"storage_type\"")
 			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappDownloadAttachmentOK")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappDownloadAttachmentOK) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappDownloadAttachmentOK) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappDownloadAttachmentReq) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappDownloadAttachmentReq) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("attachment_id")
-		e.Str(s.AttachmentID)
-	}
-	{
-		e.FieldStart("storage_id")
-		e.Str(s.StorageID)
-	}
-}
-
-var jsonFieldsNameOfWhatsappDownloadAttachmentReq = [2]string{
-	0: "attachment_id",
-	1: "storage_id",
-}
-
-// Decode decodes WhatsappDownloadAttachmentReq from json.
-func (s *WhatsappDownloadAttachmentReq) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappDownloadAttachmentReq to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "attachment_id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.AttachmentID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"attachment_id\"")
-			}
-		case "storage_id":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.StorageID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"storage_id\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappDownloadAttachmentReq")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfWhatsappDownloadAttachmentReq) {
-					name = jsonFieldsNameOfWhatsappDownloadAttachmentReq[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappDownloadAttachmentReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappDownloadAttachmentReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappDownloadMessageOK) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappDownloadMessageOK) encodeFields(e *jx.Encoder) {
-	{
-		if s.Message != nil {
-			e.FieldStart("message")
-			s.Message.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfWhatsappDownloadMessageOK = [1]string{
-	0: "message",
-}
-
-// Decode decodes WhatsappDownloadMessageOK from json.
-func (s *WhatsappDownloadMessageOK) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappDownloadMessageOK to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "message":
-			if err := func() error {
-				s.Message = nil
-				var elem WhatsappDownloadMessageOKMessage
-				if err := elem.Decode(d); err != nil {
-					return err
-				}
-				s.Message = &elem
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"message\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappDownloadMessageOK")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappDownloadMessageOK) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappDownloadMessageOK) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappDownloadMessageOKMessage) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappDownloadMessageOKMessage) encodeFields(e *jx.Encoder) {
-}
-
-var jsonFieldsNameOfWhatsappDownloadMessageOKMessage = [0]string{}
-
-// Decode decodes WhatsappDownloadMessageOKMessage from json.
-func (s *WhatsappDownloadMessageOKMessage) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappDownloadMessageOKMessage to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
 		default:
 			return d.Skip()
 		}
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappDownloadMessageOKMessage")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappDownloadMessageOKMessage) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappDownloadMessageOKMessage) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *WhatsappDownloadMessageReq) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *WhatsappDownloadMessageReq) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("message_id")
-		e.Str(s.MessageID)
-	}
-}
-
-var jsonFieldsNameOfWhatsappDownloadMessageReq = [1]string{
-	0: "message_id",
-}
-
-// Decode decodes WhatsappDownloadMessageReq from json.
-func (s *WhatsappDownloadMessageReq) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappDownloadMessageReq to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "message_id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.MessageID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"message_id\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappDownloadMessageReq")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfWhatsappDownloadMessageReq) {
-					name = jsonFieldsNameOfWhatsappDownloadMessageReq[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
+		return errors.Wrap(err, "decode UploadFileRequest")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappDownloadMessageReq) MarshalJSON() ([]byte, error) {
+func (s *UploadFileRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappDownloadMessageReq) UnmarshalJSON(data []byte) error {
+func (s *UploadFileRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *WhatsappSyncOK) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
+// Encode encodes UploadFileRequestStorageType as json.
+func (s UploadFileRequestStorageType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
 }
 
-// encodeFields encodes fields.
-func (s *WhatsappSyncOK) encodeFields(e *jx.Encoder) {
-	{
-		if s.SyncedCount.Set {
-			e.FieldStart("synced_count")
-			s.SyncedCount.Encode(e)
-		}
-	}
-	{
-		if s.Messages != nil {
-			e.FieldStart("messages")
-			e.ArrStart()
-			for _, elem := range s.Messages {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
-		}
-	}
-}
-
-var jsonFieldsNameOfWhatsappSyncOK = [2]string{
-	0: "synced_count",
-	1: "messages",
-}
-
-// Decode decodes WhatsappSyncOK from json.
-func (s *WhatsappSyncOK) Decode(d *jx.Decoder) error {
+// Decode decodes UploadFileRequestStorageType from json.
+func (s *UploadFileRequestStorageType) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappSyncOK to nil")
+		return errors.New("invalid: unable to decode UploadFileRequestStorageType to nil")
 	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "synced_count":
-			if err := func() error {
-				s.SyncedCount.Reset()
-				if err := s.SyncedCount.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"synced_count\"")
-			}
-		case "messages":
-			if err := func() error {
-				s.Messages = make([]WhatsappSyncOKMessagesItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem WhatsappSyncOKMessagesItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Messages = append(s.Messages, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"messages\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappSyncOK")
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UploadFileRequestStorageType(v) {
+	case UploadFileRequestStorageTypeS3:
+		*s = UploadFileRequestStorageTypeS3
+	case UploadFileRequestStorageTypePostgres:
+		*s = UploadFileRequestStorageTypePostgres
+	case UploadFileRequestStorageTypeHostfiles:
+		*s = UploadFileRequestStorageTypeHostfiles
+	default:
+		*s = UploadFileRequestStorageType(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappSyncOK) MarshalJSON() ([]byte, error) {
+func (s UploadFileRequestStorageType) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappSyncOK) UnmarshalJSON(data []byte) error {
+func (s *UploadFileRequestStorageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *WhatsappSyncOKMessagesItem) Encode(e *jx.Encoder) {
+func (s *UploadFileResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *WhatsappSyncOKMessagesItem) encodeFields(e *jx.Encoder) {
+func (s *UploadFileResponse) encodeFields(e *jx.Encoder) {
+	{
+		if s.File.Set {
+			e.FieldStart("file")
+			s.File.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfWhatsappSyncOKMessagesItem = [0]string{}
+var jsonFieldsNameOfUploadFileResponse = [1]string{
+	0: "file",
+}
 
-// Decode decodes WhatsappSyncOKMessagesItem from json.
-func (s *WhatsappSyncOKMessagesItem) Decode(d *jx.Decoder) error {
+// Decode decodes UploadFileResponse from json.
+func (s *UploadFileResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappSyncOKMessagesItem to nil")
+		return errors.New("invalid: unable to decode UploadFileResponse to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "file":
+			if err := func() error {
+				s.File.Reset()
+				if err := s.File.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"file\"")
+			}
 		default:
 			return d.Skip()
 		}
+		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappSyncOKMessagesItem")
+		return errors.Wrap(err, "decode UploadFileResponse")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappSyncOKMessagesItem) MarshalJSON() ([]byte, error) {
+func (s *UploadFileResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappSyncOKMessagesItem) UnmarshalJSON(data []byte) error {
+func (s *UploadFileResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *WhatsappSyncReq) Encode(e *jx.Encoder) {
+func (s *UploadPresignedUrlRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *WhatsappSyncReq) encodeFields(e *jx.Encoder) {
+func (s *UploadPresignedUrlRequest) encodeFields(e *jx.Encoder) {
 	{
-		if s.UserIds != nil {
-			e.FieldStart("user_ids")
-			e.ArrStart()
-			for _, elem := range s.UserIds {
-				e.Str(elem)
-			}
-			e.ArrEnd()
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.MimeType.Set {
+			e.FieldStart("mime_type")
+			s.MimeType.Encode(e)
+		}
+	}
+	{
+		if s.StorageType.Set {
+			e.FieldStart("storage_type")
+			s.StorageType.Encode(e)
 		}
 	}
 }
 
-var jsonFieldsNameOfWhatsappSyncReq = [1]string{
-	0: "user_ids",
+var jsonFieldsNameOfUploadPresignedUrlRequest = [3]string{
+	0: "name",
+	1: "mime_type",
+	2: "storage_type",
 }
 
-// Decode decodes WhatsappSyncReq from json.
-func (s *WhatsappSyncReq) Decode(d *jx.Decoder) error {
+// Decode decodes UploadPresignedUrlRequest from json.
+func (s *UploadPresignedUrlRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode WhatsappSyncReq to nil")
+		return errors.New("invalid: unable to decode UploadPresignedUrlRequest to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "user_ids":
+		case "name":
 			if err := func() error {
-				s.UserIds = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.UserIds = append(s.UserIds, elem)
-					return nil
-				}); err != nil {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_ids\"")
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "mime_type":
+			if err := func() error {
+				s.MimeType.Reset()
+				if err := s.MimeType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mime_type\"")
+			}
+		case "storage_type":
+			if err := func() error {
+				s.StorageType.Reset()
+				if err := s.StorageType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"storage_type\"")
 			}
 		default:
-			return errors.Errorf("unexpected field %q", k)
+			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode WhatsappSyncReq")
+		return errors.Wrap(err, "decode UploadPresignedUrlRequest")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *WhatsappSyncReq) MarshalJSON() ([]byte, error) {
+func (s *UploadPresignedUrlRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *WhatsappSyncReq) UnmarshalJSON(data []byte) error {
+func (s *UploadPresignedUrlRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UploadPresignedUrlRequestStorageType as json.
+func (s UploadPresignedUrlRequestStorageType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UploadPresignedUrlRequestStorageType from json.
+func (s *UploadPresignedUrlRequestStorageType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UploadPresignedUrlRequestStorageType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UploadPresignedUrlRequestStorageType(v) {
+	case UploadPresignedUrlRequestStorageTypeS3:
+		*s = UploadPresignedUrlRequestStorageTypeS3
+	case UploadPresignedUrlRequestStorageTypePostgres:
+		*s = UploadPresignedUrlRequestStorageTypePostgres
+	case UploadPresignedUrlRequestStorageTypeHostfiles:
+		*s = UploadPresignedUrlRequestStorageTypeHostfiles
+	default:
+		*s = UploadPresignedUrlRequestStorageType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UploadPresignedUrlRequestStorageType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UploadPresignedUrlRequestStorageType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UploadPresignedUrlResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UploadPresignedUrlResponse) encodeFields(e *jx.Encoder) {
+	{
+		if s.UploadURL.Set {
+			e.FieldStart("upload_url")
+			s.UploadURL.Encode(e)
+		}
+	}
+	{
+		if s.File.Set {
+			e.FieldStart("file")
+			s.File.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUploadPresignedUrlResponse = [2]string{
+	0: "upload_url",
+	1: "file",
+}
+
+// Decode decodes UploadPresignedUrlResponse from json.
+func (s *UploadPresignedUrlResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UploadPresignedUrlResponse to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "upload_url":
+			if err := func() error {
+				s.UploadURL.Reset()
+				if err := s.UploadURL.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"upload_url\"")
+			}
+		case "file":
+			if err := func() error {
+				s.File.Reset()
+				if err := s.File.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"file\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UploadPresignedUrlResponse")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UploadPresignedUrlResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UploadPresignedUrlResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

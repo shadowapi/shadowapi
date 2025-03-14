@@ -34,319 +34,301 @@ type Invoker interface {
 	// Create a new email datasource.
 	//
 	// POST /datasource/email
-	DatasourceEmailCreate(ctx context.Context, request *DatasourceEmailCreate) (*Datasource, error)
+	DatasourceEmailCreate(ctx context.Context, request *DatasourceEmailCreate) (DatasourceEmailCreateRes, error)
 	// DatasourceEmailDelete invokes datasource-email-delete operation.
 	//
 	// Delete an email datasource.
 	//
 	// DELETE /datasource/email/{uuid}
-	DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) error
+	DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) (DatasourceEmailDeleteRes, error)
 	// DatasourceEmailGet invokes datasource-email-get operation.
 	//
 	// Get email datasources.
 	//
 	// GET /datasource/email/{uuid}
-	DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (*Datasource, error)
+	DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (DatasourceEmailGetRes, error)
 	// DatasourceEmailList invokes datasource-email-list operation.
 	//
 	// List email datasources.
 	//
 	// GET /datasource/email
-	DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) ([]Datasource, error)
+	DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (DatasourceEmailListRes, error)
 	// DatasourceEmailRunPipeline invokes datasource-email-run-pipeline operation.
 	//
 	// Run datasource email pipeline.
 	//
 	// POST /datasource/email/{uuid}/run/pipeline
-	DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (*DatasourceEmailRunPipelineOK, error)
+	DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (DatasourceEmailRunPipelineRes, error)
 	// DatasourceEmailUpdate invokes datasource-email-update operation.
 	//
 	// Update an email datasource.
 	//
 	// PUT /datasource/email/{uuid}
-	DatasourceEmailUpdate(ctx context.Context, request *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (*Datasource, error)
+	DatasourceEmailUpdate(ctx context.Context, request *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (DatasourceEmailUpdateRes, error)
 	// DatasourceSetOAuth2Client invokes datasource-set-oauth2-client operation.
 	//
 	// Set OAuth2 client to the datasource.
 	//
 	// PUT /datasource/{uuid}/oauth2/client
-	DatasourceSetOAuth2Client(ctx context.Context, request *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error
+	DatasourceSetOAuth2Client(ctx context.Context, request *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (DatasourceSetOAuth2ClientRes, error)
+	// GenerateDownloadLink invokes generateDownloadLink operation.
+	//
+	// Generate a download link for a stored file.
+	//
+	// POST /storage/file-link
+	GenerateDownloadLink(ctx context.Context, request *GenerateDownloadLinkRequest) (*GenerateDownloadLinkResponse, error)
+	// GeneratePresignedUploadUrl invokes generatePresignedUploadUrl operation.
+	//
+	// Generate a pre-signed URL for file upload.
+	//
+	// POST /storage/upload-url
+	GeneratePresignedUploadUrl(ctx context.Context, request *UploadPresignedUrlRequest) (*UploadPresignedUrlResponse, error)
 	// MessageEmailQuery invokes messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
 	//
 	// POST /message/email/query
-	MessageEmailQuery(ctx context.Context, request *MessageQuery) (*MessageEmailQueryOK, error)
+	MessageEmailQuery(ctx context.Context, request *MessageQuery) (MessageEmailQueryRes, error)
 	// MessageLinkedinQuery invokes messageLinkedinQuery operation.
 	//
 	// Execute a search query on LinkedIn messages.
 	//
 	// POST /message/linkedin/query
-	MessageLinkedinQuery(ctx context.Context, request *MessageQuery) (*MessageLinkedinQueryOK, error)
+	MessageLinkedinQuery(ctx context.Context, request *MessageQuery) (MessageLinkedinQueryRes, error)
 	// MessageTelegramQuery invokes messageTelegramQuery operation.
 	//
 	// Execute a search query on Telegram messages.
 	//
 	// POST /message/telegram/query
-	MessageTelegramQuery(ctx context.Context, request *MessageQuery) (*MessageTelegramQueryOK, error)
+	MessageTelegramQuery(ctx context.Context, request *MessageQuery) (MessageTelegramQueryRes, error)
 	// MessageWhatsappQuery invokes messageWhatsappQuery operation.
 	//
 	// Execute a search query on WhatsApp messages.
 	//
 	// POST /message/whatsapp/query
-	MessageWhatsappQuery(ctx context.Context, request *MessageQuery) (*MessageWhatsappQueryOK, error)
+	MessageWhatsappQuery(ctx context.Context, request *MessageQuery) (MessageWhatsappQueryRes, error)
 	// OAuth2ClientCallback invokes oauth2-client-callback operation.
 	//
 	// Serve OAuth2 client callback.
 	//
 	// GET /oauth2/callback
-	OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (*OAuth2ClientCallbackFound, error)
+	OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (OAuth2ClientCallbackRes, error)
 	// OAuth2ClientCreate invokes oauth2-client-create operation.
 	//
 	// Create OAuth2 client.
 	//
 	// POST /oauth2/client
-	OAuth2ClientCreate(ctx context.Context, request *OAuth2ClientCreateReq) (*OAuth2Client, error)
+	OAuth2ClientCreate(ctx context.Context, request *OAuth2ClientCreateReq) (OAuth2ClientCreateRes, error)
 	// OAuth2ClientDelete invokes oauth2-client-delete operation.
 	//
 	// Delete OAuth2 client.
 	//
 	// DELETE /oauth2/client/{id}
-	OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error
+	OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) (OAuth2ClientDeleteRes, error)
 	// OAuth2ClientGet invokes oauth2-client-get operation.
 	//
 	// Get OAuth2 client details.
 	//
 	// GET /oauth2/client/{id}
-	OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (*OAuth2Client, error)
+	OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (OAuth2ClientGetRes, error)
 	// OAuth2ClientList invokes oauth2-client-list operation.
 	//
 	// List OAuth2 clients.
 	//
 	// GET /oauth2/client
-	OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (*OAuth2ClientListOK, error)
+	OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (OAuth2ClientListRes, error)
 	// OAuth2ClientLogin invokes oauth2-client-login operation.
 	//
 	// Start OAuth2 login flow.
 	//
 	// POST /oauth2/login
-	OAuth2ClientLogin(ctx context.Context, request *OAuth2ClientLoginReq) (*OAuth2ClientLoginOK, error)
+	OAuth2ClientLogin(ctx context.Context, request *OAuth2ClientLoginReq) (OAuth2ClientLoginRes, error)
 	// OAuth2ClientTokenDelete invokes oauth2-client-token-delete operation.
 	//
 	// Delete OAuth2 client token.
 	//
 	// DELETE /oauth2/client/{datasource_uuid}/token/{uuid}
-	OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) error
+	OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) (OAuth2ClientTokenDeleteRes, error)
 	// OAuth2ClientTokenList invokes oauth2-client-token-list operation.
 	//
 	// List OAuth2 client tokens.
 	//
 	// GET /oauth2/client/{datasource_uuid}/token
-	OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) ([]OAuth2ClientToken, error)
+	OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (OAuth2ClientTokenListRes, error)
 	// OAuth2ClientUpdate invokes oauth2-client-update operation.
 	//
 	// Update OAuth2 client.
 	//
 	// PUT /oauth2/client/{id}
-	OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error)
+	OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (OAuth2ClientUpdateRes, error)
 	// PipelineCreate invokes pipeline-create operation.
 	//
 	// Create Pipeline.
 	//
 	// POST /pipeline
-	PipelineCreate(ctx context.Context, request *PipelineCreateReq) (*Pipeline, error)
+	PipelineCreate(ctx context.Context, request *PipelineCreateReq) (PipelineCreateRes, error)
 	// PipelineDelete invokes pipeline-delete operation.
 	//
 	// Delete a pipeline.
 	//
 	// DELETE /pipeline/{uuid}
-	PipelineDelete(ctx context.Context, params PipelineDeleteParams) error
+	PipelineDelete(ctx context.Context, params PipelineDeleteParams) (PipelineDeleteRes, error)
 	// PipelineEntryCreate invokes pipeline-entry-create operation.
 	//
 	// Create a pipeline entry.
 	//
 	// POST /pipeline/{uuid}/entry
-	PipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (*PipelineEntry, error)
+	PipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (PipelineEntryCreateRes, error)
 	// PipelineEntryDelete invokes pipeline-entry-delete operation.
 	//
 	// Delete pipeline entry.
 	//
 	// DELETE /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error
+	PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) (PipelineEntryDeleteRes, error)
 	// PipelineEntryGet invokes pipeline-entry-get operation.
 	//
 	// Get pipeline entry.
 	//
 	// GET /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error)
+	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (PipelineEntryGetRes, error)
 	// PipelineEntryList invokes pipeline-entry-list operation.
 	//
 	// Get pipeline entry.
 	//
 	// GET /pipeline/{uuid}/entry
-	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error)
+	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) (PipelineEntryListRes, error)
 	// PipelineEntryTypeList invokes pipeline-entry-type-list operation.
 	//
 	// Get Pipeline Entry Types.
 	//
 	// GET /pipeline/entry/types
-	PipelineEntryTypeList(ctx context.Context) (*PipelineEntryTypeListOK, error)
+	PipelineEntryTypeList(ctx context.Context) (PipelineEntryTypeListRes, error)
 	// PipelineEntryUpdate invokes pipeline-entry-update operation.
 	//
 	// Update a pipeline entry.
 	//
 	// PUT /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error)
+	PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (PipelineEntryUpdateRes, error)
 	// PipelineGet invokes pipeline-get operation.
 	//
 	// Get pipeline.
 	//
 	// GET /pipeline/{uuid}
-	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
+	PipelineGet(ctx context.Context, params PipelineGetParams) (PipelineGetRes, error)
 	// PipelineList invokes pipeline-list operation.
 	//
 	// Create Pipeline Object.
 	//
 	// GET /pipeline
-	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)
+	PipelineList(ctx context.Context, params PipelineListParams) (PipelineListRes, error)
 	// PipelineUpdate invokes pipeline-update operation.
 	//
 	// Update pipeline.
 	//
 	// PUT /pipeline/{uuid}
-	PipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error)
+	PipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (PipelineUpdateRes, error)
 	// StorageHostfilesCreate invokes storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.
 	//
 	// POST /storage/hostfiles
-	StorageHostfilesCreate(ctx context.Context, request *StorageHostfiles) (*StorageHostfiles, error)
+	StorageHostfilesCreate(ctx context.Context, request *StorageHostfiles) (StorageHostfilesCreateRes, error)
 	// StorageHostfilesDelete invokes storage-hostfiles-delete operation.
 	//
 	// Delete a specific Host Files storage instance by UUID.
 	//
 	// DELETE /storage/hostfiles/{uuid}
-	StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) error
+	StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (StorageHostfilesDeleteRes, error)
 	// StorageHostfilesGet invokes storage-hostfiles-get operation.
 	//
 	// Retrieve details of a specific Host Files storage instance by UUID.
 	//
 	// GET /storage/hostfiles/{uuid}
-	StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (*StorageHostfiles, error)
+	StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (StorageHostfilesGetRes, error)
 	// StorageHostfilesUpdate invokes storage-hostfiles-update operation.
 	//
 	// Update details of a specific Host Files storage instance by UUID.
 	//
 	// PUT /storage/hostfiles/{uuid}
-	StorageHostfilesUpdate(ctx context.Context, request *StorageHostfiles, params StorageHostfilesUpdateParams) (*StorageHostfiles, error)
+	StorageHostfilesUpdate(ctx context.Context, request *StorageHostfiles, params StorageHostfilesUpdateParams) (StorageHostfilesUpdateRes, error)
 	// StorageList invokes storage-list operation.
 	//
 	// Retrieve a list of data storage objects.
 	//
 	// GET /storage
-	StorageList(ctx context.Context, params StorageListParams) ([]Storage, error)
+	StorageList(ctx context.Context, params StorageListParams) (StorageListRes, error)
 	// StoragePostgresCreate invokes storage-postgres-create operation.
 	//
 	// Create a new PostgreSQL storage instance.
 	//
 	// POST /storage/postgres
-	StoragePostgresCreate(ctx context.Context, request *StoragePostgres) (*StoragePostgres, error)
+	StoragePostgresCreate(ctx context.Context, request *StoragePostgres) (StoragePostgresCreateRes, error)
 	// StoragePostgresDelete invokes storage-postgres-delete operation.
 	//
 	// Delete a specific PostgreSQL storage instance by UUID.
 	//
 	// DELETE /storage/postgres/{uuid}
-	StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) error
+	StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) (StoragePostgresDeleteRes, error)
 	// StoragePostgresGet invokes storage-postgres-get operation.
 	//
 	// Retrieve details of a specific PostgreSQL storage instance by UUID.
 	//
 	// GET /storage/postgres/{uuid}
-	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (*StoragePostgres, error)
+	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (StoragePostgresGetRes, error)
 	// StoragePostgresUpdate invokes storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.
 	//
 	// PUT /storage/postgres/{uuid}
-	StoragePostgresUpdate(ctx context.Context, request *StoragePostgres, params StoragePostgresUpdateParams) (*StoragePostgres, error)
+	StoragePostgresUpdate(ctx context.Context, request *StoragePostgres, params StoragePostgresUpdateParams) (StoragePostgresUpdateRes, error)
 	// StorageS3Create invokes storage-s3-create operation.
 	//
 	// Create a new S3 storage instance.
 	//
 	// POST /storage/s3
-	StorageS3Create(ctx context.Context, request *StorageS3) (*StorageS3, error)
+	StorageS3Create(ctx context.Context, request *StorageS3) (StorageS3CreateRes, error)
 	// StorageS3Delete invokes storage-s3-delete operation.
 	//
 	// Delete a specific S3 storage instance by UUID.
 	//
 	// DELETE /storage/s3/{uuid}
-	StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) error
+	StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) (StorageS3DeleteRes, error)
 	// StorageS3Get invokes storage-s3-get operation.
 	//
 	// Retrieve details of a specific S3 storage instance by UUID.
 	//
 	// GET /storage/s3/{uuid}
-	StorageS3Get(ctx context.Context, params StorageS3GetParams) (*StorageS3, error)
+	StorageS3Get(ctx context.Context, params StorageS3GetParams) (StorageS3GetRes, error)
 	// StorageS3Update invokes storage-s3-update operation.
 	//
 	// Update details of a specific S3 storage instance by UUID.
 	//
 	// PUT /storage/s3/{uuid}
-	StorageS3Update(ctx context.Context, request *StorageS3, params StorageS3UpdateParams) (*StorageS3, error)
+	StorageS3Update(ctx context.Context, request *StorageS3, params StorageS3UpdateParams) (StorageS3UpdateRes, error)
 	// TgSessionCreate invokes tg-session-create operation.
 	//
 	// Create a new Telegram session.
 	//
 	// POST /telegram
-	TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (*Tg, error)
+	TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (TgSessionCreateRes, error)
 	// TgSessionList invokes tg-session-list operation.
 	//
 	// List all Telegram sessions for the authenticated user.
 	//
 	// GET /telegram
-	TgSessionList(ctx context.Context) (*TgSessionListOK, error)
+	TgSessionList(ctx context.Context) (TgSessionListRes, error)
 	// TgSessionVerify invokes tg-session-verify operation.
 	//
 	// Complete the session creation process by verifying the code.
 	//
 	// PUT /telegram/{id}
-	TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error)
-	// WhatsappContacts invokes whatsapp-contacts operation.
+	TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (TgSessionVerifyRes, error)
+	// UploadFile invokes uploadFile operation.
 	//
-	// Retrieve WhatsApp contacts.
+	// Upload a file.
 	//
-	// GET /whatsapp/contacts
-	WhatsappContacts(ctx context.Context) (*WhatsappContactsOK, error)
-	// WhatsappDownloadAttachment invokes whatsapp-download-attachment operation.
-	//
-	// Download WhatsApp attachment into storage.
-	//
-	// POST /whatsapp/attachments/download
-	WhatsappDownloadAttachment(ctx context.Context, request *WhatsappDownloadAttachmentReq) (*WhatsappDownloadAttachmentOK, error)
-	// WhatsappDownloadMessage invokes whatsapp-download-message operation.
-	//
-	// Download message content including media.
-	//
-	// POST /whatsapp/messages/download
-	WhatsappDownloadMessage(ctx context.Context, request *WhatsappDownloadMessageReq) (*WhatsappDownloadMessageOK, error)
-	// WhatsappLogin invokes whatsapp-login operation.
-	//
-	// Initiate WhatsApp login flow via QR code scanning.
-	//
-	// POST /whatsapp/login
-	WhatsappLogin(ctx context.Context) (*WhatsAppLoginResponse, error)
-	// WhatsappStatus invokes whatsapp-status operation.
-	//
-	// Retrieve WhatsApp login status.
-	//
-	// GET /whatsapp/status
-	WhatsappStatus(ctx context.Context) (*WhatsAppStatusResponse, error)
-	// WhatsappSync invokes whatsapp-sync operation.
-	//
-	// Sync messages for selected users or all users.
-	//
-	// POST /whatsapp/sync
-	WhatsappSync(ctx context.Context, request *WhatsappSyncReq) (*WhatsappSyncOK, error)
+	// POST /storage/upload
+	UploadFile(ctx context.Context, request *UploadFileRequest) (*UploadFileResponse, error)
 }
 
 // Client implements OAS client.
@@ -355,12 +337,8 @@ type Client struct {
 	sec       SecuritySource
 	baseClient
 }
-type errorHandler interface {
-	NewError(ctx context.Context, err error) *ErrorStatusCode
-}
 
 var _ Handler = struct {
-	errorHandler
 	*Client
 }{}
 
@@ -403,12 +381,12 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // Create a new email datasource.
 //
 // POST /datasource/email
-func (c *Client) DatasourceEmailCreate(ctx context.Context, request *DatasourceEmailCreate) (*Datasource, error) {
+func (c *Client) DatasourceEmailCreate(ctx context.Context, request *DatasourceEmailCreate) (DatasourceEmailCreateRes, error) {
 	res, err := c.sendDatasourceEmailCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendDatasourceEmailCreate(ctx context.Context, request *DatasourceEmailCreate) (res *Datasource, err error) {
+func (c *Client) sendDatasourceEmailCreate(ctx context.Context, request *DatasourceEmailCreate) (res DatasourceEmailCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-email-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -523,12 +501,12 @@ func (c *Client) sendDatasourceEmailCreate(ctx context.Context, request *Datasou
 // Delete an email datasource.
 //
 // DELETE /datasource/email/{uuid}
-func (c *Client) DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) error {
-	_, err := c.sendDatasourceEmailDelete(ctx, params)
-	return err
+func (c *Client) DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) (DatasourceEmailDeleteRes, error) {
+	res, err := c.sendDatasourceEmailDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendDatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) (res *DatasourceEmailDeleteOK, err error) {
+func (c *Client) sendDatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) (res DatasourceEmailDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-email-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -658,12 +636,12 @@ func (c *Client) sendDatasourceEmailDelete(ctx context.Context, params Datasourc
 // Get email datasources.
 //
 // GET /datasource/email/{uuid}
-func (c *Client) DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (*Datasource, error) {
+func (c *Client) DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (DatasourceEmailGetRes, error) {
 	res, err := c.sendDatasourceEmailGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendDatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (res *Datasource, err error) {
+func (c *Client) sendDatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (res DatasourceEmailGetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-email-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -793,12 +771,12 @@ func (c *Client) sendDatasourceEmailGet(ctx context.Context, params DatasourceEm
 // List email datasources.
 //
 // GET /datasource/email
-func (c *Client) DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) ([]Datasource, error) {
+func (c *Client) DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (DatasourceEmailListRes, error) {
 	res, err := c.sendDatasourceEmailList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendDatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (res []Datasource, err error) {
+func (c *Client) sendDatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (res DatasourceEmailListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-email-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -948,12 +926,12 @@ func (c *Client) sendDatasourceEmailList(ctx context.Context, params DatasourceE
 // Run datasource email pipeline.
 //
 // POST /datasource/email/{uuid}/run/pipeline
-func (c *Client) DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (*DatasourceEmailRunPipelineOK, error) {
+func (c *Client) DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (DatasourceEmailRunPipelineRes, error) {
 	res, err := c.sendDatasourceEmailRunPipeline(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendDatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (res *DatasourceEmailRunPipelineOK, err error) {
+func (c *Client) sendDatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (res DatasourceEmailRunPipelineRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-email-run-pipeline"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1084,12 +1062,12 @@ func (c *Client) sendDatasourceEmailRunPipeline(ctx context.Context, params Data
 // Update an email datasource.
 //
 // PUT /datasource/email/{uuid}
-func (c *Client) DatasourceEmailUpdate(ctx context.Context, request *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (*Datasource, error) {
+func (c *Client) DatasourceEmailUpdate(ctx context.Context, request *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (DatasourceEmailUpdateRes, error) {
 	res, err := c.sendDatasourceEmailUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendDatasourceEmailUpdate(ctx context.Context, request *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (res *Datasource, err error) {
+func (c *Client) sendDatasourceEmailUpdate(ctx context.Context, request *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (res DatasourceEmailUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-email-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -1222,12 +1200,12 @@ func (c *Client) sendDatasourceEmailUpdate(ctx context.Context, request *Datasou
 // Set OAuth2 client to the datasource.
 //
 // PUT /datasource/{uuid}/oauth2/client
-func (c *Client) DatasourceSetOAuth2Client(ctx context.Context, request *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error {
-	_, err := c.sendDatasourceSetOAuth2Client(ctx, request, params)
-	return err
+func (c *Client) DatasourceSetOAuth2Client(ctx context.Context, request *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (DatasourceSetOAuth2ClientRes, error) {
+	res, err := c.sendDatasourceSetOAuth2Client(ctx, request, params)
+	return res, err
 }
 
-func (c *Client) sendDatasourceSetOAuth2Client(ctx context.Context, request *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (res *DatasourceSetOAuth2ClientNoContent, err error) {
+func (c *Client) sendDatasourceSetOAuth2Client(ctx context.Context, request *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (res DatasourceSetOAuth2ClientRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("datasource-set-oauth2-client"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -1356,17 +1334,257 @@ func (c *Client) sendDatasourceSetOAuth2Client(ctx context.Context, request *Dat
 	return result, nil
 }
 
+// GenerateDownloadLink invokes generateDownloadLink operation.
+//
+// Generate a download link for a stored file.
+//
+// POST /storage/file-link
+func (c *Client) GenerateDownloadLink(ctx context.Context, request *GenerateDownloadLinkRequest) (*GenerateDownloadLinkResponse, error) {
+	res, err := c.sendGenerateDownloadLink(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendGenerateDownloadLink(ctx context.Context, request *GenerateDownloadLinkRequest) (res *GenerateDownloadLinkResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("generateDownloadLink"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/file-link"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GenerateDownloadLinkOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/storage/file-link"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGenerateDownloadLinkRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:SessionCookieAuth"
+			switch err := c.securitySessionCookieAuth(ctx, GenerateDownloadLinkOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GenerateDownloadLinkOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGenerateDownloadLinkResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GeneratePresignedUploadUrl invokes generatePresignedUploadUrl operation.
+//
+// Generate a pre-signed URL for file upload.
+//
+// POST /storage/upload-url
+func (c *Client) GeneratePresignedUploadUrl(ctx context.Context, request *UploadPresignedUrlRequest) (*UploadPresignedUrlResponse, error) {
+	res, err := c.sendGeneratePresignedUploadUrl(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendGeneratePresignedUploadUrl(ctx context.Context, request *UploadPresignedUrlRequest) (res *UploadPresignedUrlResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("generatePresignedUploadUrl"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/upload-url"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GeneratePresignedUploadUrlOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/storage/upload-url"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGeneratePresignedUploadUrlRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:SessionCookieAuth"
+			switch err := c.securitySessionCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGeneratePresignedUploadUrlResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // MessageEmailQuery invokes messageEmailQuery operation.
 //
 // Execute a search query on email messages.
 //
 // POST /message/email/query
-func (c *Client) MessageEmailQuery(ctx context.Context, request *MessageQuery) (*MessageEmailQueryOK, error) {
+func (c *Client) MessageEmailQuery(ctx context.Context, request *MessageQuery) (MessageEmailQueryRes, error) {
 	res, err := c.sendMessageEmailQuery(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendMessageEmailQuery(ctx context.Context, request *MessageQuery) (res *MessageEmailQueryOK, err error) {
+func (c *Client) sendMessageEmailQuery(ctx context.Context, request *MessageQuery) (res MessageEmailQueryRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("messageEmailQuery"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1481,12 +1699,12 @@ func (c *Client) sendMessageEmailQuery(ctx context.Context, request *MessageQuer
 // Execute a search query on LinkedIn messages.
 //
 // POST /message/linkedin/query
-func (c *Client) MessageLinkedinQuery(ctx context.Context, request *MessageQuery) (*MessageLinkedinQueryOK, error) {
+func (c *Client) MessageLinkedinQuery(ctx context.Context, request *MessageQuery) (MessageLinkedinQueryRes, error) {
 	res, err := c.sendMessageLinkedinQuery(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendMessageLinkedinQuery(ctx context.Context, request *MessageQuery) (res *MessageLinkedinQueryOK, err error) {
+func (c *Client) sendMessageLinkedinQuery(ctx context.Context, request *MessageQuery) (res MessageLinkedinQueryRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("messageLinkedinQuery"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1601,12 +1819,12 @@ func (c *Client) sendMessageLinkedinQuery(ctx context.Context, request *MessageQ
 // Execute a search query on Telegram messages.
 //
 // POST /message/telegram/query
-func (c *Client) MessageTelegramQuery(ctx context.Context, request *MessageQuery) (*MessageTelegramQueryOK, error) {
+func (c *Client) MessageTelegramQuery(ctx context.Context, request *MessageQuery) (MessageTelegramQueryRes, error) {
 	res, err := c.sendMessageTelegramQuery(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendMessageTelegramQuery(ctx context.Context, request *MessageQuery) (res *MessageTelegramQueryOK, err error) {
+func (c *Client) sendMessageTelegramQuery(ctx context.Context, request *MessageQuery) (res MessageTelegramQueryRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("messageTelegramQuery"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1721,12 +1939,12 @@ func (c *Client) sendMessageTelegramQuery(ctx context.Context, request *MessageQ
 // Execute a search query on WhatsApp messages.
 //
 // POST /message/whatsapp/query
-func (c *Client) MessageWhatsappQuery(ctx context.Context, request *MessageQuery) (*MessageWhatsappQueryOK, error) {
+func (c *Client) MessageWhatsappQuery(ctx context.Context, request *MessageQuery) (MessageWhatsappQueryRes, error) {
 	res, err := c.sendMessageWhatsappQuery(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendMessageWhatsappQuery(ctx context.Context, request *MessageQuery) (res *MessageWhatsappQueryOK, err error) {
+func (c *Client) sendMessageWhatsappQuery(ctx context.Context, request *MessageQuery) (res MessageWhatsappQueryRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("messageWhatsappQuery"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1841,12 +2059,12 @@ func (c *Client) sendMessageWhatsappQuery(ctx context.Context, request *MessageQ
 // Serve OAuth2 client callback.
 //
 // GET /oauth2/callback
-func (c *Client) OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (*OAuth2ClientCallbackFound, error) {
+func (c *Client) OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (OAuth2ClientCallbackRes, error) {
 	res, err := c.sendOAuth2ClientCallback(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (res *OAuth2ClientCallbackFound, err error) {
+func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (res OAuth2ClientCallbackRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-callback"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -1996,12 +2214,12 @@ func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2Clie
 // Create OAuth2 client.
 //
 // POST /oauth2/client
-func (c *Client) OAuth2ClientCreate(ctx context.Context, request *OAuth2ClientCreateReq) (*OAuth2Client, error) {
+func (c *Client) OAuth2ClientCreate(ctx context.Context, request *OAuth2ClientCreateReq) (OAuth2ClientCreateRes, error) {
 	res, err := c.sendOAuth2ClientCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2ClientCreateReq) (res *OAuth2Client, err error) {
+func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2ClientCreateReq) (res OAuth2ClientCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -2116,12 +2334,12 @@ func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2Clie
 // Delete OAuth2 client.
 //
 // DELETE /oauth2/client/{id}
-func (c *Client) OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error {
-	_, err := c.sendOAuth2ClientDelete(ctx, params)
-	return err
+func (c *Client) OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) (OAuth2ClientDeleteRes, error) {
+	res, err := c.sendOAuth2ClientDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) (res *OAuth2ClientDeleteOK, err error) {
+func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) (res OAuth2ClientDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -2251,12 +2469,12 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 // Get OAuth2 client details.
 //
 // GET /oauth2/client/{id}
-func (c *Client) OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (*OAuth2Client, error) {
+func (c *Client) OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (OAuth2ClientGetRes, error) {
 	res, err := c.sendOAuth2ClientGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (res *OAuth2Client, err error) {
+func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (res OAuth2ClientGetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -2386,12 +2604,12 @@ func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGet
 // List OAuth2 clients.
 //
 // GET /oauth2/client
-func (c *Client) OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (*OAuth2ClientListOK, error) {
+func (c *Client) OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (OAuth2ClientListRes, error) {
 	res, err := c.sendOAuth2ClientList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (res *OAuth2ClientListOK, err error) {
+func (c *Client) sendOAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (res OAuth2ClientListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -2541,12 +2759,12 @@ func (c *Client) sendOAuth2ClientList(ctx context.Context, params OAuth2ClientLi
 // Start OAuth2 login flow.
 //
 // POST /oauth2/login
-func (c *Client) OAuth2ClientLogin(ctx context.Context, request *OAuth2ClientLoginReq) (*OAuth2ClientLoginOK, error) {
+func (c *Client) OAuth2ClientLogin(ctx context.Context, request *OAuth2ClientLoginReq) (OAuth2ClientLoginRes, error) {
 	res, err := c.sendOAuth2ClientLogin(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientLogin(ctx context.Context, request *OAuth2ClientLoginReq) (res *OAuth2ClientLoginOK, err error) {
+func (c *Client) sendOAuth2ClientLogin(ctx context.Context, request *OAuth2ClientLoginReq) (res OAuth2ClientLoginRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-login"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -2661,12 +2879,12 @@ func (c *Client) sendOAuth2ClientLogin(ctx context.Context, request *OAuth2Clien
 // Delete OAuth2 client token.
 //
 // DELETE /oauth2/client/{datasource_uuid}/token/{uuid}
-func (c *Client) OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) error {
-	_, err := c.sendOAuth2ClientTokenDelete(ctx, params)
-	return err
+func (c *Client) OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) (OAuth2ClientTokenDeleteRes, error) {
+	res, err := c.sendOAuth2ClientTokenDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendOAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) (res *OAuth2ClientTokenDeleteOK, err error) {
+func (c *Client) sendOAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) (res OAuth2ClientTokenDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-token-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -2815,12 +3033,12 @@ func (c *Client) sendOAuth2ClientTokenDelete(ctx context.Context, params OAuth2C
 // List OAuth2 client tokens.
 //
 // GET /oauth2/client/{datasource_uuid}/token
-func (c *Client) OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) ([]OAuth2ClientToken, error) {
+func (c *Client) OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (OAuth2ClientTokenListRes, error) {
 	res, err := c.sendOAuth2ClientTokenList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (res []OAuth2ClientToken, err error) {
+func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (res OAuth2ClientTokenListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-token-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -2951,12 +3169,12 @@ func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2Cli
 // Update OAuth2 client.
 //
 // PUT /oauth2/client/{id}
-func (c *Client) OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error) {
+func (c *Client) OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (OAuth2ClientUpdateRes, error) {
 	res, err := c.sendOAuth2ClientUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (res *OAuth2Client, err error) {
+func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (res OAuth2ClientUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -3089,12 +3307,12 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 // Create Pipeline.
 //
 // POST /pipeline
-func (c *Client) PipelineCreate(ctx context.Context, request *PipelineCreateReq) (*Pipeline, error) {
+func (c *Client) PipelineCreate(ctx context.Context, request *PipelineCreateReq) (PipelineCreateRes, error) {
 	res, err := c.sendPipelineCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendPipelineCreate(ctx context.Context, request *PipelineCreateReq) (res *Pipeline, err error) {
+func (c *Client) sendPipelineCreate(ctx context.Context, request *PipelineCreateReq) (res PipelineCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -3209,12 +3427,12 @@ func (c *Client) sendPipelineCreate(ctx context.Context, request *PipelineCreate
 // Delete a pipeline.
 //
 // DELETE /pipeline/{uuid}
-func (c *Client) PipelineDelete(ctx context.Context, params PipelineDeleteParams) error {
-	_, err := c.sendPipelineDelete(ctx, params)
-	return err
+func (c *Client) PipelineDelete(ctx context.Context, params PipelineDeleteParams) (PipelineDeleteRes, error) {
+	res, err := c.sendPipelineDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeleteParams) (res *PipelineDeleteOK, err error) {
+func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeleteParams) (res PipelineDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -3344,12 +3562,12 @@ func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeletePa
 // Create a pipeline entry.
 //
 // POST /pipeline/{uuid}/entry
-func (c *Client) PipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (*PipelineEntry, error) {
+func (c *Client) PipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (PipelineEntryCreateRes, error) {
 	res, err := c.sendPipelineEntryCreate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (res *PipelineEntry, err error) {
+func (c *Client) sendPipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (res PipelineEntryCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-entry-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -3483,12 +3701,12 @@ func (c *Client) sendPipelineEntryCreate(ctx context.Context, request *PipelineE
 // Delete pipeline entry.
 //
 // DELETE /pipeline/{uuid}/entry/{entry_uuid}
-func (c *Client) PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error {
-	_, err := c.sendPipelineEntryDelete(ctx, params)
-	return err
+func (c *Client) PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) (PipelineEntryDeleteRes, error) {
+	res, err := c.sendPipelineEntryDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendPipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) (res *PipelineEntryDeleteOK, err error) {
+func (c *Client) sendPipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) (res PipelineEntryDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-entry-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -3637,12 +3855,12 @@ func (c *Client) sendPipelineEntryDelete(ctx context.Context, params PipelineEnt
 // Get pipeline entry.
 //
 // GET /pipeline/{uuid}/entry/{entry_uuid}
-func (c *Client) PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error) {
+func (c *Client) PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (PipelineEntryGetRes, error) {
 	res, err := c.sendPipelineEntryGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (res *PipelineEntry, err error) {
+func (c *Client) sendPipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (res PipelineEntryGetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-entry-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -3791,12 +4009,12 @@ func (c *Client) sendPipelineEntryGet(ctx context.Context, params PipelineEntryG
 // Get pipeline entry.
 //
 // GET /pipeline/{uuid}/entry
-func (c *Client) PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error) {
+func (c *Client) PipelineEntryList(ctx context.Context, params PipelineEntryListParams) (PipelineEntryListRes, error) {
 	res, err := c.sendPipelineEntryList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineEntryList(ctx context.Context, params PipelineEntryListParams) (res []PipelineEntry, err error) {
+func (c *Client) sendPipelineEntryList(ctx context.Context, params PipelineEntryListParams) (res PipelineEntryListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-entry-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -3927,12 +4145,12 @@ func (c *Client) sendPipelineEntryList(ctx context.Context, params PipelineEntry
 // Get Pipeline Entry Types.
 //
 // GET /pipeline/entry/types
-func (c *Client) PipelineEntryTypeList(ctx context.Context) (*PipelineEntryTypeListOK, error) {
+func (c *Client) PipelineEntryTypeList(ctx context.Context) (PipelineEntryTypeListRes, error) {
 	res, err := c.sendPipelineEntryTypeList(ctx)
 	return res, err
 }
 
-func (c *Client) sendPipelineEntryTypeList(ctx context.Context) (res *PipelineEntryTypeListOK, err error) {
+func (c *Client) sendPipelineEntryTypeList(ctx context.Context) (res PipelineEntryTypeListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-entry-type-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -4044,12 +4262,12 @@ func (c *Client) sendPipelineEntryTypeList(ctx context.Context) (res *PipelineEn
 // Update a pipeline entry.
 //
 // PUT /pipeline/{uuid}/entry/{entry_uuid}
-func (c *Client) PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error) {
+func (c *Client) PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (PipelineEntryUpdateRes, error) {
 	res, err := c.sendPipelineEntryUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (res *PipelineEntry, err error) {
+func (c *Client) sendPipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (res PipelineEntryUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-entry-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -4201,12 +4419,12 @@ func (c *Client) sendPipelineEntryUpdate(ctx context.Context, request *PipelineE
 // Get pipeline.
 //
 // GET /pipeline/{uuid}
-func (c *Client) PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error) {
+func (c *Client) PipelineGet(ctx context.Context, params PipelineGetParams) (PipelineGetRes, error) {
 	res, err := c.sendPipelineGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) (res *Pipeline, err error) {
+func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) (res PipelineGetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -4336,12 +4554,12 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 // Create Pipeline Object.
 //
 // GET /pipeline
-func (c *Client) PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error) {
+func (c *Client) PipelineList(ctx context.Context, params PipelineListParams) (PipelineListRes, error) {
 	res, err := c.sendPipelineList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams) (res *PipelineListOK, err error) {
+func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams) (res PipelineListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -4491,12 +4709,12 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 // Update pipeline.
 //
 // PUT /pipeline/{uuid}
-func (c *Client) PipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error) {
+func (c *Client) PipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (PipelineUpdateRes, error) {
 	res, err := c.sendPipelineUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (res *Pipeline, err error) {
+func (c *Client) sendPipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (res PipelineUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -4629,12 +4847,12 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *PipelineUpdate
 // Create a new Host Files storage instance.
 //
 // POST /storage/hostfiles
-func (c *Client) StorageHostfilesCreate(ctx context.Context, request *StorageHostfiles) (*StorageHostfiles, error) {
+func (c *Client) StorageHostfilesCreate(ctx context.Context, request *StorageHostfiles) (StorageHostfilesCreateRes, error) {
 	res, err := c.sendStorageHostfilesCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendStorageHostfilesCreate(ctx context.Context, request *StorageHostfiles) (res *StorageHostfiles, err error) {
+func (c *Client) sendStorageHostfilesCreate(ctx context.Context, request *StorageHostfiles) (res StorageHostfilesCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-hostfiles-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -4749,12 +4967,12 @@ func (c *Client) sendStorageHostfilesCreate(ctx context.Context, request *Storag
 // Delete a specific Host Files storage instance by UUID.
 //
 // DELETE /storage/hostfiles/{uuid}
-func (c *Client) StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) error {
-	_, err := c.sendStorageHostfilesDelete(ctx, params)
-	return err
+func (c *Client) StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (StorageHostfilesDeleteRes, error) {
+	res, err := c.sendStorageHostfilesDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendStorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (res *StorageHostfilesDeleteOK, err error) {
+func (c *Client) sendStorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (res StorageHostfilesDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-hostfiles-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -4884,12 +5102,12 @@ func (c *Client) sendStorageHostfilesDelete(ctx context.Context, params StorageH
 // Retrieve details of a specific Host Files storage instance by UUID.
 //
 // GET /storage/hostfiles/{uuid}
-func (c *Client) StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (*StorageHostfiles, error) {
+func (c *Client) StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (StorageHostfilesGetRes, error) {
 	res, err := c.sendStorageHostfilesGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendStorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (res *StorageHostfiles, err error) {
+func (c *Client) sendStorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (res StorageHostfilesGetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-hostfiles-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -5019,12 +5237,12 @@ func (c *Client) sendStorageHostfilesGet(ctx context.Context, params StorageHost
 // Update details of a specific Host Files storage instance by UUID.
 //
 // PUT /storage/hostfiles/{uuid}
-func (c *Client) StorageHostfilesUpdate(ctx context.Context, request *StorageHostfiles, params StorageHostfilesUpdateParams) (*StorageHostfiles, error) {
+func (c *Client) StorageHostfilesUpdate(ctx context.Context, request *StorageHostfiles, params StorageHostfilesUpdateParams) (StorageHostfilesUpdateRes, error) {
 	res, err := c.sendStorageHostfilesUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendStorageHostfilesUpdate(ctx context.Context, request *StorageHostfiles, params StorageHostfilesUpdateParams) (res *StorageHostfiles, err error) {
+func (c *Client) sendStorageHostfilesUpdate(ctx context.Context, request *StorageHostfiles, params StorageHostfilesUpdateParams) (res StorageHostfilesUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-hostfiles-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -5157,12 +5375,12 @@ func (c *Client) sendStorageHostfilesUpdate(ctx context.Context, request *Storag
 // Retrieve a list of data storage objects.
 //
 // GET /storage
-func (c *Client) StorageList(ctx context.Context, params StorageListParams) ([]Storage, error) {
+func (c *Client) StorageList(ctx context.Context, params StorageListParams) (StorageListRes, error) {
 	res, err := c.sendStorageList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendStorageList(ctx context.Context, params StorageListParams) (res []Storage, err error) {
+func (c *Client) sendStorageList(ctx context.Context, params StorageListParams) (res StorageListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -5312,12 +5530,12 @@ func (c *Client) sendStorageList(ctx context.Context, params StorageListParams) 
 // Create a new PostgreSQL storage instance.
 //
 // POST /storage/postgres
-func (c *Client) StoragePostgresCreate(ctx context.Context, request *StoragePostgres) (*StoragePostgres, error) {
+func (c *Client) StoragePostgresCreate(ctx context.Context, request *StoragePostgres) (StoragePostgresCreateRes, error) {
 	res, err := c.sendStoragePostgresCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendStoragePostgresCreate(ctx context.Context, request *StoragePostgres) (res *StoragePostgres, err error) {
+func (c *Client) sendStoragePostgresCreate(ctx context.Context, request *StoragePostgres) (res StoragePostgresCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-postgres-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -5432,12 +5650,12 @@ func (c *Client) sendStoragePostgresCreate(ctx context.Context, request *Storage
 // Delete a specific PostgreSQL storage instance by UUID.
 //
 // DELETE /storage/postgres/{uuid}
-func (c *Client) StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) error {
-	_, err := c.sendStoragePostgresDelete(ctx, params)
-	return err
+func (c *Client) StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) (StoragePostgresDeleteRes, error) {
+	res, err := c.sendStoragePostgresDelete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendStoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) (res *StoragePostgresDeleteOK, err error) {
+func (c *Client) sendStoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) (res StoragePostgresDeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-postgres-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -5567,12 +5785,12 @@ func (c *Client) sendStoragePostgresDelete(ctx context.Context, params StoragePo
 // Retrieve details of a specific PostgreSQL storage instance by UUID.
 //
 // GET /storage/postgres/{uuid}
-func (c *Client) StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (*StoragePostgres, error) {
+func (c *Client) StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (StoragePostgresGetRes, error) {
 	res, err := c.sendStoragePostgresGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (res *StoragePostgres, err error) {
+func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (res StoragePostgresGetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-postgres-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -5702,12 +5920,12 @@ func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostg
 // Update details of a specific PostgreSQL storage instance by UUID.
 //
 // PUT /storage/postgres/{uuid}
-func (c *Client) StoragePostgresUpdate(ctx context.Context, request *StoragePostgres, params StoragePostgresUpdateParams) (*StoragePostgres, error) {
+func (c *Client) StoragePostgresUpdate(ctx context.Context, request *StoragePostgres, params StoragePostgresUpdateParams) (StoragePostgresUpdateRes, error) {
 	res, err := c.sendStoragePostgresUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *StoragePostgres, params StoragePostgresUpdateParams) (res *StoragePostgres, err error) {
+func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *StoragePostgres, params StoragePostgresUpdateParams) (res StoragePostgresUpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-postgres-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -5840,12 +6058,12 @@ func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *Storage
 // Create a new S3 storage instance.
 //
 // POST /storage/s3
-func (c *Client) StorageS3Create(ctx context.Context, request *StorageS3) (*StorageS3, error) {
+func (c *Client) StorageS3Create(ctx context.Context, request *StorageS3) (StorageS3CreateRes, error) {
 	res, err := c.sendStorageS3Create(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendStorageS3Create(ctx context.Context, request *StorageS3) (res *StorageS3, err error) {
+func (c *Client) sendStorageS3Create(ctx context.Context, request *StorageS3) (res StorageS3CreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-s3-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -5960,12 +6178,12 @@ func (c *Client) sendStorageS3Create(ctx context.Context, request *StorageS3) (r
 // Delete a specific S3 storage instance by UUID.
 //
 // DELETE /storage/s3/{uuid}
-func (c *Client) StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) error {
-	_, err := c.sendStorageS3Delete(ctx, params)
-	return err
+func (c *Client) StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) (StorageS3DeleteRes, error) {
+	res, err := c.sendStorageS3Delete(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendStorageS3Delete(ctx context.Context, params StorageS3DeleteParams) (res *StorageS3DeleteOK, err error) {
+func (c *Client) sendStorageS3Delete(ctx context.Context, params StorageS3DeleteParams) (res StorageS3DeleteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-s3-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -6095,12 +6313,12 @@ func (c *Client) sendStorageS3Delete(ctx context.Context, params StorageS3Delete
 // Retrieve details of a specific S3 storage instance by UUID.
 //
 // GET /storage/s3/{uuid}
-func (c *Client) StorageS3Get(ctx context.Context, params StorageS3GetParams) (*StorageS3, error) {
+func (c *Client) StorageS3Get(ctx context.Context, params StorageS3GetParams) (StorageS3GetRes, error) {
 	res, err := c.sendStorageS3Get(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendStorageS3Get(ctx context.Context, params StorageS3GetParams) (res *StorageS3, err error) {
+func (c *Client) sendStorageS3Get(ctx context.Context, params StorageS3GetParams) (res StorageS3GetRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-s3-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -6230,12 +6448,12 @@ func (c *Client) sendStorageS3Get(ctx context.Context, params StorageS3GetParams
 // Update details of a specific S3 storage instance by UUID.
 //
 // PUT /storage/s3/{uuid}
-func (c *Client) StorageS3Update(ctx context.Context, request *StorageS3, params StorageS3UpdateParams) (*StorageS3, error) {
+func (c *Client) StorageS3Update(ctx context.Context, request *StorageS3, params StorageS3UpdateParams) (StorageS3UpdateRes, error) {
 	res, err := c.sendStorageS3Update(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendStorageS3Update(ctx context.Context, request *StorageS3, params StorageS3UpdateParams) (res *StorageS3, err error) {
+func (c *Client) sendStorageS3Update(ctx context.Context, request *StorageS3, params StorageS3UpdateParams) (res StorageS3UpdateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-s3-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -6368,12 +6586,12 @@ func (c *Client) sendStorageS3Update(ctx context.Context, request *StorageS3, pa
 // Create a new Telegram session.
 //
 // POST /telegram
-func (c *Client) TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (*Tg, error) {
+func (c *Client) TgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (TgSessionCreateRes, error) {
 	res, err := c.sendTgSessionCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (res *Tg, err error) {
+func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCreateReq) (res TgSessionCreateRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -6488,12 +6706,12 @@ func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCrea
 // List all Telegram sessions for the authenticated user.
 //
 // GET /telegram
-func (c *Client) TgSessionList(ctx context.Context) (*TgSessionListOK, error) {
+func (c *Client) TgSessionList(ctx context.Context) (TgSessionListRes, error) {
 	res, err := c.sendTgSessionList(ctx)
 	return res, err
 }
 
-func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, err error) {
+func (c *Client) sendTgSessionList(ctx context.Context) (res TgSessionListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-list"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -6605,12 +6823,12 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 // Complete the session creation process by verifying the code.
 //
 // PUT /telegram/{id}
-func (c *Client) TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (*Tg, error) {
+func (c *Client) TgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (TgSessionVerifyRes, error) {
 	res, err := c.sendTgSessionVerify(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (res *Tg, err error) {
+func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVerifyReq, params TgSessionVerifyParams) (res TgSessionVerifyRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("tg-session-verify"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -6738,138 +6956,21 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 	return result, nil
 }
 
-// WhatsappContacts invokes whatsapp-contacts operation.
+// UploadFile invokes uploadFile operation.
 //
-// Retrieve WhatsApp contacts.
+// Upload a file.
 //
-// GET /whatsapp/contacts
-func (c *Client) WhatsappContacts(ctx context.Context) (*WhatsappContactsOK, error) {
-	res, err := c.sendWhatsappContacts(ctx)
+// POST /storage/upload
+func (c *Client) UploadFile(ctx context.Context, request *UploadFileRequest) (*UploadFileResponse, error) {
+	res, err := c.sendUploadFile(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendWhatsappContacts(ctx context.Context) (res *WhatsappContactsOK, err error) {
+func (c *Client) sendUploadFile(ctx context.Context, request *UploadFileRequest) (res *UploadFileResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-contacts"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/whatsapp/contacts"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, WhatsappContactsOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/whatsapp/contacts"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WhatsappContactsOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WhatsappContactsOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeWhatsappContactsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// WhatsappDownloadAttachment invokes whatsapp-download-attachment operation.
-//
-// Download WhatsApp attachment into storage.
-//
-// POST /whatsapp/attachments/download
-func (c *Client) WhatsappDownloadAttachment(ctx context.Context, request *WhatsappDownloadAttachmentReq) (*WhatsappDownloadAttachmentOK, error) {
-	res, err := c.sendWhatsappDownloadAttachment(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *WhatsappDownloadAttachmentReq) (res *WhatsappDownloadAttachmentOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-download-attachment"),
+		otelogen.OperationID("uploadFile"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/attachments/download"),
+		semconv.HTTPRouteKey.String("/storage/upload"),
 	}
 
 	// Run stopwatch.
@@ -6884,7 +6985,7 @@ func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *Wh
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, WhatsappDownloadAttachmentOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, UploadFileOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -6902,7 +7003,7 @@ func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *Wh
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/whatsapp/attachments/download"
+	pathParts[0] = "/storage/upload"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -6910,7 +7011,7 @@ func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *Wh
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeWhatsappDownloadAttachmentRequest(request, r); err != nil {
+	if err := encodeUploadFileRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -6919,7 +7020,7 @@ func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *Wh
 		var satisfied bitset
 		{
 			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WhatsappDownloadAttachmentOperation, r); {
+			switch err := c.securitySessionCookieAuth(ctx, UploadFileOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -6930,7 +7031,7 @@ func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *Wh
 		}
 		{
 			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WhatsappDownloadAttachmentOperation, r); {
+			switch err := c.securityBearerAuth(ctx, UploadFileOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 1
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -6967,481 +7068,7 @@ func (c *Client) sendWhatsappDownloadAttachment(ctx context.Context, request *Wh
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeWhatsappDownloadAttachmentResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// WhatsappDownloadMessage invokes whatsapp-download-message operation.
-//
-// Download message content including media.
-//
-// POST /whatsapp/messages/download
-func (c *Client) WhatsappDownloadMessage(ctx context.Context, request *WhatsappDownloadMessageReq) (*WhatsappDownloadMessageOK, error) {
-	res, err := c.sendWhatsappDownloadMessage(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendWhatsappDownloadMessage(ctx context.Context, request *WhatsappDownloadMessageReq) (res *WhatsappDownloadMessageOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-download-message"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/messages/download"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, WhatsappDownloadMessageOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/whatsapp/messages/download"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeWhatsappDownloadMessageRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WhatsappDownloadMessageOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WhatsappDownloadMessageOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeWhatsappDownloadMessageResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// WhatsappLogin invokes whatsapp-login operation.
-//
-// Initiate WhatsApp login flow via QR code scanning.
-//
-// POST /whatsapp/login
-func (c *Client) WhatsappLogin(ctx context.Context) (*WhatsAppLoginResponse, error) {
-	res, err := c.sendWhatsappLogin(ctx)
-	return res, err
-}
-
-func (c *Client) sendWhatsappLogin(ctx context.Context) (res *WhatsAppLoginResponse, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-login"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/login"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, WhatsappLoginOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/whatsapp/login"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WhatsappLoginOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WhatsappLoginOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeWhatsappLoginResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// WhatsappStatus invokes whatsapp-status operation.
-//
-// Retrieve WhatsApp login status.
-//
-// GET /whatsapp/status
-func (c *Client) WhatsappStatus(ctx context.Context) (*WhatsAppStatusResponse, error) {
-	res, err := c.sendWhatsappStatus(ctx)
-	return res, err
-}
-
-func (c *Client) sendWhatsappStatus(ctx context.Context) (res *WhatsAppStatusResponse, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-status"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/whatsapp/status"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, WhatsappStatusOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/whatsapp/status"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WhatsappStatusOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WhatsappStatusOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeWhatsappStatusResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// WhatsappSync invokes whatsapp-sync operation.
-//
-// Sync messages for selected users or all users.
-//
-// POST /whatsapp/sync
-func (c *Client) WhatsappSync(ctx context.Context, request *WhatsappSyncReq) (*WhatsappSyncOK, error) {
-	res, err := c.sendWhatsappSync(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendWhatsappSync(ctx context.Context, request *WhatsappSyncReq) (res *WhatsappSyncOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("whatsapp-sync"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/whatsapp/sync"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, WhatsappSyncOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/whatsapp/sync"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeWhatsappSyncRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WhatsappSyncOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WhatsappSyncOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeWhatsappSyncResponse(resp)
+	result, err := decodeUploadFileResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

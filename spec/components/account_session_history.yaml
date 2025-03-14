@@ -1,0 +1,22 @@
+# spec/components/account_session_history.yaml
+type: array
+description: List of session logs for an account
+items:
+  type: object
+  additionalProperties: false
+  properties:
+    sessionId:
+      type: string
+      description: Unique session identifier
+    started_at:
+      type: string
+      format: date-time
+      description: Timestamp when the session started
+    ended_at:
+      type: string
+      format: date-time
+      description: Timestamp when the session ended
+    meta:
+      type: object
+      additionalProperties: true
+      description: Arbitrary key-value metadata for the session

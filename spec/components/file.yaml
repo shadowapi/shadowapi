@@ -1,0 +1,92 @@
+FileObject:
+  type: object
+  description: Represents a stored file, independent of the storage backend.
+  properties:
+    uuid:
+      type: string
+      description: Unique identifier for the file.
+    storage_type:
+      type: string
+      enum: [s3, postgres, hostfiles]
+      description: The type of storage backend.
+    storage_ref:
+      type: string
+      description: Reference ID within the respective storage backend.
+    name:
+      type: string
+      description: Original filename.
+    mime_type:
+      type: string
+      description: MIME type of the file.
+    size:
+      type: integer
+      description: Size of the file in bytes.
+    created_at:
+      type: string
+      format: date-time
+      description: Timestamp when the file was created.
+    updated_at:
+      type: string
+      format: date-time
+      description: Timestamp when the file was last modified.
+
+UploadFileRequest:
+  type: object
+  description: File upload request metadata.
+  properties:
+    name:
+      type: string
+    mime_type:
+      type: string
+    storage_type:
+      type: string
+      enum: [s3, postgres, hostfiles]
+      description: The storage backend where the file should be uploaded.
+
+UploadFileResponse:
+  type: object
+  description: Response after uploading a file.
+  properties:
+    file:
+      $ref: "../openapi.yaml#/components/schemas/FileObject"
+
+UploadPresignedUrlRequest:
+  type: object
+  description: Request to generate a pre-signed URL for upload.
+  properties:
+    name:
+      type: string
+    mime_type:
+      type: string
+    storage_type:
+      type: string
+      enum: [s3, postgres, hostfiles]
+      description: The target storage backend.
+
+UploadPresignedUrlResponse:
+  type: object
+  description: Response with a pre-signed URL for upload.
+  properties:
+    upload_url:
+      type: string
+      description: Pre-signed URL for uploading the file.
+    file:
+      $ref: "../openapi.yaml#/components/schemas/FileObject"
+
+GenerateDownloadLinkRequest:
+  type: object
+  description: Request to generate a download link.
+  properties:
+    file_uuid:
+      type: string
+    expiration:
+      type: integer
+      description: Expiration time in seconds for the download link.
+
+GenerateDownloadLinkResponse:
+  type: object
+  description: Response containing a signed download link.
+  properties:
+    url:
+      type: string
+      description: Signed URL for downloading the file.

@@ -1,0 +1,16 @@
+post:
+  summary: Upload a file
+  operationId: uploadFile
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UploadFileRequest"
+  responses:
+    "200":
+      description: File uploaded successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UploadFileResponse"

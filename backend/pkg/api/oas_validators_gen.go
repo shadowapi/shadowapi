@@ -10,6 +10,14 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func (s DatasourceEmailListOKApplicationJSON) Validate() error {
+	alias := ([]Datasource)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
 func (s *DatasourceEmailRunPipelineOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -48,6 +56,49 @@ func (s *DatasourceEmailRunPipelineOK) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s *FileObject) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.StorageType.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "storage_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s FileObjectStorageType) Validate() error {
+	switch s {
+	case "s3":
+		return nil
+	case "postgres":
+		return nil
+	case "hostfiles":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *MailLabel) Validate() error {
@@ -120,6 +171,31 @@ func (s *Message) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "recipients",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Attachments {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "attachments",
 			Error: err,
 		})
 	}
@@ -289,6 +365,8 @@ func (s MessageQuerySource) Validate() error {
 		return nil
 	case "linkedin":
 		return nil
+	case "custom":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
@@ -316,6 +394,8 @@ func (s MessageSource) Validate() error {
 	case "telegram":
 		return nil
 	case "linkedin":
+		return nil
+	case "custom":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -470,6 +550,22 @@ func (s OAuth2ClientLoginReqQuery) Validate() error {
 	return nil
 }
 
+func (s OAuth2ClientTokenListOKApplicationJSON) Validate() error {
+	alias := ([]OAuth2ClientToken)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s PipelineEntryListOKApplicationJSON) Validate() error {
+	alias := ([]PipelineEntry)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
 func (s *PipelineEntryTypeListOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -507,6 +603,160 @@ func (s *PipelineListOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "pipelines",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s StorageListOKApplicationJSON) Validate() error {
+	alias := ([]Storage)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s *UploadFileRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.StorageType.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "storage_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s UploadFileRequestStorageType) Validate() error {
+	switch s {
+	case "s3":
+		return nil
+	case "postgres":
+		return nil
+	case "hostfiles":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *UploadFileResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.File.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "file",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *UploadPresignedUrlRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.StorageType.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "storage_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s UploadPresignedUrlRequestStorageType) Validate() error {
+	switch s {
+	case "s3":
+		return nil
+	case "postgres":
+		return nil
+	case "hostfiles":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *UploadPresignedUrlResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.File.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "file",
 			Error: err,
 		})
 	}
