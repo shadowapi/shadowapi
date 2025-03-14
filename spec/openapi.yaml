@@ -7,8 +7,8 @@ info:
 
 components:
   schemas:
-    Datasource:
-      $ref: "components/datasource.yaml"
+    DatasourceEmail:
+      $ref: "components/datasource_email.yaml"
     DatasourceEmailCreate:
       $ref: "components/datasource_email_create.yaml"
     DatasourceEmailUpdate:

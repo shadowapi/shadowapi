@@ -17,7 +17,7 @@ telegram:
                 sessions:
                   type: array
                   items:
-                    $ref: "../components/tg.yaml"
+                    $ref: "../components/telegram.yaml"
       default:
         description: Error response.
         content:
@@ -48,7 +48,7 @@ telegram:
         content:
           application/json:
             schema:
-              $ref: "../components/tg.yaml"
+              $ref: "../components/telegram.yaml"
       default:
         description: Error response.
         content:
@@ -91,7 +91,7 @@ telegramId:
         content:
           application/json:
             schema:
-              $ref: "../components/tg.yaml"
+              $ref: "../components/telegram.yaml"
       default:
         description: Error response.
         content:

@@ -13,43 +13,43 @@ type Handler interface {
 	// Create a new email datasource.
 	//
 	// POST /datasource/email
-	DatasourceEmailCreate(ctx context.Context, req *DatasourceEmailCreate) (DatasourceEmailCreateRes, error)
+	DatasourceEmailCreate(ctx context.Context, req *DatasourceEmailCreate) (*DatasourceEmail, error)
 	// DatasourceEmailDelete implements datasource-email-delete operation.
 	//
 	// Delete an email datasource.
 	//
 	// DELETE /datasource/email/{uuid}
-	DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) (DatasourceEmailDeleteRes, error)
+	DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) error
 	// DatasourceEmailGet implements datasource-email-get operation.
 	//
 	// Get email datasources.
 	//
 	// GET /datasource/email/{uuid}
-	DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (DatasourceEmailGetRes, error)
+	DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (*DatasourceEmail, error)
 	// DatasourceEmailList implements datasource-email-list operation.
 	//
 	// List email datasources.
 	//
 	// GET /datasource/email
-	DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (DatasourceEmailListRes, error)
+	DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) ([]DatasourceEmail, error)
 	// DatasourceEmailRunPipeline implements datasource-email-run-pipeline operation.
 	//
 	// Run datasource email pipeline.
 	//
 	// POST /datasource/email/{uuid}/run/pipeline
-	DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (DatasourceEmailRunPipelineRes, error)
+	DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (*DatasourceEmailRunPipelineOK, error)
 	// DatasourceEmailUpdate implements datasource-email-update operation.
 	//
 	// Update an email datasource.
 	//
 	// PUT /datasource/email/{uuid}
-	DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (DatasourceEmailUpdateRes, error)
+	DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (*DatasourceEmail, error)
 	// DatasourceSetOAuth2Client implements datasource-set-oauth2-client operation.
 	//
 	// Set OAuth2 client to the datasource.
 	//
 	// PUT /datasource/{uuid}/oauth2/client
-	DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (DatasourceSetOAuth2ClientRes, error)
+	DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error
 	// GenerateDownloadLink implements generateDownloadLink operation.
 	//
 	// Generate a download link for a stored file.
@@ -67,247 +67,251 @@ type Handler interface {
 	// Execute a search query on email messages.
 	//
 	// POST /message/email/query
-	MessageEmailQuery(ctx context.Context, req *MessageQuery) (MessageEmailQueryRes, error)
+	MessageEmailQuery(ctx context.Context, req *MessageQuery) (*MessageEmailQueryOK, error)
 	// MessageLinkedinQuery implements messageLinkedinQuery operation.
 	//
 	// Execute a search query on LinkedIn messages.
 	//
 	// POST /message/linkedin/query
-	MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (MessageLinkedinQueryRes, error)
+	MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (*MessageLinkedinQueryOK, error)
 	// MessageTelegramQuery implements messageTelegramQuery operation.
 	//
 	// Execute a search query on Telegram messages.
 	//
 	// POST /message/telegram/query
-	MessageTelegramQuery(ctx context.Context, req *MessageQuery) (MessageTelegramQueryRes, error)
+	MessageTelegramQuery(ctx context.Context, req *MessageQuery) (*MessageTelegramQueryOK, error)
 	// MessageWhatsappQuery implements messageWhatsappQuery operation.
 	//
 	// Execute a search query on WhatsApp messages.
 	//
 	// POST /message/whatsapp/query
-	MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (MessageWhatsappQueryRes, error)
+	MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (*MessageWhatsappQueryOK, error)
 	// OAuth2ClientCallback implements oauth2-client-callback operation.
 	//
 	// Serve OAuth2 client callback.
 	//
 	// GET /oauth2/callback
-	OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (OAuth2ClientCallbackRes, error)
+	OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (*OAuth2ClientCallbackFound, error)
 	// OAuth2ClientCreate implements oauth2-client-create operation.
 	//
 	// Create OAuth2 client.
 	//
 	// POST /oauth2/client
-	OAuth2ClientCreate(ctx context.Context, req *OAuth2ClientCreateReq) (OAuth2ClientCreateRes, error)
+	OAuth2ClientCreate(ctx context.Context, req *OAuth2ClientCreateReq) (*OAuth2Client, error)
 	// OAuth2ClientDelete implements oauth2-client-delete operation.
 	//
 	// Delete OAuth2 client.
 	//
 	// DELETE /oauth2/client/{id}
-	OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) (OAuth2ClientDeleteRes, error)
+	OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error
 	// OAuth2ClientGet implements oauth2-client-get operation.
 	//
 	// Get OAuth2 client details.
 	//
 	// GET /oauth2/client/{id}
-	OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (OAuth2ClientGetRes, error)
+	OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (*OAuth2Client, error)
 	// OAuth2ClientList implements oauth2-client-list operation.
 	//
 	// List OAuth2 clients.
 	//
 	// GET /oauth2/client
-	OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (OAuth2ClientListRes, error)
+	OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (*OAuth2ClientListOK, error)
 	// OAuth2ClientLogin implements oauth2-client-login operation.
 	//
 	// Start OAuth2 login flow.
 	//
 	// POST /oauth2/login
-	OAuth2ClientLogin(ctx context.Context, req *OAuth2ClientLoginReq) (OAuth2ClientLoginRes, error)
+	OAuth2ClientLogin(ctx context.Context, req *OAuth2ClientLoginReq) (*OAuth2ClientLoginOK, error)
 	// OAuth2ClientTokenDelete implements oauth2-client-token-delete operation.
 	//
 	// Delete OAuth2 client token.
 	//
 	// DELETE /oauth2/client/{datasource_uuid}/token/{uuid}
-	OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) (OAuth2ClientTokenDeleteRes, error)
+	OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) error
 	// OAuth2ClientTokenList implements oauth2-client-token-list operation.
 	//
 	// List OAuth2 client tokens.
 	//
 	// GET /oauth2/client/{datasource_uuid}/token
-	OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (OAuth2ClientTokenListRes, error)
+	OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) ([]OAuth2ClientToken, error)
 	// OAuth2ClientUpdate implements oauth2-client-update operation.
 	//
 	// Update OAuth2 client.
 	//
 	// PUT /oauth2/client/{id}
-	OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (OAuth2ClientUpdateRes, error)
+	OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error)
 	// PipelineCreate implements pipeline-create operation.
 	//
 	// Create Pipeline.
 	//
 	// POST /pipeline
-	PipelineCreate(ctx context.Context, req *PipelineCreateReq) (PipelineCreateRes, error)
+	PipelineCreate(ctx context.Context, req *PipelineCreateReq) (*Pipeline, error)
 	// PipelineDelete implements pipeline-delete operation.
 	//
 	// Delete a pipeline.
 	//
 	// DELETE /pipeline/{uuid}
-	PipelineDelete(ctx context.Context, params PipelineDeleteParams) (PipelineDeleteRes, error)
+	PipelineDelete(ctx context.Context, params PipelineDeleteParams) error
 	// PipelineEntryCreate implements pipeline-entry-create operation.
 	//
 	// Create a pipeline entry.
 	//
 	// POST /pipeline/{uuid}/entry
-	PipelineEntryCreate(ctx context.Context, req *PipelineEntryCreateReq, params PipelineEntryCreateParams) (PipelineEntryCreateRes, error)
+	PipelineEntryCreate(ctx context.Context, req *PipelineEntryCreateReq, params PipelineEntryCreateParams) (*PipelineEntry, error)
 	// PipelineEntryDelete implements pipeline-entry-delete operation.
 	//
 	// Delete pipeline entry.
 	//
 	// DELETE /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) (PipelineEntryDeleteRes, error)
+	PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error
 	// PipelineEntryGet implements pipeline-entry-get operation.
 	//
 	// Get pipeline entry.
 	//
 	// GET /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (PipelineEntryGetRes, error)
+	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error)
 	// PipelineEntryList implements pipeline-entry-list operation.
 	//
 	// Get pipeline entry.
 	//
 	// GET /pipeline/{uuid}/entry
-	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) (PipelineEntryListRes, error)
+	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error)
 	// PipelineEntryTypeList implements pipeline-entry-type-list operation.
 	//
 	// Get Pipeline Entry Types.
 	//
 	// GET /pipeline/entry/types
-	PipelineEntryTypeList(ctx context.Context) (PipelineEntryTypeListRes, error)
+	PipelineEntryTypeList(ctx context.Context) (*PipelineEntryTypeListOK, error)
 	// PipelineEntryUpdate implements pipeline-entry-update operation.
 	//
 	// Update a pipeline entry.
 	//
 	// PUT /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryUpdate(ctx context.Context, req *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (PipelineEntryUpdateRes, error)
+	PipelineEntryUpdate(ctx context.Context, req *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error)
 	// PipelineGet implements pipeline-get operation.
 	//
 	// Get pipeline.
 	//
 	// GET /pipeline/{uuid}
-	PipelineGet(ctx context.Context, params PipelineGetParams) (PipelineGetRes, error)
+	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList implements pipeline-list operation.
 	//
 	// Create Pipeline Object.
 	//
 	// GET /pipeline
-	PipelineList(ctx context.Context, params PipelineListParams) (PipelineListRes, error)
+	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)
 	// PipelineUpdate implements pipeline-update operation.
 	//
 	// Update pipeline.
 	//
 	// PUT /pipeline/{uuid}
-	PipelineUpdate(ctx context.Context, req *PipelineUpdateReq, params PipelineUpdateParams) (PipelineUpdateRes, error)
+	PipelineUpdate(ctx context.Context, req *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error)
 	// StorageHostfilesCreate implements storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.
 	//
 	// POST /storage/hostfiles
-	StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (StorageHostfilesCreateRes, error)
+	StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (*StorageHostfiles, error)
 	// StorageHostfilesDelete implements storage-hostfiles-delete operation.
 	//
 	// Delete a specific Host Files storage instance by UUID.
 	//
 	// DELETE /storage/hostfiles/{uuid}
-	StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (StorageHostfilesDeleteRes, error)
+	StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) error
 	// StorageHostfilesGet implements storage-hostfiles-get operation.
 	//
 	// Retrieve details of a specific Host Files storage instance by UUID.
 	//
 	// GET /storage/hostfiles/{uuid}
-	StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (StorageHostfilesGetRes, error)
+	StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (*StorageHostfiles, error)
 	// StorageHostfilesUpdate implements storage-hostfiles-update operation.
 	//
 	// Update details of a specific Host Files storage instance by UUID.
 	//
 	// PUT /storage/hostfiles/{uuid}
-	StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (StorageHostfilesUpdateRes, error)
+	StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (*StorageHostfiles, error)
 	// StorageList implements storage-list operation.
 	//
 	// Retrieve a list of data storage objects.
 	//
 	// GET /storage
-	StorageList(ctx context.Context, params StorageListParams) (StorageListRes, error)
+	StorageList(ctx context.Context, params StorageListParams) ([]Storage, error)
 	// StoragePostgresCreate implements storage-postgres-create operation.
 	//
 	// Create a new PostgreSQL storage instance.
 	//
 	// POST /storage/postgres
-	StoragePostgresCreate(ctx context.Context, req *StoragePostgres) (StoragePostgresCreateRes, error)
+	StoragePostgresCreate(ctx context.Context, req *StoragePostgres) (*StoragePostgres, error)
 	// StoragePostgresDelete implements storage-postgres-delete operation.
 	//
 	// Delete a specific PostgreSQL storage instance by UUID.
 	//
 	// DELETE /storage/postgres/{uuid}
-	StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) (StoragePostgresDeleteRes, error)
+	StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) error
 	// StoragePostgresGet implements storage-postgres-get operation.
 	//
 	// Retrieve details of a specific PostgreSQL storage instance by UUID.
 	//
 	// GET /storage/postgres/{uuid}
-	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (StoragePostgresGetRes, error)
+	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (*StoragePostgres, error)
 	// StoragePostgresUpdate implements storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.
 	//
 	// PUT /storage/postgres/{uuid}
-	StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (StoragePostgresUpdateRes, error)
+	StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (*StoragePostgres, error)
 	// StorageS3Create implements storage-s3-create operation.
 	//
 	// Create a new S3 storage instance.
 	//
 	// POST /storage/s3
-	StorageS3Create(ctx context.Context, req *StorageS3) (StorageS3CreateRes, error)
+	StorageS3Create(ctx context.Context, req *StorageS3) (*StorageS3, error)
 	// StorageS3Delete implements storage-s3-delete operation.
 	//
 	// Delete a specific S3 storage instance by UUID.
 	//
 	// DELETE /storage/s3/{uuid}
-	StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) (StorageS3DeleteRes, error)
+	StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) error
 	// StorageS3Get implements storage-s3-get operation.
 	//
 	// Retrieve details of a specific S3 storage instance by UUID.
 	//
 	// GET /storage/s3/{uuid}
-	StorageS3Get(ctx context.Context, params StorageS3GetParams) (StorageS3GetRes, error)
+	StorageS3Get(ctx context.Context, params StorageS3GetParams) (*StorageS3, error)
 	// StorageS3Update implements storage-s3-update operation.
 	//
 	// Update details of a specific S3 storage instance by UUID.
 	//
 	// PUT /storage/s3/{uuid}
-	StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (StorageS3UpdateRes, error)
+	StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (*StorageS3, error)
 	// TgSessionCreate implements tg-session-create operation.
 	//
 	// Create a new Telegram session.
 	//
 	// POST /telegram
-	TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (TgSessionCreateRes, error)
+	TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (*Telegram, error)
 	// TgSessionList implements tg-session-list operation.
 	//
 	// List all Telegram sessions for the authenticated user.
 	//
 	// GET /telegram
-	TgSessionList(ctx context.Context) (TgSessionListRes, error)
+	TgSessionList(ctx context.Context) (*TgSessionListOK, error)
 	// TgSessionVerify implements tg-session-verify operation.
 	//
 	// Complete the session creation process by verifying the code.
 	//
 	// PUT /telegram/{id}
-	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (TgSessionVerifyRes, error)
+	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (*Telegram, error)
 	// UploadFile implements uploadFile operation.
 	//
 	// Upload a file.
 	//
 	// POST /storage/upload
 	UploadFile(ctx context.Context, req *UploadFileRequest) (*UploadFileResponse, error)
+	// NewError creates *ErrorStatusCode from error returned by handler.
+	//
+	// Used for common default response.
+	NewError(ctx context.Context, err error) *ErrorStatusCode
 }
 
 // Server implements http server based on OpenAPI v3 specification and

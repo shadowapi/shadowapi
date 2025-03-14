@@ -14,7 +14,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.DatasourceEmailCreate) (*api.Datasource, error) {
+func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.DatasourceEmailCreate) (*api.DatasourceEmail, error) {
 	log := h.log.With("handler", "DatasourceEmailCreate")
 	identity, ok := session.GetIdentity(ctx)
 	if !ok {
@@ -28,7 +28,7 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 		return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse user uuid"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Datasource, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceEmail, error) {
 		db := query.New(h.dbp).WithTx(tx)
 		cq, err := db.CreateDatasource(ctx, query.CreateDatasourceParams{
 			UUID:      uuid.Must(uuid.NewV7()),
@@ -89,7 +89,7 @@ func (h *Handler) DatasourceEmailDelete(ctx context.Context, params api.Datasour
 
 func (h *Handler) DatasourceEmailGet(
 	ctx context.Context, params api.DatasourceEmailGetParams,
-) (*api.Datasource, error) {
+) (*api.DatasourceEmail, error) {
 	log := h.log.With("handler", "DatasourceEmailGet")
 	connectionUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
@@ -97,7 +97,7 @@ func (h *Handler) DatasourceEmailGet(
 		return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse connection uuid"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Datasource, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceEmail, error) {
 		cq, err := query.New(h.dbp).GetDatasource(ctx, connectionUUID)
 		if err != nil {
 			log.Error("failed to list connections", "error", err.Error())
@@ -111,14 +111,14 @@ func (h *Handler) DatasourceEmailGet(
 
 func (h *Handler) DatasourceEmailList(
 	ctx context.Context, params api.DatasourceEmailListParams,
-) ([]api.Datasource, error) {
+) ([]api.DatasourceEmail, error) {
 	log := h.log.With("handler", "DatasourceEmailList")
 	if _, ok := session.GetIdentity(ctx); !ok {
 		log.Error("failed to get identity from context")
 		return nil, ErrWithCode(http.StatusUnauthorized, E("not authenticated"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) ([]api.Datasource, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) ([]api.DatasourceEmail, error) {
 		lp := query.ListDatasourceParams{}
 		if params.Limit.IsSet() {
 			lp.LimitRecords = params.Limit.Value
@@ -132,7 +132,7 @@ func (h *Handler) DatasourceEmailList(
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list connections"))
 		}
 
-		var connections []api.Datasource
+		var connections []api.DatasourceEmail
 		for _, row := range rows {
 			c := QToDatasource(row.Datasource)
 			QToDatasourceEmail(&c, row.DatasourceEmail)
@@ -144,7 +144,7 @@ func (h *Handler) DatasourceEmailList(
 
 func (h *Handler) DatasourceEmailUpdate(
 	ctx context.Context, req *api.DatasourceEmailUpdate, params api.DatasourceEmailUpdateParams,
-) (*api.Datasource, error) {
+) (*api.DatasourceEmail, error) {
 	log := h.log.With("handler", "DatasourceEmailUpdate", "connectionUUID", params.UUID)
 
 	identity, ok := session.GetIdentity(ctx)
@@ -165,7 +165,7 @@ func (h *Handler) DatasourceEmailUpdate(
 		return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse connection uuid"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Datasource, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceEmail, error) {
 		db := query.New(h.dbp).WithTx(tx)
 		updateDatasource := query.UpdateDatasourceParams{
 			UUID:     connectionUUID,

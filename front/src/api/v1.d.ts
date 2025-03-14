@@ -554,7 +554,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Datasource: components["schemas"]["datasource"];
+        DatasourceEmail: components["schemas"]["datasource_email"];
         DatasourceEmailCreate: components["schemas"]["datasource_email_create"];
         DatasourceEmailUpdate: components["schemas"]["datasource_email_update"];
         Error: components["schemas"]["error"];
@@ -650,24 +650,24 @@ export interface components {
              */
             status?: number;
         };
-        datasource: {
+        datasource_email: {
             readonly uuid: string;
+            name: string;
+            is_enabled: boolean;
+            type: string;
             user_uuid?: string;
             email?: string;
-            imap_server?: string;
-            is_enabled: boolean;
-            name: string;
+            provider?: string;
             oauth2_client_id?: string;
             oauth2_token_uuid?: string;
-            password?: string;
-            provider?: string;
+            imap_server?: string;
             smtp_server?: string;
             smtp_tls?: boolean;
-            type: string;
-            /** Format: date-time */
-            readonly updated_at: string;
+            password?: string;
             /** Format: date-time */
             readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
         };
         datasource_email_create: {
             /** @description Email address of the user. */
@@ -841,7 +841,7 @@ export interface components {
             path: string;
         };
         /** @description Telegram API session and user representation */
-        tg: {
+        telegram: {
             /** @description Session ID */
             id: number;
             /** @description Session phone number */
@@ -974,10 +974,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["datasource"][];
+                    "application/json": components["schemas"]["datasource_email"][];
                 };
             };
-            /** @description Error */
+            /** @description Unexpected error */
             default: {
                 headers: {
                     [name: string]: unknown;
@@ -1007,7 +1007,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["datasource"];
+                    "application/json": components["schemas"]["datasource_email"];
                 };
             };
             /** @description Error */
@@ -1039,7 +1039,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["datasource"];
+                    "application/json": components["schemas"]["datasource_email"];
                 };
             };
             /** @description Error */
@@ -1075,7 +1075,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["datasource"];
+                    "application/json": components["schemas"]["datasource_email"];
                 };
             };
             /** @description Error */
@@ -2365,7 +2365,7 @@ export interface operations {
                     "application/json": {
                         /** @description Total number of sessions */
                         total?: number;
-                        sessions?: components["schemas"]["tg"][];
+                        sessions?: components["schemas"]["telegram"][];
                     };
                 };
             };
@@ -2405,7 +2405,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tg"];
+                    "application/json": components["schemas"]["telegram"];
                 };
             };
             /** @description Error response. */
@@ -2448,7 +2448,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tg"];
+                    "application/json": components["schemas"]["telegram"];
                 };
             };
             /** @description Error response. */
@@ -2628,6 +2628,15 @@ export interface operations {
                     "application/json": components["schemas"]["UploadFileResponse"];
                 };
             };
+            /** @description Unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
         };
     };
     generatePresignedUploadUrl: {
@@ -2652,6 +2661,15 @@ export interface operations {
                     "application/json": components["schemas"]["UploadPresignedUrlResponse"];
                 };
             };
+            /** @description Unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
         };
     };
     generateDownloadLink: {
@@ -2674,6 +2692,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GenerateDownloadLinkResponse"];
+                };
+            };
+            /** @description Unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
                 };
             };
         };

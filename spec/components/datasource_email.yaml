@@ -5,38 +5,38 @@ properties:
   uuid:
     readOnly: true
     type: string
+  name:
+    type: string
+  is_enabled:
+    type: boolean
+  type:
+    type: string
   user_uuid:
     type: string
   email:
     type: string
-  imap_server:
-    type: string
-  is_enabled:
-    type: boolean
-  name:
+  provider:
     type: string
   oauth2_client_id:
     type: string
   oauth2_token_uuid:
     type: string
-  password:
-    type: string
-  provider:
+  imap_server:
     type: string
   smtp_server:
     type: string
   smtp_tls:
     type: boolean
-  type:
-    type: string
-  updated_at:
-    format: date-time
-    readOnly: true
+  password:
     type: string
   created_at:
     type: string
     format: date-time
     readOnly: true
+  updated_at:
+    format: date-time
+    readOnly: true
+    type: string
 required:
   - uuid
   - name

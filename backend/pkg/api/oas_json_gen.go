@@ -15,17 +15,29 @@ import (
 )
 
 // Encode implements json.Marshaler.
-func (s *Datasource) Encode(e *jx.Encoder) {
+func (s *DatasourceEmail) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *Datasource) encodeFields(e *jx.Encoder) {
+func (s *DatasourceEmail) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("uuid")
 		e.Str(s.UUID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("is_enabled")
+		e.Bool(s.IsEnabled)
+	}
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
 	}
 	{
 		if s.UserUUID.Set {
@@ -40,18 +52,10 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.ImapServer.Set {
-			e.FieldStart("imap_server")
-			s.ImapServer.Encode(e)
+		if s.Provider.Set {
+			e.FieldStart("provider")
+			s.Provider.Encode(e)
 		}
-	}
-	{
-		e.FieldStart("is_enabled")
-		e.Bool(s.IsEnabled)
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
 	}
 	{
 		if s.OAuth2ClientID.Set {
@@ -66,15 +70,9 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Password.Set {
-			e.FieldStart("password")
-			s.Password.Encode(e)
-		}
-	}
-	{
-		if s.Provider.Set {
-			e.FieldStart("provider")
-			s.Provider.Encode(e)
+		if s.ImapServer.Set {
+			e.FieldStart("imap_server")
+			s.ImapServer.Encode(e)
 		}
 	}
 	{
@@ -90,41 +88,43 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("type")
-		e.Str(s.Type)
-	}
-	{
-		e.FieldStart("updated_at")
-		json.EncodeDateTime(e, s.UpdatedAt)
+		if s.Password.Set {
+			e.FieldStart("password")
+			s.Password.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("created_at")
 		json.EncodeDateTime(e, s.CreatedAt)
 	}
+	{
+		e.FieldStart("updated_at")
+		json.EncodeDateTime(e, s.UpdatedAt)
+	}
 }
 
-var jsonFieldsNameOfDatasource = [15]string{
+var jsonFieldsNameOfDatasourceEmail = [15]string{
 	0:  "uuid",
-	1:  "user_uuid",
-	2:  "email",
-	3:  "imap_server",
-	4:  "is_enabled",
-	5:  "name",
-	6:  "oauth2_client_id",
-	7:  "oauth2_token_uuid",
-	8:  "password",
-	9:  "provider",
+	1:  "name",
+	2:  "is_enabled",
+	3:  "type",
+	4:  "user_uuid",
+	5:  "email",
+	6:  "provider",
+	7:  "oauth2_client_id",
+	8:  "oauth2_token_uuid",
+	9:  "imap_server",
 	10: "smtp_server",
 	11: "smtp_tls",
-	12: "type",
-	13: "updated_at",
-	14: "created_at",
+	12: "password",
+	13: "created_at",
+	14: "updated_at",
 }
 
-// Decode decodes Datasource from json.
-func (s *Datasource) Decode(d *jx.Decoder) error {
+// Decode decodes DatasourceEmail from json.
+func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode Datasource to nil")
+		return errors.New("invalid: unable to decode DatasourceEmail to nil")
 	}
 	var requiredBitSet [2]uint8
 
@@ -141,6 +141,42 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "is_enabled":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsEnabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_enabled\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "user_uuid":
 			if err := func() error {
@@ -162,39 +198,15 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email\"")
 			}
-		case "imap_server":
+		case "provider":
 			if err := func() error {
-				s.ImapServer.Reset()
-				if err := s.ImapServer.Decode(d); err != nil {
+				s.Provider.Reset()
+				if err := s.Provider.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"imap_server\"")
-			}
-		case "is_enabled":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Bool()
-				s.IsEnabled = bool(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_enabled\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
+				return errors.Wrap(err, "decode field \"provider\"")
 			}
 		case "oauth2_client_id":
 			if err := func() error {
@@ -216,25 +228,15 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"oauth2_token_uuid\"")
 			}
-		case "password":
+		case "imap_server":
 			if err := func() error {
-				s.Password.Reset()
-				if err := s.Password.Decode(d); err != nil {
+				s.ImapServer.Reset()
+				if err := s.ImapServer.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"password\"")
-			}
-		case "provider":
-			if err := func() error {
-				s.Provider.Reset()
-				if err := s.Provider.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"provider\"")
+				return errors.Wrap(err, "decode field \"imap_server\"")
 			}
 		case "smtp_server":
 			if err := func() error {
@@ -256,32 +258,18 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"smtp_tls\"")
 			}
-		case "type":
-			requiredBitSet[1] |= 1 << 4
+		case "password":
 			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
+				s.Password.Reset()
+				if err := s.Password.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"type\"")
-			}
-		case "updated_at":
-			requiredBitSet[1] |= 1 << 5
-			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.UpdatedAt = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"updated_at\"")
+				return errors.Wrap(err, "decode field \"password\"")
 			}
 		case "created_at":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -292,18 +280,30 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"created_at\"")
 			}
+		case "updated_at":
+			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.UpdatedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode Datasource")
+		return errors.Wrap(err, "decode DatasourceEmail")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00110001,
-		0b01110000,
+		0b00001111,
+		0b01100000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -315,8 +315,8 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfDatasource) {
-					name = jsonFieldsNameOfDatasource[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfDatasourceEmail) {
+					name = jsonFieldsNameOfDatasourceEmail[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -337,14 +337,14 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *Datasource) MarshalJSON() ([]byte, error) {
+func (s *DatasourceEmail) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Datasource) UnmarshalJSON(data []byte) error {
+func (s *DatasourceEmail) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -595,56 +595,6 @@ func (s *DatasourceEmailCreate) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DatasourceEmailCreate) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes DatasourceEmailListOKApplicationJSON as json.
-func (s DatasourceEmailListOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []Datasource(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
-}
-
-// Decode decodes DatasourceEmailListOKApplicationJSON from json.
-func (s *DatasourceEmailListOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DatasourceEmailListOKApplicationJSON to nil")
-	}
-	var unwrapped []Datasource
-	if err := func() error {
-		unwrapped = make([]Datasource, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem Datasource
-			if err := elem.Decode(d); err != nil {
-				return err
-			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = DatasourceEmailListOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s DatasourceEmailListOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DatasourceEmailListOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -4151,56 +4101,6 @@ func (s *OAuth2ClientToken) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes OAuth2ClientTokenListOKApplicationJSON as json.
-func (s OAuth2ClientTokenListOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []OAuth2ClientToken(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
-}
-
-// Decode decodes OAuth2ClientTokenListOKApplicationJSON from json.
-func (s *OAuth2ClientTokenListOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode OAuth2ClientTokenListOKApplicationJSON to nil")
-	}
-	var unwrapped []OAuth2ClientToken
-	if err := func() error {
-		unwrapped = make([]OAuth2ClientToken, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem OAuth2ClientToken
-			if err := elem.Decode(d); err != nil {
-				return err
-			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = OAuth2ClientTokenListOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OAuth2ClientTokenListOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OAuth2ClientTokenListOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *OAuth2ClientUpdateReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -5569,56 +5469,6 @@ func (s *PipelineEntryCreateReqParams) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes PipelineEntryListOKApplicationJSON as json.
-func (s PipelineEntryListOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []PipelineEntry(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
-}
-
-// Decode decodes PipelineEntryListOKApplicationJSON from json.
-func (s *PipelineEntryListOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryListOKApplicationJSON to nil")
-	}
-	var unwrapped []PipelineEntry
-	if err := func() error {
-		unwrapped = make([]PipelineEntry, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem PipelineEntry
-			if err := elem.Decode(d); err != nil {
-				return err
-			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = PipelineEntryListOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s PipelineEntryListOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryListOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s PipelineEntryParams) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -6760,56 +6610,6 @@ func (s *StorageHostfiles) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes StorageListOKApplicationJSON as json.
-func (s StorageListOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []Storage(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
-}
-
-// Decode decodes StorageListOKApplicationJSON from json.
-func (s *StorageListOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode StorageListOKApplicationJSON to nil")
-	}
-	var unwrapped []Storage
-	if err := func() error {
-		unwrapped = make([]Storage, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem Storage
-			if err := elem.Decode(d); err != nil {
-				return err
-			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = StorageListOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s StorageListOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *StorageListOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *StoragePostgres) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -7241,14 +7041,14 @@ func (s *StorageS3) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *Tg) Encode(e *jx.Encoder) {
+func (s *Telegram) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *Tg) encodeFields(e *jx.Encoder) {
+func (s *Telegram) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		e.Int(s.ID)
@@ -7277,7 +7077,7 @@ func (s *Tg) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTg = [6]string{
+var jsonFieldsNameOfTelegram = [6]string{
 	0: "id",
 	1: "phone",
 	2: "description",
@@ -7286,10 +7086,10 @@ var jsonFieldsNameOfTg = [6]string{
 	5: "user",
 }
 
-// Decode decodes Tg from json.
-func (s *Tg) Decode(d *jx.Decoder) error {
+// Decode decodes Telegram from json.
+func (s *Telegram) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode Tg to nil")
+		return errors.New("invalid: unable to decode Telegram to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -7368,7 +7168,7 @@ func (s *Tg) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode Tg")
+		return errors.Wrap(err, "decode Telegram")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -7385,8 +7185,8 @@ func (s *Tg) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfTg) {
-					name = jsonFieldsNameOfTg[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfTelegram) {
+					name = jsonFieldsNameOfTelegram[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -7407,14 +7207,145 @@ func (s *Tg) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *Tg) MarshalJSON() ([]byte, error) {
+func (s *Telegram) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Tg) UnmarshalJSON(data []byte) error {
+func (s *Telegram) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TelegramUser) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TelegramUser) encodeFields(e *jx.Encoder) {
+	{
+		if s.ID.Set {
+			e.FieldStart("id")
+			s.ID.Encode(e)
+		}
+	}
+	{
+		if s.Username.Set {
+			e.FieldStart("username")
+			s.Username.Encode(e)
+		}
+	}
+	{
+		if s.FirstName.Set {
+			e.FieldStart("first_name")
+			s.FirstName.Encode(e)
+		}
+	}
+	{
+		if s.LastName.Set {
+			e.FieldStart("last_name")
+			s.LastName.Encode(e)
+		}
+	}
+	{
+		if s.Phone.Set {
+			e.FieldStart("phone")
+			s.Phone.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfTelegramUser = [5]string{
+	0: "id",
+	1: "username",
+	2: "first_name",
+	3: "last_name",
+	4: "phone",
+}
+
+// Decode decodes TelegramUser from json.
+func (s *TelegramUser) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TelegramUser to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			if err := func() error {
+				s.ID.Reset()
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "username":
+			if err := func() error {
+				s.Username.Reset()
+				if err := s.Username.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"username\"")
+			}
+		case "first_name":
+			if err := func() error {
+				s.FirstName.Reset()
+				if err := s.FirstName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"first_name\"")
+			}
+		case "last_name":
+			if err := func() error {
+				s.LastName.Reset()
+				if err := s.LastName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_name\"")
+			}
+		case "phone":
+			if err := func() error {
+				s.Phone.Reset()
+				if err := s.Phone.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"phone\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TelegramUser")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TelegramUser) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TelegramUser) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -7567,9 +7498,9 @@ func (s *TgSessionListOK) Decode(d *jx.Decoder) error {
 			}
 		case "sessions":
 			if err := func() error {
-				s.Sessions = make([]Tg, 0)
+				s.Sessions = make([]Telegram, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem Tg
+					var elem Telegram
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -7699,137 +7630,6 @@ func (s *TgSessionVerifyReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *TgSessionVerifyReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *TgUser) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *TgUser) encodeFields(e *jx.Encoder) {
-	{
-		if s.ID.Set {
-			e.FieldStart("id")
-			s.ID.Encode(e)
-		}
-	}
-	{
-		if s.Username.Set {
-			e.FieldStart("username")
-			s.Username.Encode(e)
-		}
-	}
-	{
-		if s.FirstName.Set {
-			e.FieldStart("first_name")
-			s.FirstName.Encode(e)
-		}
-	}
-	{
-		if s.LastName.Set {
-			e.FieldStart("last_name")
-			s.LastName.Encode(e)
-		}
-	}
-	{
-		if s.Phone.Set {
-			e.FieldStart("phone")
-			s.Phone.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfTgUser = [5]string{
-	0: "id",
-	1: "username",
-	2: "first_name",
-	3: "last_name",
-	4: "phone",
-}
-
-// Decode decodes TgUser from json.
-func (s *TgUser) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode TgUser to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			if err := func() error {
-				s.ID.Reset()
-				if err := s.ID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "username":
-			if err := func() error {
-				s.Username.Reset()
-				if err := s.Username.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"username\"")
-			}
-		case "first_name":
-			if err := func() error {
-				s.FirstName.Reset()
-				if err := s.FirstName.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"first_name\"")
-			}
-		case "last_name":
-			if err := func() error {
-				s.LastName.Reset()
-				if err := s.LastName.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"last_name\"")
-			}
-		case "phone":
-			if err := func() error {
-				s.Phone.Reset()
-				if err := s.Phone.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode TgUser")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *TgUser) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *TgUser) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

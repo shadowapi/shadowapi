@@ -10,14 +10,6 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s DatasourceEmailListOKApplicationJSON) Validate() error {
-	alias := ([]Datasource)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
-	return nil
-}
-
 func (s *DatasourceEmailRunPipelineOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -550,22 +542,6 @@ func (s OAuth2ClientLoginReqQuery) Validate() error {
 	return nil
 }
 
-func (s OAuth2ClientTokenListOKApplicationJSON) Validate() error {
-	alias := ([]OAuth2ClientToken)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
-	return nil
-}
-
-func (s PipelineEntryListOKApplicationJSON) Validate() error {
-	alias := ([]PipelineEntry)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
-	}
-	return nil
-}
-
 func (s *PipelineEntryTypeListOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -608,14 +584,6 @@ func (s *PipelineListOK) Validate() error {
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s StorageListOKApplicationJSON) Validate() error {
-	alias := ([]Storage)(s)
-	if alias == nil {
-		return errors.New("nil is invalid value")
 	}
 	return nil
 }

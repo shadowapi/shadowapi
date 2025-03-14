@@ -8,8 +8,8 @@ import (
 )
 
 // QToDatasource converts a query.Datasource to an api.Datasource
-func QToDatasource(row query.Datasource) api.Datasource {
-	c := api.Datasource{
+func QToDatasource(row query.Datasource) api.DatasourceEmail {
+	c := api.DatasourceEmail{
 		UUID:      row.UUID.String(),
 		Name:      row.Name,
 		Type:      row.Type,
@@ -34,7 +34,7 @@ func QToDatasource(row query.Datasource) api.Datasource {
 }
 
 // QToDatasourceEmail extracts query.DatasourceEmail fields and set them to an api.Datasource
-func QToDatasourceEmail(c *api.Datasource, row query.DatasourceEmail) {
+func QToDatasourceEmail(c *api.DatasourceEmail, row query.DatasourceEmail) {
 	c.Email = api.OptString{Value: row.Email, Set: true}
 	c.Provider = api.OptString{Value: row.Provider, Set: true}
 	if row.IMAPServer.Valid {
@@ -46,22 +46,6 @@ func QToDatasourceEmail(c *api.Datasource, row query.DatasourceEmail) {
 	if row.SMTPTLS.Valid {
 		c.SMTPTLS = api.OptBool{Value: row.SMTPTLS.Bool, Set: true}
 	}
-}
-
-func QToStorageOld(row query.GetStoragesRow) api.Storage {
-	r := api.Storage{
-		UUID:      row.UUID.String(),
-		Name:      api.NewOptString(row.Name),
-		Type:      row.Type,
-		IsEnabled: row.IsEnabled,
-	}
-	if row.CreatedAt.Valid {
-		r.CreatedAt = row.CreatedAt.Time
-	}
-	if row.UpdatedAt.Valid {
-		r.UpdatedAt = row.UpdatedAt.Time
-	}
-	return r
 }
 
 func QToStorage(row query.GetStoragesRow) api.Storage {

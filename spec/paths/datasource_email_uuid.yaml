@@ -14,7 +14,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/Datasource"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
       description: OK
     default:
       content:
@@ -47,7 +47,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/Datasource"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
       description: OK
     default:
       content:

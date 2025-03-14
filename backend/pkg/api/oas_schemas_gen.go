@@ -3,12 +3,17 @@
 package api
 
 import (
+	"fmt"
 	"net/url"
 	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 )
+
+func (s *ErrorStatusCode) Error() string {
+	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
+}
 
 type BearerAuth struct {
 	Token string
@@ -25,177 +30,173 @@ func (s *BearerAuth) SetToken(val string) {
 }
 
 // Ref: #
-type Datasource struct {
+type DatasourceEmail struct {
 	UUID            string    `json:"uuid"`
+	Name            string    `json:"name"`
+	IsEnabled       bool      `json:"is_enabled"`
+	Type            string    `json:"type"`
 	UserUUID        OptString `json:"user_uuid"`
 	Email           OptString `json:"email"`
-	ImapServer      OptString `json:"imap_server"`
-	IsEnabled       bool      `json:"is_enabled"`
-	Name            string    `json:"name"`
+	Provider        OptString `json:"provider"`
 	OAuth2ClientID  OptString `json:"oauth2_client_id"`
 	OAuth2TokenUUID OptString `json:"oauth2_token_uuid"`
-	Password        OptString `json:"password"`
-	Provider        OptString `json:"provider"`
+	ImapServer      OptString `json:"imap_server"`
 	SMTPServer      OptString `json:"smtp_server"`
 	SMTPTLS         OptBool   `json:"smtp_tls"`
-	Type            string    `json:"type"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	Password        OptString `json:"password"`
 	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *Datasource) GetUUID() string {
+func (s *DatasourceEmail) GetUUID() string {
 	return s.UUID
 }
 
+// GetName returns the value of Name.
+func (s *DatasourceEmail) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *DatasourceEmail) GetIsEnabled() bool {
+	return s.IsEnabled
+}
+
+// GetType returns the value of Type.
+func (s *DatasourceEmail) GetType() string {
+	return s.Type
+}
+
 // GetUserUUID returns the value of UserUUID.
-func (s *Datasource) GetUserUUID() OptString {
+func (s *DatasourceEmail) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
 // GetEmail returns the value of Email.
-func (s *Datasource) GetEmail() OptString {
+func (s *DatasourceEmail) GetEmail() OptString {
 	return s.Email
 }
 
-// GetImapServer returns the value of ImapServer.
-func (s *Datasource) GetImapServer() OptString {
-	return s.ImapServer
-}
-
-// GetIsEnabled returns the value of IsEnabled.
-func (s *Datasource) GetIsEnabled() bool {
-	return s.IsEnabled
-}
-
-// GetName returns the value of Name.
-func (s *Datasource) GetName() string {
-	return s.Name
+// GetProvider returns the value of Provider.
+func (s *DatasourceEmail) GetProvider() OptString {
+	return s.Provider
 }
 
 // GetOAuth2ClientID returns the value of OAuth2ClientID.
-func (s *Datasource) GetOAuth2ClientID() OptString {
+func (s *DatasourceEmail) GetOAuth2ClientID() OptString {
 	return s.OAuth2ClientID
 }
 
 // GetOAuth2TokenUUID returns the value of OAuth2TokenUUID.
-func (s *Datasource) GetOAuth2TokenUUID() OptString {
+func (s *DatasourceEmail) GetOAuth2TokenUUID() OptString {
 	return s.OAuth2TokenUUID
 }
 
-// GetPassword returns the value of Password.
-func (s *Datasource) GetPassword() OptString {
-	return s.Password
-}
-
-// GetProvider returns the value of Provider.
-func (s *Datasource) GetProvider() OptString {
-	return s.Provider
+// GetImapServer returns the value of ImapServer.
+func (s *DatasourceEmail) GetImapServer() OptString {
+	return s.ImapServer
 }
 
 // GetSMTPServer returns the value of SMTPServer.
-func (s *Datasource) GetSMTPServer() OptString {
+func (s *DatasourceEmail) GetSMTPServer() OptString {
 	return s.SMTPServer
 }
 
 // GetSMTPTLS returns the value of SMTPTLS.
-func (s *Datasource) GetSMTPTLS() OptBool {
+func (s *DatasourceEmail) GetSMTPTLS() OptBool {
 	return s.SMTPTLS
 }
 
-// GetType returns the value of Type.
-func (s *Datasource) GetType() string {
-	return s.Type
-}
-
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *Datasource) GetUpdatedAt() time.Time {
-	return s.UpdatedAt
+// GetPassword returns the value of Password.
+func (s *DatasourceEmail) GetPassword() OptString {
+	return s.Password
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Datasource) GetCreatedAt() time.Time {
+func (s *DatasourceEmail) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *DatasourceEmail) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
 // SetUUID sets the value of UUID.
-func (s *Datasource) SetUUID(val string) {
+func (s *DatasourceEmail) SetUUID(val string) {
 	s.UUID = val
 }
 
+// SetName sets the value of Name.
+func (s *DatasourceEmail) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *DatasourceEmail) SetIsEnabled(val bool) {
+	s.IsEnabled = val
+}
+
+// SetType sets the value of Type.
+func (s *DatasourceEmail) SetType(val string) {
+	s.Type = val
+}
+
 // SetUserUUID sets the value of UserUUID.
-func (s *Datasource) SetUserUUID(val OptString) {
+func (s *DatasourceEmail) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
 // SetEmail sets the value of Email.
-func (s *Datasource) SetEmail(val OptString) {
+func (s *DatasourceEmail) SetEmail(val OptString) {
 	s.Email = val
 }
 
-// SetImapServer sets the value of ImapServer.
-func (s *Datasource) SetImapServer(val OptString) {
-	s.ImapServer = val
-}
-
-// SetIsEnabled sets the value of IsEnabled.
-func (s *Datasource) SetIsEnabled(val bool) {
-	s.IsEnabled = val
-}
-
-// SetName sets the value of Name.
-func (s *Datasource) SetName(val string) {
-	s.Name = val
+// SetProvider sets the value of Provider.
+func (s *DatasourceEmail) SetProvider(val OptString) {
+	s.Provider = val
 }
 
 // SetOAuth2ClientID sets the value of OAuth2ClientID.
-func (s *Datasource) SetOAuth2ClientID(val OptString) {
+func (s *DatasourceEmail) SetOAuth2ClientID(val OptString) {
 	s.OAuth2ClientID = val
 }
 
 // SetOAuth2TokenUUID sets the value of OAuth2TokenUUID.
-func (s *Datasource) SetOAuth2TokenUUID(val OptString) {
+func (s *DatasourceEmail) SetOAuth2TokenUUID(val OptString) {
 	s.OAuth2TokenUUID = val
 }
 
-// SetPassword sets the value of Password.
-func (s *Datasource) SetPassword(val OptString) {
-	s.Password = val
-}
-
-// SetProvider sets the value of Provider.
-func (s *Datasource) SetProvider(val OptString) {
-	s.Provider = val
+// SetImapServer sets the value of ImapServer.
+func (s *DatasourceEmail) SetImapServer(val OptString) {
+	s.ImapServer = val
 }
 
 // SetSMTPServer sets the value of SMTPServer.
-func (s *Datasource) SetSMTPServer(val OptString) {
+func (s *DatasourceEmail) SetSMTPServer(val OptString) {
 	s.SMTPServer = val
 }
 
 // SetSMTPTLS sets the value of SMTPTLS.
-func (s *Datasource) SetSMTPTLS(val OptBool) {
+func (s *DatasourceEmail) SetSMTPTLS(val OptBool) {
 	s.SMTPTLS = val
 }
 
-// SetType sets the value of Type.
-func (s *Datasource) SetType(val string) {
-	s.Type = val
-}
-
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *Datasource) SetUpdatedAt(val time.Time) {
-	s.UpdatedAt = val
+// SetPassword sets the value of Password.
+func (s *DatasourceEmail) SetPassword(val OptString) {
+	s.Password = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Datasource) SetCreatedAt(val time.Time) {
+func (s *DatasourceEmail) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
-func (*Datasource) datasourceEmailCreateRes() {}
-func (*Datasource) datasourceEmailGetRes()    {}
-func (*Datasource) datasourceEmailUpdateRes() {}
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *DatasourceEmail) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
 
 // Ref: #
 type DatasourceEmailCreate struct {
@@ -319,12 +320,6 @@ func (s *DatasourceEmailCreate) SetSMTPTLS(val OptBool) {
 // DatasourceEmailDeleteOK is response for DatasourceEmailDelete operation.
 type DatasourceEmailDeleteOK struct{}
 
-func (*DatasourceEmailDeleteOK) datasourceEmailDeleteRes() {}
-
-type DatasourceEmailListOKApplicationJSON []Datasource
-
-func (*DatasourceEmailListOKApplicationJSON) datasourceEmailListRes() {}
-
 type DatasourceEmailRunPipelineOK struct {
 	// List of labels.
 	Labels []MailLabel `json:"labels"`
@@ -339,8 +334,6 @@ func (s *DatasourceEmailRunPipelineOK) GetLabels() []MailLabel {
 func (s *DatasourceEmailRunPipelineOK) SetLabels(val []MailLabel) {
 	s.Labels = val
 }
-
-func (*DatasourceEmailRunPipelineOK) datasourceEmailRunPipelineRes() {}
 
 // Ref: #
 type DatasourceEmailUpdate struct {
@@ -440,8 +433,6 @@ func (s *DatasourceEmailUpdate) SetSMTPTLS(val OptBool) {
 
 // DatasourceSetOAuth2ClientNoContent is response for DatasourceSetOAuth2Client operation.
 type DatasourceSetOAuth2ClientNoContent struct{}
-
-func (*DatasourceSetOAuth2ClientNoContent) datasourceSetOAuth2ClientRes() {}
 
 type DatasourceSetOAuth2ClientReq struct {
 	// OAuth2 client ID.
@@ -562,54 +553,6 @@ func (s *ErrorStatusCode) SetStatusCode(val int) {
 func (s *ErrorStatusCode) SetResponse(val Error) {
 	s.Response = val
 }
-
-func (*ErrorStatusCode) datasourceEmailCreateRes()      {}
-func (*ErrorStatusCode) datasourceEmailDeleteRes()      {}
-func (*ErrorStatusCode) datasourceEmailGetRes()         {}
-func (*ErrorStatusCode) datasourceEmailListRes()        {}
-func (*ErrorStatusCode) datasourceEmailRunPipelineRes() {}
-func (*ErrorStatusCode) datasourceEmailUpdateRes()      {}
-func (*ErrorStatusCode) datasourceSetOAuth2ClientRes()  {}
-func (*ErrorStatusCode) messageEmailQueryRes()          {}
-func (*ErrorStatusCode) messageLinkedinQueryRes()       {}
-func (*ErrorStatusCode) messageTelegramQueryRes()       {}
-func (*ErrorStatusCode) messageWhatsappQueryRes()       {}
-func (*ErrorStatusCode) oAuth2ClientCallbackRes()       {}
-func (*ErrorStatusCode) oAuth2ClientCreateRes()         {}
-func (*ErrorStatusCode) oAuth2ClientDeleteRes()         {}
-func (*ErrorStatusCode) oAuth2ClientGetRes()            {}
-func (*ErrorStatusCode) oAuth2ClientListRes()           {}
-func (*ErrorStatusCode) oAuth2ClientLoginRes()          {}
-func (*ErrorStatusCode) oAuth2ClientTokenDeleteRes()    {}
-func (*ErrorStatusCode) oAuth2ClientTokenListRes()      {}
-func (*ErrorStatusCode) oAuth2ClientUpdateRes()         {}
-func (*ErrorStatusCode) pipelineCreateRes()             {}
-func (*ErrorStatusCode) pipelineDeleteRes()             {}
-func (*ErrorStatusCode) pipelineEntryCreateRes()        {}
-func (*ErrorStatusCode) pipelineEntryDeleteRes()        {}
-func (*ErrorStatusCode) pipelineEntryGetRes()           {}
-func (*ErrorStatusCode) pipelineEntryListRes()          {}
-func (*ErrorStatusCode) pipelineEntryTypeListRes()      {}
-func (*ErrorStatusCode) pipelineEntryUpdateRes()        {}
-func (*ErrorStatusCode) pipelineGetRes()                {}
-func (*ErrorStatusCode) pipelineListRes()               {}
-func (*ErrorStatusCode) pipelineUpdateRes()             {}
-func (*ErrorStatusCode) storageHostfilesCreateRes()     {}
-func (*ErrorStatusCode) storageHostfilesDeleteRes()     {}
-func (*ErrorStatusCode) storageHostfilesGetRes()        {}
-func (*ErrorStatusCode) storageHostfilesUpdateRes()     {}
-func (*ErrorStatusCode) storageListRes()                {}
-func (*ErrorStatusCode) storagePostgresCreateRes()      {}
-func (*ErrorStatusCode) storagePostgresDeleteRes()      {}
-func (*ErrorStatusCode) storagePostgresGetRes()         {}
-func (*ErrorStatusCode) storagePostgresUpdateRes()      {}
-func (*ErrorStatusCode) storageS3CreateRes()            {}
-func (*ErrorStatusCode) storageS3DeleteRes()            {}
-func (*ErrorStatusCode) storageS3GetRes()               {}
-func (*ErrorStatusCode) storageS3UpdateRes()            {}
-func (*ErrorStatusCode) tgSessionCreateRes()            {}
-func (*ErrorStatusCode) tgSessionListRes()              {}
-func (*ErrorStatusCode) tgSessionVerifyRes()            {}
 
 // Represents a stored file, independent of the storage backend.
 // Ref: #/FileObject
@@ -1141,8 +1084,6 @@ func (s *MessageEmailQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
-func (*MessageEmailQueryOK) messageEmailQueryRes() {}
-
 type MessageLinkedinQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -1157,8 +1098,6 @@ func (s *MessageLinkedinQueryOK) GetMessages() []Message {
 func (s *MessageLinkedinQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
-
-func (*MessageLinkedinQueryOK) messageLinkedinQueryRes() {}
 
 // Additional metadata relevant to the message.
 type MessageMeta map[string]jx.Raw
@@ -1540,8 +1479,6 @@ func (s *MessageTelegramQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
-func (*MessageTelegramQueryOK) messageTelegramQueryRes() {}
-
 type MessageWhatsappQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -1556,8 +1493,6 @@ func (s *MessageWhatsappQueryOK) GetMessages() []Message {
 func (s *MessageWhatsappQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
-
-func (*MessageWhatsappQueryOK) messageWhatsappQueryRes() {}
 
 // Ref: #
 type OAuth2Client struct {
@@ -1629,10 +1564,6 @@ func (s *OAuth2Client) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
-func (*OAuth2Client) oAuth2ClientCreateRes() {}
-func (*OAuth2Client) oAuth2ClientGetRes()    {}
-func (*OAuth2Client) oAuth2ClientUpdateRes() {}
-
 // OAuth2ClientCallbackFound is response for OAuth2ClientCallback operation.
 type OAuth2ClientCallbackFound struct {
 	Location OptURI
@@ -1647,8 +1578,6 @@ func (s *OAuth2ClientCallbackFound) GetLocation() OptURI {
 func (s *OAuth2ClientCallbackFound) SetLocation(val OptURI) {
 	s.Location = val
 }
-
-func (*OAuth2ClientCallbackFound) oAuth2ClientCallbackRes() {}
 
 type OAuth2ClientCreateReq struct {
 	// ID of the client.
@@ -1704,8 +1633,6 @@ func (s *OAuth2ClientCreateReq) SetSecret(val string) {
 // OAuth2ClientDeleteOK is response for OAuth2ClientDelete operation.
 type OAuth2ClientDeleteOK struct{}
 
-func (*OAuth2ClientDeleteOK) oAuth2ClientDeleteRes() {}
-
 type OAuth2ClientListOK struct {
 	// List of OAuth2 clients.
 	Clients []OAuth2Client `json:"clients"`
@@ -1721,8 +1648,6 @@ func (s *OAuth2ClientListOK) SetClients(val []OAuth2Client) {
 	s.Clients = val
 }
 
-func (*OAuth2ClientListOK) oAuth2ClientListRes() {}
-
 type OAuth2ClientLoginOK struct {
 	// Auth code URL.
 	AuthCodeURL string `json:"auth_code_url"`
@@ -1737,8 +1662,6 @@ func (s *OAuth2ClientLoginOK) GetAuthCodeURL() string {
 func (s *OAuth2ClientLoginOK) SetAuthCodeURL(val string) {
 	s.AuthCodeURL = val
 }
-
-func (*OAuth2ClientLoginOK) oAuth2ClientLoginRes() {}
 
 type OAuth2ClientLoginReq struct {
 	// Client ID.
@@ -1851,12 +1774,6 @@ func (s *OAuth2ClientToken) SetUpdatedAt(val time.Time) {
 
 // OAuth2ClientTokenDeleteOK is response for OAuth2ClientTokenDelete operation.
 type OAuth2ClientTokenDeleteOK struct{}
-
-func (*OAuth2ClientTokenDeleteOK) oAuth2ClientTokenDeleteRes() {}
-
-type OAuth2ClientTokenListOKApplicationJSON []OAuth2ClientToken
-
-func (*OAuth2ClientTokenListOKApplicationJSON) oAuth2ClientTokenListRes() {}
 
 type OAuth2ClientUpdateReq struct {
 	// Name of the client.
@@ -2709,10 +2626,6 @@ func (s *Pipeline) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
-func (*Pipeline) pipelineCreateRes() {}
-func (*Pipeline) pipelineGetRes()    {}
-func (*Pipeline) pipelineUpdateRes() {}
-
 type PipelineCreateReq struct {
 	// Name of the pipeline.
 	Name string `json:"name"`
@@ -2754,8 +2667,6 @@ func (s *PipelineCreateReqFlow) init() PipelineCreateReqFlow {
 
 // PipelineDeleteOK is response for PipelineDelete operation.
 type PipelineDeleteOK struct{}
-
-func (*PipelineDeleteOK) pipelineDeleteRes() {}
 
 // Ref: #
 type PipelineEntry struct {
@@ -2838,10 +2749,6 @@ func (s *PipelineEntry) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
-func (*PipelineEntry) pipelineEntryCreateRes() {}
-func (*PipelineEntry) pipelineEntryGetRes()    {}
-func (*PipelineEntry) pipelineEntryUpdateRes() {}
-
 type PipelineEntryCreateReq struct {
 	// UUID of the pipeline entry.
 	UUID string `json:"uuid"`
@@ -2920,12 +2827,6 @@ func (s *PipelineEntryCreateReqParams) init() PipelineEntryCreateReqParams {
 // PipelineEntryDeleteOK is response for PipelineEntryDelete operation.
 type PipelineEntryDeleteOK struct{}
 
-func (*PipelineEntryDeleteOK) pipelineEntryDeleteRes() {}
-
-type PipelineEntryListOKApplicationJSON []PipelineEntry
-
-func (*PipelineEntryListOKApplicationJSON) pipelineEntryListRes() {}
-
 type PipelineEntryParams map[string]jx.Raw
 
 func (s *PipelineEntryParams) init() PipelineEntryParams {
@@ -3000,8 +2901,6 @@ func (s *PipelineEntryTypeListOK) SetEntries(val []PipelineEntryType) {
 	s.Entries = val
 }
 
-func (*PipelineEntryTypeListOK) pipelineEntryTypeListRes() {}
-
 type PipelineEntryUpdateReq struct {
 	// Params of the Entry.
 	Params PipelineEntryUpdateReqParams `json:"params"`
@@ -3054,8 +2953,6 @@ func (s *PipelineListOK) GetPipelines() []Pipeline {
 func (s *PipelineListOK) SetPipelines(val []Pipeline) {
 	s.Pipelines = val
 }
-
-func (*PipelineListOK) pipelineListRes() {}
 
 type PipelineUpdateReq struct {
 	// Name of the client.
@@ -3250,18 +3147,8 @@ func (s *StorageHostfiles) SetPath(val string) {
 	s.Path = val
 }
 
-func (*StorageHostfiles) storageHostfilesCreateRes() {}
-func (*StorageHostfiles) storageHostfilesGetRes()    {}
-func (*StorageHostfiles) storageHostfilesUpdateRes() {}
-
 // StorageHostfilesDeleteOK is response for StorageHostfilesDelete operation.
 type StorageHostfilesDeleteOK struct{}
-
-func (*StorageHostfilesDeleteOK) storageHostfilesDeleteRes() {}
-
-type StorageListOKApplicationJSON []Storage
-
-func (*StorageListOKApplicationJSON) storageListRes() {}
 
 // Ref: #
 type StoragePostgres struct {
@@ -3362,14 +3249,8 @@ func (s *StoragePostgres) SetOptions(val OptString) {
 	s.Options = val
 }
 
-func (*StoragePostgres) storagePostgresCreateRes() {}
-func (*StoragePostgres) storagePostgresGetRes()    {}
-func (*StoragePostgres) storagePostgresUpdateRes() {}
-
 // StoragePostgresDeleteOK is response for StoragePostgresDelete operation.
 type StoragePostgresDeleteOK struct{}
-
-func (*StoragePostgresDeleteOK) storagePostgresDeleteRes() {}
 
 // Ref: #
 type StorageS3 struct {
@@ -3470,18 +3351,12 @@ func (s *StorageS3) SetSecretAccessKey(val string) {
 	s.SecretAccessKey = val
 }
 
-func (*StorageS3) storageS3CreateRes() {}
-func (*StorageS3) storageS3GetRes()    {}
-func (*StorageS3) storageS3UpdateRes() {}
-
 // StorageS3DeleteOK is response for StorageS3Delete operation.
 type StorageS3DeleteOK struct{}
 
-func (*StorageS3DeleteOK) storageS3DeleteRes() {}
-
 // Telegram API session and user representation.
 // Ref: #
-type Tg struct {
+type Telegram struct {
 	// Session ID.
 	ID int `json:"id"`
 	// Session phone number.
@@ -3493,71 +3368,132 @@ type Tg struct {
 	// Session creation time.
 	CreatedAt time.Time `json:"created_at"`
 	// User details.
-	User TgUser `json:"user"`
+	User TelegramUser `json:"user"`
 }
 
 // GetID returns the value of ID.
-func (s *Tg) GetID() int {
+func (s *Telegram) GetID() int {
 	return s.ID
 }
 
 // GetPhone returns the value of Phone.
-func (s *Tg) GetPhone() string {
+func (s *Telegram) GetPhone() string {
 	return s.Phone
 }
 
 // GetDescription returns the value of Description.
-func (s *Tg) GetDescription() OptNilString {
+func (s *Telegram) GetDescription() OptNilString {
 	return s.Description
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *Tg) GetUpdatedAt() time.Time {
+func (s *Telegram) GetUpdatedAt() time.Time {
 	return s.UpdatedAt
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Tg) GetCreatedAt() time.Time {
+func (s *Telegram) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
 // GetUser returns the value of User.
-func (s *Tg) GetUser() TgUser {
+func (s *Telegram) GetUser() TelegramUser {
 	return s.User
 }
 
 // SetID sets the value of ID.
-func (s *Tg) SetID(val int) {
+func (s *Telegram) SetID(val int) {
 	s.ID = val
 }
 
 // SetPhone sets the value of Phone.
-func (s *Tg) SetPhone(val string) {
+func (s *Telegram) SetPhone(val string) {
 	s.Phone = val
 }
 
 // SetDescription sets the value of Description.
-func (s *Tg) SetDescription(val OptNilString) {
+func (s *Telegram) SetDescription(val OptNilString) {
 	s.Description = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *Tg) SetUpdatedAt(val time.Time) {
+func (s *Telegram) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Tg) SetCreatedAt(val time.Time) {
+func (s *Telegram) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
 // SetUser sets the value of User.
-func (s *Tg) SetUser(val TgUser) {
+func (s *Telegram) SetUser(val TelegramUser) {
 	s.User = val
 }
 
-func (*Tg) tgSessionCreateRes() {}
-func (*Tg) tgSessionVerifyRes() {}
+// User details.
+type TelegramUser struct {
+	// User ID in Telegram.
+	ID OptInt `json:"id"`
+	// Username in Telegram.
+	Username OptString `json:"username"`
+	// First name.
+	FirstName OptString `json:"first_name"`
+	// Last name.
+	LastName OptString `json:"last_name"`
+	// User's phone number.
+	Phone OptString `json:"phone"`
+}
+
+// GetID returns the value of ID.
+func (s *TelegramUser) GetID() OptInt {
+	return s.ID
+}
+
+// GetUsername returns the value of Username.
+func (s *TelegramUser) GetUsername() OptString {
+	return s.Username
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *TelegramUser) GetFirstName() OptString {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *TelegramUser) GetLastName() OptString {
+	return s.LastName
+}
+
+// GetPhone returns the value of Phone.
+func (s *TelegramUser) GetPhone() OptString {
+	return s.Phone
+}
+
+// SetID sets the value of ID.
+func (s *TelegramUser) SetID(val OptInt) {
+	s.ID = val
+}
+
+// SetUsername sets the value of Username.
+func (s *TelegramUser) SetUsername(val OptString) {
+	s.Username = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *TelegramUser) SetFirstName(val OptString) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *TelegramUser) SetLastName(val OptString) {
+	s.LastName = val
+}
+
+// SetPhone sets the value of Phone.
+func (s *TelegramUser) SetPhone(val OptString) {
+	s.Phone = val
+}
 
 type TgSessionCreateReq struct {
 	// Phone number in international format.
@@ -3576,8 +3512,8 @@ func (s *TgSessionCreateReq) SetPhone(val string) {
 
 type TgSessionListOK struct {
 	// Total number of sessions.
-	Total    OptInt `json:"total"`
-	Sessions []Tg   `json:"sessions"`
+	Total    OptInt     `json:"total"`
+	Sessions []Telegram `json:"sessions"`
 }
 
 // GetTotal returns the value of Total.
@@ -3586,7 +3522,7 @@ func (s *TgSessionListOK) GetTotal() OptInt {
 }
 
 // GetSessions returns the value of Sessions.
-func (s *TgSessionListOK) GetSessions() []Tg {
+func (s *TgSessionListOK) GetSessions() []Telegram {
 	return s.Sessions
 }
 
@@ -3596,11 +3532,9 @@ func (s *TgSessionListOK) SetTotal(val OptInt) {
 }
 
 // SetSessions sets the value of Sessions.
-func (s *TgSessionListOK) SetSessions(val []Tg) {
+func (s *TgSessionListOK) SetSessions(val []Telegram) {
 	s.Sessions = val
 }
-
-func (*TgSessionListOK) tgSessionListRes() {}
 
 type TgSessionVerifyReq struct {
 	// Hash of the phone code.
@@ -3639,70 +3573,6 @@ func (s *TgSessionVerifyReq) SetCode(val OptString) {
 // SetPassword sets the value of Password.
 func (s *TgSessionVerifyReq) SetPassword(val OptString) {
 	s.Password = val
-}
-
-// User details.
-type TgUser struct {
-	// User ID in Telegram.
-	ID OptInt `json:"id"`
-	// Username in Telegram.
-	Username OptString `json:"username"`
-	// First name.
-	FirstName OptString `json:"first_name"`
-	// Last name.
-	LastName OptString `json:"last_name"`
-	// User's phone number.
-	Phone OptString `json:"phone"`
-}
-
-// GetID returns the value of ID.
-func (s *TgUser) GetID() OptInt {
-	return s.ID
-}
-
-// GetUsername returns the value of Username.
-func (s *TgUser) GetUsername() OptString {
-	return s.Username
-}
-
-// GetFirstName returns the value of FirstName.
-func (s *TgUser) GetFirstName() OptString {
-	return s.FirstName
-}
-
-// GetLastName returns the value of LastName.
-func (s *TgUser) GetLastName() OptString {
-	return s.LastName
-}
-
-// GetPhone returns the value of Phone.
-func (s *TgUser) GetPhone() OptString {
-	return s.Phone
-}
-
-// SetID sets the value of ID.
-func (s *TgUser) SetID(val OptInt) {
-	s.ID = val
-}
-
-// SetUsername sets the value of Username.
-func (s *TgUser) SetUsername(val OptString) {
-	s.Username = val
-}
-
-// SetFirstName sets the value of FirstName.
-func (s *TgUser) SetFirstName(val OptString) {
-	s.FirstName = val
-}
-
-// SetLastName sets the value of LastName.
-func (s *TgUser) SetLastName(val OptString) {
-	s.LastName = val
-}
-
-// SetPhone sets the value of Phone.
-func (s *TgUser) SetPhone(val OptString) {
-	s.Phone = val
 }
 
 // File upload request metadata.

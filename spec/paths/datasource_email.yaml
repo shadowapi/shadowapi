@@ -25,15 +25,15 @@ get:
           schema:
             description: List of datasources.
             items:
-              $ref: "../openapi.yaml#/components/schemas/Datasource"
+              $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
             type: array
       description: OK
     default:
+      description: Unexpected error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: Error
   tags:
     - datasource
     - datasource-email
@@ -51,7 +51,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/Datasource"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
       description: Created
     default:
       content:

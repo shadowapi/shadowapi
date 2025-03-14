@@ -14,3 +14,9 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/UploadPresignedUrlResponse"
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

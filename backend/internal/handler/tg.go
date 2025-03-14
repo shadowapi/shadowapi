@@ -36,7 +36,7 @@ func (h *Handler) TgDummy(
 // Create a new Telegram session.
 //
 // POST /tg
-func (h *Handler) TgSessionCreate(ctx context.Context, req *api.TgSessionCreateReq) (*api.Tg, error) {
+func (h *Handler) TgSessionCreate(ctx context.Context, req *api.TgSessionCreateReq) (*api.Telegram, error) {
 	return nil, ht.ErrNotImplemented
 }
 
@@ -54,7 +54,7 @@ func (h *Handler) TgSessionList(ctx context.Context) (*api.TgSessionListOK, erro
 // Complete the session creation process by verifying the code.
 //
 // PUT /tg
-func (h *Handler) TgSessionVerify(ctx context.Context, req *api.TgSessionVerifyReq, params api.TgSessionVerifyParams) (*api.Tg, error) {
+func (h *Handler) TgSessionVerify(ctx context.Context, req *api.TgSessionVerifyReq, params api.TgSessionVerifyParams) (*api.Telegram, error) {
 
 	return nil, ht.ErrNotImplemented
 }
