@@ -1,26 +1,41 @@
-# spec/components/account.yaml
-# Defines the schema for an Account in the system
+# spec/components/datasource_telegram.yaml
 type: object
 additionalProperties: false
 properties:
-  id:
+  uuid:
     type: string
-    description: Unique identifier for the account
     readOnly: true
-  user_id:
+  name:
     type: string
-    description: The associated user’s ID
+  is_enabled:
+    type: boolean
   type:
     type: string
-    enum: [personal, business, bot]
-    description: Account type
-  status:
+    default: datasource
+  user_uuid:
     type: string
-    enum: [online, offline, blocked, muted]
-    description: Availability status of the account
+    readOnly: true
   provider:
     type: string
-    description: e.g., "telegram", "whatsapp", "gmail", etc.
+    enum: ["telegram","reactima"]
+  phone_number:
+    type: string
+    description: The phone number for the Telegram account (international format)
+  api_id:
+    type: string
+    description: Telegram API ID from my.telegram.org
+  api_hash:
+    type: string
+    description: Telegram API hash
+  password:
+    type: string
+    description: Optional 2FA password
+  settings:
+    type: object
+    additionalProperties: true
+    description: |
+      Additional Telegram bridging config from telegram.tpl.yaml 
+      (proxy, concurrency, presence bridging, encryption, etc.)
   sessionHistory:
     $ref: "../openapi.yaml#/components/schemas/telegram_session_history.yaml"
   participants:
@@ -38,7 +53,14 @@ properties:
     format: date-time
     readOnly: true
 required:
-  - user_id
+  - uuid
+  - name
   - type
-  - status
+  - is_enabled
+  - provider
+  - phone_number
+  - api_id
+  - api_hash
+  - created_at
+  - updated_at
 

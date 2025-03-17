@@ -1,0 +1,49 @@
+# spec/components/datasource_linkedin.yaml
+type: object
+description: LinkedIn datasource object representation
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    readOnly: true
+  name:
+    type: string
+  is_enabled:
+    type: boolean
+  type:
+    type: string
+    default: datasource
+  user_uuid:
+    type: string
+    readOnly: true
+  provider:
+    type: string
+    enum: ["linkedin","reactima"]
+  username:
+    type: string
+    description: LinkedIn username or email for login
+  password:
+    type: string
+    description: LinkedIn password (or OAuth2 tokens if relevant)
+  settings:
+    type: object
+    additionalProperties: true
+    description: |
+      Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml 
+      (presence bridging, encryption, etc.)
+  created_at:
+    type: string
+    format: date-time
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+required:
+  - uuid
+  - name
+  - type
+  - is_enabled
+  - provider
+  - created_at
+  - updated_at

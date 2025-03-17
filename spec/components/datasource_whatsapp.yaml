@@ -1,0 +1,50 @@
+# spec/components/datasource_whatsapp.yaml
+type: object
+description: WhatsApp datasource object representation
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    readOnly: true
+  name:
+    type: string
+  is_enabled:
+    type: boolean
+  type:
+    type: string
+    default: datasource
+  user_uuid:
+    type: string
+    readOnly: true
+  provider:
+    type: string
+    enum: ["whatsapp","reactima","twillio","8x8"]
+  phone_number:
+    type: string
+    description: The phone number for the WhatsApp account
+  device_name:
+    type: string
+    description: Label for the WhatsApp device connection
+  settings:
+    type: object
+    additionalProperties: true
+    description: |
+      Additional WhatsApp bridging config from whatsapp.tpl.yaml 
+      (proxy, presence bridging, call notices, status broadcast, etc.)
+  created_at:
+    type: string
+    format: date-time
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+required:
+  - uuid
+  - name
+  - type
+  - is_enabled
+  - provider
+  - phone_number
+  - created_at
+  - updated_at
