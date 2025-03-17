@@ -1,4 +1,4 @@
-# spec/components/account_participants.yaml
+# spec/components/telegram_participants.yaml
 type: array
 description: List of account participants
 items:

@@ -1,4 +1,4 @@
-# spec/components/account_session_history.yaml
+# spec/components/telegram_session_history.yaml
 type: array
 description: List of session logs for an account
 items:

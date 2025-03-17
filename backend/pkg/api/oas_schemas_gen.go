@@ -322,16 +322,16 @@ type DatasourceEmailDeleteOK struct{}
 
 type DatasourceEmailRunPipelineOK struct {
 	// List of labels.
-	Labels []MailLabel `json:"labels"`
+	Labels []EmailLabel `json:"labels"`
 }
 
 // GetLabels returns the value of Labels.
-func (s *DatasourceEmailRunPipelineOK) GetLabels() []MailLabel {
+func (s *DatasourceEmailRunPipelineOK) GetLabels() []EmailLabel {
 	return s.Labels
 }
 
 // SetLabels sets the value of Labels.
-func (s *DatasourceEmailRunPipelineOK) SetLabels(val []MailLabel) {
+func (s *DatasourceEmailRunPipelineOK) SetLabels(val []EmailLabel) {
 	s.Labels = val
 }
 
@@ -447,6 +447,178 @@ func (s *DatasourceSetOAuth2ClientReq) GetClientID() string {
 // SetClientID sets the value of ClientID.
 func (s *DatasourceSetOAuth2ClientReq) SetClientID(val string) {
 	s.ClientID = val
+}
+
+// Ref: #
+type EmailLabel struct {
+	HTTPStatusCode        int64              `json:"HTTPStatusCode"`
+	Header                EmailLabelHeader   `json:"Header"`
+	ID                    OptString          `json:"id"`
+	Color                 OptEmailLabelColor `json:"color"`
+	LabelListVisibility   OptString          `json:"labelListVisibility"`
+	MessageListVisibility OptString          `json:"messageListVisibility"`
+	MessagesTotal         OptInt64           `json:"messagesTotal"`
+	MessagesUnread        OptInt64           `json:"messagesUnread"`
+	Name                  OptString          `json:"name"`
+	ThreadsTotal          OptInt64           `json:"threadsTotal"`
+	ThreadsUnread         OptInt64           `json:"threadsUnread"`
+	Type                  OptString          `json:"type"`
+}
+
+// GetHTTPStatusCode returns the value of HTTPStatusCode.
+func (s *EmailLabel) GetHTTPStatusCode() int64 {
+	return s.HTTPStatusCode
+}
+
+// GetHeader returns the value of Header.
+func (s *EmailLabel) GetHeader() EmailLabelHeader {
+	return s.Header
+}
+
+// GetID returns the value of ID.
+func (s *EmailLabel) GetID() OptString {
+	return s.ID
+}
+
+// GetColor returns the value of Color.
+func (s *EmailLabel) GetColor() OptEmailLabelColor {
+	return s.Color
+}
+
+// GetLabelListVisibility returns the value of LabelListVisibility.
+func (s *EmailLabel) GetLabelListVisibility() OptString {
+	return s.LabelListVisibility
+}
+
+// GetMessageListVisibility returns the value of MessageListVisibility.
+func (s *EmailLabel) GetMessageListVisibility() OptString {
+	return s.MessageListVisibility
+}
+
+// GetMessagesTotal returns the value of MessagesTotal.
+func (s *EmailLabel) GetMessagesTotal() OptInt64 {
+	return s.MessagesTotal
+}
+
+// GetMessagesUnread returns the value of MessagesUnread.
+func (s *EmailLabel) GetMessagesUnread() OptInt64 {
+	return s.MessagesUnread
+}
+
+// GetName returns the value of Name.
+func (s *EmailLabel) GetName() OptString {
+	return s.Name
+}
+
+// GetThreadsTotal returns the value of ThreadsTotal.
+func (s *EmailLabel) GetThreadsTotal() OptInt64 {
+	return s.ThreadsTotal
+}
+
+// GetThreadsUnread returns the value of ThreadsUnread.
+func (s *EmailLabel) GetThreadsUnread() OptInt64 {
+	return s.ThreadsUnread
+}
+
+// GetType returns the value of Type.
+func (s *EmailLabel) GetType() OptString {
+	return s.Type
+}
+
+// SetHTTPStatusCode sets the value of HTTPStatusCode.
+func (s *EmailLabel) SetHTTPStatusCode(val int64) {
+	s.HTTPStatusCode = val
+}
+
+// SetHeader sets the value of Header.
+func (s *EmailLabel) SetHeader(val EmailLabelHeader) {
+	s.Header = val
+}
+
+// SetID sets the value of ID.
+func (s *EmailLabel) SetID(val OptString) {
+	s.ID = val
+}
+
+// SetColor sets the value of Color.
+func (s *EmailLabel) SetColor(val OptEmailLabelColor) {
+	s.Color = val
+}
+
+// SetLabelListVisibility sets the value of LabelListVisibility.
+func (s *EmailLabel) SetLabelListVisibility(val OptString) {
+	s.LabelListVisibility = val
+}
+
+// SetMessageListVisibility sets the value of MessageListVisibility.
+func (s *EmailLabel) SetMessageListVisibility(val OptString) {
+	s.MessageListVisibility = val
+}
+
+// SetMessagesTotal sets the value of MessagesTotal.
+func (s *EmailLabel) SetMessagesTotal(val OptInt64) {
+	s.MessagesTotal = val
+}
+
+// SetMessagesUnread sets the value of MessagesUnread.
+func (s *EmailLabel) SetMessagesUnread(val OptInt64) {
+	s.MessagesUnread = val
+}
+
+// SetName sets the value of Name.
+func (s *EmailLabel) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetThreadsTotal sets the value of ThreadsTotal.
+func (s *EmailLabel) SetThreadsTotal(val OptInt64) {
+	s.ThreadsTotal = val
+}
+
+// SetThreadsUnread sets the value of ThreadsUnread.
+func (s *EmailLabel) SetThreadsUnread(val OptInt64) {
+	s.ThreadsUnread = val
+}
+
+// SetType sets the value of Type.
+func (s *EmailLabel) SetType(val OptString) {
+	s.Type = val
+}
+
+type EmailLabelColor struct {
+	BackgroundColor OptString `json:"backgroundColor"`
+	TextColor       OptString `json:"textColor"`
+}
+
+// GetBackgroundColor returns the value of BackgroundColor.
+func (s *EmailLabelColor) GetBackgroundColor() OptString {
+	return s.BackgroundColor
+}
+
+// GetTextColor returns the value of TextColor.
+func (s *EmailLabelColor) GetTextColor() OptString {
+	return s.TextColor
+}
+
+// SetBackgroundColor sets the value of BackgroundColor.
+func (s *EmailLabelColor) SetBackgroundColor(val OptString) {
+	s.BackgroundColor = val
+}
+
+// SetTextColor sets the value of TextColor.
+func (s *EmailLabelColor) SetTextColor(val OptString) {
+	s.TextColor = val
+}
+
+type EmailLabelHeader map[string][]string
+
+func (s *EmailLabelHeader) init() EmailLabelHeader {
+	m := *s
+	if m == nil {
+		m = map[string][]string{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #
@@ -750,208 +922,52 @@ func (s *GenerateDownloadLinkResponse) SetURL(val OptString) {
 }
 
 // Ref: #
-type MailLabel struct {
-	HTTPStatusCode        int64             `json:"HTTPStatusCode"`
-	Header                MailLabelHeader   `json:"Header"`
-	ID                    OptString         `json:"id"`
-	Color                 OptMailLabelColor `json:"color"`
-	LabelListVisibility   OptString         `json:"labelListVisibility"`
-	MessageListVisibility OptString         `json:"messageListVisibility"`
-	MessagesTotal         OptInt64          `json:"messagesTotal"`
-	MessagesUnread        OptInt64          `json:"messagesUnread"`
-	Name                  OptString         `json:"name"`
-	ThreadsTotal          OptInt64          `json:"threadsTotal"`
-	ThreadsUnread         OptInt64          `json:"threadsUnread"`
-	Type                  OptString         `json:"type"`
-}
-
-// GetHTTPStatusCode returns the value of HTTPStatusCode.
-func (s *MailLabel) GetHTTPStatusCode() int64 {
-	return s.HTTPStatusCode
-}
-
-// GetHeader returns the value of Header.
-func (s *MailLabel) GetHeader() MailLabelHeader {
-	return s.Header
-}
-
-// GetID returns the value of ID.
-func (s *MailLabel) GetID() OptString {
-	return s.ID
-}
-
-// GetColor returns the value of Color.
-func (s *MailLabel) GetColor() OptMailLabelColor {
-	return s.Color
-}
-
-// GetLabelListVisibility returns the value of LabelListVisibility.
-func (s *MailLabel) GetLabelListVisibility() OptString {
-	return s.LabelListVisibility
-}
-
-// GetMessageListVisibility returns the value of MessageListVisibility.
-func (s *MailLabel) GetMessageListVisibility() OptString {
-	return s.MessageListVisibility
-}
-
-// GetMessagesTotal returns the value of MessagesTotal.
-func (s *MailLabel) GetMessagesTotal() OptInt64 {
-	return s.MessagesTotal
-}
-
-// GetMessagesUnread returns the value of MessagesUnread.
-func (s *MailLabel) GetMessagesUnread() OptInt64 {
-	return s.MessagesUnread
-}
-
-// GetName returns the value of Name.
-func (s *MailLabel) GetName() OptString {
-	return s.Name
-}
-
-// GetThreadsTotal returns the value of ThreadsTotal.
-func (s *MailLabel) GetThreadsTotal() OptInt64 {
-	return s.ThreadsTotal
-}
-
-// GetThreadsUnread returns the value of ThreadsUnread.
-func (s *MailLabel) GetThreadsUnread() OptInt64 {
-	return s.ThreadsUnread
-}
-
-// GetType returns the value of Type.
-func (s *MailLabel) GetType() OptString {
-	return s.Type
-}
-
-// SetHTTPStatusCode sets the value of HTTPStatusCode.
-func (s *MailLabel) SetHTTPStatusCode(val int64) {
-	s.HTTPStatusCode = val
-}
-
-// SetHeader sets the value of Header.
-func (s *MailLabel) SetHeader(val MailLabelHeader) {
-	s.Header = val
-}
-
-// SetID sets the value of ID.
-func (s *MailLabel) SetID(val OptString) {
-	s.ID = val
-}
-
-// SetColor sets the value of Color.
-func (s *MailLabel) SetColor(val OptMailLabelColor) {
-	s.Color = val
-}
-
-// SetLabelListVisibility sets the value of LabelListVisibility.
-func (s *MailLabel) SetLabelListVisibility(val OptString) {
-	s.LabelListVisibility = val
-}
-
-// SetMessageListVisibility sets the value of MessageListVisibility.
-func (s *MailLabel) SetMessageListVisibility(val OptString) {
-	s.MessageListVisibility = val
-}
-
-// SetMessagesTotal sets the value of MessagesTotal.
-func (s *MailLabel) SetMessagesTotal(val OptInt64) {
-	s.MessagesTotal = val
-}
-
-// SetMessagesUnread sets the value of MessagesUnread.
-func (s *MailLabel) SetMessagesUnread(val OptInt64) {
-	s.MessagesUnread = val
-}
-
-// SetName sets the value of Name.
-func (s *MailLabel) SetName(val OptString) {
-	s.Name = val
-}
-
-// SetThreadsTotal sets the value of ThreadsTotal.
-func (s *MailLabel) SetThreadsTotal(val OptInt64) {
-	s.ThreadsTotal = val
-}
-
-// SetThreadsUnread sets the value of ThreadsUnread.
-func (s *MailLabel) SetThreadsUnread(val OptInt64) {
-	s.ThreadsUnread = val
-}
-
-// SetType sets the value of Type.
-func (s *MailLabel) SetType(val OptString) {
-	s.Type = val
-}
-
-type MailLabelColor struct {
-	BackgroundColor OptString `json:"backgroundColor"`
-	TextColor       OptString `json:"textColor"`
-}
-
-// GetBackgroundColor returns the value of BackgroundColor.
-func (s *MailLabelColor) GetBackgroundColor() OptString {
-	return s.BackgroundColor
-}
-
-// GetTextColor returns the value of TextColor.
-func (s *MailLabelColor) GetTextColor() OptString {
-	return s.TextColor
-}
-
-// SetBackgroundColor sets the value of BackgroundColor.
-func (s *MailLabelColor) SetBackgroundColor(val OptString) {
-	s.BackgroundColor = val
-}
-
-// SetTextColor sets the value of TextColor.
-func (s *MailLabelColor) SetTextColor(val OptString) {
-	s.TextColor = val
-}
-
-type MailLabelHeader map[string][]string
-
-func (s *MailLabelHeader) init() MailLabelHeader {
-	m := *s
-	if m == nil {
-		m = map[string][]string{}
-		*s = m
-	}
-	return m
-}
-
-// Ref: #
 type Message struct {
 	// Unique identifier for the message.
-	ID string `json:"id"`
+	UUID OptString `json:"uuid"`
 	// Data source or platform the message originated from.
 	Source MessageSource `json:"source"`
+	// Specifies the type or classification of the message.
+	Type OptMessageType `json:"type"`
 	// ID of the chat/conversation this message belongs to.
-	ChatID OptString `json:"chat_id"`
+	ChatUUID OptString `json:"chat_uuid"`
 	// ID of a sub-thread if this message is part of a threaded conversation.
-	ThreadID OptString `json:"thread_id"`
+	ThreadUUID OptString `json:"thread_uuid"`
 	// Identifier of the user or account sending the message.
 	Sender string `json:"sender"`
 	// List of users or accounts receiving the message (e.g., To, CC).
 	Recipients []string `json:"recipients"`
 	// Subject or title of the message (applicable to emails or similar).
 	Subject OptString `json:"subject"`
+	// Rich subject will be passed from JSON object silimar to Slate.js format.
+	SubjectRich OptMessageSubjectRich `json:"subject_rich"`
 	// Text content or body of the message.
 	Content string `json:"content"`
+	// Rich text content or body of the message will be passed from JSON object silimar to Slate.js format.
+	ContentRich OptMessageContentRich `json:"content_rich"`
+	// Collection of reactions (e.g., likes, emojis) applied to this message.
+	Reactions OptMessageReactions `json:"reactions"`
 	// List of file attachments associated with this message.
 	Attachments []FileObject `json:"attachments"`
-	// Timestamp when the message was sent.
-	Timestamp time.Time `json:"timestamp"`
 	// ID or handle of the original sender if this message is forwarded.
-	ForwardFrom OptString `json:"forwardFrom"`
+	ForwardFrom OptString `json:"forward_from"`
+	// ID of the message this one is directly replying to, if any.
+	ReplyToMessageUUID OptString `json:"reply_to_message_uuid"`
+	// ID of the original chat if this message is forwarded.
+	ForwardFromChatUUID OptString `json:"forward_from_chat_uuid"`
+	// ID of the original message if this is forwarded.
+	ForwardFromMessageUUID OptString `json:"forward_from_message_uuid"`
+	// Additional context or metadata about the forwarded message.
+	ForwardMeta OptMessageForwardMeta `json:"forward_meta"`
 	// Additional metadata relevant to the message.
 	Meta OptMessageMeta `json:"meta"`
+	// The date and time when the object was created.
+	CreatedAt OptDateTime `json:"created_at"`
 }
 
-// GetID returns the value of ID.
-func (s *Message) GetID() string {
-	return s.ID
+// GetUUID returns the value of UUID.
+func (s *Message) GetUUID() OptString {
+	return s.UUID
 }
 
 // GetSource returns the value of Source.
@@ -959,14 +975,19 @@ func (s *Message) GetSource() MessageSource {
 	return s.Source
 }
 
-// GetChatID returns the value of ChatID.
-func (s *Message) GetChatID() OptString {
-	return s.ChatID
+// GetType returns the value of Type.
+func (s *Message) GetType() OptMessageType {
+	return s.Type
 }
 
-// GetThreadID returns the value of ThreadID.
-func (s *Message) GetThreadID() OptString {
-	return s.ThreadID
+// GetChatUUID returns the value of ChatUUID.
+func (s *Message) GetChatUUID() OptString {
+	return s.ChatUUID
+}
+
+// GetThreadUUID returns the value of ThreadUUID.
+func (s *Message) GetThreadUUID() OptString {
+	return s.ThreadUUID
 }
 
 // GetSender returns the value of Sender.
@@ -984,9 +1005,24 @@ func (s *Message) GetSubject() OptString {
 	return s.Subject
 }
 
+// GetSubjectRich returns the value of SubjectRich.
+func (s *Message) GetSubjectRich() OptMessageSubjectRich {
+	return s.SubjectRich
+}
+
 // GetContent returns the value of Content.
 func (s *Message) GetContent() string {
 	return s.Content
+}
+
+// GetContentRich returns the value of ContentRich.
+func (s *Message) GetContentRich() OptMessageContentRich {
+	return s.ContentRich
+}
+
+// GetReactions returns the value of Reactions.
+func (s *Message) GetReactions() OptMessageReactions {
+	return s.Reactions
 }
 
 // GetAttachments returns the value of Attachments.
@@ -994,14 +1030,29 @@ func (s *Message) GetAttachments() []FileObject {
 	return s.Attachments
 }
 
-// GetTimestamp returns the value of Timestamp.
-func (s *Message) GetTimestamp() time.Time {
-	return s.Timestamp
-}
-
 // GetForwardFrom returns the value of ForwardFrom.
 func (s *Message) GetForwardFrom() OptString {
 	return s.ForwardFrom
+}
+
+// GetReplyToMessageUUID returns the value of ReplyToMessageUUID.
+func (s *Message) GetReplyToMessageUUID() OptString {
+	return s.ReplyToMessageUUID
+}
+
+// GetForwardFromChatUUID returns the value of ForwardFromChatUUID.
+func (s *Message) GetForwardFromChatUUID() OptString {
+	return s.ForwardFromChatUUID
+}
+
+// GetForwardFromMessageUUID returns the value of ForwardFromMessageUUID.
+func (s *Message) GetForwardFromMessageUUID() OptString {
+	return s.ForwardFromMessageUUID
+}
+
+// GetForwardMeta returns the value of ForwardMeta.
+func (s *Message) GetForwardMeta() OptMessageForwardMeta {
+	return s.ForwardMeta
 }
 
 // GetMeta returns the value of Meta.
@@ -1009,9 +1060,14 @@ func (s *Message) GetMeta() OptMessageMeta {
 	return s.Meta
 }
 
-// SetID sets the value of ID.
-func (s *Message) SetID(val string) {
-	s.ID = val
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Message) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *Message) SetUUID(val OptString) {
+	s.UUID = val
 }
 
 // SetSource sets the value of Source.
@@ -1019,14 +1075,19 @@ func (s *Message) SetSource(val MessageSource) {
 	s.Source = val
 }
 
-// SetChatID sets the value of ChatID.
-func (s *Message) SetChatID(val OptString) {
-	s.ChatID = val
+// SetType sets the value of Type.
+func (s *Message) SetType(val OptMessageType) {
+	s.Type = val
 }
 
-// SetThreadID sets the value of ThreadID.
-func (s *Message) SetThreadID(val OptString) {
-	s.ThreadID = val
+// SetChatUUID sets the value of ChatUUID.
+func (s *Message) SetChatUUID(val OptString) {
+	s.ChatUUID = val
+}
+
+// SetThreadUUID sets the value of ThreadUUID.
+func (s *Message) SetThreadUUID(val OptString) {
+	s.ThreadUUID = val
 }
 
 // SetSender sets the value of Sender.
@@ -1044,9 +1105,24 @@ func (s *Message) SetSubject(val OptString) {
 	s.Subject = val
 }
 
+// SetSubjectRich sets the value of SubjectRich.
+func (s *Message) SetSubjectRich(val OptMessageSubjectRich) {
+	s.SubjectRich = val
+}
+
 // SetContent sets the value of Content.
 func (s *Message) SetContent(val string) {
 	s.Content = val
+}
+
+// SetContentRich sets the value of ContentRich.
+func (s *Message) SetContentRich(val OptMessageContentRich) {
+	s.ContentRich = val
+}
+
+// SetReactions sets the value of Reactions.
+func (s *Message) SetReactions(val OptMessageReactions) {
+	s.Reactions = val
 }
 
 // SetAttachments sets the value of Attachments.
@@ -1054,19 +1130,51 @@ func (s *Message) SetAttachments(val []FileObject) {
 	s.Attachments = val
 }
 
-// SetTimestamp sets the value of Timestamp.
-func (s *Message) SetTimestamp(val time.Time) {
-	s.Timestamp = val
-}
-
 // SetForwardFrom sets the value of ForwardFrom.
 func (s *Message) SetForwardFrom(val OptString) {
 	s.ForwardFrom = val
 }
 
+// SetReplyToMessageUUID sets the value of ReplyToMessageUUID.
+func (s *Message) SetReplyToMessageUUID(val OptString) {
+	s.ReplyToMessageUUID = val
+}
+
+// SetForwardFromChatUUID sets the value of ForwardFromChatUUID.
+func (s *Message) SetForwardFromChatUUID(val OptString) {
+	s.ForwardFromChatUUID = val
+}
+
+// SetForwardFromMessageUUID sets the value of ForwardFromMessageUUID.
+func (s *Message) SetForwardFromMessageUUID(val OptString) {
+	s.ForwardFromMessageUUID = val
+}
+
+// SetForwardMeta sets the value of ForwardMeta.
+func (s *Message) SetForwardMeta(val OptMessageForwardMeta) {
+	s.ForwardMeta = val
+}
+
 // SetMeta sets the value of Meta.
 func (s *Message) SetMeta(val OptMessageMeta) {
 	s.Meta = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Message) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// Rich text content or body of the message will be passed from JSON object silimar to Slate.js format.
+type MessageContentRich map[string]jx.Raw
+
+func (s *MessageContentRich) init() MessageContentRich {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 type MessageEmailQueryOK struct {
@@ -1082,6 +1190,18 @@ func (s *MessageEmailQueryOK) GetMessages() []Message {
 // SetMessages sets the value of Messages.
 func (s *MessageEmailQueryOK) SetMessages(val []Message) {
 	s.Messages = val
+}
+
+// Additional context or metadata about the forwarded message.
+type MessageForwardMeta map[string]jx.Raw
+
+func (s *MessageForwardMeta) init() MessageForwardMeta {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 type MessageLinkedinQueryOK struct {
@@ -1401,6 +1521,18 @@ func (s *MessageQueryStorageType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Collection of reactions (e.g., likes, emojis) applied to this message.
+type MessageReactions map[string]int
+
+func (s *MessageReactions) init() MessageReactions {
+	m := *s
+	if m == nil {
+		m = map[string]int{}
+		*s = m
+	}
+	return m
+}
+
 // Data source or platform the message originated from.
 type MessageSource string
 
@@ -1464,6 +1596,18 @@ func (s *MessageSource) UnmarshalText(data []byte) error {
 	}
 }
 
+// Rich subject will be passed from JSON object silimar to Slate.js format.
+type MessageSubjectRich map[string]jx.Raw
+
+func (s *MessageSubjectRich) init() MessageSubjectRich {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 type MessageTelegramQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -1477,6 +1621,90 @@ func (s *MessageTelegramQueryOK) GetMessages() []Message {
 // SetMessages sets the value of Messages.
 func (s *MessageTelegramQueryOK) SetMessages(val []Message) {
 	s.Messages = val
+}
+
+// Specifies the type or classification of the message.
+type MessageType string
+
+const (
+	MessageTypeText         MessageType = "text"
+	MessageTypeMedia        MessageType = "media"
+	MessageTypeSystem       MessageType = "system"
+	MessageTypeNotification MessageType = "notification"
+	MessageTypeAttachment   MessageType = "attachment"
+	MessageTypeInvite       MessageType = "invite"
+	MessageTypeEvent        MessageType = "event"
+	MessageTypeCall         MessageType = "call"
+)
+
+// AllValues returns all MessageType values.
+func (MessageType) AllValues() []MessageType {
+	return []MessageType{
+		MessageTypeText,
+		MessageTypeMedia,
+		MessageTypeSystem,
+		MessageTypeNotification,
+		MessageTypeAttachment,
+		MessageTypeInvite,
+		MessageTypeEvent,
+		MessageTypeCall,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageType) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageTypeText:
+		return []byte(s), nil
+	case MessageTypeMedia:
+		return []byte(s), nil
+	case MessageTypeSystem:
+		return []byte(s), nil
+	case MessageTypeNotification:
+		return []byte(s), nil
+	case MessageTypeAttachment:
+		return []byte(s), nil
+	case MessageTypeInvite:
+		return []byte(s), nil
+	case MessageTypeEvent:
+		return []byte(s), nil
+	case MessageTypeCall:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageType) UnmarshalText(data []byte) error {
+	switch MessageType(data) {
+	case MessageTypeText:
+		*s = MessageTypeText
+		return nil
+	case MessageTypeMedia:
+		*s = MessageTypeMedia
+		return nil
+	case MessageTypeSystem:
+		*s = MessageTypeSystem
+		return nil
+	case MessageTypeNotification:
+		*s = MessageTypeNotification
+		return nil
+	case MessageTypeAttachment:
+		*s = MessageTypeAttachment
+		return nil
+	case MessageTypeInvite:
+		*s = MessageTypeInvite
+		return nil
+	case MessageTypeEvent:
+		*s = MessageTypeEvent
+		return nil
+	case MessageTypeCall:
+		*s = MessageTypeCall
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type MessageWhatsappQueryOK struct {
@@ -1906,6 +2134,52 @@ func (o OptDateTime) Or(d time.Time) time.Time {
 	return d
 }
 
+// NewOptEmailLabelColor returns new OptEmailLabelColor with value set to v.
+func NewOptEmailLabelColor(v EmailLabelColor) OptEmailLabelColor {
+	return OptEmailLabelColor{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptEmailLabelColor is optional EmailLabelColor.
+type OptEmailLabelColor struct {
+	Value EmailLabelColor
+	Set   bool
+}
+
+// IsSet returns true if OptEmailLabelColor was set.
+func (o OptEmailLabelColor) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptEmailLabelColor) Reset() {
+	var v EmailLabelColor
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptEmailLabelColor) SetTo(v EmailLabelColor) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptEmailLabelColor) Get() (v EmailLabelColor, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptEmailLabelColor) Or(d EmailLabelColor) EmailLabelColor {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptFileObject returns new OptFileObject with value set to v.
 func NewOptFileObject(v FileObject) OptFileObject {
 	return OptFileObject{
@@ -2136,38 +2410,38 @@ func (o OptInt64) Or(d int64) int64 {
 	return d
 }
 
-// NewOptMailLabelColor returns new OptMailLabelColor with value set to v.
-func NewOptMailLabelColor(v MailLabelColor) OptMailLabelColor {
-	return OptMailLabelColor{
+// NewOptMessageContentRich returns new OptMessageContentRich with value set to v.
+func NewOptMessageContentRich(v MessageContentRich) OptMessageContentRich {
+	return OptMessageContentRich{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptMailLabelColor is optional MailLabelColor.
-type OptMailLabelColor struct {
-	Value MailLabelColor
+// OptMessageContentRich is optional MessageContentRich.
+type OptMessageContentRich struct {
+	Value MessageContentRich
 	Set   bool
 }
 
-// IsSet returns true if OptMailLabelColor was set.
-func (o OptMailLabelColor) IsSet() bool { return o.Set }
+// IsSet returns true if OptMessageContentRich was set.
+func (o OptMessageContentRich) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptMailLabelColor) Reset() {
-	var v MailLabelColor
+func (o *OptMessageContentRich) Reset() {
+	var v MessageContentRich
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptMailLabelColor) SetTo(v MailLabelColor) {
+func (o *OptMessageContentRich) SetTo(v MessageContentRich) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptMailLabelColor) Get() (v MailLabelColor, ok bool) {
+func (o OptMessageContentRich) Get() (v MessageContentRich, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -2175,7 +2449,53 @@ func (o OptMailLabelColor) Get() (v MailLabelColor, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptMailLabelColor) Or(d MailLabelColor) MailLabelColor {
+func (o OptMessageContentRich) Or(d MessageContentRich) MessageContentRich {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageForwardMeta returns new OptMessageForwardMeta with value set to v.
+func NewOptMessageForwardMeta(v MessageForwardMeta) OptMessageForwardMeta {
+	return OptMessageForwardMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageForwardMeta is optional MessageForwardMeta.
+type OptMessageForwardMeta struct {
+	Value MessageForwardMeta
+	Set   bool
+}
+
+// IsSet returns true if OptMessageForwardMeta was set.
+func (o OptMessageForwardMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageForwardMeta) Reset() {
+	var v MessageForwardMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageForwardMeta) SetTo(v MessageForwardMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageForwardMeta) Get() (v MessageForwardMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageForwardMeta) Or(d MessageForwardMeta) MessageForwardMeta {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2314,6 +2634,144 @@ func (o OptMessageQueryStorageType) Get() (v MessageQueryStorageType, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageQueryStorageType) Or(d MessageQueryStorageType) MessageQueryStorageType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageReactions returns new OptMessageReactions with value set to v.
+func NewOptMessageReactions(v MessageReactions) OptMessageReactions {
+	return OptMessageReactions{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageReactions is optional MessageReactions.
+type OptMessageReactions struct {
+	Value MessageReactions
+	Set   bool
+}
+
+// IsSet returns true if OptMessageReactions was set.
+func (o OptMessageReactions) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageReactions) Reset() {
+	var v MessageReactions
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageReactions) SetTo(v MessageReactions) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageReactions) Get() (v MessageReactions, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageReactions) Or(d MessageReactions) MessageReactions {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageSubjectRich returns new OptMessageSubjectRich with value set to v.
+func NewOptMessageSubjectRich(v MessageSubjectRich) OptMessageSubjectRich {
+	return OptMessageSubjectRich{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageSubjectRich is optional MessageSubjectRich.
+type OptMessageSubjectRich struct {
+	Value MessageSubjectRich
+	Set   bool
+}
+
+// IsSet returns true if OptMessageSubjectRich was set.
+func (o OptMessageSubjectRich) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageSubjectRich) Reset() {
+	var v MessageSubjectRich
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageSubjectRich) SetTo(v MessageSubjectRich) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageSubjectRich) Get() (v MessageSubjectRich, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageSubjectRich) Or(d MessageSubjectRich) MessageSubjectRich {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageType returns new OptMessageType with value set to v.
+func NewOptMessageType(v MessageType) OptMessageType {
+	return OptMessageType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageType is optional MessageType.
+type OptMessageType struct {
+	Value MessageType
+	Set   bool
+}
+
+// IsSet returns true if OptMessageType was set.
+func (o OptMessageType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageType) Reset() {
+	var v MessageType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageType) SetTo(v MessageType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageType) Get() (v MessageType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageType) Or(d MessageType) MessageType {
 	if v, ok := o.Get(); ok {
 		return v
 	}

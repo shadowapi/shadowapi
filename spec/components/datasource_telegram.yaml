@@ -22,9 +22,9 @@ properties:
     type: string
     description: e.g., "telegram", "whatsapp", "gmail", etc.
   sessionHistory:
-    $ref: "../openapi.yaml#/components/schemas/session_history.yaml"
+    $ref: "../openapi.yaml#/components/schemas/telegram_session_history.yaml"
   participants:
-    $ref: "../openapi.yaml#/components/schemas/participants.yaml"
+    $ref: "../openapi.yaml#/components/schemas/telegram_participants.yaml"
   meta:
     type: object
     additionalProperties: true

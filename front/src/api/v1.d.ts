@@ -558,7 +558,7 @@ export interface components {
         DatasourceEmailCreate: components["schemas"]["datasource_email_create"];
         DatasourceEmailUpdate: components["schemas"]["datasource_email_update"];
         Error: components["schemas"]["error"];
-        MailLabel: components["schemas"]["mail_label"];
+        MailLabel: components["schemas"]["email_label"];
         Oauth2Client: components["schemas"]["oauth2_client"];
         Oauth2ClientToken: components["schemas"]["oauth2_client_token"];
         Pipeline: components["schemas"]["pipeline"];
@@ -568,6 +568,7 @@ export interface components {
         StoragePostgres: components["schemas"]["storage_postgres"];
         StorageS3: components["schemas"]["storage_s3"];
         StorageHostFiles: components["schemas"]["storage_hostfiles"];
+        EmailLabel: components["schemas"]["email_label"];
         Message: components["schemas"]["message"];
         MessageQuery: components["schemas"]["message_query"];
         /** @description Represents a stored file, independent of the storage backend. */
@@ -700,7 +701,7 @@ export interface components {
             /** @description SMTP TLS flag. */
             smtp_tls?: boolean;
         };
-        mail_label: {
+        email_label: {
             /** Format: int64 */
             HTTPStatusCode: number;
             Header: {
@@ -913,37 +914,64 @@ export interface components {
         };
         message: {
             /** @description Unique identifier for the message. */
-            id: string;
+            uuid?: string;
             /**
              * @description Data source or platform the message originated from.
              * @enum {string}
              */
             source: "email" | "whatsapp" | "telegram" | "linkedin" | "custom";
+            /**
+             * @description Specifies the type or classification of the message.
+             * @enum {string}
+             */
+            type?: "text" | "media" | "system" | "notification" | "attachment" | "invite" | "event" | "call";
             /** @description ID of the chat/conversation this message belongs to. */
-            chat_id?: string;
+            chat_uuid?: string;
             /** @description ID of a sub-thread if this message is part of a threaded conversation. */
-            thread_id?: string;
+            thread_uuid?: string;
             /** @description Identifier of the user or account sending the message. */
             sender: string;
             /** @description List of users or accounts receiving the message (e.g., To, CC). */
             recipients: string[];
             /** @description Subject or title of the message (applicable to emails or similar). */
             subject?: string;
+            /** @description Rich subject will be passed from JSON object silimar to Slate.js format */
+            subject_rich?: {
+                [key: string]: unknown;
+            };
             /** @description Text content or body of the message. */
             content: string;
+            /** @description Rich text content or body of the message will be passed from JSON object silimar to Slate.js format */
+            content_rich?: {
+                [key: string]: unknown;
+            };
+            /** @description Collection of reactions (e.g., likes, emojis) applied to this message. */
+            reactions?: {
+                [key: string]: number;
+            };
             /** @description List of file attachments associated with this message. */
             attachments?: components["schemas"]["FileObject"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the message was sent.
-             */
-            timestamp: string;
             /** @description ID or handle of the original sender if this message is forwarded. */
-            forwardFrom?: string;
+            forward_from?: string;
+            /** @description ID of the message this one is directly replying to, if any. */
+            reply_to_message_uuid?: string;
+            /** @description ID of the original chat if this message is forwarded. */
+            forward_from_chat_uuid?: string;
+            /** @description ID of the original message if this is forwarded. */
+            forward_from_message_uuid?: string;
+            /** @description Additional context or metadata about the forwarded message. */
+            forward_meta?: {
+                [key: string]: unknown;
+            };
             /** @description Additional metadata relevant to the message. */
             meta?: {
                 [key: string]: unknown;
             };
+            /**
+             * Format: date-time
+             * @description The date and time when the object was created.
+             */
+            readonly created_at?: string;
         };
     };
     responses: never;
@@ -1176,7 +1204,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description List of labels. */
-                        labels: components["schemas"]["mail_label"][];
+                        labels: components["schemas"]["email_label"][];
                     };
                 };
             };

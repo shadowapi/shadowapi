@@ -1,0 +1,277 @@
+type: object
+descripton: Reactima CRM compatible contact object representation, will be used for enrichment propotyping
+properties:
+  uuid:
+    readOnly: true
+    type: string
+  user_uuid:
+    readOnly: true
+    type: string
+  instance_uuid:
+    readOnly: true
+    type: string
+  status:
+    type: string
+  names:
+    type: object
+    additionalProperties: true
+  namesSearch:
+    type: string
+  last:
+    type: string
+  first:
+    type: string
+  middle:
+    type: string
+  birthday:
+    type: string
+    format: date-time
+  birthdayType:
+    type: string
+  salary:
+    type: string
+  salaryData:
+    type: object
+    additionalProperties: true
+  lastPositions:
+    type: object
+    additionalProperties: true
+  lastPositionID:
+    type: integer
+    format: int64
+  lastPositionCompanyID:
+    type: integer
+    format: int64
+  lastPositionCompanyName:
+    type: string
+  lastPositionTitle:
+    type: string
+  lastPositionStartDate:
+    type: string
+    format: date-time
+  lastPositionEndDate:
+    type: string
+    format: date-time
+  lastPositionEndNow:
+    type: boolean
+  lastPositionDescription:
+    type: string
+  noteSearch:
+    type: string
+  noteKpiID:
+    type: object
+    additionalProperties: true
+  phones:
+    type: object
+    additionalProperties: true
+  phoneSearch:
+    type: string
+  phone1:
+    type: string
+  phone1Type:
+    type: string
+  phone1Country:
+    type: string
+  phone2:
+    type: string
+  phone2Type:
+    type: string
+  phone2Country:
+    type: string
+  phone3:
+    type: string
+  phone3Type:
+    type: string
+  phone3Country:
+    type: string
+  phone4:
+    type: string
+  phone4Type:
+    type: string
+  phone4Country:
+    type: string
+  phone5:
+    type: string
+  phone5Type:
+    type: string
+  phone5Country:
+    type: string
+  emails:
+    type: object
+    additionalProperties: true
+  emailSearch:
+    type: string
+  email1:
+    type: string
+  email1Type:
+    type: string
+  email2:
+    type: string
+  email2Type:
+    type: string
+  email3:
+    type: string
+  email3Type:
+    type: string
+  email4:
+    type: string
+  email4Type:
+    type: string
+  email5:
+    type: string
+  email5Type:
+    type: string
+  messengers:
+    type: object
+    additionalProperties: true
+  messengersSearch:
+    type: string
+  skypeUUID:
+    type: string
+  skype:
+    type: string
+  whatsappUUID:
+    type: string
+  whatsapp:
+    type: string
+  telegramUUID:
+    type: string
+  telegram:
+    type: string
+  wechatUUID:
+    type: string
+  wechat:
+    type: string
+  lineUUID:
+    type: string
+  line:
+    type: string
+  socials:
+    type: object
+    additionalProperties: true
+  socialsSearch:
+    type: string
+  linkedinUUID:
+    type: string
+  linkedinURL:
+    type: string
+  facebookUUID:
+    type: string
+  facebookURL:
+    type: string
+  twitterUUID:
+    type: string
+  twitterURL:
+    type: string
+  githubUUID:
+    type: string
+  githubURL:
+    type: string
+  vkUUID:
+    type: string
+  vkURL:
+    type: string
+  odnoUUID:
+    type: string
+  odnoURL:
+    type: string
+  hhruUUID:
+    type: string
+  hhruURL:
+    type: string
+  habrUUID:
+    type: string
+  habrURL:
+    type: string
+  moikrugUUID:
+    type: string
+  moikrugURL:
+    type: string
+  instagramUUID:
+    type: string
+  instagramURL:
+    type: string
+  social1UUID:
+    type: string
+  social1URL:
+    type: string
+  social1Type:
+    type: string
+  social2UUID:
+    type: string
+  social2URL:
+    type: string
+  social2Type:
+    type: string
+  social3UUID:
+    type: string
+  social3URL:
+    type: string
+  social3Type:
+    type: string
+  social4UUID:
+    type: string
+  social4URL:
+    type: string
+  social4Type:
+    type: string
+  social5UUID:
+    type: string
+  social5URL:
+    type: string
+  social5Type:
+    type: string
+  social6UUID:
+    type: string
+  social6URL:
+    type: string
+  social6Type:
+    type: string
+  social7UUID:
+    type: string
+  social7URL:
+    type: string
+  social7Type:
+    type: string
+  social8UUID:
+    type: string
+  social8URL:
+    type: string
+  social8Type:
+    type: string
+  social9UUID:
+    type: string
+  social9URL:
+    type: string
+  social9Type:
+    type: string
+  trackingSource:
+    type: string
+  trackingSlug:
+    type: string
+  cachedImg:
+    type: string
+  cachedImgData:
+    type: object
+    additionalProperties: true
+  crawl:
+    type: object
+    additionalProperties: true
+  duplicateUserID:
+    type: string
+  duplicateAlternativeID:
+    type: string
+  duplicateReportDate:
+    type: string
+    format: date-time
+  entryDate:
+    type: string
+    format: date-time
+  editDate:
+    type: string
+    format: date-time
+  lastKPIEntryDate:
+    type: string
+    format: date-time
+  score100:
+    type: integer

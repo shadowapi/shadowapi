@@ -634,9 +634,9 @@ func (s *DatasourceEmailRunPipelineOK) Decode(d *jx.Decoder) error {
 		case "labels":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Labels = make([]MailLabel, 0)
+				s.Labels = make([]EmailLabel, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem MailLabel
+					var elem EmailLabel
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -979,6 +979,436 @@ func (s *DatasourceSetOAuth2ClientReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DatasourceSetOAuth2ClientReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *EmailLabel) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *EmailLabel) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("HTTPStatusCode")
+		e.Int64(s.HTTPStatusCode)
+	}
+	{
+		e.FieldStart("Header")
+		s.Header.Encode(e)
+	}
+	{
+		if s.ID.Set {
+			e.FieldStart("id")
+			s.ID.Encode(e)
+		}
+	}
+	{
+		if s.Color.Set {
+			e.FieldStart("color")
+			s.Color.Encode(e)
+		}
+	}
+	{
+		if s.LabelListVisibility.Set {
+			e.FieldStart("labelListVisibility")
+			s.LabelListVisibility.Encode(e)
+		}
+	}
+	{
+		if s.MessageListVisibility.Set {
+			e.FieldStart("messageListVisibility")
+			s.MessageListVisibility.Encode(e)
+		}
+	}
+	{
+		if s.MessagesTotal.Set {
+			e.FieldStart("messagesTotal")
+			s.MessagesTotal.Encode(e)
+		}
+	}
+	{
+		if s.MessagesUnread.Set {
+			e.FieldStart("messagesUnread")
+			s.MessagesUnread.Encode(e)
+		}
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.ThreadsTotal.Set {
+			e.FieldStart("threadsTotal")
+			s.ThreadsTotal.Encode(e)
+		}
+	}
+	{
+		if s.ThreadsUnread.Set {
+			e.FieldStart("threadsUnread")
+			s.ThreadsUnread.Encode(e)
+		}
+	}
+	{
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfEmailLabel = [12]string{
+	0:  "HTTPStatusCode",
+	1:  "Header",
+	2:  "id",
+	3:  "color",
+	4:  "labelListVisibility",
+	5:  "messageListVisibility",
+	6:  "messagesTotal",
+	7:  "messagesUnread",
+	8:  "name",
+	9:  "threadsTotal",
+	10: "threadsUnread",
+	11: "type",
+}
+
+// Decode decodes EmailLabel from json.
+func (s *EmailLabel) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EmailLabel to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "HTTPStatusCode":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.HTTPStatusCode = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"HTTPStatusCode\"")
+			}
+		case "Header":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Header.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"Header\"")
+			}
+		case "id":
+			if err := func() error {
+				s.ID.Reset()
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "color":
+			if err := func() error {
+				s.Color.Reset()
+				if err := s.Color.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"color\"")
+			}
+		case "labelListVisibility":
+			if err := func() error {
+				s.LabelListVisibility.Reset()
+				if err := s.LabelListVisibility.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"labelListVisibility\"")
+			}
+		case "messageListVisibility":
+			if err := func() error {
+				s.MessageListVisibility.Reset()
+				if err := s.MessageListVisibility.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"messageListVisibility\"")
+			}
+		case "messagesTotal":
+			if err := func() error {
+				s.MessagesTotal.Reset()
+				if err := s.MessagesTotal.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"messagesTotal\"")
+			}
+		case "messagesUnread":
+			if err := func() error {
+				s.MessagesUnread.Reset()
+				if err := s.MessagesUnread.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"messagesUnread\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "threadsTotal":
+			if err := func() error {
+				s.ThreadsTotal.Reset()
+				if err := s.ThreadsTotal.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"threadsTotal\"")
+			}
+		case "threadsUnread":
+			if err := func() error {
+				s.ThreadsUnread.Reset()
+				if err := s.ThreadsUnread.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"threadsUnread\"")
+			}
+		case "type":
+			if err := func() error {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EmailLabel")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00000011,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfEmailLabel) {
+					name = jsonFieldsNameOfEmailLabel[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *EmailLabel) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EmailLabel) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *EmailLabelColor) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *EmailLabelColor) encodeFields(e *jx.Encoder) {
+	{
+		if s.BackgroundColor.Set {
+			e.FieldStart("backgroundColor")
+			s.BackgroundColor.Encode(e)
+		}
+	}
+	{
+		if s.TextColor.Set {
+			e.FieldStart("textColor")
+			s.TextColor.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfEmailLabelColor = [2]string{
+	0: "backgroundColor",
+	1: "textColor",
+}
+
+// Decode decodes EmailLabelColor from json.
+func (s *EmailLabelColor) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EmailLabelColor to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "backgroundColor":
+			if err := func() error {
+				s.BackgroundColor.Reset()
+				if err := s.BackgroundColor.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"backgroundColor\"")
+			}
+		case "textColor":
+			if err := func() error {
+				s.TextColor.Reset()
+				if err := s.TextColor.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"textColor\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EmailLabelColor")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *EmailLabelColor) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EmailLabelColor) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s EmailLabelHeader) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s EmailLabelHeader) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.ArrStart()
+		for _, elem := range elem {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+}
+
+// Decode decodes EmailLabelHeader from json.
+func (s *EmailLabelHeader) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode EmailLabelHeader to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem []string
+		if err := func() error {
+			elem = make([]string, 0)
+			if err := d.Arr(func(d *jx.Decoder) error {
+				var elemElem string
+				v, err := d.Str()
+				elemElem = string(v)
+				if err != nil {
+					return err
+				}
+				elem = append(elem, elemElem)
+				return nil
+			}); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode EmailLabelHeader")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s EmailLabelHeader) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *EmailLabelHeader) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -1556,436 +1986,6 @@ func (s *GenerateDownloadLinkResponse) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *MailLabel) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *MailLabel) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("HTTPStatusCode")
-		e.Int64(s.HTTPStatusCode)
-	}
-	{
-		e.FieldStart("Header")
-		s.Header.Encode(e)
-	}
-	{
-		if s.ID.Set {
-			e.FieldStart("id")
-			s.ID.Encode(e)
-		}
-	}
-	{
-		if s.Color.Set {
-			e.FieldStart("color")
-			s.Color.Encode(e)
-		}
-	}
-	{
-		if s.LabelListVisibility.Set {
-			e.FieldStart("labelListVisibility")
-			s.LabelListVisibility.Encode(e)
-		}
-	}
-	{
-		if s.MessageListVisibility.Set {
-			e.FieldStart("messageListVisibility")
-			s.MessageListVisibility.Encode(e)
-		}
-	}
-	{
-		if s.MessagesTotal.Set {
-			e.FieldStart("messagesTotal")
-			s.MessagesTotal.Encode(e)
-		}
-	}
-	{
-		if s.MessagesUnread.Set {
-			e.FieldStart("messagesUnread")
-			s.MessagesUnread.Encode(e)
-		}
-	}
-	{
-		if s.Name.Set {
-			e.FieldStart("name")
-			s.Name.Encode(e)
-		}
-	}
-	{
-		if s.ThreadsTotal.Set {
-			e.FieldStart("threadsTotal")
-			s.ThreadsTotal.Encode(e)
-		}
-	}
-	{
-		if s.ThreadsUnread.Set {
-			e.FieldStart("threadsUnread")
-			s.ThreadsUnread.Encode(e)
-		}
-	}
-	{
-		if s.Type.Set {
-			e.FieldStart("type")
-			s.Type.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfMailLabel = [12]string{
-	0:  "HTTPStatusCode",
-	1:  "Header",
-	2:  "id",
-	3:  "color",
-	4:  "labelListVisibility",
-	5:  "messageListVisibility",
-	6:  "messagesTotal",
-	7:  "messagesUnread",
-	8:  "name",
-	9:  "threadsTotal",
-	10: "threadsUnread",
-	11: "type",
-}
-
-// Decode decodes MailLabel from json.
-func (s *MailLabel) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MailLabel to nil")
-	}
-	var requiredBitSet [2]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "HTTPStatusCode":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Int64()
-				s.HTTPStatusCode = int64(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"HTTPStatusCode\"")
-			}
-		case "Header":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.Header.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"Header\"")
-			}
-		case "id":
-			if err := func() error {
-				s.ID.Reset()
-				if err := s.ID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "color":
-			if err := func() error {
-				s.Color.Reset()
-				if err := s.Color.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"color\"")
-			}
-		case "labelListVisibility":
-			if err := func() error {
-				s.LabelListVisibility.Reset()
-				if err := s.LabelListVisibility.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"labelListVisibility\"")
-			}
-		case "messageListVisibility":
-			if err := func() error {
-				s.MessageListVisibility.Reset()
-				if err := s.MessageListVisibility.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"messageListVisibility\"")
-			}
-		case "messagesTotal":
-			if err := func() error {
-				s.MessagesTotal.Reset()
-				if err := s.MessagesTotal.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"messagesTotal\"")
-			}
-		case "messagesUnread":
-			if err := func() error {
-				s.MessagesUnread.Reset()
-				if err := s.MessagesUnread.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"messagesUnread\"")
-			}
-		case "name":
-			if err := func() error {
-				s.Name.Reset()
-				if err := s.Name.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "threadsTotal":
-			if err := func() error {
-				s.ThreadsTotal.Reset()
-				if err := s.ThreadsTotal.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"threadsTotal\"")
-			}
-		case "threadsUnread":
-			if err := func() error {
-				s.ThreadsUnread.Reset()
-				if err := s.ThreadsUnread.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"threadsUnread\"")
-			}
-		case "type":
-			if err := func() error {
-				s.Type.Reset()
-				if err := s.Type.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"type\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode MailLabel")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b00000011,
-		0b00000000,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfMailLabel) {
-					name = jsonFieldsNameOfMailLabel[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *MailLabel) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MailLabel) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *MailLabelColor) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *MailLabelColor) encodeFields(e *jx.Encoder) {
-	{
-		if s.BackgroundColor.Set {
-			e.FieldStart("backgroundColor")
-			s.BackgroundColor.Encode(e)
-		}
-	}
-	{
-		if s.TextColor.Set {
-			e.FieldStart("textColor")
-			s.TextColor.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfMailLabelColor = [2]string{
-	0: "backgroundColor",
-	1: "textColor",
-}
-
-// Decode decodes MailLabelColor from json.
-func (s *MailLabelColor) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MailLabelColor to nil")
-	}
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "backgroundColor":
-			if err := func() error {
-				s.BackgroundColor.Reset()
-				if err := s.BackgroundColor.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"backgroundColor\"")
-			}
-		case "textColor":
-			if err := func() error {
-				s.TextColor.Reset()
-				if err := s.TextColor.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"textColor\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode MailLabelColor")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *MailLabelColor) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MailLabelColor) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s MailLabelHeader) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s MailLabelHeader) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		e.ArrStart()
-		for _, elem := range elem {
-			e.Str(elem)
-		}
-		e.ArrEnd()
-	}
-}
-
-// Decode decodes MailLabelHeader from json.
-func (s *MailLabelHeader) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MailLabelHeader to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem []string
-		if err := func() error {
-			elem = make([]string, 0)
-			if err := d.Arr(func(d *jx.Decoder) error {
-				var elemElem string
-				v, err := d.Str()
-				elemElem = string(v)
-				if err != nil {
-					return err
-				}
-				elem = append(elem, elemElem)
-				return nil
-			}); err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode MailLabelHeader")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s MailLabelHeader) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MailLabelHeader) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s *Message) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -1995,23 +1995,31 @@ func (s *Message) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Message) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("id")
-		e.Str(s.ID)
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("source")
 		s.Source.Encode(e)
 	}
 	{
-		if s.ChatID.Set {
-			e.FieldStart("chat_id")
-			s.ChatID.Encode(e)
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
 		}
 	}
 	{
-		if s.ThreadID.Set {
-			e.FieldStart("thread_id")
-			s.ThreadID.Encode(e)
+		if s.ChatUUID.Set {
+			e.FieldStart("chat_uuid")
+			s.ChatUUID.Encode(e)
+		}
+	}
+	{
+		if s.ThreadUUID.Set {
+			e.FieldStart("thread_uuid")
+			s.ThreadUUID.Encode(e)
 		}
 	}
 	{
@@ -2033,8 +2041,26 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.SubjectRich.Set {
+			e.FieldStart("subject_rich")
+			s.SubjectRich.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("content")
 		e.Str(s.Content)
+	}
+	{
+		if s.ContentRich.Set {
+			e.FieldStart("content_rich")
+			s.ContentRich.Encode(e)
+		}
+	}
+	{
+		if s.Reactions.Set {
+			e.FieldStart("reactions")
+			s.Reactions.Encode(e)
+		}
 	}
 	{
 		if s.Attachments != nil {
@@ -2047,13 +2073,33 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("timestamp")
-		json.EncodeDateTime(e, s.Timestamp)
+		if s.ForwardFrom.Set {
+			e.FieldStart("forward_from")
+			s.ForwardFrom.Encode(e)
+		}
 	}
 	{
-		if s.ForwardFrom.Set {
-			e.FieldStart("forwardFrom")
-			s.ForwardFrom.Encode(e)
+		if s.ReplyToMessageUUID.Set {
+			e.FieldStart("reply_to_message_uuid")
+			s.ReplyToMessageUUID.Encode(e)
+		}
+	}
+	{
+		if s.ForwardFromChatUUID.Set {
+			e.FieldStart("forward_from_chat_uuid")
+			s.ForwardFromChatUUID.Encode(e)
+		}
+	}
+	{
+		if s.ForwardFromMessageUUID.Set {
+			e.FieldStart("forward_from_message_uuid")
+			s.ForwardFromMessageUUID.Encode(e)
+		}
+	}
+	{
+		if s.ForwardMeta.Set {
+			e.FieldStart("forward_meta")
+			s.ForwardMeta.Encode(e)
 		}
 	}
 	{
@@ -2062,21 +2108,35 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 			s.Meta.Encode(e)
 		}
 	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
 }
 
-var jsonFieldsNameOfMessage = [12]string{
-	0:  "id",
+var jsonFieldsNameOfMessage = [20]string{
+	0:  "uuid",
 	1:  "source",
-	2:  "chat_id",
-	3:  "thread_id",
-	4:  "sender",
-	5:  "recipients",
-	6:  "subject",
-	7:  "content",
-	8:  "attachments",
-	9:  "timestamp",
-	10: "forwardFrom",
-	11: "meta",
+	2:  "type",
+	3:  "chat_uuid",
+	4:  "thread_uuid",
+	5:  "sender",
+	6:  "recipients",
+	7:  "subject",
+	8:  "subject_rich",
+	9:  "content",
+	10: "content_rich",
+	11: "reactions",
+	12: "attachments",
+	13: "forward_from",
+	14: "reply_to_message_uuid",
+	15: "forward_from_chat_uuid",
+	16: "forward_from_message_uuid",
+	17: "forward_meta",
+	18: "meta",
+	19: "created_at",
 }
 
 // Decode decodes Message from json.
@@ -2084,21 +2144,19 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Message to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
+		case "uuid":
 			if err := func() error {
-				v, err := d.Str()
-				s.ID = string(v)
-				if err != nil {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "source":
 			requiredBitSet[0] |= 1 << 1
@@ -2110,28 +2168,38 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"source\"")
 			}
-		case "chat_id":
+		case "type":
 			if err := func() error {
-				s.ChatID.Reset()
-				if err := s.ChatID.Decode(d); err != nil {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"chat_id\"")
+				return errors.Wrap(err, "decode field \"type\"")
 			}
-		case "thread_id":
+		case "chat_uuid":
 			if err := func() error {
-				s.ThreadID.Reset()
-				if err := s.ThreadID.Decode(d); err != nil {
+				s.ChatUUID.Reset()
+				if err := s.ChatUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"thread_id\"")
+				return errors.Wrap(err, "decode field \"chat_uuid\"")
+			}
+		case "thread_uuid":
+			if err := func() error {
+				s.ThreadUUID.Reset()
+				if err := s.ThreadUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"thread_uuid\"")
 			}
 		case "sender":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.Sender = string(v)
@@ -2143,7 +2211,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sender\"")
 			}
 		case "recipients":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				s.Recipients = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -2172,8 +2240,18 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"subject\"")
 			}
+		case "subject_rich":
+			if err := func() error {
+				s.SubjectRich.Reset()
+				if err := s.SubjectRich.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"subject_rich\"")
+			}
 		case "content":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Content = string(v)
@@ -2183,6 +2261,26 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"content\"")
+			}
+		case "content_rich":
+			if err := func() error {
+				s.ContentRich.Reset()
+				if err := s.ContentRich.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"content_rich\"")
+			}
+		case "reactions":
+			if err := func() error {
+				s.Reactions.Reset()
+				if err := s.Reactions.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reactions\"")
 			}
 		case "attachments":
 			if err := func() error {
@@ -2201,19 +2299,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"attachments\"")
 			}
-		case "timestamp":
-			requiredBitSet[1] |= 1 << 1
-			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.Timestamp = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"timestamp\"")
-			}
-		case "forwardFrom":
+		case "forward_from":
 			if err := func() error {
 				s.ForwardFrom.Reset()
 				if err := s.ForwardFrom.Decode(d); err != nil {
@@ -2221,7 +2307,47 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"forwardFrom\"")
+				return errors.Wrap(err, "decode field \"forward_from\"")
+			}
+		case "reply_to_message_uuid":
+			if err := func() error {
+				s.ReplyToMessageUUID.Reset()
+				if err := s.ReplyToMessageUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reply_to_message_uuid\"")
+			}
+		case "forward_from_chat_uuid":
+			if err := func() error {
+				s.ForwardFromChatUUID.Reset()
+				if err := s.ForwardFromChatUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"forward_from_chat_uuid\"")
+			}
+		case "forward_from_message_uuid":
+			if err := func() error {
+				s.ForwardFromMessageUUID.Reset()
+				if err := s.ForwardFromMessageUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"forward_from_message_uuid\"")
+			}
+		case "forward_meta":
+			if err := func() error {
+				s.ForwardMeta.Reset()
+				if err := s.ForwardMeta.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"forward_meta\"")
 			}
 		case "meta":
 			if err := func() error {
@@ -2233,6 +2359,16 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"meta\"")
 			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
@@ -2242,9 +2378,10 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b10110011,
+	for i, mask := range [3]uint8{
+		0b01100010,
 		0b00000010,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2286,6 +2423,64 @@ func (s *Message) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Message) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s MessageContentRich) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MessageContentRich) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes MessageContentRich from json.
+func (s *MessageContentRich) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageContentRich to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MessageContentRich")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageContentRich) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageContentRich) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -2392,6 +2587,64 @@ func (s *MessageEmailQueryOK) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MessageEmailQueryOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s MessageForwardMeta) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MessageForwardMeta) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes MessageForwardMeta from json.
+func (s *MessageForwardMeta) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageForwardMeta to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MessageForwardMeta")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageForwardMeta) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageForwardMeta) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -2953,6 +3206,62 @@ func (s *MessageQueryStorageType) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s MessageReactions) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MessageReactions) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Int(elem)
+	}
+}
+
+// Decode decodes MessageReactions from json.
+func (s *MessageReactions) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageReactions to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem int
+		if err := func() error {
+			v, err := d.Int()
+			elem = int(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MessageReactions")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageReactions) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageReactions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes MessageSource as json.
 func (s MessageSource) Encode(e *jx.Encoder) {
 	e.Str(string(s))
@@ -2995,6 +3304,64 @@ func (s MessageSource) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MessageSource) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s MessageSubjectRich) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s MessageSubjectRich) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes MessageSubjectRich from json.
+func (s *MessageSubjectRich) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageSubjectRich to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode MessageSubjectRich")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageSubjectRich) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageSubjectRich) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3101,6 +3468,58 @@ func (s *MessageTelegramQueryOK) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MessageTelegramQueryOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageType as json.
+func (s MessageType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes MessageType from json.
+func (s *MessageType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MessageType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch MessageType(v) {
+	case MessageTypeText:
+		*s = MessageTypeText
+	case MessageTypeMedia:
+		*s = MessageTypeMedia
+	case MessageTypeSystem:
+		*s = MessageTypeSystem
+	case MessageTypeNotification:
+		*s = MessageTypeNotification
+	case MessageTypeAttachment:
+		*s = MessageTypeAttachment
+	case MessageTypeInvite:
+		*s = MessageTypeInvite
+	case MessageTypeEvent:
+		*s = MessageTypeEvent
+	case MessageTypeCall:
+		*s = MessageTypeCall
+	default:
+		*s = MessageType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MessageType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MessageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -4301,6 +4720,39 @@ func (s *OptDateTime) UnmarshalJSON(data []byte) error {
 	return s.Decode(d, json.DecodeDateTime)
 }
 
+// Encode encodes EmailLabelColor as json.
+func (o OptEmailLabelColor) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes EmailLabelColor from json.
+func (o *OptEmailLabelColor) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptEmailLabelColor to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptEmailLabelColor) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptEmailLabelColor) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes FileObject as json.
 func (o OptFileObject) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -4437,20 +4889,21 @@ func (s *OptInt64) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes MailLabelColor as json.
-func (o OptMailLabelColor) Encode(e *jx.Encoder) {
+// Encode encodes MessageContentRich as json.
+func (o OptMessageContentRich) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
 	o.Value.Encode(e)
 }
 
-// Decode decodes MailLabelColor from json.
-func (o *OptMailLabelColor) Decode(d *jx.Decoder) error {
+// Decode decodes MessageContentRich from json.
+func (o *OptMessageContentRich) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptMailLabelColor to nil")
+		return errors.New("invalid: unable to decode OptMessageContentRich to nil")
 	}
 	o.Set = true
+	o.Value = make(MessageContentRich)
 	if err := o.Value.Decode(d); err != nil {
 		return err
 	}
@@ -4458,14 +4911,48 @@ func (o *OptMailLabelColor) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptMailLabelColor) MarshalJSON() ([]byte, error) {
+func (s OptMessageContentRich) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptMailLabelColor) UnmarshalJSON(data []byte) error {
+func (s *OptMessageContentRich) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageForwardMeta as json.
+func (o OptMessageForwardMeta) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes MessageForwardMeta from json.
+func (o *OptMessageForwardMeta) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMessageForwardMeta to nil")
+	}
+	o.Set = true
+	o.Value = make(MessageForwardMeta)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMessageForwardMeta) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMessageForwardMeta) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -4566,6 +5053,107 @@ func (s OptMessageQueryStorageType) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMessageQueryStorageType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageReactions as json.
+func (o OptMessageReactions) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes MessageReactions from json.
+func (o *OptMessageReactions) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMessageReactions to nil")
+	}
+	o.Set = true
+	o.Value = make(MessageReactions)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMessageReactions) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMessageReactions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageSubjectRich as json.
+func (o OptMessageSubjectRich) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes MessageSubjectRich from json.
+func (o *OptMessageSubjectRich) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMessageSubjectRich to nil")
+	}
+	o.Set = true
+	o.Value = make(MessageSubjectRich)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMessageSubjectRich) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMessageSubjectRich) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MessageType as json.
+func (o OptMessageType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes MessageType from json.
+func (o *OptMessageType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMessageType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMessageType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMessageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

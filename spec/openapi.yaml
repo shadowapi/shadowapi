@@ -16,7 +16,7 @@ components:
     Error:
       $ref: "components/error.yaml"
     MailLabel:
-      $ref: "components/mail_label.yaml"
+      $ref: "components/email_label.yaml"
     Oauth2Client:
       $ref: "components/oauth2_client.yaml"
     Oauth2ClientToken:
@@ -35,6 +35,8 @@ components:
       $ref: "components/storage_s3.yaml"
     StorageHostFiles:
       $ref: "components/storage_hostfiles.yaml"
+    EmailLabel:
+      $ref: "components/email_label.yaml"
     Message:
       $ref: "components/message.yaml"
     MessageQuery:

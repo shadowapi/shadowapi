@@ -1,4 +1,5 @@
 # spec/components/message_query.yaml
+# TODO expand with new message.yaml fields
 type: object
 additionalProperties: false
 properties:

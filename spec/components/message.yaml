@@ -2,17 +2,21 @@
 type: object
 additionalProperties: false
 properties:
-  id:
+  uuid:
     type: string
     description: "Unique identifier for the message."
   source:
     type: string
     enum: ["email", "whatsapp", "telegram", "linkedin", "custom"]
     description: "Data source or platform the message originated from."
-  chat_id:
+  type:
+    type: string
+    enum: ["text", "media", "system", "notification", "attachment", "invite", "event", "call"]
+    description: "Specifies the type or classification of the message."
+  chat_uuid:
     type: string
     description: "ID of the chat/conversation this message belongs to."
-  thread_id:
+  thread_uuid:
     type: string
     description: "ID of a sub-thread if this message is part of a threaded conversation."
   sender:
@@ -26,25 +30,54 @@ properties:
   subject:
     type: string
     description: "Subject or title of the message (applicable to emails or similar)."
+  subject_rich:
+    type: object
+    additionalProperties: true
+    description: "Rich subject will be passed from JSON object silimar to Slate.js format"
   content:
     type: string
     description: "Text content or body of the message."
+  content_rich:
+    type: object
+    additionalProperties: true
+    description: "Rich text content or body of the message will be passed from JSON object silimar to Slate.js format"
+  reactions:
+    type: object
+    description: "Collection of reactions (e.g., likes, emojis) applied to this message."
+    additionalProperties:
+      type: integer
+      description: "Count or tally of a given reaction."
   attachments:
     type: array
     description: "List of file attachments associated with this message."
     items:
       $ref: "../openapi.yaml#/components/schemas/FileObject"
-  timestamp:
-    type: string
-    format: date-time
-    description: "Timestamp when the message was sent."
-  forwardFrom:
+  forward_from:
     type: string
     description: "ID or handle of the original sender if this message is forwarded."
+  reply_to_message_uuid:
+    type: string
+    description: "ID of the message this one is directly replying to, if any."
+  forward_from_chat_uuid:
+    type: string
+    description: "ID of the original chat if this message is forwarded."
+  forward_from_message_uuid:
+    type: string
+    description: "ID of the original message if this is forwarded."
+  forward_meta:
+    type: object
+    additionalProperties: true
+    description: "Additional context or metadata about the forwarded message."
   meta:
     type: object
     additionalProperties: true
     description: "Additional metadata relevant to the message."
+  created_at:
+    description: The date and time when the object was created.
+    format: date-time
+    readOnly: true
+    type: string
+
 required:
   - id
   - source
