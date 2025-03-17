@@ -86,7 +86,7 @@ task prod-down
 - **Run Playwright Tests (Frontend):** `task playwright-run`
 
 
-# Roadmap, Q1-Q4, 2025 scheduled features
+# Roadmap v0.1~1.0, Q1-Q4, 2025 scheduled features
 
 All messengers (Gmail, Telegram, WhatsApp, LinkedIn) should support the following functionalities:
 
@@ -109,13 +109,13 @@ All messengers (Gmail, Telegram, WhatsApp, LinkedIn) should support the followin
 - Contacts support attributes like `displayName`, `username`, `language`, `availabilityStatus`, `profilePicture`, and `meta` (e.g., `externalCrmId`)
 - Contacts can be enriched by external CRM data and have similar structure to Reactima CRM
 
-#### **ContactLinking**
+**Scheduled for v2.x:**
+- **ContactLinking**
 Handles linking external users to internal contacts and creating new contacts.
-- Links an external user to an existing internal contact.
-- Creates a new contact from an ongoing conversation.
+  - Links an external user to an existing internal contact.
+  - Creates a new contact from an ongoing conversation.
 - **SyncContactsAcrossPlatforms:** Ensures contacts from Gmail, Telegram, WhatsApp, and LinkedIn sync correctly.
 - **MergeDuplicateEntries:** Handles cases where the same user exists on multiple platforms.
-
 
 #### **Message vs Chat vs Thread **
 
@@ -132,8 +132,7 @@ A **chat** represents a conversation channel, which can be either:
     - `join`, `left`: Logs user entries and exits.
     - `status`: Member states (`member`, `left`, `kicked`, etc.).
 
-
-
+    
 #### **Thread** (Focused Sub-Conversation)
 A **thread** represents a **nested** discussion within a chat.
 - Can be a **comment thread** on a message.
