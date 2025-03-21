@@ -18,7 +18,7 @@ properties:
     readOnly: true
   provider:
     type: string
-    enum: ["whatsapp","reactima","twillio","8x8"]
+    enum: ["whatsapp","whatsapp_reactima","twillio","8x8"]
   phone_number:
     type: string
     description: The phone number for the WhatsApp account

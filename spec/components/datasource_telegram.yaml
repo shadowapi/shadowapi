@@ -17,7 +17,7 @@ properties:
     readOnly: true
   provider:
     type: string
-    enum: ["telegram","reactima"]
+    enum: ["telegram","telegram_reactima"]
   phone_number:
     type: string
     description: The phone number for the Telegram account (international format)

@@ -284,6 +284,36 @@ type Handler interface {
 	//
 	// PUT /storage/s3/{uuid}
 	StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (*StorageS3, error)
+	// SyncpolicyCreate implements syncpolicy-create operation.
+	//
+	// Create a new sync policy.
+	//
+	// POST /syncpolicy
+	SyncpolicyCreate(ctx context.Context, req *SyncPolicy) (*SyncPolicy, error)
+	// SyncpolicyDelete implements syncpolicy-delete operation.
+	//
+	// Delete a sync policy by uuid.
+	//
+	// DELETE /syncpolicy/{uuid}
+	SyncpolicyDelete(ctx context.Context, params SyncpolicyDeleteParams) error
+	// SyncpolicyGet implements syncpolicy-get operation.
+	//
+	// Retrieve a specific sync policy by uuid.
+	//
+	// GET /syncpolicy/{uuid}
+	SyncpolicyGet(ctx context.Context, params SyncpolicyGetParams) (*SyncPolicy, error)
+	// SyncpolicyList implements syncpolicy-list operation.
+	//
+	// Retrieve a list of sync policies for the authenticated user.
+	//
+	// GET /syncpolicy
+	SyncpolicyList(ctx context.Context, params SyncpolicyListParams) (*SyncpolicyListOK, error)
+	// SyncpolicyUpdate implements syncpolicy-update operation.
+	//
+	// Update a sync policy by uuid.
+	//
+	// PUT /syncpolicy/{uuid}
+	SyncpolicyUpdate(ctx context.Context, req *SyncPolicy, params SyncpolicyUpdateParams) (*SyncPolicy, error)
 	// TgSessionCreate implements tg-session-create operation.
 	//
 	// Create a new Telegram session.

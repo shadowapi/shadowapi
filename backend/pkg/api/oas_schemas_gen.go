@@ -3812,6 +3812,123 @@ func (s *StorageS3) SetSecretAccessKey(val string) {
 // StorageS3DeleteOK is response for StorageS3Delete operation.
 type StorageS3DeleteOK struct{}
 
+// Ref: #
+type SyncPolicy struct {
+	// Unique identifier for the sync policy.
+	UUID string `json:"uuid"`
+	// Unique identifier for the user associated with the sync policy.
+	UserID string `json:"user_id"`
+	// The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin).
+	Service string `json:"service"`
+	// List of blocked emails or contact identifiers.
+	Blocklist []string `json:"blocklist"`
+	// List of contacts to exclude from syncing.
+	ExcludeList []string `json:"exclude_list"`
+	// Indicates whether to sync all messages from the service (true means no filtering).
+	SyncAll bool `json:"sync_all"`
+	// Timestamp when the policy was created.
+	CreatedAt time.Time `json:"created_at"`
+	// Timestamp when the policy was last updated.
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *SyncPolicy) GetUUID() string {
+	return s.UUID
+}
+
+// GetUserID returns the value of UserID.
+func (s *SyncPolicy) GetUserID() string {
+	return s.UserID
+}
+
+// GetService returns the value of Service.
+func (s *SyncPolicy) GetService() string {
+	return s.Service
+}
+
+// GetBlocklist returns the value of Blocklist.
+func (s *SyncPolicy) GetBlocklist() []string {
+	return s.Blocklist
+}
+
+// GetExcludeList returns the value of ExcludeList.
+func (s *SyncPolicy) GetExcludeList() []string {
+	return s.ExcludeList
+}
+
+// GetSyncAll returns the value of SyncAll.
+func (s *SyncPolicy) GetSyncAll() bool {
+	return s.SyncAll
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *SyncPolicy) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *SyncPolicy) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *SyncPolicy) SetUUID(val string) {
+	s.UUID = val
+}
+
+// SetUserID sets the value of UserID.
+func (s *SyncPolicy) SetUserID(val string) {
+	s.UserID = val
+}
+
+// SetService sets the value of Service.
+func (s *SyncPolicy) SetService(val string) {
+	s.Service = val
+}
+
+// SetBlocklist sets the value of Blocklist.
+func (s *SyncPolicy) SetBlocklist(val []string) {
+	s.Blocklist = val
+}
+
+// SetExcludeList sets the value of ExcludeList.
+func (s *SyncPolicy) SetExcludeList(val []string) {
+	s.ExcludeList = val
+}
+
+// SetSyncAll sets the value of SyncAll.
+func (s *SyncPolicy) SetSyncAll(val bool) {
+	s.SyncAll = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *SyncPolicy) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *SyncPolicy) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SyncpolicyDeleteOK is response for SyncpolicyDelete operation.
+type SyncpolicyDeleteOK struct{}
+
+type SyncpolicyListOK struct {
+	Policies []SyncPolicy `json:"policies"`
+}
+
+// GetPolicies returns the value of Policies.
+func (s *SyncpolicyListOK) GetPolicies() []SyncPolicy {
+	return s.Policies
+}
+
+// SetPolicies sets the value of Policies.
+func (s *SyncpolicyListOK) SetPolicies(val []SyncPolicy) {
+	s.Policies = val
+}
+
 // Telegram API session and user representation.
 // Ref: #
 type Telegram struct {

@@ -1,0 +1,40 @@
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    description: "Unique identifier for the sync policy."
+  user_id:
+    type: string
+    description: "Unique identifier for the user associated with the sync policy."
+  service:
+    type: string
+    description: "The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin)."
+  blocklist:
+    type: array
+    description: "List of blocked emails or contact identifiers."
+    items:
+      type: string
+  exclude_list:
+    type: array
+    description: "List of contacts to exclude from syncing."
+    items:
+      type: string
+  sync_all:
+    type: boolean
+    description: "Indicates whether to sync all messages from the service (true means no filtering)."
+  created_at:
+    type: string
+    format: date-time
+    description: "Timestamp when the policy was created."
+  updated_at:
+    type: string
+    format: date-time
+    description: "Timestamp when the policy was last updated."
+required:
+  - uuid
+  - user_id
+  - service
+  - sync_all
+  - created_at
+  - updated_at

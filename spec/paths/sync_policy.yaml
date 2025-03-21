@@ -1,0 +1,64 @@
+get:
+  description: Retrieve a list of sync policies for the authenticated user.
+  operationId: syncpolicy-list
+  parameters:
+    - description: Offset records.
+      in: query
+      name: offset
+      schema:
+        type: integer
+        format: int32
+    - description: Limit records.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        format: int32
+  responses:
+    "200":
+      description: A list of sync policies.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              policies:
+                type: array
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/SyncPolicy"
+            required:
+              - policies
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - syncpolicy
+
+post:
+  description: Create a new sync policy.
+  operationId: syncpolicy-create
+  requestBody:
+    description: Sync policy to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/SyncPolicy"
+  responses:
+    "201":
+      description: Sync policy created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/SyncPolicy"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - syncpolicy

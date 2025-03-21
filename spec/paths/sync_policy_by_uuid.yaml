@@ -1,0 +1,80 @@
+get:
+  description: Retrieve a specific sync policy by uuid.
+  operationId: syncpolicy-get
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: "Unique identifier of the sync policy."
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Sync policy details.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/SyncPolicy"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - syncpolicy
+
+put:
+  description: Update a sync policy by uuid.
+  operationId: syncpolicy-update
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: "Unique identifier of the sync policy."
+      schema:
+        type: string
+  requestBody:
+    description: Updated sync policy details.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/SyncPolicy"
+  responses:
+    "200":
+      description: Sync policy updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/SyncPolicy"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - syncpolicy
+
+delete:
+  description: Delete a sync policy by uuid.
+  operationId: syncpolicy-delete
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: "Unique identifier of the sync policy."
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Sync policy deleted successfully.
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - syncpolicy

@@ -648,254 +648,52 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 's': // Prefix: "storage"
+			case 's': // Prefix: "s"
 				origElem := elem
-				if l := len("storage"); len(elem) >= l && elem[0:l] == "storage" {
+				if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleStorageListRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 't': // Prefix: "torage"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("torage"); len(elem) >= l && elem[0:l] == "torage" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						break
+						switch r.Method {
+						case "GET":
+							s.handleStorageListRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
 					}
 					switch elem[0] {
-					case 'f': // Prefix: "file-link"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleGenerateDownloadLinkRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 'h': // Prefix: "hostfiles"
-						origElem := elem
-						if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
-							elem = elem[l:]
-						} else {
 							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "POST":
-								s.handleStorageHostfilesCreateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/"
+						case 'f': // Prefix: "file-link"
 							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleStorageHostfilesDeleteRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handleStorageHostfilesGetRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handleStorageHostfilesUpdateRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 'p': // Prefix: "postgres"
-						origElem := elem
-						if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "POST":
-								s.handleStoragePostgresCreateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleStoragePostgresDeleteRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handleStoragePostgresGetRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handleStoragePostgresUpdateRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 's': // Prefix: "s3"
-						origElem := elem
-						if l := len("s3"); len(elem) >= l && elem[0:l] == "s3" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "POST":
-								s.handleStorageS3CreateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleStorageS3DeleteRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handleStorageS3GetRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handleStorageS3UpdateRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 'u': // Prefix: "upload"
-						origElem := elem
-						if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "POST":
-								s.handleUploadFileRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '-': // Prefix: "-url"
-							origElem := elem
-							if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
+							if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
 								elem = elem[l:]
 							} else {
 								break
@@ -905,7 +703,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "POST":
-									s.handleGeneratePresignedUploadUrlRequest([0]string{}, elemIsEscaped, w, r)
+									s.handleGenerateDownloadLinkRequest([0]string{}, elemIsEscaped, w, r)
 								default:
 									s.notAllowed(w, r, "POST")
 								}
@@ -914,6 +712,283 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							elem = origElem
+						case 'h': // Prefix: "hostfiles"
+							origElem := elem
+							if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "POST":
+									s.handleStorageHostfilesCreateRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleStorageHostfilesDeleteRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleStorageHostfilesGetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleStorageHostfilesUpdateRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE,GET,PUT")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 'p': // Prefix: "postgres"
+							origElem := elem
+							if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "POST":
+									s.handleStoragePostgresCreateRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleStoragePostgresDeleteRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleStoragePostgresGetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleStoragePostgresUpdateRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE,GET,PUT")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 's': // Prefix: "s3"
+							origElem := elem
+							if l := len("s3"); len(elem) >= l && elem[0:l] == "s3" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "POST":
+									s.handleStorageS3CreateRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleStorageS3DeleteRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleStorageS3GetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleStorageS3UpdateRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE,GET,PUT")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 'u': // Prefix: "upload"
+							origElem := elem
+							if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "POST":
+									s.handleUploadFileRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '-': // Prefix: "-url"
+								origElem := elem
+								if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "POST":
+										s.handleGeneratePresignedUploadUrlRequest([0]string{}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "POST")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'y': // Prefix: "yncpolicy"
+					origElem := elem
+					if l := len("yncpolicy"); len(elem) >= l && elem[0:l] == "yncpolicy" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleSyncpolicyListRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleSyncpolicyCreateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "DELETE":
+								s.handleSyncpolicyDeleteRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handleSyncpolicyGetRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handleSyncpolicyUpdateRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE,GET,PUT")
+							}
+
+							return
 						}
 
 						elem = origElem
@@ -1765,308 +1840,56 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 's': // Prefix: "storage"
+			case 's': // Prefix: "s"
 				origElem := elem
-				if l := len("storage"); len(elem) >= l && elem[0:l] == "storage" {
+				if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = StorageListOperation
-						r.summary = ""
-						r.operationID = "storage-list"
-						r.pathPattern = "/storage"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 't': // Prefix: "torage"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("torage"); len(elem) >= l && elem[0:l] == "torage" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						break
+						switch method {
+						case "GET":
+							r.name = StorageListOperation
+							r.summary = ""
+							r.operationID = "storage-list"
+							r.pathPattern = "/storage"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 					switch elem[0] {
-					case 'f': // Prefix: "file-link"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = GenerateDownloadLinkOperation
-								r.summary = "Generate a download link for a stored file"
-								r.operationID = "generateDownloadLink"
-								r.pathPattern = "/storage/file-link"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 'h': // Prefix: "hostfiles"
-						origElem := elem
-						if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
-							elem = elem[l:]
-						} else {
 							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "POST":
-								r.name = StorageHostfilesCreateOperation
-								r.summary = ""
-								r.operationID = "storage-hostfiles-create"
-								r.pathPattern = "/storage/hostfiles"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/"
+						case 'f': // Prefix: "file-link"
 							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = StorageHostfilesDeleteOperation
-									r.summary = ""
-									r.operationID = "storage-hostfiles-delete"
-									r.pathPattern = "/storage/hostfiles/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "GET":
-									r.name = StorageHostfilesGetOperation
-									r.summary = ""
-									r.operationID = "storage-hostfiles-get"
-									r.pathPattern = "/storage/hostfiles/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "PUT":
-									r.name = StorageHostfilesUpdateOperation
-									r.summary = ""
-									r.operationID = "storage-hostfiles-update"
-									r.pathPattern = "/storage/hostfiles/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 'p': // Prefix: "postgres"
-						origElem := elem
-						if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "POST":
-								r.name = StoragePostgresCreateOperation
-								r.summary = ""
-								r.operationID = "storage-postgres-create"
-								r.pathPattern = "/storage/postgres"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = StoragePostgresDeleteOperation
-									r.summary = ""
-									r.operationID = "storage-postgres-delete"
-									r.pathPattern = "/storage/postgres/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "GET":
-									r.name = StoragePostgresGetOperation
-									r.summary = ""
-									r.operationID = "storage-postgres-get"
-									r.pathPattern = "/storage/postgres/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "PUT":
-									r.name = StoragePostgresUpdateOperation
-									r.summary = ""
-									r.operationID = "storage-postgres-update"
-									r.pathPattern = "/storage/postgres/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 's': // Prefix: "s3"
-						origElem := elem
-						if l := len("s3"); len(elem) >= l && elem[0:l] == "s3" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "POST":
-								r.name = StorageS3CreateOperation
-								r.summary = ""
-								r.operationID = "storage-s3-create"
-								r.pathPattern = "/storage/s3"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = StorageS3DeleteOperation
-									r.summary = ""
-									r.operationID = "storage-s3-delete"
-									r.pathPattern = "/storage/s3/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "GET":
-									r.name = StorageS3GetOperation
-									r.summary = ""
-									r.operationID = "storage-s3-get"
-									r.pathPattern = "/storage/s3/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "PUT":
-									r.name = StorageS3UpdateOperation
-									r.summary = ""
-									r.operationID = "storage-s3-update"
-									r.pathPattern = "/storage/s3/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 'u': // Prefix: "upload"
-						origElem := elem
-						if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "POST":
-								r.name = UploadFileOperation
-								r.summary = "Upload a file"
-								r.operationID = "uploadFile"
-								r.pathPattern = "/storage/upload"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '-': // Prefix: "-url"
-							origElem := elem
-							if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
+							if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
 								elem = elem[l:]
 							} else {
 								break
@@ -2076,10 +1899,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								// Leaf node.
 								switch method {
 								case "POST":
-									r.name = GeneratePresignedUploadUrlOperation
-									r.summary = "Generate a pre-signed URL for file upload"
-									r.operationID = "generatePresignedUploadUrl"
-									r.pathPattern = "/storage/upload-url"
+									r.name = GenerateDownloadLinkOperation
+									r.summary = "Generate a download link for a stored file"
+									r.operationID = "generateDownloadLink"
+									r.pathPattern = "/storage/file-link"
 									r.args = args
 									r.count = 0
 									return r, true
@@ -2089,6 +1912,353 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 
 							elem = origElem
+						case 'h': // Prefix: "hostfiles"
+							origElem := elem
+							if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									r.name = StorageHostfilesCreateOperation
+									r.summary = ""
+									r.operationID = "storage-hostfiles-create"
+									r.pathPattern = "/storage/hostfiles"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = StorageHostfilesDeleteOperation
+										r.summary = ""
+										r.operationID = "storage-hostfiles-delete"
+										r.pathPattern = "/storage/hostfiles/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "GET":
+										r.name = StorageHostfilesGetOperation
+										r.summary = ""
+										r.operationID = "storage-hostfiles-get"
+										r.pathPattern = "/storage/hostfiles/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "PUT":
+										r.name = StorageHostfilesUpdateOperation
+										r.summary = ""
+										r.operationID = "storage-hostfiles-update"
+										r.pathPattern = "/storage/hostfiles/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 'p': // Prefix: "postgres"
+							origElem := elem
+							if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									r.name = StoragePostgresCreateOperation
+									r.summary = ""
+									r.operationID = "storage-postgres-create"
+									r.pathPattern = "/storage/postgres"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = StoragePostgresDeleteOperation
+										r.summary = ""
+										r.operationID = "storage-postgres-delete"
+										r.pathPattern = "/storage/postgres/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "GET":
+										r.name = StoragePostgresGetOperation
+										r.summary = ""
+										r.operationID = "storage-postgres-get"
+										r.pathPattern = "/storage/postgres/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "PUT":
+										r.name = StoragePostgresUpdateOperation
+										r.summary = ""
+										r.operationID = "storage-postgres-update"
+										r.pathPattern = "/storage/postgres/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 's': // Prefix: "s3"
+							origElem := elem
+							if l := len("s3"); len(elem) >= l && elem[0:l] == "s3" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									r.name = StorageS3CreateOperation
+									r.summary = ""
+									r.operationID = "storage-s3-create"
+									r.pathPattern = "/storage/s3"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = StorageS3DeleteOperation
+										r.summary = ""
+										r.operationID = "storage-s3-delete"
+										r.pathPattern = "/storage/s3/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "GET":
+										r.name = StorageS3GetOperation
+										r.summary = ""
+										r.operationID = "storage-s3-get"
+										r.pathPattern = "/storage/s3/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "PUT":
+										r.name = StorageS3UpdateOperation
+										r.summary = ""
+										r.operationID = "storage-s3-update"
+										r.pathPattern = "/storage/s3/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 'u': // Prefix: "upload"
+							origElem := elem
+							if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "POST":
+									r.name = UploadFileOperation
+									r.summary = "Upload a file"
+									r.operationID = "uploadFile"
+									r.pathPattern = "/storage/upload"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '-': // Prefix: "-url"
+								origElem := elem
+								if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "POST":
+										r.name = GeneratePresignedUploadUrlOperation
+										r.summary = "Generate a pre-signed URL for file upload"
+										r.operationID = "generatePresignedUploadUrl"
+										r.pathPattern = "/storage/upload-url"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'y': // Prefix: "yncpolicy"
+					origElem := elem
+					if l := len("yncpolicy"); len(elem) >= l && elem[0:l] == "yncpolicy" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = SyncpolicyListOperation
+							r.summary = ""
+							r.operationID = "syncpolicy-list"
+							r.pathPattern = "/syncpolicy"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = SyncpolicyCreateOperation
+							r.summary = ""
+							r.operationID = "syncpolicy-create"
+							r.pathPattern = "/syncpolicy"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "DELETE":
+								r.name = SyncpolicyDeleteOperation
+								r.summary = ""
+								r.operationID = "syncpolicy-delete"
+								r.pathPattern = "/syncpolicy/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = SyncpolicyGetOperation
+								r.summary = ""
+								r.operationID = "syncpolicy-get"
+								r.pathPattern = "/syncpolicy/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "PUT":
+								r.name = SyncpolicyUpdateOperation
+								r.summary = ""
+								r.operationID = "syncpolicy-update"
+								r.pathPattern = "/syncpolicy/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
 						}
 
 						elem = origElem

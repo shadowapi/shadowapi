@@ -18,7 +18,7 @@ properties:
     readOnly: true
   provider:
     type: string
-    enum: ["linkedin","reactima"]
+    enum: ["linkedin","linkedin_reactima"]
   username:
     type: string
     description: LinkedIn username or email for login

@@ -55,6 +55,8 @@ components:
       $ref: "components/file.yaml#/GenerateDownloadLinkRequest"
     GenerateDownloadLinkResponse:
       $ref: "components/file.yaml#/GenerateDownloadLinkResponse"
+    SyncPolicy:
+      $ref: "components/sync_policy.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -132,6 +134,10 @@ paths:
     $ref: "paths/storage_upload_url.yaml"
   /storage/file-link:
     $ref: "paths/storage_file_link.yaml"
+  /syncpolicy:
+    $ref: "paths/sync_policy.yaml"
+  /syncpolicy/{uuid}:
+    $ref: "paths/sync_policy_by_uuid.yaml"
 
 
 servers:

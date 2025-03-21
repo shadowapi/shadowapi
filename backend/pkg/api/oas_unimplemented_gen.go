@@ -427,6 +427,51 @@ func (UnimplementedHandler) StorageS3Update(ctx context.Context, req *StorageS3,
 	return r, ht.ErrNotImplemented
 }
 
+// SyncpolicyCreate implements syncpolicy-create operation.
+//
+// Create a new sync policy.
+//
+// POST /syncpolicy
+func (UnimplementedHandler) SyncpolicyCreate(ctx context.Context, req *SyncPolicy) (r *SyncPolicy, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SyncpolicyDelete implements syncpolicy-delete operation.
+//
+// Delete a sync policy by uuid.
+//
+// DELETE /syncpolicy/{uuid}
+func (UnimplementedHandler) SyncpolicyDelete(ctx context.Context, params SyncpolicyDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// SyncpolicyGet implements syncpolicy-get operation.
+//
+// Retrieve a specific sync policy by uuid.
+//
+// GET /syncpolicy/{uuid}
+func (UnimplementedHandler) SyncpolicyGet(ctx context.Context, params SyncpolicyGetParams) (r *SyncPolicy, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SyncpolicyList implements syncpolicy-list operation.
+//
+// Retrieve a list of sync policies for the authenticated user.
+//
+// GET /syncpolicy
+func (UnimplementedHandler) SyncpolicyList(ctx context.Context, params SyncpolicyListParams) (r *SyncpolicyListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SyncpolicyUpdate implements syncpolicy-update operation.
+//
+// Update a sync policy by uuid.
+//
+// PUT /syncpolicy/{uuid}
+func (UnimplementedHandler) SyncpolicyUpdate(ctx context.Context, req *SyncPolicy, params SyncpolicyUpdateParams) (r *SyncPolicy, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // TgSessionCreate implements tg-session-create operation.
 //
 // Create a new Telegram session.

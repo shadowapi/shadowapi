@@ -550,6 +550,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/syncpolicy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve a list of sync policies for the authenticated user. */
+        get: operations["syncpolicy-list"];
+        put?: never;
+        /** @description Create a new sync policy. */
+        post: operations["syncpolicy-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/syncpolicy/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve a specific sync policy by uuid. */
+        get: operations["syncpolicy-get"];
+        /** @description Update a sync policy by uuid. */
+        put: operations["syncpolicy-update"];
+        post?: never;
+        /** @description Delete a sync policy by uuid. */
+        delete: operations["syncpolicy-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -640,6 +677,7 @@ export interface components {
             /** @description Signed URL for downloading the file. */
             url?: string;
         };
+        SyncPolicy: components["schemas"]["sync_policy"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -972,6 +1010,30 @@ export interface components {
              * @description The date and time when the object was created.
              */
             readonly created_at?: string;
+        };
+        sync_policy: {
+            /** @description Unique identifier for the sync policy. */
+            uuid: string;
+            /** @description Unique identifier for the user associated with the sync policy. */
+            user_id: string;
+            /** @description The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin). */
+            service: string;
+            /** @description List of blocked emails or contact identifiers. */
+            blocklist?: string[];
+            /** @description List of contacts to exclude from syncing. */
+            exclude_list?: string[];
+            /** @description Indicates whether to sync all messages from the service (true means no filtering). */
+            sync_all: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp when the policy was created.
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the policy was last updated.
+             */
+            updated_at: string;
         };
     };
     responses: never;
@@ -2723,6 +2785,175 @@ export interface operations {
                 };
             };
             /** @description Unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "syncpolicy-list": {
+        parameters: {
+            query?: {
+                /** @description Offset records. */
+                offset?: number;
+                /** @description Limit records. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of sync policies. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        policies: components["schemas"]["sync_policy"][];
+                    };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "syncpolicy-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Sync policy to create. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["sync_policy"];
+            };
+        };
+        responses: {
+            /** @description Sync policy created successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["sync_policy"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "syncpolicy-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the sync policy. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync policy details. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["sync_policy"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "syncpolicy-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the sync policy. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        /** @description Updated sync policy details. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["sync_policy"];
+            };
+        };
+        responses: {
+            /** @description Sync policy updated successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["sync_policy"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "syncpolicy-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the sync policy. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync policy deleted successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
             default: {
                 headers: {
                     [name: string]: unknown;
