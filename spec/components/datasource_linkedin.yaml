@@ -6,19 +6,15 @@ properties:
   uuid:
     type: string
     readOnly: true
+  user_uuid:
+    type: string
+    readOnly: true
   name:
     type: string
   is_enabled:
     type: boolean
-  type:
-    type: string
-    default: datasource
-  user_uuid:
-    type: string
-    readOnly: true
   provider:
     type: string
-    enum: ["linkedin","linkedin_reactima"]
   username:
     type: string
     description: LinkedIn username or email for login
@@ -40,10 +36,8 @@ properties:
     format: date-time
     readOnly: true
 required:
-  - uuid
   - name
-  - type
-  - is_enabled
+  - user_uuid
   - provider
   - created_at
   - updated_at

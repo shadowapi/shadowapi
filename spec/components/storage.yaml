@@ -8,7 +8,7 @@ properties:
     type: string
     readOnly: true
   user_uuid:
-    description: Unique identifier for the user associated with the storage object.
+    description: Unique identifier for the user associated with the storage object @reactima TODO rethink this
     type: string
     readOnly: true
   name:

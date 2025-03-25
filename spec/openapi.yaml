@@ -7,12 +7,16 @@ info:
 
 components:
   schemas:
+    Datasource:
+      $ref: "components/datasource.yaml"
     DatasourceEmail:
       $ref: "components/datasource_email.yaml"
-    DatasourceEmailCreate:
-      $ref: "components/datasource_email_create.yaml"
-    DatasourceEmailUpdate:
-      $ref: "components/datasource_email_update.yaml"
+    DatasourceTelegram:
+      $ref: "components/datasource_telegram.yaml"
+    DatasourceWhatsapp:
+      $ref: "components/datasource_whatsapp.yaml"
+    DatasourceLinkedin:
+      $ref: "components/datasource_linkedin.yaml"
     Error:
       $ref: "components/error.yaml"
     MailLabel:
@@ -72,6 +76,8 @@ components:
       # optional field: bearerFormat: JWT
 
 paths:
+  /datasource:
+    $ref: "paths/datasource.yaml"
   /datasource/email:
     $ref: "paths/datasource_email.yaml"
   /datasource/email/{uuid}:
@@ -80,6 +86,18 @@ paths:
     $ref: "paths/datasource_uuid_oauth2_client.yaml"
   /datasource/email/{uuid}/run/pipeline:
     $ref: "paths/datasource_email_uuid_run_pipeline.yaml"
+  /datasource/telegram:
+    $ref: "paths/datasource_telegram.yaml"
+  /datasource/telegram/{uuid}:
+    $ref: "paths/datasource_telegram_uuid.yaml"
+  /datasource/whatsapp:
+    $ref: "paths/datasource_whatsapp.yaml"
+  /datasource/whatsapp/{uuid}:
+    $ref: "paths/datasource_whatsapp_uuid.yaml"
+  /datasource/linkedin:
+    $ref: "paths/datasource_linkedin.yaml"
+  /datasource/linkedin/{uuid}:
+    $ref: "paths/datasource_linkedin_uuid.yaml"
   /oauth2/callback:
     $ref: "paths/oauth2_callback.yaml"
   /oauth2/client:

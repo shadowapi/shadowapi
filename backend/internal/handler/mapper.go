@@ -2,27 +2,45 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/gofrs/uuid"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 	"net/http"
 )
 
+// ConvertUUID converts a non-empty  UUID string to a pointer to uuid.UUID.
+// If the input is empty or invalid, it returns nil.
+func ConvertUUID(originalUUID string) *uuid.UUID {
+	if originalUUID == "" {
+		return nil
+	}
+	u, err := uuid.FromString(originalUUID)
+	if err != nil {
+		return nil
+	}
+	return &u
+}
+
+// ConvertOptStringToUUID converts an api.OptString to a uuid.UUID.
+// It returns an error if the OptString is not set or if the inner value is invalid.
+func ConvertOptStringToUUID(opt api.OptString) (uuid.UUID, error) {
+	if !opt.IsSet() || opt.Value == "" {
+		return uuid.Nil, fmt.Errorf("opt string is not set")
+	}
+	return uuid.FromString(opt.Value)
+}
+
 // QToDatasource converts a query.Datasource to an api.Datasource
-func QToDatasource(row query.Datasource) api.DatasourceEmail {
-	c := api.DatasourceEmail{
+func QToDatasource(row query.GetDatasourcesRow) api.Datasource {
+	c := api.Datasource{
 		UUID:      row.UUID.String(),
 		Name:      row.Name,
 		Type:      row.Type,
 		IsEnabled: row.IsEnabled,
 	}
 	if row.UserUUID != nil {
-		c.UserUUID = api.OptString{Value: row.UserUUID.String(), Set: true}
-	}
-	if row.OAuth2TokenUUID != nil {
-		c.OAuth2TokenUUID = api.OptString{Value: row.OAuth2TokenUUID.String(), Set: true}
-	}
-	if row.Oauth2ClientID.Valid {
-		c.OAuth2ClientID = api.OptString{Value: row.Oauth2ClientID.String, Set: true}
+		c.UserUUID = row.UserUUID.String()
 	}
 	if row.CreatedAt.Valid {
 		c.CreatedAt = row.CreatedAt.Time
@@ -33,19 +51,109 @@ func QToDatasource(row query.Datasource) api.DatasourceEmail {
 	return c
 }
 
-// QToDatasourceEmail extracts query.DatasourceEmail fields and set them to an api.Datasource
-func QToDatasourceEmail(c *api.DatasourceEmail, row query.DatasourceEmail) {
-	c.Email = api.OptString{Value: row.Email, Set: true}
-	c.Provider = api.OptString{Value: row.Provider, Set: true}
-	if row.IMAPServer.Valid {
-		c.ImapServer = api.OptString{Value: row.IMAPServer.String, Set: true}
+// QToDatasourceEmail converts a query datasource row into an API DatasourceEmail.
+func QToDatasourceEmail(row query.GetDatasourcesRow) (*api.DatasourceEmail, error) {
+	var ds api.DatasourceEmail
+	if err := json.Unmarshal(row.Settings, &ds); err != nil {
+		return nil, err
 	}
-	if row.SMTPServer.Valid {
-		c.SMTPServer = api.OptString{Value: row.SMTPServer.String, Set: true}
+	ds.UUID = api.NewOptString(row.UUID.String())
+	ds.UserUUID = row.UserUUID.String()
+	ds.Name = row.Name
+	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
+	ds.Provider = row.Provider
+	if row.CreatedAt.Valid {
+		ds.CreatedAt = row.CreatedAt.Time
 	}
-	if row.SMTPTLS.Valid {
-		c.SMTPTLS = api.OptBool{Value: row.SMTPTLS.Bool, Set: true}
+	if row.UpdatedAt.Valid {
+		ds.UpdatedAt = row.UpdatedAt.Time
 	}
+	return &ds, nil
+}
+
+func QToDatasourceEmail2(row query.GetDatasourceRow) (*api.DatasourceEmail, error) {
+	var ds api.DatasourceEmail
+	// Unmarshal the settings JSON into the DatasourceEmail fields.
+	if err := json.Unmarshal(row.Datasource.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
+	if row.Datasource.UserUUID != nil {
+		ds.UserUUID = row.Datasource.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+	ds.Name = row.Datasource.Name
+	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
+	ds.Provider = row.Datasource.Provider
+	// (If your settings include an OAuth2 token UUID, it should have been unmarshaled into ds.OAuth2TokenUUID.)
+	if row.Datasource.CreatedAt.Valid {
+		ds.CreatedAt = row.Datasource.CreatedAt.Time
+	}
+	if row.Datasource.UpdatedAt.Valid {
+		ds.UpdatedAt = row.Datasource.UpdatedAt.Time
+	}
+	return &ds, nil
+}
+
+// QToDatasourceLinkedin converts a query datasource row into an API DatasourceLinkedin.
+func QToDatasourceLinkedin(row query.GetDatasourcesRow) (*api.DatasourceLinkedin, error) {
+	var ds api.DatasourceLinkedin
+	if err := json.Unmarshal(row.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.UUID.String())
+	ds.UserUUID = row.UserUUID.String()
+	ds.Name = row.Name
+	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
+	ds.Provider = row.Provider
+	if row.CreatedAt.Valid {
+		ds.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		ds.UpdatedAt = row.UpdatedAt.Time
+	}
+	return &ds, nil
+}
+
+// QToDatasourceTelegram converts a query datasource row into an API DatasourceTelegram.
+func QToDatasourceTelegram(row query.GetDatasourcesRow) (*api.DatasourceTelegram, error) {
+	var ds api.DatasourceTelegram
+	if err := json.Unmarshal(row.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.UUID.String())
+	ds.UserUUID = row.UserUUID.String()
+	ds.Name = row.Name
+	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
+	ds.Provider = row.Provider
+	if row.CreatedAt.Valid {
+		ds.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		ds.UpdatedAt = row.UpdatedAt.Time
+	}
+	return &ds, nil
+}
+
+// QToDatasourceWhatsapp converts a query datasource row into an API DatasourceWhatsapp.
+func QToDatasourceWhatsapp(row query.GetDatasourcesRow) (*api.DatasourceWhatsapp, error) {
+	var ds api.DatasourceWhatsapp
+	if err := json.Unmarshal(row.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.UUID.String())
+	ds.UserUUID = row.UserUUID.String()
+	ds.Name = row.Name
+	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
+	ds.Provider = row.Provider
+	if row.CreatedAt.Valid {
+		ds.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		ds.UpdatedAt = row.UpdatedAt.Time
+	}
+	return &ds, nil
 }
 
 func QToStorage(row query.GetStoragesRow) api.Storage {

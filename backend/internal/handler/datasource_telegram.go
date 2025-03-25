@@ -14,8 +14,8 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.DatasourceEmail) (*api.DatasourceEmail, error) {
-	log := h.log.With("handler", "DatasourceEmailCreate")
+func (h *Handler) DatasourceTelegramCreate(ctx context.Context, req *api.DatasourceTelegram) (*api.DatasourceTelegram, error) {
+	log := h.log.With("handler", "DatasourceTelegramCreate")
 	dsUUID := uuid.Must(uuid.NewV7())
 	settings, err := json.Marshal(req)
 	if err != nil {
@@ -23,6 +23,7 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 	isEnabled := req.IsEnabled.Or(false)
+
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
 		UUID:      dsUUID,
 		UserUUID:  ConvertUUID(req.UserUUID),
@@ -40,8 +41,8 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 	return &resp, nil
 }
 
-func (h *Handler) DatasourceEmailDelete(ctx context.Context, params api.DatasourceEmailDeleteParams) error {
-	log := h.log.With("handler", "DatasourceEmailDelete")
+func (h *Handler) DatasourceTelegramDelete(ctx context.Context, params api.DatasourceTelegramDeleteParams) error {
+	log := h.log.With("handler", "DatasourceTelegramDelete")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
@@ -54,8 +55,8 @@ func (h *Handler) DatasourceEmailDelete(ctx context.Context, params api.Datasour
 	return nil
 }
 
-func (h *Handler) DatasourceEmailGet(ctx context.Context, params api.DatasourceEmailGetParams) (*api.DatasourceEmail, error) {
-	log := h.log.With("handler", "DatasourceEmailGet")
+func (h *Handler) DatasourceTelegramGet(ctx context.Context, params api.DatasourceTelegramGetParams) (*api.DatasourceTelegram, error) {
+	log := h.log.With("handler", "DatasourceTelegramGet")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
@@ -73,17 +74,17 @@ func (h *Handler) DatasourceEmailGet(ctx context.Context, params api.DatasourceE
 	if len(dses) == 0 {
 		return nil, ErrWithCode(http.StatusNotFound, E("datasource not found"))
 	}
-	return QToDatasourceEmail(dses[0])
+	return QToDatasourceTelegram(dses[0])
 }
 
-func (h *Handler) DatasourceEmailUpdate(ctx context.Context, req *api.DatasourceEmail, params api.DatasourceEmailUpdateParams) (*api.DatasourceEmail, error) {
-	log := h.log.With("handler", "DatasourceEmailUpdate")
+func (h *Handler) DatasourceTelegramUpdate(ctx context.Context, req *api.DatasourceTelegram, params api.DatasourceTelegramUpdateParams) (*api.DatasourceTelegram, error) {
+	log := h.log.With("handler", "DatasourceTelegramUpdate")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceEmail, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceTelegram, error) {
 		dses, err := query.New(tx).GetDatasources(ctx, query.GetDatasourcesParams{
 			UUID:  pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
 			Limit: 1,
@@ -112,6 +113,6 @@ func (h *Handler) DatasourceEmailUpdate(ctx context.Context, req *api.Datasource
 			log.Error("failed to update datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update datasource"))
 		}
-		return h.DatasourceEmailGet(ctx, api.DatasourceEmailGetParams{UUID: params.UUID})
+		return h.DatasourceTelegramGet(ctx, api.DatasourceTelegramGetParams{UUID: params.UUID})
 	})
 }

@@ -14,7 +14,7 @@ import (
 func (h *Handler) PipelineEntryTypeList(ctx context.Context) (*api.PipelineEntryTypeListOK, error) {
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.PipelineEntryTypeListOK, error) {
 		db := query.New(h.dbp).WithTx(tx)
-		datasources, err := db.ListDatasource(ctx, query.ListDatasourceParams{})
+		datasources, err := db.ListDatasources(ctx, query.ListDatasourcesParams{})
 		if err != nil {
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list datasources"))
 		}

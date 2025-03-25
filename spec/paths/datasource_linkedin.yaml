@@ -1,0 +1,63 @@
+# spec/paths/datasource_linkedin.yaml
+get:
+  description: List all LinkedIn datasources
+  operationId: datasource-linkedin-list
+  parameters:
+    - description: Offset records
+      explode: false
+      in: query
+      name: offset
+      schema:
+        format: int32
+        type: integer
+    - description: Limit records
+      explode: false
+      in: query
+      name: limit
+      schema:
+        format: int32
+        type: integer
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/DatasourceLinkedin"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-linkedin
+
+post:
+  description: Create a new LinkedIn datasource
+  operationId: datasource-linkedin-create
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceLinkedin"
+  responses:
+    "201":
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/DatasourceLinkedin"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-linkedin

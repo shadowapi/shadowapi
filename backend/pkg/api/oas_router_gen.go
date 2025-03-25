@@ -61,94 +61,296 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'd': // Prefix: "datasource/"
+			case 'd': // Prefix: "datasource"
 				origElem := elem
-				if l := len("datasource/"); len(elem) >= l && elem[0:l] == "datasource/" {
+				if l := len("datasource"); len(elem) >= l && elem[0:l] == "datasource" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					break
+					switch r.Method {
+					case "GET":
+						s.handleDatasourceListRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
 				}
 				switch elem[0] {
-				case 'e': // Prefix: "email"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("email"); len(elem) >= l && elem[0:l] == "email" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch r.Method {
-						case "GET":
-							s.handleDatasourceEmailListRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleDatasourceEmailCreateRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,POST")
-						}
-
-						return
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'e': // Prefix: "email"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("email"); len(elem) >= l && elem[0:l] == "email" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "uuid"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
 							switch r.Method {
-							case "DELETE":
-								s.handleDatasourceEmailDeleteRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
 							case "GET":
-								s.handleDatasourceEmailGetRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "PUT":
-								s.handleDatasourceEmailUpdateRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
+								s.handleDatasourceEmailListRequest([0]string{}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleDatasourceEmailCreateRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "DELETE,GET,PUT")
+								s.notAllowed(w, r, "GET,POST")
 							}
 
 							return
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/run/pipeline"
+						case '/': // Prefix: "/"
 							origElem := elem
-							if l := len("/run/pipeline"); len(elem) >= l && elem[0:l] == "/run/pipeline" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
+							// Param: "uuid"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
 							if len(elem) == 0 {
-								// Leaf node.
 								switch r.Method {
-								case "POST":
-									s.handleDatasourceEmailRunPipelineRequest([1]string{
+								case "DELETE":
+									s.handleDatasourceEmailDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleDatasourceEmailGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleDatasourceEmailUpdateRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "POST")
+									s.notAllowed(w, r, "DELETE,GET,PUT")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/run/pipeline"
+								origElem := elem
+								if l := len("/run/pipeline"); len(elem) >= l && elem[0:l] == "/run/pipeline" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "POST":
+										s.handleDatasourceEmailRunPipelineRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "POST")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'l': // Prefix: "linkedin"
+						origElem := elem
+						if l := len("linkedin"); len(elem) >= l && elem[0:l] == "linkedin" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleDatasourceLinkedinListRequest([0]string{}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleDatasourceLinkedinCreateRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleDatasourceLinkedinDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleDatasourceLinkedinGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleDatasourceLinkedinUpdateRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET,PUT")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 't': // Prefix: "telegram"
+						origElem := elem
+						if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleDatasourceTelegramListRequest([0]string{}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleDatasourceTelegramCreateRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleDatasourceTelegramDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleDatasourceTelegramGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleDatasourceTelegramUpdateRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET,PUT")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'w': // Prefix: "whatsapp"
+						origElem := elem
+						if l := len("whatsapp"); len(elem) >= l && elem[0:l] == "whatsapp" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleDatasourceWhatsappListRequest([0]string{}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleDatasourceWhatsappCreateRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleDatasourceWhatsappDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleDatasourceWhatsappGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleDatasourceWhatsappUpdateRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET,PUT")
 								}
 
 								return
@@ -159,42 +361,42 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						elem = origElem
 					}
-
-					elem = origElem
-				}
-				// Param: "uuid"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/oauth2/client"
-					origElem := elem
-					if l := len("/oauth2/client"); len(elem) >= l && elem[0:l] == "/oauth2/client" {
-						elem = elem[l:]
-					} else {
-						break
+					// Param: "uuid"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
 					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "PUT":
-							s.handleDatasourceSetOAuth2ClientRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "PUT")
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/oauth2/client"
+						origElem := elem
+						if l := len("/oauth2/client"); len(elem) >= l && elem[0:l] == "/oauth2/client" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "PUT":
+								s.handleDatasourceSetOAuth2ClientRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -1145,113 +1347,379 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'd': // Prefix: "datasource/"
+			case 'd': // Prefix: "datasource"
 				origElem := elem
-				if l := len("datasource/"); len(elem) >= l && elem[0:l] == "datasource/" {
+				if l := len("datasource"); len(elem) >= l && elem[0:l] == "datasource" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					break
+					switch method {
+					case "GET":
+						r.name = DatasourceListOperation
+						r.summary = ""
+						r.operationID = "datasource-list"
+						r.pathPattern = "/datasource"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
 				}
 				switch elem[0] {
-				case 'e': // Prefix: "email"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("email"); len(elem) >= l && elem[0:l] == "email" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							r.name = DatasourceEmailListOperation
-							r.summary = ""
-							r.operationID = "datasource-email-list"
-							r.pathPattern = "/datasource/email"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = DatasourceEmailCreateOperation
-							r.summary = ""
-							r.operationID = "datasource-email-create"
-							r.pathPattern = "/datasource/email"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'e': // Prefix: "email"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("email"); len(elem) >= l && elem[0:l] == "email" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "uuid"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
 							switch method {
-							case "DELETE":
-								r.name = DatasourceEmailDeleteOperation
-								r.summary = ""
-								r.operationID = "datasource-email-delete"
-								r.pathPattern = "/datasource/email/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
 							case "GET":
-								r.name = DatasourceEmailGetOperation
+								r.name = DatasourceEmailListOperation
 								r.summary = ""
-								r.operationID = "datasource-email-get"
-								r.pathPattern = "/datasource/email/{uuid}"
+								r.operationID = "datasource-email-list"
+								r.pathPattern = "/datasource/email"
 								r.args = args
-								r.count = 1
+								r.count = 0
 								return r, true
-							case "PUT":
-								r.name = DatasourceEmailUpdateOperation
+							case "POST":
+								r.name = DatasourceEmailCreateOperation
 								r.summary = ""
-								r.operationID = "datasource-email-update"
-								r.pathPattern = "/datasource/email/{uuid}"
+								r.operationID = "datasource-email-create"
+								r.pathPattern = "/datasource/email"
 								r.args = args
-								r.count = 1
+								r.count = 0
 								return r, true
 							default:
 								return
 							}
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/run/pipeline"
+						case '/': // Prefix: "/"
 							origElem := elem
-							if l := len("/run/pipeline"); len(elem) >= l && elem[0:l] == "/run/pipeline" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
+							// Param: "uuid"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch method {
+								case "DELETE":
+									r.name = DatasourceEmailDeleteOperation
+									r.summary = ""
+									r.operationID = "datasource-email-delete"
+									r.pathPattern = "/datasource/email/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = DatasourceEmailGetOperation
+									r.summary = ""
+									r.operationID = "datasource-email-get"
+									r.pathPattern = "/datasource/email/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = DatasourceEmailUpdateOperation
+									r.summary = ""
+									r.operationID = "datasource-email-update"
+									r.pathPattern = "/datasource/email/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/run/pipeline"
+								origElem := elem
+								if l := len("/run/pipeline"); len(elem) >= l && elem[0:l] == "/run/pipeline" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "POST":
+										r.name = DatasourceEmailRunPipelineOperation
+										r.summary = ""
+										r.operationID = "datasource-email-run-pipeline"
+										r.pathPattern = "/datasource/email/{uuid}/run/pipeline"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'l': // Prefix: "linkedin"
+						origElem := elem
+						if l := len("linkedin"); len(elem) >= l && elem[0:l] == "linkedin" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = DatasourceLinkedinListOperation
+								r.summary = ""
+								r.operationID = "datasource-linkedin-list"
+								r.pathPattern = "/datasource/linkedin"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "POST":
+								r.name = DatasourceLinkedinCreateOperation
+								r.summary = ""
+								r.operationID = "datasource-linkedin-create"
+								r.pathPattern = "/datasource/linkedin"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
 							if len(elem) == 0 {
 								// Leaf node.
 								switch method {
-								case "POST":
-									r.name = DatasourceEmailRunPipelineOperation
+								case "DELETE":
+									r.name = DatasourceLinkedinDeleteOperation
 									r.summary = ""
-									r.operationID = "datasource-email-run-pipeline"
-									r.pathPattern = "/datasource/email/{uuid}/run/pipeline"
+									r.operationID = "datasource-linkedin-delete"
+									r.pathPattern = "/datasource/linkedin/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = DatasourceLinkedinGetOperation
+									r.summary = ""
+									r.operationID = "datasource-linkedin-get"
+									r.pathPattern = "/datasource/linkedin/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = DatasourceLinkedinUpdateOperation
+									r.summary = ""
+									r.operationID = "datasource-linkedin-update"
+									r.pathPattern = "/datasource/linkedin/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 't': // Prefix: "telegram"
+						origElem := elem
+						if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = DatasourceTelegramListOperation
+								r.summary = ""
+								r.operationID = "datasource-telegram-list"
+								r.pathPattern = "/datasource/telegram"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "POST":
+								r.name = DatasourceTelegramCreateOperation
+								r.summary = ""
+								r.operationID = "datasource-telegram-create"
+								r.pathPattern = "/datasource/telegram"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = DatasourceTelegramDeleteOperation
+									r.summary = ""
+									r.operationID = "datasource-telegram-delete"
+									r.pathPattern = "/datasource/telegram/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = DatasourceTelegramGetOperation
+									r.summary = ""
+									r.operationID = "datasource-telegram-get"
+									r.pathPattern = "/datasource/telegram/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = DatasourceTelegramUpdateOperation
+									r.summary = ""
+									r.operationID = "datasource-telegram-update"
+									r.pathPattern = "/datasource/telegram/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'w': // Prefix: "whatsapp"
+						origElem := elem
+						if l := len("whatsapp"); len(elem) >= l && elem[0:l] == "whatsapp" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = DatasourceWhatsappListOperation
+								r.summary = ""
+								r.operationID = "datasource-whatsapp-list"
+								r.pathPattern = "/datasource/whatsapp"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "POST":
+								r.name = DatasourceWhatsappCreateOperation
+								r.summary = ""
+								r.operationID = "datasource-whatsapp-create"
+								r.pathPattern = "/datasource/whatsapp"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = DatasourceWhatsappDeleteOperation
+									r.summary = ""
+									r.operationID = "datasource-whatsapp-delete"
+									r.pathPattern = "/datasource/whatsapp/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = DatasourceWhatsappGetOperation
+									r.summary = ""
+									r.operationID = "datasource-whatsapp-get"
+									r.pathPattern = "/datasource/whatsapp/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = DatasourceWhatsappUpdateOperation
+									r.summary = ""
+									r.operationID = "datasource-whatsapp-update"
+									r.pathPattern = "/datasource/whatsapp/{uuid}"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -1265,44 +1733,44 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 						elem = origElem
 					}
-
-					elem = origElem
-				}
-				// Param: "uuid"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/oauth2/client"
-					origElem := elem
-					if l := len("/oauth2/client"); len(elem) >= l && elem[0:l] == "/oauth2/client" {
-						elem = elem[l:]
-					} else {
-						break
+					// Param: "uuid"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
 					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "PUT":
-							r.name = DatasourceSetOAuth2ClientOperation
-							r.summary = ""
-							r.operationID = "datasource-set-oauth2-client"
-							r.pathPattern = "/datasource/{uuid}/oauth2/client"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/oauth2/client"
+						origElem := elem
+						if l := len("/oauth2/client"); len(elem) >= l && elem[0:l] == "/oauth2/client" {
+							elem = elem[l:]
+						} else {
+							break
 						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "PUT":
+								r.name = DatasourceSetOAuth2ClientOperation
+								r.summary = ""
+								r.operationID = "datasource-set-oauth2-client"
+								r.pathPattern = "/datasource/{uuid}/oauth2/client"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem

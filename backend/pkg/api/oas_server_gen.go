@@ -13,7 +13,7 @@ type Handler interface {
 	// Create a new email datasource.
 	//
 	// POST /datasource/email
-	DatasourceEmailCreate(ctx context.Context, req *DatasourceEmailCreate) (*DatasourceEmail, error)
+	DatasourceEmailCreate(ctx context.Context, req *DatasourceEmail) (*DatasourceEmail, error)
 	// DatasourceEmailDelete implements datasource-email-delete operation.
 	//
 	// Delete an email datasource.
@@ -43,13 +43,109 @@ type Handler interface {
 	// Update an email datasource.
 	//
 	// PUT /datasource/email/{uuid}
-	DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (*DatasourceEmail, error)
+	DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmail, params DatasourceEmailUpdateParams) (*DatasourceEmail, error)
+	// DatasourceLinkedinCreate implements datasource-linkedin-create operation.
+	//
+	// Create a new LinkedIn datasource.
+	//
+	// POST /datasource/linkedin
+	DatasourceLinkedinCreate(ctx context.Context, req *DatasourceLinkedin) (*DatasourceLinkedin, error)
+	// DatasourceLinkedinDelete implements datasource-linkedin-delete operation.
+	//
+	// Delete a LinkedIn datasource.
+	//
+	// DELETE /datasource/linkedin/{uuid}
+	DatasourceLinkedinDelete(ctx context.Context, params DatasourceLinkedinDeleteParams) error
+	// DatasourceLinkedinGet implements datasource-linkedin-get operation.
+	//
+	// Get a LinkedIn datasource.
+	//
+	// GET /datasource/linkedin/{uuid}
+	DatasourceLinkedinGet(ctx context.Context, params DatasourceLinkedinGetParams) (*DatasourceLinkedin, error)
+	// DatasourceLinkedinList implements datasource-linkedin-list operation.
+	//
+	// List all LinkedIn datasources.
+	//
+	// GET /datasource/linkedin
+	DatasourceLinkedinList(ctx context.Context, params DatasourceLinkedinListParams) ([]DatasourceLinkedin, error)
+	// DatasourceLinkedinUpdate implements datasource-linkedin-update operation.
+	//
+	// Update a LinkedIn datasource.
+	//
+	// PUT /datasource/linkedin/{uuid}
+	DatasourceLinkedinUpdate(ctx context.Context, req *DatasourceLinkedin, params DatasourceLinkedinUpdateParams) (*DatasourceLinkedin, error)
+	// DatasourceList implements datasource-list operation.
+	//
+	// Retrieve a list of datasource objects.
+	//
+	// GET /datasource
+	DatasourceList(ctx context.Context, params DatasourceListParams) ([]Datasource, error)
 	// DatasourceSetOAuth2Client implements datasource-set-oauth2-client operation.
 	//
 	// Set OAuth2 client to the datasource.
 	//
 	// PUT /datasource/{uuid}/oauth2/client
 	DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error
+	// DatasourceTelegramCreate implements datasource-telegram-create operation.
+	//
+	// Create a new Telegram datasource.
+	//
+	// POST /datasource/telegram
+	DatasourceTelegramCreate(ctx context.Context, req *DatasourceTelegram) (*DatasourceTelegram, error)
+	// DatasourceTelegramDelete implements datasource-telegram-delete operation.
+	//
+	// Delete a Telegram datasource.
+	//
+	// DELETE /datasource/telegram/{uuid}
+	DatasourceTelegramDelete(ctx context.Context, params DatasourceTelegramDeleteParams) error
+	// DatasourceTelegramGet implements datasource-telegram-get operation.
+	//
+	// Get a Telegram datasource.
+	//
+	// GET /datasource/telegram/{uuid}
+	DatasourceTelegramGet(ctx context.Context, params DatasourceTelegramGetParams) (*DatasourceTelegram, error)
+	// DatasourceTelegramList implements datasource-telegram-list operation.
+	//
+	// List all Telegram datasources.
+	//
+	// GET /datasource/telegram
+	DatasourceTelegramList(ctx context.Context, params DatasourceTelegramListParams) ([]DatasourceTelegram, error)
+	// DatasourceTelegramUpdate implements datasource-telegram-update operation.
+	//
+	// Update a Telegram datasource.
+	//
+	// PUT /datasource/telegram/{uuid}
+	DatasourceTelegramUpdate(ctx context.Context, req *DatasourceTelegram, params DatasourceTelegramUpdateParams) (*DatasourceTelegram, error)
+	// DatasourceWhatsappCreate implements datasource-whatsapp-create operation.
+	//
+	// Create a new WhatsApp datasource.
+	//
+	// POST /datasource/whatsapp
+	DatasourceWhatsappCreate(ctx context.Context, req *DatasourceWhatsapp) (*DatasourceWhatsapp, error)
+	// DatasourceWhatsappDelete implements datasource-whatsapp-delete operation.
+	//
+	// Delete a WhatsApp datasource.
+	//
+	// DELETE /datasource/whatsapp/{uuid}
+	DatasourceWhatsappDelete(ctx context.Context, params DatasourceWhatsappDeleteParams) error
+	// DatasourceWhatsappGet implements datasource-whatsapp-get operation.
+	//
+	// Get a WhatsApp datasource.
+	//
+	// GET /datasource/whatsapp/{uuid}
+	DatasourceWhatsappGet(ctx context.Context, params DatasourceWhatsappGetParams) (*DatasourceWhatsapp, error)
+	// DatasourceWhatsappList implements datasource-whatsapp-list operation.
+	//
+	// List all WhatsApp datasources.
+	//
+	// GET /datasource/whatsapp
+	DatasourceWhatsappList(ctx context.Context, params DatasourceWhatsappListParams) ([]DatasourceWhatsapp, error)
+	// DatasourceWhatsappUpdate implements datasource-whatsapp-update operation.
+	//
+	// Update a WhatsApp datasource.
+	//
+	// PUT /datasource/whatsapp/{uuid}
+	DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (*DatasourceWhatsapp, error)
 	// GenerateDownloadLink implements generateDownloadLink operation.
 	//
 	// Generate a download link for a stored file.

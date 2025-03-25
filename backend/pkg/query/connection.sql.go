@@ -9,221 +9,38 @@ import (
 	"context"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createDatasource = `-- name: CreateDatasource :one
-INSERT INTO datasource (
-	uuid, name, type, is_enabled, user_uuid
-) VALUES (
-	$1, $2, $3, $4, $5
-) RETURNING uuid, user_uuid, name, type, is_enabled, oauth2_client_id, oauth2_token_uuid, created_at, updated_at
-`
-
-type CreateDatasourceParams struct {
-	UUID      uuid.UUID  `json:"uuid"`
-	Name      string     `json:"name"`
-	Type      string     `json:"type"`
-	IsEnabled bool       `json:"is_enabled"`
-	UserUUID  *uuid.UUID `json:"user_uuid"`
-}
-
-func (q *Queries) CreateDatasource(ctx context.Context, arg CreateDatasourceParams) (Datasource, error) {
-	row := q.db.QueryRow(ctx, createDatasource,
-		arg.UUID,
-		arg.Name,
-		arg.Type,
-		arg.IsEnabled,
-		arg.UserUUID,
-	)
-	var i Datasource
-	err := row.Scan(
-		&i.UUID,
-		&i.UserUUID,
-		&i.Name,
-		&i.Type,
-		&i.IsEnabled,
-		&i.Oauth2ClientID,
-		&i.OAuth2TokenUUID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const deleteDatasource = `-- name: DeleteDatasource :exec
-DELETE FROM datasource
-WHERE uuid = $1
-`
-
-func (q *Queries) DeleteDatasource(ctx context.Context, argUuid uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteDatasource, argUuid)
-	return err
-}
-
-const getDatasource = `-- name: GetDatasource :one
-SELECT
-	datasource.uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.oauth2_client_id, datasource.oauth2_token_uuid, datasource.created_at, datasource.updated_at,
-	datasource_email.uuid, datasource_email.datasource_uuid, datasource_email.email, datasource_email.password, datasource_email.imap_server, datasource_email.smtp_server, datasource_email.smtp_tls, datasource_email.provider, datasource_email.created_at, datasource_email.updated_at
-FROM datasource
-LEFT JOIN datasource_email ON datasource_email.datasource_uuid = datasource.uuid
-LEFT JOIN oauth2_client ON oauth2_client.id = datasource.oauth2_client_id
-WHERE datasource.uuid = $1
-LIMIT 1
-`
-
-type GetDatasourceRow struct {
-	Datasource      Datasource      `json:"datasource"`
-	DatasourceEmail DatasourceEmail `json:"datasource_email"`
-}
-
-func (q *Queries) GetDatasource(ctx context.Context, argUuid uuid.UUID) (GetDatasourceRow, error) {
-	row := q.db.QueryRow(ctx, getDatasource, argUuid)
-	var i GetDatasourceRow
-	err := row.Scan(
-		&i.Datasource.UUID,
-		&i.Datasource.UserUUID,
-		&i.Datasource.Name,
-		&i.Datasource.Type,
-		&i.Datasource.IsEnabled,
-		&i.Datasource.Oauth2ClientID,
-		&i.Datasource.OAuth2TokenUUID,
-		&i.Datasource.CreatedAt,
-		&i.Datasource.UpdatedAt,
-		&i.DatasourceEmail.UUID,
-		&i.DatasourceEmail.DatasourceUUID,
-		&i.DatasourceEmail.Email,
-		&i.DatasourceEmail.Password,
-		&i.DatasourceEmail.IMAPServer,
-		&i.DatasourceEmail.SMTPServer,
-		&i.DatasourceEmail.SMTPTLS,
-		&i.DatasourceEmail.Provider,
-		&i.DatasourceEmail.CreatedAt,
-		&i.DatasourceEmail.UpdatedAt,
-	)
-	return i, err
-}
-
 const linkDatasourceWithClient = `-- name: LinkDatasourceWithClient :exec
-UPDATE datasource SET
-	oauth2_client_id = $1
+UPDATE datasource
+SET settings = jsonb_set(settings, '{oauth2_client_id}', to_jsonb($1::text), true),
+    updated_at = NOW()
 WHERE uuid = $2
 `
 
 type LinkDatasourceWithClientParams struct {
-	ClientID pgtype.Text `json:"client_id"`
-	UUID     uuid.UUID   `json:"uuid"`
+	Column1 string    `json:"column_1"`
+	UUID    uuid.UUID `json:"uuid"`
 }
 
 func (q *Queries) LinkDatasourceWithClient(ctx context.Context, arg LinkDatasourceWithClientParams) error {
-	_, err := q.db.Exec(ctx, linkDatasourceWithClient, arg.ClientID, arg.UUID)
+	_, err := q.db.Exec(ctx, linkDatasourceWithClient, arg.Column1, arg.UUID)
 	return err
 }
 
 const linkDatasourceWithToken = `-- name: LinkDatasourceWithToken :exec
-UPDATE datasource SET oauth2_token_uuid = $1 WHERE uuid = $2
+UPDATE datasource
+SET settings = jsonb_set(settings, '{oauth2_token_uuid}', to_jsonb($1::text), true),
+    updated_at = NOW()
+WHERE uuid = $2
 `
 
 type LinkDatasourceWithTokenParams struct {
-	OAuth2TokenUUID *uuid.UUID `json:"oauth2_token_uuid"`
-	UUID            uuid.UUID  `json:"uuid"`
+	Column1 string    `json:"column_1"`
+	UUID    uuid.UUID `json:"uuid"`
 }
 
 func (q *Queries) LinkDatasourceWithToken(ctx context.Context, arg LinkDatasourceWithTokenParams) error {
-	_, err := q.db.Exec(ctx, linkDatasourceWithToken, arg.OAuth2TokenUUID, arg.UUID)
-	return err
-}
-
-const listDatasource = `-- name: ListDatasource :many
-SELECT
-	datasource.uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.oauth2_client_id, datasource.oauth2_token_uuid, datasource.created_at, datasource.updated_at,
-	datasource_email.uuid, datasource_email.datasource_uuid, datasource_email.email, datasource_email.password, datasource_email.imap_server, datasource_email.smtp_server, datasource_email.smtp_tls, datasource_email.provider, datasource_email.created_at, datasource_email.updated_at
-FROM datasource
-LEFT JOIN datasource_email ON datasource_email.datasource_uuid = datasource.uuid
-LEFT JOIN oauth2_client ON oauth2_client.id = datasource.oauth2_client_id
-ORDER BY datasource.created_at DESC
-LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-OFFSET $1::int
-`
-
-type ListDatasourceParams struct {
-	OffsetRecords int32 `json:"offset_records"`
-	LimitRecords  int32 `json:"limit_records"`
-}
-
-type ListDatasourceRow struct {
-	Datasource      Datasource      `json:"datasource"`
-	DatasourceEmail DatasourceEmail `json:"datasource_email"`
-}
-
-func (q *Queries) ListDatasource(ctx context.Context, arg ListDatasourceParams) ([]ListDatasourceRow, error) {
-	rows, err := q.db.Query(ctx, listDatasource, arg.OffsetRecords, arg.LimitRecords)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListDatasourceRow
-	for rows.Next() {
-		var i ListDatasourceRow
-		if err := rows.Scan(
-			&i.Datasource.UUID,
-			&i.Datasource.UserUUID,
-			&i.Datasource.Name,
-			&i.Datasource.Type,
-			&i.Datasource.IsEnabled,
-			&i.Datasource.Oauth2ClientID,
-			&i.Datasource.OAuth2TokenUUID,
-			&i.Datasource.CreatedAt,
-			&i.Datasource.UpdatedAt,
-			&i.DatasourceEmail.UUID,
-			&i.DatasourceEmail.DatasourceUUID,
-			&i.DatasourceEmail.Email,
-			&i.DatasourceEmail.Password,
-			&i.DatasourceEmail.IMAPServer,
-			&i.DatasourceEmail.SMTPServer,
-			&i.DatasourceEmail.SMTPTLS,
-			&i.DatasourceEmail.Provider,
-			&i.DatasourceEmail.CreatedAt,
-			&i.DatasourceEmail.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const updateDatasource = `-- name: UpdateDatasource :exec
-UPDATE datasource SET
-	name              = $1,
-  user_uuid         = $2,
-  is_enabled        = $3,
-  oauth2_client_id  = $4,
-  oauth2_token_uuid = $5
-WHERE uuid = $6
-RETURNING uuid, user_uuid, name, type, is_enabled, oauth2_client_id, oauth2_token_uuid, created_at, updated_at
-`
-
-type UpdateDatasourceParams struct {
-	Name            string      `json:"name"`
-	UserUUID        *uuid.UUID  `json:"user_uuid"`
-	IsEnabled       bool        `json:"is_enabled"`
-	Oauth2ClientID  pgtype.Text `json:"oauth2_client_id"`
-	OAuth2TokenUUID *uuid.UUID  `json:"oauth2_token_uuid"`
-	UUID            uuid.UUID   `json:"uuid"`
-}
-
-func (q *Queries) UpdateDatasource(ctx context.Context, arg UpdateDatasourceParams) error {
-	_, err := q.db.Exec(ctx, updateDatasource,
-		arg.Name,
-		arg.UserUUID,
-		arg.IsEnabled,
-		arg.Oauth2ClientID,
-		arg.OAuth2TokenUUID,
-		arg.UUID,
-	)
+	_, err := q.db.Exec(ctx, linkDatasourceWithToken, arg.Column1, arg.UUID)
 	return err
 }

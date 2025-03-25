@@ -1,22 +1,20 @@
-# spec/paths/datasource_email.yaml
+# spec/paths/datasource_telegram.yaml
 get:
-  description: List email datasources
-  operationId: datasource-email-list
+  description: List all Telegram datasources
+  operationId: datasource-telegram-list
   parameters:
-    - description: Offset records.
+    - description: Offset records
       explode: false
       in: query
       name: offset
       schema:
-        description: Offset records.
         format: int32
         type: integer
-    - description: Limit records.
+    - description: Limit records
       explode: false
       in: query
       name: limit
       schema:
-        description: Limit records.
         format: int32
         type: integer
   responses:
@@ -26,35 +24,8 @@ get:
         application/json:
           schema:
             type: array
-            description: List of email datasources
             items:
-              $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
-    default:
-      description: Unexpected error
-      content:
-        application/json:
-          schema:
-            $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - datasource
-    - datasource-email
-
-post:
-  description: Create a new email datasource
-  operationId: datasource-email-create
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
-  responses:
-    "201":
-      description: Created
-      content:
-        application/json:
-          schema:
-            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+              $ref: "../openapi.yaml#/components/schemas/DatasourceTelegram"
     default:
       description: Error
       content:
@@ -63,4 +34,30 @@ post:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-telegram
+
+post:
+  description: Create a new Telegram datasource
+  operationId: datasource-telegram-create
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceTelegram"
+  responses:
+    "201":
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/DatasourceTelegram"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-telegram

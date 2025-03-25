@@ -30,14 +30,105 @@ func (s *BearerAuth) SetToken(val string) {
 }
 
 // Ref: #
+type Datasource struct {
+	UUID      string    `json:"uuid"`
+	UserUUID  string    `json:"user_uuid"`
+	Name      string    `json:"name"`
+	IsEnabled bool      `json:"is_enabled"`
+	Type      string    `json:"type"`
+	Provider  string    `json:"provider"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *Datasource) GetUUID() string {
+	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *Datasource) GetUserUUID() string {
+	return s.UserUUID
+}
+
+// GetName returns the value of Name.
+func (s *Datasource) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *Datasource) GetIsEnabled() bool {
+	return s.IsEnabled
+}
+
+// GetType returns the value of Type.
+func (s *Datasource) GetType() string {
+	return s.Type
+}
+
+// GetProvider returns the value of Provider.
+func (s *Datasource) GetProvider() string {
+	return s.Provider
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Datasource) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Datasource) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *Datasource) SetUUID(val string) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *Datasource) SetUserUUID(val string) {
+	s.UserUUID = val
+}
+
+// SetName sets the value of Name.
+func (s *Datasource) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *Datasource) SetIsEnabled(val bool) {
+	s.IsEnabled = val
+}
+
+// SetType sets the value of Type.
+func (s *Datasource) SetType(val string) {
+	s.Type = val
+}
+
+// SetProvider sets the value of Provider.
+func (s *Datasource) SetProvider(val string) {
+	s.Provider = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Datasource) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Datasource) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// Ref: #
 type DatasourceEmail struct {
-	UUID            string    `json:"uuid"`
-	Name            string    `json:"name"`
-	IsEnabled       bool      `json:"is_enabled"`
-	Type            string    `json:"type"`
-	UserUUID        OptString `json:"user_uuid"`
+	UUID            OptString `json:"uuid"`
+	UserUUID        string    `json:"user_uuid"`
 	Email           OptString `json:"email"`
-	Provider        OptString `json:"provider"`
+	Name            string    `json:"name"`
+	IsEnabled       OptBool   `json:"is_enabled"`
+	Provider        string    `json:"provider"`
 	OAuth2ClientID  OptString `json:"oauth2_client_id"`
 	OAuth2TokenUUID OptString `json:"oauth2_token_uuid"`
 	ImapServer      OptString `json:"imap_server"`
@@ -49,27 +140,12 @@ type DatasourceEmail struct {
 }
 
 // GetUUID returns the value of UUID.
-func (s *DatasourceEmail) GetUUID() string {
+func (s *DatasourceEmail) GetUUID() OptString {
 	return s.UUID
 }
 
-// GetName returns the value of Name.
-func (s *DatasourceEmail) GetName() string {
-	return s.Name
-}
-
-// GetIsEnabled returns the value of IsEnabled.
-func (s *DatasourceEmail) GetIsEnabled() bool {
-	return s.IsEnabled
-}
-
-// GetType returns the value of Type.
-func (s *DatasourceEmail) GetType() string {
-	return s.Type
-}
-
 // GetUserUUID returns the value of UserUUID.
-func (s *DatasourceEmail) GetUserUUID() OptString {
+func (s *DatasourceEmail) GetUserUUID() string {
 	return s.UserUUID
 }
 
@@ -78,8 +154,18 @@ func (s *DatasourceEmail) GetEmail() OptString {
 	return s.Email
 }
 
+// GetName returns the value of Name.
+func (s *DatasourceEmail) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *DatasourceEmail) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
 // GetProvider returns the value of Provider.
-func (s *DatasourceEmail) GetProvider() OptString {
+func (s *DatasourceEmail) GetProvider() string {
 	return s.Provider
 }
 
@@ -124,27 +210,12 @@ func (s *DatasourceEmail) GetUpdatedAt() time.Time {
 }
 
 // SetUUID sets the value of UUID.
-func (s *DatasourceEmail) SetUUID(val string) {
+func (s *DatasourceEmail) SetUUID(val OptString) {
 	s.UUID = val
 }
 
-// SetName sets the value of Name.
-func (s *DatasourceEmail) SetName(val string) {
-	s.Name = val
-}
-
-// SetIsEnabled sets the value of IsEnabled.
-func (s *DatasourceEmail) SetIsEnabled(val bool) {
-	s.IsEnabled = val
-}
-
-// SetType sets the value of Type.
-func (s *DatasourceEmail) SetType(val string) {
-	s.Type = val
-}
-
 // SetUserUUID sets the value of UserUUID.
-func (s *DatasourceEmail) SetUserUUID(val OptString) {
+func (s *DatasourceEmail) SetUserUUID(val string) {
 	s.UserUUID = val
 }
 
@@ -153,8 +224,18 @@ func (s *DatasourceEmail) SetEmail(val OptString) {
 	s.Email = val
 }
 
+// SetName sets the value of Name.
+func (s *DatasourceEmail) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *DatasourceEmail) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
 // SetProvider sets the value of Provider.
-func (s *DatasourceEmail) SetProvider(val OptString) {
+func (s *DatasourceEmail) SetProvider(val string) {
 	s.Provider = val
 }
 
@@ -198,125 +279,6 @@ func (s *DatasourceEmail) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
 }
 
-// Ref: #
-type DatasourceEmailCreate struct {
-	// Email address of the user.
-	Email string `json:"email"`
-	// IMAP server address.
-	ImapServer      OptString `json:"imap_server"`
-	IsEnabled       bool      `json:"is_enabled"`
-	Name            string    `json:"name"`
-	OAuth2ClientID  OptString `json:"oauth2_client_id"`
-	OAuth2TokenUUID OptString `json:"oauth2_token_uuid"`
-	// Password of the email address.
-	Password OptString `json:"password"`
-	Provider OptString `json:"provider"`
-	// SMTP server address.
-	SMTPServer OptString `json:"smtp_server"`
-	// SMTP TLS flag.
-	SMTPTLS OptBool `json:"smtp_tls"`
-}
-
-// GetEmail returns the value of Email.
-func (s *DatasourceEmailCreate) GetEmail() string {
-	return s.Email
-}
-
-// GetImapServer returns the value of ImapServer.
-func (s *DatasourceEmailCreate) GetImapServer() OptString {
-	return s.ImapServer
-}
-
-// GetIsEnabled returns the value of IsEnabled.
-func (s *DatasourceEmailCreate) GetIsEnabled() bool {
-	return s.IsEnabled
-}
-
-// GetName returns the value of Name.
-func (s *DatasourceEmailCreate) GetName() string {
-	return s.Name
-}
-
-// GetOAuth2ClientID returns the value of OAuth2ClientID.
-func (s *DatasourceEmailCreate) GetOAuth2ClientID() OptString {
-	return s.OAuth2ClientID
-}
-
-// GetOAuth2TokenUUID returns the value of OAuth2TokenUUID.
-func (s *DatasourceEmailCreate) GetOAuth2TokenUUID() OptString {
-	return s.OAuth2TokenUUID
-}
-
-// GetPassword returns the value of Password.
-func (s *DatasourceEmailCreate) GetPassword() OptString {
-	return s.Password
-}
-
-// GetProvider returns the value of Provider.
-func (s *DatasourceEmailCreate) GetProvider() OptString {
-	return s.Provider
-}
-
-// GetSMTPServer returns the value of SMTPServer.
-func (s *DatasourceEmailCreate) GetSMTPServer() OptString {
-	return s.SMTPServer
-}
-
-// GetSMTPTLS returns the value of SMTPTLS.
-func (s *DatasourceEmailCreate) GetSMTPTLS() OptBool {
-	return s.SMTPTLS
-}
-
-// SetEmail sets the value of Email.
-func (s *DatasourceEmailCreate) SetEmail(val string) {
-	s.Email = val
-}
-
-// SetImapServer sets the value of ImapServer.
-func (s *DatasourceEmailCreate) SetImapServer(val OptString) {
-	s.ImapServer = val
-}
-
-// SetIsEnabled sets the value of IsEnabled.
-func (s *DatasourceEmailCreate) SetIsEnabled(val bool) {
-	s.IsEnabled = val
-}
-
-// SetName sets the value of Name.
-func (s *DatasourceEmailCreate) SetName(val string) {
-	s.Name = val
-}
-
-// SetOAuth2ClientID sets the value of OAuth2ClientID.
-func (s *DatasourceEmailCreate) SetOAuth2ClientID(val OptString) {
-	s.OAuth2ClientID = val
-}
-
-// SetOAuth2TokenUUID sets the value of OAuth2TokenUUID.
-func (s *DatasourceEmailCreate) SetOAuth2TokenUUID(val OptString) {
-	s.OAuth2TokenUUID = val
-}
-
-// SetPassword sets the value of Password.
-func (s *DatasourceEmailCreate) SetPassword(val OptString) {
-	s.Password = val
-}
-
-// SetProvider sets the value of Provider.
-func (s *DatasourceEmailCreate) SetProvider(val OptString) {
-	s.Provider = val
-}
-
-// SetSMTPServer sets the value of SMTPServer.
-func (s *DatasourceEmailCreate) SetSMTPServer(val OptString) {
-	s.SMTPServer = val
-}
-
-// SetSMTPTLS sets the value of SMTPTLS.
-func (s *DatasourceEmailCreate) SetSMTPTLS(val OptBool) {
-	s.SMTPTLS = val
-}
-
 // DatasourceEmailDeleteOK is response for DatasourceEmailDelete operation.
 type DatasourceEmailDeleteOK struct{}
 
@@ -335,100 +297,139 @@ func (s *DatasourceEmailRunPipelineOK) SetLabels(val []EmailLabel) {
 	s.Labels = val
 }
 
+// LinkedIn datasource object representation.
 // Ref: #
-type DatasourceEmailUpdate struct {
-	// IMAP server address.
-	ImapServer      OptString `json:"imap_server"`
-	IsEnabled       OptBool   `json:"is_enabled"`
-	Name            OptString `json:"name"`
-	OAuth2ClientID  OptString `json:"oauth2_client_id"`
-	OAuth2TokenUUID OptString `json:"oauth2_token_uuid"`
-	// Password of the email address.
+type DatasourceLinkedin struct {
+	UUID      OptString `json:"uuid"`
+	UserUUID  string    `json:"user_uuid"`
+	Name      string    `json:"name"`
+	IsEnabled OptBool   `json:"is_enabled"`
+	Provider  string    `json:"provider"`
+	// LinkedIn username or email for login.
+	Username OptString `json:"username"`
+	// LinkedIn password (or OAuth2 tokens if relevant).
 	Password OptString `json:"password"`
-	// SMTP server address.
-	SMTPServer OptString `json:"smtp_server"`
-	// SMTP TLS flag.
-	SMTPTLS OptBool `json:"smtp_tls"`
+	// Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml
+	// (presence bridging, encryption, etc.).
+	Settings  OptDatasourceLinkedinSettings `json:"settings"`
+	CreatedAt time.Time                     `json:"created_at"`
+	UpdatedAt time.Time                     `json:"updated_at"`
 }
 
-// GetImapServer returns the value of ImapServer.
-func (s *DatasourceEmailUpdate) GetImapServer() OptString {
-	return s.ImapServer
+// GetUUID returns the value of UUID.
+func (s *DatasourceLinkedin) GetUUID() OptString {
+	return s.UUID
 }
 
-// GetIsEnabled returns the value of IsEnabled.
-func (s *DatasourceEmailUpdate) GetIsEnabled() OptBool {
-	return s.IsEnabled
+// GetUserUUID returns the value of UserUUID.
+func (s *DatasourceLinkedin) GetUserUUID() string {
+	return s.UserUUID
 }
 
 // GetName returns the value of Name.
-func (s *DatasourceEmailUpdate) GetName() OptString {
+func (s *DatasourceLinkedin) GetName() string {
 	return s.Name
 }
 
-// GetOAuth2ClientID returns the value of OAuth2ClientID.
-func (s *DatasourceEmailUpdate) GetOAuth2ClientID() OptString {
-	return s.OAuth2ClientID
+// GetIsEnabled returns the value of IsEnabled.
+func (s *DatasourceLinkedin) GetIsEnabled() OptBool {
+	return s.IsEnabled
 }
 
-// GetOAuth2TokenUUID returns the value of OAuth2TokenUUID.
-func (s *DatasourceEmailUpdate) GetOAuth2TokenUUID() OptString {
-	return s.OAuth2TokenUUID
+// GetProvider returns the value of Provider.
+func (s *DatasourceLinkedin) GetProvider() string {
+	return s.Provider
+}
+
+// GetUsername returns the value of Username.
+func (s *DatasourceLinkedin) GetUsername() OptString {
+	return s.Username
 }
 
 // GetPassword returns the value of Password.
-func (s *DatasourceEmailUpdate) GetPassword() OptString {
+func (s *DatasourceLinkedin) GetPassword() OptString {
 	return s.Password
 }
 
-// GetSMTPServer returns the value of SMTPServer.
-func (s *DatasourceEmailUpdate) GetSMTPServer() OptString {
-	return s.SMTPServer
+// GetSettings returns the value of Settings.
+func (s *DatasourceLinkedin) GetSettings() OptDatasourceLinkedinSettings {
+	return s.Settings
 }
 
-// GetSMTPTLS returns the value of SMTPTLS.
-func (s *DatasourceEmailUpdate) GetSMTPTLS() OptBool {
-	return s.SMTPTLS
+// GetCreatedAt returns the value of CreatedAt.
+func (s *DatasourceLinkedin) GetCreatedAt() time.Time {
+	return s.CreatedAt
 }
 
-// SetImapServer sets the value of ImapServer.
-func (s *DatasourceEmailUpdate) SetImapServer(val OptString) {
-	s.ImapServer = val
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *DatasourceLinkedin) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
 }
 
-// SetIsEnabled sets the value of IsEnabled.
-func (s *DatasourceEmailUpdate) SetIsEnabled(val OptBool) {
-	s.IsEnabled = val
+// SetUUID sets the value of UUID.
+func (s *DatasourceLinkedin) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *DatasourceLinkedin) SetUserUUID(val string) {
+	s.UserUUID = val
 }
 
 // SetName sets the value of Name.
-func (s *DatasourceEmailUpdate) SetName(val OptString) {
+func (s *DatasourceLinkedin) SetName(val string) {
 	s.Name = val
 }
 
-// SetOAuth2ClientID sets the value of OAuth2ClientID.
-func (s *DatasourceEmailUpdate) SetOAuth2ClientID(val OptString) {
-	s.OAuth2ClientID = val
+// SetIsEnabled sets the value of IsEnabled.
+func (s *DatasourceLinkedin) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
 }
 
-// SetOAuth2TokenUUID sets the value of OAuth2TokenUUID.
-func (s *DatasourceEmailUpdate) SetOAuth2TokenUUID(val OptString) {
-	s.OAuth2TokenUUID = val
+// SetProvider sets the value of Provider.
+func (s *DatasourceLinkedin) SetProvider(val string) {
+	s.Provider = val
+}
+
+// SetUsername sets the value of Username.
+func (s *DatasourceLinkedin) SetUsername(val OptString) {
+	s.Username = val
 }
 
 // SetPassword sets the value of Password.
-func (s *DatasourceEmailUpdate) SetPassword(val OptString) {
+func (s *DatasourceLinkedin) SetPassword(val OptString) {
 	s.Password = val
 }
 
-// SetSMTPServer sets the value of SMTPServer.
-func (s *DatasourceEmailUpdate) SetSMTPServer(val OptString) {
-	s.SMTPServer = val
+// SetSettings sets the value of Settings.
+func (s *DatasourceLinkedin) SetSettings(val OptDatasourceLinkedinSettings) {
+	s.Settings = val
 }
 
-// SetSMTPTLS sets the value of SMTPTLS.
-func (s *DatasourceEmailUpdate) SetSMTPTLS(val OptBool) {
-	s.SMTPTLS = val
+// SetCreatedAt sets the value of CreatedAt.
+func (s *DatasourceLinkedin) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *DatasourceLinkedin) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// DatasourceLinkedinDeleteOK is response for DatasourceLinkedinDelete operation.
+type DatasourceLinkedinDeleteOK struct{}
+
+// Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml
+// (presence bridging, encryption, etc.).
+type DatasourceLinkedinSettings map[string]jx.Raw
+
+func (s *DatasourceLinkedinSettings) init() DatasourceLinkedinSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // DatasourceSetOAuth2ClientNoContent is response for DatasourceSetOAuth2Client operation.
@@ -447,6 +448,345 @@ func (s *DatasourceSetOAuth2ClientReq) GetClientID() string {
 // SetClientID sets the value of ClientID.
 func (s *DatasourceSetOAuth2ClientReq) SetClientID(val string) {
 	s.ClientID = val
+}
+
+// Ref: #
+type DatasourceTelegram struct {
+	UUID      OptString `json:"uuid"`
+	UserUUID  string    `json:"user_uuid"`
+	Name      string    `json:"name"`
+	IsEnabled OptBool   `json:"is_enabled"`
+	Provider  string    `json:"provider"`
+	// The phone number for the Telegram account (international format).
+	PhoneNumber string `json:"phone_number"`
+	// Telegram API ID from my.telegram.org.
+	APIID string `json:"api_id"`
+	// Telegram API hash.
+	APIHash string `json:"api_hash"`
+	// Optional 2FA password.
+	Password OptString `json:"password"`
+	// Additional Telegram bridging config from telegram.tpl.yaml
+	// (proxy, concurrency, presence bridging, encryption, etc.).
+	Settings       OptDatasourceTelegramSettings `json:"settings"`
+	SessionHistory TelegramSessionHistory        `json:"sessionHistory"`
+	Participants   TelegramParticipants          `json:"participants"`
+	// Arbitrary key-value metadata about the account.
+	Meta      OptDatasourceTelegramMeta `json:"meta"`
+	CreatedAt time.Time                 `json:"created_at"`
+	UpdatedAt time.Time                 `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *DatasourceTelegram) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *DatasourceTelegram) GetUserUUID() string {
+	return s.UserUUID
+}
+
+// GetName returns the value of Name.
+func (s *DatasourceTelegram) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *DatasourceTelegram) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetProvider returns the value of Provider.
+func (s *DatasourceTelegram) GetProvider() string {
+	return s.Provider
+}
+
+// GetPhoneNumber returns the value of PhoneNumber.
+func (s *DatasourceTelegram) GetPhoneNumber() string {
+	return s.PhoneNumber
+}
+
+// GetAPIID returns the value of APIID.
+func (s *DatasourceTelegram) GetAPIID() string {
+	return s.APIID
+}
+
+// GetAPIHash returns the value of APIHash.
+func (s *DatasourceTelegram) GetAPIHash() string {
+	return s.APIHash
+}
+
+// GetPassword returns the value of Password.
+func (s *DatasourceTelegram) GetPassword() OptString {
+	return s.Password
+}
+
+// GetSettings returns the value of Settings.
+func (s *DatasourceTelegram) GetSettings() OptDatasourceTelegramSettings {
+	return s.Settings
+}
+
+// GetSessionHistory returns the value of SessionHistory.
+func (s *DatasourceTelegram) GetSessionHistory() TelegramSessionHistory {
+	return s.SessionHistory
+}
+
+// GetParticipants returns the value of Participants.
+func (s *DatasourceTelegram) GetParticipants() TelegramParticipants {
+	return s.Participants
+}
+
+// GetMeta returns the value of Meta.
+func (s *DatasourceTelegram) GetMeta() OptDatasourceTelegramMeta {
+	return s.Meta
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *DatasourceTelegram) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *DatasourceTelegram) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *DatasourceTelegram) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *DatasourceTelegram) SetUserUUID(val string) {
+	s.UserUUID = val
+}
+
+// SetName sets the value of Name.
+func (s *DatasourceTelegram) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *DatasourceTelegram) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetProvider sets the value of Provider.
+func (s *DatasourceTelegram) SetProvider(val string) {
+	s.Provider = val
+}
+
+// SetPhoneNumber sets the value of PhoneNumber.
+func (s *DatasourceTelegram) SetPhoneNumber(val string) {
+	s.PhoneNumber = val
+}
+
+// SetAPIID sets the value of APIID.
+func (s *DatasourceTelegram) SetAPIID(val string) {
+	s.APIID = val
+}
+
+// SetAPIHash sets the value of APIHash.
+func (s *DatasourceTelegram) SetAPIHash(val string) {
+	s.APIHash = val
+}
+
+// SetPassword sets the value of Password.
+func (s *DatasourceTelegram) SetPassword(val OptString) {
+	s.Password = val
+}
+
+// SetSettings sets the value of Settings.
+func (s *DatasourceTelegram) SetSettings(val OptDatasourceTelegramSettings) {
+	s.Settings = val
+}
+
+// SetSessionHistory sets the value of SessionHistory.
+func (s *DatasourceTelegram) SetSessionHistory(val TelegramSessionHistory) {
+	s.SessionHistory = val
+}
+
+// SetParticipants sets the value of Participants.
+func (s *DatasourceTelegram) SetParticipants(val TelegramParticipants) {
+	s.Participants = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *DatasourceTelegram) SetMeta(val OptDatasourceTelegramMeta) {
+	s.Meta = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *DatasourceTelegram) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *DatasourceTelegram) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// DatasourceTelegramDeleteOK is response for DatasourceTelegramDelete operation.
+type DatasourceTelegramDeleteOK struct{}
+
+// Arbitrary key-value metadata about the account.
+type DatasourceTelegramMeta map[string]jx.Raw
+
+func (s *DatasourceTelegramMeta) init() DatasourceTelegramMeta {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Additional Telegram bridging config from telegram.tpl.yaml
+// (proxy, concurrency, presence bridging, encryption, etc.).
+type DatasourceTelegramSettings map[string]jx.Raw
+
+func (s *DatasourceTelegramSettings) init() DatasourceTelegramSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// WhatsApp datasource object representation.
+// Ref: #
+type DatasourceWhatsapp struct {
+	UUID      OptString `json:"uuid"`
+	UserUUID  string    `json:"user_uuid"`
+	Name      string    `json:"name"`
+	IsEnabled OptBool   `json:"is_enabled"`
+	Provider  string    `json:"provider"`
+	// The phone number for the WhatsApp account.
+	PhoneNumber string `json:"phone_number"`
+	// Label for the WhatsApp device connection.
+	DeviceName OptString `json:"device_name"`
+	// Additional WhatsApp bridging config from whatsapp.tpl.yaml
+	// (proxy, presence bridging, call notices, status broadcast, etc.).
+	Settings  OptDatasourceWhatsappSettings `json:"settings"`
+	CreatedAt time.Time                     `json:"created_at"`
+	UpdatedAt time.Time                     `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *DatasourceWhatsapp) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *DatasourceWhatsapp) GetUserUUID() string {
+	return s.UserUUID
+}
+
+// GetName returns the value of Name.
+func (s *DatasourceWhatsapp) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *DatasourceWhatsapp) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetProvider returns the value of Provider.
+func (s *DatasourceWhatsapp) GetProvider() string {
+	return s.Provider
+}
+
+// GetPhoneNumber returns the value of PhoneNumber.
+func (s *DatasourceWhatsapp) GetPhoneNumber() string {
+	return s.PhoneNumber
+}
+
+// GetDeviceName returns the value of DeviceName.
+func (s *DatasourceWhatsapp) GetDeviceName() OptString {
+	return s.DeviceName
+}
+
+// GetSettings returns the value of Settings.
+func (s *DatasourceWhatsapp) GetSettings() OptDatasourceWhatsappSettings {
+	return s.Settings
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *DatasourceWhatsapp) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *DatasourceWhatsapp) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *DatasourceWhatsapp) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *DatasourceWhatsapp) SetUserUUID(val string) {
+	s.UserUUID = val
+}
+
+// SetName sets the value of Name.
+func (s *DatasourceWhatsapp) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *DatasourceWhatsapp) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetProvider sets the value of Provider.
+func (s *DatasourceWhatsapp) SetProvider(val string) {
+	s.Provider = val
+}
+
+// SetPhoneNumber sets the value of PhoneNumber.
+func (s *DatasourceWhatsapp) SetPhoneNumber(val string) {
+	s.PhoneNumber = val
+}
+
+// SetDeviceName sets the value of DeviceName.
+func (s *DatasourceWhatsapp) SetDeviceName(val OptString) {
+	s.DeviceName = val
+}
+
+// SetSettings sets the value of Settings.
+func (s *DatasourceWhatsapp) SetSettings(val OptDatasourceWhatsappSettings) {
+	s.Settings = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *DatasourceWhatsapp) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *DatasourceWhatsapp) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// DatasourceWhatsappDeleteOK is response for DatasourceWhatsappDelete operation.
+type DatasourceWhatsappDeleteOK struct{}
+
+// Additional WhatsApp bridging config from whatsapp.tpl.yaml
+// (proxy, presence bridging, call notices, status broadcast, etc.).
+type DatasourceWhatsappSettings map[string]jx.Raw
+
+func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #
@@ -2088,6 +2428,190 @@ func (o OptBool) Or(d bool) bool {
 	return d
 }
 
+// NewOptDatasourceLinkedinSettings returns new OptDatasourceLinkedinSettings with value set to v.
+func NewOptDatasourceLinkedinSettings(v DatasourceLinkedinSettings) OptDatasourceLinkedinSettings {
+	return OptDatasourceLinkedinSettings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDatasourceLinkedinSettings is optional DatasourceLinkedinSettings.
+type OptDatasourceLinkedinSettings struct {
+	Value DatasourceLinkedinSettings
+	Set   bool
+}
+
+// IsSet returns true if OptDatasourceLinkedinSettings was set.
+func (o OptDatasourceLinkedinSettings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDatasourceLinkedinSettings) Reset() {
+	var v DatasourceLinkedinSettings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDatasourceLinkedinSettings) SetTo(v DatasourceLinkedinSettings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDatasourceLinkedinSettings) Get() (v DatasourceLinkedinSettings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDatasourceLinkedinSettings) Or(d DatasourceLinkedinSettings) DatasourceLinkedinSettings {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDatasourceTelegramMeta returns new OptDatasourceTelegramMeta with value set to v.
+func NewOptDatasourceTelegramMeta(v DatasourceTelegramMeta) OptDatasourceTelegramMeta {
+	return OptDatasourceTelegramMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDatasourceTelegramMeta is optional DatasourceTelegramMeta.
+type OptDatasourceTelegramMeta struct {
+	Value DatasourceTelegramMeta
+	Set   bool
+}
+
+// IsSet returns true if OptDatasourceTelegramMeta was set.
+func (o OptDatasourceTelegramMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDatasourceTelegramMeta) Reset() {
+	var v DatasourceTelegramMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDatasourceTelegramMeta) SetTo(v DatasourceTelegramMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDatasourceTelegramMeta) Get() (v DatasourceTelegramMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDatasourceTelegramMeta) Or(d DatasourceTelegramMeta) DatasourceTelegramMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDatasourceTelegramSettings returns new OptDatasourceTelegramSettings with value set to v.
+func NewOptDatasourceTelegramSettings(v DatasourceTelegramSettings) OptDatasourceTelegramSettings {
+	return OptDatasourceTelegramSettings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDatasourceTelegramSettings is optional DatasourceTelegramSettings.
+type OptDatasourceTelegramSettings struct {
+	Value DatasourceTelegramSettings
+	Set   bool
+}
+
+// IsSet returns true if OptDatasourceTelegramSettings was set.
+func (o OptDatasourceTelegramSettings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDatasourceTelegramSettings) Reset() {
+	var v DatasourceTelegramSettings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDatasourceTelegramSettings) SetTo(v DatasourceTelegramSettings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDatasourceTelegramSettings) Get() (v DatasourceTelegramSettings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDatasourceTelegramSettings) Or(d DatasourceTelegramSettings) DatasourceTelegramSettings {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDatasourceWhatsappSettings returns new OptDatasourceWhatsappSettings with value set to v.
+func NewOptDatasourceWhatsappSettings(v DatasourceWhatsappSettings) OptDatasourceWhatsappSettings {
+	return OptDatasourceWhatsappSettings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDatasourceWhatsappSettings is optional DatasourceWhatsappSettings.
+type OptDatasourceWhatsappSettings struct {
+	Value DatasourceWhatsappSettings
+	Set   bool
+}
+
+// IsSet returns true if OptDatasourceWhatsappSettings was set.
+func (o OptDatasourceWhatsappSettings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDatasourceWhatsappSettings) Reset() {
+	var v DatasourceWhatsappSettings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDatasourceWhatsappSettings) SetTo(v DatasourceWhatsappSettings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDatasourceWhatsappSettings) Get() (v DatasourceWhatsappSettings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDatasourceWhatsappSettings) Or(d DatasourceWhatsappSettings) DatasourceWhatsappSettings {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDateTime returns new OptDateTime with value set to v.
 func NewOptDateTime(v time.Time) OptDateTime {
 	return OptDateTime{
@@ -2887,6 +3411,98 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
+// NewOptTelegramParticipantsItemMeta returns new OptTelegramParticipantsItemMeta with value set to v.
+func NewOptTelegramParticipantsItemMeta(v TelegramParticipantsItemMeta) OptTelegramParticipantsItemMeta {
+	return OptTelegramParticipantsItemMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTelegramParticipantsItemMeta is optional TelegramParticipantsItemMeta.
+type OptTelegramParticipantsItemMeta struct {
+	Value TelegramParticipantsItemMeta
+	Set   bool
+}
+
+// IsSet returns true if OptTelegramParticipantsItemMeta was set.
+func (o OptTelegramParticipantsItemMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTelegramParticipantsItemMeta) Reset() {
+	var v TelegramParticipantsItemMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTelegramParticipantsItemMeta) SetTo(v TelegramParticipantsItemMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTelegramParticipantsItemMeta) Get() (v TelegramParticipantsItemMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTelegramParticipantsItemMeta) Or(d TelegramParticipantsItemMeta) TelegramParticipantsItemMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTelegramSessionHistoryItemMeta returns new OptTelegramSessionHistoryItemMeta with value set to v.
+func NewOptTelegramSessionHistoryItemMeta(v TelegramSessionHistoryItemMeta) OptTelegramSessionHistoryItemMeta {
+	return OptTelegramSessionHistoryItemMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTelegramSessionHistoryItemMeta is optional TelegramSessionHistoryItemMeta.
+type OptTelegramSessionHistoryItemMeta struct {
+	Value TelegramSessionHistoryItemMeta
+	Set   bool
+}
+
+// IsSet returns true if OptTelegramSessionHistoryItemMeta was set.
+func (o OptTelegramSessionHistoryItemMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTelegramSessionHistoryItemMeta) Reset() {
+	var v TelegramSessionHistoryItemMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTelegramSessionHistoryItemMeta) SetTo(v TelegramSessionHistoryItemMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTelegramSessionHistoryItemMeta) Get() (v TelegramSessionHistoryItemMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTelegramSessionHistoryItemMeta) Or(d TelegramSessionHistoryItemMeta) TelegramSessionHistoryItemMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptURI returns new OptURI with value set to v.
 func NewOptURI(v url.URL) OptURI {
 	return OptURI{
@@ -3470,7 +4086,7 @@ func (s *SessionCookieAuth) SetAPIKey(val string) {
 type Storage struct {
 	// Unique identifier for the storage object.
 	UUID string `json:"uuid"`
-	// Unique identifier for the user associated with the storage object.
+	// Unique identifier for the user associated with the storage object @reactima TODO rethink this.
 	UserUUID OptString `json:"user_uuid"`
 	// Name of the storage object.
 	Name OptString `json:"name"`
@@ -4004,6 +4620,112 @@ func (s *Telegram) SetCreatedAt(val time.Time) {
 // SetUser sets the value of User.
 func (s *Telegram) SetUser(val TelegramUser) {
 	s.User = val
+}
+
+type TelegramParticipants []TelegramParticipantsItem
+
+type TelegramParticipantsItem struct {
+	// Unique identifier of the participant (e.g. user ID).
+	ParticipantId OptString `json:"participantId"`
+	// Arbitrary key-value metadata about the participant.
+	Meta OptTelegramParticipantsItemMeta `json:"meta"`
+}
+
+// GetParticipantId returns the value of ParticipantId.
+func (s *TelegramParticipantsItem) GetParticipantId() OptString {
+	return s.ParticipantId
+}
+
+// GetMeta returns the value of Meta.
+func (s *TelegramParticipantsItem) GetMeta() OptTelegramParticipantsItemMeta {
+	return s.Meta
+}
+
+// SetParticipantId sets the value of ParticipantId.
+func (s *TelegramParticipantsItem) SetParticipantId(val OptString) {
+	s.ParticipantId = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *TelegramParticipantsItem) SetMeta(val OptTelegramParticipantsItemMeta) {
+	s.Meta = val
+}
+
+// Arbitrary key-value metadata about the participant.
+type TelegramParticipantsItemMeta map[string]jx.Raw
+
+func (s *TelegramParticipantsItemMeta) init() TelegramParticipantsItemMeta {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type TelegramSessionHistory []TelegramSessionHistoryItem
+
+type TelegramSessionHistoryItem struct {
+	// Unique session identifier.
+	SessionId OptString `json:"sessionId"`
+	// Timestamp when the session started.
+	StartedAt OptDateTime `json:"started_at"`
+	// Timestamp when the session ended.
+	EndedAt OptDateTime `json:"ended_at"`
+	// Arbitrary key-value metadata for the session.
+	Meta OptTelegramSessionHistoryItemMeta `json:"meta"`
+}
+
+// GetSessionId returns the value of SessionId.
+func (s *TelegramSessionHistoryItem) GetSessionId() OptString {
+	return s.SessionId
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *TelegramSessionHistoryItem) GetStartedAt() OptDateTime {
+	return s.StartedAt
+}
+
+// GetEndedAt returns the value of EndedAt.
+func (s *TelegramSessionHistoryItem) GetEndedAt() OptDateTime {
+	return s.EndedAt
+}
+
+// GetMeta returns the value of Meta.
+func (s *TelegramSessionHistoryItem) GetMeta() OptTelegramSessionHistoryItemMeta {
+	return s.Meta
+}
+
+// SetSessionId sets the value of SessionId.
+func (s *TelegramSessionHistoryItem) SetSessionId(val OptString) {
+	s.SessionId = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *TelegramSessionHistoryItem) SetStartedAt(val OptDateTime) {
+	s.StartedAt = val
+}
+
+// SetEndedAt sets the value of EndedAt.
+func (s *TelegramSessionHistoryItem) SetEndedAt(val OptDateTime) {
+	s.EndedAt = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *TelegramSessionHistoryItem) SetMeta(val OptTelegramSessionHistoryItemMeta) {
+	s.Meta = val
+}
+
+// Arbitrary key-value metadata for the session.
+type TelegramSessionHistoryItemMeta map[string]jx.Raw
+
+func (s *TelegramSessionHistoryItemMeta) init() TelegramSessionHistoryItemMeta {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // User details.

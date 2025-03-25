@@ -14,8 +14,8 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.DatasourceEmail) (*api.DatasourceEmail, error) {
-	log := h.log.With("handler", "DatasourceEmailCreate")
+func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.DatasourceLinkedin) (*api.DatasourceLinkedin, error) {
+	log := h.log.With("handler", "DatasourceLinkedinCreate")
 	dsUUID := uuid.Must(uuid.NewV7())
 	settings, err := json.Marshal(req)
 	if err != nil {
@@ -40,8 +40,8 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 	return &resp, nil
 }
 
-func (h *Handler) DatasourceEmailDelete(ctx context.Context, params api.DatasourceEmailDeleteParams) error {
-	log := h.log.With("handler", "DatasourceEmailDelete")
+func (h *Handler) DatasourceLinkedinDelete(ctx context.Context, params api.DatasourceLinkedinDeleteParams) error {
+	log := h.log.With("handler", "DatasourceLinkedinDelete")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
@@ -54,15 +54,15 @@ func (h *Handler) DatasourceEmailDelete(ctx context.Context, params api.Datasour
 	return nil
 }
 
-func (h *Handler) DatasourceEmailGet(ctx context.Context, params api.DatasourceEmailGetParams) (*api.DatasourceEmail, error) {
-	log := h.log.With("handler", "DatasourceEmailGet")
-	dsUUID, err := uuid.FromString(params.UUID)
+func (h *Handler) DatasourceLinkedinGet(ctx context.Context, params api.DatasourceLinkedinGetParams) (*api.DatasourceLinkedin, error) {
+	log := h.log.With("handler", "DatasourceLinkedinGet")
+	id, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
 	dses, err := query.New(h.dbp).GetDatasources(ctx, query.GetDatasourcesParams{
-		UUID:   pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
+		UUID:   pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
 		Limit:  1,
 		Offset: 0,
 	})
@@ -73,17 +73,17 @@ func (h *Handler) DatasourceEmailGet(ctx context.Context, params api.DatasourceE
 	if len(dses) == 0 {
 		return nil, ErrWithCode(http.StatusNotFound, E("datasource not found"))
 	}
-	return QToDatasourceEmail(dses[0])
+	return QToDatasourceLinkedin(dses[0])
 }
 
-func (h *Handler) DatasourceEmailUpdate(ctx context.Context, req *api.DatasourceEmail, params api.DatasourceEmailUpdateParams) (*api.DatasourceEmail, error) {
-	log := h.log.With("handler", "DatasourceEmailUpdate")
+func (h *Handler) DatasourceLinkedinUpdate(ctx context.Context, req *api.DatasourceLinkedin, params api.DatasourceLinkedinUpdateParams) (*api.DatasourceLinkedin, error) {
+	log := h.log.With("handler", "DatasourceLinkedinUpdate")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceEmail, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceLinkedin, error) {
 		dses, err := query.New(tx).GetDatasources(ctx, query.GetDatasourcesParams{
 			UUID:  pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
 			Limit: 1,
@@ -112,6 +112,6 @@ func (h *Handler) DatasourceEmailUpdate(ctx context.Context, req *api.Datasource
 			log.Error("failed to update datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update datasource"))
 		}
-		return h.DatasourceEmailGet(ctx, api.DatasourceEmailGetParams{UUID: params.UUID})
+		return h.DatasourceLinkedinGet(ctx, api.DatasourceLinkedinGetParams{UUID: params.UUID})
 	})
 }

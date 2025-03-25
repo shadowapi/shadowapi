@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/datasource": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve a list of datasource objects. */
+        get: operations["datasource-list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/datasource/email": {
         parameters: {
             query?: never;
@@ -70,6 +87,117 @@ export interface paths {
         /** @description Run datasource email pipeline */
         post: operations["datasource-email-run-pipeline"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all Telegram datasources */
+        get: operations["datasource-telegram-list"];
+        put?: never;
+        /** @description Create a new Telegram datasource */
+        post: operations["datasource-telegram-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/telegram/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get a Telegram datasource */
+        get: operations["datasource-telegram-get"];
+        /** @description Update a Telegram datasource */
+        put: operations["datasource-telegram-update"];
+        post?: never;
+        /** @description Delete a Telegram datasource */
+        delete: operations["datasource-telegram-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/whatsapp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all WhatsApp datasources */
+        get: operations["datasource-whatsapp-list"];
+        put?: never;
+        /** @description Create a new WhatsApp datasource */
+        post: operations["datasource-whatsapp-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/whatsapp/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get a WhatsApp datasource */
+        get: operations["datasource-whatsapp-get"];
+        /** @description Update a WhatsApp datasource */
+        put: operations["datasource-whatsapp-update"];
+        post?: never;
+        /** @description Delete a WhatsApp datasource */
+        delete: operations["datasource-whatsapp-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/linkedin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all LinkedIn datasources */
+        get: operations["datasource-linkedin-list"];
+        put?: never;
+        /** @description Create a new LinkedIn datasource */
+        post: operations["datasource-linkedin-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/linkedin/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get a LinkedIn datasource */
+        get: operations["datasource-linkedin-get"];
+        /** @description Update a LinkedIn datasource */
+        put: operations["datasource-linkedin-update"];
+        post?: never;
+        /** @description Delete a LinkedIn datasource */
+        delete: operations["datasource-linkedin-delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -591,9 +719,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Datasource: components["schemas"]["datasource"];
         DatasourceEmail: components["schemas"]["datasource_email"];
-        DatasourceEmailCreate: components["schemas"]["datasource_email_create"];
-        DatasourceEmailUpdate: components["schemas"]["datasource_email_update"];
+        DatasourceTelegram: components["schemas"]["datasource_telegram"];
+        DatasourceWhatsapp: components["schemas"]["datasource_whatsapp"];
+        DatasourceLinkedin: components["schemas"]["datasource_linkedin"];
         Error: components["schemas"]["error"];
         MailLabel: components["schemas"]["email_label"];
         Oauth2Client: components["schemas"]["oauth2_client"];
@@ -689,14 +819,25 @@ export interface components {
              */
             status?: number;
         };
-        datasource_email: {
+        datasource: {
             readonly uuid: string;
+            readonly user_uuid: string;
             name: string;
             is_enabled: boolean;
             type: string;
-            user_uuid?: string;
+            provider: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        datasource_email: {
+            readonly uuid?: string;
+            readonly user_uuid: string;
             email?: string;
-            provider?: string;
+            name: string;
+            is_enabled?: boolean;
+            provider: string;
             oauth2_client_id?: string;
             oauth2_token_uuid?: string;
             imap_server?: string;
@@ -707,37 +848,6 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
-        };
-        datasource_email_create: {
-            /** @description Email address of the user. */
-            email: string;
-            /** @description IMAP server address. */
-            imap_server?: string;
-            is_enabled: boolean;
-            name: string;
-            oauth2_client_id?: string;
-            oauth2_token_uuid?: string;
-            /** @description Password of the email address. */
-            password?: string;
-            provider?: string;
-            /** @description SMTP server address. */
-            smtp_server?: string;
-            /** @description SMTP TLS flag. */
-            smtp_tls?: boolean;
-        };
-        datasource_email_update: {
-            /** @description IMAP server address. */
-            imap_server?: string;
-            is_enabled?: boolean;
-            name?: string;
-            oauth2_client_id?: string;
-            oauth2_token_uuid?: string;
-            /** @description Password of the email address. */
-            password?: string;
-            /** @description SMTP server address. */
-            smtp_server?: string;
-            /** @description SMTP TLS flag. */
-            smtp_tls?: boolean;
         };
         email_label: {
             /** Format: int64 */
@@ -762,6 +872,109 @@ export interface components {
             /** Format: int64 */
             threadsUnread?: number;
             type?: string;
+        };
+        /** @description List of session logs for an account */
+        telegram_session_history: {
+            /** @description Unique session identifier */
+            sessionId?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the session started
+             */
+            started_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the session ended
+             */
+            ended_at?: string;
+            /** @description Arbitrary key-value metadata for the session */
+            meta?: {
+                [key: string]: unknown;
+            };
+        }[];
+        /** @description List of account participants */
+        telegram_participants: {
+            /** @description Unique identifier of the participant (e.g. user ID) */
+            participantId?: string;
+            /** @description Arbitrary key-value metadata about the participant */
+            meta?: {
+                [key: string]: unknown;
+            };
+        }[];
+        datasource_telegram: {
+            readonly uuid?: string;
+            readonly user_uuid: string;
+            name: string;
+            is_enabled?: boolean;
+            provider: string;
+            /** @description The phone number for the Telegram account (international format) */
+            phone_number: string;
+            /** @description Telegram API ID from my.telegram.org */
+            api_id: string;
+            /** @description Telegram API hash */
+            api_hash: string;
+            /** @description Optional 2FA password */
+            password?: string;
+            /** @description Additional Telegram bridging config from telegram.tpl.yaml
+             *     (proxy, concurrency, presence bridging, encryption, etc.)
+             *      */
+            settings?: {
+                [key: string]: unknown;
+            };
+            sessionHistory?: components["schemas"]["telegram_session_history"];
+            participants?: components["schemas"]["telegram_participants"];
+            /** @description Arbitrary key-value metadata about the account */
+            meta?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description WhatsApp datasource object representation */
+        datasource_whatsapp: {
+            readonly uuid?: string;
+            readonly user_uuid: string;
+            name: string;
+            is_enabled?: boolean;
+            provider: string;
+            /** @description The phone number for the WhatsApp account */
+            phone_number: string;
+            /** @description Label for the WhatsApp device connection */
+            device_name?: string;
+            /** @description Additional WhatsApp bridging config from whatsapp.tpl.yaml
+             *     (proxy, presence bridging, call notices, status broadcast, etc.)
+             *      */
+            settings?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description LinkedIn datasource object representation */
+        datasource_linkedin: {
+            readonly uuid?: string;
+            readonly user_uuid: string;
+            name: string;
+            is_enabled?: boolean;
+            provider: string;
+            /** @description LinkedIn username or email for login */
+            username?: string;
+            /** @description LinkedIn password (or OAuth2 tokens if relevant) */
+            password?: string;
+            /** @description Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml
+             *     (presence bridging, encryption, etc.)
+             *      */
+            settings?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
         };
         oauth2_client: {
             id: string;
@@ -817,7 +1030,7 @@ export interface components {
         storage: {
             /** @description Unique identifier for the storage object. */
             readonly uuid: string;
-            /** @description Unique identifier for the user associated with the storage object. */
+            /** @description Unique identifier for the user associated with the storage object @reactima TODO rethink this */
             readonly user_uuid?: string;
             /** @description Name of the storage object. */
             name?: string;
@@ -1044,6 +1257,40 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "datasource-list": {
+        parameters: {
+            query?: {
+                /** @description The number of records to skip for pagination. */
+                offset?: number;
+                /** @description The maximum number of records to return. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request was successful. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource"][];
+                };
+            };
+            /** @description An error occurred. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
     "datasource-email-list": {
         parameters: {
             query?: {
@@ -1087,7 +1334,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["datasource_email_create"];
+                "application/json": components["schemas"]["datasource_email"];
             };
         };
         responses: {
@@ -1148,14 +1395,14 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description UUID of the datasource base object. */
+                /** @description UUID of the datasource */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["datasource_email_update"];
+                "application/json": components["schemas"]["datasource_email"];
             };
         };
         responses: {
@@ -1184,7 +1431,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description UUID of the email datasource. */
+                /** @description UUID of the email datasource */
                 uuid: string;
             };
             cookie?: never;
@@ -1269,6 +1516,501 @@ export interface operations {
                         labels: components["schemas"]["email_label"][];
                     };
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-telegram-list": {
+        parameters: {
+            query?: {
+                /** @description Offset records */
+                offset?: number;
+                /** @description Limit records */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_telegram"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-telegram-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_telegram"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_telegram"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-telegram-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the Telegram datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_telegram"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-telegram-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_telegram"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_telegram"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-telegram-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the Telegram datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-whatsapp-list": {
+        parameters: {
+            query?: {
+                /** @description Offset records */
+                offset?: number;
+                /** @description Limit records */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_whatsapp"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-whatsapp-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_whatsapp"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_whatsapp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-whatsapp-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the WhatsApp datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_whatsapp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-whatsapp-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_whatsapp"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_whatsapp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-whatsapp-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the WhatsApp datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-linkedin-list": {
+        parameters: {
+            query?: {
+                /** @description Offset records */
+                offset?: number;
+                /** @description Limit records */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_linkedin"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-linkedin-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_linkedin"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_linkedin"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-linkedin-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the LinkedIn datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_linkedin"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-linkedin-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_linkedin"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_linkedin"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-linkedin-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the LinkedIn datasource */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {

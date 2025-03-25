@@ -1,13 +1,13 @@
+# spec/paths/datasource_whatsapp_uuid.yaml
 get:
-  description: Get email datasources
-  operationId: datasource-email-get
+  description: Get a WhatsApp datasource
+  operationId: datasource-whatsapp-get
   parameters:
-    - description: UUID of the email datasource.
+    - description: UUID of the WhatsApp datasource
       in: path
       name: uuid
       required: true
       schema:
-        description: UUID of the email datasource.
         type: string
   responses:
     "200":
@@ -15,7 +15,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceWhatsapp"
     default:
       description: Error
       content:
@@ -24,11 +24,11 @@ get:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-whatsapp
 
 put:
-  description: Update an email datasource
-  operationId: datasource-email-update
+  description: Update a WhatsApp datasource
+  operationId: datasource-whatsapp-update
   parameters:
     - description: UUID of the datasource
       in: path
@@ -41,14 +41,14 @@ put:
     content:
       application/json:
         schema:
-          $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+          $ref: "../openapi.yaml#/components/schemas/DatasourceWhatsapp"
   responses:
     "200":
       description: OK
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceWhatsapp"
     default:
       description: Error
       content:
@@ -57,13 +57,13 @@ put:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-whatsapp
 
 delete:
-  description: Delete an email datasource
-  operationId: datasource-email-delete
+  description: Delete a WhatsApp datasource
+  operationId: datasource-whatsapp-delete
   parameters:
-    - description: UUID of the email datasource
+    - description: UUID of the WhatsApp datasource
       in: path
       name: uuid
       required: true
@@ -80,4 +80,4 @@ delete:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-whatsapp

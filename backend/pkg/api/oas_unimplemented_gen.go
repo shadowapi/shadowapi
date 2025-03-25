@@ -18,7 +18,7 @@ var _ Handler = UnimplementedHandler{}
 // Create a new email datasource.
 //
 // POST /datasource/email
-func (UnimplementedHandler) DatasourceEmailCreate(ctx context.Context, req *DatasourceEmailCreate) (r *DatasourceEmail, _ error) {
+func (UnimplementedHandler) DatasourceEmailCreate(ctx context.Context, req *DatasourceEmail) (r *DatasourceEmail, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -63,7 +63,61 @@ func (UnimplementedHandler) DatasourceEmailRunPipeline(ctx context.Context, para
 // Update an email datasource.
 //
 // PUT /datasource/email/{uuid}
-func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmailUpdate, params DatasourceEmailUpdateParams) (r *DatasourceEmail, _ error) {
+func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmail, params DatasourceEmailUpdateParams) (r *DatasourceEmail, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceLinkedinCreate implements datasource-linkedin-create operation.
+//
+// Create a new LinkedIn datasource.
+//
+// POST /datasource/linkedin
+func (UnimplementedHandler) DatasourceLinkedinCreate(ctx context.Context, req *DatasourceLinkedin) (r *DatasourceLinkedin, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceLinkedinDelete implements datasource-linkedin-delete operation.
+//
+// Delete a LinkedIn datasource.
+//
+// DELETE /datasource/linkedin/{uuid}
+func (UnimplementedHandler) DatasourceLinkedinDelete(ctx context.Context, params DatasourceLinkedinDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DatasourceLinkedinGet implements datasource-linkedin-get operation.
+//
+// Get a LinkedIn datasource.
+//
+// GET /datasource/linkedin/{uuid}
+func (UnimplementedHandler) DatasourceLinkedinGet(ctx context.Context, params DatasourceLinkedinGetParams) (r *DatasourceLinkedin, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceLinkedinList implements datasource-linkedin-list operation.
+//
+// List all LinkedIn datasources.
+//
+// GET /datasource/linkedin
+func (UnimplementedHandler) DatasourceLinkedinList(ctx context.Context, params DatasourceLinkedinListParams) (r []DatasourceLinkedin, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceLinkedinUpdate implements datasource-linkedin-update operation.
+//
+// Update a LinkedIn datasource.
+//
+// PUT /datasource/linkedin/{uuid}
+func (UnimplementedHandler) DatasourceLinkedinUpdate(ctx context.Context, req *DatasourceLinkedin, params DatasourceLinkedinUpdateParams) (r *DatasourceLinkedin, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceList implements datasource-list operation.
+//
+// Retrieve a list of datasource objects.
+//
+// GET /datasource
+func (UnimplementedHandler) DatasourceList(ctx context.Context, params DatasourceListParams) (r []Datasource, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -74,6 +128,96 @@ func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *Data
 // PUT /datasource/{uuid}/oauth2/client
 func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error {
 	return ht.ErrNotImplemented
+}
+
+// DatasourceTelegramCreate implements datasource-telegram-create operation.
+//
+// Create a new Telegram datasource.
+//
+// POST /datasource/telegram
+func (UnimplementedHandler) DatasourceTelegramCreate(ctx context.Context, req *DatasourceTelegram) (r *DatasourceTelegram, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceTelegramDelete implements datasource-telegram-delete operation.
+//
+// Delete a Telegram datasource.
+//
+// DELETE /datasource/telegram/{uuid}
+func (UnimplementedHandler) DatasourceTelegramDelete(ctx context.Context, params DatasourceTelegramDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DatasourceTelegramGet implements datasource-telegram-get operation.
+//
+// Get a Telegram datasource.
+//
+// GET /datasource/telegram/{uuid}
+func (UnimplementedHandler) DatasourceTelegramGet(ctx context.Context, params DatasourceTelegramGetParams) (r *DatasourceTelegram, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceTelegramList implements datasource-telegram-list operation.
+//
+// List all Telegram datasources.
+//
+// GET /datasource/telegram
+func (UnimplementedHandler) DatasourceTelegramList(ctx context.Context, params DatasourceTelegramListParams) (r []DatasourceTelegram, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceTelegramUpdate implements datasource-telegram-update operation.
+//
+// Update a Telegram datasource.
+//
+// PUT /datasource/telegram/{uuid}
+func (UnimplementedHandler) DatasourceTelegramUpdate(ctx context.Context, req *DatasourceTelegram, params DatasourceTelegramUpdateParams) (r *DatasourceTelegram, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceWhatsappCreate implements datasource-whatsapp-create operation.
+//
+// Create a new WhatsApp datasource.
+//
+// POST /datasource/whatsapp
+func (UnimplementedHandler) DatasourceWhatsappCreate(ctx context.Context, req *DatasourceWhatsapp) (r *DatasourceWhatsapp, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceWhatsappDelete implements datasource-whatsapp-delete operation.
+//
+// Delete a WhatsApp datasource.
+//
+// DELETE /datasource/whatsapp/{uuid}
+func (UnimplementedHandler) DatasourceWhatsappDelete(ctx context.Context, params DatasourceWhatsappDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DatasourceWhatsappGet implements datasource-whatsapp-get operation.
+//
+// Get a WhatsApp datasource.
+//
+// GET /datasource/whatsapp/{uuid}
+func (UnimplementedHandler) DatasourceWhatsappGet(ctx context.Context, params DatasourceWhatsappGetParams) (r *DatasourceWhatsapp, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceWhatsappList implements datasource-whatsapp-list operation.
+//
+// List all WhatsApp datasources.
+//
+// GET /datasource/whatsapp
+func (UnimplementedHandler) DatasourceWhatsappList(ctx context.Context, params DatasourceWhatsappListParams) (r []DatasourceWhatsapp, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceWhatsappUpdate implements datasource-whatsapp-update operation.
+//
+// Update a WhatsApp datasource.
+//
+// PUT /datasource/whatsapp/{uuid}
+func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (r *DatasourceWhatsapp, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // GenerateDownloadLink implements generateDownloadLink operation.

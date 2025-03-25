@@ -1,0 +1,63 @@
+# spec/paths/datasource_whatsapp.yaml
+get:
+  description: List all WhatsApp datasources
+  operationId: datasource-whatsapp-list
+  parameters:
+    - description: Offset records
+      explode: false
+      in: query
+      name: offset
+      schema:
+        format: int32
+        type: integer
+    - description: Limit records
+      explode: false
+      in: query
+      name: limit
+      schema:
+        format: int32
+        type: integer
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/DatasourceWhatsapp"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-whatsapp
+
+post:
+  description: Create a new WhatsApp datasource
+  operationId: datasource-whatsapp-create
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceWhatsapp"
+  responses:
+    "201":
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/DatasourceWhatsapp"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-whatsapp

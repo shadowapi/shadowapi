@@ -1,13 +1,13 @@
+# spec/paths/datasource_telegram_uuid.yaml
 get:
-  description: Get email datasources
-  operationId: datasource-email-get
+  description: Get a Telegram datasource
+  operationId: datasource-telegram-get
   parameters:
-    - description: UUID of the email datasource.
+    - description: UUID of the Telegram datasource
       in: path
       name: uuid
       required: true
       schema:
-        description: UUID of the email datasource.
         type: string
   responses:
     "200":
@@ -15,7 +15,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceTelegram"
     default:
       description: Error
       content:
@@ -24,11 +24,11 @@ get:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-telegram
 
 put:
-  description: Update an email datasource
-  operationId: datasource-email-update
+  description: Update a Telegram datasource
+  operationId: datasource-telegram-update
   parameters:
     - description: UUID of the datasource
       in: path
@@ -41,14 +41,14 @@ put:
     content:
       application/json:
         schema:
-          $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+          $ref: "../openapi.yaml#/components/schemas/DatasourceTelegram"
   responses:
     "200":
       description: OK
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/DatasourceEmail"
+            $ref: "../openapi.yaml#/components/schemas/DatasourceTelegram"
     default:
       description: Error
       content:
@@ -57,13 +57,13 @@ put:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-telegram
 
 delete:
-  description: Delete an email datasource
-  operationId: datasource-email-delete
+  description: Delete a Telegram datasource
+  operationId: datasource-telegram-delete
   parameters:
-    - description: UUID of the email datasource
+    - description: UUID of the Telegram datasource
       in: path
       name: uuid
       required: true
@@ -80,4 +80,4 @@ delete:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - datasource
-    - datasource-email
+    - datasource-telegram

@@ -10,28 +10,15 @@ import (
 )
 
 type Datasource struct {
-	UUID            uuid.UUID          `json:"uuid"`
-	UserUUID        *uuid.UUID         `json:"user_uuid"`
-	Name            string             `json:"name"`
-	Type            string             `json:"type"`
-	IsEnabled       bool               `json:"is_enabled"`
-	Oauth2ClientID  pgtype.Text        `json:"oauth2_client_id"`
-	OAuth2TokenUUID *uuid.UUID         `json:"oauth2_token_uuid"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-}
-
-type DatasourceEmail struct {
-	UUID           uuid.UUID          `json:"uuid"`
-	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
-	Email          string             `json:"email"`
-	Password       pgtype.Text        `json:"password"`
-	IMAPServer     pgtype.Text        `json:"imap_server"`
-	SMTPServer     pgtype.Text        `json:"smtp_server"`
-	SMTPTLS        pgtype.Bool        `json:"smtp_tls"`
-	Provider       string             `json:"provider"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	UUID      uuid.UUID          `json:"uuid"`
+	UserUUID  *uuid.UUID         `json:"user_uuid"`
+	Name      string             `json:"name"`
+	Type      string             `json:"type"`
+	IsEnabled bool               `json:"is_enabled"`
+	Provider  string             `json:"provider"`
+	Settings  []byte             `json:"settings"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Oauth2Client struct {

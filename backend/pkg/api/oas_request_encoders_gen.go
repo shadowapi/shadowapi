@@ -12,7 +12,7 @@ import (
 )
 
 func encodeDatasourceEmailCreateRequest(
-	req *DatasourceEmailCreate,
+	req *DatasourceEmail,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -26,7 +26,35 @@ func encodeDatasourceEmailCreateRequest(
 }
 
 func encodeDatasourceEmailUpdateRequest(
-	req *DatasourceEmailUpdate,
+	req *DatasourceEmail,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDatasourceLinkedinCreateRequest(
+	req *DatasourceLinkedin,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDatasourceLinkedinUpdateRequest(
+	req *DatasourceLinkedin,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -41,6 +69,62 @@ func encodeDatasourceEmailUpdateRequest(
 
 func encodeDatasourceSetOAuth2ClientRequest(
 	req *DatasourceSetOAuth2ClientReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDatasourceTelegramCreateRequest(
+	req *DatasourceTelegram,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDatasourceTelegramUpdateRequest(
+	req *DatasourceTelegram,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDatasourceWhatsappCreateRequest(
+	req *DatasourceWhatsapp,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDatasourceWhatsappUpdateRequest(
+	req *DatasourceWhatsapp,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

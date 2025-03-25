@@ -64,36 +64,11 @@ CREATE TABLE datasource(
   name              VARCHAR NOT NULL,
   "type"            VARCHAR NOT NULL,
   is_enabled        BOOLEAN NOT NULL,
-  oauth2_client_id  VARCHAR,
-  oauth2_token_uuid UUID,
+  provider VARCHAR NOT NULL,
+  settings          JSONB,
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE,
-
-  CONSTRAINT fk_datasource_oauth2_client_id
-  FOREIGN KEY(oauth2_client_id) REFERENCES oauth2_client("id")
-  ON DELETE SET NULL,
-
-  CONSTRAINT fk_datasource_oauth2_token_id
-  FOREIGN KEY(oauth2_token_uuid) REFERENCES oauth2_token("uuid")
-  ON DELETE SET NULL
-);
-
-CREATE TABLE datasource_email(
-  "uuid"           UUID PRIMARY KEY,
-  datasource_uuid  UUID NOT NULL,
-  email            VARCHAR NOT NULL,
-  password         VARCHAR,
-  imap_server      VARCHAR,
-  smtp_server      VARCHAR,
-  smtp_tls         BOOLEAN,
-  provider         VARCHAR NOT NULL DEFAULT 'imap',
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE,
-
-  CONSTRAINT fk_datasource_email_datasource_uuid
-  FOREIGN KEY(datasource_uuid) REFERENCES datasource("uuid") ON DELETE CASCADE
+  updated_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE pipeline(

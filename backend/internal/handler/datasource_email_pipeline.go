@@ -36,7 +36,22 @@ func (h *Handler) DatasourceEmailRunPipeline(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get connection"))
 	}
 
-	token, err := query.New(h.dbp).GetOauth2TokenByUUID(ctx, *ce.Datasource.OAuth2TokenUUID)
+	var ds api.DatasourceEmail
+	if ce.Datasource.Settings == nil {
+		h.log.Error("no settings", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("no settings"))
+	}
+	if err := json.Unmarshal(ce.Datasource.Settings, &ds); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal settings"))
+	}
+
+	tokenUUID, err := ConvertOptStringToUUID(ds.OAuth2TokenUUID)
+	if err != nil {
+		log.Error("invalid OAuth2TokenUUID", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid oauth2 token uuid"))
+	}
+
+	token, err := query.New(h.dbp).GetOauth2TokenByUUID(ctx, tokenUUID)
 	if err != nil && err != pgx.ErrNoRows {
 		h.log.Error("no such oauth2 token", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("no such oauth2 token"))
@@ -73,12 +88,12 @@ func (h *Handler) DatasourceEmailRunPipeline(
 
 	out := api.DatasourceEmailRunPipelineOK{}
 	for _, l := range listLablesResponse.Labels {
-		ml := api.MailLabel{
+		ml := api.EmailLabel{
 			ID:             api.OptString{Value: l.Id, Set: true},
 			HTTPStatusCode: int64(l.HTTPStatusCode),
-			Header:         api.MailLabelHeader(map[string][]string(l.Header)),
-			Color: api.OptMailLabelColor{
-				Value: api.MailLabelColor{
+			Header:         api.EmailLabelHeader(map[string][]string(l.Header)),
+			Color: api.OptEmailLabelColor{
+				Value: api.EmailLabelColor{
 					BackgroundColor: api.OptString{Value: l.Color.BackgroundColor, Set: true},
 					TextColor:       api.OptString{Value: l.Color.TextColor, Set: true},
 				},

@@ -5,19 +5,15 @@ properties:
   uuid:
     type: string
     readOnly: true
+  user_uuid:
+    type: string
+    readOnly: true
   name:
     type: string
   is_enabled:
     type: boolean
-  type:
-    type: string
-    default: datasource
-  user_uuid:
-    type: string
-    readOnly: true
   provider:
     type: string
-    enum: ["telegram","telegram_reactima"]
   phone_number:
     type: string
     description: The phone number for the Telegram account (international format)
@@ -37,9 +33,9 @@ properties:
       Additional Telegram bridging config from telegram.tpl.yaml 
       (proxy, concurrency, presence bridging, encryption, etc.)
   sessionHistory:
-    $ref: "../openapi.yaml#/components/schemas/telegram_session_history.yaml"
+    $ref: "./telegram_session_history.yaml"
   participants:
-    $ref: "../openapi.yaml#/components/schemas/telegram_participants.yaml"
+    $ref: "./telegram_participants.yaml"
   meta:
     type: object
     additionalProperties: true
@@ -53,10 +49,8 @@ properties:
     format: date-time
     readOnly: true
 required:
-  - uuid
   - name
-  - type
-  - is_enabled
+  - user_uuid
   - provider
   - phone_number
   - api_id
