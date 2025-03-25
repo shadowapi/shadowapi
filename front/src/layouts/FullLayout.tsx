@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { ActionButton, Flex, Heading, Item, Menu, MenuTrigger, View } from '@adobe/react-spectrum'
+import AssetsExpired from '@spectrum-icons/workflow/AssetsExpired'
 import Data from '@spectrum-icons/workflow/Data'
 import EmailGear from '@spectrum-icons/workflow/EmailGear'
 import Gears from '@spectrum-icons/workflow/Gears'
@@ -17,6 +18,7 @@ export function FullLayout({ children }: { children: ReactNode }) {
   // Main navigation items
   const navItems = [
     { Label: 'Dashboard', AriaLabel: 'Go to dashboard page', Icon: <Homepage />, URL: '/' },
+    { Label: 'Users', AriaLabel: 'Go to data users page', Icon: <User />, URL: '/users' },
     { Label: 'Data Sources', AriaLabel: 'Go to data sources page', Icon: <EmailGear />, URL: '/datasources' },
     { Label: 'Data Pipelines', AriaLabel: 'Go to data pipelines page', Icon: <Workflow />, URL: '/pipelines' },
     { Label: 'Data Storages', AriaLabel: 'Go to data storages page', Icon: <Data />, URL: '/storages' },
@@ -27,6 +29,7 @@ export function FullLayout({ children }: { children: ReactNode }) {
       URL: '/oauth2/credentials',
     },
     { Label: 'Workers', AriaLabel: 'Go to workers page', Icon: <Gears />, URL: '/workers' },
+    { Label: 'SyncPolicies', AriaLabel: 'Go to sync policies page', Icon: <AssetsExpired />, URL: '/syncpolicies' },
     { Label: 'Logs', AriaLabel: 'Go to logs page', Icon: <Organize />, URL: '/logs' },
   ]
 

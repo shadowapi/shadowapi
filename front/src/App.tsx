@@ -14,6 +14,8 @@ import {
   Pipelines,
   StorageEdit,
   Storages,
+  SyncPolicies,
+  Users,
   Workers,
 } from '@/pages'
 import { LoginPage, ProtectedRoute, SignupPage } from '@/shauth'
@@ -42,6 +44,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DataSources />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Users />
             </ProtectedRoute>
           }
         />
@@ -140,6 +150,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Workers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/syncpolicies"
+          element={
+            <ProtectedRoute>
+              <SyncPolicies />
             </ProtectedRoute>
           }
         />
