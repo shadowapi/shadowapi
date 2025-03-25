@@ -104,3 +104,16 @@ CREATE TABLE storage(
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );
+
+CREATE TABLE "sync_policy" (
+                               "uuid" UUID PRIMARY KEY,
+                               "user_id" UUID NOT NULL,
+                               "service" VARCHAR NOT NULL,
+                               "blocklist" TEXT[],
+                               "exclude_list" TEXT[],
+                               "sync_all" BOOLEAN NOT NULL,
+                               "settings" JSONB,
+                               "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                               "updated_at" TIMESTAMP WITH TIME ZONE,
+                               CONSTRAINT fk_sync_policy_user FOREIGN KEY("user_id") REFERENCES "user"("uuid") ON DELETE CASCADE
+);

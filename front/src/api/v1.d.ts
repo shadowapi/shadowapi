@@ -1237,6 +1237,10 @@ export interface components {
             exclude_list?: string[];
             /** @description Indicates whether to sync all messages from the service (true means no filtering). */
             sync_all: boolean;
+            /** @description additional key-value settings for the sync policy. */
+            settings?: {
+                [key: string]: unknown;
+            };
             /**
              * Format: date-time
              * @description Timestamp when the policy was created.

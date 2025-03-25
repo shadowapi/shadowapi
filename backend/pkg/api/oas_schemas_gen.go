@@ -3411,6 +3411,52 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
+// NewOptSyncPolicySettings returns new OptSyncPolicySettings with value set to v.
+func NewOptSyncPolicySettings(v SyncPolicySettings) OptSyncPolicySettings {
+	return OptSyncPolicySettings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSyncPolicySettings is optional SyncPolicySettings.
+type OptSyncPolicySettings struct {
+	Value SyncPolicySettings
+	Set   bool
+}
+
+// IsSet returns true if OptSyncPolicySettings was set.
+func (o OptSyncPolicySettings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSyncPolicySettings) Reset() {
+	var v SyncPolicySettings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSyncPolicySettings) SetTo(v SyncPolicySettings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSyncPolicySettings) Get() (v SyncPolicySettings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSyncPolicySettings) Or(d SyncPolicySettings) SyncPolicySettings {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptTelegramParticipantsItemMeta returns new OptTelegramParticipantsItemMeta with value set to v.
 func NewOptTelegramParticipantsItemMeta(v TelegramParticipantsItemMeta) OptTelegramParticipantsItemMeta {
 	return OptTelegramParticipantsItemMeta{
@@ -4442,6 +4488,8 @@ type SyncPolicy struct {
 	ExcludeList []string `json:"exclude_list"`
 	// Indicates whether to sync all messages from the service (true means no filtering).
 	SyncAll bool `json:"sync_all"`
+	// Additional key-value settings for the sync policy.
+	Settings OptSyncPolicySettings `json:"settings"`
 	// Timestamp when the policy was created.
 	CreatedAt time.Time `json:"created_at"`
 	// Timestamp when the policy was last updated.
@@ -4476,6 +4524,11 @@ func (s *SyncPolicy) GetExcludeList() []string {
 // GetSyncAll returns the value of SyncAll.
 func (s *SyncPolicy) GetSyncAll() bool {
 	return s.SyncAll
+}
+
+// GetSettings returns the value of Settings.
+func (s *SyncPolicy) GetSettings() OptSyncPolicySettings {
+	return s.Settings
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -4518,6 +4571,11 @@ func (s *SyncPolicy) SetSyncAll(val bool) {
 	s.SyncAll = val
 }
 
+// SetSettings sets the value of Settings.
+func (s *SyncPolicy) SetSettings(val OptSyncPolicySettings) {
+	s.Settings = val
+}
+
 // SetCreatedAt sets the value of CreatedAt.
 func (s *SyncPolicy) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
@@ -4526,6 +4584,18 @@ func (s *SyncPolicy) SetCreatedAt(val time.Time) {
 // SetUpdatedAt sets the value of UpdatedAt.
 func (s *SyncPolicy) SetUpdatedAt(val time.Time) {
 	s.UpdatedAt = val
+}
+
+// Additional key-value settings for the sync policy.
+type SyncPolicySettings map[string]jx.Raw
+
+func (s *SyncPolicySettings) init() SyncPolicySettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // SyncpolicyDeleteOK is response for SyncpolicyDelete operation.

@@ -15,6 +15,8 @@ import {
   StorageEdit,
   Storages,
   SyncPolicies,
+  SyncPolicyEdit,
+  UserEdit,
   Users,
   Workers,
 } from '@/pages'
@@ -52,6 +54,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Users />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users/add"
+          element={
+            <ProtectedRoute>
+              <UserEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users/:uuid"
+          element={
+            <ProtectedRoute>
+              <UserEdit />
             </ProtectedRoute>
           }
         />
@@ -158,6 +176,22 @@ function App() {
           element={
             <ProtectedRoute>
               <SyncPolicies />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/syncpolicy/add"
+          element={
+            <ProtectedRoute>
+              <SyncPolicyEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/syncpolicy/:uuid"
+          element={
+            <ProtectedRoute>
+              <SyncPolicyEdit />
             </ProtectedRoute>
           }
         />

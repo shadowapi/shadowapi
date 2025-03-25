@@ -87,6 +87,18 @@ type Storage struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type SyncPolicy struct {
+	UUID        uuid.UUID          `json:"uuid"`
+	UserID      pgtype.UUID        `json:"user_id"`
+	Service     string             `json:"service"`
+	Blocklist   []string           `json:"blocklist"`
+	ExcludeList []string           `json:"exclude_list"`
+	SyncAll     bool               `json:"sync_all"`
+	Settings    []byte             `json:"settings"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
 type TgAccount struct {
 	ID       int64       `json:"id"`
 	Username pgtype.Text `json:"username"`

@@ -23,6 +23,10 @@ properties:
   sync_all:
     type: boolean
     description: "Indicates whether to sync all messages from the service (true means no filtering)."
+  settings:
+    type: object
+    additionalProperties: true
+    description: "additional key-value settings for the sync policy."
   created_at:
     type: string
     format: date-time
