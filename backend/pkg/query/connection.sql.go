@@ -13,34 +13,44 @@ import (
 
 const linkDatasourceWithClient = `-- name: LinkDatasourceWithClient :exec
 UPDATE datasource
-SET settings = jsonb_set(settings, '{oauth2_client_id}', to_jsonb($1::text), true),
+SET settings = jsonb_set(
+        settings,
+        '{oauth2_client_id}',
+        to_jsonb($1::text),
+        true
+               ),
     updated_at = NOW()
 WHERE uuid = $2
 `
 
 type LinkDatasourceWithClientParams struct {
-	Column1 string    `json:"column_1"`
-	UUID    uuid.UUID `json:"uuid"`
+	Oauth2ClientID string    `json:"oauth2_client_id"`
+	UUID           uuid.UUID `json:"uuid"`
 }
 
 func (q *Queries) LinkDatasourceWithClient(ctx context.Context, arg LinkDatasourceWithClientParams) error {
-	_, err := q.db.Exec(ctx, linkDatasourceWithClient, arg.Column1, arg.UUID)
+	_, err := q.db.Exec(ctx, linkDatasourceWithClient, arg.Oauth2ClientID, arg.UUID)
 	return err
 }
 
 const linkDatasourceWithToken = `-- name: LinkDatasourceWithToken :exec
 UPDATE datasource
-SET settings = jsonb_set(settings, '{oauth2_token_uuid}', to_jsonb($1::text), true),
+SET settings = jsonb_set(
+        settings,
+        '{oauth2_token_uuid}',
+        to_jsonb($1::text),
+        true
+               ),
     updated_at = NOW()
 WHERE uuid = $2
 `
 
 type LinkDatasourceWithTokenParams struct {
-	Column1 string    `json:"column_1"`
-	UUID    uuid.UUID `json:"uuid"`
+	OAuth2TokenUUID string    `json:"oauth2_token_uuid"`
+	UUID            uuid.UUID `json:"uuid"`
 }
 
 func (q *Queries) LinkDatasourceWithToken(ctx context.Context, arg LinkDatasourceWithTokenParams) error {
-	_, err := q.db.Exec(ctx, linkDatasourceWithToken, arg.Column1, arg.UUID)
+	_, err := q.db.Exec(ctx, linkDatasourceWithToken, arg.OAuth2TokenUUID, arg.UUID)
 	return err
 }

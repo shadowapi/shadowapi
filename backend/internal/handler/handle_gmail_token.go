@@ -58,8 +58,8 @@ func (h *Handler) handleGmailToken(
 		}
 
 		err = db.LinkDatasourceWithToken(ctx, query.LinkDatasourceWithTokenParams{
-			UUID:    datasourceUUID,
-			Column1: tokenUUID.String(), // @reactima TODO how convert in sqlc and make it back as OAuth2TokenUUID, not Column1
+			UUID:            datasourceUUID,
+			OAuth2TokenUUID: tokenUUID.String(),
 		})
 		if err != nil {
 			log.Error("link datasource with token", "error", err)
