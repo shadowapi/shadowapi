@@ -146,6 +146,36 @@ type Handler interface {
 	//
 	// PUT /datasource/whatsapp/{uuid}
 	DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (*DatasourceWhatsapp, error)
+	// FileCreate implements file-create operation.
+	//
+	// Upload a new file and create its record.
+	//
+	// POST /file
+	FileCreate(ctx context.Context, req *UploadFileRequest) (*UploadFileResponse, error)
+	// FileDelete implements file-delete operation.
+	//
+	// Delete a stored file.
+	//
+	// DELETE /file/{uuid}
+	FileDelete(ctx context.Context, params FileDeleteParams) error
+	// FileGet implements file-get operation.
+	//
+	// Retrieve details of a stored file.
+	//
+	// GET /file/{uuid}
+	FileGet(ctx context.Context, params FileGetParams) (*FileObject, error)
+	// FileList implements file-list operation.
+	//
+	// Retrieve a list of stored files.
+	//
+	// GET /file
+	FileList(ctx context.Context, params FileListParams) ([]FileObject, error)
+	// FileUpdate implements file-update operation.
+	//
+	// Update metadata of a stored file.
+	//
+	// PUT /file/{uuid}
+	FileUpdate(ctx context.Context, req *FileUpdateReq, params FileUpdateParams) (*FileObject, error)
 	// GenerateDownloadLink implements generateDownloadLink operation.
 	//
 	// Generate a download link for a stored file.

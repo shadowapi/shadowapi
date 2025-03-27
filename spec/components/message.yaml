@@ -30,17 +30,11 @@ properties:
   subject:
     type: string
     description: "Subject or title of the message (applicable to emails or similar)."
-  subject_rich:
-    type: object
-    additionalProperties: true
-    description: "Rich subject will be passed from JSON object silimar to Slate.js format"
-  content:
+  body:
     type: string
     description: "Text content or body of the message."
-  content_rich:
-    type: object
-    additionalProperties: true
-    description: "Rich text content or body of the message will be passed from JSON object silimar to Slate.js format"
+  body_parsed:
+    $ref: "../openapi.yaml#/components/schemas/MessageBodyParsed"
   reactions:
     type: object
     description: "Collection of reactions (e.g., likes, emojis) applied to this message."
@@ -77,11 +71,16 @@ properties:
     format: date-time
     readOnly: true
     type: string
+  updated_at:
+    type: string
+    format: date-time
+    description: "The date and time when the message was last updated."
 
 required:
-  - id
+  - uuid
   - source
   - sender
   - recipients
-  - content
-  - timestamp
+  - body
+  - created_at
+  - updated_at

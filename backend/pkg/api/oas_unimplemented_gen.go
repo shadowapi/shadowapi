@@ -220,6 +220,51 @@ func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *D
 	return r, ht.ErrNotImplemented
 }
 
+// FileCreate implements file-create operation.
+//
+// Upload a new file and create its record.
+//
+// POST /file
+func (UnimplementedHandler) FileCreate(ctx context.Context, req *UploadFileRequest) (r *UploadFileResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// FileDelete implements file-delete operation.
+//
+// Delete a stored file.
+//
+// DELETE /file/{uuid}
+func (UnimplementedHandler) FileDelete(ctx context.Context, params FileDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// FileGet implements file-get operation.
+//
+// Retrieve details of a stored file.
+//
+// GET /file/{uuid}
+func (UnimplementedHandler) FileGet(ctx context.Context, params FileGetParams) (r *FileObject, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// FileList implements file-list operation.
+//
+// Retrieve a list of stored files.
+//
+// GET /file
+func (UnimplementedHandler) FileList(ctx context.Context, params FileListParams) (r []FileObject, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// FileUpdate implements file-update operation.
+//
+// Update metadata of a stored file.
+//
+// PUT /file/{uuid}
+func (UnimplementedHandler) FileUpdate(ctx context.Context, req *FileUpdateReq, params FileUpdateParams) (r *FileObject, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GenerateDownloadLink implements generateDownloadLink operation.
 //
 // Generate a download link for a stored file.

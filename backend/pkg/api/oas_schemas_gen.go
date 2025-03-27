@@ -1066,6 +1066,9 @@ func (s *ErrorStatusCode) SetResponse(val Error) {
 	s.Response = val
 }
 
+// FileDeleteOK is response for FileDelete operation.
+type FileDeleteOK struct{}
+
 // Represents a stored file, independent of the storage backend.
 // Ref: #/FileObject
 type FileObject struct {
@@ -1216,6 +1219,21 @@ func (s *FileObjectStorageType) UnmarshalText(data []byte) error {
 	}
 }
 
+type FileUpdateReq struct {
+	// Updated name of the file.
+	Name string `json:"name"`
+}
+
+// GetName returns the value of Name.
+func (s *FileUpdateReq) GetName() string {
+	return s.Name
+}
+
+// SetName sets the value of Name.
+func (s *FileUpdateReq) SetName(val string) {
+	s.Name = val
+}
+
 // Request to generate a download link.
 // Ref: #/GenerateDownloadLinkRequest
 type GenerateDownloadLinkRequest struct {
@@ -1264,7 +1282,7 @@ func (s *GenerateDownloadLinkResponse) SetURL(val OptString) {
 // Ref: #
 type Message struct {
 	// Unique identifier for the message.
-	UUID OptString `json:"uuid"`
+	UUID string `json:"uuid"`
 	// Data source or platform the message originated from.
 	Source MessageSource `json:"source"`
 	// Specifies the type or classification of the message.
@@ -1279,12 +1297,9 @@ type Message struct {
 	Recipients []string `json:"recipients"`
 	// Subject or title of the message (applicable to emails or similar).
 	Subject OptString `json:"subject"`
-	// Rich subject will be passed from JSON object silimar to Slate.js format.
-	SubjectRich OptMessageSubjectRich `json:"subject_rich"`
 	// Text content or body of the message.
-	Content string `json:"content"`
-	// Rich text content or body of the message will be passed from JSON object silimar to Slate.js format.
-	ContentRich OptMessageContentRich `json:"content_rich"`
+	Body       string               `json:"body"`
+	BodyParsed OptMessageBodyParsed `json:"body_parsed"`
 	// Collection of reactions (e.g., likes, emojis) applied to this message.
 	Reactions OptMessageReactions `json:"reactions"`
 	// List of file attachments associated with this message.
@@ -1302,11 +1317,13 @@ type Message struct {
 	// Additional metadata relevant to the message.
 	Meta OptMessageMeta `json:"meta"`
 	// The date and time when the object was created.
-	CreatedAt OptDateTime `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
+	// The date and time when the message was last updated.
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *Message) GetUUID() OptString {
+func (s *Message) GetUUID() string {
 	return s.UUID
 }
 
@@ -1345,19 +1362,14 @@ func (s *Message) GetSubject() OptString {
 	return s.Subject
 }
 
-// GetSubjectRich returns the value of SubjectRich.
-func (s *Message) GetSubjectRich() OptMessageSubjectRich {
-	return s.SubjectRich
+// GetBody returns the value of Body.
+func (s *Message) GetBody() string {
+	return s.Body
 }
 
-// GetContent returns the value of Content.
-func (s *Message) GetContent() string {
-	return s.Content
-}
-
-// GetContentRich returns the value of ContentRich.
-func (s *Message) GetContentRich() OptMessageContentRich {
-	return s.ContentRich
+// GetBodyParsed returns the value of BodyParsed.
+func (s *Message) GetBodyParsed() OptMessageBodyParsed {
+	return s.BodyParsed
 }
 
 // GetReactions returns the value of Reactions.
@@ -1401,12 +1413,17 @@ func (s *Message) GetMeta() OptMessageMeta {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Message) GetCreatedAt() OptDateTime {
+func (s *Message) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Message) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
 // SetUUID sets the value of UUID.
-func (s *Message) SetUUID(val OptString) {
+func (s *Message) SetUUID(val string) {
 	s.UUID = val
 }
 
@@ -1445,19 +1462,14 @@ func (s *Message) SetSubject(val OptString) {
 	s.Subject = val
 }
 
-// SetSubjectRich sets the value of SubjectRich.
-func (s *Message) SetSubjectRich(val OptMessageSubjectRich) {
-	s.SubjectRich = val
+// SetBody sets the value of Body.
+func (s *Message) SetBody(val string) {
+	s.Body = val
 }
 
-// SetContent sets the value of Content.
-func (s *Message) SetContent(val string) {
-	s.Content = val
-}
-
-// SetContentRich sets the value of ContentRich.
-func (s *Message) SetContentRich(val OptMessageContentRich) {
-	s.ContentRich = val
+// SetBodyParsed sets the value of BodyParsed.
+func (s *Message) SetBodyParsed(val OptMessageBodyParsed) {
+	s.BodyParsed = val
 }
 
 // SetReactions sets the value of Reactions.
@@ -1501,14 +1513,95 @@ func (s *Message) SetMeta(val OptMessageMeta) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Message) SetCreatedAt(val OptDateTime) {
+func (s *Message) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
-// Rich text content or body of the message will be passed from JSON object silimar to Slate.js format.
-type MessageContentRich map[string]jx.Raw
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Message) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
 
-func (s *MessageContentRich) init() MessageContentRich {
+// Ref: #
+type MessageBodyParsed struct {
+	// Plain text representation of the subject.
+	SubjectText OptString `json:"subject_text"`
+	// Slate.js JSON representation of the subject.
+	SubjectSlate OptMessageBodyParsedSubjectSlate `json:"subject_slate"`
+	// Plain text representation of the body.
+	BodyText string `json:"body_text"`
+	// Binary representation of the body (e.g., base64-encoded rich content).
+	BodyByte []byte `json:"body_byte"`
+	// Slate.js JSON representation of the message body.
+	BodySlate OptMessageBodyParsedBodySlate `json:"body_slate"`
+}
+
+// GetSubjectText returns the value of SubjectText.
+func (s *MessageBodyParsed) GetSubjectText() OptString {
+	return s.SubjectText
+}
+
+// GetSubjectSlate returns the value of SubjectSlate.
+func (s *MessageBodyParsed) GetSubjectSlate() OptMessageBodyParsedSubjectSlate {
+	return s.SubjectSlate
+}
+
+// GetBodyText returns the value of BodyText.
+func (s *MessageBodyParsed) GetBodyText() string {
+	return s.BodyText
+}
+
+// GetBodyByte returns the value of BodyByte.
+func (s *MessageBodyParsed) GetBodyByte() []byte {
+	return s.BodyByte
+}
+
+// GetBodySlate returns the value of BodySlate.
+func (s *MessageBodyParsed) GetBodySlate() OptMessageBodyParsedBodySlate {
+	return s.BodySlate
+}
+
+// SetSubjectText sets the value of SubjectText.
+func (s *MessageBodyParsed) SetSubjectText(val OptString) {
+	s.SubjectText = val
+}
+
+// SetSubjectSlate sets the value of SubjectSlate.
+func (s *MessageBodyParsed) SetSubjectSlate(val OptMessageBodyParsedSubjectSlate) {
+	s.SubjectSlate = val
+}
+
+// SetBodyText sets the value of BodyText.
+func (s *MessageBodyParsed) SetBodyText(val string) {
+	s.BodyText = val
+}
+
+// SetBodyByte sets the value of BodyByte.
+func (s *MessageBodyParsed) SetBodyByte(val []byte) {
+	s.BodyByte = val
+}
+
+// SetBodySlate sets the value of BodySlate.
+func (s *MessageBodyParsed) SetBodySlate(val OptMessageBodyParsedBodySlate) {
+	s.BodySlate = val
+}
+
+// Slate.js JSON representation of the message body.
+type MessageBodyParsedBodySlate map[string]jx.Raw
+
+func (s *MessageBodyParsedBodySlate) init() MessageBodyParsedBodySlate {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Slate.js JSON representation of the subject.
+type MessageBodyParsedSubjectSlate map[string]jx.Raw
+
+func (s *MessageBodyParsedSubjectSlate) init() MessageBodyParsedSubjectSlate {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -1934,18 +2027,6 @@ func (s *MessageSource) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
-}
-
-// Rich subject will be passed from JSON object silimar to Slate.js format.
-type MessageSubjectRich map[string]jx.Raw
-
-func (s *MessageSubjectRich) init() MessageSubjectRich {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
 }
 
 type MessageTelegramQueryOK struct {
@@ -2934,38 +3015,38 @@ func (o OptInt64) Or(d int64) int64 {
 	return d
 }
 
-// NewOptMessageContentRich returns new OptMessageContentRich with value set to v.
-func NewOptMessageContentRich(v MessageContentRich) OptMessageContentRich {
-	return OptMessageContentRich{
+// NewOptMessageBodyParsed returns new OptMessageBodyParsed with value set to v.
+func NewOptMessageBodyParsed(v MessageBodyParsed) OptMessageBodyParsed {
+	return OptMessageBodyParsed{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptMessageContentRich is optional MessageContentRich.
-type OptMessageContentRich struct {
-	Value MessageContentRich
+// OptMessageBodyParsed is optional MessageBodyParsed.
+type OptMessageBodyParsed struct {
+	Value MessageBodyParsed
 	Set   bool
 }
 
-// IsSet returns true if OptMessageContentRich was set.
-func (o OptMessageContentRich) IsSet() bool { return o.Set }
+// IsSet returns true if OptMessageBodyParsed was set.
+func (o OptMessageBodyParsed) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptMessageContentRich) Reset() {
-	var v MessageContentRich
+func (o *OptMessageBodyParsed) Reset() {
+	var v MessageBodyParsed
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptMessageContentRich) SetTo(v MessageContentRich) {
+func (o *OptMessageBodyParsed) SetTo(v MessageBodyParsed) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptMessageContentRich) Get() (v MessageContentRich, ok bool) {
+func (o OptMessageBodyParsed) Get() (v MessageBodyParsed, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -2973,7 +3054,99 @@ func (o OptMessageContentRich) Get() (v MessageContentRich, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptMessageContentRich) Or(d MessageContentRich) MessageContentRich {
+func (o OptMessageBodyParsed) Or(d MessageBodyParsed) MessageBodyParsed {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageBodyParsedBodySlate returns new OptMessageBodyParsedBodySlate with value set to v.
+func NewOptMessageBodyParsedBodySlate(v MessageBodyParsedBodySlate) OptMessageBodyParsedBodySlate {
+	return OptMessageBodyParsedBodySlate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageBodyParsedBodySlate is optional MessageBodyParsedBodySlate.
+type OptMessageBodyParsedBodySlate struct {
+	Value MessageBodyParsedBodySlate
+	Set   bool
+}
+
+// IsSet returns true if OptMessageBodyParsedBodySlate was set.
+func (o OptMessageBodyParsedBodySlate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageBodyParsedBodySlate) Reset() {
+	var v MessageBodyParsedBodySlate
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageBodyParsedBodySlate) SetTo(v MessageBodyParsedBodySlate) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageBodyParsedBodySlate) Get() (v MessageBodyParsedBodySlate, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageBodyParsedBodySlate) Or(d MessageBodyParsedBodySlate) MessageBodyParsedBodySlate {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageBodyParsedSubjectSlate returns new OptMessageBodyParsedSubjectSlate with value set to v.
+func NewOptMessageBodyParsedSubjectSlate(v MessageBodyParsedSubjectSlate) OptMessageBodyParsedSubjectSlate {
+	return OptMessageBodyParsedSubjectSlate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageBodyParsedSubjectSlate is optional MessageBodyParsedSubjectSlate.
+type OptMessageBodyParsedSubjectSlate struct {
+	Value MessageBodyParsedSubjectSlate
+	Set   bool
+}
+
+// IsSet returns true if OptMessageBodyParsedSubjectSlate was set.
+func (o OptMessageBodyParsedSubjectSlate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageBodyParsedSubjectSlate) Reset() {
+	var v MessageBodyParsedSubjectSlate
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageBodyParsedSubjectSlate) SetTo(v MessageBodyParsedSubjectSlate) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageBodyParsedSubjectSlate) Get() (v MessageBodyParsedSubjectSlate, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageBodyParsedSubjectSlate) Or(d MessageBodyParsedSubjectSlate) MessageBodyParsedSubjectSlate {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -3204,52 +3377,6 @@ func (o OptMessageReactions) Get() (v MessageReactions, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageReactions) Or(d MessageReactions) MessageReactions {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptMessageSubjectRich returns new OptMessageSubjectRich with value set to v.
-func NewOptMessageSubjectRich(v MessageSubjectRich) OptMessageSubjectRich {
-	return OptMessageSubjectRich{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptMessageSubjectRich is optional MessageSubjectRich.
-type OptMessageSubjectRich struct {
-	Value MessageSubjectRich
-	Set   bool
-}
-
-// IsSet returns true if OptMessageSubjectRich was set.
-func (o OptMessageSubjectRich) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptMessageSubjectRich) Reset() {
-	var v MessageSubjectRich
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptMessageSubjectRich) SetTo(v MessageSubjectRich) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptMessageSubjectRich) Get() (v MessageSubjectRich, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptMessageSubjectRich) Or(d MessageSubjectRich) MessageSubjectRich {
 	if v, ok := o.Get(); ok {
 		return v
 	}

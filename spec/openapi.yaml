@@ -43,6 +43,8 @@ components:
       $ref: "components/email_label.yaml"
     Message:
       $ref: "components/message.yaml"
+    MessageBodyParsed:
+      $ref: "components/message_body_parsed.yaml"
     MessageQuery:
       $ref: "components/message_query.yaml"
     FileObject:
@@ -120,6 +122,10 @@ paths:
     $ref: "paths/pipeline_uuid_entry.yaml"
   /pipeline/{uuid}/entry/{entry_uuid}:
     $ref: "paths/pipeline_uuid_entry_uuid.yaml"
+  /file:
+    $ref: "paths/file.yaml"
+  /file/{uuid}:
+    $ref: "paths/file_uuid.yaml"
   /storage:
     $ref: "paths/storage.yaml"
   /storage/postgres:

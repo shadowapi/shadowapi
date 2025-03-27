@@ -1,0 +1,79 @@
+get:
+  description: Retrieve details of a stored file.
+  operationId: file-get
+  parameters:
+    - description: UUID of the file.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: File details retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/FileObject"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  description: Update metadata of a stored file.
+  operationId: file-update
+  parameters:
+    - description: UUID of the file.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  requestBody:
+    description: Updated file metadata.
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              description: Updated name of the file.
+              type: string
+          required:
+            - name
+  responses:
+    "200":
+      description: File metadata updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/FileObject"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  description: Delete a stored file.
+  operationId: file-delete
+  parameters:
+    - description: UUID of the file.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: File deleted successfully.
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

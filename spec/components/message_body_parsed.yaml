@@ -1,0 +1,23 @@
+type: object
+additionalProperties: false
+properties:
+  subject_text:
+    type: string
+    description: "Plain text representation of the subject."
+  subject_slate:
+    type: object
+    description: "Slate.js JSON representation of the subject."
+    additionalProperties: true
+  body_text:
+    type: string
+    description: "Plain text representation of the body."
+  body_byte:
+    type: string
+    format: byte
+    description: "Binary representation of the body (e.g., base64-encoded rich content)."
+  body_slate:
+    type: object
+    description: "Slate.js JSON representation of the message body."
+    additionalProperties: true
+required:
+  - body_text

@@ -1,0 +1,54 @@
+get:
+  description: Retrieve a list of stored files.
+  operationId: file-list
+  parameters:
+    - description: The number of records to skip for pagination.
+      in: query
+      name: offset
+      schema:
+        type: integer
+        format: int32
+    - description: The maximum number of records to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        format: int32
+  responses:
+    "200":
+      description: A list of file objects.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/FileObject"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+post:
+  description: Upload a new file and create its record.
+  operationId: file-create
+  requestBody:
+    description: File upload request.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UploadFileRequest"
+  responses:
+    "201":
+      description: File uploaded successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UploadFileResponse"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

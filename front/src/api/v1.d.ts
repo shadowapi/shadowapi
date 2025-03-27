@@ -399,6 +399,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve a list of stored files. */
+        get: operations["file-list"];
+        put?: never;
+        /** @description Upload a new file and create its record. */
+        post: operations["file-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/file/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve details of a stored file. */
+        get: operations["file-get"];
+        /** @description Update metadata of a stored file. */
+        put: operations["file-update"];
+        post?: never;
+        /** @description Delete a stored file. */
+        delete: operations["file-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/storage": {
         parameters: {
             query?: never;
@@ -737,6 +774,7 @@ export interface components {
         StorageHostFiles: components["schemas"]["storage_hostfiles"];
         EmailLabel: components["schemas"]["email_label"];
         Message: components["schemas"]["message"];
+        MessageBodyParsed: components["schemas"]["message_body_parsed"];
         MessageQuery: components["schemas"]["message_query"];
         /** @description Represents a stored file, independent of the storage backend. */
         FileObject: {
@@ -1163,9 +1201,28 @@ export interface components {
             /** @description Enable fuzzy matching if true. */
             fuzzy?: boolean;
         };
+        message_body_parsed: {
+            /** @description Plain text representation of the subject. */
+            subject_text?: string;
+            /** @description Slate.js JSON representation of the subject. */
+            subject_slate?: {
+                [key: string]: unknown;
+            };
+            /** @description Plain text representation of the body. */
+            body_text: string;
+            /**
+             * Format: byte
+             * @description Binary representation of the body (e.g., base64-encoded rich content).
+             */
+            body_byte?: string;
+            /** @description Slate.js JSON representation of the message body. */
+            body_slate?: {
+                [key: string]: unknown;
+            };
+        };
         message: {
             /** @description Unique identifier for the message. */
-            uuid?: string;
+            uuid: string;
             /**
              * @description Data source or platform the message originated from.
              * @enum {string}
@@ -1186,16 +1243,9 @@ export interface components {
             recipients: string[];
             /** @description Subject or title of the message (applicable to emails or similar). */
             subject?: string;
-            /** @description Rich subject will be passed from JSON object silimar to Slate.js format */
-            subject_rich?: {
-                [key: string]: unknown;
-            };
             /** @description Text content or body of the message. */
-            content: string;
-            /** @description Rich text content or body of the message will be passed from JSON object silimar to Slate.js format */
-            content_rich?: {
-                [key: string]: unknown;
-            };
+            body: string;
+            body_parsed?: components["schemas"]["message_body_parsed"];
             /** @description Collection of reactions (e.g., likes, emojis) applied to this message. */
             reactions?: {
                 [key: string]: number;
@@ -1222,7 +1272,12 @@ export interface components {
              * Format: date-time
              * @description The date and time when the object was created.
              */
-            readonly created_at?: string;
+            readonly created_at: string;
+            /**
+             * Format: date-time
+             * @description The date and time when the message was last updated.
+             */
+            updated_at: string;
         };
         sync_policy: {
             /** @description Unique identifier for the sync policy. */
@@ -2739,6 +2794,176 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "file-list": {
+        parameters: {
+            query?: {
+                /** @description The number of records to skip for pagination. */
+                offset?: number;
+                /** @description The maximum number of records to return. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of file objects. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileObject"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "file-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description File upload request. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadFileRequest"];
+            };
+        };
+        responses: {
+            /** @description File uploaded successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadFileResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "file-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the file. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File details retrieved successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileObject"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "file-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the file. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        /** @description Updated file metadata. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Updated name of the file. */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description File metadata updated successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileObject"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "file-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the file. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File deleted successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;

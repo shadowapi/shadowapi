@@ -403,6 +403,66 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'f': // Prefix: "file"
+				origElem := elem
+				if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
+					case "GET":
+						s.handleFileListRequest([0]string{}, elemIsEscaped, w, r)
+					case "POST":
+						s.handleFileCreateRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET,POST")
+					}
+
+					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "DELETE":
+							s.handleFileDeleteRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "GET":
+							s.handleFileGetRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "PUT":
+							s.handleFileUpdateRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "DELETE,GET,PUT")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'm': // Prefix: "message/"
 				origElem := elem
 				if l := len("message/"); len(elem) >= l && elem[0:l] == "message/" {
@@ -1771,6 +1831,86 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'f': // Prefix: "file"
+				origElem := elem
+				if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						r.name = FileListOperation
+						r.summary = ""
+						r.operationID = "file-list"
+						r.pathPattern = "/file"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "POST":
+						r.name = FileCreateOperation
+						r.summary = ""
+						r.operationID = "file-create"
+						r.pathPattern = "/file"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "DELETE":
+							r.name = FileDeleteOperation
+							r.summary = ""
+							r.operationID = "file-delete"
+							r.pathPattern = "/file/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "GET":
+							r.name = FileGetOperation
+							r.summary = ""
+							r.operationID = "file-get"
+							r.pathPattern = "/file/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "PUT":
+							r.name = FileUpdateOperation
+							r.summary = ""
+							r.operationID = "file-update"
+							r.pathPattern = "/file/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
 					}
 
 					elem = origElem
