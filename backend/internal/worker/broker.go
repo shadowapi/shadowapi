@@ -2,18 +2,17 @@ package worker
 
 import (
 	"context"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
+
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
-
-	// Import the jobs package.
 	"github.com/shadowapi/shadowapi/backend/internal/worker/jobs"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/pipelines"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 )
 
 type Broker struct {
