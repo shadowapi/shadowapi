@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// CreateContact implements createContact operation.
+	//
+	// Create a new contact record.
+	//
+	// POST /contact
+	CreateContact(ctx context.Context, req *Contact) (*Contact, error)
 	// DatasourceEmailCreate implements datasource-email-create operation.
 	//
 	// Create a new email datasource.
@@ -146,6 +152,12 @@ type Handler interface {
 	//
 	// PUT /datasource/whatsapp/{uuid}
 	DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (*DatasourceWhatsapp, error)
+	// DeleteContact implements deleteContact operation.
+	//
+	// Delete a contact record.
+	//
+	// DELETE /contact/{uuid}
+	DeleteContact(ctx context.Context, params DeleteContactParams) error
 	// FileCreate implements file-create operation.
 	//
 	// Upload a new file and create its record.
@@ -188,6 +200,18 @@ type Handler interface {
 	//
 	// POST /storage/upload-url
 	GeneratePresignedUploadUrl(ctx context.Context, req *UploadPresignedUrlRequest) (*UploadPresignedUrlResponse, error)
+	// GetContact implements getContact operation.
+	//
+	// Get contact details.
+	//
+	// GET /contact/{uuid}
+	GetContact(ctx context.Context, params GetContactParams) (*Contact, error)
+	// ListContacts implements listContacts operation.
+	//
+	// List all contacts.
+	//
+	// GET /contact
+	ListContacts(ctx context.Context) ([]Contact, error)
 	// MessageEmailQuery implements messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
@@ -458,6 +482,12 @@ type Handler interface {
 	//
 	// PUT /telegram/{id}
 	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (*Telegram, error)
+	// UpdateContact implements updateContact operation.
+	//
+	// Update contact details.
+	//
+	// PUT /contact/{uuid}
+	UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (*Contact, error)
 	// UploadFile implements uploadFile operation.
 	//
 	// Upload a file.

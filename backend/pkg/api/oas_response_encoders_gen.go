@@ -15,6 +15,20 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+func encodeCreateContactResponse(response *Contact, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+	span.SetStatus(codes.Ok, http.StatusText(201))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeDatasourceEmailCreateResponse(response *DatasourceEmail, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
@@ -322,6 +336,13 @@ func encodeDatasourceWhatsappUpdateResponse(response *DatasourceWhatsapp, w http
 	return nil
 }
 
+func encodeDeleteContactResponse(response *DeleteContactOK, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	return nil
+}
+
 func encodeFileCreateResponse(response *UploadFileResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
@@ -410,6 +431,38 @@ func encodeGeneratePresignedUploadUrlResponse(response *UploadPresignedUrlRespon
 
 	e := new(jx.Encoder)
 	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetContactResponse(response *Contact, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListContactsResponse(response []Contact, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
@@ -1002,6 +1055,20 @@ func encodeTgSessionListResponse(response *TgSessionListOK, w http.ResponseWrite
 }
 
 func encodeTgSessionVerifyResponse(response *Telegram, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateContactResponse(response *Contact, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

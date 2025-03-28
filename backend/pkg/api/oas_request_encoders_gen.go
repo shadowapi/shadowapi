@@ -11,6 +11,20 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeCreateContactRequest(
+	req *Contact,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDatasourceEmailCreateRequest(
 	req *DatasourceEmail,
 	r *http.Request,
@@ -475,6 +489,20 @@ func encodeTgSessionCreateRequest(
 
 func encodeTgSessionVerifyRequest(
 	req *TgSessionVerifyReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateContactRequest(
+	req *Contact,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

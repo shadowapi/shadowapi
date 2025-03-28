@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// CreateContact implements createContact operation.
+//
+// Create a new contact record.
+//
+// POST /contact
+func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r *Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DatasourceEmailCreate implements datasource-email-create operation.
 //
 // Create a new email datasource.
@@ -220,6 +229,15 @@ func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *D
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteContact implements deleteContact operation.
+//
+// Delete a contact record.
+//
+// DELETE /contact/{uuid}
+func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteContactParams) error {
+	return ht.ErrNotImplemented
+}
+
 // FileCreate implements file-create operation.
 //
 // Upload a new file and create its record.
@@ -280,6 +298,24 @@ func (UnimplementedHandler) GenerateDownloadLink(ctx context.Context, req *Gener
 //
 // POST /storage/upload-url
 func (UnimplementedHandler) GeneratePresignedUploadUrl(ctx context.Context, req *UploadPresignedUrlRequest) (r *UploadPresignedUrlResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetContact implements getContact operation.
+//
+// Get contact details.
+//
+// GET /contact/{uuid}
+func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactParams) (r *Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListContacts implements listContacts operation.
+//
+// List all contacts.
+//
+// GET /contact
+func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -685,6 +721,15 @@ func (UnimplementedHandler) TgSessionList(ctx context.Context) (r *TgSessionList
 //
 // PUT /telegram/{id}
 func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (r *Telegram, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateContact implements updateContact operation.
+//
+// Update contact details.
+//
+// PUT /contact/{uuid}
+func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (r *Contact, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

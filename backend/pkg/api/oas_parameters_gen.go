@@ -1524,6 +1524,71 @@ func decodeDatasourceWhatsappUpdateParams(args [1]string, argsEscaped bool, r *h
 	return params, nil
 }
 
+// DeleteContactParams is parameters of deleteContact operation.
+type DeleteContactParams struct {
+	UUID string
+}
+
+func unpackDeleteContactParams(packed middleware.Parameters) (params DeleteContactParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeleteContactParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteContactParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // FileDeleteParams is parameters of file-delete operation.
 type FileDeleteParams struct {
 	// UUID of the file.
@@ -1791,6 +1856,71 @@ func unpackFileUpdateParams(packed middleware.Parameters) (params FileUpdatePara
 }
 
 func decodeFileUpdateParams(args [1]string, argsEscaped bool, r *http.Request) (params FileUpdateParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetContactParams is parameters of getContact operation.
+type GetContactParams struct {
+	UUID string
+}
+
+func unpackGetContactParams(packed middleware.Parameters) (params GetContactParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetContactParams(args [1]string, argsEscaped bool, r *http.Request) (params GetContactParams, _ error) {
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
@@ -4349,6 +4479,71 @@ func decodeTgSessionVerifyParams(args [1]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateContactParams is parameters of updateContact operation.
+type UpdateContactParams struct {
+	UUID string
+}
+
+func unpackUpdateContactParams(packed middleware.Parameters) (params UpdateContactParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateContactParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateContactParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
 			In:   "path",
 			Err:  err,
 		}

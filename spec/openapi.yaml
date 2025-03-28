@@ -41,6 +41,8 @@ components:
       $ref: "components/storage_hostfiles.yaml"
     EmailLabel:
       $ref: "components/email_label.yaml"
+    Contact:
+      $ref: "components/contact.yaml"
     Message:
       $ref: "components/message.yaml"
     MessageBodyParsed:
@@ -162,6 +164,10 @@ paths:
     $ref: "paths/sync_policy.yaml"
   /syncpolicy/{uuid}:
     $ref: "paths/sync_policy_by_uuid.yaml"
+  /contact:
+    $ref: "paths/contact.yaml"
+  /contact/{uuid}:
+    $ref: "paths/contact_uuid.yaml"
 
 
 servers:

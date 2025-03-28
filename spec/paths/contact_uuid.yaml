@@ -1,0 +1,69 @@
+# spec/paths/contact_uuid.yaml
+get:
+  summary: Get contact details
+  operationId: getContact
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Contact details retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Contact"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  summary: Update contact details
+  operationId: updateContact
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Contact"
+  responses:
+    "200":
+      description: Contact updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Contact"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Delete a contact record
+  operationId: deleteContact
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Contact deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

@@ -6,6 +6,7 @@ package api
 type OperationName = string
 
 const (
+	CreateContactOperation              OperationName = "CreateContact"
 	DatasourceEmailCreateOperation      OperationName = "DatasourceEmailCreate"
 	DatasourceEmailDeleteOperation      OperationName = "DatasourceEmailDelete"
 	DatasourceEmailGetOperation         OperationName = "DatasourceEmailGet"
@@ -29,6 +30,7 @@ const (
 	DatasourceWhatsappGetOperation      OperationName = "DatasourceWhatsappGet"
 	DatasourceWhatsappListOperation     OperationName = "DatasourceWhatsappList"
 	DatasourceWhatsappUpdateOperation   OperationName = "DatasourceWhatsappUpdate"
+	DeleteContactOperation              OperationName = "DeleteContact"
 	FileCreateOperation                 OperationName = "FileCreate"
 	FileDeleteOperation                 OperationName = "FileDelete"
 	FileGetOperation                    OperationName = "FileGet"
@@ -36,6 +38,8 @@ const (
 	FileUpdateOperation                 OperationName = "FileUpdate"
 	GenerateDownloadLinkOperation       OperationName = "GenerateDownloadLink"
 	GeneratePresignedUploadUrlOperation OperationName = "GeneratePresignedUploadUrl"
+	GetContactOperation                 OperationName = "GetContact"
+	ListContactsOperation               OperationName = "ListContacts"
 	MessageEmailQueryOperation          OperationName = "MessageEmailQuery"
 	MessageLinkedinQueryOperation       OperationName = "MessageLinkedinQuery"
 	MessageTelegramQueryOperation       OperationName = "MessageTelegramQuery"
@@ -81,5 +85,6 @@ const (
 	TgSessionCreateOperation            OperationName = "TgSessionCreate"
 	TgSessionListOperation              OperationName = "TgSessionList"
 	TgSessionVerifyOperation            OperationName = "TgSessionVerify"
+	UpdateContactOperation              OperationName = "UpdateContact"
 	UploadFileOperation                 OperationName = "UploadFile"
 )

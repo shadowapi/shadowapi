@@ -1,0 +1,41 @@
+# spec/paths/contact.yaml
+get:
+  summary: List all contacts
+  operationId: listContacts
+  responses:
+    "200":
+      description: List of contacts
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Contact"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+post:
+  summary: Create a new contact record
+  operationId: createContact
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Contact"
+  responses:
+    "201":
+      description: Contact created successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Contact"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

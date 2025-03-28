@@ -30,6 +30,1506 @@ func (s *BearerAuth) SetToken(val string) {
 }
 
 // Ref: #
+type Contact struct {
+	UUID                    OptString               `json:"uuid"`
+	UserUUID                OptString               `json:"user_uuid"`
+	InstanceUUID            OptString               `json:"instance_uuid"`
+	Status                  OptString               `json:"status"`
+	Names                   OptContactNames         `json:"names"`
+	NamesSearch             OptString               `json:"namesSearch"`
+	Last                    OptString               `json:"last"`
+	First                   OptString               `json:"first"`
+	Middle                  OptString               `json:"middle"`
+	Birthday                OptDateTime             `json:"birthday"`
+	BirthdayType            OptString               `json:"birthdayType"`
+	Salary                  OptString               `json:"salary"`
+	SalaryData              OptContactSalaryData    `json:"salaryData"`
+	LastPositions           OptContactLastPositions `json:"lastPositions"`
+	LastPositionID          OptInt64                `json:"lastPositionID"`
+	LastPositionCompanyID   OptInt64                `json:"lastPositionCompanyID"`
+	LastPositionCompanyName OptString               `json:"lastPositionCompanyName"`
+	LastPositionTitle       OptString               `json:"lastPositionTitle"`
+	LastPositionStartDate   OptDateTime             `json:"lastPositionStartDate"`
+	LastPositionEndDate     OptDateTime             `json:"lastPositionEndDate"`
+	LastPositionEndNow      OptBool                 `json:"lastPositionEndNow"`
+	LastPositionDescription OptString               `json:"lastPositionDescription"`
+	NoteSearch              OptString               `json:"noteSearch"`
+	NoteKpiID               OptContactNoteKpiID     `json:"noteKpiID"`
+	Phones                  OptContactPhones        `json:"phones"`
+	PhoneSearch             OptString               `json:"phoneSearch"`
+	Phone1                  OptString               `json:"phone1"`
+	Phone1Type              OptString               `json:"phone1Type"`
+	Phone1Country           OptString               `json:"phone1Country"`
+	Phone2                  OptString               `json:"phone2"`
+	Phone2Type              OptString               `json:"phone2Type"`
+	Phone2Country           OptString               `json:"phone2Country"`
+	Phone3                  OptString               `json:"phone3"`
+	Phone3Type              OptString               `json:"phone3Type"`
+	Phone3Country           OptString               `json:"phone3Country"`
+	Phone4                  OptString               `json:"phone4"`
+	Phone4Type              OptString               `json:"phone4Type"`
+	Phone4Country           OptString               `json:"phone4Country"`
+	Phone5                  OptString               `json:"phone5"`
+	Phone5Type              OptString               `json:"phone5Type"`
+	Phone5Country           OptString               `json:"phone5Country"`
+	Emails                  OptContactEmails        `json:"emails"`
+	EmailSearch             OptString               `json:"emailSearch"`
+	Email1                  OptString               `json:"email1"`
+	Email1Type              OptString               `json:"email1Type"`
+	Email2                  OptString               `json:"email2"`
+	Email2Type              OptString               `json:"email2Type"`
+	Email3                  OptString               `json:"email3"`
+	Email3Type              OptString               `json:"email3Type"`
+	Email4                  OptString               `json:"email4"`
+	Email4Type              OptString               `json:"email4Type"`
+	Email5                  OptString               `json:"email5"`
+	Email5Type              OptString               `json:"email5Type"`
+	Messengers              OptContactMessengers    `json:"messengers"`
+	MessengersSearch        OptString               `json:"messengersSearch"`
+	SkypeUUID               OptString               `json:"skypeUUID"`
+	Skype                   OptString               `json:"skype"`
+	WhatsappUUID            OptString               `json:"whatsappUUID"`
+	Whatsapp                OptString               `json:"whatsapp"`
+	TelegramUUID            OptString               `json:"telegramUUID"`
+	Telegram                OptString               `json:"telegram"`
+	WechatUUID              OptString               `json:"wechatUUID"`
+	Wechat                  OptString               `json:"wechat"`
+	LineUUID                OptString               `json:"lineUUID"`
+	Line                    OptString               `json:"line"`
+	Socials                 OptContactSocials       `json:"socials"`
+	SocialsSearch           OptString               `json:"socialsSearch"`
+	LinkedinUUID            OptString               `json:"linkedinUUID"`
+	LinkedinURL             OptString               `json:"linkedinURL"`
+	FacebookUUID            OptString               `json:"facebookUUID"`
+	FacebookURL             OptString               `json:"facebookURL"`
+	TwitterUUID             OptString               `json:"twitterUUID"`
+	TwitterURL              OptString               `json:"twitterURL"`
+	GithubUUID              OptString               `json:"githubUUID"`
+	GithubURL               OptString               `json:"githubURL"`
+	VkUUID                  OptString               `json:"vkUUID"`
+	VkURL                   OptString               `json:"vkURL"`
+	OdnoUUID                OptString               `json:"odnoUUID"`
+	OdnoURL                 OptString               `json:"odnoURL"`
+	HhruUUID                OptString               `json:"hhruUUID"`
+	HhruURL                 OptString               `json:"hhruURL"`
+	HabrUUID                OptString               `json:"habrUUID"`
+	HabrURL                 OptString               `json:"habrURL"`
+	MoikrugUUID             OptString               `json:"moikrugUUID"`
+	MoikrugURL              OptString               `json:"moikrugURL"`
+	InstagramUUID           OptString               `json:"instagramUUID"`
+	InstagramURL            OptString               `json:"instagramURL"`
+	Social1UUID             OptString               `json:"social1UUID"`
+	Social1URL              OptString               `json:"social1URL"`
+	Social1Type             OptString               `json:"social1Type"`
+	Social2UUID             OptString               `json:"social2UUID"`
+	Social2URL              OptString               `json:"social2URL"`
+	Social2Type             OptString               `json:"social2Type"`
+	Social3UUID             OptString               `json:"social3UUID"`
+	Social3URL              OptString               `json:"social3URL"`
+	Social3Type             OptString               `json:"social3Type"`
+	Social4UUID             OptString               `json:"social4UUID"`
+	Social4URL              OptString               `json:"social4URL"`
+	Social4Type             OptString               `json:"social4Type"`
+	Social5UUID             OptString               `json:"social5UUID"`
+	Social5URL              OptString               `json:"social5URL"`
+	Social5Type             OptString               `json:"social5Type"`
+	Social6UUID             OptString               `json:"social6UUID"`
+	Social6URL              OptString               `json:"social6URL"`
+	Social6Type             OptString               `json:"social6Type"`
+	Social7UUID             OptString               `json:"social7UUID"`
+	Social7URL              OptString               `json:"social7URL"`
+	Social7Type             OptString               `json:"social7Type"`
+	Social8UUID             OptString               `json:"social8UUID"`
+	Social8URL              OptString               `json:"social8URL"`
+	Social8Type             OptString               `json:"social8Type"`
+	Social9UUID             OptString               `json:"social9UUID"`
+	Social9URL              OptString               `json:"social9URL"`
+	Social9Type             OptString               `json:"social9Type"`
+	TrackingSource          OptString               `json:"trackingSource"`
+	TrackingSlug            OptString               `json:"trackingSlug"`
+	CachedImg               OptString               `json:"cachedImg"`
+	CachedImgData           OptContactCachedImgData `json:"cachedImgData"`
+	Crawl                   OptContactCrawl         `json:"crawl"`
+	DuplicateUserID         OptString               `json:"duplicateUserID"`
+	DuplicateAlternativeID  OptString               `json:"duplicateAlternativeID"`
+	DuplicateReportDate     OptDateTime             `json:"duplicateReportDate"`
+	EntryDate               OptDateTime             `json:"entryDate"`
+	EditDate                OptDateTime             `json:"editDate"`
+	LastKPIEntryDate        OptDateTime             `json:"lastKPIEntryDate"`
+	Score100                OptInt                  `json:"score100"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *Contact) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *Contact) GetUserUUID() OptString {
+	return s.UserUUID
+}
+
+// GetInstanceUUID returns the value of InstanceUUID.
+func (s *Contact) GetInstanceUUID() OptString {
+	return s.InstanceUUID
+}
+
+// GetStatus returns the value of Status.
+func (s *Contact) GetStatus() OptString {
+	return s.Status
+}
+
+// GetNames returns the value of Names.
+func (s *Contact) GetNames() OptContactNames {
+	return s.Names
+}
+
+// GetNamesSearch returns the value of NamesSearch.
+func (s *Contact) GetNamesSearch() OptString {
+	return s.NamesSearch
+}
+
+// GetLast returns the value of Last.
+func (s *Contact) GetLast() OptString {
+	return s.Last
+}
+
+// GetFirst returns the value of First.
+func (s *Contact) GetFirst() OptString {
+	return s.First
+}
+
+// GetMiddle returns the value of Middle.
+func (s *Contact) GetMiddle() OptString {
+	return s.Middle
+}
+
+// GetBirthday returns the value of Birthday.
+func (s *Contact) GetBirthday() OptDateTime {
+	return s.Birthday
+}
+
+// GetBirthdayType returns the value of BirthdayType.
+func (s *Contact) GetBirthdayType() OptString {
+	return s.BirthdayType
+}
+
+// GetSalary returns the value of Salary.
+func (s *Contact) GetSalary() OptString {
+	return s.Salary
+}
+
+// GetSalaryData returns the value of SalaryData.
+func (s *Contact) GetSalaryData() OptContactSalaryData {
+	return s.SalaryData
+}
+
+// GetLastPositions returns the value of LastPositions.
+func (s *Contact) GetLastPositions() OptContactLastPositions {
+	return s.LastPositions
+}
+
+// GetLastPositionID returns the value of LastPositionID.
+func (s *Contact) GetLastPositionID() OptInt64 {
+	return s.LastPositionID
+}
+
+// GetLastPositionCompanyID returns the value of LastPositionCompanyID.
+func (s *Contact) GetLastPositionCompanyID() OptInt64 {
+	return s.LastPositionCompanyID
+}
+
+// GetLastPositionCompanyName returns the value of LastPositionCompanyName.
+func (s *Contact) GetLastPositionCompanyName() OptString {
+	return s.LastPositionCompanyName
+}
+
+// GetLastPositionTitle returns the value of LastPositionTitle.
+func (s *Contact) GetLastPositionTitle() OptString {
+	return s.LastPositionTitle
+}
+
+// GetLastPositionStartDate returns the value of LastPositionStartDate.
+func (s *Contact) GetLastPositionStartDate() OptDateTime {
+	return s.LastPositionStartDate
+}
+
+// GetLastPositionEndDate returns the value of LastPositionEndDate.
+func (s *Contact) GetLastPositionEndDate() OptDateTime {
+	return s.LastPositionEndDate
+}
+
+// GetLastPositionEndNow returns the value of LastPositionEndNow.
+func (s *Contact) GetLastPositionEndNow() OptBool {
+	return s.LastPositionEndNow
+}
+
+// GetLastPositionDescription returns the value of LastPositionDescription.
+func (s *Contact) GetLastPositionDescription() OptString {
+	return s.LastPositionDescription
+}
+
+// GetNoteSearch returns the value of NoteSearch.
+func (s *Contact) GetNoteSearch() OptString {
+	return s.NoteSearch
+}
+
+// GetNoteKpiID returns the value of NoteKpiID.
+func (s *Contact) GetNoteKpiID() OptContactNoteKpiID {
+	return s.NoteKpiID
+}
+
+// GetPhones returns the value of Phones.
+func (s *Contact) GetPhones() OptContactPhones {
+	return s.Phones
+}
+
+// GetPhoneSearch returns the value of PhoneSearch.
+func (s *Contact) GetPhoneSearch() OptString {
+	return s.PhoneSearch
+}
+
+// GetPhone1 returns the value of Phone1.
+func (s *Contact) GetPhone1() OptString {
+	return s.Phone1
+}
+
+// GetPhone1Type returns the value of Phone1Type.
+func (s *Contact) GetPhone1Type() OptString {
+	return s.Phone1Type
+}
+
+// GetPhone1Country returns the value of Phone1Country.
+func (s *Contact) GetPhone1Country() OptString {
+	return s.Phone1Country
+}
+
+// GetPhone2 returns the value of Phone2.
+func (s *Contact) GetPhone2() OptString {
+	return s.Phone2
+}
+
+// GetPhone2Type returns the value of Phone2Type.
+func (s *Contact) GetPhone2Type() OptString {
+	return s.Phone2Type
+}
+
+// GetPhone2Country returns the value of Phone2Country.
+func (s *Contact) GetPhone2Country() OptString {
+	return s.Phone2Country
+}
+
+// GetPhone3 returns the value of Phone3.
+func (s *Contact) GetPhone3() OptString {
+	return s.Phone3
+}
+
+// GetPhone3Type returns the value of Phone3Type.
+func (s *Contact) GetPhone3Type() OptString {
+	return s.Phone3Type
+}
+
+// GetPhone3Country returns the value of Phone3Country.
+func (s *Contact) GetPhone3Country() OptString {
+	return s.Phone3Country
+}
+
+// GetPhone4 returns the value of Phone4.
+func (s *Contact) GetPhone4() OptString {
+	return s.Phone4
+}
+
+// GetPhone4Type returns the value of Phone4Type.
+func (s *Contact) GetPhone4Type() OptString {
+	return s.Phone4Type
+}
+
+// GetPhone4Country returns the value of Phone4Country.
+func (s *Contact) GetPhone4Country() OptString {
+	return s.Phone4Country
+}
+
+// GetPhone5 returns the value of Phone5.
+func (s *Contact) GetPhone5() OptString {
+	return s.Phone5
+}
+
+// GetPhone5Type returns the value of Phone5Type.
+func (s *Contact) GetPhone5Type() OptString {
+	return s.Phone5Type
+}
+
+// GetPhone5Country returns the value of Phone5Country.
+func (s *Contact) GetPhone5Country() OptString {
+	return s.Phone5Country
+}
+
+// GetEmails returns the value of Emails.
+func (s *Contact) GetEmails() OptContactEmails {
+	return s.Emails
+}
+
+// GetEmailSearch returns the value of EmailSearch.
+func (s *Contact) GetEmailSearch() OptString {
+	return s.EmailSearch
+}
+
+// GetEmail1 returns the value of Email1.
+func (s *Contact) GetEmail1() OptString {
+	return s.Email1
+}
+
+// GetEmail1Type returns the value of Email1Type.
+func (s *Contact) GetEmail1Type() OptString {
+	return s.Email1Type
+}
+
+// GetEmail2 returns the value of Email2.
+func (s *Contact) GetEmail2() OptString {
+	return s.Email2
+}
+
+// GetEmail2Type returns the value of Email2Type.
+func (s *Contact) GetEmail2Type() OptString {
+	return s.Email2Type
+}
+
+// GetEmail3 returns the value of Email3.
+func (s *Contact) GetEmail3() OptString {
+	return s.Email3
+}
+
+// GetEmail3Type returns the value of Email3Type.
+func (s *Contact) GetEmail3Type() OptString {
+	return s.Email3Type
+}
+
+// GetEmail4 returns the value of Email4.
+func (s *Contact) GetEmail4() OptString {
+	return s.Email4
+}
+
+// GetEmail4Type returns the value of Email4Type.
+func (s *Contact) GetEmail4Type() OptString {
+	return s.Email4Type
+}
+
+// GetEmail5 returns the value of Email5.
+func (s *Contact) GetEmail5() OptString {
+	return s.Email5
+}
+
+// GetEmail5Type returns the value of Email5Type.
+func (s *Contact) GetEmail5Type() OptString {
+	return s.Email5Type
+}
+
+// GetMessengers returns the value of Messengers.
+func (s *Contact) GetMessengers() OptContactMessengers {
+	return s.Messengers
+}
+
+// GetMessengersSearch returns the value of MessengersSearch.
+func (s *Contact) GetMessengersSearch() OptString {
+	return s.MessengersSearch
+}
+
+// GetSkypeUUID returns the value of SkypeUUID.
+func (s *Contact) GetSkypeUUID() OptString {
+	return s.SkypeUUID
+}
+
+// GetSkype returns the value of Skype.
+func (s *Contact) GetSkype() OptString {
+	return s.Skype
+}
+
+// GetWhatsappUUID returns the value of WhatsappUUID.
+func (s *Contact) GetWhatsappUUID() OptString {
+	return s.WhatsappUUID
+}
+
+// GetWhatsapp returns the value of Whatsapp.
+func (s *Contact) GetWhatsapp() OptString {
+	return s.Whatsapp
+}
+
+// GetTelegramUUID returns the value of TelegramUUID.
+func (s *Contact) GetTelegramUUID() OptString {
+	return s.TelegramUUID
+}
+
+// GetTelegram returns the value of Telegram.
+func (s *Contact) GetTelegram() OptString {
+	return s.Telegram
+}
+
+// GetWechatUUID returns the value of WechatUUID.
+func (s *Contact) GetWechatUUID() OptString {
+	return s.WechatUUID
+}
+
+// GetWechat returns the value of Wechat.
+func (s *Contact) GetWechat() OptString {
+	return s.Wechat
+}
+
+// GetLineUUID returns the value of LineUUID.
+func (s *Contact) GetLineUUID() OptString {
+	return s.LineUUID
+}
+
+// GetLine returns the value of Line.
+func (s *Contact) GetLine() OptString {
+	return s.Line
+}
+
+// GetSocials returns the value of Socials.
+func (s *Contact) GetSocials() OptContactSocials {
+	return s.Socials
+}
+
+// GetSocialsSearch returns the value of SocialsSearch.
+func (s *Contact) GetSocialsSearch() OptString {
+	return s.SocialsSearch
+}
+
+// GetLinkedinUUID returns the value of LinkedinUUID.
+func (s *Contact) GetLinkedinUUID() OptString {
+	return s.LinkedinUUID
+}
+
+// GetLinkedinURL returns the value of LinkedinURL.
+func (s *Contact) GetLinkedinURL() OptString {
+	return s.LinkedinURL
+}
+
+// GetFacebookUUID returns the value of FacebookUUID.
+func (s *Contact) GetFacebookUUID() OptString {
+	return s.FacebookUUID
+}
+
+// GetFacebookURL returns the value of FacebookURL.
+func (s *Contact) GetFacebookURL() OptString {
+	return s.FacebookURL
+}
+
+// GetTwitterUUID returns the value of TwitterUUID.
+func (s *Contact) GetTwitterUUID() OptString {
+	return s.TwitterUUID
+}
+
+// GetTwitterURL returns the value of TwitterURL.
+func (s *Contact) GetTwitterURL() OptString {
+	return s.TwitterURL
+}
+
+// GetGithubUUID returns the value of GithubUUID.
+func (s *Contact) GetGithubUUID() OptString {
+	return s.GithubUUID
+}
+
+// GetGithubURL returns the value of GithubURL.
+func (s *Contact) GetGithubURL() OptString {
+	return s.GithubURL
+}
+
+// GetVkUUID returns the value of VkUUID.
+func (s *Contact) GetVkUUID() OptString {
+	return s.VkUUID
+}
+
+// GetVkURL returns the value of VkURL.
+func (s *Contact) GetVkURL() OptString {
+	return s.VkURL
+}
+
+// GetOdnoUUID returns the value of OdnoUUID.
+func (s *Contact) GetOdnoUUID() OptString {
+	return s.OdnoUUID
+}
+
+// GetOdnoURL returns the value of OdnoURL.
+func (s *Contact) GetOdnoURL() OptString {
+	return s.OdnoURL
+}
+
+// GetHhruUUID returns the value of HhruUUID.
+func (s *Contact) GetHhruUUID() OptString {
+	return s.HhruUUID
+}
+
+// GetHhruURL returns the value of HhruURL.
+func (s *Contact) GetHhruURL() OptString {
+	return s.HhruURL
+}
+
+// GetHabrUUID returns the value of HabrUUID.
+func (s *Contact) GetHabrUUID() OptString {
+	return s.HabrUUID
+}
+
+// GetHabrURL returns the value of HabrURL.
+func (s *Contact) GetHabrURL() OptString {
+	return s.HabrURL
+}
+
+// GetMoikrugUUID returns the value of MoikrugUUID.
+func (s *Contact) GetMoikrugUUID() OptString {
+	return s.MoikrugUUID
+}
+
+// GetMoikrugURL returns the value of MoikrugURL.
+func (s *Contact) GetMoikrugURL() OptString {
+	return s.MoikrugURL
+}
+
+// GetInstagramUUID returns the value of InstagramUUID.
+func (s *Contact) GetInstagramUUID() OptString {
+	return s.InstagramUUID
+}
+
+// GetInstagramURL returns the value of InstagramURL.
+func (s *Contact) GetInstagramURL() OptString {
+	return s.InstagramURL
+}
+
+// GetSocial1UUID returns the value of Social1UUID.
+func (s *Contact) GetSocial1UUID() OptString {
+	return s.Social1UUID
+}
+
+// GetSocial1URL returns the value of Social1URL.
+func (s *Contact) GetSocial1URL() OptString {
+	return s.Social1URL
+}
+
+// GetSocial1Type returns the value of Social1Type.
+func (s *Contact) GetSocial1Type() OptString {
+	return s.Social1Type
+}
+
+// GetSocial2UUID returns the value of Social2UUID.
+func (s *Contact) GetSocial2UUID() OptString {
+	return s.Social2UUID
+}
+
+// GetSocial2URL returns the value of Social2URL.
+func (s *Contact) GetSocial2URL() OptString {
+	return s.Social2URL
+}
+
+// GetSocial2Type returns the value of Social2Type.
+func (s *Contact) GetSocial2Type() OptString {
+	return s.Social2Type
+}
+
+// GetSocial3UUID returns the value of Social3UUID.
+func (s *Contact) GetSocial3UUID() OptString {
+	return s.Social3UUID
+}
+
+// GetSocial3URL returns the value of Social3URL.
+func (s *Contact) GetSocial3URL() OptString {
+	return s.Social3URL
+}
+
+// GetSocial3Type returns the value of Social3Type.
+func (s *Contact) GetSocial3Type() OptString {
+	return s.Social3Type
+}
+
+// GetSocial4UUID returns the value of Social4UUID.
+func (s *Contact) GetSocial4UUID() OptString {
+	return s.Social4UUID
+}
+
+// GetSocial4URL returns the value of Social4URL.
+func (s *Contact) GetSocial4URL() OptString {
+	return s.Social4URL
+}
+
+// GetSocial4Type returns the value of Social4Type.
+func (s *Contact) GetSocial4Type() OptString {
+	return s.Social4Type
+}
+
+// GetSocial5UUID returns the value of Social5UUID.
+func (s *Contact) GetSocial5UUID() OptString {
+	return s.Social5UUID
+}
+
+// GetSocial5URL returns the value of Social5URL.
+func (s *Contact) GetSocial5URL() OptString {
+	return s.Social5URL
+}
+
+// GetSocial5Type returns the value of Social5Type.
+func (s *Contact) GetSocial5Type() OptString {
+	return s.Social5Type
+}
+
+// GetSocial6UUID returns the value of Social6UUID.
+func (s *Contact) GetSocial6UUID() OptString {
+	return s.Social6UUID
+}
+
+// GetSocial6URL returns the value of Social6URL.
+func (s *Contact) GetSocial6URL() OptString {
+	return s.Social6URL
+}
+
+// GetSocial6Type returns the value of Social6Type.
+func (s *Contact) GetSocial6Type() OptString {
+	return s.Social6Type
+}
+
+// GetSocial7UUID returns the value of Social7UUID.
+func (s *Contact) GetSocial7UUID() OptString {
+	return s.Social7UUID
+}
+
+// GetSocial7URL returns the value of Social7URL.
+func (s *Contact) GetSocial7URL() OptString {
+	return s.Social7URL
+}
+
+// GetSocial7Type returns the value of Social7Type.
+func (s *Contact) GetSocial7Type() OptString {
+	return s.Social7Type
+}
+
+// GetSocial8UUID returns the value of Social8UUID.
+func (s *Contact) GetSocial8UUID() OptString {
+	return s.Social8UUID
+}
+
+// GetSocial8URL returns the value of Social8URL.
+func (s *Contact) GetSocial8URL() OptString {
+	return s.Social8URL
+}
+
+// GetSocial8Type returns the value of Social8Type.
+func (s *Contact) GetSocial8Type() OptString {
+	return s.Social8Type
+}
+
+// GetSocial9UUID returns the value of Social9UUID.
+func (s *Contact) GetSocial9UUID() OptString {
+	return s.Social9UUID
+}
+
+// GetSocial9URL returns the value of Social9URL.
+func (s *Contact) GetSocial9URL() OptString {
+	return s.Social9URL
+}
+
+// GetSocial9Type returns the value of Social9Type.
+func (s *Contact) GetSocial9Type() OptString {
+	return s.Social9Type
+}
+
+// GetTrackingSource returns the value of TrackingSource.
+func (s *Contact) GetTrackingSource() OptString {
+	return s.TrackingSource
+}
+
+// GetTrackingSlug returns the value of TrackingSlug.
+func (s *Contact) GetTrackingSlug() OptString {
+	return s.TrackingSlug
+}
+
+// GetCachedImg returns the value of CachedImg.
+func (s *Contact) GetCachedImg() OptString {
+	return s.CachedImg
+}
+
+// GetCachedImgData returns the value of CachedImgData.
+func (s *Contact) GetCachedImgData() OptContactCachedImgData {
+	return s.CachedImgData
+}
+
+// GetCrawl returns the value of Crawl.
+func (s *Contact) GetCrawl() OptContactCrawl {
+	return s.Crawl
+}
+
+// GetDuplicateUserID returns the value of DuplicateUserID.
+func (s *Contact) GetDuplicateUserID() OptString {
+	return s.DuplicateUserID
+}
+
+// GetDuplicateAlternativeID returns the value of DuplicateAlternativeID.
+func (s *Contact) GetDuplicateAlternativeID() OptString {
+	return s.DuplicateAlternativeID
+}
+
+// GetDuplicateReportDate returns the value of DuplicateReportDate.
+func (s *Contact) GetDuplicateReportDate() OptDateTime {
+	return s.DuplicateReportDate
+}
+
+// GetEntryDate returns the value of EntryDate.
+func (s *Contact) GetEntryDate() OptDateTime {
+	return s.EntryDate
+}
+
+// GetEditDate returns the value of EditDate.
+func (s *Contact) GetEditDate() OptDateTime {
+	return s.EditDate
+}
+
+// GetLastKPIEntryDate returns the value of LastKPIEntryDate.
+func (s *Contact) GetLastKPIEntryDate() OptDateTime {
+	return s.LastKPIEntryDate
+}
+
+// GetScore100 returns the value of Score100.
+func (s *Contact) GetScore100() OptInt {
+	return s.Score100
+}
+
+// SetUUID sets the value of UUID.
+func (s *Contact) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *Contact) SetUserUUID(val OptString) {
+	s.UserUUID = val
+}
+
+// SetInstanceUUID sets the value of InstanceUUID.
+func (s *Contact) SetInstanceUUID(val OptString) {
+	s.InstanceUUID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Contact) SetStatus(val OptString) {
+	s.Status = val
+}
+
+// SetNames sets the value of Names.
+func (s *Contact) SetNames(val OptContactNames) {
+	s.Names = val
+}
+
+// SetNamesSearch sets the value of NamesSearch.
+func (s *Contact) SetNamesSearch(val OptString) {
+	s.NamesSearch = val
+}
+
+// SetLast sets the value of Last.
+func (s *Contact) SetLast(val OptString) {
+	s.Last = val
+}
+
+// SetFirst sets the value of First.
+func (s *Contact) SetFirst(val OptString) {
+	s.First = val
+}
+
+// SetMiddle sets the value of Middle.
+func (s *Contact) SetMiddle(val OptString) {
+	s.Middle = val
+}
+
+// SetBirthday sets the value of Birthday.
+func (s *Contact) SetBirthday(val OptDateTime) {
+	s.Birthday = val
+}
+
+// SetBirthdayType sets the value of BirthdayType.
+func (s *Contact) SetBirthdayType(val OptString) {
+	s.BirthdayType = val
+}
+
+// SetSalary sets the value of Salary.
+func (s *Contact) SetSalary(val OptString) {
+	s.Salary = val
+}
+
+// SetSalaryData sets the value of SalaryData.
+func (s *Contact) SetSalaryData(val OptContactSalaryData) {
+	s.SalaryData = val
+}
+
+// SetLastPositions sets the value of LastPositions.
+func (s *Contact) SetLastPositions(val OptContactLastPositions) {
+	s.LastPositions = val
+}
+
+// SetLastPositionID sets the value of LastPositionID.
+func (s *Contact) SetLastPositionID(val OptInt64) {
+	s.LastPositionID = val
+}
+
+// SetLastPositionCompanyID sets the value of LastPositionCompanyID.
+func (s *Contact) SetLastPositionCompanyID(val OptInt64) {
+	s.LastPositionCompanyID = val
+}
+
+// SetLastPositionCompanyName sets the value of LastPositionCompanyName.
+func (s *Contact) SetLastPositionCompanyName(val OptString) {
+	s.LastPositionCompanyName = val
+}
+
+// SetLastPositionTitle sets the value of LastPositionTitle.
+func (s *Contact) SetLastPositionTitle(val OptString) {
+	s.LastPositionTitle = val
+}
+
+// SetLastPositionStartDate sets the value of LastPositionStartDate.
+func (s *Contact) SetLastPositionStartDate(val OptDateTime) {
+	s.LastPositionStartDate = val
+}
+
+// SetLastPositionEndDate sets the value of LastPositionEndDate.
+func (s *Contact) SetLastPositionEndDate(val OptDateTime) {
+	s.LastPositionEndDate = val
+}
+
+// SetLastPositionEndNow sets the value of LastPositionEndNow.
+func (s *Contact) SetLastPositionEndNow(val OptBool) {
+	s.LastPositionEndNow = val
+}
+
+// SetLastPositionDescription sets the value of LastPositionDescription.
+func (s *Contact) SetLastPositionDescription(val OptString) {
+	s.LastPositionDescription = val
+}
+
+// SetNoteSearch sets the value of NoteSearch.
+func (s *Contact) SetNoteSearch(val OptString) {
+	s.NoteSearch = val
+}
+
+// SetNoteKpiID sets the value of NoteKpiID.
+func (s *Contact) SetNoteKpiID(val OptContactNoteKpiID) {
+	s.NoteKpiID = val
+}
+
+// SetPhones sets the value of Phones.
+func (s *Contact) SetPhones(val OptContactPhones) {
+	s.Phones = val
+}
+
+// SetPhoneSearch sets the value of PhoneSearch.
+func (s *Contact) SetPhoneSearch(val OptString) {
+	s.PhoneSearch = val
+}
+
+// SetPhone1 sets the value of Phone1.
+func (s *Contact) SetPhone1(val OptString) {
+	s.Phone1 = val
+}
+
+// SetPhone1Type sets the value of Phone1Type.
+func (s *Contact) SetPhone1Type(val OptString) {
+	s.Phone1Type = val
+}
+
+// SetPhone1Country sets the value of Phone1Country.
+func (s *Contact) SetPhone1Country(val OptString) {
+	s.Phone1Country = val
+}
+
+// SetPhone2 sets the value of Phone2.
+func (s *Contact) SetPhone2(val OptString) {
+	s.Phone2 = val
+}
+
+// SetPhone2Type sets the value of Phone2Type.
+func (s *Contact) SetPhone2Type(val OptString) {
+	s.Phone2Type = val
+}
+
+// SetPhone2Country sets the value of Phone2Country.
+func (s *Contact) SetPhone2Country(val OptString) {
+	s.Phone2Country = val
+}
+
+// SetPhone3 sets the value of Phone3.
+func (s *Contact) SetPhone3(val OptString) {
+	s.Phone3 = val
+}
+
+// SetPhone3Type sets the value of Phone3Type.
+func (s *Contact) SetPhone3Type(val OptString) {
+	s.Phone3Type = val
+}
+
+// SetPhone3Country sets the value of Phone3Country.
+func (s *Contact) SetPhone3Country(val OptString) {
+	s.Phone3Country = val
+}
+
+// SetPhone4 sets the value of Phone4.
+func (s *Contact) SetPhone4(val OptString) {
+	s.Phone4 = val
+}
+
+// SetPhone4Type sets the value of Phone4Type.
+func (s *Contact) SetPhone4Type(val OptString) {
+	s.Phone4Type = val
+}
+
+// SetPhone4Country sets the value of Phone4Country.
+func (s *Contact) SetPhone4Country(val OptString) {
+	s.Phone4Country = val
+}
+
+// SetPhone5 sets the value of Phone5.
+func (s *Contact) SetPhone5(val OptString) {
+	s.Phone5 = val
+}
+
+// SetPhone5Type sets the value of Phone5Type.
+func (s *Contact) SetPhone5Type(val OptString) {
+	s.Phone5Type = val
+}
+
+// SetPhone5Country sets the value of Phone5Country.
+func (s *Contact) SetPhone5Country(val OptString) {
+	s.Phone5Country = val
+}
+
+// SetEmails sets the value of Emails.
+func (s *Contact) SetEmails(val OptContactEmails) {
+	s.Emails = val
+}
+
+// SetEmailSearch sets the value of EmailSearch.
+func (s *Contact) SetEmailSearch(val OptString) {
+	s.EmailSearch = val
+}
+
+// SetEmail1 sets the value of Email1.
+func (s *Contact) SetEmail1(val OptString) {
+	s.Email1 = val
+}
+
+// SetEmail1Type sets the value of Email1Type.
+func (s *Contact) SetEmail1Type(val OptString) {
+	s.Email1Type = val
+}
+
+// SetEmail2 sets the value of Email2.
+func (s *Contact) SetEmail2(val OptString) {
+	s.Email2 = val
+}
+
+// SetEmail2Type sets the value of Email2Type.
+func (s *Contact) SetEmail2Type(val OptString) {
+	s.Email2Type = val
+}
+
+// SetEmail3 sets the value of Email3.
+func (s *Contact) SetEmail3(val OptString) {
+	s.Email3 = val
+}
+
+// SetEmail3Type sets the value of Email3Type.
+func (s *Contact) SetEmail3Type(val OptString) {
+	s.Email3Type = val
+}
+
+// SetEmail4 sets the value of Email4.
+func (s *Contact) SetEmail4(val OptString) {
+	s.Email4 = val
+}
+
+// SetEmail4Type sets the value of Email4Type.
+func (s *Contact) SetEmail4Type(val OptString) {
+	s.Email4Type = val
+}
+
+// SetEmail5 sets the value of Email5.
+func (s *Contact) SetEmail5(val OptString) {
+	s.Email5 = val
+}
+
+// SetEmail5Type sets the value of Email5Type.
+func (s *Contact) SetEmail5Type(val OptString) {
+	s.Email5Type = val
+}
+
+// SetMessengers sets the value of Messengers.
+func (s *Contact) SetMessengers(val OptContactMessengers) {
+	s.Messengers = val
+}
+
+// SetMessengersSearch sets the value of MessengersSearch.
+func (s *Contact) SetMessengersSearch(val OptString) {
+	s.MessengersSearch = val
+}
+
+// SetSkypeUUID sets the value of SkypeUUID.
+func (s *Contact) SetSkypeUUID(val OptString) {
+	s.SkypeUUID = val
+}
+
+// SetSkype sets the value of Skype.
+func (s *Contact) SetSkype(val OptString) {
+	s.Skype = val
+}
+
+// SetWhatsappUUID sets the value of WhatsappUUID.
+func (s *Contact) SetWhatsappUUID(val OptString) {
+	s.WhatsappUUID = val
+}
+
+// SetWhatsapp sets the value of Whatsapp.
+func (s *Contact) SetWhatsapp(val OptString) {
+	s.Whatsapp = val
+}
+
+// SetTelegramUUID sets the value of TelegramUUID.
+func (s *Contact) SetTelegramUUID(val OptString) {
+	s.TelegramUUID = val
+}
+
+// SetTelegram sets the value of Telegram.
+func (s *Contact) SetTelegram(val OptString) {
+	s.Telegram = val
+}
+
+// SetWechatUUID sets the value of WechatUUID.
+func (s *Contact) SetWechatUUID(val OptString) {
+	s.WechatUUID = val
+}
+
+// SetWechat sets the value of Wechat.
+func (s *Contact) SetWechat(val OptString) {
+	s.Wechat = val
+}
+
+// SetLineUUID sets the value of LineUUID.
+func (s *Contact) SetLineUUID(val OptString) {
+	s.LineUUID = val
+}
+
+// SetLine sets the value of Line.
+func (s *Contact) SetLine(val OptString) {
+	s.Line = val
+}
+
+// SetSocials sets the value of Socials.
+func (s *Contact) SetSocials(val OptContactSocials) {
+	s.Socials = val
+}
+
+// SetSocialsSearch sets the value of SocialsSearch.
+func (s *Contact) SetSocialsSearch(val OptString) {
+	s.SocialsSearch = val
+}
+
+// SetLinkedinUUID sets the value of LinkedinUUID.
+func (s *Contact) SetLinkedinUUID(val OptString) {
+	s.LinkedinUUID = val
+}
+
+// SetLinkedinURL sets the value of LinkedinURL.
+func (s *Contact) SetLinkedinURL(val OptString) {
+	s.LinkedinURL = val
+}
+
+// SetFacebookUUID sets the value of FacebookUUID.
+func (s *Contact) SetFacebookUUID(val OptString) {
+	s.FacebookUUID = val
+}
+
+// SetFacebookURL sets the value of FacebookURL.
+func (s *Contact) SetFacebookURL(val OptString) {
+	s.FacebookURL = val
+}
+
+// SetTwitterUUID sets the value of TwitterUUID.
+func (s *Contact) SetTwitterUUID(val OptString) {
+	s.TwitterUUID = val
+}
+
+// SetTwitterURL sets the value of TwitterURL.
+func (s *Contact) SetTwitterURL(val OptString) {
+	s.TwitterURL = val
+}
+
+// SetGithubUUID sets the value of GithubUUID.
+func (s *Contact) SetGithubUUID(val OptString) {
+	s.GithubUUID = val
+}
+
+// SetGithubURL sets the value of GithubURL.
+func (s *Contact) SetGithubURL(val OptString) {
+	s.GithubURL = val
+}
+
+// SetVkUUID sets the value of VkUUID.
+func (s *Contact) SetVkUUID(val OptString) {
+	s.VkUUID = val
+}
+
+// SetVkURL sets the value of VkURL.
+func (s *Contact) SetVkURL(val OptString) {
+	s.VkURL = val
+}
+
+// SetOdnoUUID sets the value of OdnoUUID.
+func (s *Contact) SetOdnoUUID(val OptString) {
+	s.OdnoUUID = val
+}
+
+// SetOdnoURL sets the value of OdnoURL.
+func (s *Contact) SetOdnoURL(val OptString) {
+	s.OdnoURL = val
+}
+
+// SetHhruUUID sets the value of HhruUUID.
+func (s *Contact) SetHhruUUID(val OptString) {
+	s.HhruUUID = val
+}
+
+// SetHhruURL sets the value of HhruURL.
+func (s *Contact) SetHhruURL(val OptString) {
+	s.HhruURL = val
+}
+
+// SetHabrUUID sets the value of HabrUUID.
+func (s *Contact) SetHabrUUID(val OptString) {
+	s.HabrUUID = val
+}
+
+// SetHabrURL sets the value of HabrURL.
+func (s *Contact) SetHabrURL(val OptString) {
+	s.HabrURL = val
+}
+
+// SetMoikrugUUID sets the value of MoikrugUUID.
+func (s *Contact) SetMoikrugUUID(val OptString) {
+	s.MoikrugUUID = val
+}
+
+// SetMoikrugURL sets the value of MoikrugURL.
+func (s *Contact) SetMoikrugURL(val OptString) {
+	s.MoikrugURL = val
+}
+
+// SetInstagramUUID sets the value of InstagramUUID.
+func (s *Contact) SetInstagramUUID(val OptString) {
+	s.InstagramUUID = val
+}
+
+// SetInstagramURL sets the value of InstagramURL.
+func (s *Contact) SetInstagramURL(val OptString) {
+	s.InstagramURL = val
+}
+
+// SetSocial1UUID sets the value of Social1UUID.
+func (s *Contact) SetSocial1UUID(val OptString) {
+	s.Social1UUID = val
+}
+
+// SetSocial1URL sets the value of Social1URL.
+func (s *Contact) SetSocial1URL(val OptString) {
+	s.Social1URL = val
+}
+
+// SetSocial1Type sets the value of Social1Type.
+func (s *Contact) SetSocial1Type(val OptString) {
+	s.Social1Type = val
+}
+
+// SetSocial2UUID sets the value of Social2UUID.
+func (s *Contact) SetSocial2UUID(val OptString) {
+	s.Social2UUID = val
+}
+
+// SetSocial2URL sets the value of Social2URL.
+func (s *Contact) SetSocial2URL(val OptString) {
+	s.Social2URL = val
+}
+
+// SetSocial2Type sets the value of Social2Type.
+func (s *Contact) SetSocial2Type(val OptString) {
+	s.Social2Type = val
+}
+
+// SetSocial3UUID sets the value of Social3UUID.
+func (s *Contact) SetSocial3UUID(val OptString) {
+	s.Social3UUID = val
+}
+
+// SetSocial3URL sets the value of Social3URL.
+func (s *Contact) SetSocial3URL(val OptString) {
+	s.Social3URL = val
+}
+
+// SetSocial3Type sets the value of Social3Type.
+func (s *Contact) SetSocial3Type(val OptString) {
+	s.Social3Type = val
+}
+
+// SetSocial4UUID sets the value of Social4UUID.
+func (s *Contact) SetSocial4UUID(val OptString) {
+	s.Social4UUID = val
+}
+
+// SetSocial4URL sets the value of Social4URL.
+func (s *Contact) SetSocial4URL(val OptString) {
+	s.Social4URL = val
+}
+
+// SetSocial4Type sets the value of Social4Type.
+func (s *Contact) SetSocial4Type(val OptString) {
+	s.Social4Type = val
+}
+
+// SetSocial5UUID sets the value of Social5UUID.
+func (s *Contact) SetSocial5UUID(val OptString) {
+	s.Social5UUID = val
+}
+
+// SetSocial5URL sets the value of Social5URL.
+func (s *Contact) SetSocial5URL(val OptString) {
+	s.Social5URL = val
+}
+
+// SetSocial5Type sets the value of Social5Type.
+func (s *Contact) SetSocial5Type(val OptString) {
+	s.Social5Type = val
+}
+
+// SetSocial6UUID sets the value of Social6UUID.
+func (s *Contact) SetSocial6UUID(val OptString) {
+	s.Social6UUID = val
+}
+
+// SetSocial6URL sets the value of Social6URL.
+func (s *Contact) SetSocial6URL(val OptString) {
+	s.Social6URL = val
+}
+
+// SetSocial6Type sets the value of Social6Type.
+func (s *Contact) SetSocial6Type(val OptString) {
+	s.Social6Type = val
+}
+
+// SetSocial7UUID sets the value of Social7UUID.
+func (s *Contact) SetSocial7UUID(val OptString) {
+	s.Social7UUID = val
+}
+
+// SetSocial7URL sets the value of Social7URL.
+func (s *Contact) SetSocial7URL(val OptString) {
+	s.Social7URL = val
+}
+
+// SetSocial7Type sets the value of Social7Type.
+func (s *Contact) SetSocial7Type(val OptString) {
+	s.Social7Type = val
+}
+
+// SetSocial8UUID sets the value of Social8UUID.
+func (s *Contact) SetSocial8UUID(val OptString) {
+	s.Social8UUID = val
+}
+
+// SetSocial8URL sets the value of Social8URL.
+func (s *Contact) SetSocial8URL(val OptString) {
+	s.Social8URL = val
+}
+
+// SetSocial8Type sets the value of Social8Type.
+func (s *Contact) SetSocial8Type(val OptString) {
+	s.Social8Type = val
+}
+
+// SetSocial9UUID sets the value of Social9UUID.
+func (s *Contact) SetSocial9UUID(val OptString) {
+	s.Social9UUID = val
+}
+
+// SetSocial9URL sets the value of Social9URL.
+func (s *Contact) SetSocial9URL(val OptString) {
+	s.Social9URL = val
+}
+
+// SetSocial9Type sets the value of Social9Type.
+func (s *Contact) SetSocial9Type(val OptString) {
+	s.Social9Type = val
+}
+
+// SetTrackingSource sets the value of TrackingSource.
+func (s *Contact) SetTrackingSource(val OptString) {
+	s.TrackingSource = val
+}
+
+// SetTrackingSlug sets the value of TrackingSlug.
+func (s *Contact) SetTrackingSlug(val OptString) {
+	s.TrackingSlug = val
+}
+
+// SetCachedImg sets the value of CachedImg.
+func (s *Contact) SetCachedImg(val OptString) {
+	s.CachedImg = val
+}
+
+// SetCachedImgData sets the value of CachedImgData.
+func (s *Contact) SetCachedImgData(val OptContactCachedImgData) {
+	s.CachedImgData = val
+}
+
+// SetCrawl sets the value of Crawl.
+func (s *Contact) SetCrawl(val OptContactCrawl) {
+	s.Crawl = val
+}
+
+// SetDuplicateUserID sets the value of DuplicateUserID.
+func (s *Contact) SetDuplicateUserID(val OptString) {
+	s.DuplicateUserID = val
+}
+
+// SetDuplicateAlternativeID sets the value of DuplicateAlternativeID.
+func (s *Contact) SetDuplicateAlternativeID(val OptString) {
+	s.DuplicateAlternativeID = val
+}
+
+// SetDuplicateReportDate sets the value of DuplicateReportDate.
+func (s *Contact) SetDuplicateReportDate(val OptDateTime) {
+	s.DuplicateReportDate = val
+}
+
+// SetEntryDate sets the value of EntryDate.
+func (s *Contact) SetEntryDate(val OptDateTime) {
+	s.EntryDate = val
+}
+
+// SetEditDate sets the value of EditDate.
+func (s *Contact) SetEditDate(val OptDateTime) {
+	s.EditDate = val
+}
+
+// SetLastKPIEntryDate sets the value of LastKPIEntryDate.
+func (s *Contact) SetLastKPIEntryDate(val OptDateTime) {
+	s.LastKPIEntryDate = val
+}
+
+// SetScore100 sets the value of Score100.
+func (s *Contact) SetScore100(val OptInt) {
+	s.Score100 = val
+}
+
+type ContactCachedImgData map[string]jx.Raw
+
+func (s *ContactCachedImgData) init() ContactCachedImgData {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactCrawl map[string]jx.Raw
+
+func (s *ContactCrawl) init() ContactCrawl {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactEmails map[string]jx.Raw
+
+func (s *ContactEmails) init() ContactEmails {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactLastPositions map[string]jx.Raw
+
+func (s *ContactLastPositions) init() ContactLastPositions {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactMessengers map[string]jx.Raw
+
+func (s *ContactMessengers) init() ContactMessengers {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactNames map[string]jx.Raw
+
+func (s *ContactNames) init() ContactNames {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactNoteKpiID map[string]jx.Raw
+
+func (s *ContactNoteKpiID) init() ContactNoteKpiID {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactPhones map[string]jx.Raw
+
+func (s *ContactPhones) init() ContactPhones {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactSalaryData map[string]jx.Raw
+
+func (s *ContactSalaryData) init() ContactSalaryData {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ContactSocials map[string]jx.Raw
+
+func (s *ContactSocials) init() ContactSocials {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #
 type Datasource struct {
 	UUID      string    `json:"uuid"`
 	UserUUID  string    `json:"user_uuid"`
@@ -788,6 +2288,9 @@ func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
 	}
 	return m
 }
+
+// DeleteContactOK is response for DeleteContact operation.
+type DeleteContactOK struct{}
 
 // Ref: #
 type EmailLabel struct {
@@ -2503,6 +4006,466 @@ func (o OptBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactCachedImgData returns new OptContactCachedImgData with value set to v.
+func NewOptContactCachedImgData(v ContactCachedImgData) OptContactCachedImgData {
+	return OptContactCachedImgData{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactCachedImgData is optional ContactCachedImgData.
+type OptContactCachedImgData struct {
+	Value ContactCachedImgData
+	Set   bool
+}
+
+// IsSet returns true if OptContactCachedImgData was set.
+func (o OptContactCachedImgData) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactCachedImgData) Reset() {
+	var v ContactCachedImgData
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactCachedImgData) SetTo(v ContactCachedImgData) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactCachedImgData) Get() (v ContactCachedImgData, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactCachedImgData) Or(d ContactCachedImgData) ContactCachedImgData {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactCrawl returns new OptContactCrawl with value set to v.
+func NewOptContactCrawl(v ContactCrawl) OptContactCrawl {
+	return OptContactCrawl{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactCrawl is optional ContactCrawl.
+type OptContactCrawl struct {
+	Value ContactCrawl
+	Set   bool
+}
+
+// IsSet returns true if OptContactCrawl was set.
+func (o OptContactCrawl) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactCrawl) Reset() {
+	var v ContactCrawl
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactCrawl) SetTo(v ContactCrawl) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactCrawl) Get() (v ContactCrawl, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactCrawl) Or(d ContactCrawl) ContactCrawl {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactEmails returns new OptContactEmails with value set to v.
+func NewOptContactEmails(v ContactEmails) OptContactEmails {
+	return OptContactEmails{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactEmails is optional ContactEmails.
+type OptContactEmails struct {
+	Value ContactEmails
+	Set   bool
+}
+
+// IsSet returns true if OptContactEmails was set.
+func (o OptContactEmails) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactEmails) Reset() {
+	var v ContactEmails
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactEmails) SetTo(v ContactEmails) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactEmails) Get() (v ContactEmails, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactEmails) Or(d ContactEmails) ContactEmails {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactLastPositions returns new OptContactLastPositions with value set to v.
+func NewOptContactLastPositions(v ContactLastPositions) OptContactLastPositions {
+	return OptContactLastPositions{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactLastPositions is optional ContactLastPositions.
+type OptContactLastPositions struct {
+	Value ContactLastPositions
+	Set   bool
+}
+
+// IsSet returns true if OptContactLastPositions was set.
+func (o OptContactLastPositions) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactLastPositions) Reset() {
+	var v ContactLastPositions
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactLastPositions) SetTo(v ContactLastPositions) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactLastPositions) Get() (v ContactLastPositions, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactLastPositions) Or(d ContactLastPositions) ContactLastPositions {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactMessengers returns new OptContactMessengers with value set to v.
+func NewOptContactMessengers(v ContactMessengers) OptContactMessengers {
+	return OptContactMessengers{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactMessengers is optional ContactMessengers.
+type OptContactMessengers struct {
+	Value ContactMessengers
+	Set   bool
+}
+
+// IsSet returns true if OptContactMessengers was set.
+func (o OptContactMessengers) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactMessengers) Reset() {
+	var v ContactMessengers
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactMessengers) SetTo(v ContactMessengers) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactMessengers) Get() (v ContactMessengers, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactMessengers) Or(d ContactMessengers) ContactMessengers {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactNames returns new OptContactNames with value set to v.
+func NewOptContactNames(v ContactNames) OptContactNames {
+	return OptContactNames{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactNames is optional ContactNames.
+type OptContactNames struct {
+	Value ContactNames
+	Set   bool
+}
+
+// IsSet returns true if OptContactNames was set.
+func (o OptContactNames) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactNames) Reset() {
+	var v ContactNames
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactNames) SetTo(v ContactNames) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactNames) Get() (v ContactNames, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactNames) Or(d ContactNames) ContactNames {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactNoteKpiID returns new OptContactNoteKpiID with value set to v.
+func NewOptContactNoteKpiID(v ContactNoteKpiID) OptContactNoteKpiID {
+	return OptContactNoteKpiID{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactNoteKpiID is optional ContactNoteKpiID.
+type OptContactNoteKpiID struct {
+	Value ContactNoteKpiID
+	Set   bool
+}
+
+// IsSet returns true if OptContactNoteKpiID was set.
+func (o OptContactNoteKpiID) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactNoteKpiID) Reset() {
+	var v ContactNoteKpiID
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactNoteKpiID) SetTo(v ContactNoteKpiID) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactNoteKpiID) Get() (v ContactNoteKpiID, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactNoteKpiID) Or(d ContactNoteKpiID) ContactNoteKpiID {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactPhones returns new OptContactPhones with value set to v.
+func NewOptContactPhones(v ContactPhones) OptContactPhones {
+	return OptContactPhones{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactPhones is optional ContactPhones.
+type OptContactPhones struct {
+	Value ContactPhones
+	Set   bool
+}
+
+// IsSet returns true if OptContactPhones was set.
+func (o OptContactPhones) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactPhones) Reset() {
+	var v ContactPhones
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactPhones) SetTo(v ContactPhones) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactPhones) Get() (v ContactPhones, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactPhones) Or(d ContactPhones) ContactPhones {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactSalaryData returns new OptContactSalaryData with value set to v.
+func NewOptContactSalaryData(v ContactSalaryData) OptContactSalaryData {
+	return OptContactSalaryData{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactSalaryData is optional ContactSalaryData.
+type OptContactSalaryData struct {
+	Value ContactSalaryData
+	Set   bool
+}
+
+// IsSet returns true if OptContactSalaryData was set.
+func (o OptContactSalaryData) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactSalaryData) Reset() {
+	var v ContactSalaryData
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactSalaryData) SetTo(v ContactSalaryData) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactSalaryData) Get() (v ContactSalaryData, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactSalaryData) Or(d ContactSalaryData) ContactSalaryData {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptContactSocials returns new OptContactSocials with value set to v.
+func NewOptContactSocials(v ContactSocials) OptContactSocials {
+	return OptContactSocials{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptContactSocials is optional ContactSocials.
+type OptContactSocials struct {
+	Value ContactSocials
+	Set   bool
+}
+
+// IsSet returns true if OptContactSocials was set.
+func (o OptContactSocials) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptContactSocials) Reset() {
+	var v ContactSocials
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptContactSocials) SetTo(v ContactSocials) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptContactSocials) Get() (v ContactSocials, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptContactSocials) Or(d ContactSocials) ContactSocials {
 	if v, ok := o.Get(); ok {
 		return v
 	}

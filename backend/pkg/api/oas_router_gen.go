@@ -61,6 +61,66 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
+			case 'c': // Prefix: "contact"
+				origElem := elem
+				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
+					case "GET":
+						s.handleListContactsRequest([0]string{}, elemIsEscaped, w, r)
+					case "POST":
+						s.handleCreateContactRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET,POST")
+					}
+
+					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "DELETE":
+							s.handleDeleteContactRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "GET":
+							s.handleGetContactRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "PUT":
+							s.handleUpdateContactRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "DELETE,GET,PUT")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'd': // Prefix: "datasource"
 				origElem := elem
 				if l := len("datasource"); len(elem) >= l && elem[0:l] == "datasource" {
@@ -1407,6 +1467,86 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
+			case 'c': // Prefix: "contact"
+				origElem := elem
+				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						r.name = ListContactsOperation
+						r.summary = "List all contacts"
+						r.operationID = "listContacts"
+						r.pathPattern = "/contact"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "POST":
+						r.name = CreateContactOperation
+						r.summary = "Create a new contact record"
+						r.operationID = "createContact"
+						r.pathPattern = "/contact"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "DELETE":
+							r.name = DeleteContactOperation
+							r.summary = "Delete a contact record"
+							r.operationID = "deleteContact"
+							r.pathPattern = "/contact/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "GET":
+							r.name = GetContactOperation
+							r.summary = "Get contact details"
+							r.operationID = "getContact"
+							r.pathPattern = "/contact/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "PUT":
+							r.name = UpdateContactOperation
+							r.summary = "Update contact details"
+							r.operationID = "updateContact"
+							r.pathPattern = "/contact/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'd': // Prefix: "datasource"
 				origElem := elem
 				if l := len("datasource"); len(elem) >= l && elem[0:l] == "datasource" {

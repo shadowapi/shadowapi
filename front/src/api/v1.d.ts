@@ -752,6 +752,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all contacts */
+        get: operations["listContacts"];
+        put?: never;
+        /** Create a new contact record */
+        post: operations["createContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contact/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get contact details */
+        get: operations["getContact"];
+        /** Update contact details */
+        put: operations["updateContact"];
+        post?: never;
+        /** Delete a contact record */
+        delete: operations["deleteContact"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -773,6 +810,7 @@ export interface components {
         StorageS3: components["schemas"]["storage_s3"];
         StorageHostFiles: components["schemas"]["storage_hostfiles"];
         EmailLabel: components["schemas"]["email_label"];
+        Contact: components["schemas"]["contact"];
         Message: components["schemas"]["message"];
         MessageBodyParsed: components["schemas"]["message_body_parsed"];
         MessageQuery: components["schemas"]["message_query"];
@@ -1306,6 +1344,163 @@ export interface components {
              * @description Timestamp when the policy was last updated.
              */
             updated_at: string;
+        };
+        contact: {
+            readonly uuid?: string;
+            readonly user_uuid?: string;
+            readonly instance_uuid?: string;
+            status?: string;
+            names?: {
+                [key: string]: unknown;
+            };
+            namesSearch?: string;
+            last?: string;
+            first?: string;
+            middle?: string;
+            /** Format: date-time */
+            birthday?: string;
+            birthdayType?: string;
+            salary?: string;
+            salaryData?: {
+                [key: string]: unknown;
+            };
+            lastPositions?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            lastPositionID?: number;
+            /** Format: int64 */
+            lastPositionCompanyID?: number;
+            lastPositionCompanyName?: string;
+            lastPositionTitle?: string;
+            /** Format: date-time */
+            lastPositionStartDate?: string;
+            /** Format: date-time */
+            lastPositionEndDate?: string;
+            lastPositionEndNow?: boolean;
+            lastPositionDescription?: string;
+            noteSearch?: string;
+            noteKpiID?: {
+                [key: string]: unknown;
+            };
+            phones?: {
+                [key: string]: unknown;
+            };
+            phoneSearch?: string;
+            phone1?: string;
+            phone1Type?: string;
+            phone1Country?: string;
+            phone2?: string;
+            phone2Type?: string;
+            phone2Country?: string;
+            phone3?: string;
+            phone3Type?: string;
+            phone3Country?: string;
+            phone4?: string;
+            phone4Type?: string;
+            phone4Country?: string;
+            phone5?: string;
+            phone5Type?: string;
+            phone5Country?: string;
+            emails?: {
+                [key: string]: unknown;
+            };
+            emailSearch?: string;
+            email1?: string;
+            email1Type?: string;
+            email2?: string;
+            email2Type?: string;
+            email3?: string;
+            email3Type?: string;
+            email4?: string;
+            email4Type?: string;
+            email5?: string;
+            email5Type?: string;
+            messengers?: {
+                [key: string]: unknown;
+            };
+            messengersSearch?: string;
+            skypeUUID?: string;
+            skype?: string;
+            whatsappUUID?: string;
+            whatsapp?: string;
+            telegramUUID?: string;
+            telegram?: string;
+            wechatUUID?: string;
+            wechat?: string;
+            lineUUID?: string;
+            line?: string;
+            socials?: {
+                [key: string]: unknown;
+            };
+            socialsSearch?: string;
+            linkedinUUID?: string;
+            linkedinURL?: string;
+            facebookUUID?: string;
+            facebookURL?: string;
+            twitterUUID?: string;
+            twitterURL?: string;
+            githubUUID?: string;
+            githubURL?: string;
+            vkUUID?: string;
+            vkURL?: string;
+            odnoUUID?: string;
+            odnoURL?: string;
+            hhruUUID?: string;
+            hhruURL?: string;
+            habrUUID?: string;
+            habrURL?: string;
+            moikrugUUID?: string;
+            moikrugURL?: string;
+            instagramUUID?: string;
+            instagramURL?: string;
+            social1UUID?: string;
+            social1URL?: string;
+            social1Type?: string;
+            social2UUID?: string;
+            social2URL?: string;
+            social2Type?: string;
+            social3UUID?: string;
+            social3URL?: string;
+            social3Type?: string;
+            social4UUID?: string;
+            social4URL?: string;
+            social4Type?: string;
+            social5UUID?: string;
+            social5URL?: string;
+            social5Type?: string;
+            social6UUID?: string;
+            social6URL?: string;
+            social6Type?: string;
+            social7UUID?: string;
+            social7URL?: string;
+            social7Type?: string;
+            social8UUID?: string;
+            social8URL?: string;
+            social8Type?: string;
+            social9UUID?: string;
+            social9URL?: string;
+            social9Type?: string;
+            trackingSource?: string;
+            trackingSlug?: string;
+            cachedImg?: string;
+            cachedImgData?: {
+                [key: string]: unknown;
+            };
+            crawl?: {
+                [key: string]: unknown;
+            };
+            duplicateUserID?: string;
+            duplicateAlternativeID?: string;
+            /** Format: date-time */
+            duplicateReportDate?: string;
+            /** Format: date-time */
+            entryDate?: string;
+            /** Format: date-time */
+            editDate?: string;
+            /** Format: date-time */
+            lastKPIEntryDate?: string;
+            score100?: number;
         };
     };
     responses: never;
@@ -3918,6 +4113,163 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Sync policy deleted successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of contacts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["contact"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["contact"];
+            };
+        };
+        responses: {
+            /** @description Contact created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["contact"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contact details retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["contact"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["contact"];
+            };
+        };
+        responses: {
+            /** @description Contact updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["contact"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contact deleted successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
