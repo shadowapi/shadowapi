@@ -1,5 +1,7 @@
 package worker
 
+/*
+// OLD CODE
 import (
 	"context"
 	"encoding/json"
@@ -78,3 +80,4 @@ func (t *tokenRefresherWorker) Work(ctx context.Context, b *Broker, args *tokenR
 	// reschedule the worker
 	return b.ScheduleRefresh(ctx, args.TokenUUID, token.Expiry)
 }
+*/
