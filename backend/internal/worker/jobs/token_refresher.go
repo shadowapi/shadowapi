@@ -3,6 +3,8 @@ package jobs
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"log/slog"
 	"time"
 
@@ -14,7 +16,6 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	oauthTools "github.com/shadowapi/shadowapi/backend/internal/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
-	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
@@ -104,19 +105,19 @@ func ScheduleTokenRefresh(ctx context.Context, q *queue.Queue, tokenUUID uuid.UU
 		return err
 	}
 	// Publish using the registered worker subject.
-	return q.Publish(ctx, worker.WorkerSubjectTokenRefresh, msg)
+	return q.Publish(ctx, registry.WorkerSubjectTokenRefresh, msg)
 }
 
 // TokenRefresherJobFactory is the factory for token refresher jobs.
-func TokenRefresherJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue) worker.JobFactory {
-	return func(data []byte) (worker.Job, error) {
+func TokenRefresherJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue) types.JobFactory {
+	return func(data []byte) (types.Job, error) {
 		var args TokenRefresherJobArgs
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err
 		}
 		// If the job is not yet ready, return a JobNotReadyError.
 		if time.Now().UTC().Before(args.Expiry) {
-			return nil, worker.JobNotReadyError{Delay: time.Until(args.Expiry)}
+			return nil, types.JobNotReadyError{Delay: time.Until(args.Expiry)}
 		}
 		return NewTokenRefresherJob(dbp, log, q, args), nil
 	}

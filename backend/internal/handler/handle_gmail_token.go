@@ -66,11 +66,12 @@ func (h *Handler) handleGmailToken(
 			return nil, ErrWithCode(http.StatusInternalServerError, E("link datasource with token"))
 		}
 
-		log.Info("add token refresh job to worker pool", "token_uuid", tokenUUID, "expiry", token.Expiry)
-		if err = h.wbr.ScheduleRefresh(ctx, tokenUUID, token.Expiry); err != nil {
-			log.Error("fail add job to worker pool", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("fail add job to worker pool"))
-		}
+		// TODO @reactima token needs to be sent and processed as a message
+		//log.Info("add token refresh job to worker pool", "token_uuid", tokenUUID, "expiry", token.Expiry)
+		//if err = h.wbr.ScheduleRefresh(ctx, tokenUUID, token.Expiry); err != nil {
+		//	log.Error("fail add job to worker pool", "error", err)
+		//	return nil, ErrWithCode(http.StatusInternalServerError, E("fail add job to worker pool"))
+		//}
 
 		location, err := url.Parse("/datasources/" + datasourceUUID.String())
 		if err != nil {

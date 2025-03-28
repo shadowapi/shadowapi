@@ -1,25 +1,26 @@
 get:
-  description: Create Pipeline Object
+  description: List pipelines
   operationId: pipeline-list
   parameters:
     - description: Offset records.
-      explode: false
       in: query
       name: offset
+      explode: false
       schema:
         description: Offset records.
         format: int32
         type: integer
     - description: Limit records.
-      explode: false
       in: query
       name: limit
+      explode: false
       schema:
         description: Limit records.
         format: int32
         type: integer
   responses:
     "200":
+      description: Pipelines retrieved successfully.
       content:
         application/json:
           schema:
@@ -27,54 +28,57 @@ get:
             additionalProperties: false
             properties:
               pipelines:
-                description: List of Pipelines.
+                description: List of pipelines.
+                type: array
                 items:
                   $ref: "../openapi.yaml#/components/schemas/Pipeline"
-                type: array
             required:
               - pipelines
-      description: OK
     default:
+      description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: Error
   tags:
     - pipeline
+
 post:
   description: Create Pipeline
   operationId: pipeline-create
   requestBody:
+    required: true
     content:
       application/json:
         schema:
           type: object
           additionalProperties: false
           properties:
-            name:
-              description: Name of the pipeline.
+            user_uuid:
               type: string
+              description: The user or account that owns this pipeline.
+            name:
+              type: string
+              description: Name of the pipeline.
             flow:
-              description: Flow JSON to draw.
               type: object
               additionalProperties: true
+              description: Flow JSON to draw.
           required:
             - name
             - flow
-    required: true
   responses:
     "200":
+      description: Pipeline created successfully.
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Pipeline"
-      description: OK
     default:
+      description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: Error
   tags:
     - pipeline

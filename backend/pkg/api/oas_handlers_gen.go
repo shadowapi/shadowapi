@@ -11309,7 +11309,7 @@ func (s *Server) handlePipelineEntryGetRequest(args [2]string, argsEscaped bool,
 
 // handlePipelineEntryListRequest handles pipeline-entry-list operation.
 //
-// Get pipeline entry.
+// Get all entries for a pipeline.
 //
 // GET /pipeline/{uuid}/entry
 func (s *Server) handlePipelineEntryListRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11955,7 +11955,7 @@ func (s *Server) handlePipelineEntryUpdateRequest(args [2]string, argsEscaped bo
 
 // handlePipelineGetRequest handles pipeline-get operation.
 //
-// Get pipeline.
+// Get pipeline by UUID (optionally filter by user).
 //
 // GET /pipeline/{uuid}
 func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12116,6 +12116,10 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 					Name: "uuid",
 					In:   "path",
 				}: params.UUID,
+				{
+					Name: "user_uuid",
+					In:   "query",
+				}: params.UserUUID,
 			},
 			Raw: r,
 		}
@@ -12169,7 +12173,7 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 
 // handlePipelineListRequest handles pipeline-list operation.
 //
-// Create Pipeline Object.
+// List pipelines.
 //
 // GET /pipeline
 func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

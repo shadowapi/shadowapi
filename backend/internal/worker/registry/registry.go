@@ -1,8 +1,9 @@
 // Central registration of all workers
-package worker
+package registry
 
 import (
 	"fmt"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"sync"
 )
 
@@ -15,11 +16,8 @@ const (
 	WorkerSubjectEmailFetch   = WorkerSubject + ".sync.emailFetch"
 )
 
-// JobFactory is a function that builds a Job from a message’s raw data.
-type JobFactory func(data []byte) (Job, error)
-
 var (
-	jobRegistry   = make(map[string]JobFactory)
+	jobRegistry   = make(map[string]types.JobFactory)
 	jobRegistryMu sync.RWMutex
 
 	RegistrySubjects = []string{
@@ -30,14 +28,14 @@ var (
 )
 
 // RegisterJob registers a job factory for a given subject.
-func RegisterJob(subject string, factory JobFactory) {
+func RegisterJob(subject string, factory types.JobFactory) {
 	jobRegistryMu.Lock()
 	defer jobRegistryMu.Unlock()
 	jobRegistry[subject] = factory
 }
 
 // CreateJob returns a new job instance for a given subject.
-func CreateJob(subject string, data []byte) (Job, error) {
+func CreateJob(subject string, data []byte) (types.Job, error) {
 	jobRegistryMu.RLock()
 	factory, ok := jobRegistry[subject]
 	jobRegistryMu.RUnlock()

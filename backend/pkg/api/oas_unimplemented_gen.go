@@ -483,7 +483,7 @@ func (UnimplementedHandler) PipelineEntryGet(ctx context.Context, params Pipelin
 
 // PipelineEntryList implements pipeline-entry-list operation.
 //
-// Get pipeline entry.
+// Get all entries for a pipeline.
 //
 // GET /pipeline/{uuid}/entry
 func (UnimplementedHandler) PipelineEntryList(ctx context.Context, params PipelineEntryListParams) (r []PipelineEntry, _ error) {
@@ -510,7 +510,7 @@ func (UnimplementedHandler) PipelineEntryUpdate(ctx context.Context, req *Pipeli
 
 // PipelineGet implements pipeline-get operation.
 //
-// Get pipeline.
+// Get pipeline by UUID (optionally filter by user).
 //
 // GET /pipeline/{uuid}
 func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetParams) (r *Pipeline, _ error) {
@@ -519,7 +519,7 @@ func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetP
 
 // PipelineList implements pipeline-list operation.
 //
-// Create Pipeline Object.
+// List pipelines.
 //
 // GET /pipeline
 func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineListParams) (r *PipelineListOK, _ error) {

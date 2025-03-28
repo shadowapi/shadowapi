@@ -1,5 +1,5 @@
 get:
-  description: Get pipeline
+  description: Get pipeline by UUID (optionally filter by user)
   operationId: pipeline-get
   parameters:
     - description: UUID of the pipeline.
@@ -7,35 +7,41 @@ get:
       name: uuid
       required: true
       schema:
-        description: UUID of the pipeline.
+        type: string
+    - description: (Optional) UUID of the user that owns the pipeline.
+      in: query
+      name: user_uuid
+      required: false
+      schema:
         type: string
   responses:
     "200":
+      description: OK
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Pipeline"
-      description: OK
     default:
+      description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: Error
   tags:
     - pipeline
+
 put:
   description: Update pipeline
   operationId: pipeline-update
   parameters:
-    - description: UUID of the pipeline object.
+    - description: UUID of the pipeline.
       in: path
       name: uuid
       required: true
       schema:
-        description: UUID of the pipeline object.
         type: string
   requestBody:
+    required: true
     content:
       application/json:
         schema:
@@ -43,31 +49,31 @@ put:
           additionalProperties: false
           properties:
             name:
-              description: Name of the client.
+              description: Updated name of the pipeline.
               type: string
             flow:
-              description: Flow JSON to draw.
+              description: Updated flow JSON.
               type: object
               additionalProperties: true
           required:
             - name
             - flow
-    required: true
   responses:
     "200":
+      description: Pipeline updated successfully.
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Pipeline"
-      description: OK
     default:
+      description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: Error
   tags:
     - pipeline
+
 delete:
   description: Delete a pipeline
   operationId: pipeline-delete
@@ -77,16 +83,15 @@ delete:
       name: uuid
       required: true
       schema:
-        description: UUID of the pipeline.
         type: string
   responses:
     "200":
-      description: OK
+      description: Pipeline deleted successfully.
     default:
+      description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: Error
   tags:
     - pipeline

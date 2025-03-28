@@ -3,6 +3,10 @@ additionalProperties: false
 properties:
   uuid:
     type: string
+  user_uuid:
+    type: string
+    description: The user (or account) that owns this pipeline.
+    readOnly: true
   name:
     type: string
   flow:
@@ -16,6 +20,5 @@ properties:
     type: string
 required:
   - uuid
-  - datasource_uuid
   - name
   - flow

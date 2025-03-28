@@ -322,7 +322,7 @@ type Handler interface {
 	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error)
 	// PipelineEntryList implements pipeline-entry-list operation.
 	//
-	// Get pipeline entry.
+	// Get all entries for a pipeline.
 	//
 	// GET /pipeline/{uuid}/entry
 	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error)
@@ -340,13 +340,13 @@ type Handler interface {
 	PipelineEntryUpdate(ctx context.Context, req *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error)
 	// PipelineGet implements pipeline-get operation.
 	//
-	// Get pipeline.
+	// Get pipeline by UUID (optionally filter by user).
 	//
 	// GET /pipeline/{uuid}
 	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList implements pipeline-list operation.
 	//
-	// Create Pipeline Object.
+	// List pipelines.
 	//
 	// GET /pipeline
 	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)

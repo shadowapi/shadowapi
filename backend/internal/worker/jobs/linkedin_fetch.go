@@ -3,9 +3,8 @@ package jobs
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"log/slog"
-
-	"github.com/shadowapi/shadowapi/backend/internal/worker"
 )
 
 type LinkedinJobArgs struct {
@@ -28,8 +27,8 @@ func (j *LinkedinJob) Execute(ctx context.Context) error {
 	return nil
 }
 
-func LinkedinJobFactory(log *slog.Logger) worker.JobFactory {
-	return func(data []byte) (worker.Job, error) {
+func LinkedinJobFactory(log *slog.Logger) types.JobFactory {
+	return func(data []byte) (types.Job, error) {
 		var args LinkedinJobArgs
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err

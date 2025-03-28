@@ -343,7 +343,7 @@ type Invoker interface {
 	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error)
 	// PipelineEntryList invokes pipeline-entry-list operation.
 	//
-	// Get pipeline entry.
+	// Get all entries for a pipeline.
 	//
 	// GET /pipeline/{uuid}/entry
 	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error)
@@ -361,13 +361,13 @@ type Invoker interface {
 	PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error)
 	// PipelineGet invokes pipeline-get operation.
 	//
-	// Get pipeline.
+	// Get pipeline by UUID (optionally filter by user).
 	//
 	// GET /pipeline/{uuid}
 	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList invokes pipeline-list operation.
 	//
-	// Create Pipeline Object.
+	// List pipelines.
 	//
 	// GET /pipeline
 	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)
@@ -7590,7 +7590,7 @@ func (c *Client) sendPipelineEntryGet(ctx context.Context, params PipelineEntryG
 
 // PipelineEntryList invokes pipeline-entry-list operation.
 //
-// Get pipeline entry.
+// Get all entries for a pipeline.
 //
 // GET /pipeline/{uuid}/entry
 func (c *Client) PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error) {
@@ -8000,7 +8000,7 @@ func (c *Client) sendPipelineEntryUpdate(ctx context.Context, request *PipelineE
 
 // PipelineGet invokes pipeline-get operation.
 //
-// Get pipeline.
+// Get pipeline by UUID (optionally filter by user).
 //
 // GET /pipeline/{uuid}
 func (c *Client) PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error) {
@@ -8065,6 +8065,27 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "user_uuid" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "user_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.UserUUID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -8135,7 +8156,7 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 
 // PipelineList invokes pipeline-list operation.
 //
-// Create Pipeline Object.
+// List pipelines.
 //
 // GET /pipeline
 func (c *Client) PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error) {

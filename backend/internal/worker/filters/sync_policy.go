@@ -1,9 +1,8 @@
 package filters
 
 import (
-	"strings"
-
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"strings"
 )
 
 type SyncPolicyFilter struct {

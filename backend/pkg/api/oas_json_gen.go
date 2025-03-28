@@ -48,14 +48,14 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Names.Set {
+		if s.Names != nil {
 			e.FieldStart("names")
 			s.Names.Encode(e)
 		}
 	}
 	{
 		if s.NamesSearch.Set {
-			e.FieldStart("namesSearch")
+			e.FieldStart("names_search")
 			s.NamesSearch.Encode(e)
 		}
 	}
@@ -85,7 +85,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.BirthdayType.Set {
-			e.FieldStart("birthdayType")
+			e.FieldStart("birthday_type")
 			s.BirthdayType.Encode(e)
 		}
 	}
@@ -96,86 +96,86 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.SalaryData.Set {
-			e.FieldStart("salaryData")
+		if s.SalaryData != nil {
+			e.FieldStart("salary_data")
 			s.SalaryData.Encode(e)
 		}
 	}
 	{
-		if s.LastPositions.Set {
-			e.FieldStart("lastPositions")
+		if s.LastPositions != nil {
+			e.FieldStart("last_positions")
 			s.LastPositions.Encode(e)
 		}
 	}
 	{
 		if s.LastPositionID.Set {
-			e.FieldStart("lastPositionID")
+			e.FieldStart("last_position_id")
 			s.LastPositionID.Encode(e)
 		}
 	}
 	{
 		if s.LastPositionCompanyID.Set {
-			e.FieldStart("lastPositionCompanyID")
+			e.FieldStart("last_position_company_id")
 			s.LastPositionCompanyID.Encode(e)
 		}
 	}
 	{
 		if s.LastPositionCompanyName.Set {
-			e.FieldStart("lastPositionCompanyName")
+			e.FieldStart("last_position_company_name")
 			s.LastPositionCompanyName.Encode(e)
 		}
 	}
 	{
 		if s.LastPositionTitle.Set {
-			e.FieldStart("lastPositionTitle")
+			e.FieldStart("last_position_title")
 			s.LastPositionTitle.Encode(e)
 		}
 	}
 	{
 		if s.LastPositionStartDate.Set {
-			e.FieldStart("lastPositionStartDate")
+			e.FieldStart("last_position_start_date")
 			s.LastPositionStartDate.Encode(e, json.EncodeDateTime)
 		}
 	}
 	{
 		if s.LastPositionEndDate.Set {
-			e.FieldStart("lastPositionEndDate")
+			e.FieldStart("last_position_end_date")
 			s.LastPositionEndDate.Encode(e, json.EncodeDateTime)
 		}
 	}
 	{
 		if s.LastPositionEndNow.Set {
-			e.FieldStart("lastPositionEndNow")
+			e.FieldStart("last_position_end_now")
 			s.LastPositionEndNow.Encode(e)
 		}
 	}
 	{
 		if s.LastPositionDescription.Set {
-			e.FieldStart("lastPositionDescription")
+			e.FieldStart("last_position_description")
 			s.LastPositionDescription.Encode(e)
 		}
 	}
 	{
 		if s.NoteSearch.Set {
-			e.FieldStart("noteSearch")
+			e.FieldStart("note_search")
 			s.NoteSearch.Encode(e)
 		}
 	}
 	{
-		if s.NoteKpiID.Set {
-			e.FieldStart("noteKpiID")
+		if s.NoteKpiID != nil {
+			e.FieldStart("note_kpi_id")
 			s.NoteKpiID.Encode(e)
 		}
 	}
 	{
-		if s.Phones.Set {
+		if s.Phones != nil {
 			e.FieldStart("phones")
 			s.Phones.Encode(e)
 		}
 	}
 	{
 		if s.PhoneSearch.Set {
-			e.FieldStart("phoneSearch")
+			e.FieldStart("phone_search")
 			s.PhoneSearch.Encode(e)
 		}
 	}
@@ -187,13 +187,13 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Phone1Type.Set {
-			e.FieldStart("phone1Type")
+			e.FieldStart("phone1_type")
 			s.Phone1Type.Encode(e)
 		}
 	}
 	{
 		if s.Phone1Country.Set {
-			e.FieldStart("phone1Country")
+			e.FieldStart("phone1_country")
 			s.Phone1Country.Encode(e)
 		}
 	}
@@ -205,13 +205,13 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Phone2Type.Set {
-			e.FieldStart("phone2Type")
+			e.FieldStart("phone2_type")
 			s.Phone2Type.Encode(e)
 		}
 	}
 	{
 		if s.Phone2Country.Set {
-			e.FieldStart("phone2Country")
+			e.FieldStart("phone2_country")
 			s.Phone2Country.Encode(e)
 		}
 	}
@@ -223,13 +223,13 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Phone3Type.Set {
-			e.FieldStart("phone3Type")
+			e.FieldStart("phone3_type")
 			s.Phone3Type.Encode(e)
 		}
 	}
 	{
 		if s.Phone3Country.Set {
-			e.FieldStart("phone3Country")
+			e.FieldStart("phone3_country")
 			s.Phone3Country.Encode(e)
 		}
 	}
@@ -241,13 +241,13 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Phone4Type.Set {
-			e.FieldStart("phone4Type")
+			e.FieldStart("phone4_type")
 			s.Phone4Type.Encode(e)
 		}
 	}
 	{
 		if s.Phone4Country.Set {
-			e.FieldStart("phone4Country")
+			e.FieldStart("phone4_country")
 			s.Phone4Country.Encode(e)
 		}
 	}
@@ -259,25 +259,25 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Phone5Type.Set {
-			e.FieldStart("phone5Type")
+			e.FieldStart("phone5_type")
 			s.Phone5Type.Encode(e)
 		}
 	}
 	{
 		if s.Phone5Country.Set {
-			e.FieldStart("phone5Country")
+			e.FieldStart("phone5_country")
 			s.Phone5Country.Encode(e)
 		}
 	}
 	{
-		if s.Emails.Set {
+		if s.Emails != nil {
 			e.FieldStart("emails")
 			s.Emails.Encode(e)
 		}
 	}
 	{
 		if s.EmailSearch.Set {
-			e.FieldStart("emailSearch")
+			e.FieldStart("email_search")
 			s.EmailSearch.Encode(e)
 		}
 	}
@@ -289,7 +289,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Email1Type.Set {
-			e.FieldStart("email1Type")
+			e.FieldStart("email1_type")
 			s.Email1Type.Encode(e)
 		}
 	}
@@ -301,7 +301,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Email2Type.Set {
-			e.FieldStart("email2Type")
+			e.FieldStart("email2_type")
 			s.Email2Type.Encode(e)
 		}
 	}
@@ -313,7 +313,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Email3Type.Set {
-			e.FieldStart("email3Type")
+			e.FieldStart("email3_type")
 			s.Email3Type.Encode(e)
 		}
 	}
@@ -325,7 +325,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Email4Type.Set {
-			e.FieldStart("email4Type")
+			e.FieldStart("email4_type")
 			s.Email4Type.Encode(e)
 		}
 	}
@@ -337,25 +337,25 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.Email5Type.Set {
-			e.FieldStart("email5Type")
+			e.FieldStart("email5_type")
 			s.Email5Type.Encode(e)
 		}
 	}
 	{
-		if s.Messengers.Set {
+		if s.Messengers != nil {
 			e.FieldStart("messengers")
 			s.Messengers.Encode(e)
 		}
 	}
 	{
 		if s.MessengersSearch.Set {
-			e.FieldStart("messengersSearch")
+			e.FieldStart("messengers_search")
 			s.MessengersSearch.Encode(e)
 		}
 	}
 	{
 		if s.SkypeUUID.Set {
-			e.FieldStart("skypeUUID")
+			e.FieldStart("skype_uuid")
 			s.SkypeUUID.Encode(e)
 		}
 	}
@@ -367,7 +367,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.WhatsappUUID.Set {
-			e.FieldStart("whatsappUUID")
+			e.FieldStart("whatsapp_uuid")
 			s.WhatsappUUID.Encode(e)
 		}
 	}
@@ -379,7 +379,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.TelegramUUID.Set {
-			e.FieldStart("telegramUUID")
+			e.FieldStart("telegram_uuid")
 			s.TelegramUUID.Encode(e)
 		}
 	}
@@ -391,7 +391,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.WechatUUID.Set {
-			e.FieldStart("wechatUUID")
+			e.FieldStart("wechat_uuid")
 			s.WechatUUID.Encode(e)
 		}
 	}
@@ -403,7 +403,7 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 	}
 	{
 		if s.LineUUID.Set {
-			e.FieldStart("lineUUID")
+			e.FieldStart("line_uuid")
 			s.LineUUID.Encode(e)
 		}
 	}
@@ -414,500 +414,493 @@ func (s *Contact) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Socials.Set {
+		if s.Socials != nil {
 			e.FieldStart("socials")
 			s.Socials.Encode(e)
 		}
 	}
 	{
 		if s.SocialsSearch.Set {
-			e.FieldStart("socialsSearch")
+			e.FieldStart("socials_search")
 			s.SocialsSearch.Encode(e)
 		}
 	}
 	{
 		if s.LinkedinUUID.Set {
-			e.FieldStart("linkedinUUID")
+			e.FieldStart("linkedin_uuid")
 			s.LinkedinUUID.Encode(e)
 		}
 	}
 	{
 		if s.LinkedinURL.Set {
-			e.FieldStart("linkedinURL")
+			e.FieldStart("linkedin_url")
 			s.LinkedinURL.Encode(e)
 		}
 	}
 	{
 		if s.FacebookUUID.Set {
-			e.FieldStart("facebookUUID")
+			e.FieldStart("facebook_uuid")
 			s.FacebookUUID.Encode(e)
 		}
 	}
 	{
 		if s.FacebookURL.Set {
-			e.FieldStart("facebookURL")
+			e.FieldStart("facebook_url")
 			s.FacebookURL.Encode(e)
 		}
 	}
 	{
 		if s.TwitterUUID.Set {
-			e.FieldStart("twitterUUID")
+			e.FieldStart("twitter_uuid")
 			s.TwitterUUID.Encode(e)
 		}
 	}
 	{
 		if s.TwitterURL.Set {
-			e.FieldStart("twitterURL")
+			e.FieldStart("twitter_url")
 			s.TwitterURL.Encode(e)
 		}
 	}
 	{
 		if s.GithubUUID.Set {
-			e.FieldStart("githubUUID")
+			e.FieldStart("github_uuid")
 			s.GithubUUID.Encode(e)
 		}
 	}
 	{
 		if s.GithubURL.Set {
-			e.FieldStart("githubURL")
+			e.FieldStart("github_url")
 			s.GithubURL.Encode(e)
 		}
 	}
 	{
 		if s.VkUUID.Set {
-			e.FieldStart("vkUUID")
+			e.FieldStart("vk_uuid")
 			s.VkUUID.Encode(e)
 		}
 	}
 	{
 		if s.VkURL.Set {
-			e.FieldStart("vkURL")
+			e.FieldStart("vk_url")
 			s.VkURL.Encode(e)
 		}
 	}
 	{
 		if s.OdnoUUID.Set {
-			e.FieldStart("odnoUUID")
+			e.FieldStart("odno_uuid")
 			s.OdnoUUID.Encode(e)
 		}
 	}
 	{
 		if s.OdnoURL.Set {
-			e.FieldStart("odnoURL")
+			e.FieldStart("odno_url")
 			s.OdnoURL.Encode(e)
 		}
 	}
 	{
 		if s.HhruUUID.Set {
-			e.FieldStart("hhruUUID")
+			e.FieldStart("hhru_uuid")
 			s.HhruUUID.Encode(e)
 		}
 	}
 	{
 		if s.HhruURL.Set {
-			e.FieldStart("hhruURL")
+			e.FieldStart("hhru_url")
 			s.HhruURL.Encode(e)
 		}
 	}
 	{
 		if s.HabrUUID.Set {
-			e.FieldStart("habrUUID")
+			e.FieldStart("habr_uuid")
 			s.HabrUUID.Encode(e)
 		}
 	}
 	{
 		if s.HabrURL.Set {
-			e.FieldStart("habrURL")
+			e.FieldStart("habr_url")
 			s.HabrURL.Encode(e)
 		}
 	}
 	{
 		if s.MoikrugUUID.Set {
-			e.FieldStart("moikrugUUID")
+			e.FieldStart("moikrug_uuid")
 			s.MoikrugUUID.Encode(e)
 		}
 	}
 	{
 		if s.MoikrugURL.Set {
-			e.FieldStart("moikrugURL")
+			e.FieldStart("moikrug_url")
 			s.MoikrugURL.Encode(e)
 		}
 	}
 	{
 		if s.InstagramUUID.Set {
-			e.FieldStart("instagramUUID")
+			e.FieldStart("instagram_uuid")
 			s.InstagramUUID.Encode(e)
 		}
 	}
 	{
 		if s.InstagramURL.Set {
-			e.FieldStart("instagramURL")
+			e.FieldStart("instagram_url")
 			s.InstagramURL.Encode(e)
 		}
 	}
 	{
 		if s.Social1UUID.Set {
-			e.FieldStart("social1UUID")
+			e.FieldStart("social1_uuid")
 			s.Social1UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social1URL.Set {
-			e.FieldStart("social1URL")
+			e.FieldStart("social1_url")
 			s.Social1URL.Encode(e)
 		}
 	}
 	{
 		if s.Social1Type.Set {
-			e.FieldStart("social1Type")
+			e.FieldStart("social1_type")
 			s.Social1Type.Encode(e)
 		}
 	}
 	{
 		if s.Social2UUID.Set {
-			e.FieldStart("social2UUID")
+			e.FieldStart("social2_uuid")
 			s.Social2UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social2URL.Set {
-			e.FieldStart("social2URL")
+			e.FieldStart("social2_url")
 			s.Social2URL.Encode(e)
 		}
 	}
 	{
 		if s.Social2Type.Set {
-			e.FieldStart("social2Type")
+			e.FieldStart("social2_type")
 			s.Social2Type.Encode(e)
 		}
 	}
 	{
 		if s.Social3UUID.Set {
-			e.FieldStart("social3UUID")
+			e.FieldStart("social3_uuid")
 			s.Social3UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social3URL.Set {
-			e.FieldStart("social3URL")
+			e.FieldStart("social3_url")
 			s.Social3URL.Encode(e)
 		}
 	}
 	{
 		if s.Social3Type.Set {
-			e.FieldStart("social3Type")
+			e.FieldStart("social3_type")
 			s.Social3Type.Encode(e)
 		}
 	}
 	{
 		if s.Social4UUID.Set {
-			e.FieldStart("social4UUID")
+			e.FieldStart("social4_uuid")
 			s.Social4UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social4URL.Set {
-			e.FieldStart("social4URL")
+			e.FieldStart("social4_url")
 			s.Social4URL.Encode(e)
 		}
 	}
 	{
 		if s.Social4Type.Set {
-			e.FieldStart("social4Type")
+			e.FieldStart("social4_type")
 			s.Social4Type.Encode(e)
 		}
 	}
 	{
 		if s.Social5UUID.Set {
-			e.FieldStart("social5UUID")
+			e.FieldStart("social5_uuid")
 			s.Social5UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social5URL.Set {
-			e.FieldStart("social5URL")
+			e.FieldStart("social5_url")
 			s.Social5URL.Encode(e)
 		}
 	}
 	{
 		if s.Social5Type.Set {
-			e.FieldStart("social5Type")
+			e.FieldStart("social5_type")
 			s.Social5Type.Encode(e)
 		}
 	}
 	{
 		if s.Social6UUID.Set {
-			e.FieldStart("social6UUID")
+			e.FieldStart("social6_uuid")
 			s.Social6UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social6URL.Set {
-			e.FieldStart("social6URL")
+			e.FieldStart("social6_url")
 			s.Social6URL.Encode(e)
 		}
 	}
 	{
 		if s.Social6Type.Set {
-			e.FieldStart("social6Type")
+			e.FieldStart("social6_type")
 			s.Social6Type.Encode(e)
 		}
 	}
 	{
 		if s.Social7UUID.Set {
-			e.FieldStart("social7UUID")
+			e.FieldStart("social7_uuid")
 			s.Social7UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social7URL.Set {
-			e.FieldStart("social7URL")
+			e.FieldStart("social7_url")
 			s.Social7URL.Encode(e)
 		}
 	}
 	{
 		if s.Social7Type.Set {
-			e.FieldStart("social7Type")
+			e.FieldStart("social7_type")
 			s.Social7Type.Encode(e)
 		}
 	}
 	{
 		if s.Social8UUID.Set {
-			e.FieldStart("social8UUID")
+			e.FieldStart("social8_uuid")
 			s.Social8UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social8URL.Set {
-			e.FieldStart("social8URL")
+			e.FieldStart("social8_url")
 			s.Social8URL.Encode(e)
 		}
 	}
 	{
 		if s.Social8Type.Set {
-			e.FieldStart("social8Type")
+			e.FieldStart("social8_type")
 			s.Social8Type.Encode(e)
 		}
 	}
 	{
 		if s.Social9UUID.Set {
-			e.FieldStart("social9UUID")
+			e.FieldStart("social9_uuid")
 			s.Social9UUID.Encode(e)
 		}
 	}
 	{
 		if s.Social9URL.Set {
-			e.FieldStart("social9URL")
+			e.FieldStart("social9_url")
 			s.Social9URL.Encode(e)
 		}
 	}
 	{
 		if s.Social9Type.Set {
-			e.FieldStart("social9Type")
+			e.FieldStart("social9_type")
 			s.Social9Type.Encode(e)
 		}
 	}
 	{
 		if s.TrackingSource.Set {
-			e.FieldStart("trackingSource")
+			e.FieldStart("tracking_source")
 			s.TrackingSource.Encode(e)
 		}
 	}
 	{
 		if s.TrackingSlug.Set {
-			e.FieldStart("trackingSlug")
+			e.FieldStart("tracking_slug")
 			s.TrackingSlug.Encode(e)
 		}
 	}
 	{
 		if s.CachedImg.Set {
-			e.FieldStart("cachedImg")
+			e.FieldStart("cached_img")
 			s.CachedImg.Encode(e)
 		}
 	}
 	{
-		if s.CachedImgData.Set {
-			e.FieldStart("cachedImgData")
+		if s.CachedImgData != nil {
+			e.FieldStart("cached_img_data")
 			s.CachedImgData.Encode(e)
 		}
 	}
 	{
-		if s.Crawl.Set {
+		if s.Crawl != nil {
 			e.FieldStart("crawl")
 			s.Crawl.Encode(e)
 		}
 	}
 	{
 		if s.DuplicateUserID.Set {
-			e.FieldStart("duplicateUserID")
+			e.FieldStart("duplicate_user_id")
 			s.DuplicateUserID.Encode(e)
 		}
 	}
 	{
 		if s.DuplicateAlternativeID.Set {
-			e.FieldStart("duplicateAlternativeID")
+			e.FieldStart("duplicate_alternative_id")
 			s.DuplicateAlternativeID.Encode(e)
 		}
 	}
 	{
 		if s.DuplicateReportDate.Set {
-			e.FieldStart("duplicateReportDate")
+			e.FieldStart("duplicate_report_date")
 			s.DuplicateReportDate.Encode(e, json.EncodeDateTime)
 		}
 	}
 	{
 		if s.EntryDate.Set {
-			e.FieldStart("entryDate")
+			e.FieldStart("entry_date")
 			s.EntryDate.Encode(e, json.EncodeDateTime)
 		}
 	}
 	{
 		if s.EditDate.Set {
-			e.FieldStart("editDate")
+			e.FieldStart("edit_date")
 			s.EditDate.Encode(e, json.EncodeDateTime)
 		}
 	}
 	{
-		if s.LastKPIEntryDate.Set {
-			e.FieldStart("lastKPIEntryDate")
-			s.LastKPIEntryDate.Encode(e, json.EncodeDateTime)
-		}
-	}
-	{
-		if s.Score100.Set {
-			e.FieldStart("score100")
-			s.Score100.Encode(e)
+		if s.LastKpiEntryDate.Set {
+			e.FieldStart("last_kpi_entry_date")
+			s.LastKpiEntryDate.Encode(e, json.EncodeDateTime)
 		}
 	}
 }
 
-var jsonFieldsNameOfContact = [126]string{
+var jsonFieldsNameOfContact = [125]string{
 	0:   "uuid",
 	1:   "user_uuid",
 	2:   "instance_uuid",
 	3:   "status",
 	4:   "names",
-	5:   "namesSearch",
+	5:   "names_search",
 	6:   "last",
 	7:   "first",
 	8:   "middle",
 	9:   "birthday",
-	10:  "birthdayType",
+	10:  "birthday_type",
 	11:  "salary",
-	12:  "salaryData",
-	13:  "lastPositions",
-	14:  "lastPositionID",
-	15:  "lastPositionCompanyID",
-	16:  "lastPositionCompanyName",
-	17:  "lastPositionTitle",
-	18:  "lastPositionStartDate",
-	19:  "lastPositionEndDate",
-	20:  "lastPositionEndNow",
-	21:  "lastPositionDescription",
-	22:  "noteSearch",
-	23:  "noteKpiID",
+	12:  "salary_data",
+	13:  "last_positions",
+	14:  "last_position_id",
+	15:  "last_position_company_id",
+	16:  "last_position_company_name",
+	17:  "last_position_title",
+	18:  "last_position_start_date",
+	19:  "last_position_end_date",
+	20:  "last_position_end_now",
+	21:  "last_position_description",
+	22:  "note_search",
+	23:  "note_kpi_id",
 	24:  "phones",
-	25:  "phoneSearch",
+	25:  "phone_search",
 	26:  "phone1",
-	27:  "phone1Type",
-	28:  "phone1Country",
+	27:  "phone1_type",
+	28:  "phone1_country",
 	29:  "phone2",
-	30:  "phone2Type",
-	31:  "phone2Country",
+	30:  "phone2_type",
+	31:  "phone2_country",
 	32:  "phone3",
-	33:  "phone3Type",
-	34:  "phone3Country",
+	33:  "phone3_type",
+	34:  "phone3_country",
 	35:  "phone4",
-	36:  "phone4Type",
-	37:  "phone4Country",
+	36:  "phone4_type",
+	37:  "phone4_country",
 	38:  "phone5",
-	39:  "phone5Type",
-	40:  "phone5Country",
+	39:  "phone5_type",
+	40:  "phone5_country",
 	41:  "emails",
-	42:  "emailSearch",
+	42:  "email_search",
 	43:  "email1",
-	44:  "email1Type",
+	44:  "email1_type",
 	45:  "email2",
-	46:  "email2Type",
+	46:  "email2_type",
 	47:  "email3",
-	48:  "email3Type",
+	48:  "email3_type",
 	49:  "email4",
-	50:  "email4Type",
+	50:  "email4_type",
 	51:  "email5",
-	52:  "email5Type",
+	52:  "email5_type",
 	53:  "messengers",
-	54:  "messengersSearch",
-	55:  "skypeUUID",
+	54:  "messengers_search",
+	55:  "skype_uuid",
 	56:  "skype",
-	57:  "whatsappUUID",
+	57:  "whatsapp_uuid",
 	58:  "whatsapp",
-	59:  "telegramUUID",
+	59:  "telegram_uuid",
 	60:  "telegram",
-	61:  "wechatUUID",
+	61:  "wechat_uuid",
 	62:  "wechat",
-	63:  "lineUUID",
+	63:  "line_uuid",
 	64:  "line",
 	65:  "socials",
-	66:  "socialsSearch",
-	67:  "linkedinUUID",
-	68:  "linkedinURL",
-	69:  "facebookUUID",
-	70:  "facebookURL",
-	71:  "twitterUUID",
-	72:  "twitterURL",
-	73:  "githubUUID",
-	74:  "githubURL",
-	75:  "vkUUID",
-	76:  "vkURL",
-	77:  "odnoUUID",
-	78:  "odnoURL",
-	79:  "hhruUUID",
-	80:  "hhruURL",
-	81:  "habrUUID",
-	82:  "habrURL",
-	83:  "moikrugUUID",
-	84:  "moikrugURL",
-	85:  "instagramUUID",
-	86:  "instagramURL",
-	87:  "social1UUID",
-	88:  "social1URL",
-	89:  "social1Type",
-	90:  "social2UUID",
-	91:  "social2URL",
-	92:  "social2Type",
-	93:  "social3UUID",
-	94:  "social3URL",
-	95:  "social3Type",
-	96:  "social4UUID",
-	97:  "social4URL",
-	98:  "social4Type",
-	99:  "social5UUID",
-	100: "social5URL",
-	101: "social5Type",
-	102: "social6UUID",
-	103: "social6URL",
-	104: "social6Type",
-	105: "social7UUID",
-	106: "social7URL",
-	107: "social7Type",
-	108: "social8UUID",
-	109: "social8URL",
-	110: "social8Type",
-	111: "social9UUID",
-	112: "social9URL",
-	113: "social9Type",
-	114: "trackingSource",
-	115: "trackingSlug",
-	116: "cachedImg",
-	117: "cachedImgData",
+	66:  "socials_search",
+	67:  "linkedin_uuid",
+	68:  "linkedin_url",
+	69:  "facebook_uuid",
+	70:  "facebook_url",
+	71:  "twitter_uuid",
+	72:  "twitter_url",
+	73:  "github_uuid",
+	74:  "github_url",
+	75:  "vk_uuid",
+	76:  "vk_url",
+	77:  "odno_uuid",
+	78:  "odno_url",
+	79:  "hhru_uuid",
+	80:  "hhru_url",
+	81:  "habr_uuid",
+	82:  "habr_url",
+	83:  "moikrug_uuid",
+	84:  "moikrug_url",
+	85:  "instagram_uuid",
+	86:  "instagram_url",
+	87:  "social1_uuid",
+	88:  "social1_url",
+	89:  "social1_type",
+	90:  "social2_uuid",
+	91:  "social2_url",
+	92:  "social2_type",
+	93:  "social3_uuid",
+	94:  "social3_url",
+	95:  "social3_type",
+	96:  "social4_uuid",
+	97:  "social4_url",
+	98:  "social4_type",
+	99:  "social5_uuid",
+	100: "social5_url",
+	101: "social5_type",
+	102: "social6_uuid",
+	103: "social6_url",
+	104: "social6_type",
+	105: "social7_uuid",
+	106: "social7_url",
+	107: "social7_type",
+	108: "social8_uuid",
+	109: "social8_url",
+	110: "social8_type",
+	111: "social9_uuid",
+	112: "social9_url",
+	113: "social9_type",
+	114: "tracking_source",
+	115: "tracking_slug",
+	116: "cached_img",
+	117: "cached_img_data",
 	118: "crawl",
-	119: "duplicateUserID",
-	120: "duplicateAlternativeID",
-	121: "duplicateReportDate",
-	122: "entryDate",
-	123: "editDate",
-	124: "lastKPIEntryDate",
-	125: "score100",
+	119: "duplicate_user_id",
+	120: "duplicate_alternative_id",
+	121: "duplicate_report_date",
+	122: "entry_date",
+	123: "edit_date",
+	124: "last_kpi_entry_date",
 }
 
 // Decode decodes Contact from json.
@@ -960,15 +953,17 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}
 		case "names":
 			if err := func() error {
-				s.Names.Reset()
-				if err := s.Names.Decode(d); err != nil {
+				s.Names = nil
+				var elem ContactNames
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.Names = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"names\"")
 			}
-		case "namesSearch":
+		case "names_search":
 			if err := func() error {
 				s.NamesSearch.Reset()
 				if err := s.NamesSearch.Decode(d); err != nil {
@@ -976,7 +971,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"namesSearch\"")
+				return errors.Wrap(err, "decode field \"names_search\"")
 			}
 		case "last":
 			if err := func() error {
@@ -1018,7 +1013,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"birthday\"")
 			}
-		case "birthdayType":
+		case "birthday_type":
 			if err := func() error {
 				s.BirthdayType.Reset()
 				if err := s.BirthdayType.Decode(d); err != nil {
@@ -1026,7 +1021,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"birthdayType\"")
+				return errors.Wrap(err, "decode field \"birthday_type\"")
 			}
 		case "salary":
 			if err := func() error {
@@ -1038,27 +1033,31 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"salary\"")
 			}
-		case "salaryData":
+		case "salary_data":
 			if err := func() error {
-				s.SalaryData.Reset()
-				if err := s.SalaryData.Decode(d); err != nil {
+				s.SalaryData = nil
+				var elem ContactSalaryData
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.SalaryData = &elem
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"salaryData\"")
+				return errors.Wrap(err, "decode field \"salary_data\"")
 			}
-		case "lastPositions":
+		case "last_positions":
 			if err := func() error {
-				s.LastPositions.Reset()
-				if err := s.LastPositions.Decode(d); err != nil {
+				s.LastPositions = nil
+				var elem ContactLastPositions
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.LastPositions = &elem
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositions\"")
+				return errors.Wrap(err, "decode field \"last_positions\"")
 			}
-		case "lastPositionID":
+		case "last_position_id":
 			if err := func() error {
 				s.LastPositionID.Reset()
 				if err := s.LastPositionID.Decode(d); err != nil {
@@ -1066,9 +1065,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionID\"")
+				return errors.Wrap(err, "decode field \"last_position_id\"")
 			}
-		case "lastPositionCompanyID":
+		case "last_position_company_id":
 			if err := func() error {
 				s.LastPositionCompanyID.Reset()
 				if err := s.LastPositionCompanyID.Decode(d); err != nil {
@@ -1076,9 +1075,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionCompanyID\"")
+				return errors.Wrap(err, "decode field \"last_position_company_id\"")
 			}
-		case "lastPositionCompanyName":
+		case "last_position_company_name":
 			if err := func() error {
 				s.LastPositionCompanyName.Reset()
 				if err := s.LastPositionCompanyName.Decode(d); err != nil {
@@ -1086,9 +1085,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionCompanyName\"")
+				return errors.Wrap(err, "decode field \"last_position_company_name\"")
 			}
-		case "lastPositionTitle":
+		case "last_position_title":
 			if err := func() error {
 				s.LastPositionTitle.Reset()
 				if err := s.LastPositionTitle.Decode(d); err != nil {
@@ -1096,9 +1095,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionTitle\"")
+				return errors.Wrap(err, "decode field \"last_position_title\"")
 			}
-		case "lastPositionStartDate":
+		case "last_position_start_date":
 			if err := func() error {
 				s.LastPositionStartDate.Reset()
 				if err := s.LastPositionStartDate.Decode(d, json.DecodeDateTime); err != nil {
@@ -1106,9 +1105,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionStartDate\"")
+				return errors.Wrap(err, "decode field \"last_position_start_date\"")
 			}
-		case "lastPositionEndDate":
+		case "last_position_end_date":
 			if err := func() error {
 				s.LastPositionEndDate.Reset()
 				if err := s.LastPositionEndDate.Decode(d, json.DecodeDateTime); err != nil {
@@ -1116,9 +1115,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionEndDate\"")
+				return errors.Wrap(err, "decode field \"last_position_end_date\"")
 			}
-		case "lastPositionEndNow":
+		case "last_position_end_now":
 			if err := func() error {
 				s.LastPositionEndNow.Reset()
 				if err := s.LastPositionEndNow.Decode(d); err != nil {
@@ -1126,9 +1125,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionEndNow\"")
+				return errors.Wrap(err, "decode field \"last_position_end_now\"")
 			}
-		case "lastPositionDescription":
+		case "last_position_description":
 			if err := func() error {
 				s.LastPositionDescription.Reset()
 				if err := s.LastPositionDescription.Decode(d); err != nil {
@@ -1136,9 +1135,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastPositionDescription\"")
+				return errors.Wrap(err, "decode field \"last_position_description\"")
 			}
-		case "noteSearch":
+		case "note_search":
 			if err := func() error {
 				s.NoteSearch.Reset()
 				if err := s.NoteSearch.Decode(d); err != nil {
@@ -1146,29 +1145,33 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"noteSearch\"")
+				return errors.Wrap(err, "decode field \"note_search\"")
 			}
-		case "noteKpiID":
+		case "note_kpi_id":
 			if err := func() error {
-				s.NoteKpiID.Reset()
-				if err := s.NoteKpiID.Decode(d); err != nil {
+				s.NoteKpiID = nil
+				var elem ContactNoteKpiID
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.NoteKpiID = &elem
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"noteKpiID\"")
+				return errors.Wrap(err, "decode field \"note_kpi_id\"")
 			}
 		case "phones":
 			if err := func() error {
-				s.Phones.Reset()
-				if err := s.Phones.Decode(d); err != nil {
+				s.Phones = nil
+				var elem ContactPhones
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.Phones = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phones\"")
 			}
-		case "phoneSearch":
+		case "phone_search":
 			if err := func() error {
 				s.PhoneSearch.Reset()
 				if err := s.PhoneSearch.Decode(d); err != nil {
@@ -1176,7 +1179,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phoneSearch\"")
+				return errors.Wrap(err, "decode field \"phone_search\"")
 			}
 		case "phone1":
 			if err := func() error {
@@ -1188,7 +1191,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phone1\"")
 			}
-		case "phone1Type":
+		case "phone1_type":
 			if err := func() error {
 				s.Phone1Type.Reset()
 				if err := s.Phone1Type.Decode(d); err != nil {
@@ -1196,9 +1199,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone1Type\"")
+				return errors.Wrap(err, "decode field \"phone1_type\"")
 			}
-		case "phone1Country":
+		case "phone1_country":
 			if err := func() error {
 				s.Phone1Country.Reset()
 				if err := s.Phone1Country.Decode(d); err != nil {
@@ -1206,7 +1209,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone1Country\"")
+				return errors.Wrap(err, "decode field \"phone1_country\"")
 			}
 		case "phone2":
 			if err := func() error {
@@ -1218,7 +1221,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phone2\"")
 			}
-		case "phone2Type":
+		case "phone2_type":
 			if err := func() error {
 				s.Phone2Type.Reset()
 				if err := s.Phone2Type.Decode(d); err != nil {
@@ -1226,9 +1229,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone2Type\"")
+				return errors.Wrap(err, "decode field \"phone2_type\"")
 			}
-		case "phone2Country":
+		case "phone2_country":
 			if err := func() error {
 				s.Phone2Country.Reset()
 				if err := s.Phone2Country.Decode(d); err != nil {
@@ -1236,7 +1239,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone2Country\"")
+				return errors.Wrap(err, "decode field \"phone2_country\"")
 			}
 		case "phone3":
 			if err := func() error {
@@ -1248,7 +1251,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phone3\"")
 			}
-		case "phone3Type":
+		case "phone3_type":
 			if err := func() error {
 				s.Phone3Type.Reset()
 				if err := s.Phone3Type.Decode(d); err != nil {
@@ -1256,9 +1259,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone3Type\"")
+				return errors.Wrap(err, "decode field \"phone3_type\"")
 			}
-		case "phone3Country":
+		case "phone3_country":
 			if err := func() error {
 				s.Phone3Country.Reset()
 				if err := s.Phone3Country.Decode(d); err != nil {
@@ -1266,7 +1269,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone3Country\"")
+				return errors.Wrap(err, "decode field \"phone3_country\"")
 			}
 		case "phone4":
 			if err := func() error {
@@ -1278,7 +1281,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phone4\"")
 			}
-		case "phone4Type":
+		case "phone4_type":
 			if err := func() error {
 				s.Phone4Type.Reset()
 				if err := s.Phone4Type.Decode(d); err != nil {
@@ -1286,9 +1289,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone4Type\"")
+				return errors.Wrap(err, "decode field \"phone4_type\"")
 			}
-		case "phone4Country":
+		case "phone4_country":
 			if err := func() error {
 				s.Phone4Country.Reset()
 				if err := s.Phone4Country.Decode(d); err != nil {
@@ -1296,7 +1299,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone4Country\"")
+				return errors.Wrap(err, "decode field \"phone4_country\"")
 			}
 		case "phone5":
 			if err := func() error {
@@ -1308,7 +1311,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phone5\"")
 			}
-		case "phone5Type":
+		case "phone5_type":
 			if err := func() error {
 				s.Phone5Type.Reset()
 				if err := s.Phone5Type.Decode(d); err != nil {
@@ -1316,9 +1319,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone5Type\"")
+				return errors.Wrap(err, "decode field \"phone5_type\"")
 			}
-		case "phone5Country":
+		case "phone5_country":
 			if err := func() error {
 				s.Phone5Country.Reset()
 				if err := s.Phone5Country.Decode(d); err != nil {
@@ -1326,19 +1329,21 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"phone5Country\"")
+				return errors.Wrap(err, "decode field \"phone5_country\"")
 			}
 		case "emails":
 			if err := func() error {
-				s.Emails.Reset()
-				if err := s.Emails.Decode(d); err != nil {
+				s.Emails = nil
+				var elem ContactEmails
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.Emails = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"emails\"")
 			}
-		case "emailSearch":
+		case "email_search":
 			if err := func() error {
 				s.EmailSearch.Reset()
 				if err := s.EmailSearch.Decode(d); err != nil {
@@ -1346,7 +1351,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"emailSearch\"")
+				return errors.Wrap(err, "decode field \"email_search\"")
 			}
 		case "email1":
 			if err := func() error {
@@ -1358,7 +1363,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email1\"")
 			}
-		case "email1Type":
+		case "email1_type":
 			if err := func() error {
 				s.Email1Type.Reset()
 				if err := s.Email1Type.Decode(d); err != nil {
@@ -1366,7 +1371,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"email1Type\"")
+				return errors.Wrap(err, "decode field \"email1_type\"")
 			}
 		case "email2":
 			if err := func() error {
@@ -1378,7 +1383,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email2\"")
 			}
-		case "email2Type":
+		case "email2_type":
 			if err := func() error {
 				s.Email2Type.Reset()
 				if err := s.Email2Type.Decode(d); err != nil {
@@ -1386,7 +1391,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"email2Type\"")
+				return errors.Wrap(err, "decode field \"email2_type\"")
 			}
 		case "email3":
 			if err := func() error {
@@ -1398,7 +1403,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email3\"")
 			}
-		case "email3Type":
+		case "email3_type":
 			if err := func() error {
 				s.Email3Type.Reset()
 				if err := s.Email3Type.Decode(d); err != nil {
@@ -1406,7 +1411,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"email3Type\"")
+				return errors.Wrap(err, "decode field \"email3_type\"")
 			}
 		case "email4":
 			if err := func() error {
@@ -1418,7 +1423,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email4\"")
 			}
-		case "email4Type":
+		case "email4_type":
 			if err := func() error {
 				s.Email4Type.Reset()
 				if err := s.Email4Type.Decode(d); err != nil {
@@ -1426,7 +1431,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"email4Type\"")
+				return errors.Wrap(err, "decode field \"email4_type\"")
 			}
 		case "email5":
 			if err := func() error {
@@ -1438,7 +1443,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email5\"")
 			}
-		case "email5Type":
+		case "email5_type":
 			if err := func() error {
 				s.Email5Type.Reset()
 				if err := s.Email5Type.Decode(d); err != nil {
@@ -1446,19 +1451,21 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"email5Type\"")
+				return errors.Wrap(err, "decode field \"email5_type\"")
 			}
 		case "messengers":
 			if err := func() error {
-				s.Messengers.Reset()
-				if err := s.Messengers.Decode(d); err != nil {
+				s.Messengers = nil
+				var elem ContactMessengers
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.Messengers = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"messengers\"")
 			}
-		case "messengersSearch":
+		case "messengers_search":
 			if err := func() error {
 				s.MessengersSearch.Reset()
 				if err := s.MessengersSearch.Decode(d); err != nil {
@@ -1466,9 +1473,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"messengersSearch\"")
+				return errors.Wrap(err, "decode field \"messengers_search\"")
 			}
-		case "skypeUUID":
+		case "skype_uuid":
 			if err := func() error {
 				s.SkypeUUID.Reset()
 				if err := s.SkypeUUID.Decode(d); err != nil {
@@ -1476,7 +1483,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"skypeUUID\"")
+				return errors.Wrap(err, "decode field \"skype_uuid\"")
 			}
 		case "skype":
 			if err := func() error {
@@ -1488,7 +1495,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"skype\"")
 			}
-		case "whatsappUUID":
+		case "whatsapp_uuid":
 			if err := func() error {
 				s.WhatsappUUID.Reset()
 				if err := s.WhatsappUUID.Decode(d); err != nil {
@@ -1496,7 +1503,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"whatsappUUID\"")
+				return errors.Wrap(err, "decode field \"whatsapp_uuid\"")
 			}
 		case "whatsapp":
 			if err := func() error {
@@ -1508,7 +1515,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"whatsapp\"")
 			}
-		case "telegramUUID":
+		case "telegram_uuid":
 			if err := func() error {
 				s.TelegramUUID.Reset()
 				if err := s.TelegramUUID.Decode(d); err != nil {
@@ -1516,7 +1523,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"telegramUUID\"")
+				return errors.Wrap(err, "decode field \"telegram_uuid\"")
 			}
 		case "telegram":
 			if err := func() error {
@@ -1528,7 +1535,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"telegram\"")
 			}
-		case "wechatUUID":
+		case "wechat_uuid":
 			if err := func() error {
 				s.WechatUUID.Reset()
 				if err := s.WechatUUID.Decode(d); err != nil {
@@ -1536,7 +1543,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"wechatUUID\"")
+				return errors.Wrap(err, "decode field \"wechat_uuid\"")
 			}
 		case "wechat":
 			if err := func() error {
@@ -1548,7 +1555,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"wechat\"")
 			}
-		case "lineUUID":
+		case "line_uuid":
 			if err := func() error {
 				s.LineUUID.Reset()
 				if err := s.LineUUID.Decode(d); err != nil {
@@ -1556,7 +1563,7 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lineUUID\"")
+				return errors.Wrap(err, "decode field \"line_uuid\"")
 			}
 		case "line":
 			if err := func() error {
@@ -1570,15 +1577,17 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 			}
 		case "socials":
 			if err := func() error {
-				s.Socials.Reset()
-				if err := s.Socials.Decode(d); err != nil {
+				s.Socials = nil
+				var elem ContactSocials
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.Socials = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"socials\"")
 			}
-		case "socialsSearch":
+		case "socials_search":
 			if err := func() error {
 				s.SocialsSearch.Reset()
 				if err := s.SocialsSearch.Decode(d); err != nil {
@@ -1586,9 +1595,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"socialsSearch\"")
+				return errors.Wrap(err, "decode field \"socials_search\"")
 			}
-		case "linkedinUUID":
+		case "linkedin_uuid":
 			if err := func() error {
 				s.LinkedinUUID.Reset()
 				if err := s.LinkedinUUID.Decode(d); err != nil {
@@ -1596,9 +1605,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"linkedinUUID\"")
+				return errors.Wrap(err, "decode field \"linkedin_uuid\"")
 			}
-		case "linkedinURL":
+		case "linkedin_url":
 			if err := func() error {
 				s.LinkedinURL.Reset()
 				if err := s.LinkedinURL.Decode(d); err != nil {
@@ -1606,9 +1615,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"linkedinURL\"")
+				return errors.Wrap(err, "decode field \"linkedin_url\"")
 			}
-		case "facebookUUID":
+		case "facebook_uuid":
 			if err := func() error {
 				s.FacebookUUID.Reset()
 				if err := s.FacebookUUID.Decode(d); err != nil {
@@ -1616,9 +1625,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"facebookUUID\"")
+				return errors.Wrap(err, "decode field \"facebook_uuid\"")
 			}
-		case "facebookURL":
+		case "facebook_url":
 			if err := func() error {
 				s.FacebookURL.Reset()
 				if err := s.FacebookURL.Decode(d); err != nil {
@@ -1626,9 +1635,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"facebookURL\"")
+				return errors.Wrap(err, "decode field \"facebook_url\"")
 			}
-		case "twitterUUID":
+		case "twitter_uuid":
 			if err := func() error {
 				s.TwitterUUID.Reset()
 				if err := s.TwitterUUID.Decode(d); err != nil {
@@ -1636,9 +1645,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"twitterUUID\"")
+				return errors.Wrap(err, "decode field \"twitter_uuid\"")
 			}
-		case "twitterURL":
+		case "twitter_url":
 			if err := func() error {
 				s.TwitterURL.Reset()
 				if err := s.TwitterURL.Decode(d); err != nil {
@@ -1646,9 +1655,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"twitterURL\"")
+				return errors.Wrap(err, "decode field \"twitter_url\"")
 			}
-		case "githubUUID":
+		case "github_uuid":
 			if err := func() error {
 				s.GithubUUID.Reset()
 				if err := s.GithubUUID.Decode(d); err != nil {
@@ -1656,9 +1665,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"githubUUID\"")
+				return errors.Wrap(err, "decode field \"github_uuid\"")
 			}
-		case "githubURL":
+		case "github_url":
 			if err := func() error {
 				s.GithubURL.Reset()
 				if err := s.GithubURL.Decode(d); err != nil {
@@ -1666,9 +1675,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"githubURL\"")
+				return errors.Wrap(err, "decode field \"github_url\"")
 			}
-		case "vkUUID":
+		case "vk_uuid":
 			if err := func() error {
 				s.VkUUID.Reset()
 				if err := s.VkUUID.Decode(d); err != nil {
@@ -1676,9 +1685,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"vkUUID\"")
+				return errors.Wrap(err, "decode field \"vk_uuid\"")
 			}
-		case "vkURL":
+		case "vk_url":
 			if err := func() error {
 				s.VkURL.Reset()
 				if err := s.VkURL.Decode(d); err != nil {
@@ -1686,9 +1695,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"vkURL\"")
+				return errors.Wrap(err, "decode field \"vk_url\"")
 			}
-		case "odnoUUID":
+		case "odno_uuid":
 			if err := func() error {
 				s.OdnoUUID.Reset()
 				if err := s.OdnoUUID.Decode(d); err != nil {
@@ -1696,9 +1705,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"odnoUUID\"")
+				return errors.Wrap(err, "decode field \"odno_uuid\"")
 			}
-		case "odnoURL":
+		case "odno_url":
 			if err := func() error {
 				s.OdnoURL.Reset()
 				if err := s.OdnoURL.Decode(d); err != nil {
@@ -1706,9 +1715,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"odnoURL\"")
+				return errors.Wrap(err, "decode field \"odno_url\"")
 			}
-		case "hhruUUID":
+		case "hhru_uuid":
 			if err := func() error {
 				s.HhruUUID.Reset()
 				if err := s.HhruUUID.Decode(d); err != nil {
@@ -1716,9 +1725,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"hhruUUID\"")
+				return errors.Wrap(err, "decode field \"hhru_uuid\"")
 			}
-		case "hhruURL":
+		case "hhru_url":
 			if err := func() error {
 				s.HhruURL.Reset()
 				if err := s.HhruURL.Decode(d); err != nil {
@@ -1726,9 +1735,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"hhruURL\"")
+				return errors.Wrap(err, "decode field \"hhru_url\"")
 			}
-		case "habrUUID":
+		case "habr_uuid":
 			if err := func() error {
 				s.HabrUUID.Reset()
 				if err := s.HabrUUID.Decode(d); err != nil {
@@ -1736,9 +1745,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"habrUUID\"")
+				return errors.Wrap(err, "decode field \"habr_uuid\"")
 			}
-		case "habrURL":
+		case "habr_url":
 			if err := func() error {
 				s.HabrURL.Reset()
 				if err := s.HabrURL.Decode(d); err != nil {
@@ -1746,9 +1755,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"habrURL\"")
+				return errors.Wrap(err, "decode field \"habr_url\"")
 			}
-		case "moikrugUUID":
+		case "moikrug_uuid":
 			if err := func() error {
 				s.MoikrugUUID.Reset()
 				if err := s.MoikrugUUID.Decode(d); err != nil {
@@ -1756,9 +1765,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"moikrugUUID\"")
+				return errors.Wrap(err, "decode field \"moikrug_uuid\"")
 			}
-		case "moikrugURL":
+		case "moikrug_url":
 			if err := func() error {
 				s.MoikrugURL.Reset()
 				if err := s.MoikrugURL.Decode(d); err != nil {
@@ -1766,9 +1775,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"moikrugURL\"")
+				return errors.Wrap(err, "decode field \"moikrug_url\"")
 			}
-		case "instagramUUID":
+		case "instagram_uuid":
 			if err := func() error {
 				s.InstagramUUID.Reset()
 				if err := s.InstagramUUID.Decode(d); err != nil {
@@ -1776,9 +1785,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"instagramUUID\"")
+				return errors.Wrap(err, "decode field \"instagram_uuid\"")
 			}
-		case "instagramURL":
+		case "instagram_url":
 			if err := func() error {
 				s.InstagramURL.Reset()
 				if err := s.InstagramURL.Decode(d); err != nil {
@@ -1786,9 +1795,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"instagramURL\"")
+				return errors.Wrap(err, "decode field \"instagram_url\"")
 			}
-		case "social1UUID":
+		case "social1_uuid":
 			if err := func() error {
 				s.Social1UUID.Reset()
 				if err := s.Social1UUID.Decode(d); err != nil {
@@ -1796,9 +1805,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social1UUID\"")
+				return errors.Wrap(err, "decode field \"social1_uuid\"")
 			}
-		case "social1URL":
+		case "social1_url":
 			if err := func() error {
 				s.Social1URL.Reset()
 				if err := s.Social1URL.Decode(d); err != nil {
@@ -1806,9 +1815,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social1URL\"")
+				return errors.Wrap(err, "decode field \"social1_url\"")
 			}
-		case "social1Type":
+		case "social1_type":
 			if err := func() error {
 				s.Social1Type.Reset()
 				if err := s.Social1Type.Decode(d); err != nil {
@@ -1816,9 +1825,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social1Type\"")
+				return errors.Wrap(err, "decode field \"social1_type\"")
 			}
-		case "social2UUID":
+		case "social2_uuid":
 			if err := func() error {
 				s.Social2UUID.Reset()
 				if err := s.Social2UUID.Decode(d); err != nil {
@@ -1826,9 +1835,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social2UUID\"")
+				return errors.Wrap(err, "decode field \"social2_uuid\"")
 			}
-		case "social2URL":
+		case "social2_url":
 			if err := func() error {
 				s.Social2URL.Reset()
 				if err := s.Social2URL.Decode(d); err != nil {
@@ -1836,9 +1845,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social2URL\"")
+				return errors.Wrap(err, "decode field \"social2_url\"")
 			}
-		case "social2Type":
+		case "social2_type":
 			if err := func() error {
 				s.Social2Type.Reset()
 				if err := s.Social2Type.Decode(d); err != nil {
@@ -1846,9 +1855,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social2Type\"")
+				return errors.Wrap(err, "decode field \"social2_type\"")
 			}
-		case "social3UUID":
+		case "social3_uuid":
 			if err := func() error {
 				s.Social3UUID.Reset()
 				if err := s.Social3UUID.Decode(d); err != nil {
@@ -1856,9 +1865,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social3UUID\"")
+				return errors.Wrap(err, "decode field \"social3_uuid\"")
 			}
-		case "social3URL":
+		case "social3_url":
 			if err := func() error {
 				s.Social3URL.Reset()
 				if err := s.Social3URL.Decode(d); err != nil {
@@ -1866,9 +1875,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social3URL\"")
+				return errors.Wrap(err, "decode field \"social3_url\"")
 			}
-		case "social3Type":
+		case "social3_type":
 			if err := func() error {
 				s.Social3Type.Reset()
 				if err := s.Social3Type.Decode(d); err != nil {
@@ -1876,9 +1885,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social3Type\"")
+				return errors.Wrap(err, "decode field \"social3_type\"")
 			}
-		case "social4UUID":
+		case "social4_uuid":
 			if err := func() error {
 				s.Social4UUID.Reset()
 				if err := s.Social4UUID.Decode(d); err != nil {
@@ -1886,9 +1895,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social4UUID\"")
+				return errors.Wrap(err, "decode field \"social4_uuid\"")
 			}
-		case "social4URL":
+		case "social4_url":
 			if err := func() error {
 				s.Social4URL.Reset()
 				if err := s.Social4URL.Decode(d); err != nil {
@@ -1896,9 +1905,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social4URL\"")
+				return errors.Wrap(err, "decode field \"social4_url\"")
 			}
-		case "social4Type":
+		case "social4_type":
 			if err := func() error {
 				s.Social4Type.Reset()
 				if err := s.Social4Type.Decode(d); err != nil {
@@ -1906,9 +1915,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social4Type\"")
+				return errors.Wrap(err, "decode field \"social4_type\"")
 			}
-		case "social5UUID":
+		case "social5_uuid":
 			if err := func() error {
 				s.Social5UUID.Reset()
 				if err := s.Social5UUID.Decode(d); err != nil {
@@ -1916,9 +1925,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social5UUID\"")
+				return errors.Wrap(err, "decode field \"social5_uuid\"")
 			}
-		case "social5URL":
+		case "social5_url":
 			if err := func() error {
 				s.Social5URL.Reset()
 				if err := s.Social5URL.Decode(d); err != nil {
@@ -1926,9 +1935,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social5URL\"")
+				return errors.Wrap(err, "decode field \"social5_url\"")
 			}
-		case "social5Type":
+		case "social5_type":
 			if err := func() error {
 				s.Social5Type.Reset()
 				if err := s.Social5Type.Decode(d); err != nil {
@@ -1936,9 +1945,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social5Type\"")
+				return errors.Wrap(err, "decode field \"social5_type\"")
 			}
-		case "social6UUID":
+		case "social6_uuid":
 			if err := func() error {
 				s.Social6UUID.Reset()
 				if err := s.Social6UUID.Decode(d); err != nil {
@@ -1946,9 +1955,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social6UUID\"")
+				return errors.Wrap(err, "decode field \"social6_uuid\"")
 			}
-		case "social6URL":
+		case "social6_url":
 			if err := func() error {
 				s.Social6URL.Reset()
 				if err := s.Social6URL.Decode(d); err != nil {
@@ -1956,9 +1965,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social6URL\"")
+				return errors.Wrap(err, "decode field \"social6_url\"")
 			}
-		case "social6Type":
+		case "social6_type":
 			if err := func() error {
 				s.Social6Type.Reset()
 				if err := s.Social6Type.Decode(d); err != nil {
@@ -1966,9 +1975,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social6Type\"")
+				return errors.Wrap(err, "decode field \"social6_type\"")
 			}
-		case "social7UUID":
+		case "social7_uuid":
 			if err := func() error {
 				s.Social7UUID.Reset()
 				if err := s.Social7UUID.Decode(d); err != nil {
@@ -1976,9 +1985,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social7UUID\"")
+				return errors.Wrap(err, "decode field \"social7_uuid\"")
 			}
-		case "social7URL":
+		case "social7_url":
 			if err := func() error {
 				s.Social7URL.Reset()
 				if err := s.Social7URL.Decode(d); err != nil {
@@ -1986,9 +1995,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social7URL\"")
+				return errors.Wrap(err, "decode field \"social7_url\"")
 			}
-		case "social7Type":
+		case "social7_type":
 			if err := func() error {
 				s.Social7Type.Reset()
 				if err := s.Social7Type.Decode(d); err != nil {
@@ -1996,9 +2005,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social7Type\"")
+				return errors.Wrap(err, "decode field \"social7_type\"")
 			}
-		case "social8UUID":
+		case "social8_uuid":
 			if err := func() error {
 				s.Social8UUID.Reset()
 				if err := s.Social8UUID.Decode(d); err != nil {
@@ -2006,9 +2015,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social8UUID\"")
+				return errors.Wrap(err, "decode field \"social8_uuid\"")
 			}
-		case "social8URL":
+		case "social8_url":
 			if err := func() error {
 				s.Social8URL.Reset()
 				if err := s.Social8URL.Decode(d); err != nil {
@@ -2016,9 +2025,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social8URL\"")
+				return errors.Wrap(err, "decode field \"social8_url\"")
 			}
-		case "social8Type":
+		case "social8_type":
 			if err := func() error {
 				s.Social8Type.Reset()
 				if err := s.Social8Type.Decode(d); err != nil {
@@ -2026,9 +2035,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social8Type\"")
+				return errors.Wrap(err, "decode field \"social8_type\"")
 			}
-		case "social9UUID":
+		case "social9_uuid":
 			if err := func() error {
 				s.Social9UUID.Reset()
 				if err := s.Social9UUID.Decode(d); err != nil {
@@ -2036,9 +2045,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social9UUID\"")
+				return errors.Wrap(err, "decode field \"social9_uuid\"")
 			}
-		case "social9URL":
+		case "social9_url":
 			if err := func() error {
 				s.Social9URL.Reset()
 				if err := s.Social9URL.Decode(d); err != nil {
@@ -2046,9 +2055,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social9URL\"")
+				return errors.Wrap(err, "decode field \"social9_url\"")
 			}
-		case "social9Type":
+		case "social9_type":
 			if err := func() error {
 				s.Social9Type.Reset()
 				if err := s.Social9Type.Decode(d); err != nil {
@@ -2056,9 +2065,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"social9Type\"")
+				return errors.Wrap(err, "decode field \"social9_type\"")
 			}
-		case "trackingSource":
+		case "tracking_source":
 			if err := func() error {
 				s.TrackingSource.Reset()
 				if err := s.TrackingSource.Decode(d); err != nil {
@@ -2066,9 +2075,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"trackingSource\"")
+				return errors.Wrap(err, "decode field \"tracking_source\"")
 			}
-		case "trackingSlug":
+		case "tracking_slug":
 			if err := func() error {
 				s.TrackingSlug.Reset()
 				if err := s.TrackingSlug.Decode(d); err != nil {
@@ -2076,9 +2085,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"trackingSlug\"")
+				return errors.Wrap(err, "decode field \"tracking_slug\"")
 			}
-		case "cachedImg":
+		case "cached_img":
 			if err := func() error {
 				s.CachedImg.Reset()
 				if err := s.CachedImg.Decode(d); err != nil {
@@ -2086,29 +2095,33 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"cachedImg\"")
+				return errors.Wrap(err, "decode field \"cached_img\"")
 			}
-		case "cachedImgData":
+		case "cached_img_data":
 			if err := func() error {
-				s.CachedImgData.Reset()
-				if err := s.CachedImgData.Decode(d); err != nil {
+				s.CachedImgData = nil
+				var elem ContactCachedImgData
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.CachedImgData = &elem
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"cachedImgData\"")
+				return errors.Wrap(err, "decode field \"cached_img_data\"")
 			}
 		case "crawl":
 			if err := func() error {
-				s.Crawl.Reset()
-				if err := s.Crawl.Decode(d); err != nil {
+				s.Crawl = nil
+				var elem ContactCrawl
+				if err := elem.Decode(d); err != nil {
 					return err
 				}
+				s.Crawl = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"crawl\"")
 			}
-		case "duplicateUserID":
+		case "duplicate_user_id":
 			if err := func() error {
 				s.DuplicateUserID.Reset()
 				if err := s.DuplicateUserID.Decode(d); err != nil {
@@ -2116,9 +2129,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"duplicateUserID\"")
+				return errors.Wrap(err, "decode field \"duplicate_user_id\"")
 			}
-		case "duplicateAlternativeID":
+		case "duplicate_alternative_id":
 			if err := func() error {
 				s.DuplicateAlternativeID.Reset()
 				if err := s.DuplicateAlternativeID.Decode(d); err != nil {
@@ -2126,9 +2139,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"duplicateAlternativeID\"")
+				return errors.Wrap(err, "decode field \"duplicate_alternative_id\"")
 			}
-		case "duplicateReportDate":
+		case "duplicate_report_date":
 			if err := func() error {
 				s.DuplicateReportDate.Reset()
 				if err := s.DuplicateReportDate.Decode(d, json.DecodeDateTime); err != nil {
@@ -2136,9 +2149,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"duplicateReportDate\"")
+				return errors.Wrap(err, "decode field \"duplicate_report_date\"")
 			}
-		case "entryDate":
+		case "entry_date":
 			if err := func() error {
 				s.EntryDate.Reset()
 				if err := s.EntryDate.Decode(d, json.DecodeDateTime); err != nil {
@@ -2146,9 +2159,9 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"entryDate\"")
+				return errors.Wrap(err, "decode field \"entry_date\"")
 			}
-		case "editDate":
+		case "edit_date":
 			if err := func() error {
 				s.EditDate.Reset()
 				if err := s.EditDate.Decode(d, json.DecodeDateTime); err != nil {
@@ -2156,27 +2169,17 @@ func (s *Contact) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"editDate\"")
+				return errors.Wrap(err, "decode field \"edit_date\"")
 			}
-		case "lastKPIEntryDate":
+		case "last_kpi_entry_date":
 			if err := func() error {
-				s.LastKPIEntryDate.Reset()
-				if err := s.LastKPIEntryDate.Decode(d, json.DecodeDateTime); err != nil {
+				s.LastKpiEntryDate.Reset()
+				if err := s.LastKpiEntryDate.Decode(d, json.DecodeDateTime); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lastKPIEntryDate\"")
-			}
-		case "score100":
-			if err := func() error {
-				s.Score100.Reset()
-				if err := s.Score100.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"score100\"")
+				return errors.Wrap(err, "decode field \"last_kpi_entry_date\"")
 			}
 		default:
 			return d.Skip()
@@ -2203,43 +2206,29 @@ func (s *Contact) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactCachedImgData) Encode(e *jx.Encoder) {
+func (s *ContactCachedImgData) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactCachedImgData) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactCachedImgData) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactCachedImgData = [0]string{}
 
 // Decode decodes ContactCachedImgData from json.
 func (s *ContactCachedImgData) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactCachedImgData to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactCachedImgData")
 	}
@@ -2248,7 +2237,7 @@ func (s *ContactCachedImgData) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactCachedImgData) MarshalJSON() ([]byte, error) {
+func (s *ContactCachedImgData) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2261,43 +2250,29 @@ func (s *ContactCachedImgData) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactCrawl) Encode(e *jx.Encoder) {
+func (s *ContactCrawl) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactCrawl) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactCrawl) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactCrawl = [0]string{}
 
 // Decode decodes ContactCrawl from json.
 func (s *ContactCrawl) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactCrawl to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactCrawl")
 	}
@@ -2306,7 +2281,7 @@ func (s *ContactCrawl) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactCrawl) MarshalJSON() ([]byte, error) {
+func (s *ContactCrawl) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2319,43 +2294,29 @@ func (s *ContactCrawl) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactEmails) Encode(e *jx.Encoder) {
+func (s *ContactEmails) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactEmails) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactEmails) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactEmails = [0]string{}
 
 // Decode decodes ContactEmails from json.
 func (s *ContactEmails) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactEmails to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactEmails")
 	}
@@ -2364,7 +2325,7 @@ func (s *ContactEmails) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactEmails) MarshalJSON() ([]byte, error) {
+func (s *ContactEmails) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2377,43 +2338,29 @@ func (s *ContactEmails) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactLastPositions) Encode(e *jx.Encoder) {
+func (s *ContactLastPositions) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactLastPositions) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactLastPositions) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactLastPositions = [0]string{}
 
 // Decode decodes ContactLastPositions from json.
 func (s *ContactLastPositions) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactLastPositions to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactLastPositions")
 	}
@@ -2422,7 +2369,7 @@ func (s *ContactLastPositions) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactLastPositions) MarshalJSON() ([]byte, error) {
+func (s *ContactLastPositions) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2435,43 +2382,29 @@ func (s *ContactLastPositions) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactMessengers) Encode(e *jx.Encoder) {
+func (s *ContactMessengers) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactMessengers) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactMessengers) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactMessengers = [0]string{}
 
 // Decode decodes ContactMessengers from json.
 func (s *ContactMessengers) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactMessengers to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactMessengers")
 	}
@@ -2480,7 +2413,7 @@ func (s *ContactMessengers) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactMessengers) MarshalJSON() ([]byte, error) {
+func (s *ContactMessengers) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2493,43 +2426,29 @@ func (s *ContactMessengers) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactNames) Encode(e *jx.Encoder) {
+func (s *ContactNames) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactNames) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactNames) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactNames = [0]string{}
 
 // Decode decodes ContactNames from json.
 func (s *ContactNames) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactNames to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactNames")
 	}
@@ -2538,7 +2457,7 @@ func (s *ContactNames) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactNames) MarshalJSON() ([]byte, error) {
+func (s *ContactNames) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2551,43 +2470,29 @@ func (s *ContactNames) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactNoteKpiID) Encode(e *jx.Encoder) {
+func (s *ContactNoteKpiID) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactNoteKpiID) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactNoteKpiID) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactNoteKpiID = [0]string{}
 
 // Decode decodes ContactNoteKpiID from json.
 func (s *ContactNoteKpiID) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactNoteKpiID to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactNoteKpiID")
 	}
@@ -2596,7 +2501,7 @@ func (s *ContactNoteKpiID) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactNoteKpiID) MarshalJSON() ([]byte, error) {
+func (s *ContactNoteKpiID) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2609,43 +2514,29 @@ func (s *ContactNoteKpiID) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactPhones) Encode(e *jx.Encoder) {
+func (s *ContactPhones) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactPhones) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactPhones) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactPhones = [0]string{}
 
 // Decode decodes ContactPhones from json.
 func (s *ContactPhones) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactPhones to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactPhones")
 	}
@@ -2654,7 +2545,7 @@ func (s *ContactPhones) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactPhones) MarshalJSON() ([]byte, error) {
+func (s *ContactPhones) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2667,43 +2558,29 @@ func (s *ContactPhones) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactSalaryData) Encode(e *jx.Encoder) {
+func (s *ContactSalaryData) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactSalaryData) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactSalaryData) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactSalaryData = [0]string{}
 
 // Decode decodes ContactSalaryData from json.
 func (s *ContactSalaryData) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactSalaryData to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactSalaryData")
 	}
@@ -2712,7 +2589,7 @@ func (s *ContactSalaryData) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactSalaryData) MarshalJSON() ([]byte, error) {
+func (s *ContactSalaryData) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -2725,43 +2602,29 @@ func (s *ContactSalaryData) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s ContactSocials) Encode(e *jx.Encoder) {
+func (s *ContactSocials) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s ContactSocials) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+// encodeFields encodes fields.
+func (s *ContactSocials) encodeFields(e *jx.Encoder) {
 }
+
+var jsonFieldsNameOfContactSocials = [0]string{}
 
 // Decode decodes ContactSocials from json.
 func (s *ContactSocials) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ContactSocials to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		switch string(k) {
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
-		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode ContactSocials")
 	}
@@ -2770,7 +2633,7 @@ func (s *ContactSocials) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s ContactSocials) MarshalJSON() ([]byte, error) {
+func (s *ContactSocials) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -5239,9 +5102,9 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.StorageRef.Set {
-			e.FieldStart("storage_ref")
-			s.StorageRef.Encode(e)
+		if s.StorageUUID.Set {
+			e.FieldStart("storage_uuid")
+			s.StorageUUID.Encode(e)
 		}
 	}
 	{
@@ -5279,7 +5142,7 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 var jsonFieldsNameOfFileObject = [8]string{
 	0: "uuid",
 	1: "storage_type",
-	2: "storage_ref",
+	2: "storage_uuid",
 	3: "name",
 	4: "mime_type",
 	5: "size",
@@ -5315,15 +5178,15 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"storage_type\"")
 			}
-		case "storage_ref":
+		case "storage_uuid":
 			if err := func() error {
-				s.StorageRef.Reset()
-				if err := s.StorageRef.Decode(d); err != nil {
+				s.StorageUUID.Reset()
+				if err := s.StorageUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"storage_ref\"")
+				return errors.Wrap(err, "decode field \"storage_uuid\"")
 			}
 		case "name":
 			if err := func() error {
@@ -8543,346 +8406,6 @@ func (s *OptBool) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes ContactCachedImgData as json.
-func (o OptContactCachedImgData) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactCachedImgData from json.
-func (o *OptContactCachedImgData) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactCachedImgData to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactCachedImgData)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactCachedImgData) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactCachedImgData) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactCrawl as json.
-func (o OptContactCrawl) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactCrawl from json.
-func (o *OptContactCrawl) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactCrawl to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactCrawl)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactCrawl) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactCrawl) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactEmails as json.
-func (o OptContactEmails) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactEmails from json.
-func (o *OptContactEmails) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactEmails to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactEmails)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactEmails) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactEmails) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactLastPositions as json.
-func (o OptContactLastPositions) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactLastPositions from json.
-func (o *OptContactLastPositions) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactLastPositions to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactLastPositions)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactLastPositions) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactLastPositions) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactMessengers as json.
-func (o OptContactMessengers) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactMessengers from json.
-func (o *OptContactMessengers) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactMessengers to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactMessengers)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactMessengers) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactMessengers) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactNames as json.
-func (o OptContactNames) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactNames from json.
-func (o *OptContactNames) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactNames to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactNames)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactNames) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactNames) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactNoteKpiID as json.
-func (o OptContactNoteKpiID) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactNoteKpiID from json.
-func (o *OptContactNoteKpiID) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactNoteKpiID to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactNoteKpiID)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactNoteKpiID) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactNoteKpiID) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactPhones as json.
-func (o OptContactPhones) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactPhones from json.
-func (o *OptContactPhones) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactPhones to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactPhones)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactPhones) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactPhones) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactSalaryData as json.
-func (o OptContactSalaryData) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactSalaryData from json.
-func (o *OptContactSalaryData) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactSalaryData to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactSalaryData)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactSalaryData) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactSalaryData) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ContactSocials as json.
-func (o OptContactSocials) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes ContactSocials from json.
-func (o *OptContactSocials) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptContactSocials to nil")
-	}
-	o.Set = true
-	o.Value = make(ContactSocials)
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptContactSocials) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptContactSocials) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes DatasourceLinkedinSettings as json.
 func (o OptDatasourceLinkedinSettings) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -9793,6 +9316,12 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 		e.Str(s.UUID)
 	}
 	{
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
@@ -9814,12 +9343,13 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPipeline = [5]string{
+var jsonFieldsNameOfPipeline = [6]string{
 	0: "uuid",
-	1: "name",
-	2: "flow",
-	3: "created_at",
-	4: "updated_at",
+	1: "user_uuid",
+	2: "name",
+	3: "flow",
+	4: "created_at",
+	5: "updated_at",
 }
 
 // Decode decodes Pipeline from json.
@@ -9843,8 +9373,18 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
+		case "user_uuid":
+			if err := func() error {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_uuid\"")
+			}
 		case "name":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -9856,7 +9396,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "flow":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Flow.Decode(d); err != nil {
 					return err
@@ -9895,7 +9435,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -9951,6 +9491,12 @@ func (s *PipelineCreateReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *PipelineCreateReq) encodeFields(e *jx.Encoder) {
 	{
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
@@ -9960,9 +9506,10 @@ func (s *PipelineCreateReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPipelineCreateReq = [2]string{
-	0: "name",
-	1: "flow",
+var jsonFieldsNameOfPipelineCreateReq = [3]string{
+	0: "user_uuid",
+	1: "name",
+	2: "flow",
 }
 
 // Decode decodes PipelineCreateReq from json.
@@ -9974,8 +9521,18 @@ func (s *PipelineCreateReq) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "user_uuid":
+			if err := func() error {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_uuid\"")
+			}
 		case "name":
-			requiredBitSet[0] |= 1 << 0
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -9987,7 +9544,7 @@ func (s *PipelineCreateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "flow":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.Flow.Decode(d); err != nil {
 					return err
@@ -10006,7 +9563,7 @@ func (s *PipelineCreateReq) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

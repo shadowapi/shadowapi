@@ -1,14 +1,13 @@
-// internal/worker/jobs/email_pipeline.go
 package jobs
 
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
-	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"log/slog"
 )
@@ -28,7 +27,7 @@ type EmailPipelineJob struct {
 	// Save the raw message data so we can process it.
 	MessageData json.RawMessage
 	// The pipeline to process the email.
-	Pipeline worker.Pipeline
+	Pipeline types.Pipeline
 	// Token information for the account.
 	TokenUUID   uuid.UUID
 	TokenExpiry time.Time
@@ -39,7 +38,7 @@ type EmailPipelineJob struct {
 }
 
 // NewEmailPipelineJob creates a new EmailPipelineJob instance.
-func NewEmailPipelineJob(p worker.Pipeline, args EmailPipelineJobArgs, q *queue.Queue, log *slog.Logger) (*EmailPipelineJob, error) {
+func NewEmailPipelineJob(p types.Pipeline, args EmailPipelineJobArgs, q *queue.Queue, log *slog.Logger) (*EmailPipelineJob, error) {
 	tUUID, err := uuid.FromString(args.TokenUUID)
 	if err != nil {
 		return nil, err
@@ -81,8 +80,8 @@ func (e *EmailPipelineJob) Execute(ctx context.Context) error {
 }
 
 // EmailPipelineJobFactory returns a worker.JobFactory for email pipeline jobs.
-func EmailPipelineJobFactory(p worker.Pipeline, q *queue.Queue, log *slog.Logger) worker.JobFactory {
-	return func(data []byte) (worker.Job, error) {
+func EmailPipelineJobFactory(p types.Pipeline, q *queue.Queue, log *slog.Logger) types.JobFactory {
+	return func(data []byte) (types.Job, error) {
 		var args EmailPipelineJobArgs
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err

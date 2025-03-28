@@ -31,132 +31,131 @@ func (s *BearerAuth) SetToken(val string) {
 
 // Ref: #
 type Contact struct {
-	UUID                    OptString               `json:"uuid"`
-	UserUUID                OptString               `json:"user_uuid"`
-	InstanceUUID            OptString               `json:"instance_uuid"`
-	Status                  OptString               `json:"status"`
-	Names                   OptContactNames         `json:"names"`
-	NamesSearch             OptString               `json:"namesSearch"`
-	Last                    OptString               `json:"last"`
-	First                   OptString               `json:"first"`
-	Middle                  OptString               `json:"middle"`
-	Birthday                OptDateTime             `json:"birthday"`
-	BirthdayType            OptString               `json:"birthdayType"`
-	Salary                  OptString               `json:"salary"`
-	SalaryData              OptContactSalaryData    `json:"salaryData"`
-	LastPositions           OptContactLastPositions `json:"lastPositions"`
-	LastPositionID          OptInt64                `json:"lastPositionID"`
-	LastPositionCompanyID   OptInt64                `json:"lastPositionCompanyID"`
-	LastPositionCompanyName OptString               `json:"lastPositionCompanyName"`
-	LastPositionTitle       OptString               `json:"lastPositionTitle"`
-	LastPositionStartDate   OptDateTime             `json:"lastPositionStartDate"`
-	LastPositionEndDate     OptDateTime             `json:"lastPositionEndDate"`
-	LastPositionEndNow      OptBool                 `json:"lastPositionEndNow"`
-	LastPositionDescription OptString               `json:"lastPositionDescription"`
-	NoteSearch              OptString               `json:"noteSearch"`
-	NoteKpiID               OptContactNoteKpiID     `json:"noteKpiID"`
-	Phones                  OptContactPhones        `json:"phones"`
-	PhoneSearch             OptString               `json:"phoneSearch"`
-	Phone1                  OptString               `json:"phone1"`
-	Phone1Type              OptString               `json:"phone1Type"`
-	Phone1Country           OptString               `json:"phone1Country"`
-	Phone2                  OptString               `json:"phone2"`
-	Phone2Type              OptString               `json:"phone2Type"`
-	Phone2Country           OptString               `json:"phone2Country"`
-	Phone3                  OptString               `json:"phone3"`
-	Phone3Type              OptString               `json:"phone3Type"`
-	Phone3Country           OptString               `json:"phone3Country"`
-	Phone4                  OptString               `json:"phone4"`
-	Phone4Type              OptString               `json:"phone4Type"`
-	Phone4Country           OptString               `json:"phone4Country"`
-	Phone5                  OptString               `json:"phone5"`
-	Phone5Type              OptString               `json:"phone5Type"`
-	Phone5Country           OptString               `json:"phone5Country"`
-	Emails                  OptContactEmails        `json:"emails"`
-	EmailSearch             OptString               `json:"emailSearch"`
-	Email1                  OptString               `json:"email1"`
-	Email1Type              OptString               `json:"email1Type"`
-	Email2                  OptString               `json:"email2"`
-	Email2Type              OptString               `json:"email2Type"`
-	Email3                  OptString               `json:"email3"`
-	Email3Type              OptString               `json:"email3Type"`
-	Email4                  OptString               `json:"email4"`
-	Email4Type              OptString               `json:"email4Type"`
-	Email5                  OptString               `json:"email5"`
-	Email5Type              OptString               `json:"email5Type"`
-	Messengers              OptContactMessengers    `json:"messengers"`
-	MessengersSearch        OptString               `json:"messengersSearch"`
-	SkypeUUID               OptString               `json:"skypeUUID"`
-	Skype                   OptString               `json:"skype"`
-	WhatsappUUID            OptString               `json:"whatsappUUID"`
-	Whatsapp                OptString               `json:"whatsapp"`
-	TelegramUUID            OptString               `json:"telegramUUID"`
-	Telegram                OptString               `json:"telegram"`
-	WechatUUID              OptString               `json:"wechatUUID"`
-	Wechat                  OptString               `json:"wechat"`
-	LineUUID                OptString               `json:"lineUUID"`
-	Line                    OptString               `json:"line"`
-	Socials                 OptContactSocials       `json:"socials"`
-	SocialsSearch           OptString               `json:"socialsSearch"`
-	LinkedinUUID            OptString               `json:"linkedinUUID"`
-	LinkedinURL             OptString               `json:"linkedinURL"`
-	FacebookUUID            OptString               `json:"facebookUUID"`
-	FacebookURL             OptString               `json:"facebookURL"`
-	TwitterUUID             OptString               `json:"twitterUUID"`
-	TwitterURL              OptString               `json:"twitterURL"`
-	GithubUUID              OptString               `json:"githubUUID"`
-	GithubURL               OptString               `json:"githubURL"`
-	VkUUID                  OptString               `json:"vkUUID"`
-	VkURL                   OptString               `json:"vkURL"`
-	OdnoUUID                OptString               `json:"odnoUUID"`
-	OdnoURL                 OptString               `json:"odnoURL"`
-	HhruUUID                OptString               `json:"hhruUUID"`
-	HhruURL                 OptString               `json:"hhruURL"`
-	HabrUUID                OptString               `json:"habrUUID"`
-	HabrURL                 OptString               `json:"habrURL"`
-	MoikrugUUID             OptString               `json:"moikrugUUID"`
-	MoikrugURL              OptString               `json:"moikrugURL"`
-	InstagramUUID           OptString               `json:"instagramUUID"`
-	InstagramURL            OptString               `json:"instagramURL"`
-	Social1UUID             OptString               `json:"social1UUID"`
-	Social1URL              OptString               `json:"social1URL"`
-	Social1Type             OptString               `json:"social1Type"`
-	Social2UUID             OptString               `json:"social2UUID"`
-	Social2URL              OptString               `json:"social2URL"`
-	Social2Type             OptString               `json:"social2Type"`
-	Social3UUID             OptString               `json:"social3UUID"`
-	Social3URL              OptString               `json:"social3URL"`
-	Social3Type             OptString               `json:"social3Type"`
-	Social4UUID             OptString               `json:"social4UUID"`
-	Social4URL              OptString               `json:"social4URL"`
-	Social4Type             OptString               `json:"social4Type"`
-	Social5UUID             OptString               `json:"social5UUID"`
-	Social5URL              OptString               `json:"social5URL"`
-	Social5Type             OptString               `json:"social5Type"`
-	Social6UUID             OptString               `json:"social6UUID"`
-	Social6URL              OptString               `json:"social6URL"`
-	Social6Type             OptString               `json:"social6Type"`
-	Social7UUID             OptString               `json:"social7UUID"`
-	Social7URL              OptString               `json:"social7URL"`
-	Social7Type             OptString               `json:"social7Type"`
-	Social8UUID             OptString               `json:"social8UUID"`
-	Social8URL              OptString               `json:"social8URL"`
-	Social8Type             OptString               `json:"social8Type"`
-	Social9UUID             OptString               `json:"social9UUID"`
-	Social9URL              OptString               `json:"social9URL"`
-	Social9Type             OptString               `json:"social9Type"`
-	TrackingSource          OptString               `json:"trackingSource"`
-	TrackingSlug            OptString               `json:"trackingSlug"`
-	CachedImg               OptString               `json:"cachedImg"`
-	CachedImgData           OptContactCachedImgData `json:"cachedImgData"`
-	Crawl                   OptContactCrawl         `json:"crawl"`
-	DuplicateUserID         OptString               `json:"duplicateUserID"`
-	DuplicateAlternativeID  OptString               `json:"duplicateAlternativeID"`
-	DuplicateReportDate     OptDateTime             `json:"duplicateReportDate"`
-	EntryDate               OptDateTime             `json:"entryDate"`
-	EditDate                OptDateTime             `json:"editDate"`
-	LastKPIEntryDate        OptDateTime             `json:"lastKPIEntryDate"`
-	Score100                OptInt                  `json:"score100"`
+	UUID                    OptString             `json:"uuid"`
+	UserUUID                OptString             `json:"user_uuid"`
+	InstanceUUID            OptString             `json:"instance_uuid"`
+	Status                  OptString             `json:"status"`
+	Names                   *ContactNames         `json:"names"`
+	NamesSearch             OptString             `json:"names_search"`
+	Last                    OptString             `json:"last"`
+	First                   OptString             `json:"first"`
+	Middle                  OptString             `json:"middle"`
+	Birthday                OptDateTime           `json:"birthday"`
+	BirthdayType            OptString             `json:"birthday_type"`
+	Salary                  OptString             `json:"salary"`
+	SalaryData              *ContactSalaryData    `json:"salary_data"`
+	LastPositions           *ContactLastPositions `json:"last_positions"`
+	LastPositionID          OptInt                `json:"last_position_id"`
+	LastPositionCompanyID   OptInt                `json:"last_position_company_id"`
+	LastPositionCompanyName OptString             `json:"last_position_company_name"`
+	LastPositionTitle       OptString             `json:"last_position_title"`
+	LastPositionStartDate   OptDateTime           `json:"last_position_start_date"`
+	LastPositionEndDate     OptDateTime           `json:"last_position_end_date"`
+	LastPositionEndNow      OptBool               `json:"last_position_end_now"`
+	LastPositionDescription OptString             `json:"last_position_description"`
+	NoteSearch              OptString             `json:"note_search"`
+	NoteKpiID               *ContactNoteKpiID     `json:"note_kpi_id"`
+	Phones                  *ContactPhones        `json:"phones"`
+	PhoneSearch             OptString             `json:"phone_search"`
+	Phone1                  OptString             `json:"phone1"`
+	Phone1Type              OptString             `json:"phone1_type"`
+	Phone1Country           OptString             `json:"phone1_country"`
+	Phone2                  OptString             `json:"phone2"`
+	Phone2Type              OptString             `json:"phone2_type"`
+	Phone2Country           OptString             `json:"phone2_country"`
+	Phone3                  OptString             `json:"phone3"`
+	Phone3Type              OptString             `json:"phone3_type"`
+	Phone3Country           OptString             `json:"phone3_country"`
+	Phone4                  OptString             `json:"phone4"`
+	Phone4Type              OptString             `json:"phone4_type"`
+	Phone4Country           OptString             `json:"phone4_country"`
+	Phone5                  OptString             `json:"phone5"`
+	Phone5Type              OptString             `json:"phone5_type"`
+	Phone5Country           OptString             `json:"phone5_country"`
+	Emails                  *ContactEmails        `json:"emails"`
+	EmailSearch             OptString             `json:"email_search"`
+	Email1                  OptString             `json:"email1"`
+	Email1Type              OptString             `json:"email1_type"`
+	Email2                  OptString             `json:"email2"`
+	Email2Type              OptString             `json:"email2_type"`
+	Email3                  OptString             `json:"email3"`
+	Email3Type              OptString             `json:"email3_type"`
+	Email4                  OptString             `json:"email4"`
+	Email4Type              OptString             `json:"email4_type"`
+	Email5                  OptString             `json:"email5"`
+	Email5Type              OptString             `json:"email5_type"`
+	Messengers              *ContactMessengers    `json:"messengers"`
+	MessengersSearch        OptString             `json:"messengers_search"`
+	SkypeUUID               OptString             `json:"skype_uuid"`
+	Skype                   OptString             `json:"skype"`
+	WhatsappUUID            OptString             `json:"whatsapp_uuid"`
+	Whatsapp                OptString             `json:"whatsapp"`
+	TelegramUUID            OptString             `json:"telegram_uuid"`
+	Telegram                OptString             `json:"telegram"`
+	WechatUUID              OptString             `json:"wechat_uuid"`
+	Wechat                  OptString             `json:"wechat"`
+	LineUUID                OptString             `json:"line_uuid"`
+	Line                    OptString             `json:"line"`
+	Socials                 *ContactSocials       `json:"socials"`
+	SocialsSearch           OptString             `json:"socials_search"`
+	LinkedinUUID            OptString             `json:"linkedin_uuid"`
+	LinkedinURL             OptString             `json:"linkedin_url"`
+	FacebookUUID            OptString             `json:"facebook_uuid"`
+	FacebookURL             OptString             `json:"facebook_url"`
+	TwitterUUID             OptString             `json:"twitter_uuid"`
+	TwitterURL              OptString             `json:"twitter_url"`
+	GithubUUID              OptString             `json:"github_uuid"`
+	GithubURL               OptString             `json:"github_url"`
+	VkUUID                  OptString             `json:"vk_uuid"`
+	VkURL                   OptString             `json:"vk_url"`
+	OdnoUUID                OptString             `json:"odno_uuid"`
+	OdnoURL                 OptString             `json:"odno_url"`
+	HhruUUID                OptString             `json:"hhru_uuid"`
+	HhruURL                 OptString             `json:"hhru_url"`
+	HabrUUID                OptString             `json:"habr_uuid"`
+	HabrURL                 OptString             `json:"habr_url"`
+	MoikrugUUID             OptString             `json:"moikrug_uuid"`
+	MoikrugURL              OptString             `json:"moikrug_url"`
+	InstagramUUID           OptString             `json:"instagram_uuid"`
+	InstagramURL            OptString             `json:"instagram_url"`
+	Social1UUID             OptString             `json:"social1_uuid"`
+	Social1URL              OptString             `json:"social1_url"`
+	Social1Type             OptString             `json:"social1_type"`
+	Social2UUID             OptString             `json:"social2_uuid"`
+	Social2URL              OptString             `json:"social2_url"`
+	Social2Type             OptString             `json:"social2_type"`
+	Social3UUID             OptString             `json:"social3_uuid"`
+	Social3URL              OptString             `json:"social3_url"`
+	Social3Type             OptString             `json:"social3_type"`
+	Social4UUID             OptString             `json:"social4_uuid"`
+	Social4URL              OptString             `json:"social4_url"`
+	Social4Type             OptString             `json:"social4_type"`
+	Social5UUID             OptString             `json:"social5_uuid"`
+	Social5URL              OptString             `json:"social5_url"`
+	Social5Type             OptString             `json:"social5_type"`
+	Social6UUID             OptString             `json:"social6_uuid"`
+	Social6URL              OptString             `json:"social6_url"`
+	Social6Type             OptString             `json:"social6_type"`
+	Social7UUID             OptString             `json:"social7_uuid"`
+	Social7URL              OptString             `json:"social7_url"`
+	Social7Type             OptString             `json:"social7_type"`
+	Social8UUID             OptString             `json:"social8_uuid"`
+	Social8URL              OptString             `json:"social8_url"`
+	Social8Type             OptString             `json:"social8_type"`
+	Social9UUID             OptString             `json:"social9_uuid"`
+	Social9URL              OptString             `json:"social9_url"`
+	Social9Type             OptString             `json:"social9_type"`
+	TrackingSource          OptString             `json:"tracking_source"`
+	TrackingSlug            OptString             `json:"tracking_slug"`
+	CachedImg               OptString             `json:"cached_img"`
+	CachedImgData           *ContactCachedImgData `json:"cached_img_data"`
+	Crawl                   *ContactCrawl         `json:"crawl"`
+	DuplicateUserID         OptString             `json:"duplicate_user_id"`
+	DuplicateAlternativeID  OptString             `json:"duplicate_alternative_id"`
+	DuplicateReportDate     OptDateTime           `json:"duplicate_report_date"`
+	EntryDate               OptDateTime           `json:"entry_date"`
+	EditDate                OptDateTime           `json:"edit_date"`
+	LastKpiEntryDate        OptDateTime           `json:"last_kpi_entry_date"`
 }
 
 // GetUUID returns the value of UUID.
@@ -180,7 +179,7 @@ func (s *Contact) GetStatus() OptString {
 }
 
 // GetNames returns the value of Names.
-func (s *Contact) GetNames() OptContactNames {
+func (s *Contact) GetNames() *ContactNames {
 	return s.Names
 }
 
@@ -220,22 +219,22 @@ func (s *Contact) GetSalary() OptString {
 }
 
 // GetSalaryData returns the value of SalaryData.
-func (s *Contact) GetSalaryData() OptContactSalaryData {
+func (s *Contact) GetSalaryData() *ContactSalaryData {
 	return s.SalaryData
 }
 
 // GetLastPositions returns the value of LastPositions.
-func (s *Contact) GetLastPositions() OptContactLastPositions {
+func (s *Contact) GetLastPositions() *ContactLastPositions {
 	return s.LastPositions
 }
 
 // GetLastPositionID returns the value of LastPositionID.
-func (s *Contact) GetLastPositionID() OptInt64 {
+func (s *Contact) GetLastPositionID() OptInt {
 	return s.LastPositionID
 }
 
 // GetLastPositionCompanyID returns the value of LastPositionCompanyID.
-func (s *Contact) GetLastPositionCompanyID() OptInt64 {
+func (s *Contact) GetLastPositionCompanyID() OptInt {
 	return s.LastPositionCompanyID
 }
 
@@ -275,12 +274,12 @@ func (s *Contact) GetNoteSearch() OptString {
 }
 
 // GetNoteKpiID returns the value of NoteKpiID.
-func (s *Contact) GetNoteKpiID() OptContactNoteKpiID {
+func (s *Contact) GetNoteKpiID() *ContactNoteKpiID {
 	return s.NoteKpiID
 }
 
 // GetPhones returns the value of Phones.
-func (s *Contact) GetPhones() OptContactPhones {
+func (s *Contact) GetPhones() *ContactPhones {
 	return s.Phones
 }
 
@@ -365,7 +364,7 @@ func (s *Contact) GetPhone5Country() OptString {
 }
 
 // GetEmails returns the value of Emails.
-func (s *Contact) GetEmails() OptContactEmails {
+func (s *Contact) GetEmails() *ContactEmails {
 	return s.Emails
 }
 
@@ -425,7 +424,7 @@ func (s *Contact) GetEmail5Type() OptString {
 }
 
 // GetMessengers returns the value of Messengers.
-func (s *Contact) GetMessengers() OptContactMessengers {
+func (s *Contact) GetMessengers() *ContactMessengers {
 	return s.Messengers
 }
 
@@ -485,7 +484,7 @@ func (s *Contact) GetLine() OptString {
 }
 
 // GetSocials returns the value of Socials.
-func (s *Contact) GetSocials() OptContactSocials {
+func (s *Contact) GetSocials() *ContactSocials {
 	return s.Socials
 }
 
@@ -745,12 +744,12 @@ func (s *Contact) GetCachedImg() OptString {
 }
 
 // GetCachedImgData returns the value of CachedImgData.
-func (s *Contact) GetCachedImgData() OptContactCachedImgData {
+func (s *Contact) GetCachedImgData() *ContactCachedImgData {
 	return s.CachedImgData
 }
 
 // GetCrawl returns the value of Crawl.
-func (s *Contact) GetCrawl() OptContactCrawl {
+func (s *Contact) GetCrawl() *ContactCrawl {
 	return s.Crawl
 }
 
@@ -779,14 +778,9 @@ func (s *Contact) GetEditDate() OptDateTime {
 	return s.EditDate
 }
 
-// GetLastKPIEntryDate returns the value of LastKPIEntryDate.
-func (s *Contact) GetLastKPIEntryDate() OptDateTime {
-	return s.LastKPIEntryDate
-}
-
-// GetScore100 returns the value of Score100.
-func (s *Contact) GetScore100() OptInt {
-	return s.Score100
+// GetLastKpiEntryDate returns the value of LastKpiEntryDate.
+func (s *Contact) GetLastKpiEntryDate() OptDateTime {
+	return s.LastKpiEntryDate
 }
 
 // SetUUID sets the value of UUID.
@@ -810,7 +804,7 @@ func (s *Contact) SetStatus(val OptString) {
 }
 
 // SetNames sets the value of Names.
-func (s *Contact) SetNames(val OptContactNames) {
+func (s *Contact) SetNames(val *ContactNames) {
 	s.Names = val
 }
 
@@ -850,22 +844,22 @@ func (s *Contact) SetSalary(val OptString) {
 }
 
 // SetSalaryData sets the value of SalaryData.
-func (s *Contact) SetSalaryData(val OptContactSalaryData) {
+func (s *Contact) SetSalaryData(val *ContactSalaryData) {
 	s.SalaryData = val
 }
 
 // SetLastPositions sets the value of LastPositions.
-func (s *Contact) SetLastPositions(val OptContactLastPositions) {
+func (s *Contact) SetLastPositions(val *ContactLastPositions) {
 	s.LastPositions = val
 }
 
 // SetLastPositionID sets the value of LastPositionID.
-func (s *Contact) SetLastPositionID(val OptInt64) {
+func (s *Contact) SetLastPositionID(val OptInt) {
 	s.LastPositionID = val
 }
 
 // SetLastPositionCompanyID sets the value of LastPositionCompanyID.
-func (s *Contact) SetLastPositionCompanyID(val OptInt64) {
+func (s *Contact) SetLastPositionCompanyID(val OptInt) {
 	s.LastPositionCompanyID = val
 }
 
@@ -905,12 +899,12 @@ func (s *Contact) SetNoteSearch(val OptString) {
 }
 
 // SetNoteKpiID sets the value of NoteKpiID.
-func (s *Contact) SetNoteKpiID(val OptContactNoteKpiID) {
+func (s *Contact) SetNoteKpiID(val *ContactNoteKpiID) {
 	s.NoteKpiID = val
 }
 
 // SetPhones sets the value of Phones.
-func (s *Contact) SetPhones(val OptContactPhones) {
+func (s *Contact) SetPhones(val *ContactPhones) {
 	s.Phones = val
 }
 
@@ -995,7 +989,7 @@ func (s *Contact) SetPhone5Country(val OptString) {
 }
 
 // SetEmails sets the value of Emails.
-func (s *Contact) SetEmails(val OptContactEmails) {
+func (s *Contact) SetEmails(val *ContactEmails) {
 	s.Emails = val
 }
 
@@ -1055,7 +1049,7 @@ func (s *Contact) SetEmail5Type(val OptString) {
 }
 
 // SetMessengers sets the value of Messengers.
-func (s *Contact) SetMessengers(val OptContactMessengers) {
+func (s *Contact) SetMessengers(val *ContactMessengers) {
 	s.Messengers = val
 }
 
@@ -1115,7 +1109,7 @@ func (s *Contact) SetLine(val OptString) {
 }
 
 // SetSocials sets the value of Socials.
-func (s *Contact) SetSocials(val OptContactSocials) {
+func (s *Contact) SetSocials(val *ContactSocials) {
 	s.Socials = val
 }
 
@@ -1375,12 +1369,12 @@ func (s *Contact) SetCachedImg(val OptString) {
 }
 
 // SetCachedImgData sets the value of CachedImgData.
-func (s *Contact) SetCachedImgData(val OptContactCachedImgData) {
+func (s *Contact) SetCachedImgData(val *ContactCachedImgData) {
 	s.CachedImgData = val
 }
 
 // SetCrawl sets the value of Crawl.
-func (s *Contact) SetCrawl(val OptContactCrawl) {
+func (s *Contact) SetCrawl(val *ContactCrawl) {
 	s.Crawl = val
 }
 
@@ -1409,125 +1403,30 @@ func (s *Contact) SetEditDate(val OptDateTime) {
 	s.EditDate = val
 }
 
-// SetLastKPIEntryDate sets the value of LastKPIEntryDate.
-func (s *Contact) SetLastKPIEntryDate(val OptDateTime) {
-	s.LastKPIEntryDate = val
+// SetLastKpiEntryDate sets the value of LastKpiEntryDate.
+func (s *Contact) SetLastKpiEntryDate(val OptDateTime) {
+	s.LastKpiEntryDate = val
 }
 
-// SetScore100 sets the value of Score100.
-func (s *Contact) SetScore100(val OptInt) {
-	s.Score100 = val
-}
+type ContactCachedImgData struct{}
 
-type ContactCachedImgData map[string]jx.Raw
+type ContactCrawl struct{}
 
-func (s *ContactCachedImgData) init() ContactCachedImgData {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
+type ContactEmails struct{}
 
-type ContactCrawl map[string]jx.Raw
+type ContactLastPositions struct{}
 
-func (s *ContactCrawl) init() ContactCrawl {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
+type ContactMessengers struct{}
 
-type ContactEmails map[string]jx.Raw
+type ContactNames struct{}
 
-func (s *ContactEmails) init() ContactEmails {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
+type ContactNoteKpiID struct{}
 
-type ContactLastPositions map[string]jx.Raw
+type ContactPhones struct{}
 
-func (s *ContactLastPositions) init() ContactLastPositions {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
+type ContactSalaryData struct{}
 
-type ContactMessengers map[string]jx.Raw
-
-func (s *ContactMessengers) init() ContactMessengers {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type ContactNames map[string]jx.Raw
-
-func (s *ContactNames) init() ContactNames {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type ContactNoteKpiID map[string]jx.Raw
-
-func (s *ContactNoteKpiID) init() ContactNoteKpiID {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type ContactPhones map[string]jx.Raw
-
-func (s *ContactPhones) init() ContactPhones {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type ContactSalaryData map[string]jx.Raw
-
-func (s *ContactSalaryData) init() ContactSalaryData {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type ContactSocials map[string]jx.Raw
-
-func (s *ContactSocials) init() ContactSocials {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
+type ContactSocials struct{}
 
 // Ref: #
 type Datasource struct {
@@ -2580,7 +2479,7 @@ type FileObject struct {
 	// The type of storage backend.
 	StorageType OptFileObjectStorageType `json:"storage_type"`
 	// Reference ID within the respective storage backend.
-	StorageRef OptString `json:"storage_ref"`
+	StorageUUID OptString `json:"storage_uuid"`
 	// Original filename.
 	Name OptString `json:"name"`
 	// MIME type of the file.
@@ -2603,9 +2502,9 @@ func (s *FileObject) GetStorageType() OptFileObjectStorageType {
 	return s.StorageType
 }
 
-// GetStorageRef returns the value of StorageRef.
-func (s *FileObject) GetStorageRef() OptString {
-	return s.StorageRef
+// GetStorageUUID returns the value of StorageUUID.
+func (s *FileObject) GetStorageUUID() OptString {
+	return s.StorageUUID
 }
 
 // GetName returns the value of Name.
@@ -2643,9 +2542,9 @@ func (s *FileObject) SetStorageType(val OptFileObjectStorageType) {
 	s.StorageType = val
 }
 
-// SetStorageRef sets the value of StorageRef.
-func (s *FileObject) SetStorageRef(val OptString) {
-	s.StorageRef = val
+// SetStorageUUID sets the value of StorageUUID.
+func (s *FileObject) SetStorageUUID(val OptString) {
+	s.StorageUUID = val
 }
 
 // SetName sets the value of Name.
@@ -4012,466 +3911,6 @@ func (o OptBool) Or(d bool) bool {
 	return d
 }
 
-// NewOptContactCachedImgData returns new OptContactCachedImgData with value set to v.
-func NewOptContactCachedImgData(v ContactCachedImgData) OptContactCachedImgData {
-	return OptContactCachedImgData{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactCachedImgData is optional ContactCachedImgData.
-type OptContactCachedImgData struct {
-	Value ContactCachedImgData
-	Set   bool
-}
-
-// IsSet returns true if OptContactCachedImgData was set.
-func (o OptContactCachedImgData) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactCachedImgData) Reset() {
-	var v ContactCachedImgData
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactCachedImgData) SetTo(v ContactCachedImgData) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactCachedImgData) Get() (v ContactCachedImgData, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactCachedImgData) Or(d ContactCachedImgData) ContactCachedImgData {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactCrawl returns new OptContactCrawl with value set to v.
-func NewOptContactCrawl(v ContactCrawl) OptContactCrawl {
-	return OptContactCrawl{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactCrawl is optional ContactCrawl.
-type OptContactCrawl struct {
-	Value ContactCrawl
-	Set   bool
-}
-
-// IsSet returns true if OptContactCrawl was set.
-func (o OptContactCrawl) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactCrawl) Reset() {
-	var v ContactCrawl
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactCrawl) SetTo(v ContactCrawl) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactCrawl) Get() (v ContactCrawl, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactCrawl) Or(d ContactCrawl) ContactCrawl {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactEmails returns new OptContactEmails with value set to v.
-func NewOptContactEmails(v ContactEmails) OptContactEmails {
-	return OptContactEmails{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactEmails is optional ContactEmails.
-type OptContactEmails struct {
-	Value ContactEmails
-	Set   bool
-}
-
-// IsSet returns true if OptContactEmails was set.
-func (o OptContactEmails) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactEmails) Reset() {
-	var v ContactEmails
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactEmails) SetTo(v ContactEmails) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactEmails) Get() (v ContactEmails, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactEmails) Or(d ContactEmails) ContactEmails {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactLastPositions returns new OptContactLastPositions with value set to v.
-func NewOptContactLastPositions(v ContactLastPositions) OptContactLastPositions {
-	return OptContactLastPositions{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactLastPositions is optional ContactLastPositions.
-type OptContactLastPositions struct {
-	Value ContactLastPositions
-	Set   bool
-}
-
-// IsSet returns true if OptContactLastPositions was set.
-func (o OptContactLastPositions) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactLastPositions) Reset() {
-	var v ContactLastPositions
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactLastPositions) SetTo(v ContactLastPositions) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactLastPositions) Get() (v ContactLastPositions, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactLastPositions) Or(d ContactLastPositions) ContactLastPositions {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactMessengers returns new OptContactMessengers with value set to v.
-func NewOptContactMessengers(v ContactMessengers) OptContactMessengers {
-	return OptContactMessengers{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactMessengers is optional ContactMessengers.
-type OptContactMessengers struct {
-	Value ContactMessengers
-	Set   bool
-}
-
-// IsSet returns true if OptContactMessengers was set.
-func (o OptContactMessengers) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactMessengers) Reset() {
-	var v ContactMessengers
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactMessengers) SetTo(v ContactMessengers) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactMessengers) Get() (v ContactMessengers, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactMessengers) Or(d ContactMessengers) ContactMessengers {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactNames returns new OptContactNames with value set to v.
-func NewOptContactNames(v ContactNames) OptContactNames {
-	return OptContactNames{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactNames is optional ContactNames.
-type OptContactNames struct {
-	Value ContactNames
-	Set   bool
-}
-
-// IsSet returns true if OptContactNames was set.
-func (o OptContactNames) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactNames) Reset() {
-	var v ContactNames
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactNames) SetTo(v ContactNames) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactNames) Get() (v ContactNames, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactNames) Or(d ContactNames) ContactNames {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactNoteKpiID returns new OptContactNoteKpiID with value set to v.
-func NewOptContactNoteKpiID(v ContactNoteKpiID) OptContactNoteKpiID {
-	return OptContactNoteKpiID{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactNoteKpiID is optional ContactNoteKpiID.
-type OptContactNoteKpiID struct {
-	Value ContactNoteKpiID
-	Set   bool
-}
-
-// IsSet returns true if OptContactNoteKpiID was set.
-func (o OptContactNoteKpiID) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactNoteKpiID) Reset() {
-	var v ContactNoteKpiID
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactNoteKpiID) SetTo(v ContactNoteKpiID) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactNoteKpiID) Get() (v ContactNoteKpiID, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactNoteKpiID) Or(d ContactNoteKpiID) ContactNoteKpiID {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactPhones returns new OptContactPhones with value set to v.
-func NewOptContactPhones(v ContactPhones) OptContactPhones {
-	return OptContactPhones{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactPhones is optional ContactPhones.
-type OptContactPhones struct {
-	Value ContactPhones
-	Set   bool
-}
-
-// IsSet returns true if OptContactPhones was set.
-func (o OptContactPhones) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactPhones) Reset() {
-	var v ContactPhones
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactPhones) SetTo(v ContactPhones) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactPhones) Get() (v ContactPhones, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactPhones) Or(d ContactPhones) ContactPhones {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactSalaryData returns new OptContactSalaryData with value set to v.
-func NewOptContactSalaryData(v ContactSalaryData) OptContactSalaryData {
-	return OptContactSalaryData{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactSalaryData is optional ContactSalaryData.
-type OptContactSalaryData struct {
-	Value ContactSalaryData
-	Set   bool
-}
-
-// IsSet returns true if OptContactSalaryData was set.
-func (o OptContactSalaryData) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactSalaryData) Reset() {
-	var v ContactSalaryData
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactSalaryData) SetTo(v ContactSalaryData) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactSalaryData) Get() (v ContactSalaryData, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactSalaryData) Or(d ContactSalaryData) ContactSalaryData {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptContactSocials returns new OptContactSocials with value set to v.
-func NewOptContactSocials(v ContactSocials) OptContactSocials {
-	return OptContactSocials{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptContactSocials is optional ContactSocials.
-type OptContactSocials struct {
-	Value ContactSocials
-	Set   bool
-}
-
-// IsSet returns true if OptContactSocials was set.
-func (o OptContactSocials) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptContactSocials) Reset() {
-	var v ContactSocials
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptContactSocials) SetTo(v ContactSocials) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptContactSocials) Get() (v ContactSocials, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptContactSocials) Or(d ContactSocials) ContactSocials {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptDatasourceLinkedinSettings returns new OptDatasourceLinkedinSettings with value set to v.
 func NewOptDatasourceLinkedinSettings(v DatasourceLinkedinSettings) OptDatasourceLinkedinSettings {
 	return OptDatasourceLinkedinSettings{
@@ -5779,7 +5218,9 @@ func (o OptUploadPresignedUrlRequestStorageType) Or(d UploadPresignedUrlRequestS
 
 // Ref: #
 type Pipeline struct {
-	UUID      string       `json:"uuid"`
+	UUID string `json:"uuid"`
+	// The user (or account) that owns this pipeline.
+	UserUUID  OptString    `json:"user_uuid"`
 	Name      string       `json:"name"`
 	Flow      PipelineFlow `json:"flow"`
 	CreatedAt OptDateTime  `json:"created_at"`
@@ -5789,6 +5230,11 @@ type Pipeline struct {
 // GetUUID returns the value of UUID.
 func (s *Pipeline) GetUUID() string {
 	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *Pipeline) GetUserUUID() OptString {
+	return s.UserUUID
 }
 
 // GetName returns the value of Name.
@@ -5816,6 +5262,11 @@ func (s *Pipeline) SetUUID(val string) {
 	s.UUID = val
 }
 
+// SetUserUUID sets the value of UserUUID.
+func (s *Pipeline) SetUserUUID(val OptString) {
+	s.UserUUID = val
+}
+
 // SetName sets the value of Name.
 func (s *Pipeline) SetName(val string) {
 	s.Name = val
@@ -5837,10 +5288,17 @@ func (s *Pipeline) SetUpdatedAt(val OptDateTime) {
 }
 
 type PipelineCreateReq struct {
+	// The user or account that owns this pipeline.
+	UserUUID OptString `json:"user_uuid"`
 	// Name of the pipeline.
 	Name string `json:"name"`
 	// Flow JSON to draw.
 	Flow PipelineCreateReqFlow `json:"flow"`
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *PipelineCreateReq) GetUserUUID() OptString {
+	return s.UserUUID
 }
 
 // GetName returns the value of Name.
@@ -5851,6 +5309,11 @@ func (s *PipelineCreateReq) GetName() string {
 // GetFlow returns the value of Flow.
 func (s *PipelineCreateReq) GetFlow() PipelineCreateReqFlow {
 	return s.Flow
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *PipelineCreateReq) SetUserUUID(val OptString) {
+	s.UserUUID = val
 }
 
 // SetName sets the value of Name.
@@ -5960,15 +5423,15 @@ func (s *PipelineEntry) SetUpdatedAt(val OptDateTime) {
 }
 
 type PipelineEntryCreateReq struct {
-	// UUID of the pipeline entry.
+	// UUID of the new pipeline entry.
 	UUID string `json:"uuid"`
 	// Pipeline UUID.
 	PipelineUUID string `json:"pipeline_uuid"`
-	// Parent pipeline entry UUID.
+	// Parent pipeline entry UUID (if any).
 	ParentUUID OptString `json:"parent_uuid"`
 	// Type of pipeline entry.
 	Type string `json:"type"`
-	// Params of the Entry.
+	// Parameters for the pipeline entry.
 	Params PipelineEntryCreateReqParams `json:"params"`
 }
 
@@ -6022,7 +5485,7 @@ func (s *PipelineEntryCreateReq) SetParams(val PipelineEntryCreateReqParams) {
 	s.Params = val
 }
 
-// Params of the Entry.
+// Parameters for the pipeline entry.
 type PipelineEntryCreateReqParams map[string]jx.Raw
 
 func (s *PipelineEntryCreateReqParams) init() PipelineEntryCreateReqParams {
@@ -6150,7 +5613,7 @@ func (s *PipelineFlow) init() PipelineFlow {
 }
 
 type PipelineListOK struct {
-	// List of Pipelines.
+	// List of pipelines.
 	Pipelines []Pipeline `json:"pipelines"`
 }
 
@@ -6165,9 +5628,9 @@ func (s *PipelineListOK) SetPipelines(val []Pipeline) {
 }
 
 type PipelineUpdateReq struct {
-	// Name of the client.
+	// Updated name of the pipeline.
 	Name string `json:"name"`
-	// Flow JSON to draw.
+	// Updated flow JSON.
 	Flow PipelineUpdateReqFlow `json:"flow"`
 }
 
@@ -6191,7 +5654,7 @@ func (s *PipelineUpdateReq) SetFlow(val PipelineUpdateReqFlow) {
 	s.Flow = val
 }
 
-// Flow JSON to draw.
+// Updated flow JSON.
 type PipelineUpdateReqFlow map[string]jx.Raw
 
 func (s *PipelineUpdateReqFlow) init() PipelineUpdateReqFlow {

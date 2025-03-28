@@ -51,6 +51,7 @@ put:
         description: Entry UUID of the pipeline.
         type: string
   requestBody:
+    required: true
     content:
       application/json:
         schema:
@@ -63,7 +64,6 @@ put:
               additionalProperties: true
           required:
             - params
-    required: true
   responses:
     "200":
       content:
@@ -80,6 +80,7 @@ put:
   tags:
     - pipeline
     - pipeline-entry
+
 delete:
   description: Delete pipeline entry
   operationId: pipeline-entry-delete

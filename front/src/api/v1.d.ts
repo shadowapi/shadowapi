@@ -315,7 +315,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Create Pipeline Object */
+        /** @description List pipelines */
         get: operations["pipeline-list"];
         put?: never;
         /** @description Create Pipeline */
@@ -350,7 +350,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Get pipeline */
+        /** @description Get pipeline by UUID (optionally filter by user) */
         get: operations["pipeline-get"];
         /** @description Update pipeline */
         put: operations["pipeline-update"];
@@ -369,7 +369,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Get pipeline entry */
+        /** @description Get all entries for a pipeline */
         get: operations["pipeline-entry-list"];
         put?: never;
         /** @description Create a pipeline entry */
@@ -824,7 +824,7 @@ export interface components {
              */
             storage_type?: "s3" | "postgres" | "hostfiles";
             /** @description Reference ID within the respective storage backend. */
-            storage_ref?: string;
+            storage_uuid?: string;
             /** @description Original filename. */
             name?: string;
             /** @description MIME type of the file. */
@@ -1074,6 +1074,8 @@ export interface components {
         };
         pipeline: {
             uuid: string;
+            /** @description The user (or account) that owns this pipeline. */
+            readonly user_uuid?: string;
             name: string;
             flow: {
                 [key: string]: unknown;
@@ -1350,157 +1352,134 @@ export interface components {
             readonly user_uuid?: string;
             readonly instance_uuid?: string;
             status?: string;
-            names?: {
-                [key: string]: unknown;
-            };
-            namesSearch?: string;
+            names?: Record<string, never>;
+            readonly names_search?: string;
             last?: string;
             first?: string;
             middle?: string;
             /** Format: date-time */
             birthday?: string;
-            birthdayType?: string;
+            birthday_type?: string;
             salary?: string;
-            salaryData?: {
-                [key: string]: unknown;
-            };
-            lastPositions?: {
-                [key: string]: unknown;
-            };
-            /** Format: int64 */
-            lastPositionID?: number;
-            /** Format: int64 */
-            lastPositionCompanyID?: number;
-            lastPositionCompanyName?: string;
-            lastPositionTitle?: string;
+            salary_data?: Record<string, never>;
+            last_positions?: Record<string, never>;
+            last_position_id?: number;
+            last_position_company_id?: number;
+            last_position_company_name?: string;
+            last_position_title?: string;
             /** Format: date-time */
-            lastPositionStartDate?: string;
+            last_position_start_date?: string;
             /** Format: date-time */
-            lastPositionEndDate?: string;
-            lastPositionEndNow?: boolean;
-            lastPositionDescription?: string;
-            noteSearch?: string;
-            noteKpiID?: {
-                [key: string]: unknown;
-            };
-            phones?: {
-                [key: string]: unknown;
-            };
-            phoneSearch?: string;
+            last_position_end_date?: string;
+            last_position_end_now?: boolean;
+            last_position_description?: string;
+            readonly note_search?: string;
+            note_kpi_id?: Record<string, never>;
+            phones?: Record<string, never>;
+            readonly phone_search?: string;
             phone1?: string;
-            phone1Type?: string;
-            phone1Country?: string;
+            phone1_type?: string;
+            phone1_country?: string;
             phone2?: string;
-            phone2Type?: string;
-            phone2Country?: string;
+            phone2_type?: string;
+            phone2_country?: string;
             phone3?: string;
-            phone3Type?: string;
-            phone3Country?: string;
+            phone3_type?: string;
+            phone3_country?: string;
             phone4?: string;
-            phone4Type?: string;
-            phone4Country?: string;
+            phone4_type?: string;
+            phone4_country?: string;
             phone5?: string;
-            phone5Type?: string;
-            phone5Country?: string;
-            emails?: {
-                [key: string]: unknown;
-            };
-            emailSearch?: string;
+            phone5_type?: string;
+            phone5_country?: string;
+            emails?: Record<string, never>;
+            readonly email_search?: string;
             email1?: string;
-            email1Type?: string;
+            email1_type?: string;
             email2?: string;
-            email2Type?: string;
+            email2_type?: string;
             email3?: string;
-            email3Type?: string;
+            email3_type?: string;
             email4?: string;
-            email4Type?: string;
+            email4_type?: string;
             email5?: string;
-            email5Type?: string;
-            messengers?: {
-                [key: string]: unknown;
-            };
-            messengersSearch?: string;
-            skypeUUID?: string;
+            email5_type?: string;
+            messengers?: Record<string, never>;
+            readonly messengers_search?: string;
+            skype_uuid?: string;
             skype?: string;
-            whatsappUUID?: string;
+            whatsapp_uuid?: string;
             whatsapp?: string;
-            telegramUUID?: string;
+            telegram_uuid?: string;
             telegram?: string;
-            wechatUUID?: string;
+            wechat_uuid?: string;
             wechat?: string;
-            lineUUID?: string;
+            line_uuid?: string;
             line?: string;
-            socials?: {
-                [key: string]: unknown;
-            };
-            socialsSearch?: string;
-            linkedinUUID?: string;
-            linkedinURL?: string;
-            facebookUUID?: string;
-            facebookURL?: string;
-            twitterUUID?: string;
-            twitterURL?: string;
-            githubUUID?: string;
-            githubURL?: string;
-            vkUUID?: string;
-            vkURL?: string;
-            odnoUUID?: string;
-            odnoURL?: string;
-            hhruUUID?: string;
-            hhruURL?: string;
-            habrUUID?: string;
-            habrURL?: string;
-            moikrugUUID?: string;
-            moikrugURL?: string;
-            instagramUUID?: string;
-            instagramURL?: string;
-            social1UUID?: string;
-            social1URL?: string;
-            social1Type?: string;
-            social2UUID?: string;
-            social2URL?: string;
-            social2Type?: string;
-            social3UUID?: string;
-            social3URL?: string;
-            social3Type?: string;
-            social4UUID?: string;
-            social4URL?: string;
-            social4Type?: string;
-            social5UUID?: string;
-            social5URL?: string;
-            social5Type?: string;
-            social6UUID?: string;
-            social6URL?: string;
-            social6Type?: string;
-            social7UUID?: string;
-            social7URL?: string;
-            social7Type?: string;
-            social8UUID?: string;
-            social8URL?: string;
-            social8Type?: string;
-            social9UUID?: string;
-            social9URL?: string;
-            social9Type?: string;
-            trackingSource?: string;
-            trackingSlug?: string;
-            cachedImg?: string;
-            cachedImgData?: {
-                [key: string]: unknown;
-            };
-            crawl?: {
-                [key: string]: unknown;
-            };
-            duplicateUserID?: string;
-            duplicateAlternativeID?: string;
+            socials?: Record<string, never>;
+            socials_search?: string;
+            linkedin_uuid?: string;
+            linkedin_url?: string;
+            facebook_uuid?: string;
+            facebook_url?: string;
+            twitter_uuid?: string;
+            twitter_url?: string;
+            github_uuid?: string;
+            github_url?: string;
+            vk_uuid?: string;
+            vk_url?: string;
+            odno_uuid?: string;
+            odno_url?: string;
+            hhru_uuid?: string;
+            hhru_url?: string;
+            habr_uuid?: string;
+            habr_url?: string;
+            moikrug_uuid?: string;
+            moikrug_url?: string;
+            instagram_uuid?: string;
+            instagram_url?: string;
+            social1_uuid?: string;
+            social1_url?: string;
+            social1_type?: string;
+            social2_uuid?: string;
+            social2_url?: string;
+            social2_type?: string;
+            social3_uuid?: string;
+            social3_url?: string;
+            social3_type?: string;
+            social4_uuid?: string;
+            social4_url?: string;
+            social4_type?: string;
+            social5_uuid?: string;
+            social5_url?: string;
+            social5_type?: string;
+            social6_uuid?: string;
+            social6_url?: string;
+            social6_type?: string;
+            social7_uuid?: string;
+            social7_url?: string;
+            social7_type?: string;
+            social8_uuid?: string;
+            social8_url?: string;
+            social8_type?: string;
+            social9_uuid?: string;
+            social9_url?: string;
+            social9_type?: string;
+            tracking_source?: string;
+            tracking_slug?: string;
+            cached_img?: string;
+            cached_img_data?: Record<string, never>;
+            crawl?: Record<string, never>;
+            duplicate_user_id?: string;
+            duplicate_alternative_id?: string;
             /** Format: date-time */
-            duplicateReportDate?: string;
+            duplicate_report_date?: string;
             /** Format: date-time */
-            entryDate?: string;
+            readonly entry_date?: string;
             /** Format: date-time */
-            editDate?: string;
+            readonly edit_date?: string;
             /** Format: date-time */
-            lastKPIEntryDate?: string;
-            score100?: number;
+            readonly last_kpi_entry_date?: string;
         };
     };
     responses: never;
@@ -2616,14 +2595,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Pipelines retrieved successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description List of Pipelines. */
+                        /** @description List of pipelines. */
                         pipelines: components["schemas"]["pipeline"][];
                     };
                 };
@@ -2649,6 +2628,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description The user or account that owns this pipeline. */
+                    user_uuid?: string;
                     /** @description Name of the pipeline. */
                     name: string;
                     /** @description Flow JSON to draw. */
@@ -2659,7 +2640,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
+            /** @description Pipeline created successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2713,7 +2694,10 @@ export interface operations {
     };
     "pipeline-get": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description (Optional) UUID of the user that owns the pipeline. */
+                user_uuid?: string;
+            };
             header?: never;
             path: {
                 /** @description UUID of the pipeline. */
@@ -2748,7 +2732,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description UUID of the pipeline object. */
+                /** @description UUID of the pipeline. */
                 uuid: string;
             };
             cookie?: never;
@@ -2756,9 +2740,9 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description Name of the client. */
+                    /** @description Updated name of the pipeline. */
                     name: string;
-                    /** @description Flow JSON to draw. */
+                    /** @description Updated flow JSON. */
                     flow: {
                         [key: string]: unknown;
                     };
@@ -2766,7 +2750,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
+            /** @description Pipeline updated successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2798,7 +2782,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Pipeline deleted successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2861,15 +2845,15 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description UUID of the pipeline entry. */
+                    /** @description UUID of the new pipeline entry. */
                     uuid: string;
                     /** @description Pipeline UUID. */
                     pipeline_uuid: string;
-                    /** @description Parent pipeline entry UUID. */
+                    /** @description Parent pipeline entry UUID (if any). */
                     parent_uuid?: string;
                     /** @description Type of pipeline entry. */
                     type: string;
-                    /** @description Params of the Entry. */
+                    /** @description Parameters for the pipeline entry. */
                     params: {
                         [key: string]: unknown;
                     };
@@ -2877,7 +2861,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
+            /** @description Pipeline entry created successfully. */
             201: {
                 headers: {
                     [name: string]: unknown;

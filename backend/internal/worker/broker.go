@@ -2,6 +2,8 @@ package worker
 
 import (
 	"context"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -42,9 +44,9 @@ func Provide(i do.Injector) (*Broker, error) {
 	// Create the email pipeline.
 	emailPipeline := pipelines.CreateEmailPipeline(log)
 	// Register  pipeline job factory.
-	RegisterJob(WorkerSubjectEmailFetch, jobs.EmailFetchJobFactory(log, emailPipeline))
-	RegisterJob(WorkerSubjectEmailSync, jobs.EmailPipelineJobFactory(emailPipeline, q, log))
-	RegisterJob(WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
+	registry.RegisterJob(registry.WorkerSubjectEmailFetch, jobs.EmailFetchJobFactory(log, emailPipeline, dbp, q))
+	registry.RegisterJob(registry.WorkerSubjectEmailSync, jobs.EmailPipelineJobFactory(emailPipeline, q, log))
+	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
 
 	if err := b.Start(ctx); err != nil {
 		log.Error("failed to start broker", "error", err)
@@ -55,16 +57,16 @@ func Provide(i do.Injector) (*Broker, error) {
 
 // Start ensures the stream exists and begins consuming messages.
 func (b *Broker) Start(ctx context.Context) error {
-	b.log.Debug("Broker starting", "stream", WorkerStream)
+	b.log.Debug("Broker starting", "stream", registry.WorkerStream)
 
-	if err := b.queue.Ensure(ctx, WorkerStream, RegistrySubjects); err != nil {
+	if err := b.queue.Ensure(ctx, registry.WorkerStream, registry.RegistrySubjects); err != nil {
 		b.log.Error("failed to ensure stream", "error", err)
 		return err
 	}
 	cancel, err := b.queue.Consume(
 		ctx,
-		WorkerStream,
-		RegistrySubjects,
+		registry.WorkerStream,
+		registry.RegistrySubjects,
 		"worker-jobs",
 		b.handleMessages(ctx),
 	)
@@ -86,9 +88,9 @@ func (b *Broker) Shutdown(ctx context.Context) error {
 func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 	return func(msg queue.Msg) {
 		b.log.Debug("Job received", "subject", msg.Subject())
-		job, err := CreateJob(msg.Subject(), msg.Data())
+		job, err := registry.CreateJob(msg.Subject(), msg.Data())
 		if err != nil {
-			if notReadyErr, ok := err.(JobNotReadyError); ok {
+			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
 				b.log.Debug("Job not ready, requeuing", "delay", notReadyErr.Delay)
 				_ = msg.NakWithDelay(notReadyErr.Delay)
 				return
@@ -98,7 +100,7 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 			return
 		}
 		if err := job.Execute(ctx); err != nil {
-			if notReadyErr, ok := err.(JobNotReadyError); ok {
+			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
 				b.log.Debug("Job not ready upon execution, requeuing", "delay", notReadyErr.Delay)
 				_ = msg.NakWithDelay(notReadyErr.Delay)
 				return

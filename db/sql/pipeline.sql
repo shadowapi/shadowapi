@@ -1,10 +1,15 @@
 -- name: CreatePipeline :one
 INSERT INTO pipeline (
-  uuid, name, flow,
-  created_at,
-  updated_at
-) VALUES (
-  @uuid, @name, @flow, NOW(), NOW()
+  uuid, user_uuid, name, flow,
+  created_at, updated_at
+)
+VALUES (
+  @uuid,
+  @user_uuid,        -- new
+  @name,
+  @flow,
+  NOW(),
+  NOW()
 ) RETURNING *;
 
 -- name: UpdatePipeline :exec
@@ -12,10 +17,15 @@ UPDATE pipeline SET
   name = COALESCE(@name, name),
   flow = COALESCE(@flow, flow),
   updated_at = NOW()
-WHERE uuid = @uuid;
+WHERE uuid = @uuid
+  AND (
+    -- only the owning user can update
+    user_uuid = @user_uuid
+  );
 
 -- name: DeletePipeline :exec
-DELETE FROM pipeline WHERE uuid = @uuid;
+DELETE FROM pipeline WHERE uuid = @uuid
+  AND user_uuid = @user_uuid;  -- multi-user safety check
 
 -- name: GetPipelines :many
 SELECT

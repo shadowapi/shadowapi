@@ -193,7 +193,7 @@ func (q *Queries) GetOauth2Client(ctx context.Context, id string) (Oauth2Client,
 
 const getOauth2ClientTokens = `-- name: GetOauth2ClientTokens :many
 SELECT
-  ot.uuid, ot.client_id, ot.token, ot.created_at, ot.updated_at,
+  ot.uuid, ot.client_id, ot.token, ot.created_at, ot.updated_at, ot.name,
   c.name
 FROM oauth2_token AS ot
 LEFT JOIN datasource AS c ON c.oauth2_token_uuid = ot.uuid
@@ -208,6 +208,7 @@ type GetOauth2ClientTokensRow struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	Name      pgtype.Text        `json:"name"`
+	Name_2    pgtype.Text        `json:"name_2"`
 }
 
 func (q *Queries) GetOauth2ClientTokens(ctx context.Context, clientID string) ([]GetOauth2ClientTokensRow, error) {
@@ -226,6 +227,7 @@ func (q *Queries) GetOauth2ClientTokens(ctx context.Context, clientID string) ([
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Name,
+			&i.Name_2,
 		); err != nil {
 			return nil, err
 		}
@@ -263,7 +265,7 @@ func (q *Queries) GetOauth2State(ctx context.Context, argUuid uuid.UUID) (Oauth2
 
 const getOauth2TokenByUUID = `-- name: GetOauth2TokenByUUID :one
 SELECT
-  uuid, client_id, token, created_at, updated_at
+  uuid, client_id, token, created_at, updated_at, name
 FROM oauth2_token
 WHERE "uuid" = $1
 LIMIT 1
@@ -278,13 +280,14 @@ func (q *Queries) GetOauth2TokenByUUID(ctx context.Context, argUuid uuid.UUID) (
 		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Name,
 	)
 	return i, err
 }
 
 const getOauth2TokensByClientID = `-- name: GetOauth2TokensByClientID :many
 SELECT
-  uuid, client_id, token, created_at, updated_at
+  uuid, client_id, token, created_at, updated_at, name
 FROM oauth2_token
 WHERE "client_id" = $1
 `
@@ -304,6 +307,7 @@ func (q *Queries) GetOauth2TokensByClientID(ctx context.Context, id string) ([]O
 			&i.Token,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Name,
 		); err != nil {
 			return nil, err
 		}

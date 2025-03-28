@@ -1,8 +1,10 @@
 // Pipeline execution engine (core logic)
 package worker
 
+/* remove
 import (
 	"context"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"log/slog"
@@ -11,13 +13,13 @@ import (
 // SimplePipeline is an example implementation of the Pipeline interface.
 type SimplePipeline struct {
 	log       *slog.Logger
-	extractor Extractor
-	filter    Filter
-	storage   Storage
+	extractor types.Extractor
+	filter    types.Filter
+	storage   types.Storage
 }
 
 // NewSimplePipeline creates a new pipeline.
-func NewSimplePipeline(log *slog.Logger, extractor Extractor, filter Filter, storage Storage) Pipeline {
+func NewSimplePipeline(log *slog.Logger, extractor types.Extractor, filter types.Filter, storage types.Storage) types.Pipeline {
 	return &SimplePipeline{
 		log:       log,
 		extractor: extractor,
@@ -51,3 +53,4 @@ func (p *SimplePipeline) Run(ctx context.Context, message *api.Message) error {
 	}
 	return nil
 }
+*/

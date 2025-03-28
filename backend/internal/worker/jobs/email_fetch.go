@@ -3,14 +3,13 @@ package jobs
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
+	"log/slog"
 	"time"
 
-	"github.com/shadowapi/shadowapi/backend/internal/worker"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
-	//"github.com/shadowapi/shadowapi/backend/internal/worker/extractors"
-	//"github.com/shadowapi/shadowapi/backend/internal/worker/filters"
-	//"github.com/shadowapi/shadowapi/backend/internal/worker/storage"
-	"log/slog"
 )
 
 // EmailFetchJobArgs holds job arguments (e.g. the datasource account ID).
@@ -26,22 +25,27 @@ type EmailFetchJob struct {
 	lastFetched time.Time
 	log         *slog.Logger
 	// The pipeline combines the extractor, filter, and storage.
-	pipeline worker.Pipeline
+	pipeline types.Pipeline
+	dbp      *pgxpool.Pool
+	queue    *queue.Queue
 }
 
 // NewEmailFetchJob constructs an email fetch job.
-func NewEmailFetchJob(args EmailFetchJobArgs, log *slog.Logger, pipeline worker.Pipeline) *EmailFetchJob {
+func NewEmailFetchJob(args EmailFetchJobArgs, log *slog.Logger, pipeline types.Pipeline, dbp *pgxpool.Pool, q *queue.Queue) *EmailFetchJob {
 	return &EmailFetchJob{
 		accountID:   args.AccountID,
 		lastFetched: args.LastFetched,
 		log:         log,
 		pipeline:    pipeline,
+		dbp:         dbp,
+		queue:       q,
 	}
 }
 
 // Execute runs the job:
 // 1. Look up the datasource account (and verify that it’s enabled).
-// 2. Use an email client (e.g. IMAP or Gmail API) to fetch messages.
+// 2. Use an email client (IMAP or Gmail API) to fetch messages since lastFetched.
+// 3. For each message, run the pipeline.
 func (j *EmailFetchJob) Execute(ctx context.Context) error {
 	j.log.Info("Starting email fetch job", "account_id", j.accountID)
 
@@ -71,30 +75,21 @@ func (j *EmailFetchJob) Execute(ctx context.Context) error {
 	return nil
 }
 
-// fetchEmailsForAccount simulates fetching emails for a given account.
-// In a real implementation, this would use the account’s credentials.
+// Some dummy helper that simulates fetching emails
 func fetchEmailsForAccount(accountID string, since time.Time) []api.Message {
-	// Example: return a slice of messages (fetched from IMAP or API)
+	// In real code, you’d use IMAP/Gmail API, etc.
 	return []api.Message{
-		{
-			UUID:   "msg-001",
-			Sender: "alice@example.com",
-			// Body is assumed to be a JSON payload that can be parsed into a Contact.
-			Body: `{"first": "Alice", "last": "Smith", "email": "alice@example.com"}`,
-			// You can set additional fields such as attachments here.
-		},
-		// Additional messages…
+		{UUID: "msg-001", Sender: "alice@example.com", Body: `{"first":"Alice","last":"Smith"}`},
 	}
 }
 
 // EmailFetchJobFactory returns a JobFactory to create EmailFetchJob instances.
-func EmailFetchJobFactory(log *slog.Logger, pipeline worker.Pipeline) worker.JobFactory {
-	return func(data []byte) (worker.Job, error) {
+func EmailFetchJobFactory(log *slog.Logger, pipeline types.Pipeline, dbp *pgxpool.Pool, q *queue.Queue) types.JobFactory {
+	return func(data []byte) (types.Job, error) {
 		var args EmailFetchJobArgs
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err
 		}
-		// Optionally: check account is enabled in DB.
-		return NewEmailFetchJob(args, log, pipeline), nil
+		return NewEmailFetchJob(args, log, pipeline, dbp, q), nil
 	}
 }

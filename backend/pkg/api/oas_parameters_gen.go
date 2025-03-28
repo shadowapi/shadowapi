@@ -3149,6 +3149,8 @@ func decodePipelineEntryUpdateParams(args [2]string, argsEscaped bool, r *http.R
 type PipelineGetParams struct {
 	// UUID of the pipeline.
 	UUID string
+	// (Optional) UUID of the user that owns the pipeline.
+	UserUUID OptString
 }
 
 func unpackPipelineGetParams(packed middleware.Parameters) (params PipelineGetParams) {
@@ -3159,10 +3161,20 @@ func unpackPipelineGetParams(packed middleware.Parameters) (params PipelineGetPa
 		}
 		params.UUID = packed[key].(string)
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.UserUUID = v.(OptString)
+		}
+	}
 	return params
 }
 
 func decodePipelineGetParams(args [1]string, argsEscaped bool, r *http.Request) (params PipelineGetParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
@@ -3205,6 +3217,47 @@ func decodePipelineGetParams(args [1]string, argsEscaped bool, r *http.Request) 
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: user_uuid.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "user_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotUserUUIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotUserUUIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.UserUUID.SetTo(paramsDotUserUUIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "query",
 			Err:  err,
 		}
 	}
@@ -3330,7 +3383,7 @@ func decodePipelineListParams(args [0]string, argsEscaped bool, r *http.Request)
 
 // PipelineUpdateParams is parameters of pipeline-update operation.
 type PipelineUpdateParams struct {
-	// UUID of the pipeline object.
+	// UUID of the pipeline.
 	UUID string
 }
 

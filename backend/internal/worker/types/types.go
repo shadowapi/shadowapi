@@ -1,6 +1,6 @@
 // Shared types and interfaces
 // internal/worker/types.go
-package worker
+package types
 
 import (
 	"context"
@@ -56,3 +56,6 @@ type Pipeline interface {
 	// Run executes the pipeline steps.
 	Run(ctx context.Context, message *api.Message) error
 }
+
+// JobFactory is a function that builds a Job from a message’s raw data.
+type JobFactory func(data []byte) (Job, error)

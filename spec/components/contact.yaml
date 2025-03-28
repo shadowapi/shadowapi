@@ -14,9 +14,9 @@ properties:
     type: string
   names:
     type: object
-    additionalProperties: true
-  namesSearch:
+  names_search:
     type: string
+    readOnly: true
   last:
     type: string
   first:
@@ -26,252 +26,246 @@ properties:
   birthday:
     type: string
     format: date-time
-  birthdayType:
+  birthday_type:
     type: string
   salary:
     type: string
-  salaryData:
+  salary_data:
     type: object
-    additionalProperties: true
-  lastPositions:
+  last_positions:
     type: object
-    additionalProperties: true
-  lastPositionID:
+  last_position_id:
     type: integer
-    format: int64
-  lastPositionCompanyID:
+  last_position_company_id:
     type: integer
-    format: int64
-  lastPositionCompanyName:
+  last_position_company_name:
     type: string
-  lastPositionTitle:
+  last_position_title:
     type: string
-  lastPositionStartDate:
+  last_position_start_date:
     type: string
     format: date-time
-  lastPositionEndDate:
+  last_position_end_date:
     type: string
     format: date-time
-  lastPositionEndNow:
+  last_position_end_now:
     type: boolean
-  lastPositionDescription:
+  last_position_description:
     type: string
-  noteSearch:
+  note_search:
     type: string
-  noteKpiID:
+    readOnly: true
+  note_kpi_id:
     type: object
-    additionalProperties: true
   phones:
     type: object
-    additionalProperties: true
-  phoneSearch:
+  phone_search:
     type: string
+    readOnly: true
   phone1:
     type: string
-  phone1Type:
+  phone1_type:
     type: string
-  phone1Country:
+  phone1_country:
     type: string
   phone2:
     type: string
-  phone2Type:
+  phone2_type:
     type: string
-  phone2Country:
+  phone2_country:
     type: string
   phone3:
     type: string
-  phone3Type:
+  phone3_type:
     type: string
-  phone3Country:
+  phone3_country:
     type: string
   phone4:
     type: string
-  phone4Type:
+  phone4_type:
     type: string
-  phone4Country:
+  phone4_country:
     type: string
   phone5:
     type: string
-  phone5Type:
+  phone5_type:
     type: string
-  phone5Country:
+  phone5_country:
     type: string
   emails:
     type: object
-    additionalProperties: true
-  emailSearch:
+  email_search:
     type: string
+    readOnly: true
   email1:
     type: string
-  email1Type:
+  email1_type:
     type: string
   email2:
     type: string
-  email2Type:
+  email2_type:
     type: string
   email3:
     type: string
-  email3Type:
+  email3_type:
     type: string
   email4:
     type: string
-  email4Type:
+  email4_type:
     type: string
   email5:
     type: string
-  email5Type:
+  email5_type:
     type: string
   messengers:
     type: object
-    additionalProperties: true
-  messengersSearch:
+  messengers_search:
     type: string
-  skypeUUID:
+    readOnly: true
+  skype_uuid:
     type: string
   skype:
     type: string
-  whatsappUUID:
+  whatsapp_uuid:
     type: string
   whatsapp:
     type: string
-  telegramUUID:
+  telegram_uuid:
     type: string
   telegram:
     type: string
-  wechatUUID:
+  wechat_uuid:
     type: string
   wechat:
     type: string
-  lineUUID:
+  line_uuid:
     type: string
   line:
     type: string
   socials:
     type: object
-    additionalProperties: true
-  socialsSearch:
+  socials_search:
     type: string
-  linkedinUUID:
+  linkedin_uuid:
     type: string
-  linkedinURL:
+  linkedin_url:
     type: string
-  facebookUUID:
+  facebook_uuid:
     type: string
-  facebookURL:
+  facebook_url:
     type: string
-  twitterUUID:
+  twitter_uuid:
     type: string
-  twitterURL:
+  twitter_url:
     type: string
-  githubUUID:
+  github_uuid:
     type: string
-  githubURL:
+  github_url:
     type: string
-  vkUUID:
+  vk_uuid:
     type: string
-  vkURL:
+  vk_url:
     type: string
-  odnoUUID:
+  odno_uuid:
     type: string
-  odnoURL:
+  odno_url:
     type: string
-  hhruUUID:
+  hhru_uuid:
     type: string
-  hhruURL:
+  hhru_url:
     type: string
-  habrUUID:
+  habr_uuid:
     type: string
-  habrURL:
+  habr_url:
     type: string
-  moikrugUUID:
+  moikrug_uuid:
     type: string
-  moikrugURL:
+  moikrug_url:
     type: string
-  instagramUUID:
+  instagram_uuid:
     type: string
-  instagramURL:
+  instagram_url:
     type: string
-  social1UUID:
+  social1_uuid:
     type: string
-  social1URL:
+  social1_url:
     type: string
-  social1Type:
+  social1_type:
     type: string
-  social2UUID:
+  social2_uuid:
     type: string
-  social2URL:
+  social2_url:
     type: string
-  social2Type:
+  social2_type:
     type: string
-  social3UUID:
+  social3_uuid:
     type: string
-  social3URL:
+  social3_url:
     type: string
-  social3Type:
+  social3_type:
     type: string
-  social4UUID:
+  social4_uuid:
     type: string
-  social4URL:
+  social4_url:
     type: string
-  social4Type:
+  social4_type:
     type: string
-  social5UUID:
+  social5_uuid:
     type: string
-  social5URL:
+  social5_url:
     type: string
-  social5Type:
+  social5_type:
     type: string
-  social6UUID:
+  social6_uuid:
     type: string
-  social6URL:
+  social6_url:
     type: string
-  social6Type:
+  social6_type:
     type: string
-  social7UUID:
+  social7_uuid:
     type: string
-  social7URL:
+  social7_url:
     type: string
-  social7Type:
+  social7_type:
     type: string
-  social8UUID:
+  social8_uuid:
     type: string
-  social8URL:
+  social8_url:
     type: string
-  social8Type:
+  social8_type:
     type: string
-  social9UUID:
+  social9_uuid:
     type: string
-  social9URL:
+  social9_url:
     type: string
-  social9Type:
+  social9_type:
     type: string
-  trackingSource:
+  tracking_source:
     type: string
-  trackingSlug:
+  tracking_slug:
     type: string
-  cachedImg:
+  cached_img:
     type: string
-  cachedImgData:
+  cached_img_data:
     type: object
-    additionalProperties: true
   crawl:
     type: object
-    additionalProperties: true
-  duplicateUserID:
+  duplicate_user_id:
     type: string
-  duplicateAlternativeID:
+  duplicate_alternative_id:
     type: string
-  duplicateReportDate:
-    type: string
-    format: date-time
-  entryDate:
+  duplicate_report_date:
     type: string
     format: date-time
-  editDate:
+  entry_date:
     type: string
     format: date-time
-  lastKPIEntryDate:
+    readOnly: true
+  edit_date:
     type: string
     format: date-time
-  score100:
-    type: integer
+    readOnly: true
+  last_kpi_entry_date:
+    type: string
+    format: date-time
+    readOnly: true

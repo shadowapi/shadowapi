@@ -9,7 +9,7 @@ FileObject:
       type: string
       enum: [s3, postgres, hostfiles]
       description: The type of storage backend.
-    storage_ref:
+    storage_uuid:
       type: string
       description: Reference ID within the respective storage backend.
     name:

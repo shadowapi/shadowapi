@@ -31,6 +31,7 @@ import { FlowEntries } from '@/components/FlowEntries'
 
 interface PipelineProps {
   pipelineUUID: string
+  userUUID: string // or accountUUID, whichever your system uses
 }
 
 interface FlowEntryItem {
@@ -41,7 +42,7 @@ interface FlowEntryItem {
   title: string
 }
 
-export const PipelineForm = ({ pipelineUUID }: PipelineProps) => {
+export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const form = useForm<components['schemas']['pipeline']>({})
@@ -58,19 +59,24 @@ export const PipelineForm = ({ pipelineUUID }: PipelineProps) => {
       const { data } = await client.GET('/pipeline/entry/types', { signal })
       return data
     },
-    throwOnError: false,
+    // throwOnError: false,
   })
 
   const pipelineQuery = useQuery({
-    queryKey: ['/pipeline/{uuid}', { id: pipelineUUID }],
+    queryKey: ['/pipeline/{uuid}', { uuid: pipelineUUID, user_uuid: userUUID }],
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/pipeline/{uuid}', {
-        params: { path: { uuid: pipelineUUID } },
+        params: {
+          query: {
+            user_uuid: userUUID,
+          },
+          path: { uuid: pipelineUUID },
+        },
         signal,
       })
       return data
     },
-    throwOnError: false,
+    // throwOnError: false,
     enabled: pipelineUUID !== 'add',
   })
 
@@ -86,7 +92,7 @@ export const PipelineForm = ({ pipelineUUID }: PipelineProps) => {
         })
       } else {
         resp = await client.PUT(`/pipeline/{uuid}`, {
-          params: { path: { uuid: pipelineUUID } },
+          params: { path: { uuid: pipelineUUID } }, // TODO @reactima , query: { user_uuid: userUUID }
           body: {
             name: data.name,
             flow: data.flow,
