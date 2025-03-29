@@ -5124,52 +5124,6 @@ func (o OptURI) Or(d url.URL) url.URL {
 	return d
 }
 
-// NewOptUploadFileRequestStorageType returns new OptUploadFileRequestStorageType with value set to v.
-func NewOptUploadFileRequestStorageType(v UploadFileRequestStorageType) OptUploadFileRequestStorageType {
-	return OptUploadFileRequestStorageType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptUploadFileRequestStorageType is optional UploadFileRequestStorageType.
-type OptUploadFileRequestStorageType struct {
-	Value UploadFileRequestStorageType
-	Set   bool
-}
-
-// IsSet returns true if OptUploadFileRequestStorageType was set.
-func (o OptUploadFileRequestStorageType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptUploadFileRequestStorageType) Reset() {
-	var v UploadFileRequestStorageType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptUploadFileRequestStorageType) SetTo(v UploadFileRequestStorageType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptUploadFileRequestStorageType) Get() (v UploadFileRequestStorageType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptUploadFileRequestStorageType) Or(d UploadFileRequestStorageType) UploadFileRequestStorageType {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptUploadPresignedUrlRequestStorageType returns new OptUploadPresignedUrlRequestStorageType with value set to v.
 func NewOptUploadPresignedUrlRequestStorageType(v UploadPresignedUrlRequestStorageType) OptUploadPresignedUrlRequestStorageType {
 	return OptUploadPresignedUrlRequestStorageType{
@@ -6498,10 +6452,12 @@ func (s *TgSessionVerifyReq) SetPassword(val OptString) {
 // File upload request metadata.
 // Ref: #/UploadFileRequest
 type UploadFileRequest struct {
-	Name     OptString `json:"name"`
+	// Desired name of the file.
+	Name OptString `json:"name"`
+	// MIME type of the file, defaults to "application/octet-stream".
 	MimeType OptString `json:"mime_type"`
-	// The storage backend where the file should be uploaded.
-	StorageType OptUploadFileRequestStorageType `json:"storage_type"`
+	// The UUID of the storage where this file will be uploaded.
+	StorageUUID string `json:"storage_uuid"`
 }
 
 // GetName returns the value of Name.
@@ -6514,9 +6470,9 @@ func (s *UploadFileRequest) GetMimeType() OptString {
 	return s.MimeType
 }
 
-// GetStorageType returns the value of StorageType.
-func (s *UploadFileRequest) GetStorageType() OptUploadFileRequestStorageType {
-	return s.StorageType
+// GetStorageUUID returns the value of StorageUUID.
+func (s *UploadFileRequest) GetStorageUUID() string {
+	return s.StorageUUID
 }
 
 // SetName sets the value of Name.
@@ -6529,58 +6485,9 @@ func (s *UploadFileRequest) SetMimeType(val OptString) {
 	s.MimeType = val
 }
 
-// SetStorageType sets the value of StorageType.
-func (s *UploadFileRequest) SetStorageType(val OptUploadFileRequestStorageType) {
-	s.StorageType = val
-}
-
-// The storage backend where the file should be uploaded.
-type UploadFileRequestStorageType string
-
-const (
-	UploadFileRequestStorageTypeS3        UploadFileRequestStorageType = "s3"
-	UploadFileRequestStorageTypePostgres  UploadFileRequestStorageType = "postgres"
-	UploadFileRequestStorageTypeHostfiles UploadFileRequestStorageType = "hostfiles"
-)
-
-// AllValues returns all UploadFileRequestStorageType values.
-func (UploadFileRequestStorageType) AllValues() []UploadFileRequestStorageType {
-	return []UploadFileRequestStorageType{
-		UploadFileRequestStorageTypeS3,
-		UploadFileRequestStorageTypePostgres,
-		UploadFileRequestStorageTypeHostfiles,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s UploadFileRequestStorageType) MarshalText() ([]byte, error) {
-	switch s {
-	case UploadFileRequestStorageTypeS3:
-		return []byte(s), nil
-	case UploadFileRequestStorageTypePostgres:
-		return []byte(s), nil
-	case UploadFileRequestStorageTypeHostfiles:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *UploadFileRequestStorageType) UnmarshalText(data []byte) error {
-	switch UploadFileRequestStorageType(data) {
-	case UploadFileRequestStorageTypeS3:
-		*s = UploadFileRequestStorageTypeS3
-		return nil
-	case UploadFileRequestStorageTypePostgres:
-		*s = UploadFileRequestStorageTypePostgres
-		return nil
-	case UploadFileRequestStorageTypeHostfiles:
-		*s = UploadFileRequestStorageTypeHostfiles
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
+// SetStorageUUID sets the value of StorageUUID.
+func (s *UploadFileRequest) SetStorageUUID(val string) {
+	s.StorageUUID = val
 }
 
 // Response after uploading a file.

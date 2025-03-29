@@ -41,7 +41,7 @@ func Provide(i do.Injector) (*Broker, error) {
 	}
 
 	// Create the email pipeline.
-	emailPipeline := pipelines.CreateEmailPipeline(log)
+	emailPipeline := pipelines.CreateEmailPipeline(ctx, log, dbp)
 	// Register  pipeline job factory.
 	registry.RegisterJob(registry.WorkerSubjectEmailFetch, jobs.EmailFetchJobFactory(log, emailPipeline, dbp, q))
 	registry.RegisterJob(registry.WorkerSubjectEmailSync, jobs.EmailPipelineJobFactory(emailPipeline, q, log))

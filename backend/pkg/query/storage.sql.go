@@ -70,6 +70,35 @@ func (q *Queries) DeleteStorage(ctx context.Context, argUuid uuid.UUID) error {
 	return err
 }
 
+const getStorage = `-- name: GetStorage :one
+SELECT
+    uuid,
+    name,
+    "type",
+    is_enabled,
+    settings,
+    created_at,
+    updated_at
+FROM storage
+WHERE uuid = $1
+LIMIT 1
+`
+
+func (q *Queries) GetStorage(ctx context.Context, argUuid uuid.UUID) (Storage, error) {
+	row := q.db.QueryRow(ctx, getStorage, argUuid)
+	var i Storage
+	err := row.Scan(
+		&i.UUID,
+		&i.Name,
+		&i.Type,
+		&i.IsEnabled,
+		&i.Settings,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getStorages = `-- name: GetStorages :many
 WITH filtered_storages AS (
   SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE 

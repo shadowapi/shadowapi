@@ -39,8 +39,7 @@ type Extractor interface {
 
 // Filter determines whether a message meets some criteria.
 type Filter interface {
-	// Apply returns true if the message passes the filter.
-	Apply(message *api.Message) bool
+	Apply(ctx context.Context, message *api.Message) bool
 }
 
 // Storage saves message and attachment data.

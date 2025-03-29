@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -9,11 +10,11 @@ import (
 
 type PostgresStorage struct {
 	log *slog.Logger
-	// In a full implementation, you might embed a DB connection here.
+	dbp *pgxpool.Pool
 }
 
-func NewPostgresStorage(log *slog.Logger) *PostgresStorage {
-	return &PostgresStorage{log: log}
+func NewPostgresStorage(log *slog.Logger, dbp *pgxpool.Pool) *PostgresStorage {
+	return &PostgresStorage{log: log, dbp: dbp}
 }
 
 func (p *PostgresStorage) SaveMessage(ctx context.Context, message *api.Message) error {

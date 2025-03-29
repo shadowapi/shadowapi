@@ -41,25 +41,37 @@ func (q *Queries) AddPipelineEntry(ctx context.Context, arg AddPipelineEntryPara
 
 const createPipeline = `-- name: CreatePipeline :one
 INSERT INTO pipeline (
-  uuid, name, flow,
-  created_at,
-  updated_at
-) VALUES (
-  $1, $2, $3, NOW(), NOW()
-) RETURNING uuid, name, flow, created_at, updated_at
+  uuid, user_uuid, name, flow,
+  created_at, updated_at
+)
+VALUES (
+  $1,
+  $2,        -- new
+  $3,
+  $4,
+  NOW(),
+  NOW()
+) RETURNING uuid, user_uuid, name, flow, created_at, updated_at
 `
 
 type CreatePipelineParams struct {
-	UUID uuid.UUID `json:"uuid"`
-	Name string    `json:"name"`
-	Flow []byte    `json:"flow"`
+	UUID     uuid.UUID  `json:"uuid"`
+	UserUUID *uuid.UUID `json:"user_uuid"`
+	Name     string     `json:"name"`
+	Flow     []byte     `json:"flow"`
 }
 
 func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) (Pipeline, error) {
-	row := q.db.QueryRow(ctx, createPipeline, arg.UUID, arg.Name, arg.Flow)
+	row := q.db.QueryRow(ctx, createPipeline,
+		arg.UUID,
+		arg.UserUUID,
+		arg.Name,
+		arg.Flow,
+	)
 	var i Pipeline
 	err := row.Scan(
 		&i.UUID,
+		&i.UserUUID,
 		&i.Name,
 		&i.Flow,
 		&i.CreatedAt,
@@ -159,7 +171,7 @@ func (q *Queries) GetPipelineEntryByUUID(ctx context.Context, argUuid uuid.UUID)
 
 const getPipelines = `-- name: GetPipelines :many
 SELECT
-uuid, name, flow, created_at, updated_at
+uuid, user_uuid, name, flow, created_at, updated_at
 FROM pipeline
 WHERE 
   -- if all params are null, select all
@@ -199,6 +211,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]P
 		var i Pipeline
 		if err := rows.Scan(
 			&i.UUID,
+			&i.UserUUID,
 			&i.Name,
 			&i.Flow,
 			&i.CreatedAt,
@@ -220,16 +233,26 @@ UPDATE pipeline SET
   flow = COALESCE($2, flow),
   updated_at = NOW()
 WHERE uuid = $3
+  AND (
+    -- only the owning user can update
+    user_uuid = $4
+  )
 `
 
 type UpdatePipelineParams struct {
-	Name string    `json:"name"`
-	Flow []byte    `json:"flow"`
-	UUID uuid.UUID `json:"uuid"`
+	Name     string     `json:"name"`
+	Flow     []byte     `json:"flow"`
+	UUID     uuid.UUID  `json:"uuid"`
+	UserUUID *uuid.UUID `json:"user_uuid"`
 }
 
 func (q *Queries) UpdatePipeline(ctx context.Context, arg UpdatePipelineParams) error {
-	_, err := q.db.Exec(ctx, updatePipeline, arg.Name, arg.Flow, arg.UUID)
+	_, err := q.db.Exec(ctx, updatePipeline,
+		arg.Name,
+		arg.Flow,
+		arg.UUID,
+		arg.UserUUID,
+	)
 	return err
 }
 

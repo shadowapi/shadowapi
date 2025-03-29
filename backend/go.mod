@@ -15,6 +15,7 @@ require (
 	github.com/nats-io/nats.go v1.38.0
 	github.com/ogen-go/ogen v1.10.0
 	github.com/ory/kratos-client-go v1.2.1
+	github.com/ory/ladon v1.3.0
 	github.com/phsym/console-slog v0.3.1
 	github.com/prometheus/client_golang v1.21.0
 	github.com/samber/do/v2 v2.0.0-beta.7
@@ -56,6 +57,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/gotd/ige v0.2.2 // indirect
 	github.com/gotd/neo v0.1.5 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -69,7 +71,9 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/nats-io/nkeys v0.4.9 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/ory/pagination v0.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect

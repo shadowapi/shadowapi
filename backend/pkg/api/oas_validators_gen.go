@@ -652,49 +652,6 @@ func (s *SyncpolicyListOK) Validate() error {
 	return nil
 }
 
-func (s *UploadFileRequest) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if value, ok := s.StorageType.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "storage_type",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s UploadFileRequestStorageType) Validate() error {
-	switch s {
-	case "s3":
-		return nil
-	case "postgres":
-		return nil
-	case "hostfiles":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *UploadFileResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer

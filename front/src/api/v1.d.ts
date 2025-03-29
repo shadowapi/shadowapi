@@ -844,13 +844,12 @@ export interface components {
         };
         /** @description File upload request metadata. */
         UploadFileRequest: {
+            /** @description Desired name of the file. */
             name?: string;
+            /** @description MIME type of the file, defaults to "application/octet-stream". */
             mime_type?: string;
-            /**
-             * @description The storage backend where the file should be uploaded.
-             * @enum {string}
-             */
-            storage_type?: "s3" | "postgres" | "hostfiles";
+            /** @description The UUID of the storage where this file will be uploaded. */
+            storage_uuid: string;
         };
         /** @description Response after uploading a file. */
         UploadFileResponse: {

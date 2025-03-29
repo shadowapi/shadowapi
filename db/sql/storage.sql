@@ -46,6 +46,19 @@ ORDER BY
   created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0) OFFSET sqlc.arg('offset');
 
+-- name: GetStorage :one
+SELECT
+    uuid,
+    name,
+    "type",
+    is_enabled,
+    settings,
+    created_at,
+    updated_at
+FROM storage
+WHERE uuid = $1
+LIMIT 1;
+
 -- name: UpdateStorage :exec
 UPDATE storage SET
   "type" = @type,

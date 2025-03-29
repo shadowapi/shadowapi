@@ -9236,39 +9236,6 @@ func (s *OptTelegramSessionHistoryItemMeta) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes UploadFileRequestStorageType as json.
-func (o OptUploadFileRequestStorageType) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes UploadFileRequestStorageType from json.
-func (o *OptUploadFileRequestStorageType) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptUploadFileRequestStorageType to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptUploadFileRequestStorageType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptUploadFileRequestStorageType) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes UploadPresignedUrlRequestStorageType as json.
 func (o OptUploadPresignedUrlRequestStorageType) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -13113,17 +13080,15 @@ func (s *UploadFileRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.StorageType.Set {
-			e.FieldStart("storage_type")
-			s.StorageType.Encode(e)
-		}
+		e.FieldStart("storage_uuid")
+		e.Str(s.StorageUUID)
 	}
 }
 
 var jsonFieldsNameOfUploadFileRequest = [3]string{
 	0: "name",
 	1: "mime_type",
-	2: "storage_type",
+	2: "storage_uuid",
 }
 
 // Decode decodes UploadFileRequest from json.
@@ -13131,6 +13096,7 @@ func (s *UploadFileRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UploadFileRequest to nil")
 	}
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -13154,22 +13120,56 @@ func (s *UploadFileRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"mime_type\"")
 			}
-		case "storage_type":
+		case "storage_uuid":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				s.StorageType.Reset()
-				if err := s.StorageType.Decode(d); err != nil {
+				v, err := d.Str()
+				s.StorageUUID = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"storage_type\"")
+				return errors.Wrap(err, "decode field \"storage_uuid\"")
 			}
 		default:
-			return d.Skip()
+			return errors.Errorf("unexpected field %q", k)
 		}
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode UploadFileRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000100,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfUploadFileRequest) {
+					name = jsonFieldsNameOfUploadFileRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 
 	return nil
@@ -13184,48 +13184,6 @@ func (s *UploadFileRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UploadFileRequest) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes UploadFileRequestStorageType as json.
-func (s UploadFileRequestStorageType) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes UploadFileRequestStorageType from json.
-func (s *UploadFileRequestStorageType) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode UploadFileRequestStorageType to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch UploadFileRequestStorageType(v) {
-	case UploadFileRequestStorageTypeS3:
-		*s = UploadFileRequestStorageTypeS3
-	case UploadFileRequestStorageTypePostgres:
-		*s = UploadFileRequestStorageTypePostgres
-	case UploadFileRequestStorageTypeHostfiles:
-		*s = UploadFileRequestStorageTypeHostfiles
-	default:
-		*s = UploadFileRequestStorageType(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s UploadFileRequestStorageType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UploadFileRequestStorageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -2,6 +2,7 @@ package pipelines
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"log/slog"
 
@@ -34,8 +35,8 @@ func (p *SimplePipeline) Run(ctx context.Context, message *api.Message) error {
 	p.log.Info("Running pipeline", "message_uuid", message.UUID)
 
 	// Apply filter.
-	if !p.filter.Apply(message) {
-		p.log.Info("Message filtered out", "message_uuid", message.UUID)
+	if filtered := p.filter.Apply(ctx, message); !filtered {
+		p.log.Info("Message blocked by policy", "sender", message.Sender)
 		return nil
 	}
 
@@ -56,13 +57,13 @@ func (p *SimplePipeline) Run(ctx context.Context, message *api.Message) error {
 }
 
 // CreateEmailPipeline instantiates a pipeline for processing email messages.
-func CreateEmailPipeline(log *slog.Logger) types.Pipeline {
+func CreateEmailPipeline(ctx context.Context, log *slog.Logger, dbp *pgxpool.Pool) types.Pipeline {
 	// Extractor: extracts contact details from the email message body.
 	extractor := extractors.NewContactExtractor()
 	// Filter: for example, allow only messages from specific domains.
 	filter := filters.NewSyncPolicyFilter([]string{"@example.com", "@mydomain.com"})
-	// Storage: persist full messages in Postgres (or S3/hostfiles as needed).
-	storageBackend := storage.NewPostgresStorage(log)
+	// Storage: persist full messages in Postgres (or S3/hostfiles as needed)
+	storageBackend := storage.NewPostgresStorage(log, dbp)
 	// Create a simple pipeline that uses the three components.
 	return NewSimplePipeline(log, extractor, filter, storageBackend)
 }

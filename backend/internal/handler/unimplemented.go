@@ -61,3 +61,14 @@ func (h *Handler) DatasourceWhatsappList(ctx context.Context, params api.Datasou
 
 	return pl, ht.ErrNotImplemented
 }
+
+// GeneratePresignedUploadUrl implements generatePresignedUploadUrl operation.
+//
+// Generate a pre-signed URL for file upload.
+//
+// POST /storage/upload-url
+func (h *Handler) GeneratePresignedUploadUrl(ctx context.Context, req *api.UploadPresignedUrlRequest) (*api.UploadPresignedUrlResponse, error) {
+	var pl api.UploadPresignedUrlResponse
+
+	return &pl, ht.ErrNotImplemented
+}

@@ -24,8 +24,7 @@ WHERE uuid = @uuid
   );
 
 -- name: DeletePipeline :exec
-DELETE FROM pipeline WHERE uuid = @uuid
-  AND user_uuid = @user_uuid;  -- multi-user safety check
+DELETE FROM pipeline WHERE uuid = @uuid;
 
 -- name: GetPipelines :many
 SELECT

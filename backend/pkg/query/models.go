@@ -224,6 +224,7 @@ type Oauth2Token struct {
 
 type Pipeline struct {
 	UUID      uuid.UUID          `json:"uuid"`
+	UserUUID  *uuid.UUID         `json:"user_uuid"`
 	Name      string             `json:"name"`
 	Flow      []byte             `json:"flow"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`

@@ -33,15 +33,20 @@ FileObject:
 UploadFileRequest:
   type: object
   description: File upload request metadata.
+  additionalProperties: false
   properties:
     name:
       type: string
+      description: Desired name of the file.
     mime_type:
       type: string
-    storage_type:
+      description: MIME type of the file, defaults to "application/octet-stream".
+    storage_uuid:
       type: string
-      enum: [s3, postgres, hostfiles]
-      description: The storage backend where the file should be uploaded.
+      description: The UUID of the storage where this file will be uploaded.
+  required:
+    - storage_uuid
+
 
 UploadFileResponse:
   type: object
