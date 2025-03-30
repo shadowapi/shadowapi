@@ -19,7 +19,11 @@ type SyncPolicyFormData = {
 export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactElement {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const form = useForm<SyncPolicyFormData>({})
+  const form = useForm<SyncPolicyFormData>({
+    defaultValues: {
+      settings: '{}',
+    },
+  })
 
   const isAdd = policyUUID === 'add'
 
@@ -122,7 +126,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {usersQuery.data?.map((user: components['schemas']['user']) => (
+                {usersQuery.data?.map((user: components['schemas']['user']) => 
                   <Item key={user.uuid}>
                     <span
                       style={{
@@ -136,7 +140,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
                       {user.email} {user.first_name} {user.last_name}
                     </span>
                   </Item>
-                ))}
+                )}
               </Picker>
             )}
           />
