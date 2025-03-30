@@ -19,15 +19,24 @@ type UserFormData = {
 export function UserForm({ userUUID }: { userUUID: string }): ReactElement {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const form = useForm<UserFormData>({})
+  const form = useForm<UserFormData>({
+    defaultValues: {
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      is_enabled: false,
+      is_admin: false,
+    },
+  })
 
   const isAdd = userUUID === 'add'
 
   const query = useQuery({
-    queryKey: isAdd ? ['/users', 'add'] : ['/users', { uuid: userUUID }],
+    queryKey: isAdd ? ['/user', 'add'] : ['/user', { uuid: userUUID }],
     queryFn: async ({ signal }) => {
       if (isAdd) return {}
-      const { data } = await client.GET('/users/' + userUUID, { signal })
+      const { data } = await client.GET('/user/' + userUUID, { signal })
       return data
     },
     enabled: !isAdd,
@@ -42,14 +51,14 @@ export function UserForm({ userUUID }: { userUUID: string }): ReactElement {
   const mutation = useMutation({
     mutationFn: async (data: UserFormData) => {
       if (isAdd) {
-        const resp = await client.POST('/users', { body: data })
+        const resp = await client.POST('/user', { body: data })
         if (resp.error) {
           form.setError('email', { message: resp.error.detail })
           throw new Error(resp.error.detail)
         }
         return resp
       } else {
-        const resp = await client.PUT('/users/' + userUUID, { body: data })
+        const resp = await client.PUT('/user/' + userUUID, { body: data })
         if (resp.error) {
           form.setError('email', { message: resp.error.detail })
           throw new Error(resp.error.detail)
@@ -58,14 +67,14 @@ export function UserForm({ userUUID }: { userUUID: string }): ReactElement {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: '/users' })
+      queryClient.invalidateQueries({ queryKey: '/user' })
       navigate('/users')
     },
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (uuid: string) => {
-      const resp = await client.DELETE('/users/' + uuid)
+      const resp = await client.DELETE('/user/' + uuid)
       if (resp.error) {
         form.setError('email', { message: resp.error.detail })
         throw new Error(resp.error.detail)
@@ -73,7 +82,7 @@ export function UserForm({ userUUID }: { userUUID: string }): ReactElement {
       return resp
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: '/users' })
+      queryClient.invalidateQueries({ queryKey: '/user' })
       navigate('/users')
     },
   })
@@ -86,7 +95,7 @@ export function UserForm({ userUUID }: { userUUID: string }): ReactElement {
     deleteMutation.mutate(userUUID)
   }
 
-  if (query.isPending && !isAdd) return <></>
+  if (query.isLoading && !isAdd) return <></>
 
   return (
     <Flex direction="row" alignItems="center" justifyContent="center" height="100vh">

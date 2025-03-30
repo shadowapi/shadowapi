@@ -142,7 +142,7 @@ func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (*api.U
 func (h *Handler) ListUsers(ctx context.Context) ([]api.User, error) {
 	users, err := query.New(h.dbp).ListUsers(ctx, query.ListUsersParams{
 		OffsetRecords: 0,
-		LimitRecords:  100,
+		LimitRecords:  10000, // TODO @reactima worry about paging later
 	})
 	if err != nil && err != pgx.ErrNoRows {
 		h.log.Error("failed to list users", "error", err)

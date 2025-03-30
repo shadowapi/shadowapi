@@ -22,10 +22,10 @@ import { FullLayout } from '@/layouts/FullLayout'
 export function Users() {
   const navigate = useNavigate()
   const query = useQuery({
-    queryKey: ['/users'],
+    queryKey: ['/user'],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET('/users', { signal })
-      return data?.users || []
+      const { data } = await client.GET('/user', { signal })
+      return data || []
     },
     retry: false,
     throwOnError: false,
@@ -41,7 +41,7 @@ export function Users() {
     )
   }
 
-  if (query.isPending) {
+  if (query.isLoading) {
     return (
       <FullLayout>
         <Flex direction="column">
@@ -68,7 +68,9 @@ export function Users() {
           <TableBody items={query.data}>
             {(item: components['schemas']['user']) => (
               <Row key={item.uuid}>
-                <Cell>{item.name}</Cell>
+                <Cell>
+                  {item.first_name} {item.last_name}
+                </Cell>
                 <Cell>
                   <ActionButton onPress={() => navigate('/users/' + item.uuid)}>
                     <Edit />

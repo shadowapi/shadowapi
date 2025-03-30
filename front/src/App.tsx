@@ -58,14 +58,6 @@ function App() {
           }
         />
         <Route
-          path="/users/add"
-          element={
-            <ProtectedRoute>
-              <UserEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/users/:uuid"
           element={
             <ProtectedRoute>
@@ -176,14 +168,6 @@ function App() {
           element={
             <ProtectedRoute>
               <SyncPolicies />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/syncpolicy/add"
-          element={
-            <ProtectedRoute>
-              <SyncPolicyEdit />
             </ProtectedRoute>
           }
         />
