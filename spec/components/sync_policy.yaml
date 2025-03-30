@@ -40,5 +40,3 @@ required:
   - user_id
   - service
   - sync_all
-  - created_at
-  - updated_at

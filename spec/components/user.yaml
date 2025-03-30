@@ -3,17 +3,29 @@
 type: object
 additionalProperties: false
 properties:
-  id:
+  uuid:
     type: string
     description: Unique identifier for the user
     readOnly: true
   email:
     type: string
     format: email
-    description: User’s primary email address
-  name:
+    description: User's primary email address
+  password:
     type: string
-    description: Full name of the user
+    description: User's password (hashed)
+  first_name:
+    type: string
+    description: User's first name
+  last_name:
+    type: string
+    description: User's last name
+  is_enabled:
+    type: boolean
+    description: Indicates if the user is enabled
+  is_admin:
+    type: boolean
+    description: Indicates if the user has administrative privileges
   meta:
     type: object
     additionalProperties: true
@@ -30,4 +42,6 @@ properties:
     readOnly: true
 required:
   - email
-  - name
+  - password
+  - first_name
+  - last_name

@@ -55,6 +55,4 @@ required:
   - phone_number
   - api_id
   - api_hash
-  - created_at
-  - updated_at
 

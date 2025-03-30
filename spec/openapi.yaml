@@ -65,6 +65,8 @@ components:
       $ref: "components/file.yaml#/GenerateDownloadLinkResponse"
     SyncPolicy:
       $ref: "components/sync_policy.yaml"
+    User:
+      $ref: "components/user.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -168,6 +170,10 @@ paths:
     $ref: "paths/contact.yaml"
   /contact/{uuid}:
     $ref: "paths/contact_uuid.yaml"
+  /user:
+    $ref: "paths/user.yaml"
+  /user/{uuid}:
+    $ref: "paths/user_uuid.yaml"
 
 
 servers:

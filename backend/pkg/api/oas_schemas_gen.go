@@ -1430,14 +1430,14 @@ type ContactSocials struct{}
 
 // Ref: #
 type Datasource struct {
-	UUID      string    `json:"uuid"`
-	UserUUID  string    `json:"user_uuid"`
-	Name      string    `json:"name"`
-	IsEnabled bool      `json:"is_enabled"`
-	Type      string    `json:"type"`
-	Provider  string    `json:"provider"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UUID      string      `json:"uuid"`
+	UserUUID  OptString   `json:"user_uuid"`
+	Name      string      `json:"name"`
+	IsEnabled bool        `json:"is_enabled"`
+	Type      string      `json:"type"`
+	Provider  string      `json:"provider"`
+	CreatedAt OptDateTime `json:"created_at"`
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -1446,7 +1446,7 @@ func (s *Datasource) GetUUID() string {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *Datasource) GetUserUUID() string {
+func (s *Datasource) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -1471,12 +1471,12 @@ func (s *Datasource) GetProvider() string {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Datasource) GetCreatedAt() time.Time {
+func (s *Datasource) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *Datasource) GetUpdatedAt() time.Time {
+func (s *Datasource) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
@@ -1486,7 +1486,7 @@ func (s *Datasource) SetUUID(val string) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *Datasource) SetUserUUID(val string) {
+func (s *Datasource) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
@@ -1511,31 +1511,31 @@ func (s *Datasource) SetProvider(val string) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Datasource) SetCreatedAt(val time.Time) {
+func (s *Datasource) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *Datasource) SetUpdatedAt(val time.Time) {
+func (s *Datasource) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
 // Ref: #
 type DatasourceEmail struct {
-	UUID            OptString `json:"uuid"`
-	UserUUID        string    `json:"user_uuid"`
-	Email           OptString `json:"email"`
-	Name            string    `json:"name"`
-	IsEnabled       OptBool   `json:"is_enabled"`
-	Provider        string    `json:"provider"`
-	OAuth2ClientID  OptString `json:"oauth2_client_id"`
-	OAuth2TokenUUID OptString `json:"oauth2_token_uuid"`
-	ImapServer      OptString `json:"imap_server"`
-	SMTPServer      OptString `json:"smtp_server"`
-	SMTPTLS         OptBool   `json:"smtp_tls"`
-	Password        OptString `json:"password"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	UUID            OptString   `json:"uuid"`
+	UserUUID        string      `json:"user_uuid"`
+	Email           string      `json:"email"`
+	Name            string      `json:"name"`
+	IsEnabled       OptBool     `json:"is_enabled"`
+	Provider        string      `json:"provider"`
+	OAuth2ClientID  OptString   `json:"oauth2_client_id"`
+	OAuth2TokenUUID OptString   `json:"oauth2_token_uuid"`
+	ImapServer      string      `json:"imap_server"`
+	SMTPServer      string      `json:"smtp_server"`
+	SMTPTLS         OptBool     `json:"smtp_tls"`
+	Password        string      `json:"password"`
+	CreatedAt       OptDateTime `json:"created_at"`
+	UpdatedAt       OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -1549,7 +1549,7 @@ func (s *DatasourceEmail) GetUserUUID() string {
 }
 
 // GetEmail returns the value of Email.
-func (s *DatasourceEmail) GetEmail() OptString {
+func (s *DatasourceEmail) GetEmail() string {
 	return s.Email
 }
 
@@ -1579,12 +1579,12 @@ func (s *DatasourceEmail) GetOAuth2TokenUUID() OptString {
 }
 
 // GetImapServer returns the value of ImapServer.
-func (s *DatasourceEmail) GetImapServer() OptString {
+func (s *DatasourceEmail) GetImapServer() string {
 	return s.ImapServer
 }
 
 // GetSMTPServer returns the value of SMTPServer.
-func (s *DatasourceEmail) GetSMTPServer() OptString {
+func (s *DatasourceEmail) GetSMTPServer() string {
 	return s.SMTPServer
 }
 
@@ -1594,17 +1594,17 @@ func (s *DatasourceEmail) GetSMTPTLS() OptBool {
 }
 
 // GetPassword returns the value of Password.
-func (s *DatasourceEmail) GetPassword() OptString {
+func (s *DatasourceEmail) GetPassword() string {
 	return s.Password
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *DatasourceEmail) GetCreatedAt() time.Time {
+func (s *DatasourceEmail) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *DatasourceEmail) GetUpdatedAt() time.Time {
+func (s *DatasourceEmail) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
@@ -1619,7 +1619,7 @@ func (s *DatasourceEmail) SetUserUUID(val string) {
 }
 
 // SetEmail sets the value of Email.
-func (s *DatasourceEmail) SetEmail(val OptString) {
+func (s *DatasourceEmail) SetEmail(val string) {
 	s.Email = val
 }
 
@@ -1649,12 +1649,12 @@ func (s *DatasourceEmail) SetOAuth2TokenUUID(val OptString) {
 }
 
 // SetImapServer sets the value of ImapServer.
-func (s *DatasourceEmail) SetImapServer(val OptString) {
+func (s *DatasourceEmail) SetImapServer(val string) {
 	s.ImapServer = val
 }
 
 // SetSMTPServer sets the value of SMTPServer.
-func (s *DatasourceEmail) SetSMTPServer(val OptString) {
+func (s *DatasourceEmail) SetSMTPServer(val string) {
 	s.SMTPServer = val
 }
 
@@ -1664,17 +1664,17 @@ func (s *DatasourceEmail) SetSMTPTLS(val OptBool) {
 }
 
 // SetPassword sets the value of Password.
-func (s *DatasourceEmail) SetPassword(val OptString) {
+func (s *DatasourceEmail) SetPassword(val string) {
 	s.Password = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *DatasourceEmail) SetCreatedAt(val time.Time) {
+func (s *DatasourceEmail) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *DatasourceEmail) SetUpdatedAt(val time.Time) {
+func (s *DatasourceEmail) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -1705,14 +1705,14 @@ type DatasourceLinkedin struct {
 	IsEnabled OptBool   `json:"is_enabled"`
 	Provider  string    `json:"provider"`
 	// LinkedIn username or email for login.
-	Username OptString `json:"username"`
+	Username string `json:"username"`
 	// LinkedIn password (or OAuth2 tokens if relevant).
-	Password OptString `json:"password"`
+	Password string `json:"password"`
 	// Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml
 	// (presence bridging, encryption, etc.).
 	Settings  OptDatasourceLinkedinSettings `json:"settings"`
-	CreatedAt time.Time                     `json:"created_at"`
-	UpdatedAt time.Time                     `json:"updated_at"`
+	CreatedAt OptDateTime                   `json:"created_at"`
+	UpdatedAt OptDateTime                   `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -1741,12 +1741,12 @@ func (s *DatasourceLinkedin) GetProvider() string {
 }
 
 // GetUsername returns the value of Username.
-func (s *DatasourceLinkedin) GetUsername() OptString {
+func (s *DatasourceLinkedin) GetUsername() string {
 	return s.Username
 }
 
 // GetPassword returns the value of Password.
-func (s *DatasourceLinkedin) GetPassword() OptString {
+func (s *DatasourceLinkedin) GetPassword() string {
 	return s.Password
 }
 
@@ -1756,12 +1756,12 @@ func (s *DatasourceLinkedin) GetSettings() OptDatasourceLinkedinSettings {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *DatasourceLinkedin) GetCreatedAt() time.Time {
+func (s *DatasourceLinkedin) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *DatasourceLinkedin) GetUpdatedAt() time.Time {
+func (s *DatasourceLinkedin) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
@@ -1791,12 +1791,12 @@ func (s *DatasourceLinkedin) SetProvider(val string) {
 }
 
 // SetUsername sets the value of Username.
-func (s *DatasourceLinkedin) SetUsername(val OptString) {
+func (s *DatasourceLinkedin) SetUsername(val string) {
 	s.Username = val
 }
 
 // SetPassword sets the value of Password.
-func (s *DatasourceLinkedin) SetPassword(val OptString) {
+func (s *DatasourceLinkedin) SetPassword(val string) {
 	s.Password = val
 }
 
@@ -1806,12 +1806,12 @@ func (s *DatasourceLinkedin) SetSettings(val OptDatasourceLinkedinSettings) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *DatasourceLinkedin) SetCreatedAt(val time.Time) {
+func (s *DatasourceLinkedin) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *DatasourceLinkedin) SetUpdatedAt(val time.Time) {
+func (s *DatasourceLinkedin) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -1871,8 +1871,8 @@ type DatasourceTelegram struct {
 	Participants   TelegramParticipants          `json:"participants"`
 	// Arbitrary key-value metadata about the account.
 	Meta      OptDatasourceTelegramMeta `json:"meta"`
-	CreatedAt time.Time                 `json:"created_at"`
-	UpdatedAt time.Time                 `json:"updated_at"`
+	CreatedAt OptDateTime               `json:"created_at"`
+	UpdatedAt OptDateTime               `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -1941,12 +1941,12 @@ func (s *DatasourceTelegram) GetMeta() OptDatasourceTelegramMeta {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *DatasourceTelegram) GetCreatedAt() time.Time {
+func (s *DatasourceTelegram) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *DatasourceTelegram) GetUpdatedAt() time.Time {
+func (s *DatasourceTelegram) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
@@ -2016,12 +2016,12 @@ func (s *DatasourceTelegram) SetMeta(val OptDatasourceTelegramMeta) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *DatasourceTelegram) SetCreatedAt(val time.Time) {
+func (s *DatasourceTelegram) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *DatasourceTelegram) SetUpdatedAt(val time.Time) {
+func (s *DatasourceTelegram) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -2068,8 +2068,8 @@ type DatasourceWhatsapp struct {
 	// Additional WhatsApp bridging config from whatsapp.tpl.yaml
 	// (proxy, presence bridging, call notices, status broadcast, etc.).
 	Settings  OptDatasourceWhatsappSettings `json:"settings"`
-	CreatedAt time.Time                     `json:"created_at"`
-	UpdatedAt time.Time                     `json:"updated_at"`
+	CreatedAt OptDateTime                   `json:"created_at"`
+	UpdatedAt OptDateTime                   `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -2113,12 +2113,12 @@ func (s *DatasourceWhatsapp) GetSettings() OptDatasourceWhatsappSettings {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *DatasourceWhatsapp) GetCreatedAt() time.Time {
+func (s *DatasourceWhatsapp) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *DatasourceWhatsapp) GetUpdatedAt() time.Time {
+func (s *DatasourceWhatsapp) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
@@ -2163,12 +2163,12 @@ func (s *DatasourceWhatsapp) SetSettings(val OptDatasourceWhatsappSettings) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *DatasourceWhatsapp) SetCreatedAt(val time.Time) {
+func (s *DatasourceWhatsapp) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *DatasourceWhatsapp) SetUpdatedAt(val time.Time) {
+func (s *DatasourceWhatsapp) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -2190,6 +2190,9 @@ func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
 
 // DeleteContactOK is response for DeleteContact operation.
 type DeleteContactOK struct{}
+
+// DeleteUserOK is response for DeleteUser operation.
+type DeleteUserOK struct{}
 
 // Ref: #
 type EmailLabel struct {
@@ -5262,6 +5265,52 @@ func (o OptUploadPresignedUrlRequestStorageType) Or(d UploadPresignedUrlRequestS
 	return d
 }
 
+// NewOptUserMeta returns new OptUserMeta with value set to v.
+func NewOptUserMeta(v UserMeta) OptUserMeta {
+	return OptUserMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUserMeta is optional UserMeta.
+type OptUserMeta struct {
+	Value UserMeta
+	Set   bool
+}
+
+// IsSet returns true if OptUserMeta was set.
+func (o OptUserMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUserMeta) Reset() {
+	var v UserMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUserMeta) SetTo(v UserMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUserMeta) Get() (v UserMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUserMeta) Or(d UserMeta) UserMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #
 type Pipeline struct {
 	UUID string `json:"uuid"`
@@ -5740,9 +5789,9 @@ type Storage struct {
 	// Indicates whether the storage object is enabled.
 	IsEnabled bool `json:"is_enabled"`
 	// The date and time when the storage object was last updated.
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt OptDateTime `json:"updated_at"`
 	// The date and time when the storage object was created.
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt OptDateTime `json:"created_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -5771,12 +5820,12 @@ func (s *Storage) GetIsEnabled() bool {
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *Storage) GetUpdatedAt() time.Time {
+func (s *Storage) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Storage) GetCreatedAt() time.Time {
+func (s *Storage) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
@@ -5806,12 +5855,12 @@ func (s *Storage) SetIsEnabled(val bool) {
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *Storage) SetUpdatedAt(val time.Time) {
+func (s *Storage) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Storage) SetCreatedAt(val time.Time) {
+func (s *Storage) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
@@ -6179,9 +6228,9 @@ type SyncPolicy struct {
 	// Additional key-value settings for the sync policy.
 	Settings OptSyncPolicySettings `json:"settings"`
 	// Timestamp when the policy was created.
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt OptDateTime `json:"created_at"`
 	// Timestamp when the policy was last updated.
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -6220,12 +6269,12 @@ func (s *SyncPolicy) GetSettings() OptSyncPolicySettings {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *SyncPolicy) GetCreatedAt() time.Time {
+func (s *SyncPolicy) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *SyncPolicy) GetUpdatedAt() time.Time {
+func (s *SyncPolicy) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
@@ -6265,12 +6314,12 @@ func (s *SyncPolicy) SetSettings(val OptSyncPolicySettings) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *SyncPolicy) SetCreatedAt(val time.Time) {
+func (s *SyncPolicy) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *SyncPolicy) SetUpdatedAt(val time.Time) {
+func (s *SyncPolicy) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -6801,4 +6850,140 @@ func (s *UploadPresignedUrlResponse) SetUploadURL(val OptString) {
 // SetFile sets the value of File.
 func (s *UploadPresignedUrlResponse) SetFile(val OptFileObject) {
 	s.File = val
+}
+
+// Ref: #
+type User struct {
+	// Unique identifier for the user.
+	UUID OptString `json:"uuid"`
+	// User's primary email address.
+	Email string `json:"email"`
+	// User's password (hashed).
+	Password string `json:"password"`
+	// User's first name.
+	FirstName string `json:"first_name"`
+	// User's last name.
+	LastName string `json:"last_name"`
+	// Indicates if the user is enabled.
+	IsEnabled OptBool `json:"is_enabled"`
+	// Indicates if the user has administrative privileges.
+	IsAdmin OptBool `json:"is_admin"`
+	// Arbitrary key-value metadata about the user.
+	Meta OptUserMeta `json:"meta"`
+	// Timestamp of user creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *User) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetEmail returns the value of Email.
+func (s *User) GetEmail() string {
+	return s.Email
+}
+
+// GetPassword returns the value of Password.
+func (s *User) GetPassword() string {
+	return s.Password
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *User) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *User) GetLastName() string {
+	return s.LastName
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *User) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetIsAdmin returns the value of IsAdmin.
+func (s *User) GetIsAdmin() OptBool {
+	return s.IsAdmin
+}
+
+// GetMeta returns the value of Meta.
+func (s *User) GetMeta() OptUserMeta {
+	return s.Meta
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *User) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *User) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *User) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetEmail sets the value of Email.
+func (s *User) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetPassword sets the value of Password.
+func (s *User) SetPassword(val string) {
+	s.Password = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *User) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *User) SetLastName(val string) {
+	s.LastName = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *User) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetIsAdmin sets the value of IsAdmin.
+func (s *User) SetIsAdmin(val OptBool) {
+	s.IsAdmin = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *User) SetMeta(val OptUserMeta) {
+	s.Meta = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *User) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *User) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// Arbitrary key-value metadata about the user.
+type UserMeta map[string]jx.Raw
+
+func (s *UserMeta) init() UserMeta {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }

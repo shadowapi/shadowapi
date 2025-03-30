@@ -1,0 +1,68 @@
+get:
+  summary: Get user details
+  operationId: getUser
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: User details retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/User"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  summary: Update user details
+  operationId: updateUser
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/User"
+  responses:
+    "200":
+      description: User updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/User"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Delete user
+  operationId: deleteUser
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: User deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

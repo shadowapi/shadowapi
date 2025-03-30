@@ -360,8 +360,8 @@ func qToApiSyncPolicy(dbp query.SyncPolicy) (api.SyncPolicy, error) {
 		Blocklist:   dbp.Blocklist,
 		ExcludeList: dbp.ExcludeList,
 		SyncAll:     dbp.SyncAll,
-		CreatedAt:   dbp.CreatedAt.Time,
-		UpdatedAt:   dbp.UpdatedAt.Time,
+		CreatedAt:   api.NewOptDateTime(dbp.CreatedAt.Time),
+		UpdatedAt:   api.NewOptDateTime(dbp.UpdatedAt.Time),
 	}
 	if dbp.UserID.Valid {
 		// user id is stored

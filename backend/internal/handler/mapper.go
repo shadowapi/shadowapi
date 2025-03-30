@@ -3,13 +3,14 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
-	"net/http"
 )
 
-// ConvertUUID converts a non-empty  UUID string to a pointer to uuid.UUID.
+// ConvertUUID converts a non-empty UUID string to a pointer to uuid.UUID.
 // If the input is empty or invalid, it returns nil.
 func ConvertUUID(originalUUID string) *uuid.UUID {
 	if originalUUID == "" {
@@ -31,7 +32,7 @@ func ConvertOptStringToUUID(opt api.OptString) (uuid.UUID, error) {
 	return uuid.FromString(opt.Value)
 }
 
-// QToDatasource converts a query.Datasource to an api.Datasource
+// QToDatasource converts a query.Datasource to an api.Datasource.
 func QToDatasource(row query.GetDatasourcesRow) api.Datasource {
 	c := api.Datasource{
 		UUID:      row.UUID.String(),
@@ -40,13 +41,13 @@ func QToDatasource(row query.GetDatasourcesRow) api.Datasource {
 		IsEnabled: row.IsEnabled,
 	}
 	if row.UserUUID != nil {
-		c.UserUUID = row.UserUUID.String()
+		c.UserUUID = api.NewOptString(row.UserUUID.String())
 	}
 	if row.CreatedAt.Valid {
-		c.CreatedAt = row.CreatedAt.Time
+		c.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
 	}
 	if row.UpdatedAt.Valid {
-		c.UpdatedAt = row.UpdatedAt.Time
+		c.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
 	}
 	return c
 }
@@ -58,15 +59,22 @@ func QToDatasourceEmail(row query.GetDatasourcesRow) (*api.DatasourceEmail, erro
 		return nil, err
 	}
 	ds.UUID = api.NewOptString(row.UUID.String())
-	ds.UserUUID = row.UserUUID.String()
+
+	if row.UserUUID != nil {
+		ds.UserUUID = row.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+
+	// ds.Name is a plain string:
 	ds.Name = row.Name
 	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
 	ds.Provider = row.Provider
 	if row.CreatedAt.Valid {
-		ds.CreatedAt = row.CreatedAt.Time
+		ds.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
 	}
 	if row.UpdatedAt.Valid {
-		ds.UpdatedAt = row.UpdatedAt.Time
+		ds.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
 	}
 	return &ds, nil
 }
@@ -86,12 +94,11 @@ func QToDatasourceEmail2(row query.GetDatasourceRow) (*api.DatasourceEmail, erro
 	ds.Name = row.Datasource.Name
 	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
 	ds.Provider = row.Datasource.Provider
-	// (If your settings include an OAuth2 token UUID, it should have been unmarshaled into ds.OAuth2TokenUUID.)
 	if row.Datasource.CreatedAt.Valid {
-		ds.CreatedAt = row.Datasource.CreatedAt.Time
+		ds.CreatedAt = api.NewOptDateTime(row.Datasource.CreatedAt.Time)
 	}
 	if row.Datasource.UpdatedAt.Valid {
-		ds.UpdatedAt = row.Datasource.UpdatedAt.Time
+		ds.UpdatedAt = api.NewOptDateTime(row.Datasource.UpdatedAt.Time)
 	}
 	return &ds, nil
 }
@@ -103,15 +110,22 @@ func QToDatasourceLinkedin(row query.GetDatasourcesRow) (*api.DatasourceLinkedin
 		return nil, err
 	}
 	ds.UUID = api.NewOptString(row.UUID.String())
-	ds.UserUUID = row.UserUUID.String()
+
+	// ds.UserUUID is a plain string
+	if row.UserUUID != nil {
+		ds.UserUUID = row.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+
 	ds.Name = row.Name
 	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
 	ds.Provider = row.Provider
 	if row.CreatedAt.Valid {
-		ds.CreatedAt = row.CreatedAt.Time
+		ds.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
 	}
 	if row.UpdatedAt.Valid {
-		ds.UpdatedAt = row.UpdatedAt.Time
+		ds.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
 	}
 	return &ds, nil
 }
@@ -123,15 +137,21 @@ func QToDatasourceTelegram(row query.GetDatasourcesRow) (*api.DatasourceTelegram
 		return nil, err
 	}
 	ds.UUID = api.NewOptString(row.UUID.String())
-	ds.UserUUID = row.UserUUID.String()
+
+	if row.UserUUID != nil {
+		ds.UserUUID = row.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+
 	ds.Name = row.Name
 	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
 	ds.Provider = row.Provider
 	if row.CreatedAt.Valid {
-		ds.CreatedAt = row.CreatedAt.Time
+		ds.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
 	}
 	if row.UpdatedAt.Valid {
-		ds.UpdatedAt = row.UpdatedAt.Time
+		ds.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
 	}
 	return &ds, nil
 }
@@ -143,19 +163,26 @@ func QToDatasourceWhatsapp(row query.GetDatasourcesRow) (*api.DatasourceWhatsapp
 		return nil, err
 	}
 	ds.UUID = api.NewOptString(row.UUID.String())
-	ds.UserUUID = row.UserUUID.String()
+
+	if row.UserUUID != nil {
+		ds.UserUUID = row.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+
 	ds.Name = row.Name
 	ds.IsEnabled = api.NewOptBool(row.IsEnabled)
 	ds.Provider = row.Provider
 	if row.CreatedAt.Valid {
-		ds.CreatedAt = row.CreatedAt.Time
+		ds.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
 	}
 	if row.UpdatedAt.Valid {
-		ds.UpdatedAt = row.UpdatedAt.Time
+		ds.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
 	}
 	return &ds, nil
 }
 
+// QToStorage converts a query storage row into an API Storage.
 func QToStorage(row query.GetStoragesRow) api.Storage {
 	r := api.Storage{
 		UUID:      row.UUID.String(),
@@ -164,16 +191,15 @@ func QToStorage(row query.GetStoragesRow) api.Storage {
 		IsEnabled: row.IsEnabled,
 	}
 	if row.CreatedAt.Valid {
-		r.CreatedAt = row.CreatedAt.Time
+		r.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
 	}
 	if row.UpdatedAt.Valid {
-		r.UpdatedAt = row.UpdatedAt.Time
+		r.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
 	}
 	return r
 }
 
 func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) {
-	// The JSON in row.Settings has the entire Postgres object
 	var s api.StoragePostgres
 	if err := json.Unmarshal(row.Settings, &s); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings", err.Error()))
@@ -185,21 +211,17 @@ func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) 
 }
 
 func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
-	// The JSON in row.Settings has the entire S3 object
 	var stored api.StorageS3
 	if err := json.Unmarshal(row.Settings, &stored); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings", err.Error()))
 	}
-
 	stored.UUID = api.NewOptString(row.UUID.String())
 	stored.Name = row.Name
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
-
 	return &stored, nil
 }
 
 func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error) {
-	// The JSON stored in row.Settings has the entire original api.StorageHostfiles object.
 	var stored api.StorageHostfiles
 	if err := json.Unmarshal(row.Settings, &stored); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings", err.Error()))
@@ -207,6 +229,5 @@ func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error
 	stored.UUID = api.NewOptString(row.UUID.String())
 	stored.Name = row.Name
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
-
 	return &stored, nil
 }

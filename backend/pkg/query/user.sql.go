@@ -13,10 +13,28 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO "user" (
-	"uuid", email, password, first_name, last_name, is_enabled, is_admin
-) VALUES(
-	$1, $2, $3, $4, $5, $6, $7
-) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, created_at, updated_at
+    uuid,
+    email,
+    password,
+    first_name,
+    last_name,
+    is_enabled,
+    is_admin,
+    meta,
+    created_at,
+    updated_at
+) VALUES (
+             $1,
+             $2,
+             $3,
+             $4,
+             $5,
+             $6,
+             $7,
+             $8,
+             NOW(),
+             NULL
+         ) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -27,6 +45,7 @@ type CreateUserParams struct {
 	LastName  string    `json:"last_name"`
 	IsEnabled bool      `json:"is_enabled"`
 	IsAdmin   bool      `json:"is_admin"`
+	Meta      []byte    `json:"meta"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -38,6 +57,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.LastName,
 		arg.IsEnabled,
 		arg.IsAdmin,
+		arg.Meta,
 	)
 	var i User
 	err := row.Scan(
@@ -48,6 +68,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LastName,
 		&i.IsEnabled,
 		&i.IsAdmin,
+		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -56,7 +77,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM "user"
-WHERE "uuid" = $1
+WHERE uuid = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, argUuid uuid.UUID) error {
@@ -65,20 +86,14 @@ func (q *Queries) DeleteUser(ctx context.Context, argUuid uuid.UUID) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT uuid, email, password, first_name, last_name, is_enabled, is_admin, created_at, updated_at FROM "user"
-WHERE
-	($1::text <> '' AND "uuid"::text = $1::text) OR
-	($2::text <> '' AND email = $2::text)
+SELECT uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+FROM "user"
+WHERE uuid = $1
 LIMIT 1
 `
 
-type GetUserParams struct {
-	UUID  string `json:"uuid"`
-	Email string `json:"email"`
-}
-
-func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, getUser, arg.UUID, arg.Email)
+func (q *Queries) GetUser(ctx context.Context, argUuid uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, argUuid)
 	var i User
 	err := row.Scan(
 		&i.UUID,
@@ -88,6 +103,7 @@ func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (User, error) 
 		&i.LastName,
 		&i.IsEnabled,
 		&i.IsAdmin,
+		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -95,10 +111,11 @@ func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (User, error) 
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT uuid, email, password, first_name, last_name, is_enabled, is_admin, created_at, updated_at FROM "user"
+SELECT uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+FROM "user"
 ORDER BY created_at DESC
 LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-OFFSET $1::int
+    OFFSET $1::int
 `
 
 type ListUsersParams struct {
@@ -123,6 +140,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.LastName,
 			&i.IsEnabled,
 			&i.IsAdmin,
+			&i.Meta,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -137,14 +155,17 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 }
 
 const updateUser = `-- name: UpdateUser :exec
-UPDATE "user" SET
-	email = $1,
-	password = COALESCE($2, password),
-	first_name = $3,
-	last_name = $4,
-	is_enabled = $5,
-	is_admin = $6
-WHERE "uuid" = $7
+UPDATE "user"
+SET
+    email = COALESCE($1, email),
+    password = COALESCE($2, password),
+    first_name = COALESCE($3, first_name),
+    last_name = COALESCE($4, last_name),
+    is_enabled = COALESCE($5, is_enabled),
+    is_admin = COALESCE($6, is_admin),
+    meta = COALESCE($7, meta),
+    updated_at = NOW()
+WHERE uuid = $8
 `
 
 type UpdateUserParams struct {
@@ -154,6 +175,7 @@ type UpdateUserParams struct {
 	LastName  string    `json:"last_name"`
 	IsEnabled bool      `json:"is_enabled"`
 	IsAdmin   bool      `json:"is_admin"`
+	Meta      []byte    `json:"meta"`
 	UUID      uuid.UUID `json:"uuid"`
 }
 
@@ -165,6 +187,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.LastName,
 		arg.IsEnabled,
 		arg.IsAdmin,
+		arg.Meta,
 		arg.UUID,
 	)
 	return err

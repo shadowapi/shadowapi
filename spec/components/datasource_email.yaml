@@ -39,7 +39,9 @@ properties:
 required:
   - name
   - user_uuid
+  - email
   - provider
   - user_uuid
-  - created_at
-  - updated_at
+  - imap_server
+  - smtp_server
+  - password

@@ -22,6 +22,15 @@ func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r 
 	return r, ht.ErrNotImplemented
 }
 
+// CreateUser implements createUser operation.
+//
+// Create a new user.
+//
+// POST /user
+func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DatasourceEmailCreate implements datasource-email-create operation.
 //
 // Create a new email datasource.
@@ -238,6 +247,15 @@ func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteCont
 	return ht.ErrNotImplemented
 }
 
+// DeleteUser implements deleteUser operation.
+//
+// Delete user.
+//
+// DELETE /user/{uuid}
+func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserParams) error {
+	return ht.ErrNotImplemented
+}
+
 // FileCreate implements file-create operation.
 //
 // Upload a new file and create its record.
@@ -310,12 +328,30 @@ func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetUser implements getUser operation.
+//
+// Get user details.
+//
+// GET /user/{uuid}
+func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListContacts implements listContacts operation.
 //
 // List all contacts.
 //
 // GET /contact
 func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUsers implements listUsers operation.
+//
+// List all users.
+//
+// GET /user
+func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -730,6 +766,15 @@ func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionV
 //
 // PUT /contact/{uuid}
 func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (r *Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateUser implements updateUser operation.
+//
+// Update user details.
+//
+// PUT /user/{uuid}
+func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

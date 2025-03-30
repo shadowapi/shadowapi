@@ -14,6 +14,12 @@ type Handler interface {
 	//
 	// POST /contact
 	CreateContact(ctx context.Context, req *Contact) (*Contact, error)
+	// CreateUser implements createUser operation.
+	//
+	// Create a new user.
+	//
+	// POST /user
+	CreateUser(ctx context.Context, req *User) (*User, error)
 	// DatasourceEmailCreate implements datasource-email-create operation.
 	//
 	// Create a new email datasource.
@@ -158,6 +164,12 @@ type Handler interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
+	// DeleteUser implements deleteUser operation.
+	//
+	// Delete user.
+	//
+	// DELETE /user/{uuid}
+	DeleteUser(ctx context.Context, params DeleteUserParams) error
 	// FileCreate implements file-create operation.
 	//
 	// Upload a new file and create its record.
@@ -206,12 +218,24 @@ type Handler interface {
 	//
 	// GET /contact/{uuid}
 	GetContact(ctx context.Context, params GetContactParams) (*Contact, error)
+	// GetUser implements getUser operation.
+	//
+	// Get user details.
+	//
+	// GET /user/{uuid}
+	GetUser(ctx context.Context, params GetUserParams) (*User, error)
 	// ListContacts implements listContacts operation.
 	//
 	// List all contacts.
 	//
 	// GET /contact
 	ListContacts(ctx context.Context) ([]Contact, error)
+	// ListUsers implements listUsers operation.
+	//
+	// List all users.
+	//
+	// GET /user
+	ListUsers(ctx context.Context) ([]User, error)
 	// MessageEmailQuery implements messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
@@ -488,6 +512,12 @@ type Handler interface {
 	//
 	// PUT /contact/{uuid}
 	UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (*Contact, error)
+	// UpdateUser implements updateUser operation.
+	//
+	// Update user details.
+	//
+	// PUT /user/{uuid}
+	UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (*User, error)
 	// UploadFile implements uploadFile operation.
 	//
 	// Upload a file.

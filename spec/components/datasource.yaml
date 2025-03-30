@@ -26,10 +26,7 @@ properties:
     type: string
 required:
   - uuid
-  - user_uuid
   - name
   - type
   - provider
   - is_enabled
-  - created_at
-  - updated_at

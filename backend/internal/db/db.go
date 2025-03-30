@@ -15,15 +15,15 @@ import (
 // Provide database connection pool for the dependency injector
 func Provide(i do.Injector) (*pgxpool.Pool, error) {
 	ctx := do.MustInvoke[context.Context](i)
-	config := do.MustInvoke[*config.Config](i)
+	conf := do.MustInvoke[*config.Config](i)
 	log := do.MustInvoke[*slog.Logger](i)
 
-	if config.DB.URI == "" {
+	if conf.DB.URI == "" {
 		log.Error("database URI is empty")
 		return nil, fmt.Errorf("failed to connect to database: database URI is empty")
 	}
 
-	cfg, err := pgxpool.ParseConfig(config.DB.URI)
+	cfg, err := pgxpool.ParseConfig(conf.DB.URI)
 	if err != nil {
 		log.Error("parse config", "error", err)
 		return nil, err
@@ -34,7 +34,7 @@ func Provide(i do.Injector) (*pgxpool.Pool, error) {
 		LogLevel: tracelog.LogLevelDebug,
 	}
 
-	slog.Debug("connecting to database", "uri", config.DB.URI)
+	slog.Debug("connecting to database", "uri", conf.DB.URI)
 	dbpool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		log.Error("unable to create connection pool", "error", err)

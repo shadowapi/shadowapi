@@ -6,6 +6,7 @@ CREATE TABLE "user" (
   last_name  VARCHAR NOT NULL,
   is_enabled BOOLEAN NOT NULL,
   is_admin   BOOLEAN NOT NULL DEFAULT FALSE,
+  meta JSONB,
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE,

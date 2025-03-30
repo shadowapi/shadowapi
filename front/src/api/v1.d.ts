@@ -789,6 +789,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all users */
+        get: operations["listUsers"];
+        put?: never;
+        /** Create a new user */
+        post: operations["createUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get user details */
+        get: operations["getUser"];
+        /** Update user details */
+        put: operations["updateUser"];
+        post?: never;
+        /** Delete user */
+        delete: operations["deleteUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -883,6 +920,7 @@ export interface components {
             url?: string;
         };
         SyncPolicy: components["schemas"]["sync_policy"];
+        User: components["schemas"]["user"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -896,33 +934,33 @@ export interface components {
         };
         datasource: {
             readonly uuid: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             name: string;
             is_enabled: boolean;
             type: string;
             provider: string;
             /** Format: date-time */
-            readonly created_at: string;
+            readonly created_at?: string;
             /** Format: date-time */
-            readonly updated_at: string;
+            readonly updated_at?: string;
         };
         datasource_email: {
             readonly uuid?: string;
             readonly user_uuid: string;
-            email?: string;
+            email: string;
             name: string;
             is_enabled?: boolean;
             provider: string;
             oauth2_client_id?: string;
             oauth2_token_uuid?: string;
-            imap_server?: string;
-            smtp_server?: string;
+            imap_server: string;
+            smtp_server: string;
             smtp_tls?: boolean;
-            password?: string;
+            password: string;
             /** Format: date-time */
-            readonly created_at: string;
+            readonly created_at?: string;
             /** Format: date-time */
-            readonly updated_at: string;
+            readonly updated_at?: string;
         };
         email_label: {
             /** Format: int64 */
@@ -1003,9 +1041,9 @@ export interface components {
                 [key: string]: unknown;
             };
             /** Format: date-time */
-            readonly created_at: string;
+            readonly created_at?: string;
             /** Format: date-time */
-            readonly updated_at: string;
+            readonly updated_at?: string;
         };
         /** @description WhatsApp datasource object representation */
         datasource_whatsapp: {
@@ -1025,9 +1063,9 @@ export interface components {
                 [key: string]: unknown;
             };
             /** Format: date-time */
-            readonly created_at: string;
+            readonly created_at?: string;
             /** Format: date-time */
-            readonly updated_at: string;
+            readonly updated_at?: string;
         };
         /** @description LinkedIn datasource object representation */
         datasource_linkedin: {
@@ -1037,9 +1075,9 @@ export interface components {
             is_enabled?: boolean;
             provider: string;
             /** @description LinkedIn username or email for login */
-            username?: string;
+            username: string;
             /** @description LinkedIn password (or OAuth2 tokens if relevant) */
-            password?: string;
+            password: string;
             /** @description Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml
              *     (presence bridging, encryption, etc.)
              *      */
@@ -1047,9 +1085,9 @@ export interface components {
                 [key: string]: unknown;
             };
             /** Format: date-time */
-            readonly created_at: string;
+            readonly created_at?: string;
             /** Format: date-time */
-            readonly updated_at: string;
+            readonly updated_at?: string;
         };
         oauth2_client: {
             id: string;
@@ -1119,12 +1157,12 @@ export interface components {
              * Format: date-time
              * @description The date and time when the storage object was last updated.
              */
-            readonly updated_at: string;
+            readonly updated_at?: string;
             /**
              * Format: date-time
              * @description The date and time when the storage object was created.
              */
-            readonly created_at: string;
+            readonly created_at?: string;
         };
         storage_postgres: {
             readonly uuid?: string;
@@ -1339,12 +1377,12 @@ export interface components {
              * Format: date-time
              * @description Timestamp when the policy was created.
              */
-            created_at: string;
+            created_at?: string;
             /**
              * Format: date-time
              * @description Timestamp when the policy was last updated.
              */
-            updated_at: string;
+            updated_at?: string;
         };
         contact: {
             readonly uuid?: string;
@@ -1479,6 +1517,39 @@ export interface components {
             readonly edit_date?: string;
             /** Format: date-time */
             readonly last_kpi_entry_date?: string;
+        };
+        user: {
+            /** @description Unique identifier for the user */
+            readonly uuid?: string;
+            /**
+             * Format: email
+             * @description User's primary email address
+             */
+            email: string;
+            /** @description User's password (hashed) */
+            password: string;
+            /** @description User's first name */
+            first_name: string;
+            /** @description User's last name */
+            last_name: string;
+            /** @description Indicates if the user is enabled */
+            is_enabled?: boolean;
+            /** @description Indicates if the user has administrative privileges */
+            is_admin?: boolean;
+            /** @description Arbitrary key-value metadata about the user */
+            meta?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: date-time
+             * @description Timestamp of user creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
         };
     };
     responses: never;
@@ -4263,6 +4334,163 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Contact deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of users */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["user"];
+            };
+        };
+        responses: {
+            /** @description User created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User details retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["user"];
+            };
+        };
+        responses: {
+            /** @description User updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User deleted successfully */
             200: {
                 headers: {
                     [name: string]: unknown;

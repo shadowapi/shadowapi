@@ -7,6 +7,7 @@ type OperationName = string
 
 const (
 	CreateContactOperation              OperationName = "CreateContact"
+	CreateUserOperation                 OperationName = "CreateUser"
 	DatasourceEmailCreateOperation      OperationName = "DatasourceEmailCreate"
 	DatasourceEmailDeleteOperation      OperationName = "DatasourceEmailDelete"
 	DatasourceEmailGetOperation         OperationName = "DatasourceEmailGet"
@@ -31,6 +32,7 @@ const (
 	DatasourceWhatsappListOperation     OperationName = "DatasourceWhatsappList"
 	DatasourceWhatsappUpdateOperation   OperationName = "DatasourceWhatsappUpdate"
 	DeleteContactOperation              OperationName = "DeleteContact"
+	DeleteUserOperation                 OperationName = "DeleteUser"
 	FileCreateOperation                 OperationName = "FileCreate"
 	FileDeleteOperation                 OperationName = "FileDelete"
 	FileGetOperation                    OperationName = "FileGet"
@@ -39,7 +41,9 @@ const (
 	GenerateDownloadLinkOperation       OperationName = "GenerateDownloadLink"
 	GeneratePresignedUploadUrlOperation OperationName = "GeneratePresignedUploadUrl"
 	GetContactOperation                 OperationName = "GetContact"
+	GetUserOperation                    OperationName = "GetUser"
 	ListContactsOperation               OperationName = "ListContacts"
+	ListUsersOperation                  OperationName = "ListUsers"
 	MessageEmailQueryOperation          OperationName = "MessageEmailQuery"
 	MessageLinkedinQueryOperation       OperationName = "MessageLinkedinQuery"
 	MessageTelegramQueryOperation       OperationName = "MessageTelegramQuery"
@@ -86,5 +90,6 @@ const (
 	TgSessionListOperation              OperationName = "TgSessionList"
 	TgSessionVerifyOperation            OperationName = "TgSessionVerify"
 	UpdateContactOperation              OperationName = "UpdateContact"
+	UpdateUserOperation                 OperationName = "UpdateUser"
 	UploadFileOperation                 OperationName = "UploadFile"
 )

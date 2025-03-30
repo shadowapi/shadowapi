@@ -34,5 +34,3 @@ required:
   - uuid
   - type
   - is_enabled
-  - created_at
-  - updated_at

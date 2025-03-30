@@ -39,5 +39,5 @@ required:
   - name
   - user_uuid
   - provider
-  - created_at
-  - updated_at
+  - username
+  - password
