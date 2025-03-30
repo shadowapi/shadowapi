@@ -9,8 +9,6 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/jobs"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/pipelines"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 )
@@ -41,11 +39,11 @@ func Provide(i do.Injector) (*Broker, error) {
 	}
 
 	// Create the email pipeline.
-	emailPipeline := pipelines.CreateEmailPipeline(ctx, log, dbp)
-	// Register  pipeline job factory.
-	registry.RegisterJob(registry.WorkerSubjectEmailFetch, jobs.EmailFetchJobFactory(log, emailPipeline, dbp, q))
-	registry.RegisterJob(registry.WorkerSubjectEmailSync, jobs.EmailPipelineJobFactory(emailPipeline, q, log))
-	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
+	//emailPipeline := pipelines.CreateEmailPipeline(ctx, log, dbp)
+	//// Register  pipeline job factory.
+	//registry.RegisterJob(registry.WorkerSubjectEmailFetch, jobs.EmailFetchJobFactory(log, emailPipeline, dbp, q))
+	//registry.RegisterJob(registry.WorkerSubjectEmailSync, jobs.EmailPipelineJobFactory(emailPipeline, q, log))
+	//registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
 
 	if err := b.Start(ctx); err != nil {
 		log.Error("failed to start broker", "error", err)

@@ -10,6 +10,7 @@ get:
         description: The number of records to skip for pagination.
         format: int32
         type: integer
+
     - description: The maximum number of records to return.
       explode: false
       in: query
@@ -18,21 +19,59 @@ get:
         description: The maximum number of records to return.
         format: int32
         type: integer
+
+    - description: Filter storage objects by type.
+      explode: false
+      in: query
+      name: type
+      schema:
+        type: string
+
+    - description: Filter storage objects by the is_enabled boolean field.
+      explode: false
+      in: query
+      name: is_enabled
+      schema:
+        type: boolean
+
+    - description: Filter storage objects by name (e.g., partial or exact match).
+      explode: false
+      in: query
+      name: name
+      schema:
+        type: string
+
+    - description: Sort results by a specific column.
+      explode: false
+      in: query
+      name: order_by
+      schema:
+        type: string
+        enum: [created_at, updated_at, name]
+
+    - description: Specify the sorting direction (ascending or descending).
+      explode: false
+      in: query
+      name: order_direction
+      schema:
+        type: string
+        enum: [asc, desc]
+
   responses:
     "200":
+      description: Request was successful.
       content:
         application/json:
           schema:
             description: A list of data storage objects.
+            type: array
             items:
               $ref: "../openapi.yaml#/components/schemas/Storage"
-            type: array
-      description: Request was successful.
     default:
+      description: An error occurred.
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-      description: An error occurred.
   tags:
     - storage

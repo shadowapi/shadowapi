@@ -3166,6 +3166,16 @@ export interface operations {
                 offset?: number;
                 /** @description The maximum number of records to return. */
                 limit?: number;
+                /** @description Filter storage objects by type. */
+                type?: string;
+                /** @description Filter storage objects by the is_enabled boolean field. */
+                is_enabled?: boolean;
+                /** @description Filter storage objects by name (e.g., partial or exact match). */
+                name?: string;
+                /** @description Sort results by a specific column. */
+                order_by?: "created_at" | "updated_at" | "name";
+                /** @description Specify the sorting direction (ascending or descending). */
+                order_direction?: "asc" | "desc";
             };
             header?: never;
             path?: never;

@@ -13656,6 +13656,26 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 					Name: "limit",
 					In:   "query",
 				}: params.Limit,
+				{
+					Name: "type",
+					In:   "query",
+				}: params.Type,
+				{
+					Name: "is_enabled",
+					In:   "query",
+				}: params.IsEnabled,
+				{
+					Name: "name",
+					In:   "query",
+				}: params.Name,
+				{
+					Name: "order_by",
+					In:   "query",
+				}: params.OrderBy,
+				{
+					Name: "order_direction",
+					In:   "query",
+				}: params.OrderDirection,
 			},
 			Raw: r,
 		}

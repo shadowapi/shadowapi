@@ -4894,6 +4894,98 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
+// NewOptStorageListOrderBy returns new OptStorageListOrderBy with value set to v.
+func NewOptStorageListOrderBy(v StorageListOrderBy) OptStorageListOrderBy {
+	return OptStorageListOrderBy{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptStorageListOrderBy is optional StorageListOrderBy.
+type OptStorageListOrderBy struct {
+	Value StorageListOrderBy
+	Set   bool
+}
+
+// IsSet returns true if OptStorageListOrderBy was set.
+func (o OptStorageListOrderBy) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptStorageListOrderBy) Reset() {
+	var v StorageListOrderBy
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptStorageListOrderBy) SetTo(v StorageListOrderBy) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptStorageListOrderBy) Get() (v StorageListOrderBy, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptStorageListOrderBy) Or(d StorageListOrderBy) StorageListOrderBy {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptStorageListOrderDirection returns new OptStorageListOrderDirection with value set to v.
+func NewOptStorageListOrderDirection(v StorageListOrderDirection) OptStorageListOrderDirection {
+	return OptStorageListOrderDirection{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptStorageListOrderDirection is optional StorageListOrderDirection.
+type OptStorageListOrderDirection struct {
+	Value StorageListOrderDirection
+	Set   bool
+}
+
+// IsSet returns true if OptStorageListOrderDirection was set.
+func (o OptStorageListOrderDirection) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptStorageListOrderDirection) Reset() {
+	var v StorageListOrderDirection
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptStorageListOrderDirection) SetTo(v StorageListOrderDirection) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptStorageListOrderDirection) Get() (v StorageListOrderDirection, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptStorageListOrderDirection) Or(d StorageListOrderDirection) StorageListOrderDirection {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -5776,6 +5868,95 @@ func (s *StorageHostfiles) SetPath(val string) {
 
 // StorageHostfilesDeleteOK is response for StorageHostfilesDelete operation.
 type StorageHostfilesDeleteOK struct{}
+
+type StorageListOrderBy string
+
+const (
+	StorageListOrderByCreatedAt StorageListOrderBy = "created_at"
+	StorageListOrderByUpdatedAt StorageListOrderBy = "updated_at"
+	StorageListOrderByName      StorageListOrderBy = "name"
+)
+
+// AllValues returns all StorageListOrderBy values.
+func (StorageListOrderBy) AllValues() []StorageListOrderBy {
+	return []StorageListOrderBy{
+		StorageListOrderByCreatedAt,
+		StorageListOrderByUpdatedAt,
+		StorageListOrderByName,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StorageListOrderBy) MarshalText() ([]byte, error) {
+	switch s {
+	case StorageListOrderByCreatedAt:
+		return []byte(s), nil
+	case StorageListOrderByUpdatedAt:
+		return []byte(s), nil
+	case StorageListOrderByName:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StorageListOrderBy) UnmarshalText(data []byte) error {
+	switch StorageListOrderBy(data) {
+	case StorageListOrderByCreatedAt:
+		*s = StorageListOrderByCreatedAt
+		return nil
+	case StorageListOrderByUpdatedAt:
+		*s = StorageListOrderByUpdatedAt
+		return nil
+	case StorageListOrderByName:
+		*s = StorageListOrderByName
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type StorageListOrderDirection string
+
+const (
+	StorageListOrderDirectionAsc  StorageListOrderDirection = "asc"
+	StorageListOrderDirectionDesc StorageListOrderDirection = "desc"
+)
+
+// AllValues returns all StorageListOrderDirection values.
+func (StorageListOrderDirection) AllValues() []StorageListOrderDirection {
+	return []StorageListOrderDirection{
+		StorageListOrderDirectionAsc,
+		StorageListOrderDirectionDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StorageListOrderDirection) MarshalText() ([]byte, error) {
+	switch s {
+	case StorageListOrderDirectionAsc:
+		return []byte(s), nil
+	case StorageListOrderDirectionDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StorageListOrderDirection) UnmarshalText(data []byte) error {
+	switch StorageListOrderDirection(data) {
+	case StorageListOrderDirectionAsc:
+		*s = StorageListOrderDirectionAsc
+		return nil
+	case StorageListOrderDirectionDesc:
+		*s = StorageListOrderDirectionDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #
 type StoragePostgres struct {

@@ -629,6 +629,30 @@ func (s *PipelineListOK) Validate() error {
 	return nil
 }
 
+func (s StorageListOrderBy) Validate() error {
+	switch s {
+	case "created_at":
+		return nil
+	case "updated_at":
+		return nil
+	case "name":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s StorageListOrderDirection) Validate() error {
+	switch s {
+	case "asc":
+		return nil
+	case "desc":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *SyncpolicyListOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
