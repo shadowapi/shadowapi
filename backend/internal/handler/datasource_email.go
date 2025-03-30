@@ -30,6 +30,7 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 		IsEnabled: isEnabled,
 		Provider:  string(req.Provider),
 		Settings:  settings,
+		Type:      "email",
 	})
 	if err != nil {
 		log.Error("failed to create datasource", "error", err)

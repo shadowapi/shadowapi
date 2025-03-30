@@ -109,7 +109,7 @@ CREATE TABLE storage(
 
 CREATE TABLE "sync_policy" (
                                "uuid" UUID PRIMARY KEY,
-                               "user_id" UUID NOT NULL,
+                               "user_uuid" UUID NOT NULL,
                                "service" VARCHAR NOT NULL,
                                "blocklist" TEXT[],
                                "exclude_list" TEXT[],
@@ -117,7 +117,7 @@ CREATE TABLE "sync_policy" (
                                "settings" JSONB,
                                "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                                "updated_at" TIMESTAMP WITH TIME ZONE,
-                               CONSTRAINT fk_sync_policy_user FOREIGN KEY("user_id") REFERENCES "user"("uuid") ON DELETE CASCADE
+                               CONSTRAINT fk_sync_policy_user FOREIGN KEY("user_uuid") REFERENCES "user"("uuid") ON DELETE CASCADE
 );
 
 -- 2025-03-28 @reactima

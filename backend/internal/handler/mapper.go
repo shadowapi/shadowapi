@@ -194,3 +194,14 @@ func QToStorageHostfile(row query.Storage) (*api.StorageHostfiles, error) {
 	stored.IsEnabled = api.NewOptBool(row.IsEnabled)
 	return &stored, nil
 }
+
+func QToStorage(row query.GetStoragesRow) api.Storage {
+	return api.Storage{
+		UUID:      row.UUID.String(),
+		Name:      api.NewOptString(row.Name),
+		Type:      row.Type,
+		IsEnabled: row.IsEnabled,
+		CreatedAt: api.NewOptDateTime(row.CreatedAt.Time),
+		UpdatedAt: api.NewOptDateTime(row.UpdatedAt.Time),
+	}
+}

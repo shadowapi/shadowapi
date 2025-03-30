@@ -105,7 +105,7 @@ export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string 
   }
 
   return (
-    <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
+    <Flex direction="row" justifyContent="center" flexBasis="100%" height="100vh">
       <Form onSubmit={methods.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600">
           <Header marginBottom="size-160">OAuth2 Credential</Header>

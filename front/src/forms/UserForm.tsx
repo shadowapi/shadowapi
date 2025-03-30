@@ -98,7 +98,7 @@ export function UserForm({ userUUID }: { userUUID: string }): ReactElement {
   if (query.isLoading && !isAdd) return <></>
 
   return (
-    <Flex direction="row" alignItems="center" justifyContent="center" height="100vh">
+    <Flex direction="row" justifyContent="center" height="100vh">
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600" gap="size-100">
           <Header marginBottom="size-160">{isAdd ? 'Add User' : 'Edit User'}</Header>

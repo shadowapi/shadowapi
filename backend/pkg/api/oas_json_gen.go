@@ -11665,12 +11665,16 @@ func (s *SyncPolicy) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *SyncPolicy) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("user_id")
-		e.Str(s.UserID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("service")
@@ -11697,8 +11701,10 @@ func (s *SyncPolicy) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("sync_all")
-		e.Bool(s.SyncAll)
+		if s.SyncAll.Set {
+			e.FieldStart("sync_all")
+			s.SyncAll.Encode(e)
+		}
 	}
 	{
 		if s.Settings.Set {
@@ -11722,7 +11728,7 @@ func (s *SyncPolicy) encodeFields(e *jx.Encoder) {
 
 var jsonFieldsNameOfSyncPolicy = [9]string{
 	0: "uuid",
-	1: "user_id",
+	1: "user_uuid",
 	2: "service",
 	3: "blocklist",
 	4: "exclude_list",
@@ -11742,28 +11748,24 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "uuid":
-			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.UUID = string(v)
-				if err != nil {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
-		case "user_id":
-			requiredBitSet[0] |= 1 << 1
+		case "user_uuid":
 			if err := func() error {
-				v, err := d.Str()
-				s.UserID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_id\"")
+				return errors.Wrap(err, "decode field \"user_uuid\"")
 			}
 		case "service":
 			requiredBitSet[0] |= 1 << 2
@@ -11816,11 +11818,9 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"exclude_list\"")
 			}
 		case "sync_all":
-			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.Bool()
-				s.SyncAll = bool(v)
-				if err != nil {
+				s.SyncAll.Reset()
+				if err := s.SyncAll.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -11867,7 +11867,7 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00100111,
+		0b00000100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {

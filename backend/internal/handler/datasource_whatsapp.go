@@ -30,6 +30,7 @@ func (h *Handler) DatasourceWhatsappCreate(ctx context.Context, req *api.Datasou
 		IsEnabled: isEnabled,
 		Provider:  string(req.Provider),
 		Settings:  settings,
+		Type:      "whatsapp",
 	})
 	if err != nil {
 		log.Error("failed to create datasource", "error", err)

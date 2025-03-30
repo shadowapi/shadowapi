@@ -85,7 +85,7 @@ export function DataSourceAuthForm({ datasourceUUID: datasourceUUID }: { datasou
   }
 
   return (
-    <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
+    <Flex direction="row" justifyContent="center" flexBasis="100%" height="100vh">
       <Form onSubmit={methods.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600">
           <Header marginBottom="size-160">Authenticate Datasource</Header>
@@ -102,9 +102,9 @@ export function DataSourceAuthForm({ datasourceUUID: datasourceUUID }: { datasou
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {methods.watch('oauth2_clients').map((client) => 
+                {methods.watch('oauth2_clients').map((client) => (
                   <Item key={client.id}>{client.name}</Item>
-                )}
+                ))}
               </Picker>
             )}
           />

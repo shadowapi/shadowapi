@@ -31,6 +31,7 @@ func (h *Handler) DatasourceTelegramCreate(ctx context.Context, req *api.Datasou
 		IsEnabled: isEnabled,
 		Provider:  string(req.Provider),
 		Settings:  settings,
+		Type:      "telegram",
 	})
 	if err != nil {
 		log.Error("failed to create datasource", "error", err)

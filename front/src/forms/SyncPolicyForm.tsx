@@ -1,14 +1,14 @@
 import { ReactElement, useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { Button, Flex, Form, Header, Switch, TextArea, TextField } from '@adobe/react-spectrum'
+import { Button, Flex, Form, Header, Item, Picker, Switch, TextArea, TextField } from '@adobe/react-spectrum'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 
 type SyncPolicyFormData = {
-  user_id: string
+  user_uuid: string
   service: string
   blocklist?: string[]
   exclude_list?: string[]
@@ -22,6 +22,14 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
   const form = useForm<SyncPolicyFormData>({})
 
   const isAdd = policyUUID === 'add'
+
+  const usersQuery = useQuery({
+    queryKey: ['users'],
+    queryFn: async ({ signal }) => {
+      const { data } = await client.GET('/user', { signal })
+      return data as components['schemas']['user'][]
+    },
+  })
 
   const query = useQuery({
     queryKey: isAdd ? ['/syncpolicy', 'add'] : ['/syncpolicy', { uuid: policyUUID }],
@@ -97,24 +105,39 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
   if (query.isPending && !isAdd) return <></>
 
   return (
-    <Flex direction="row" alignItems="center" justifyContent="center" height="100vh">
+    <Flex direction="row" justifyContent="center" height="100vh">
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600" gap="size-100">
           <Header marginBottom="size-160">{isAdd ? 'Add Sync Policy' : 'Edit Sync Policy'}</Header>
           <Controller
-            name="user_id"
+            name="user_uuid"
             control={form.control}
-            rules={{ required: 'User ID is required' }}
+            rules={{ required: 'User is required' }}
             render={({ field, fieldState }) => (
-              <TextField
-                label="User ID"
+              <Picker
+                label="User"
                 isRequired
-                type="text"
-                width="100%"
-                {...field}
-                validationState={fieldState.invalid ? 'invalid' : undefined}
+                selectedKey={field.value}
+                onSelectionChange={(key) => field.onChange(key.toString())}
                 errorMessage={fieldState.error?.message}
-              />
+                width="100%"
+              >
+                {usersQuery.data?.map((user: components['schemas']['user']) => (
+                  <Item key={user.uuid}>
+                    <span
+                      style={{
+                        whiteSpace: 'nowrap',
+                        height: '24px',
+                        lineHeight: '24px',
+                        marginLeft: 10,
+                        marginRight: 10,
+                      }}
+                    >
+                      {user.email} {user.first_name} {user.last_name}
+                    </span>
+                  </Item>
+                ))}
+              </Picker>
             )}
           />
           <Controller
@@ -122,15 +145,19 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
             control={form.control}
             rules={{ required: 'Service is required' }}
             render={({ field, fieldState }) => (
-              <TextField
+              <Picker
                 label="Service"
                 isRequired
-                type="text"
-                width="100%"
-                {...field}
-                validationState={fieldState.invalid ? 'invalid' : undefined}
+                selectedKey={field.value}
+                onSelectionChange={(key) => field.onChange(key.toString())}
                 errorMessage={fieldState.error?.message}
-              />
+                width="100%"
+              >
+                <Item key="gmail">Gmail</Item>
+                <Item key="telegram">Telegram</Item>
+                <Item key="whatsapp">WhatsApp</Item>
+                <Item key="linkedin">LinkedIn</Item>
+              </Picker>
             )}
           />
           <Controller

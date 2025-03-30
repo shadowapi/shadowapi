@@ -7,13 +7,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import client from '@/api/client'
 import type { components, paths } from '@/api/v1'
 
-export type DataSourceKind = 'email' | 'telegram' | 'whatsapp' | 'linkedin'
-
 type DataSourceBase = {
   name: string
   type: string
   is_enabled: boolean
+  user_uuid?: string
 }
+
+export type DataSourceKind = 'email' | 'telegram' | 'whatsapp' | 'linkedin'
 
 type DataSourceFormData =
   | (DataSourceBase & { type: 'email' } & components['schemas']['datasource_email'])
@@ -42,54 +43,69 @@ const deleteEndpoints: Record<DataSourceKind, keyof paths> = {
   linkedin: '/datasource/linkedin/{uuid}',
 }
 
-export function DataSourceForm({
-  datasourceUUID,
-  datasourceKind,
-}: {
-  datasourceUUID: string
-  datasourceKind?: DataSourceKind
-}): ReactElement {
+export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): ReactElement {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const form = useForm<DataSourceFormData>({})
 
-  if (datasourceUUID !== 'add' && !datasourceKind) {
-    throw new Error('datasourceKind is required for editing datasource')
-  }
+  // Always watch the "type" field so the hook order is fixed.
+  const watchedType = useWatch({ control: form.control, name: 'type' })
+
+  const usersQuery = useQuery({
+    queryKey: ['users'],
+    queryFn: async ({ signal }) => {
+      const { data } = await client.GET('/user', { signal })
+      return data as components['schemas']['user'][]
+    },
+  })
+
+  // In edit mode, fetch generic datasource record to get the type (dsKind)
+  const genericQuery = useQuery({
+    queryKey: datasourceUUID === 'add' ? null : ['genericDatasource', datasourceUUID],
+    queryFn: async ({ signal }) => {
+      const { data } = await client.GET('/datasource', { signal })
+      const ds = (data as components['schemas']['datasource'][]).find((ds) => ds.uuid === datasourceUUID)
+      if (!ds) throw new Error('Datasource not found')
+      return ds
+    },
+    enabled: datasourceUUID !== 'add',
+  })
+
+  // dsKind comes from the loaded record; default to "email" if missing.
+  const dsKind = datasourceUUID === 'add' ? undefined : ((genericQuery.data?.type || 'email') as DataSourceKind)
+
+  // currentType is used for conditional rendering.
+  const currentType = datasourceUUID === 'add' ? watchedType : dsKind || watchedType
 
   const getEndpoint = (kind: DataSourceKind, isCreate: boolean): keyof paths => {
     return isCreate ? createEndpoints[kind] : updateEndpoints[kind]
   }
 
+  // Enable the detailed query once generic data is loaded.
   const query = useQuery({
     queryKey:
-      datasourceUUID === 'add'
-        ? ['/datasource', 'add']
-        : [getEndpoint(datasourceKind!, false), { uuid: datasourceUUID }],
+      datasourceUUID === 'add' ? ['/datasource', 'add'] : [getEndpoint(dsKind!, false), { uuid: datasourceUUID }],
     queryFn: async ({ signal }) => {
       if (datasourceUUID === 'add') return {}
-      const endpoint = getEndpoint(datasourceKind!, false)
+      const endpoint = getEndpoint(dsKind!, false)
       const { data } = await client.GET(endpoint, {
         params: { path: { uuid: datasourceUUID } },
         signal,
       })
       return data
     },
-    enabled: datasourceUUID !== 'add',
+    enabled: datasourceUUID === 'add' ? true : genericQuery.data !== undefined,
   })
 
+  // Reset the form when the record is loaded.
   useEffect(() => {
     if (query.data) {
       form.reset({
         ...query.data,
-        type: datasourceKind ?? (query.data as Partial<DataSourceFormData>).type,
+        type: dsKind ?? (query.data as Partial<DataSourceFormData>).type,
       } as DataSourceFormData)
-    } else if (datasourceKind) {
-      form.setValue('type', datasourceKind)
     }
-  }, [query.data, datasourceKind, form])
-
-  const dataSourceType = useWatch({ control: form.control, name: 'type' })
+  }, [query.data, dsKind, form])
 
   const modifyMutation = useMutation({
     mutationFn: async (data: DataSourceFormData) => {
@@ -107,6 +123,7 @@ export function DataSourceForm({
               smtp_server: data.smtp_server,
               smtp_tls: data.smtp_tls,
               password: data.password,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -124,6 +141,7 @@ export function DataSourceForm({
               api_id: data.api_id,
               api_hash: data.api_hash,
               password: data.password,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -139,6 +157,7 @@ export function DataSourceForm({
               phone_number: data.phone_number,
               provider: data.provider,
               device_name: data.device_name,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -154,6 +173,7 @@ export function DataSourceForm({
               username: data.username,
               password: data.password,
               provider: data.provider,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -163,7 +183,7 @@ export function DataSourceForm({
           return resp
         }
       } else {
-        const endpoint = getEndpoint(datasourceKind!, false)
+        const endpoint = getEndpoint(dsKind!, false)
         if (data.type === 'email') {
           const resp = await client.PUT(endpoint, {
             params: { path: { uuid: datasourceUUID } },
@@ -176,6 +196,7 @@ export function DataSourceForm({
               smtp_server: data.smtp_server,
               smtp_tls: data.smtp_tls,
               password: data.password,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -194,6 +215,7 @@ export function DataSourceForm({
               api_id: data.api_id,
               api_hash: data.api_hash,
               password: data.password,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -210,6 +232,7 @@ export function DataSourceForm({
               phone_number: data.phone_number,
               provider: data.provider,
               device_name: data.device_name,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -226,6 +249,7 @@ export function DataSourceForm({
               username: data.username,
               password: data.password,
               provider: data.provider,
+              user_uuid: data.user_uuid,
             },
           })
           if (resp.error) {
@@ -244,7 +268,7 @@ export function DataSourceForm({
 
   const deleteMutation = useMutation({
     mutationFn: async (uuid: string) => {
-      const endpoint = deleteEndpoints[datasourceKind!]
+      const endpoint = deleteEndpoints[dsKind!]
       const resp = await client.DELETE(endpoint, {
         params: { path: { uuid } },
       })
@@ -268,21 +292,20 @@ export function DataSourceForm({
     modifyMutation.mutate(data)
   }
 
-  if (query.isPending && datasourceUUID !== 'add') {
-    return <></>
-  }
-
-  console.log('@reactima remove DataSourceForm', {
+  console.log('@reactima remove DataSourceForm !', {
     datasourceUUID,
-    datasourceKind,
     query,
     form,
-    dataSourceType,
+    currentType,
     queryData: query.data,
   })
 
+  if (datasourceUUID !== 'add' && (genericQuery.isPending || query.isPending)) {
+    return <></>
+  }
+
   return (
-    <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
+    <Flex direction="row" justifyContent="center" flexBasis="100%" height="100vh">
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600">
           <Header marginBottom="size-160">Data Source</Header>
@@ -303,6 +326,36 @@ export function DataSourceForm({
             )}
           />
           <Controller
+            name="user_uuid"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Picker
+                label="User"
+                isRequired
+                selectedKey={field.value}
+                onSelectionChange={(key) => field.onChange(key.toString())}
+                errorMessage={fieldState.error?.message}
+                width="100%"
+              >
+                {usersQuery.data?.map((user: components['schemas']['user']) => 
+                  <Item key={user.uuid}>
+                    <span
+                      style={{
+                        whiteSpace: 'nowrap',
+                        height: '24px',
+                        lineHeight: '24px',
+                        marginLeft: 10,
+                        marginRight: 10,
+                      }}
+                    >
+                      {user.email} {user.first_name} {user.last_name}
+                    </span>
+                  </Item>
+                )}
+              </Picker>
+            )}
+          />
+          <Controller
             name="type"
             control={form.control}
             rules={{ required: 'Type is required' }}
@@ -310,8 +363,8 @@ export function DataSourceForm({
               <Picker
                 label="Type"
                 isRequired
-                isDisabled={!!datasourceKind || datasourceUUID !== 'add'}
-                selectedKey={datasourceKind ?? field.value}
+                isDisabled={datasourceUUID !== 'add'}
+                selectedKey={field.value}
                 onSelectionChange={(key) => field.onChange(key.toString())}
                 errorMessage={fieldState.error?.message}
                 width="100%"
@@ -332,7 +385,7 @@ export function DataSourceForm({
               </Switch>
             )}
           />
-          {dataSourceType === 'email' && (
+          {currentType === 'email' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="email"
@@ -357,11 +410,11 @@ export function DataSourceForm({
               <Controller
                 name="smtp_tls"
                 control={form.control}
-                render={({ field }) => 
+                render={({ field }) => (
                   <Switch isSelected={field.value} onChange={field.onChange}>
                     SMTP TLS
                   </Switch>
-                }
+                )}
               />
               <Controller
                 name="password"
@@ -370,7 +423,7 @@ export function DataSourceForm({
               />
             </Flex>
           )}
-          {dataSourceType === 'telegram' && (
+          {currentType === 'telegram' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="phone_number"
@@ -399,7 +452,7 @@ export function DataSourceForm({
               />
             </Flex>
           )}
-          {dataSourceType === 'whatsapp' && (
+          {currentType === 'whatsapp' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="phone_number"
@@ -418,7 +471,7 @@ export function DataSourceForm({
               />
             </Flex>
           )}
-          {dataSourceType === 'linkedin' && (
+          {currentType === 'linkedin' && (
             <Flex direction="column" gap="size-100" marginTop="size-200">
               <Controller
                 name="username"

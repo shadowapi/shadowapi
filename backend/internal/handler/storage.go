@@ -54,7 +54,7 @@ func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams)
 			fmt.Println("OrderDirection is set")
 			arg.OrderDirection = params.OrderDirection.Value
 		}
-		
+
 		rows, err := query.New(h.dbp).GetStorages(ctx, arg)
 		if err != nil {
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list storage"))
@@ -66,15 +66,4 @@ func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams)
 		}
 		return storages, nil
 	})
-}
-
-func QToStorage(row query.GetStoragesRow) api.Storage {
-	return api.Storage{
-		UUID:      row.UUID.String(),
-		Name:      api.NewOptString(row.Name),
-		Type:      row.Type,
-		IsEnabled: row.IsEnabled,
-		CreatedAt: api.NewOptDateTime(row.CreatedAt.Time),
-		UpdatedAt: api.NewOptDateTime(row.UpdatedAt.Time),
-	}
 }

@@ -1358,9 +1358,9 @@ export interface components {
         };
         sync_policy: {
             /** @description Unique identifier for the sync policy. */
-            uuid: string;
+            uuid?: string;
             /** @description Unique identifier for the user associated with the sync policy. */
-            user_id: string;
+            user_uuid?: string;
             /** @description The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin). */
             service: string;
             /** @description List of blocked emails or contact identifiers. */
@@ -1368,7 +1368,7 @@ export interface components {
             /** @description List of contacts to exclude from syncing. */
             exclude_list?: string[];
             /** @description Indicates whether to sync all messages from the service (true means no filtering). */
-            sync_all: boolean;
+            sync_all?: boolean;
             /** @description additional key-value settings for the sync policy. */
             settings?: {
                 [key: string]: unknown;

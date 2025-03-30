@@ -253,7 +253,7 @@ type Storage struct {
 
 type SyncPolicy struct {
 	UUID        uuid.UUID          `json:"uuid"`
-	UserID      pgtype.UUID        `json:"user_id"`
+	UserUUID    *uuid.UUID         `json:"user_uuid"`
 	Service     string             `json:"service"`
 	Blocklist   []string           `json:"blocklist"`
 	ExcludeList []string           `json:"exclude_list"`

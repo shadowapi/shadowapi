@@ -4,7 +4,7 @@ properties:
   uuid:
     type: string
     description: "Unique identifier for the sync policy."
-  user_id:
+  user_uuid:
     type: string
     description: "Unique identifier for the user associated with the sync policy."
   service:
@@ -36,7 +36,5 @@ properties:
     format: date-time
     description: "Timestamp when the policy was last updated."
 required:
-  - uuid
   - user_id
   - service
-  - sync_all

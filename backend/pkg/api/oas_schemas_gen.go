@@ -6214,9 +6214,9 @@ type StorageS3DeleteOK struct{}
 // Ref: #
 type SyncPolicy struct {
 	// Unique identifier for the sync policy.
-	UUID string `json:"uuid"`
+	UUID OptString `json:"uuid"`
 	// Unique identifier for the user associated with the sync policy.
-	UserID string `json:"user_id"`
+	UserUUID OptString `json:"user_uuid"`
 	// The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin).
 	Service string `json:"service"`
 	// List of blocked emails or contact identifiers.
@@ -6224,7 +6224,7 @@ type SyncPolicy struct {
 	// List of contacts to exclude from syncing.
 	ExcludeList []string `json:"exclude_list"`
 	// Indicates whether to sync all messages from the service (true means no filtering).
-	SyncAll bool `json:"sync_all"`
+	SyncAll OptBool `json:"sync_all"`
 	// Additional key-value settings for the sync policy.
 	Settings OptSyncPolicySettings `json:"settings"`
 	// Timestamp when the policy was created.
@@ -6234,13 +6234,13 @@ type SyncPolicy struct {
 }
 
 // GetUUID returns the value of UUID.
-func (s *SyncPolicy) GetUUID() string {
+func (s *SyncPolicy) GetUUID() OptString {
 	return s.UUID
 }
 
-// GetUserID returns the value of UserID.
-func (s *SyncPolicy) GetUserID() string {
-	return s.UserID
+// GetUserUUID returns the value of UserUUID.
+func (s *SyncPolicy) GetUserUUID() OptString {
+	return s.UserUUID
 }
 
 // GetService returns the value of Service.
@@ -6259,7 +6259,7 @@ func (s *SyncPolicy) GetExcludeList() []string {
 }
 
 // GetSyncAll returns the value of SyncAll.
-func (s *SyncPolicy) GetSyncAll() bool {
+func (s *SyncPolicy) GetSyncAll() OptBool {
 	return s.SyncAll
 }
 
@@ -6279,13 +6279,13 @@ func (s *SyncPolicy) GetUpdatedAt() OptDateTime {
 }
 
 // SetUUID sets the value of UUID.
-func (s *SyncPolicy) SetUUID(val string) {
+func (s *SyncPolicy) SetUUID(val OptString) {
 	s.UUID = val
 }
 
-// SetUserID sets the value of UserID.
-func (s *SyncPolicy) SetUserID(val string) {
-	s.UserID = val
+// SetUserUUID sets the value of UserUUID.
+func (s *SyncPolicy) SetUserUUID(val OptString) {
+	s.UserUUID = val
 }
 
 // SetService sets the value of Service.
@@ -6304,7 +6304,7 @@ func (s *SyncPolicy) SetExcludeList(val []string) {
 }
 
 // SetSyncAll sets the value of SyncAll.
-func (s *SyncPolicy) SetSyncAll(val bool) {
+func (s *SyncPolicy) SetSyncAll(val OptBool) {
 	s.SyncAll = val
 }
 

@@ -238,7 +238,7 @@ export function StorageForm({
   })
 
   return (
-    <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
+    <Flex direction="row" justifyContent="center" flexBasis="100%" height="100vh">
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <Flex direction="column" width="size-4600">
           <Header marginBottom="size-160">Storage</Header>
