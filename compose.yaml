@@ -78,7 +78,7 @@ services:
     restart: always
     networks:
       - shadowapi
-    image: oryd/kratos:v1.2.0
+    image: oryd/kratos:v1.3.1
     command: serve --dev --watch-courier --config /home/ory/kratos.yaml
     environment:
       - DSN=postgres://shadowapi:shadowapi@sa-db:5432/kratos

@@ -18,7 +18,6 @@ tasks:
     desc: "Clean docker compose and volumes"
     cmds:
       - docker compose down -v --rmi all --remove-orphans
-      - docker compose down -v --rmi all --remove-orphans
 
   dev-up:
     desc: "Spin up all services in development mode"
