@@ -4,6 +4,13 @@ services:
     container_name: sa-traefik
     command:
       - --log.level=DEBUG
+      - --accesslog=true
+      - --accesslog.fields.defaultmode=keep
+      - --accesslog.fields.names.StartUTC=keep
+      - --accesslog.fields.names.Duration=keep
+      - --accesslog.fields.names.ResponseStatus=keep
+      - --accesslog.fields.names.RequestMethod=keep
+      - --accesslog.fields.names.RequestPath=keep
       - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
