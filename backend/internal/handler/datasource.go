@@ -3,59 +3,68 @@ package handler
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
-	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"net/http"
 
+	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 func (h *Handler) DatasourceList(
-	ctx context.Context, params api.DatasourceListParams,
+	ctx context.Context,
+	params api.DatasourceListParams, // Has Offset, Limit only
 ) ([]api.Datasource, error) {
-	log := h.log.With("handler", "StorageList")
-
+	// Because ogen only defines offset/limit in DatasourceListParams,
+	// we can unify them into a single function.
+	log := h.log.With("handler", "DatasourceList")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) ([]api.Datasource, error) {
-		arg := query.GetDatasourcesParams{}
-		if params.Limit.IsSet() {
-			arg.Limit = params.Limit.Value
-		}
+		var offset, limit int32
 		if params.Offset.IsSet() {
-			arg.Offset = params.Offset.Value
+			offset = params.Offset.Value
+		}
+		if params.Limit.IsSet() {
+			limit = params.Limit.Value
 		}
 
-		rows, err := query.New(h.dbp).GetDatasources(ctx, arg)
+		// Call our one "ListDatasources" query with offset & limit
+		listArgs := query.ListDatasourcesParams{
+			OffsetRecords: offset,
+			LimitRecords:  limit,
+		}
+		rows, err := query.New(h.dbp).ListDatasources(ctx, listArgs)
 		if err != nil {
 			log.Error("failed to list datasources", "error", err.Error())
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list datasources"))
 		}
 
+		// Convert each row from the query to our API representation
 		var datasources []api.Datasource
 		for _, row := range rows {
-			datasources = append(datasources, QToDatasource(row))
+			datasources = append(datasources, QToDatasource(row.Datasource))
 		}
 		return datasources, nil
 	})
 }
 
-//func (h *Handler) DatasourceSetOAuth2Client(
-//	ctx context.Context, req *api.DatasourceSetOAuth2ClientReq, params api.DatasourceSetOAuth2ClientParams,
-//) error {
-//	log := h.log.With("handler", "DatasourceSetOAuth2Client")
-//	connectionUUID, err := uuid.FromString(params.UUID)
-//	if err != nil {
-//		log.Error("failed to parse connection uuid", "error", err)
-//		return ErrWithCode(http.StatusBadRequest, E("failed to parse connection uuid"))
-//	}
-//
-//	err = query.New(h.dbp).LinkDatasourceWithClient(ctx,
-//		query.LinkDatasourceWithClientParams{
-//			UUID:     connectionUUID,
-//			ClientID: pgtype.Text{String: req.ClientID, Valid: true},
-//		})
-//	if err != nil {
-//		log.Error("failed to link connection with client", "error", err)
-//		return ErrWithCode(http.StatusInternalServerError, E("failed to link connection with client"))
-//	}
-//	return nil
-//}
+// QToDatasource maps a single query.Datasource to api.Datasource.
+// Notice it does NOT reference any 'Status' or 'IsEnabled' param from your endpoint –
+// it just reads the actual fields in query.Datasource.
+func QToDatasource(ds query.Datasource) api.Datasource {
+	c := api.Datasource{
+		UUID:      ds.UUID.String(),
+		Name:      ds.Name,
+		Type:      ds.Type,
+		IsEnabled: ds.IsEnabled,
+	}
+	if ds.UserUUID != nil {
+		c.UserUUID = api.NewOptString(ds.UserUUID.String())
+	}
+	if ds.CreatedAt.Valid {
+		c.CreatedAt = api.NewOptDateTime(ds.CreatedAt.Time)
+	}
+	if ds.UpdatedAt.Valid {
+		c.UpdatedAt = api.NewOptDateTime(ds.UpdatedAt.Time)
+	}
+	// Feel free to parse ds.Provider or ds.Settings if needed
+	return c
+}

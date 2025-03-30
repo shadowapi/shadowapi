@@ -23,9 +23,9 @@ import { FullLayout } from '@/layouts/FullLayout'
 export function DataSources() {
   const navigate = useNavigate()
   const query = useQuery({
-    queryKey: ['/datasource/email'],
+    queryKey: ['/datasource'],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET('/datasource/email', { signal })
+      const { data } = await client.GET('/datasource', { signal })
       return data || []
     },
     retry: false,

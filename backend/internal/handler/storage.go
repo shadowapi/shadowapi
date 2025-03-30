@@ -66,3 +66,19 @@ func (h *Handler) StorageList(
 		return storages, nil
 	})
 }
+
+func QToStorage(row query.GetStoragesRow) api.Storage {
+	r := api.Storage{
+		UUID:      row.UUID.String(),
+		Name:      api.NewOptString(row.Name),
+		Type:      row.Type,
+		IsEnabled: row.IsEnabled,
+	}
+	if row.CreatedAt.Valid {
+		r.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
+	}
+	if row.UpdatedAt.Valid {
+		r.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
+	}
+	return r
+}

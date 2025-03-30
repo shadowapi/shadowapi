@@ -32,26 +32,6 @@ func ConvertOptStringToUUID(opt api.OptString) (uuid.UUID, error) {
 	return uuid.FromString(opt.Value)
 }
 
-// QToDatasource converts a query.Datasource to an api.Datasource.
-func QToDatasource(row query.GetDatasourcesRow) api.Datasource {
-	c := api.Datasource{
-		UUID:      row.UUID.String(),
-		Name:      row.Name,
-		Type:      row.Type,
-		IsEnabled: row.IsEnabled,
-	}
-	if row.UserUUID != nil {
-		c.UserUUID = api.NewOptString(row.UserUUID.String())
-	}
-	if row.CreatedAt.Valid {
-		c.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
-	}
-	if row.UpdatedAt.Valid {
-		c.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
-	}
-	return c
-}
-
 // QToDatasourceEmail converts a query datasource row into an API DatasourceEmail.
 func QToDatasourceEmail(row query.GetDatasourcesRow) (*api.DatasourceEmail, error) {
 	var ds api.DatasourceEmail
@@ -183,21 +163,6 @@ func QToDatasourceWhatsapp(row query.GetDatasourcesRow) (*api.DatasourceWhatsapp
 }
 
 // QToStorage converts a query storage row into an API Storage.
-func QToStorage(row query.GetStoragesRow) api.Storage {
-	r := api.Storage{
-		UUID:      row.UUID.String(),
-		Name:      api.NewOptString(row.Name),
-		Type:      row.Type,
-		IsEnabled: row.IsEnabled,
-	}
-	if row.CreatedAt.Valid {
-		r.CreatedAt = api.NewOptDateTime(row.CreatedAt.Time)
-	}
-	if row.UpdatedAt.Valid {
-		r.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
-	}
-	return r
-}
 
 func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) {
 	var s api.StoragePostgres
