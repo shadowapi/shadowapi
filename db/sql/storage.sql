@@ -25,26 +25,28 @@ ORDER BY created_at DESC
 LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
     OFFSET @offset_records::int;
 
+
 -- name: GetStorages :many
 WITH filtered_storages AS (
-  SELECT d.*
-  FROM storage d
-  WHERE
-    (@type::text IS NULL OR d."type" = @type)
-    AND (@uuid::uuid IS NULL OR d.uuid = @uuid)
-    AND (@is_enabled::bool IS NULL OR d.is_enabled = @is_enabled)
-    AND (@name::text IS NULL OR d.name ILIKE @name)
+    SELECT d.*
+    FROM storage d
+    WHERE
+        (NULLIF(sqlc.arg('type'), '') IS NULL OR d."type" = sqlc.arg('type'))
+      AND (sqlc.arg('uuid')::uuid IS NULL OR d.uuid = sqlc.arg('uuid'))
+      AND (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR d.is_enabled = sqlc.arg('is_enabled')::boolean)
+      AND (NULLIF(sqlc.arg('name'), '') IS NULL OR d.name ILIKE sqlc.arg('name'))
 )
 SELECT
-  *,
-  (SELECT count(*) FROM filtered_storages) AS total_count
+    *,
+    (SELECT count(*) FROM filtered_storages) AS total_count
 FROM filtered_storages
 ORDER BY
-  CASE WHEN @order_by = 'created_at' AND @order_direction = 'asc' THEN created_at END ASC,
-  CASE WHEN @order_by = 'created_at' AND @order_direction = 'desc' THEN created_at END DESC,
-  created_at DESC
+    CASE WHEN sqlc.arg('order_by') = 'created_at' AND sqlc.arg('order_direction') = 'asc' THEN created_at END ASC,
+    CASE WHEN sqlc.arg('order_by') = 'created_at' AND sqlc.arg('order_direction') = 'desc' THEN created_at END DESC,
+    created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
     OFFSET sqlc.arg('offset');
+
 
 -- name: GetStorage :one
 SELECT

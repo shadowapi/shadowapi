@@ -8,8 +8,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -74,19 +72,12 @@ func (h *Handler) StorageS3Get(ctx context.Context, params api.StorageS3GetParam
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid s3 storage UUID"))
 	}
 
-	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
-		Limit: 1,
-	})
+	storage, err := query.New(h.dbp).GetStorage(ctx, [16]byte(id.Bytes()))
 	if err != nil {
 		log.Error("failed to get s3 storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get s3 storage"))
 	}
-	if len(storages) == 0 {
-		return nil, ErrWithCode(http.StatusNotFound, E("s3 storage not found"))
-	}
-
-	return QToStorageS3(storages[0])
+	return QToStorageS3(storage)
 }
 
 func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, params api.StorageS3UpdateParams) (*api.StorageS3, error) {
@@ -99,24 +90,17 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageS3, error) {
-		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(s3UUID.Bytes()), Valid: true},
-			Limit: 1,
-		})
+		storage, err := query.New(tx).GetStorage(ctx, [16]byte(s3UUID.Bytes()))
 		if err != nil {
 			log.Error("failed to get s3 storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get s3 storage"))
 		}
-		if len(storages) == 0 {
-			return nil, ErrWithCode(http.StatusNotFound, E("s3 storage not found"))
-		}
-
 		// For update, use new values if provided; fallback to existing DB values.
 		var isEnabled bool
 		if req.IsEnabled.IsSet() {
 			isEnabled = req.IsEnabled.Value
 		} else {
-			isEnabled = storages[0].IsEnabled
+			isEnabled = storage.IsEnabled
 		}
 
 		newSettings, err := json.Marshal(req)

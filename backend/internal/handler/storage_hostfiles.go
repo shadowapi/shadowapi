@@ -8,8 +8,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -78,19 +76,13 @@ func (h *Handler) StorageHostfilesGet(ctx context.Context, params api.StorageHos
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:  pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
-		Limit: 1,
-	})
+	storage, err := query.New(h.dbp).GetStorage(ctx, [16]byte(id.Bytes()))
 	if err != nil {
 		log.Error("failed to get hostfiles storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
 	}
-	if len(storages) == 0 {
-		return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
-	}
 
-	return QToStorageHostfiles(storages[0])
+	return QToStorageHostfile(storage)
 }
 
 func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHostfiles, params api.StorageHostfilesUpdateParams) (*api.StorageHostfiles, error) {
@@ -103,16 +95,10 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageHostfiles, error) {
-		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(hostfilesUUID.Bytes()), Valid: true},
-			Limit: 1,
-		})
+		storage, err := query.New(tx).GetStorage(ctx, [16]byte(hostfilesUUID.Bytes()))
 		if err != nil {
 			log.Error("failed to get hostfiles storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
-		}
-		if len(storages) == 0 {
-			return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
 		}
 
 		// For update, use new values if provided; otherwise fallback to current DB value.
@@ -120,7 +106,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 		if req.IsEnabled.IsSet() {
 			isEnabled = req.IsEnabled.Value
 		} else {
-			isEnabled = storages[0].IsEnabled
+			isEnabled = storage.IsEnabled
 		}
 
 		updatedSettings, err := json.Marshal(req)

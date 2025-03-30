@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
@@ -18,36 +19,42 @@ func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams)
 			OrderBy:        "created_at",
 			OrderDirection: "desc",
 			Offset:         0,
-			Limit:          0,
-			// Use empty string for text filters which the SQL now converts to NULL using NULLIF.
-			Type:      "",
-			UUID:      pgtype.UUID{}, // Will be treated as NULL if not set.
-			IsEnabled: false,         // Must be provided explicitly to filter.
-			Name:      "",
+			Limit:          10000,
+			Type:           "",
+			UUID:           pgtype.UUID{}, // Will be treated as NULL if not set.
+			IsEnabled:      -1,            // -1 = unset, 0 = false, 1 = true
+			Name:           "",
 		}
 		if params.Limit.IsSet() {
+			fmt.Println("Limit is set")
 			arg.Limit = params.Limit.Value
 		}
 		if params.Offset.IsSet() {
+			fmt.Println("Offset is set")
 			arg.Offset = params.Offset.Value
 		}
 		if params.Type.IsSet() {
+			fmt.Println("Type is set")
 			arg.Type = params.Type.Value
 		}
 		if params.IsEnabled.IsSet() {
-			arg.IsEnabled = params.IsEnabled.Value
+			fmt.Println("IsEnabled is set")
+			arg.IsEnabled = 1
 		}
 		if params.Name.IsSet() {
+			fmt.Println("Name is set")
 			// Wrap with wildcards for ILIKE filtering
 			arg.Name = "%" + params.Name.Value + "%"
 		}
 		if params.OrderBy.IsSet() {
+			fmt.Println("OrderBy is set")
 			arg.OrderBy = params.OrderBy.Value
 		}
 		if params.OrderDirection.IsSet() {
+			fmt.Println("OrderDirection is set")
 			arg.OrderDirection = params.OrderDirection.Value
 		}
-
+		
 		rows, err := query.New(h.dbp).GetStorages(ctx, arg)
 		if err != nil {
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list storage"))

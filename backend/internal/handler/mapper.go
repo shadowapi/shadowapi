@@ -162,9 +162,7 @@ func QToDatasourceWhatsapp(row query.GetDatasourcesRow) (*api.DatasourceWhatsapp
 	return &ds, nil
 }
 
-// QToStorage converts a query storage row into an API Storage.
-
-func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) {
+func QToStoragePostgres(row query.Storage) (*api.StoragePostgres, error) {
 	var s api.StoragePostgres
 	if err := json.Unmarshal(row.Settings, &s); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings", err.Error()))
@@ -175,7 +173,7 @@ func QToStoragePostgres(row query.GetStoragesRow) (*api.StoragePostgres, error) 
 	return &s, nil
 }
 
-func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
+func QToStorageS3(row query.Storage) (*api.StorageS3, error) {
 	var stored api.StorageS3
 	if err := json.Unmarshal(row.Settings, &stored); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings", err.Error()))
@@ -186,7 +184,7 @@ func QToStorageS3(row query.GetStoragesRow) (*api.StorageS3, error) {
 	return &stored, nil
 }
 
-func QToStorageHostfiles(row query.GetStoragesRow) (*api.StorageHostfiles, error) {
+func QToStorageHostfile(row query.Storage) (*api.StorageHostfiles, error) {
 	var stored api.StorageHostfiles
 	if err := json.Unmarshal(row.Settings, &stored); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings", err.Error()))

@@ -9,8 +9,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -79,21 +77,13 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 	}
 	fmt.Println("id", id)
 
-	storages, err := query.New(h.dbp).GetStorages(ctx, query.GetStoragesParams{
-		UUID:   pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
-		Limit:  1,
-		Offset: 0,
-	})
+	storages, err := query.New(h.dbp).GetStorage(ctx, [16]byte(id.Bytes()))
 	if err != nil {
 		log.Error("failed to get storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
 	}
 
-	if len(storages) == 0 {
-		return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
-	}
-
-	return QToStoragePostgres(storages[0])
+	return QToStoragePostgres(storages)
 }
 
 func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePostgres, params api.StoragePostgresUpdateParams) (*api.StoragePostgres, error) {
@@ -106,16 +96,10 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StoragePostgres, error) {
-		storages, err := query.New(tx).GetStorages(ctx, query.GetStoragesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(storageUUID.Bytes()), Valid: true},
-			Limit: 1,
-		})
+		storage, err := query.New(tx).GetStorage(ctx, [16]byte(storageUUID.Bytes()))
 		if err != nil {
 			log.Error("failed to get storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
-		}
-		if len(storages) == 0 {
-			return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
 		}
 
 		// For update, use new values if provided; otherwise fall back to current DB values.
@@ -123,7 +107,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 		if req.IsEnabled.IsSet() {
 			isEnabled = req.IsEnabled.Value
 		} else {
-			isEnabled = storages[0].IsEnabled
+			isEnabled = storage.IsEnabled
 		}
 
 		newSettings, err := json.Marshal(req)
