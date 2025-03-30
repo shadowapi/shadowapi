@@ -101,29 +101,29 @@ func (q *Queries) GetStorage(ctx context.Context, argUuid uuid.UUID) (Storage, e
 
 const getStorages = `-- name: GetStorages :many
 WITH filtered_storages AS (
-  SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at FROM storage d WHERE 
-    ($5::text IS NULL OR "type" = $5) AND
-    ($6::uuid IS NULL OR "uuid" = $6) AND
-    ($7::bool IS NULL OR is_enabled = $7) AND
-    ($8::text IS NULL OR d.name ILIKE $8))
+  SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at
+  FROM storage d
+  WHERE
+    ($5::text IS NULL OR d."type" = $5)
+    AND ($6::uuid IS NULL OR d.uuid = $6)
+    AND ($7::bool IS NULL OR d.is_enabled = $7)
+    AND ($8::text IS NULL OR d.name ILIKE $8)
+)
 SELECT
   uuid, name, type, is_enabled, settings, created_at, updated_at,
-  (SELECT count(*) FROM filtered_storages) as total_count
+  (SELECT count(*) FROM filtered_storages) AS total_count
 FROM filtered_storages
-ORDER BY 
-  CASE WHEN $1 = 'created_at' AND $2::text = 'asc' THEN created_at END ASC,
-  CASE WHEN $1 = 'created_at' AND $2::text = 'desc' THEN created_at END DESC,
-  CASE WHEN $1 = 'updated_at' AND $2::text = 'asc' THEN updated_at END ASC,
-  CASE WHEN $1 = 'updated_at' AND $2::text = 'desc' THEN updated_at END DESC,
-  CASE WHEN $1 = 'name' AND $2::text = 'asc' THEN name END ASC,
-  CASE WHEN $1 = 'name' AND $2::text = 'desc' THEN name END DESC,
+ORDER BY
+  CASE WHEN $1 = 'created_at' AND $2 = 'asc' THEN created_at END ASC,
+  CASE WHEN $1 = 'created_at' AND $2 = 'desc' THEN created_at END DESC,
   created_at DESC
-LIMIT NULLIF($4::int, 0) OFFSET $3
+LIMIT NULLIF($4::int, 0)
+    OFFSET $3
 `
 
 type GetStoragesParams struct {
 	OrderBy        interface{} `json:"order_by"`
-	OrderDirection string      `json:"order_direction"`
+	OrderDirection interface{} `json:"order_direction"`
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
 	Type           string      `json:"type"`
