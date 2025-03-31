@@ -51,6 +51,7 @@ func Provide(i do.Injector) (*Broker, error) {
 		log.Error("failed to start broker", "error", err)
 		return nil, err
 	}
+	b.StartScheduler(ctx)
 	return b, nil
 }
 
