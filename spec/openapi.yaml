@@ -27,10 +27,10 @@ components:
       $ref: "components/oauth2_client_token.yaml"
     Pipeline:
       $ref: "components/pipeline.yaml"
-    PipelineEntry:
-      $ref: "components/pipeline_entry.yaml"
-    PipelineEntryType:
-      $ref: "components/pipeline_entry_type.yaml"
+    PipelineEdge:
+      $ref: "components/pipeline_edge.yaml"
+    PipelineNode:
+      $ref: "components/pipeline_node.yaml"
     Storage:
       $ref: "components/storage.yaml"
     StoragePostgres:
@@ -118,14 +118,8 @@ paths:
     $ref: "paths/oauth2_login.yaml"
   /pipeline:
     $ref: "paths/pipeline.yaml"
-  /pipeline/entry/types:
-    $ref: "paths/pipeline_entry_types.yaml"
   /pipeline/{uuid}:
     $ref: "paths/pipeline_uuid.yaml"
-  /pipeline/{uuid}/entry:
-    $ref: "paths/pipeline_uuid_entry.yaml"
-  /pipeline/{uuid}/entry/{entry_uuid}:
-    $ref: "paths/pipeline_uuid_entry_uuid.yaml"
   /file:
     $ref: "paths/file.yaml"
   /file/{uuid}:

@@ -8,7 +8,7 @@ package query
 import (
 	"context"
 
-	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -24,13 +24,13 @@ INSERT INTO "user" (
     created_at,
     updated_at
 ) VALUES (
-             $1,
+             $1::uuid,
              $2,
              $3,
              $4,
              $5,
-             $6,
-             $7,
+             $6::boolean,
+             $7::boolean,
              $8,
              NOW(),
              NULL
@@ -38,14 +38,14 @@ INSERT INTO "user" (
 `
 
 type CreateUserParams struct {
-	UUID      uuid.UUID `json:"uuid"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	IsEnabled bool      `json:"is_enabled"`
-	IsAdmin   bool      `json:"is_admin"`
-	Meta      []byte    `json:"meta"`
+	UUID      pgtype.UUID `json:"uuid"`
+	Email     string      `json:"email"`
+	Password  string      `json:"password"`
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	IsEnabled bool        `json:"is_enabled"`
+	IsAdmin   bool        `json:"is_admin"`
+	Meta      []byte      `json:"meta"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -77,23 +77,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM "user"
-WHERE uuid = $1
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, argUuid uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteUser, argUuid)
+func (q *Queries) DeleteUser(ctx context.Context, uuid pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUser, uuid)
 	return err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+SELECT
+    uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 FROM "user"
-WHERE uuid = $1
-LIMIT 1
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetUser(ctx context.Context, argUuid uuid.UUID) (User, error) {
-	row := q.db.QueryRow(ctx, getUser, argUuid)
+func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, uuid)
 	var i User
 	err := row.Scan(
 		&i.UUID,
@@ -111,20 +111,21 @@ func (q *Queries) GetUser(ctx context.Context, argUuid uuid.UUID) (User, error) 
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+SELECT
+   uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 FROM "user"
 ORDER BY created_at DESC
-LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-    OFFSET $1::int
+LIMIT NULLIF($2::int, 0)
+    OFFSET $1
 `
 
 type ListUsersParams struct {
-	OffsetRecords int32 `json:"offset_records"`
-	LimitRecords  int32 `json:"limit_records"`
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
 func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, listUsers, arg.OffsetRecords, arg.LimitRecords)
+	rows, err := q.db.Query(ctx, listUsers, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -157,26 +158,26 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 const updateUser = `-- name: UpdateUser :exec
 UPDATE "user"
 SET
-    email = COALESCE($1, email),
-    password = COALESCE($2, password),
-    first_name = COALESCE($3, first_name),
-    last_name = COALESCE($4, last_name),
-    is_enabled = COALESCE($5, is_enabled),
-    is_admin = COALESCE($6, is_admin),
-    meta = COALESCE($7, meta),
+    email = $1,
+    password = $2,
+    first_name = $3,
+    last_name = $4,
+    is_enabled =  $5::boolean,
+    is_admin = $6::boolean,
+    meta = $7,
     updated_at = NOW()
-WHERE uuid = $8
+WHERE uuid = $8::uuid
 `
 
 type UpdateUserParams struct {
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	IsEnabled bool      `json:"is_enabled"`
-	IsAdmin   bool      `json:"is_admin"`
-	Meta      []byte    `json:"meta"`
-	UUID      uuid.UUID `json:"uuid"`
+	Email     string      `json:"email"`
+	Password  string      `json:"password"`
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	IsEnabled bool        `json:"is_enabled"`
+	IsAdmin   bool        `json:"is_admin"`
+	Meta      []byte      `json:"meta"`
+	UUID      pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {

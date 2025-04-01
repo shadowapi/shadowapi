@@ -28,8 +28,8 @@ func (h *Handler) DatasourceList(
 
 		// Call our one "ListDatasources" query with offset & limit
 		listArgs := query.ListDatasourcesParams{
-			OffsetRecords: offset,
-			LimitRecords:  limit,
+			Offset: offset,
+			Limit:  limit,
 		}
 		rows, err := query.New(h.dbp).ListDatasources(ctx, listArgs)
 		if err != nil {
@@ -51,13 +51,13 @@ func (h *Handler) DatasourceList(
 // it just reads the actual fields in query.Datasource.
 func QToDatasource(ds query.Datasource) api.Datasource {
 	c := api.Datasource{
-		UUID:      ds.UUID.String(),
+		UUID:      api.NewOptString(ds.UUID.String()),
 		Name:      ds.Name,
 		Type:      ds.Type,
-		IsEnabled: ds.IsEnabled,
+		IsEnabled: api.NewOptBool(ds.IsEnabled),
 	}
 	if ds.UserUUID != nil {
-		c.UserUUID = api.NewOptString(ds.UserUUID.String())
+		c.UserUUID = ds.UserUUID.String()
 	}
 	if ds.CreatedAt.Valid {
 		c.CreatedAt = api.NewOptDateTime(ds.CreatedAt.Time)

@@ -7,7 +7,6 @@ FileObject:
       description: Unique identifier for the file.
     storage_type:
       type: string
-      enum: [s3, postgres, hostfiles]
       description: The type of storage backend.
     storage_uuid:
       type: string

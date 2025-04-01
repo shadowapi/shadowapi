@@ -315,28 +315,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List pipelines */
+        /**
+         * List pipelines
+         * @description Get all pipelines for the current user
+         */
         get: operations["pipeline-list"];
         put?: never;
-        /** @description Create Pipeline */
+        /**
+         * Create a new pipeline
+         * @description Create a new pipeline for a datasource
+         */
         post: operations["pipeline-create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipeline/entry/types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Get Pipeline Entry Types */
-        get: operations["pipeline-entry-type-list"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -347,53 +336,28 @@ export interface paths {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description UUID of the pipeline */
+                uuid: string;
+            };
             cookie?: never;
         };
-        /** @description Get pipeline by UUID (optionally filter by user) */
+        /**
+         * Get pipeline by UUID
+         * @description Retrieve a specific pipeline by its UUID
+         */
         get: operations["pipeline-get"];
-        /** @description Update pipeline */
+        /**
+         * Update pipeline
+         * @description Update an existing pipeline
+         */
         put: operations["pipeline-update"];
         post?: never;
-        /** @description Delete a pipeline */
+        /**
+         * Delete pipeline
+         * @description Delete a specific pipeline by UUID
+         */
         delete: operations["pipeline-delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipeline/{uuid}/entry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Get all entries for a pipeline */
-        get: operations["pipeline-entry-list"];
-        put?: never;
-        /** @description Create a pipeline entry */
-        post: operations["pipeline-entry-create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipeline/{uuid}/entry/{entry_uuid}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Get pipeline entry */
-        get: operations["pipeline-entry-get"];
-        /** @description Update a pipeline entry */
-        put: operations["pipeline-entry-update"];
-        post?: never;
-        /** @description Delete pipeline entry */
-        delete: operations["pipeline-entry-delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -840,8 +804,8 @@ export interface components {
         Oauth2Client: components["schemas"]["oauth2_client"];
         Oauth2ClientToken: components["schemas"]["oauth2_client_token"];
         Pipeline: components["schemas"]["pipeline"];
-        PipelineEntry: components["schemas"]["pipeline_entry"];
-        PipelineEntryType: components["schemas"]["pipeline_entry_type"];
+        PipelineEdge: components["schemas"]["pipeline_edge"];
+        PipelineNode: components["schemas"]["pipeline_node"];
         Storage: components["schemas"]["storage"];
         StoragePostgres: components["schemas"]["storage_postgres"];
         StorageS3: components["schemas"]["storage_s3"];
@@ -855,11 +819,8 @@ export interface components {
         FileObject: {
             /** @description Unique identifier for the file. */
             uuid?: string;
-            /**
-             * @description The type of storage backend.
-             * @enum {string}
-             */
-            storage_type?: "s3" | "postgres" | "hostfiles";
+            /** @description The type of storage backend. */
+            storage_type?: string;
             /** @description Reference ID within the respective storage backend. */
             storage_uuid?: string;
             /** @description Original filename. */
@@ -933,11 +894,11 @@ export interface components {
             status?: number;
         };
         datasource: {
-            readonly uuid: string;
-            readonly user_uuid?: string;
-            name: string;
-            is_enabled: boolean;
+            readonly uuid?: string;
+            readonly user_uuid: string;
             type: string;
+            name: string;
+            is_enabled?: boolean;
             provider: string;
             /** Format: date-time */
             readonly created_at?: string;
@@ -1109,60 +1070,84 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
-        pipeline: {
-            uuid: string;
-            /** @description The user (or account) that owns this pipeline. */
-            readonly user_uuid?: string;
-            name: string;
-            flow: {
-                [key: string]: unknown;
-            };
-            /** Format: date-time */
-            created_at?: string;
-            /** Format: date-time */
-            updated_at?: string;
-        };
-        pipeline_entry_type: {
-            uuid: string;
-            category: string;
-            flow_type: string;
-            name: string;
-        };
-        pipeline_entry: {
-            uuid: string;
-            pipeline_uuid: string;
-            parent_uuid?: string;
+        pipeline_node: {
+            id: string;
+            /** @description Required. Ex datasource, extractor, filter, storage */
             type: string;
-            params: {
-                [key: string]: unknown;
+            position: {
+                x?: number;
+                y?: number;
             };
-            /** Format: date-time */
+            data: {
+                label?: string;
+                /** Format: uuid */
+                entry_uuid?: string;
+                /** @description TODO @reactima stricter types */
+                config?: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        pipeline_edge: {
+            id: string;
+            source: string;
+            target: string;
+            /** @enum {string} */
+            type?: "default" | "step";
+        };
+        pipeline: {
+            /**
+             * Format: uuid
+             * @description Unique identifier
+             */
+            uuid?: string;
+            /**
+             * Format: uuid
+             * @description Optional. Required for datasources based pipelines
+             */
+            datasource_uuid: string;
+            /** @description Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching contacts outside of pipelines */
+            type: string;
+            /** @description Pipeline name. Ex gmail_ilya@reactima.com */
+            name: string;
+            /** @description Whether this pipeline is currently active */
+            is_enabled?: boolean;
+            /** @description JSON representation of the flow (compatible with @xyflow/react) */
+            flow?: {
+                nodes?: components["schemas"]["pipeline_node"][];
+                edges?: components["schemas"]["pipeline_edge"][];
+            };
+            /**
+             * Format: date-time
+             * @description Timestamp when the policy was created.
+             */
             created_at?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the policy was last updated.
+             */
             updated_at?: string;
         };
         /** @description Data storage settings object. */
         storage: {
             /** @description Unique identifier for the storage object. */
             readonly uuid: string;
-            /** @description Unique identifier for the user associated with the storage object @reactima TODO rethink this */
-            readonly user_uuid?: string;
-            /** @description Name of the storage object. */
-            name?: string;
             /** @description Type of the storage object. */
             type: string;
+            /** @description Name of the storage object. */
+            name?: string;
             /** @description Indicates whether the storage object is enabled. */
             is_enabled: boolean;
-            /**
-             * Format: date-time
-             * @description The date and time when the storage object was last updated.
-             */
-            readonly updated_at?: string;
             /**
              * Format: date-time
              * @description The date and time when the storage object was created.
              */
             readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description The date and time when the storage object was last updated.
+             */
+            readonly updated_at?: string;
         };
         storage_postgres: {
             readonly uuid?: string;
@@ -1360,9 +1345,13 @@ export interface components {
             /** @description Unique identifier for the sync policy. */
             uuid?: string;
             /** @description Unique identifier for the user associated with the sync policy. */
-            user_uuid?: string;
-            /** @description The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin). */
-            service: string;
+            pipeline_uuid: string;
+            /** @description Policy type (email, telegram, whatsapp, linkedin) */
+            type: string;
+            /** @description Sync policy name */
+            name: string;
+            /** @description Whether this policy is currently active */
+            is_enabled?: boolean;
             /** @description List of blocked emails or contact identifiers. */
             blocklist?: string[];
             /** @description List of contacts to exclude from syncing. */
@@ -2654,6 +2643,8 @@ export interface operations {
     "pipeline-list": {
         parameters: {
             query?: {
+                /** @description Filter pipelines by datasource UUID */
+                datasource_uuid?: string;
                 /** @description Offset records. */
                 offset?: number;
                 /** @description Limit records. */
@@ -2665,14 +2656,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Pipelines retrieved successfully. */
+            /** @description List of pipelines */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description List of pipelines. */
                         pipelines: components["schemas"]["pipeline"][];
                     };
                 };
@@ -2697,21 +2687,12 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": {
-                    /** @description The user or account that owns this pipeline. */
-                    user_uuid?: string;
-                    /** @description Name of the pipeline. */
-                    name: string;
-                    /** @description Flow JSON to draw. */
-                    flow: {
-                        [key: string]: unknown;
-                    };
-                };
+                "application/json": components["schemas"]["pipeline"];
             };
         };
         responses: {
-            /** @description Pipeline created successfully. */
-            200: {
+            /** @description Pipeline created successfully */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2730,54 +2711,19 @@ export interface operations {
             };
         };
     };
-    "pipeline-entry-type-list": {
+    "pipeline-get": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Map with list of all categories of pipeline entry types */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description List of Pipeline Type Entries. */
-                        entries: components["schemas"]["pipeline_entry_type"][];
-                    };
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "pipeline-get": {
-        parameters: {
-            query?: {
-                /** @description (Optional) UUID of the user that owns the pipeline. */
-                user_uuid?: string;
-            };
-            header?: never;
             path: {
-                /** @description UUID of the pipeline. */
+                /** @description UUID of the pipeline */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Pipeline found */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2802,25 +2748,18 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description UUID of the pipeline. */
+                /** @description UUID of the pipeline */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": {
-                    /** @description Updated name of the pipeline. */
-                    name: string;
-                    /** @description Updated flow JSON. */
-                    flow: {
-                        [key: string]: unknown;
-                    };
-                };
+                "application/json": components["schemas"]["pipeline"];
             };
         };
         responses: {
-            /** @description Pipeline updated successfully. */
+            /** @description Pipeline updated successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2845,204 +2784,14 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description UUID of the pipeline. */
+                /** @description UUID of the pipeline */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Pipeline deleted successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "pipeline-entry-list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the pipeline. */
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["pipeline_entry"][];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "pipeline-entry-create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the pipeline. */
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description UUID of the new pipeline entry. */
-                    uuid: string;
-                    /** @description Pipeline UUID. */
-                    pipeline_uuid: string;
-                    /** @description Parent pipeline entry UUID (if any). */
-                    parent_uuid?: string;
-                    /** @description Type of pipeline entry. */
-                    type: string;
-                    /** @description Parameters for the pipeline entry. */
-                    params: {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description Pipeline entry created successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["pipeline_entry"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "pipeline-entry-get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the pipeline. */
-                uuid: string;
-                /** @description Entry UUID of the pipeline. */
-                entry_uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["pipeline_entry"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "pipeline-entry-update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the pipeline. */
-                uuid: string;
-                /** @description Entry UUID of the pipeline. */
-                entry_uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description Params of the Entry. */
-                    params: {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["pipeline_entry"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "pipeline-entry-delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the pipeline. */
-                uuid: string;
-                /** @description Entry UUID of the pipeline. */
-                entry_uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
+            /** @description Pipeline deleted successfully */
             200: {
                 headers: {
                     [name: string]: unknown;

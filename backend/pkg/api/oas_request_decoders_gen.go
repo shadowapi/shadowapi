@@ -1458,7 +1458,7 @@ func (s *Server) decodeOAuth2ClientUpdateRequest(r *http.Request) (
 }
 
 func (s *Server) decodePipelineCreateRequest(r *http.Request) (
-	req *PipelineCreateReq,
+	req *Pipeline,
 	close func() error,
 	rerr error,
 ) {
@@ -1497,7 +1497,7 @@ func (s *Server) decodePipelineCreateRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request PipelineCreateReq
+		var request Pipeline
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -1514,131 +1514,13 @@ func (s *Server) decodePipelineCreateRequest(r *http.Request) (
 			}
 			return req, close, err
 		}
-		return &request, close, nil
-	default:
-		return req, close, validate.InvalidContentType(ct)
-	}
-}
-
-func (s *Server) decodePipelineEntryCreateRequest(r *http.Request) (
-	req *PipelineEntryCreateReq,
-	close func() error,
-	rerr error,
-) {
-	var closers []func() error
-	close = func() error {
-		var merr error
-		// Close in reverse order, to match defer behavior.
-		for i := len(closers) - 1; i >= 0; i-- {
-			c := closers[i]
-			merr = multierr.Append(merr, c())
-		}
-		return merr
-	}
-	defer func() {
-		if rerr != nil {
-			rerr = multierr.Append(rerr, close())
-		}
-	}()
-	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if err != nil {
-		return req, close, errors.Wrap(err, "parse media type")
-	}
-	switch {
-	case ct == "application/json":
-		if r.ContentLength == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-		buf, err := io.ReadAll(r.Body)
-		if err != nil {
-			return req, close, err
-		}
-
-		if len(buf) == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-
-		d := jx.DecodeBytes(buf)
-
-		var request PipelineEntryCreateReq
 		if err := func() error {
-			if err := request.Decode(d); err != nil {
+			if err := request.Validate(); err != nil {
 				return err
-			}
-			if err := d.Skip(); err != io.EOF {
-				return errors.New("unexpected trailing data")
 			}
 			return nil
 		}(); err != nil {
-			err = &ogenerrors.DecodeBodyError{
-				ContentType: ct,
-				Body:        buf,
-				Err:         err,
-			}
-			return req, close, err
-		}
-		return &request, close, nil
-	default:
-		return req, close, validate.InvalidContentType(ct)
-	}
-}
-
-func (s *Server) decodePipelineEntryUpdateRequest(r *http.Request) (
-	req *PipelineEntryUpdateReq,
-	close func() error,
-	rerr error,
-) {
-	var closers []func() error
-	close = func() error {
-		var merr error
-		// Close in reverse order, to match defer behavior.
-		for i := len(closers) - 1; i >= 0; i-- {
-			c := closers[i]
-			merr = multierr.Append(merr, c())
-		}
-		return merr
-	}
-	defer func() {
-		if rerr != nil {
-			rerr = multierr.Append(rerr, close())
-		}
-	}()
-	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if err != nil {
-		return req, close, errors.Wrap(err, "parse media type")
-	}
-	switch {
-	case ct == "application/json":
-		if r.ContentLength == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-		buf, err := io.ReadAll(r.Body)
-		if err != nil {
-			return req, close, err
-		}
-
-		if len(buf) == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-
-		d := jx.DecodeBytes(buf)
-
-		var request PipelineEntryUpdateReq
-		if err := func() error {
-			if err := request.Decode(d); err != nil {
-				return err
-			}
-			if err := d.Skip(); err != io.EOF {
-				return errors.New("unexpected trailing data")
-			}
-			return nil
-		}(); err != nil {
-			err = &ogenerrors.DecodeBodyError{
-				ContentType: ct,
-				Body:        buf,
-				Err:         err,
-			}
-			return req, close, err
+			return req, close, errors.Wrap(err, "validate")
 		}
 		return &request, close, nil
 	default:
@@ -1647,7 +1529,7 @@ func (s *Server) decodePipelineEntryUpdateRequest(r *http.Request) (
 }
 
 func (s *Server) decodePipelineUpdateRequest(r *http.Request) (
-	req *PipelineUpdateReq,
+	req *Pipeline,
 	close func() error,
 	rerr error,
 ) {
@@ -1686,7 +1568,7 @@ func (s *Server) decodePipelineUpdateRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request PipelineUpdateReq
+		var request Pipeline
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -1702,6 +1584,14 @@ func (s *Server) decodePipelineUpdateRequest(r *http.Request) (
 				Err:         err,
 			}
 			return req, close, err
+		}
+		if err := func() error {
+			if err := request.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return req, close, errors.Wrap(err, "validate")
 		}
 		return &request, close, nil
 	default:

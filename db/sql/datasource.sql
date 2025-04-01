@@ -10,13 +10,13 @@ INSERT INTO datasource (
     created_at,
     updated_at
 ) VALUES (
-             @uuid,
-             @user_uuid,
-             @name,
-             @type,
-             @is_enabled,
-             @provider,
-             @settings,
+             sqlc.arg('uuid')::uuid,
+             sqlc.arg('user_uuid')::uuid,
+             NULLIF(sqlc.arg('name'), ''),
+             NULLIF(sqlc.arg('type'), ''),
+             sqlc.arg('is_enabled')::boolean,
+             sqlc.arg('provider'),
+             sqlc.arg('settings'),
              NOW(),
              NOW()
          ) RETURNING *;
@@ -25,16 +25,15 @@ INSERT INTO datasource (
 SELECT
     sqlc.embed(datasource)
 FROM datasource
-WHERE datasource.uuid = @uuid
-LIMIT 1;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: ListDatasources :many
 SELECT
     sqlc.embed(datasource)
 FROM datasource
 ORDER BY created_at DESC
-LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
-    OFFSET @offset_records::int;
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
 
 -- name: GetDatasources :many
 WITH filtered_datasource AS (
@@ -66,15 +65,14 @@ LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 -- name: UpdateDatasource :exec
 UPDATE datasource
 SET
-    user_uuid  = @user_uuid,
-    "type"     = @type,
-    name       = @name,
-    is_enabled = @is_enabled,
-    provider   = @provider,
-    settings   = @settings,
+    user_uuid  = sqlc.arg('user_uuid')::uuid,
+    "type"     = NULLIF(sqlc.arg('type'), ''),
+    name       =  NULLIF(sqlc.arg('name'), ''),
+    is_enabled = sqlc.arg('is_enabled')::boolean,
+    provider   = sqlc.arg('provider'),
+    settings   = sqlc.arg('settings'),
     updated_at = NOW()
-WHERE uuid = @uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: DeleteDatasource :exec
-DELETE FROM datasource
-WHERE uuid = @uuid;
+DELETE FROM datasource WHERE uuid = sqlc.arg('uuid')::uuid;

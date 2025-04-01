@@ -23,10 +23,14 @@ func (h *Handler) DatasourceTelegramCreate(ctx context.Context, req *api.Datasou
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 	isEnabled := req.IsEnabled.Or(false)
-
+	pgUserUUID, err := ConvertStringToPgUUID(req.UserUUID)
+	if err != nil {
+		log.Error("failed to convert user uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
+	}
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
-		UUID:      dsUUID,
-		UserUUID:  ConvertUUID(req.UserUUID),
+		UUID:      pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true},
+		UserUUID:  pgUserUUID,
 		Name:      req.Name,
 		IsEnabled: isEnabled,
 		Provider:  string(req.Provider),
@@ -49,7 +53,7 @@ func (h *Handler) DatasourceTelegramDelete(ctx context.Context, params api.Datas
 		log.Error("failed to parse datasource uuid", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	if err := query.New(h.dbp).DeleteDatasource(ctx, dsUUID); err != nil {
+	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true}); err != nil {
 		log.Error("failed to delete datasource", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
 	}
@@ -103,9 +107,15 @@ func (h *Handler) DatasourceTelegramUpdate(ctx context.Context, req *api.Datasou
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
+		pgUserUUID, err := ConvertStringToPgUUID(req.UserUUID)
+		if err != nil {
+			log.Error("failed to convert user uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
+		}
+
 		if err := query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
-			UUID:      dsUUID,
-			UserUUID:  ConvertUUID(req.UserUUID),
+			UUID:      pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true},
+			UserUUID:  pgUserUUID,
 			Name:      req.Name,
 			IsEnabled: isEnabled,
 			Provider:  string(req.Provider),

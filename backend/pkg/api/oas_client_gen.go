@@ -337,70 +337,34 @@ type Invoker interface {
 	OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error)
 	// PipelineCreate invokes pipeline-create operation.
 	//
-	// Create Pipeline.
+	// Create a new pipeline for a datasource.
 	//
 	// POST /pipeline
-	PipelineCreate(ctx context.Context, request *PipelineCreateReq) (*Pipeline, error)
+	PipelineCreate(ctx context.Context, request *Pipeline) (*Pipeline, error)
 	// PipelineDelete invokes pipeline-delete operation.
 	//
-	// Delete a pipeline.
+	// Delete a specific pipeline by UUID.
 	//
 	// DELETE /pipeline/{uuid}
 	PipelineDelete(ctx context.Context, params PipelineDeleteParams) error
-	// PipelineEntryCreate invokes pipeline-entry-create operation.
-	//
-	// Create a pipeline entry.
-	//
-	// POST /pipeline/{uuid}/entry
-	PipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (*PipelineEntry, error)
-	// PipelineEntryDelete invokes pipeline-entry-delete operation.
-	//
-	// Delete pipeline entry.
-	//
-	// DELETE /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error
-	// PipelineEntryGet invokes pipeline-entry-get operation.
-	//
-	// Get pipeline entry.
-	//
-	// GET /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error)
-	// PipelineEntryList invokes pipeline-entry-list operation.
-	//
-	// Get all entries for a pipeline.
-	//
-	// GET /pipeline/{uuid}/entry
-	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error)
-	// PipelineEntryTypeList invokes pipeline-entry-type-list operation.
-	//
-	// Get Pipeline Entry Types.
-	//
-	// GET /pipeline/entry/types
-	PipelineEntryTypeList(ctx context.Context) (*PipelineEntryTypeListOK, error)
-	// PipelineEntryUpdate invokes pipeline-entry-update operation.
-	//
-	// Update a pipeline entry.
-	//
-	// PUT /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error)
 	// PipelineGet invokes pipeline-get operation.
 	//
-	// Get pipeline by UUID (optionally filter by user).
+	// Retrieve a specific pipeline by its UUID.
 	//
 	// GET /pipeline/{uuid}
 	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList invokes pipeline-list operation.
 	//
-	// List pipelines.
+	// Get all pipelines for the current user.
 	//
 	// GET /pipeline
 	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)
 	// PipelineUpdate invokes pipeline-update operation.
 	//
-	// Update pipeline.
+	// Update an existing pipeline.
 	//
 	// PUT /pipeline/{uuid}
-	PipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error)
+	PipelineUpdate(ctx context.Context, request *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
 	// StorageHostfilesCreate invokes storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.
@@ -7425,15 +7389,15 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 
 // PipelineCreate invokes pipeline-create operation.
 //
-// Create Pipeline.
+// Create a new pipeline for a datasource.
 //
 // POST /pipeline
-func (c *Client) PipelineCreate(ctx context.Context, request *PipelineCreateReq) (*Pipeline, error) {
+func (c *Client) PipelineCreate(ctx context.Context, request *Pipeline) (*Pipeline, error) {
 	res, err := c.sendPipelineCreate(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendPipelineCreate(ctx context.Context, request *PipelineCreateReq) (res *Pipeline, err error) {
+func (c *Client) sendPipelineCreate(ctx context.Context, request *Pipeline) (res *Pipeline, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-create"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -7545,7 +7509,7 @@ func (c *Client) sendPipelineCreate(ctx context.Context, request *PipelineCreate
 
 // PipelineDelete invokes pipeline-delete operation.
 //
-// Delete a pipeline.
+// Delete a specific pipeline by UUID.
 //
 // DELETE /pipeline/{uuid}
 func (c *Client) PipelineDelete(ctx context.Context, params PipelineDeleteParams) error {
@@ -7599,7 +7563,7 @@ func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeletePa
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -7678,866 +7642,9 @@ func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeletePa
 	return result, nil
 }
 
-// PipelineEntryCreate invokes pipeline-entry-create operation.
-//
-// Create a pipeline entry.
-//
-// POST /pipeline/{uuid}/entry
-func (c *Client) PipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (*PipelineEntry, error) {
-	res, err := c.sendPipelineEntryCreate(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendPipelineEntryCreate(ctx context.Context, request *PipelineEntryCreateReq, params PipelineEntryCreateParams) (res *PipelineEntry, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("pipeline-entry-create"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/pipeline/{uuid}/entry"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PipelineEntryCreateOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/pipeline/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/entry"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodePipelineEntryCreateRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineEntryCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineEntryCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePipelineEntryCreateResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// PipelineEntryDelete invokes pipeline-entry-delete operation.
-//
-// Delete pipeline entry.
-//
-// DELETE /pipeline/{uuid}/entry/{entry_uuid}
-func (c *Client) PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error {
-	_, err := c.sendPipelineEntryDelete(ctx, params)
-	return err
-}
-
-func (c *Client) sendPipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) (res *PipelineEntryDeleteOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("pipeline-entry-delete"),
-		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/pipeline/{uuid}/entry/{entry_uuid}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PipelineEntryDeleteOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/pipeline/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/entry/"
-	{
-		// Encode "entry_uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "entry_uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.EntryUUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "DELETE", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineEntryDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineEntryDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePipelineEntryDeleteResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// PipelineEntryGet invokes pipeline-entry-get operation.
-//
-// Get pipeline entry.
-//
-// GET /pipeline/{uuid}/entry/{entry_uuid}
-func (c *Client) PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error) {
-	res, err := c.sendPipelineEntryGet(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendPipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (res *PipelineEntry, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("pipeline-entry-get"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/pipeline/{uuid}/entry/{entry_uuid}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PipelineEntryGetOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/pipeline/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/entry/"
-	{
-		// Encode "entry_uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "entry_uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.EntryUUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineEntryGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineEntryGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePipelineEntryGetResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// PipelineEntryList invokes pipeline-entry-list operation.
-//
-// Get all entries for a pipeline.
-//
-// GET /pipeline/{uuid}/entry
-func (c *Client) PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error) {
-	res, err := c.sendPipelineEntryList(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendPipelineEntryList(ctx context.Context, params PipelineEntryListParams) (res []PipelineEntry, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("pipeline-entry-list"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/pipeline/{uuid}/entry"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PipelineEntryListOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/pipeline/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/entry"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineEntryListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineEntryListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePipelineEntryListResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// PipelineEntryTypeList invokes pipeline-entry-type-list operation.
-//
-// Get Pipeline Entry Types.
-//
-// GET /pipeline/entry/types
-func (c *Client) PipelineEntryTypeList(ctx context.Context) (*PipelineEntryTypeListOK, error) {
-	res, err := c.sendPipelineEntryTypeList(ctx)
-	return res, err
-}
-
-func (c *Client) sendPipelineEntryTypeList(ctx context.Context) (res *PipelineEntryTypeListOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("pipeline-entry-type-list"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/pipeline/entry/types"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PipelineEntryTypeListOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/pipeline/entry/types"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineEntryTypeListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineEntryTypeListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePipelineEntryTypeListResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// PipelineEntryUpdate invokes pipeline-entry-update operation.
-//
-// Update a pipeline entry.
-//
-// PUT /pipeline/{uuid}/entry/{entry_uuid}
-func (c *Client) PipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error) {
-	res, err := c.sendPipelineEntryUpdate(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendPipelineEntryUpdate(ctx context.Context, request *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (res *PipelineEntry, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("pipeline-entry-update"),
-		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/pipeline/{uuid}/entry/{entry_uuid}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PipelineEntryUpdateOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/pipeline/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/entry/"
-	{
-		// Encode "entry_uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "entry_uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.EntryUUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodePipelineEntryUpdateRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineEntryUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineEntryUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePipelineEntryUpdateResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // PipelineGet invokes pipeline-get operation.
 //
-// Get pipeline by UUID (optionally filter by user).
+// Retrieve a specific pipeline by its UUID.
 //
 // GET /pipeline/{uuid}
 func (c *Client) PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error) {
@@ -8591,7 +7698,7 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -8602,27 +7709,6 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "user_uuid" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "user_uuid",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.UserUUID.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -8693,7 +7779,7 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 
 // PipelineList invokes pipeline-list operation.
 //
-// List pipelines.
+// Get all pipelines for the current user.
 //
 // GET /pipeline
 func (c *Client) PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error) {
@@ -8744,11 +7830,28 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
+		// Encode "datasource_uuid" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "datasource_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.DatasourceUUID.Get(); ok {
+				return e.EncodeValue(conv.UUIDToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "offset" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "offset",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
@@ -8765,7 +7868,7 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
@@ -8848,15 +7951,15 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 
 // PipelineUpdate invokes pipeline-update operation.
 //
-// Update pipeline.
+// Update an existing pipeline.
 //
 // PUT /pipeline/{uuid}
-func (c *Client) PipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error) {
+func (c *Client) PipelineUpdate(ctx context.Context, request *Pipeline, params PipelineUpdateParams) (*Pipeline, error) {
 	res, err := c.sendPipelineUpdate(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendPipelineUpdate(ctx context.Context, request *PipelineUpdateReq, params PipelineUpdateParams) (res *Pipeline, err error) {
+func (c *Client) sendPipelineUpdate(ctx context.Context, request *Pipeline, params PipelineUpdateParams) (res *Pipeline, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("pipeline-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
@@ -8902,7 +8005,7 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *PipelineUpdate
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -33,7 +34,7 @@ func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePos
 	}
 
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:      storageUUID,
+		UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
 		Name:      req.Name,
 		Type:      "postgres",
 		IsEnabled: isEnabled,
@@ -59,7 +60,7 @@ func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StorageP
 		return ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	if err := query.New(h.dbp).DeleteStorage(ctx, storageUUID); err != nil {
+	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true}); err != nil {
 		log.Error("failed to delete storage", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete storage"))
 	}
@@ -77,7 +78,7 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 	}
 	fmt.Println("id", id)
 
-	storages, err := query.New(h.dbp).GetStorage(ctx, [16]byte(id.Bytes()))
+	storages, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(id), Valid: true})
 	if err != nil {
 		log.Error("failed to get storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -96,7 +97,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StoragePostgres, error) {
-		storage, err := query.New(tx).GetStorage(ctx, [16]byte(storageUUID.Bytes()))
+		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -107,7 +108,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 		if req.IsEnabled.IsSet() {
 			isEnabled = req.IsEnabled.Value
 		} else {
-			isEnabled = storage.IsEnabled
+			isEnabled = storage.Storage.IsEnabled
 		}
 
 		newSettings, err := json.Marshal(req)
@@ -117,7 +118,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 		}
 
 		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      storageUUID,
+			UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
 			Type:      "postgres",
 			Name:      req.Name,
 			IsEnabled: isEnabled,
@@ -129,4 +130,15 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 
 		return h.StoragePostgresGet(ctx, api.StoragePostgresGetParams{UUID: params.UUID})
 	})
+}
+
+func QToStoragePostgres(row query.GetStorageRow) (*api.StoragePostgres, error) {
+	var s api.StoragePostgres
+	if err := json.Unmarshal(row.Storage.Settings, &s); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings", err.Error()))
+	}
+	s.UUID = api.NewOptString(row.Storage.UUID.String())
+	s.Name = row.Storage.Name
+	s.IsEnabled = api.NewOptBool(row.Storage.IsEnabled)
+	return &s, nil
 }

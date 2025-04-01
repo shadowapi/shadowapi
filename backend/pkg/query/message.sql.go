@@ -8,7 +8,6 @@ package query
 import (
 	"context"
 
-	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -35,11 +34,11 @@ INSERT INTO message (
     created_at,
     updated_at
 ) VALUES (
-             $1,
-             $2,
-             $3,
-             $4,
-             $5,
+             $1::uuid,
+             NULLIF($2, '')::uuid,
+             NULLIF($3, ''),
+             NULLIF($4, '')::uuid,
+             NULLIF($5, '')::uuid,
              $6,
              $7,
              $8,
@@ -48,22 +47,22 @@ INSERT INTO message (
              $11,
              $12,
              $13,
-             $14,
-             $15,
-             $16,
+             NULLIF($14, '')::uuid,
+             NULLIF($15, '')::uuid,
+             NULLIF($16, '')::uuid,
              $17,
              $18,
              NOW(),
-             NULL
+             NOW()
          ) RETURNING uuid, source, type, chat_uuid, thread_uuid, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at
 `
 
 type CreateMessageParams struct {
-	UUID                   uuid.UUID   `json:"uuid"`
-	Source                 string      `json:"source"`
-	Type                   string      `json:"type"`
-	ChatUuid               *uuid.UUID  `json:"chat_uuid"`
-	ThreadUuid             *uuid.UUID  `json:"thread_uuid"`
+	UUID                   pgtype.UUID `json:"uuid"`
+	Source                 interface{} `json:"source"`
+	Type                   interface{} `json:"type"`
+	ChatUuid               interface{} `json:"chat_uuid"`
+	ThreadUuid             interface{} `json:"thread_uuid"`
 	Sender                 string      `json:"sender"`
 	Recipients             []string    `json:"recipients"`
 	Subject                pgtype.Text `json:"subject"`
@@ -72,9 +71,9 @@ type CreateMessageParams struct {
 	Reactions              []byte      `json:"reactions"`
 	Attachments            []byte      `json:"attachments"`
 	ForwardFrom            pgtype.Text `json:"forward_from"`
-	ReplyToMessageUuid     *uuid.UUID  `json:"reply_to_message_uuid"`
-	ForwardFromChatUuid    *uuid.UUID  `json:"forward_from_chat_uuid"`
-	ForwardFromMessageUuid *uuid.UUID  `json:"forward_from_message_uuid"`
+	ReplyToMessageUuid     interface{} `json:"reply_to_message_uuid"`
+	ForwardFromChatUuid    interface{} `json:"forward_from_chat_uuid"`
+	ForwardFromMessageUuid interface{} `json:"forward_from_message_uuid"`
 	ForwardMeta            []byte      `json:"forward_meta"`
 	Meta                   []byte      `json:"meta"`
 }
@@ -127,12 +126,11 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 }
 
 const deleteMessage = `-- name: DeleteMessage :exec
-DELETE FROM message
-WHERE uuid = $1
+DELETE FROM message WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeleteMessage(ctx context.Context, argUuid uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteMessage, argUuid)
+func (q *Queries) DeleteMessage(ctx context.Context, uuid pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteMessage, uuid)
 	return err
 }
 
@@ -140,13 +138,11 @@ const getMessage = `-- name: GetMessage :one
 SELECT
     uuid, source, type, chat_uuid, thread_uuid, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at
 FROM message
-WHERE
-    uuid = $1
-LIMIT 1
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetMessage(ctx context.Context, argUuid uuid.UUID) (Message, error) {
-	row := q.db.QueryRow(ctx, getMessage, argUuid)
+func (q *Queries) GetMessage(ctx context.Context, uuid pgtype.UUID) (Message, error) {
+	row := q.db.QueryRow(ctx, getMessage, uuid)
 	var i Message
 	err := row.Scan(
 		&i.UUID,
@@ -178,17 +174,17 @@ SELECT
     uuid, source, type, chat_uuid, thread_uuid, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at
 FROM message
 ORDER BY created_at DESC
-LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-    OFFSET $1::int
+LIMIT NULLIF($2::int, 0)
+    OFFSET $1
 `
 
 type ListMessagesParams struct {
-	OffsetRecords int32 `json:"offset_records"`
-	LimitRecords  int32 `json:"limit_records"`
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
 func (q *Queries) ListMessages(ctx context.Context, arg ListMessagesParams) ([]Message, error) {
-	rows, err := q.db.Query(ctx, listMessages, arg.OffsetRecords, arg.LimitRecords)
+	rows, err := q.db.Query(ctx, listMessages, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -231,32 +227,32 @@ func (q *Queries) ListMessages(ctx context.Context, arg ListMessagesParams) ([]M
 const updateMessage = `-- name: UpdateMessage :exec
 UPDATE message
 SET
-    source                    = COALESCE($1, source),
-    type                      = COALESCE($2, type),
-    chat_uuid                 = COALESCE($3, chat_uuid),
-    thread_uuid               = COALESCE($4, thread_uuid),
-    sender                    = COALESCE($5, sender),
-    recipients                = COALESCE($6, recipients),
-    subject                   = COALESCE($7, subject),
-    body                      = COALESCE($8, body),
-    body_parsed               = COALESCE($9, body_parsed),
-    reactions                 = COALESCE($10, reactions),
-    attachments               = COALESCE($11, attachments),
-    forward_from              = COALESCE($12, forward_from),
-    reply_to_message_uuid     = COALESCE($13, reply_to_message_uuid),
-    forward_from_chat_uuid    = COALESCE($14, forward_from_chat_uuid),
-    forward_from_message_uuid = COALESCE($15, forward_from_message_uuid),
-    forward_meta              = COALESCE($16, forward_meta),
-    meta                      = COALESCE($17, meta),
-    updated_at                = NOW()
-WHERE uuid = $18
+    source                    = NULLIF($1, '')::uuid,
+    type                      = NULLIF($2, ''),
+    chat_uuid                 = NULLIF($3, '')::uuid,
+    thread_uuid               = NULLIF($4, '')::uuid,
+    sender                    =  $5,
+    recipients                = $6,
+    subject                   = $7,
+    body                      = $8,
+    body_parsed               =  $9,
+    reactions                 = $10,
+    attachments               =  $11,
+    forward_from              = $12,
+    reply_to_message_uuid     = NULLIF($13, '')::uuid,
+    forward_from_chat_uuid    = NULLIF($14, '')::uuid,
+    forward_from_message_uuid = NULLIF($15, '')::uuid,
+    forward_meta              = $16,
+    meta                      = $17,
+    updated_at = NOW()
+WHERE uuid = $18::uuid
 `
 
 type UpdateMessageParams struct {
-	Source                 string      `json:"source"`
-	Type                   string      `json:"type"`
-	ChatUuid               *uuid.UUID  `json:"chat_uuid"`
-	ThreadUuid             *uuid.UUID  `json:"thread_uuid"`
+	Source                 interface{} `json:"source"`
+	Type                   interface{} `json:"type"`
+	ChatUuid               interface{} `json:"chat_uuid"`
+	ThreadUuid             interface{} `json:"thread_uuid"`
 	Sender                 string      `json:"sender"`
 	Recipients             []string    `json:"recipients"`
 	Subject                pgtype.Text `json:"subject"`
@@ -265,12 +261,12 @@ type UpdateMessageParams struct {
 	Reactions              []byte      `json:"reactions"`
 	Attachments            []byte      `json:"attachments"`
 	ForwardFrom            pgtype.Text `json:"forward_from"`
-	ReplyToMessageUuid     *uuid.UUID  `json:"reply_to_message_uuid"`
-	ForwardFromChatUuid    *uuid.UUID  `json:"forward_from_chat_uuid"`
-	ForwardFromMessageUuid *uuid.UUID  `json:"forward_from_message_uuid"`
+	ReplyToMessageUuid     interface{} `json:"reply_to_message_uuid"`
+	ForwardFromChatUuid    interface{} `json:"forward_from_chat_uuid"`
+	ForwardFromMessageUuid interface{} `json:"forward_from_message_uuid"`
 	ForwardMeta            []byte      `json:"forward_meta"`
 	Meta                   []byte      `json:"meta"`
-	UUID                   uuid.UUID   `json:"uuid"`
+	UUID                   pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateMessage(ctx context.Context, arg UpdateMessageParams) error {

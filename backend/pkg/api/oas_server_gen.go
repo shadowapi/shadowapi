@@ -316,70 +316,34 @@ type Handler interface {
 	OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error)
 	// PipelineCreate implements pipeline-create operation.
 	//
-	// Create Pipeline.
+	// Create a new pipeline for a datasource.
 	//
 	// POST /pipeline
-	PipelineCreate(ctx context.Context, req *PipelineCreateReq) (*Pipeline, error)
+	PipelineCreate(ctx context.Context, req *Pipeline) (*Pipeline, error)
 	// PipelineDelete implements pipeline-delete operation.
 	//
-	// Delete a pipeline.
+	// Delete a specific pipeline by UUID.
 	//
 	// DELETE /pipeline/{uuid}
 	PipelineDelete(ctx context.Context, params PipelineDeleteParams) error
-	// PipelineEntryCreate implements pipeline-entry-create operation.
-	//
-	// Create a pipeline entry.
-	//
-	// POST /pipeline/{uuid}/entry
-	PipelineEntryCreate(ctx context.Context, req *PipelineEntryCreateReq, params PipelineEntryCreateParams) (*PipelineEntry, error)
-	// PipelineEntryDelete implements pipeline-entry-delete operation.
-	//
-	// Delete pipeline entry.
-	//
-	// DELETE /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error
-	// PipelineEntryGet implements pipeline-entry-get operation.
-	//
-	// Get pipeline entry.
-	//
-	// GET /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (*PipelineEntry, error)
-	// PipelineEntryList implements pipeline-entry-list operation.
-	//
-	// Get all entries for a pipeline.
-	//
-	// GET /pipeline/{uuid}/entry
-	PipelineEntryList(ctx context.Context, params PipelineEntryListParams) ([]PipelineEntry, error)
-	// PipelineEntryTypeList implements pipeline-entry-type-list operation.
-	//
-	// Get Pipeline Entry Types.
-	//
-	// GET /pipeline/entry/types
-	PipelineEntryTypeList(ctx context.Context) (*PipelineEntryTypeListOK, error)
-	// PipelineEntryUpdate implements pipeline-entry-update operation.
-	//
-	// Update a pipeline entry.
-	//
-	// PUT /pipeline/{uuid}/entry/{entry_uuid}
-	PipelineEntryUpdate(ctx context.Context, req *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (*PipelineEntry, error)
 	// PipelineGet implements pipeline-get operation.
 	//
-	// Get pipeline by UUID (optionally filter by user).
+	// Retrieve a specific pipeline by its UUID.
 	//
 	// GET /pipeline/{uuid}
 	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList implements pipeline-list operation.
 	//
-	// List pipelines.
+	// Get all pipelines for the current user.
 	//
 	// GET /pipeline
 	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)
 	// PipelineUpdate implements pipeline-update operation.
 	//
-	// Update pipeline.
+	// Update an existing pipeline.
 	//
 	// PUT /pipeline/{uuid}
-	PipelineUpdate(ctx context.Context, req *PipelineUpdateReq, params PipelineUpdateParams) (*Pipeline, error)
+	PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
 	// StorageHostfilesCreate implements storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.

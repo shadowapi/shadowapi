@@ -1,0 +1,31 @@
+type: object
+properties:
+  id:
+    type: string
+  type:
+    description: Required. Ex datasource, extractor, filter, storage
+    type: string
+  position:
+    type: object
+    properties:
+      x:
+        type: number
+      y:
+        type: number
+  data:
+    type: object
+    properties:
+      label:
+        type: string
+      entry_uuid:
+        type: string
+        format: uuid
+      config:
+        description: TODO @reactima stricter types
+        type: object
+        additionalProperties: true
+required:
+  - id
+  - type
+  - position
+  - data

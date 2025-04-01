@@ -11,44 +11,45 @@ INSERT INTO "user" (
     created_at,
     updated_at
 ) VALUES (
-             @uuid,
-             @email,
-             @password,
-             @first_name,
-             @last_name,
-             @is_enabled,
-             @is_admin,
-             @meta,
+             sqlc.arg('uuid')::uuid,
+             sqlc.arg('email'),
+             sqlc.arg('password'),
+             sqlc.arg('first_name'),
+             sqlc.arg('last_name'),
+             sqlc.arg('is_enabled')::boolean,
+             sqlc.arg('is_admin')::boolean,
+             sqlc.arg('meta'),
              NOW(),
              NULL
          ) RETURNING *;
 
 -- name: GetUser :one
-SELECT *
+SELECT
+    *
 FROM "user"
-WHERE uuid = @uuid
-LIMIT 1;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: ListUsers :many
-SELECT *
+SELECT
+   *
 FROM "user"
 ORDER BY created_at DESC
-LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
-    OFFSET @offset_records::int;
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
 
 -- name: UpdateUser :exec
 UPDATE "user"
 SET
-    email = COALESCE(@email, email),
-    password = COALESCE(@password, password),
-    first_name = COALESCE(@first_name, first_name),
-    last_name = COALESCE(@last_name, last_name),
-    is_enabled = COALESCE(@is_enabled, is_enabled),
-    is_admin = COALESCE(@is_admin, is_admin),
-    meta = COALESCE(@meta, meta),
+    email = sqlc.arg('email'),
+    password = sqlc.arg('password'),
+    first_name = sqlc.arg('first_name'),
+    last_name = sqlc.arg('last_name'),
+    is_enabled =  sqlc.arg('is_enabled')::boolean,
+    is_admin = sqlc.arg('is_admin')::boolean,
+    meta = sqlc.arg('meta'),
     updated_at = NOW()
-WHERE uuid = @uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: DeleteUser :exec
 DELETE FROM "user"
-WHERE uuid = @uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;

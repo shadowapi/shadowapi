@@ -24,11 +24,11 @@ INSERT INTO datasource (
     created_at,
     updated_at
 ) VALUES (
-             $1,
-             $2,
-             $3,
-             $4,
-             $5,
+             $1::uuid,
+             $2::uuid,
+             NULLIF($3, ''),
+             NULLIF($4, ''),
+             $5::boolean,
              $6,
              $7,
              NOW(),
@@ -37,13 +37,13 @@ INSERT INTO datasource (
 `
 
 type CreateDatasourceParams struct {
-	UUID      uuid.UUID  `json:"uuid"`
-	UserUUID  *uuid.UUID `json:"user_uuid"`
-	Name      string     `json:"name"`
-	Type      string     `json:"type"`
-	IsEnabled bool       `json:"is_enabled"`
-	Provider  string     `json:"provider"`
-	Settings  []byte     `json:"settings"`
+	UUID      pgtype.UUID `json:"uuid"`
+	UserUUID  pgtype.UUID `json:"user_uuid"`
+	Name      interface{} `json:"name"`
+	Type      interface{} `json:"type"`
+	IsEnabled bool        `json:"is_enabled"`
+	Provider  string      `json:"provider"`
+	Settings  []byte      `json:"settings"`
 }
 
 func (q *Queries) CreateDatasource(ctx context.Context, arg CreateDatasourceParams) (Datasource, error) {
@@ -72,11 +72,10 @@ func (q *Queries) CreateDatasource(ctx context.Context, arg CreateDatasourcePara
 }
 
 const deleteDatasource = `-- name: DeleteDatasource :exec
-DELETE FROM datasource
-WHERE uuid = $1
+DELETE FROM datasource WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeleteDatasource(ctx context.Context, argUuid uuid.UUID) error {
+func (q *Queries) DeleteDatasource(ctx context.Context, argUuid pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteDatasource, argUuid)
 	return err
 }
@@ -85,15 +84,14 @@ const getDatasource = `-- name: GetDatasource :one
 SELECT
     datasource.uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at
 FROM datasource
-WHERE datasource.uuid = $1
-LIMIT 1
+WHERE uuid = $1::uuid
 `
 
 type GetDatasourceRow struct {
 	Datasource Datasource `json:"datasource"`
 }
 
-func (q *Queries) GetDatasource(ctx context.Context, argUuid uuid.UUID) (GetDatasourceRow, error) {
+func (q *Queries) GetDatasource(ctx context.Context, argUuid pgtype.UUID) (GetDatasourceRow, error) {
 	row := q.db.QueryRow(ctx, getDatasource, argUuid)
 	var i GetDatasourceRow
 	err := row.Scan(
@@ -211,13 +209,13 @@ SELECT
     datasource.uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at
 FROM datasource
 ORDER BY created_at DESC
-LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-    OFFSET $1::int
+LIMIT NULLIF($2::int, 0)
+    OFFSET $1
 `
 
 type ListDatasourcesParams struct {
-	OffsetRecords int32 `json:"offset_records"`
-	LimitRecords  int32 `json:"limit_records"`
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
 type ListDatasourcesRow struct {
@@ -225,7 +223,7 @@ type ListDatasourcesRow struct {
 }
 
 func (q *Queries) ListDatasources(ctx context.Context, arg ListDatasourcesParams) ([]ListDatasourcesRow, error) {
-	rows, err := q.db.Query(ctx, listDatasources, arg.OffsetRecords, arg.LimitRecords)
+	rows, err := q.db.Query(ctx, listDatasources, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -257,24 +255,24 @@ func (q *Queries) ListDatasources(ctx context.Context, arg ListDatasourcesParams
 const updateDatasource = `-- name: UpdateDatasource :exec
 UPDATE datasource
 SET
-    user_uuid  = $1,
-    "type"     = $2,
-    name       = $3,
-    is_enabled = $4,
+    user_uuid  = $1::uuid,
+    "type"     = NULLIF($2, ''),
+    name       =  NULLIF($3, ''),
+    is_enabled = $4::boolean,
     provider   = $5,
     settings   = $6,
     updated_at = NOW()
-WHERE uuid = $7
+WHERE uuid = $7::uuid
 `
 
 type UpdateDatasourceParams struct {
-	UserUUID  *uuid.UUID `json:"user_uuid"`
-	Type      string     `json:"type"`
-	Name      string     `json:"name"`
-	IsEnabled bool       `json:"is_enabled"`
-	Provider  string     `json:"provider"`
-	Settings  []byte     `json:"settings"`
-	UUID      uuid.UUID  `json:"uuid"`
+	UserUUID  pgtype.UUID `json:"user_uuid"`
+	Type      interface{} `json:"type"`
+	Name      interface{} `json:"name"`
+	IsEnabled bool        `json:"is_enabled"`
+	Provider  string      `json:"provider"`
+	Settings  []byte      `json:"settings"`
+	UUID      pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateDatasource(ctx context.Context, arg UpdateDatasourceParams) error {

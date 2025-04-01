@@ -12,67 +12,53 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const addPipelineEntry = `-- name: AddPipelineEntry :exec
-INSERT INTO pipeline_entry (
-  uuid, pipeline_uuid, parent_uuid, "type", params, created_at
-) VALUES (
-  $1, $2, $3, $4, $5, NOW()
-) RETURNING uuid, pipeline_uuid, parent_uuid, type, params, created_at, updated_at
-`
-
-type AddPipelineEntryParams struct {
-	UUID         uuid.UUID  `json:"uuid"`
-	PipelineUuid *uuid.UUID `json:"pipeline_uuid"`
-	ParentUuid   *uuid.UUID `json:"parent_uuid"`
-	Type         string     `json:"type"`
-	Params       []byte     `json:"params"`
-}
-
-func (q *Queries) AddPipelineEntry(ctx context.Context, arg AddPipelineEntryParams) error {
-	_, err := q.db.Exec(ctx, addPipelineEntry,
-		arg.UUID,
-		arg.PipelineUuid,
-		arg.ParentUuid,
-		arg.Type,
-		arg.Params,
-	)
-	return err
-}
-
 const createPipeline = `-- name: CreatePipeline :one
 INSERT INTO pipeline (
-  uuid, user_uuid, name, flow,
-  created_at, updated_at
-)
-VALUES (
-  $1,
-  $2,        -- new
-  $3,
-  $4,
-  NOW(),
+  uuid,
+  datasource_uuid,
+  name,
+  type,
+  is_enabled,
+  flow,
+  created_at,
+  updated_at
+) VALUES (
+             $1::uuid,
+             $2::uuid,
+             NULLIF($3, ''),
+             NULLIF($4, ''),
+  $5::boolean,
+              $6,
+             NOW(),
   NOW()
-) RETURNING uuid, user_uuid, name, flow, created_at, updated_at
+) RETURNING uuid, datasource_uuid, name, type, is_enabled, flow, created_at, updated_at
 `
 
 type CreatePipelineParams struct {
-	UUID     uuid.UUID  `json:"uuid"`
-	UserUUID *uuid.UUID `json:"user_uuid"`
-	Name     string     `json:"name"`
-	Flow     []byte     `json:"flow"`
+	UUID           pgtype.UUID `json:"uuid"`
+	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
+	Name           interface{} `json:"name"`
+	Type           interface{} `json:"type"`
+	IsEnabled      bool        `json:"is_enabled"`
+	Flow           []byte      `json:"flow"`
 }
 
 func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) (Pipeline, error) {
 	row := q.db.QueryRow(ctx, createPipeline,
 		arg.UUID,
-		arg.UserUUID,
+		arg.DatasourceUUID,
 		arg.Name,
+		arg.Type,
+		arg.IsEnabled,
 		arg.Flow,
 	)
 	var i Pipeline
 	err := row.Scan(
 		&i.UUID,
-		&i.UserUUID,
+		&i.DatasourceUUID,
 		&i.Name,
+		&i.Type,
+		&i.IsEnabled,
 		&i.Flow,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -81,63 +67,121 @@ func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) 
 }
 
 const deletePipeline = `-- name: DeletePipeline :exec
-DELETE FROM pipeline WHERE uuid = $1
+DELETE FROM pipeline WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeletePipeline(ctx context.Context, argUuid uuid.UUID) error {
+func (q *Queries) DeletePipeline(ctx context.Context, argUuid pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deletePipeline, argUuid)
 	return err
 }
 
-const deletePipelineEntry = `-- name: DeletePipelineEntry :exec
-DELETE FROM pipeline_entry
-WHERE uuid = $1
+const getPipeline = `-- name: GetPipeline :one
+SELECT
+    pipeline.uuid, pipeline.datasource_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+FROM pipeline
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeletePipelineEntry(ctx context.Context, argUuid uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deletePipelineEntry, argUuid)
-	return err
+type GetPipelineRow struct {
+	Pipeline Pipeline `json:"pipeline"`
 }
 
-const getPipelineEntries = `-- name: GetPipelineEntries :many
-SELECT uuid, pipeline_uuid, parent_uuid, type, params, created_at, updated_at FROM pipeline_entry
-WHERE
-	($1 <> '' AND "pipeline_uuid" = $1) OR
-	($2 <> '' AND "parent_uuid" = $2) OR
-	($3 <> '' AND "type" = $3) OR
-	($4 <> '' AND "name" like $4 )
-ORDER BY created_at DESC
+func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipelineRow, error) {
+	row := q.db.QueryRow(ctx, getPipeline, argUuid)
+	var i GetPipelineRow
+	err := row.Scan(
+		&i.Pipeline.UUID,
+		&i.Pipeline.DatasourceUUID,
+		&i.Pipeline.Name,
+		&i.Pipeline.Type,
+		&i.Pipeline.IsEnabled,
+		&i.Pipeline.Flow,
+		&i.Pipeline.CreatedAt,
+		&i.Pipeline.UpdatedAt,
+	)
+	return i, err
+}
+
+const getPipelines = `-- name: GetPipelines :many
+WITH filtered_pipelines AS (
+    SELECT p.uuid, p.datasource_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
+    FROM pipeline p
+    WHERE
+        (NULLIF($5, '') IS NULL OR p.uuid = $5::uuid)
+      AND (NULLIF($6, '') IS NULL OR p.datasource_uuid = $6::uuid)
+      AND (NULLIF($7, '') IS NULL OR p.type = $7)
+      AND (NULLIF($8::int, -1) IS NULL OR p.is_enabled = $8::boolean)
+      AND (NULLIF($9, '') IS NULL OR p.name ILIKE '%' || $9 || '%')
+)
+SELECT
+    uuid, datasource_uuid, name, type, is_enabled, flow, created_at, updated_at,
+    (SELECT count(*) FROM filtered_pipelines) AS total_count
+FROM filtered_pipelines
+ORDER BY
+    CASE WHEN $1 = 'created_at' AND $2 = 'asc' THEN created_at END ASC,
+    CASE WHEN $1 = 'created_at' AND $2 = 'desc' THEN created_at END DESC,
+    CASE WHEN $1 = 'name' AND $2 = 'asc' THEN name END ASC,
+    CASE WHEN $1 = 'name' AND $2 = 'desc' THEN name END DESC,
+    CASE WHEN $1 = 'type' AND $2 = 'asc' THEN type END ASC,
+    CASE WHEN $1 = 'type' AND $2 = 'desc' THEN type END DESC,
+    created_at DESC
+LIMIT NULLIF($4::int, 0)
+    OFFSET $3::int
 `
 
-type GetPipelineEntriesParams struct {
-	PipelineUuid interface{} `json:"pipeline_uuid"`
-	ParentUuid   interface{} `json:"parent_uuid"`
-	Type         interface{} `json:"type"`
-	Name         interface{} `json:"name"`
+type GetPipelinesParams struct {
+	OrderBy        interface{} `json:"order_by"`
+	OrderDirection interface{} `json:"order_direction"`
+	Offset         int32       `json:"offset"`
+	Limit          int32       `json:"limit"`
+	UUID           interface{} `json:"uuid"`
+	DatasourceUUID interface{} `json:"datasource_uuid"`
+	Type           interface{} `json:"type"`
+	IsEnabled      int32       `json:"is_enabled"`
+	Name           interface{} `json:"name"`
 }
 
-func (q *Queries) GetPipelineEntries(ctx context.Context, arg GetPipelineEntriesParams) ([]PipelineEntry, error) {
-	rows, err := q.db.Query(ctx, getPipelineEntries,
-		arg.PipelineUuid,
-		arg.ParentUuid,
+type GetPipelinesRow struct {
+	UUID           uuid.UUID          `json:"uuid"`
+	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
+	Name           string             `json:"name"`
+	Type           string             `json:"type"`
+	IsEnabled      bool               `json:"is_enabled"`
+	Flow           []byte             `json:"flow"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	TotalCount     int64              `json:"total_count"`
+}
+
+func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]GetPipelinesRow, error) {
+	rows, err := q.db.Query(ctx, getPipelines,
+		arg.OrderBy,
+		arg.OrderDirection,
+		arg.Offset,
+		arg.Limit,
+		arg.UUID,
+		arg.DatasourceUUID,
 		arg.Type,
+		arg.IsEnabled,
 		arg.Name,
 	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PipelineEntry
+	var items []GetPipelinesRow
 	for rows.Next() {
-		var i PipelineEntry
+		var i GetPipelinesRow
 		if err := rows.Scan(
 			&i.UUID,
-			&i.PipelineUuid,
-			&i.ParentUuid,
+			&i.DatasourceUUID,
+			&i.Name,
 			&i.Type,
-			&i.Params,
+			&i.IsEnabled,
+			&i.Flow,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.TotalCount,
 		); err != nil {
 			return nil, err
 		}
@@ -149,73 +193,42 @@ func (q *Queries) GetPipelineEntries(ctx context.Context, arg GetPipelineEntries
 	return items, nil
 }
 
-const getPipelineEntryByUUID = `-- name: GetPipelineEntryByUUID :one
-SELECT uuid, pipeline_uuid, parent_uuid, type, params, created_at, updated_at FROM pipeline_entry
-WHERE uuid = $1
-`
-
-func (q *Queries) GetPipelineEntryByUUID(ctx context.Context, argUuid uuid.UUID) (PipelineEntry, error) {
-	row := q.db.QueryRow(ctx, getPipelineEntryByUUID, argUuid)
-	var i PipelineEntry
-	err := row.Scan(
-		&i.UUID,
-		&i.PipelineUuid,
-		&i.ParentUuid,
-		&i.Type,
-		&i.Params,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getPipelines = `-- name: GetPipelines :many
+const listPipelines = `-- name: ListPipelines :many
 SELECT
-uuid, user_uuid, name, flow, created_at, updated_at
+    pipeline.uuid, pipeline.datasource_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
-WHERE 
-  -- if all params are null, select all
-  ($1::text IS NULL
-   AND $2::text IS NULL
-   AND $3::timestamp IS NULL
-  ) OR
-  -- if any param is not null, filter
-  ($1 IS NOT NULL AND "uuid"::text = $1::text)
-  OR ($2 IS NOT NULL AND "name"::text like $2::text)
-  OR ($3 IS NOT NULL AND "created_at" >= $3)
-LIMIT $5 OFFSET $4
+ORDER BY created_at DESC
+LIMIT NULLIF($2::int, 0)
+    OFFSET $1
 `
 
-type GetPipelinesParams struct {
-	UUID          pgtype.Text      `json:"uuid"`
-	Name          pgtype.Text      `json:"name"`
-	CreatedAtFrom pgtype.Timestamp `json:"created_at_from"`
-	Offset        pgtype.Int4      `json:"offset"`
-	Limit         pgtype.Int4      `json:"limit"`
+type ListPipelinesParams struct {
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]Pipeline, error) {
-	rows, err := q.db.Query(ctx, getPipelines,
-		arg.UUID,
-		arg.Name,
-		arg.CreatedAtFrom,
-		arg.Offset,
-		arg.Limit,
-	)
+type ListPipelinesRow struct {
+	Pipeline Pipeline `json:"pipeline"`
+}
+
+func (q *Queries) ListPipelines(ctx context.Context, arg ListPipelinesParams) ([]ListPipelinesRow, error) {
+	rows, err := q.db.Query(ctx, listPipelines, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Pipeline
+	var items []ListPipelinesRow
 	for rows.Next() {
-		var i Pipeline
+		var i ListPipelinesRow
 		if err := rows.Scan(
-			&i.UUID,
-			&i.UserUUID,
-			&i.Name,
-			&i.Flow,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.Pipeline.UUID,
+			&i.Pipeline.DatasourceUUID,
+			&i.Pipeline.Name,
+			&i.Pipeline.Type,
+			&i.Pipeline.IsEnabled,
+			&i.Pipeline.Flow,
+			&i.Pipeline.CreatedAt,
+			&i.Pipeline.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -229,46 +242,32 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]P
 
 const updatePipeline = `-- name: UpdatePipeline :exec
 UPDATE pipeline SET
-  name = COALESCE($1, name),
-  flow = COALESCE($2, flow),
+  "name" = NULLIF($1, ''),
+  "type" = NULLIF($2, ''),
+  datasource_uuid = $3::uuid,
+  is_enabled = $4::boolean,
+  flow = $5,
   updated_at = NOW()
-WHERE uuid = $3
-  AND (
-    -- only the owning user can update
-    user_uuid = $4
-  )
+WHERE uuid = $6::uuid
 `
 
 type UpdatePipelineParams struct {
-	Name     string     `json:"name"`
-	Flow     []byte     `json:"flow"`
-	UUID     uuid.UUID  `json:"uuid"`
-	UserUUID *uuid.UUID `json:"user_uuid"`
+	Name           interface{} `json:"name"`
+	Type           interface{} `json:"type"`
+	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
+	IsEnabled      bool        `json:"is_enabled"`
+	Flow           []byte      `json:"flow"`
+	UUID           pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdatePipeline(ctx context.Context, arg UpdatePipelineParams) error {
 	_, err := q.db.Exec(ctx, updatePipeline,
 		arg.Name,
+		arg.Type,
+		arg.DatasourceUUID,
+		arg.IsEnabled,
 		arg.Flow,
 		arg.UUID,
-		arg.UserUUID,
 	)
-	return err
-}
-
-const updatePipelineEntry = `-- name: UpdatePipelineEntry :exec
-UPDATE pipeline_entry SET
-  params = COALESCE($1, params),
-  updated_at = NOW()
-WHERE uuid = $2
-`
-
-type UpdatePipelineEntryParams struct {
-	Params []byte    `json:"params"`
-	UUID   uuid.UUID `json:"uuid"`
-}
-
-func (q *Queries) UpdatePipelineEntry(ctx context.Context, arg UpdatePipelineEntryParams) error {
-	_, err := q.db.Exec(ctx, updatePipelineEntry, arg.Params, arg.UUID)
 	return err
 }

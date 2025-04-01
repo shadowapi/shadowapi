@@ -19,15 +19,7 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 	log := h.log.With("handler", "SyncpolicyCreate")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.SyncPolicy, error) {
 		policyUUID := uuid.Must(uuid.NewV7())
-		var userUUID interface{}
-		if req.UserUUID.IsSet() && req.UserUUID.Value != "" {
-			uID, err := uuid.FromString(req.UserUUID.Value)
-			if err != nil {
-				log.Error("invalid user uuid", "error", err)
-				return nil, ErrWithCode(http.StatusBadRequest, E("invalid user uuid"))
-			}
-			userUUID = uID.String()
-		}
+
 		var settingsData []byte
 		if req.Settings.IsSet() {
 			j, err := json.Marshal(req.Settings.Value)
@@ -39,8 +31,7 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 		}
 		qParams := query.CreateSyncPolicyParams{
 			UUID:        pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
-			UserUUID:    userUUID,
-			Service:     req.Service,
+			Type:        req.Type,
 			Blocklist:   req.Blocklist,
 			ExcludeList: req.ExcludeList,
 			SyncAll:     req.SyncAll.Or(false),
@@ -87,7 +78,7 @@ func (h *Handler) SyncpolicyGet(ctx context.Context, params api.SyncpolicyGetPar
 		OrderDirection: "asc",
 		Offset:         0,
 		Limit:          1,
-		Service:        "",
+		Type:           "",
 		UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
 		UserUUID:       "",
 		SyncAll:        -1,
@@ -122,7 +113,7 @@ func (h *Handler) SyncpolicyList(ctx context.Context, params api.SyncpolicyListP
 		OrderDirection: "desc",
 		Offset:         offset,
 		Limit:          limit,
-		Service:        "",
+		Type:           "",
 		UUID:           "",
 		UserUUID:       "",
 		SyncAll:        -1,
@@ -157,7 +148,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			OrderDirection: "asc",
 			Offset:         0,
 			Limit:          1,
-			Service:        "",
+			Type:           "",
 			UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
 			UserUUID:       "",
 			SyncAll:        -1,
@@ -181,8 +172,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			settingsData = existing[0].Settings
 		}
 		uParams := query.UpdateSyncPolicyParams{
-			UserUUID:    req.UserUUID.Or(""),
-			Service:     req.Service,
+			Type:        req.Type,
 			Blocklist:   req.Blocklist,
 			ExcludeList: req.ExcludeList,
 			SyncAll:     req.SyncAll.Or(false),
@@ -199,7 +189,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			OrderDirection: "asc",
 			Offset:         0,
 			Limit:          1,
-			Service:        "",
+			Type:           "",
 			UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
 			UserUUID:       "",
 			SyncAll:        -1,
@@ -223,8 +213,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 func qToApiSyncPolicyRow(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
 	var sp query.SyncPolicy
 	sp.UUID = row.UUID
-	sp.UserUUID = row.UserUUID
-	sp.Service = row.Service
+	sp.Type = row.Type
 	sp.Blocklist = row.Blocklist
 	sp.ExcludeList = row.ExcludeList
 	sp.SyncAll = row.SyncAll
@@ -237,15 +226,12 @@ func qToApiSyncPolicyRow(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
 func qToApiSyncPolicy(dbp query.SyncPolicy) (api.SyncPolicy, error) {
 	out := api.SyncPolicy{
 		UUID:        api.NewOptString(dbp.UUID.String()),
-		Service:     dbp.Service,
+		Type:        dbp.Type,
 		Blocklist:   dbp.Blocklist,
 		ExcludeList: dbp.ExcludeList,
 		SyncAll:     api.NewOptBool(dbp.SyncAll),
 		CreatedAt:   api.NewOptDateTime(dbp.CreatedAt.Time),
 		UpdatedAt:   api.NewOptDateTime(dbp.UpdatedAt.Time),
-	}
-	if dbp.UserUUID != nil {
-		out.UserUUID.SetTo(dbp.UserUUID.String())
 	}
 	if len(dbp.Settings) > 0 {
 		var settings map[string]json.RawMessage
@@ -259,14 +245,4 @@ func qToApiSyncPolicy(dbp query.SyncPolicy) (api.SyncPolicy, error) {
 		out.Settings.SetTo(spSettings)
 	}
 	return out, nil
-}
-
-func uToBytes(u uuid.UUID) [16]byte {
-	var arr [16]byte
-	copy(arr[:], u.Bytes())
-	return arr
-}
-
-func bytesToUUID(b [16]byte) (uuid.UUID, error) {
-	return uuid.FromBytes(b[:])
 }

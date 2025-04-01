@@ -2,27 +2,29 @@ package pipelines
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/shadowapi/shadowapi/backend/pkg/api"
-	"log/slog"
+	"encoding/json"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/extractors"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/filters"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/storage"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
+	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
+	"log/slog"
 )
 
-// SimplePipeline is an example implementation of the Pipeline interface.
-type SimplePipeline struct {
+// EmailPipeline implements the Pipeline interface.
+type EmailPipeline struct {
 	log       *slog.Logger
 	extractor types.Extractor
 	filter    types.Filter
 	storage   types.Storage
 }
 
-// NewSimplePipeline creates a new pipeline.
-func NewSimplePipeline(log *slog.Logger, extractor types.Extractor, filter types.Filter, storage types.Storage) types.Pipeline {
-	return &SimplePipeline{
+// NewEmailPipeline creates a new EmailPipeline.
+func NewEmailPipeline(log *slog.Logger, extractor types.Extractor, filter types.Filter, storage types.Storage) types.Pipeline {
+	return &EmailPipeline{
 		log:       log,
 		extractor: extractor,
 		filter:    filter,
@@ -30,17 +32,15 @@ func NewSimplePipeline(log *slog.Logger, extractor types.Extractor, filter types
 	}
 }
 
-// Run executes the pipeline on a message.
-func (p *SimplePipeline) Run(ctx context.Context, message *api.Message) error {
+// Run executes the pipeline steps: filtering, extracting, and saving.
+func (p *EmailPipeline) Run(ctx context.Context, message *api.Message) error {
 	p.log.Info("Running pipeline", "message_uuid", message.UUID)
 
-	// Apply filter.
-	if filtered := p.filter.Apply(ctx, message); !filtered {
-		p.log.Info("Message blocked by policy", "sender", message.Sender)
+	if !p.filter.Apply(ctx, message) {
+		p.log.Info("Message blocked by sync policy", "sender", message.Sender)
 		return nil
 	}
 
-	// Extract contact.
 	contact, err := p.extractor.ExtractContact(message)
 	if err != nil {
 		p.log.Error("Failed to extract contact", "error", err)
@@ -48,7 +48,6 @@ func (p *SimplePipeline) Run(ctx context.Context, message *api.Message) error {
 	}
 	p.log.Info("Extracted contact", "contact_uuid", contact.UUID)
 
-	// Save the message.
 	if err := p.storage.SaveMessage(ctx, message); err != nil {
 		p.log.Error("Failed to save message", "error", err)
 		return err
@@ -56,14 +55,83 @@ func (p *SimplePipeline) Run(ctx context.Context, message *api.Message) error {
 	return nil
 }
 
+// convertSyncPolicy converts a query sync policy row to an API sync policy.
+func convertSyncPolicy(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
+	var policy api.SyncPolicy
+	policy.SetUUID(api.NewOptString(row.UUID.String()))
+	if row.UserUUID != nil {
+		policy.SetUserUUID(api.NewOptString(row.UserUUID.String()))
+	} else {
+		policy.SetUserUUID(api.NewOptString(""))
+	}
+	policy.SetService(row.Service)
+	policy.SetBlocklist(row.Blocklist)
+	policy.SetExcludeList(row.ExcludeList)
+	policy.SetSyncAll(api.NewOptBool(row.SyncAll))
+
+	// Unmarshal the settings JSON bytes into the API SyncPolicySettings type.
+	var settings api.SyncPolicySettings
+	if len(row.Settings) > 0 {
+		if err := json.Unmarshal(row.Settings, &settings); err != nil {
+			return policy, err
+		}
+	} else {
+		settings = make(api.SyncPolicySettings)
+	}
+	policy.SetSettings(api.NewOptSyncPolicySettings(settings))
+
+	policy.SetCreatedAt(api.NewOptDateTime(row.CreatedAt.Time))
+	policy.SetUpdatedAt(api.NewOptDateTime(row.UpdatedAt.Time))
+	return policy, nil
+}
+
 // CreateEmailPipeline instantiates a pipeline for processing email messages.
+// It loads the sync policy for "email" from the database and uses it in the filter.
 func CreateEmailPipeline(ctx context.Context, log *slog.Logger, dbp *pgxpool.Pool) types.Pipeline {
-	// Extractor: extracts contact details from the email message body.
 	extractor := extractors.NewContactExtractor()
-	// Filter: for example, allow only messages from specific domains.
-	filter := filters.NewSyncPolicyFilter([]string{"@example.com", "@mydomain.com"})
-	// Storage: persist full messages in Postgres (or S3/hostfiles as needed)
+
+	// Load the sync policy for the "email" service.
+	queries := query.New(dbp)
+	policies, err := queries.GetSyncPolicies(ctx, query.GetSyncPoliciesParams{
+		OrderBy:        "created_at",
+		OrderDirection: "desc",
+		Offset:         0,
+		Limit:          1,
+		Service:        "email",
+		UUID:           "",
+		UserUUID:       "",
+		SyncAll:        -1, // -1 means do not filter by SyncAll in the query.
+	})
+	var apiPolicy api.SyncPolicy
+	if err != nil {
+		log.Error("Failed to get sync policy from DB", "error", err)
+		// If error occurs, default to a policy that allows all messages.
+		apiPolicy = api.SyncPolicy{
+			Service: "email",
+			SyncAll: api.NewOptBool(true),
+		}
+	} else if len(policies) == 0 {
+		// No policy exists; default to allowing all messages.
+		apiPolicy = api.SyncPolicy{
+			Service: "email",
+			SyncAll: api.NewOptBool(true),
+		}
+	} else {
+		// Convert the first returned policy to API format.
+		converted, err := convertSyncPolicy(policies[0])
+		if err != nil {
+			log.Error("Failed to convert sync policy", "error", err)
+			// Fallback to allow all messages.
+			apiPolicy = api.SyncPolicy{
+				Service: "email",
+				SyncAll: api.NewOptBool(true),
+			}
+		} else {
+			apiPolicy = converted
+		}
+	}
+
+	filter := filters.NewSyncPolicyFilter(apiPolicy, log)
 	storageBackend := storage.NewPostgresStorage(log, dbp)
-	// Create a simple pipeline that uses the three components.
-	return NewSimplePipeline(log, extractor, filter, storageBackend)
+	return NewEmailPipeline(log, extractor, filter, storageBackend)
 }

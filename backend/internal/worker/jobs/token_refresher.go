@@ -122,3 +122,55 @@ func TokenRefresherJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queu
 		return NewTokenRefresherJob(dbp, log, q, args), nil
 	}
 }
+
+/*
+// OLD CODE
+
+// ScheduleRefresh runs the token refresh worker after 30% of the expiration time
+func (b *Broker) ScheduleRefresh(ctx context.Context, tokenUUID uuid.UUID, expiresAt time.Time) error {
+	log := b.log.With("token_uuid", tokenUUID, "action", "scheduleTokenRefresh")
+	duration := expiresAt.Sub(time.Now().UTC())
+	duration = time.Duration(float64(duration) * 0.1)
+	log.Info("schedule token refresh", "token_uuid", tokenUUID, "scheduled_at", time.Now().UTC().Add(duration))
+
+	args := &tokenRefresherWorkerArgs{TokenUUID: tokenUUID, Expiry: time.Now().UTC().Add(duration)}
+	msg, err := json.Marshal(args)
+	if err != nil {
+		log.Error("failed to marshal token refresh args", "error", err)
+		return err
+	}
+	return b.queue.Publish(ctx, workerSubjectTokenRefresh, msg)
+}
+
+// tokenRefresherWorkerArgs for the token refresh worker
+func (b *Broker) tokenRefreshHandler(ctx context.Context, msg queue.Msg) {
+	log := b.log.With("method", "tokenRefreshHandler")
+	args := &tokenRefresherWorkerArgs{}
+	if err := json.Unmarshal(msg.Data(), args); err != nil {
+		log.Error("failed to unmarshal token refresh args", "error", err)
+		if err := msg.Term(); err != nil {
+			log.Error("failed to terminate message", "error", err)
+		}
+		return
+	}
+	// This is a scheduled job, postpone it until the scheduled time
+	if !time.Now().UTC().After(args.Expiry) {
+		log.Debug("job is not ready yet, postpone it", "scheduled_at", args.Expiry)
+		// NAK message with delay, we see it again after the scheduled time
+		if err := msg.NakWithDelay(time.Until(args.Expiry)); err != nil {
+			log.Error("failed to negative acknowledge message", "error", err)
+		}
+		return
+	}
+	w := tokenRefresherWorker{dbp: b.dbp, log: b.log}
+	if err := w.Work(ctx, b, args); err != nil {
+		if err := msg.Term(); err != nil {
+			log.Error("failed to terminate message", "error", err)
+		}
+		return
+	}
+	if err := msg.Ack(); err != nil {
+		log.Error("failed to acknowledge message", "error", err)
+	}
+}
+*/

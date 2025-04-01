@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
+	"github.com/google/uuid"
 )
 
 func (s *ErrorStatusCode) Error() string {
@@ -1430,24 +1431,29 @@ type ContactSocials struct{}
 
 // Ref: #
 type Datasource struct {
-	UUID      string      `json:"uuid"`
-	UserUUID  OptString   `json:"user_uuid"`
-	Name      string      `json:"name"`
-	IsEnabled bool        `json:"is_enabled"`
+	UUID      OptString   `json:"uuid"`
+	UserUUID  string      `json:"user_uuid"`
 	Type      string      `json:"type"`
+	Name      string      `json:"name"`
+	IsEnabled OptBool     `json:"is_enabled"`
 	Provider  string      `json:"provider"`
 	CreatedAt OptDateTime `json:"created_at"`
 	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *Datasource) GetUUID() string {
+func (s *Datasource) GetUUID() OptString {
 	return s.UUID
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *Datasource) GetUserUUID() OptString {
+func (s *Datasource) GetUserUUID() string {
 	return s.UserUUID
+}
+
+// GetType returns the value of Type.
+func (s *Datasource) GetType() string {
+	return s.Type
 }
 
 // GetName returns the value of Name.
@@ -1456,13 +1462,8 @@ func (s *Datasource) GetName() string {
 }
 
 // GetIsEnabled returns the value of IsEnabled.
-func (s *Datasource) GetIsEnabled() bool {
+func (s *Datasource) GetIsEnabled() OptBool {
 	return s.IsEnabled
-}
-
-// GetType returns the value of Type.
-func (s *Datasource) GetType() string {
-	return s.Type
 }
 
 // GetProvider returns the value of Provider.
@@ -1481,13 +1482,18 @@ func (s *Datasource) GetUpdatedAt() OptDateTime {
 }
 
 // SetUUID sets the value of UUID.
-func (s *Datasource) SetUUID(val string) {
+func (s *Datasource) SetUUID(val OptString) {
 	s.UUID = val
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *Datasource) SetUserUUID(val OptString) {
+func (s *Datasource) SetUserUUID(val string) {
 	s.UserUUID = val
+}
+
+// SetType sets the value of Type.
+func (s *Datasource) SetType(val string) {
+	s.Type = val
 }
 
 // SetName sets the value of Name.
@@ -1496,13 +1502,8 @@ func (s *Datasource) SetName(val string) {
 }
 
 // SetIsEnabled sets the value of IsEnabled.
-func (s *Datasource) SetIsEnabled(val bool) {
+func (s *Datasource) SetIsEnabled(val OptBool) {
 	s.IsEnabled = val
-}
-
-// SetType sets the value of Type.
-func (s *Datasource) SetType(val string) {
-	s.Type = val
 }
 
 // SetProvider sets the value of Provider.
@@ -2480,7 +2481,7 @@ type FileObject struct {
 	// Unique identifier for the file.
 	UUID OptString `json:"uuid"`
 	// The type of storage backend.
-	StorageType OptFileObjectStorageType `json:"storage_type"`
+	StorageType OptString `json:"storage_type"`
 	// Reference ID within the respective storage backend.
 	StorageUUID OptString `json:"storage_uuid"`
 	// Original filename.
@@ -2501,7 +2502,7 @@ func (s *FileObject) GetUUID() OptString {
 }
 
 // GetStorageType returns the value of StorageType.
-func (s *FileObject) GetStorageType() OptFileObjectStorageType {
+func (s *FileObject) GetStorageType() OptString {
 	return s.StorageType
 }
 
@@ -2541,7 +2542,7 @@ func (s *FileObject) SetUUID(val OptString) {
 }
 
 // SetStorageType sets the value of StorageType.
-func (s *FileObject) SetStorageType(val OptFileObjectStorageType) {
+func (s *FileObject) SetStorageType(val OptString) {
 	s.StorageType = val
 }
 
@@ -2573,55 +2574,6 @@ func (s *FileObject) SetCreatedAt(val OptDateTime) {
 // SetUpdatedAt sets the value of UpdatedAt.
 func (s *FileObject) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
-}
-
-// The type of storage backend.
-type FileObjectStorageType string
-
-const (
-	FileObjectStorageTypeS3        FileObjectStorageType = "s3"
-	FileObjectStorageTypePostgres  FileObjectStorageType = "postgres"
-	FileObjectStorageTypeHostfiles FileObjectStorageType = "hostfiles"
-)
-
-// AllValues returns all FileObjectStorageType values.
-func (FileObjectStorageType) AllValues() []FileObjectStorageType {
-	return []FileObjectStorageType{
-		FileObjectStorageTypeS3,
-		FileObjectStorageTypePostgres,
-		FileObjectStorageTypeHostfiles,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s FileObjectStorageType) MarshalText() ([]byte, error) {
-	switch s {
-	case FileObjectStorageTypeS3:
-		return []byte(s), nil
-	case FileObjectStorageTypePostgres:
-		return []byte(s), nil
-	case FileObjectStorageTypeHostfiles:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *FileObjectStorageType) UnmarshalText(data []byte) error {
-	switch FileObjectStorageType(data) {
-	case FileObjectStorageTypeS3:
-		*s = FileObjectStorageTypeS3
-		return nil
-	case FileObjectStorageTypePostgres:
-		*s = FileObjectStorageTypePostgres
-		return nil
-	case FileObjectStorageTypeHostfiles:
-		*s = FileObjectStorageTypeHostfiles
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 type FileUpdateReq struct {
@@ -4236,38 +4188,38 @@ func (o OptFileObject) Or(d FileObject) FileObject {
 	return d
 }
 
-// NewOptFileObjectStorageType returns new OptFileObjectStorageType with value set to v.
-func NewOptFileObjectStorageType(v FileObjectStorageType) OptFileObjectStorageType {
-	return OptFileObjectStorageType{
+// NewOptFloat64 returns new OptFloat64 with value set to v.
+func NewOptFloat64(v float64) OptFloat64 {
+	return OptFloat64{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptFileObjectStorageType is optional FileObjectStorageType.
-type OptFileObjectStorageType struct {
-	Value FileObjectStorageType
+// OptFloat64 is optional float64.
+type OptFloat64 struct {
+	Value float64
 	Set   bool
 }
 
-// IsSet returns true if OptFileObjectStorageType was set.
-func (o OptFileObjectStorageType) IsSet() bool { return o.Set }
+// IsSet returns true if OptFloat64 was set.
+func (o OptFloat64) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptFileObjectStorageType) Reset() {
-	var v FileObjectStorageType
+func (o *OptFloat64) Reset() {
+	var v float64
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptFileObjectStorageType) SetTo(v FileObjectStorageType) {
+func (o *OptFloat64) SetTo(v float64) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptFileObjectStorageType) Get() (v FileObjectStorageType, ok bool) {
+func (o OptFloat64) Get() (v float64, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -4275,7 +4227,7 @@ func (o OptFileObjectStorageType) Get() (v FileObjectStorageType, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptFileObjectStorageType) Or(d FileObjectStorageType) FileObjectStorageType {
+func (o OptFloat64) Or(d float64) float64 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4897,6 +4849,144 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
+// NewOptPipelineEdgeType returns new OptPipelineEdgeType with value set to v.
+func NewOptPipelineEdgeType(v PipelineEdgeType) OptPipelineEdgeType {
+	return OptPipelineEdgeType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPipelineEdgeType is optional PipelineEdgeType.
+type OptPipelineEdgeType struct {
+	Value PipelineEdgeType
+	Set   bool
+}
+
+// IsSet returns true if OptPipelineEdgeType was set.
+func (o OptPipelineEdgeType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPipelineEdgeType) Reset() {
+	var v PipelineEdgeType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPipelineEdgeType) SetTo(v PipelineEdgeType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPipelineEdgeType) Get() (v PipelineEdgeType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPipelineEdgeType) Or(d PipelineEdgeType) PipelineEdgeType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPipelineFlow returns new OptPipelineFlow with value set to v.
+func NewOptPipelineFlow(v PipelineFlow) OptPipelineFlow {
+	return OptPipelineFlow{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPipelineFlow is optional PipelineFlow.
+type OptPipelineFlow struct {
+	Value PipelineFlow
+	Set   bool
+}
+
+// IsSet returns true if OptPipelineFlow was set.
+func (o OptPipelineFlow) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPipelineFlow) Reset() {
+	var v PipelineFlow
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPipelineFlow) SetTo(v PipelineFlow) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPipelineFlow) Get() (v PipelineFlow, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPipelineFlow) Or(d PipelineFlow) PipelineFlow {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPipelineNodeDataConfig returns new OptPipelineNodeDataConfig with value set to v.
+func NewOptPipelineNodeDataConfig(v PipelineNodeDataConfig) OptPipelineNodeDataConfig {
+	return OptPipelineNodeDataConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPipelineNodeDataConfig is optional PipelineNodeDataConfig.
+type OptPipelineNodeDataConfig struct {
+	Value PipelineNodeDataConfig
+	Set   bool
+}
+
+// IsSet returns true if OptPipelineNodeDataConfig was set.
+func (o OptPipelineNodeDataConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPipelineNodeDataConfig) Reset() {
+	var v PipelineNodeDataConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPipelineNodeDataConfig) SetTo(v PipelineNodeDataConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPipelineNodeDataConfig) Get() (v PipelineNodeDataConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPipelineNodeDataConfig) Or(d PipelineNodeDataConfig) PipelineNodeDataConfig {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptStorageListOrderBy returns new OptStorageListOrderBy with value set to v.
 func NewOptStorageListOrderBy(v StorageListOrderBy) OptStorageListOrderBy {
 	return OptStorageListOrderBy{
@@ -5219,6 +5309,52 @@ func (o OptURI) Or(d url.URL) url.URL {
 	return d
 }
 
+// NewOptUUID returns new OptUUID with value set to v.
+func NewOptUUID(v uuid.UUID) OptUUID {
+	return OptUUID{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUUID is optional uuid.UUID.
+type OptUUID struct {
+	Value uuid.UUID
+	Set   bool
+}
+
+// IsSet returns true if OptUUID was set.
+func (o OptUUID) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUUID) Reset() {
+	var v uuid.UUID
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUUID) SetTo(v uuid.UUID) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUUID) Get() (v uuid.UUID, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptUploadPresignedUrlRequestStorageType returns new OptUploadPresignedUrlRequestStorageType with value set to v.
 func NewOptUploadPresignedUrlRequestStorageType(v UploadPresignedUrlRequestStorageType) OptUploadPresignedUrlRequestStorageType {
 	return OptUploadPresignedUrlRequestStorageType{
@@ -5313,23 +5449,38 @@ func (o OptUserMeta) Or(d UserMeta) UserMeta {
 
 // Ref: #
 type Pipeline struct {
-	UUID string `json:"uuid"`
-	// The user (or account) that owns this pipeline.
-	UserUUID  OptString    `json:"user_uuid"`
-	Name      string       `json:"name"`
-	Flow      PipelineFlow `json:"flow"`
-	CreatedAt OptDateTime  `json:"created_at"`
-	UpdatedAt OptDateTime  `json:"updated_at"`
+	// Unique identifier.
+	UUID OptUUID `json:"uuid"`
+	// Optional. Required for datasources based pipelines.
+	DatasourceUUID uuid.UUID `json:"datasource_uuid"`
+	// Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching
+	// contacts outside of pipelines.
+	Type string `json:"type"`
+	// Pipeline name. Ex gmail_ilya@reactima.com.
+	Name string `json:"name"`
+	// Whether this pipeline is currently active.
+	IsEnabled OptBool `json:"is_enabled"`
+	// JSON representation of the flow (compatible with @xyflow/react).
+	Flow OptPipelineFlow `json:"flow"`
+	// Timestamp when the policy was created.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp when the policy was last updated.
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *Pipeline) GetUUID() string {
+func (s *Pipeline) GetUUID() OptUUID {
 	return s.UUID
 }
 
-// GetUserUUID returns the value of UserUUID.
-func (s *Pipeline) GetUserUUID() OptString {
-	return s.UserUUID
+// GetDatasourceUUID returns the value of DatasourceUUID.
+func (s *Pipeline) GetDatasourceUUID() uuid.UUID {
+	return s.DatasourceUUID
+}
+
+// GetType returns the value of Type.
+func (s *Pipeline) GetType() string {
+	return s.Type
 }
 
 // GetName returns the value of Name.
@@ -5337,8 +5488,13 @@ func (s *Pipeline) GetName() string {
 	return s.Name
 }
 
+// GetIsEnabled returns the value of IsEnabled.
+func (s *Pipeline) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
 // GetFlow returns the value of Flow.
-func (s *Pipeline) GetFlow() PipelineFlow {
+func (s *Pipeline) GetFlow() OptPipelineFlow {
 	return s.Flow
 }
 
@@ -5353,13 +5509,18 @@ func (s *Pipeline) GetUpdatedAt() OptDateTime {
 }
 
 // SetUUID sets the value of UUID.
-func (s *Pipeline) SetUUID(val string) {
+func (s *Pipeline) SetUUID(val OptUUID) {
 	s.UUID = val
 }
 
-// SetUserUUID sets the value of UserUUID.
-func (s *Pipeline) SetUserUUID(val OptString) {
-	s.UserUUID = val
+// SetDatasourceUUID sets the value of DatasourceUUID.
+func (s *Pipeline) SetDatasourceUUID(val uuid.UUID) {
+	s.DatasourceUUID = val
+}
+
+// SetType sets the value of Type.
+func (s *Pipeline) SetType(val string) {
+	s.Type = val
 }
 
 // SetName sets the value of Name.
@@ -5367,8 +5528,13 @@ func (s *Pipeline) SetName(val string) {
 	s.Name = val
 }
 
+// SetIsEnabled sets the value of IsEnabled.
+func (s *Pipeline) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
 // SetFlow sets the value of Flow.
-func (s *Pipeline) SetFlow(val PipelineFlow) {
+func (s *Pipeline) SetFlow(val OptPipelineFlow) {
 	s.Flow = val
 }
 
@@ -5382,333 +5548,125 @@ func (s *Pipeline) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
-type PipelineCreateReq struct {
-	// The user or account that owns this pipeline.
-	UserUUID OptString `json:"user_uuid"`
-	// Name of the pipeline.
-	Name string `json:"name"`
-	// Flow JSON to draw.
-	Flow PipelineCreateReqFlow `json:"flow"`
-}
-
-// GetUserUUID returns the value of UserUUID.
-func (s *PipelineCreateReq) GetUserUUID() OptString {
-	return s.UserUUID
-}
-
-// GetName returns the value of Name.
-func (s *PipelineCreateReq) GetName() string {
-	return s.Name
-}
-
-// GetFlow returns the value of Flow.
-func (s *PipelineCreateReq) GetFlow() PipelineCreateReqFlow {
-	return s.Flow
-}
-
-// SetUserUUID sets the value of UserUUID.
-func (s *PipelineCreateReq) SetUserUUID(val OptString) {
-	s.UserUUID = val
-}
-
-// SetName sets the value of Name.
-func (s *PipelineCreateReq) SetName(val string) {
-	s.Name = val
-}
-
-// SetFlow sets the value of Flow.
-func (s *PipelineCreateReq) SetFlow(val PipelineCreateReqFlow) {
-	s.Flow = val
-}
-
-// Flow JSON to draw.
-type PipelineCreateReqFlow map[string]jx.Raw
-
-func (s *PipelineCreateReqFlow) init() PipelineCreateReqFlow {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
 // PipelineDeleteOK is response for PipelineDelete operation.
 type PipelineDeleteOK struct{}
 
 // Ref: #
-type PipelineEntry struct {
-	UUID         string              `json:"uuid"`
-	PipelineUUID string              `json:"pipeline_uuid"`
-	ParentUUID   OptString           `json:"parent_uuid"`
-	Type         string              `json:"type"`
-	Params       PipelineEntryParams `json:"params"`
-	CreatedAt    OptDateTime         `json:"created_at"`
-	UpdatedAt    OptDateTime         `json:"updated_at"`
+type PipelineEdge struct {
+	ID     string              `json:"id"`
+	Source string              `json:"source"`
+	Target string              `json:"target"`
+	Type   OptPipelineEdgeType `json:"type"`
 }
 
-// GetUUID returns the value of UUID.
-func (s *PipelineEntry) GetUUID() string {
-	return s.UUID
+// GetID returns the value of ID.
+func (s *PipelineEdge) GetID() string {
+	return s.ID
 }
 
-// GetPipelineUUID returns the value of PipelineUUID.
-func (s *PipelineEntry) GetPipelineUUID() string {
-	return s.PipelineUUID
+// GetSource returns the value of Source.
+func (s *PipelineEdge) GetSource() string {
+	return s.Source
 }
 
-// GetParentUUID returns the value of ParentUUID.
-func (s *PipelineEntry) GetParentUUID() OptString {
-	return s.ParentUUID
+// GetTarget returns the value of Target.
+func (s *PipelineEdge) GetTarget() string {
+	return s.Target
 }
 
 // GetType returns the value of Type.
-func (s *PipelineEntry) GetType() string {
+func (s *PipelineEdge) GetType() OptPipelineEdgeType {
 	return s.Type
 }
 
-// GetParams returns the value of Params.
-func (s *PipelineEntry) GetParams() PipelineEntryParams {
-	return s.Params
+// SetID sets the value of ID.
+func (s *PipelineEdge) SetID(val string) {
+	s.ID = val
 }
 
-// GetCreatedAt returns the value of CreatedAt.
-func (s *PipelineEntry) GetCreatedAt() OptDateTime {
-	return s.CreatedAt
+// SetSource sets the value of Source.
+func (s *PipelineEdge) SetSource(val string) {
+	s.Source = val
 }
 
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *PipelineEntry) GetUpdatedAt() OptDateTime {
-	return s.UpdatedAt
-}
-
-// SetUUID sets the value of UUID.
-func (s *PipelineEntry) SetUUID(val string) {
-	s.UUID = val
-}
-
-// SetPipelineUUID sets the value of PipelineUUID.
-func (s *PipelineEntry) SetPipelineUUID(val string) {
-	s.PipelineUUID = val
-}
-
-// SetParentUUID sets the value of ParentUUID.
-func (s *PipelineEntry) SetParentUUID(val OptString) {
-	s.ParentUUID = val
+// SetTarget sets the value of Target.
+func (s *PipelineEdge) SetTarget(val string) {
+	s.Target = val
 }
 
 // SetType sets the value of Type.
-func (s *PipelineEntry) SetType(val string) {
+func (s *PipelineEdge) SetType(val OptPipelineEdgeType) {
 	s.Type = val
 }
 
-// SetParams sets the value of Params.
-func (s *PipelineEntry) SetParams(val PipelineEntryParams) {
-	s.Params = val
-}
+type PipelineEdgeType string
 
-// SetCreatedAt sets the value of CreatedAt.
-func (s *PipelineEntry) SetCreatedAt(val OptDateTime) {
-	s.CreatedAt = val
-}
+const (
+	PipelineEdgeTypeDefault PipelineEdgeType = "default"
+	PipelineEdgeTypeStep    PipelineEdgeType = "step"
+)
 
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *PipelineEntry) SetUpdatedAt(val OptDateTime) {
-	s.UpdatedAt = val
-}
-
-type PipelineEntryCreateReq struct {
-	// UUID of the new pipeline entry.
-	UUID string `json:"uuid"`
-	// Pipeline UUID.
-	PipelineUUID string `json:"pipeline_uuid"`
-	// Parent pipeline entry UUID (if any).
-	ParentUUID OptString `json:"parent_uuid"`
-	// Type of pipeline entry.
-	Type string `json:"type"`
-	// Parameters for the pipeline entry.
-	Params PipelineEntryCreateReqParams `json:"params"`
-}
-
-// GetUUID returns the value of UUID.
-func (s *PipelineEntryCreateReq) GetUUID() string {
-	return s.UUID
-}
-
-// GetPipelineUUID returns the value of PipelineUUID.
-func (s *PipelineEntryCreateReq) GetPipelineUUID() string {
-	return s.PipelineUUID
-}
-
-// GetParentUUID returns the value of ParentUUID.
-func (s *PipelineEntryCreateReq) GetParentUUID() OptString {
-	return s.ParentUUID
-}
-
-// GetType returns the value of Type.
-func (s *PipelineEntryCreateReq) GetType() string {
-	return s.Type
-}
-
-// GetParams returns the value of Params.
-func (s *PipelineEntryCreateReq) GetParams() PipelineEntryCreateReqParams {
-	return s.Params
-}
-
-// SetUUID sets the value of UUID.
-func (s *PipelineEntryCreateReq) SetUUID(val string) {
-	s.UUID = val
-}
-
-// SetPipelineUUID sets the value of PipelineUUID.
-func (s *PipelineEntryCreateReq) SetPipelineUUID(val string) {
-	s.PipelineUUID = val
-}
-
-// SetParentUUID sets the value of ParentUUID.
-func (s *PipelineEntryCreateReq) SetParentUUID(val OptString) {
-	s.ParentUUID = val
-}
-
-// SetType sets the value of Type.
-func (s *PipelineEntryCreateReq) SetType(val string) {
-	s.Type = val
-}
-
-// SetParams sets the value of Params.
-func (s *PipelineEntryCreateReq) SetParams(val PipelineEntryCreateReqParams) {
-	s.Params = val
-}
-
-// Parameters for the pipeline entry.
-type PipelineEntryCreateReqParams map[string]jx.Raw
-
-func (s *PipelineEntryCreateReqParams) init() PipelineEntryCreateReqParams {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
+// AllValues returns all PipelineEdgeType values.
+func (PipelineEdgeType) AllValues() []PipelineEdgeType {
+	return []PipelineEdgeType{
+		PipelineEdgeTypeDefault,
+		PipelineEdgeTypeStep,
 	}
-	return m
 }
 
-// PipelineEntryDeleteOK is response for PipelineEntryDelete operation.
-type PipelineEntryDeleteOK struct{}
-
-type PipelineEntryParams map[string]jx.Raw
-
-func (s *PipelineEntryParams) init() PipelineEntryParams {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
+// MarshalText implements encoding.TextMarshaler.
+func (s PipelineEdgeType) MarshalText() ([]byte, error) {
+	switch s {
+	case PipelineEdgeTypeDefault:
+		return []byte(s), nil
+	case PipelineEdgeTypeStep:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
 	}
-	return m
 }
 
-// Ref: #
-type PipelineEntryType struct {
-	UUID     string `json:"uuid"`
-	Category string `json:"category"`
-	FlowType string `json:"flow_type"`
-	Name     string `json:"name"`
-}
-
-// GetUUID returns the value of UUID.
-func (s *PipelineEntryType) GetUUID() string {
-	return s.UUID
-}
-
-// GetCategory returns the value of Category.
-func (s *PipelineEntryType) GetCategory() string {
-	return s.Category
-}
-
-// GetFlowType returns the value of FlowType.
-func (s *PipelineEntryType) GetFlowType() string {
-	return s.FlowType
-}
-
-// GetName returns the value of Name.
-func (s *PipelineEntryType) GetName() string {
-	return s.Name
-}
-
-// SetUUID sets the value of UUID.
-func (s *PipelineEntryType) SetUUID(val string) {
-	s.UUID = val
-}
-
-// SetCategory sets the value of Category.
-func (s *PipelineEntryType) SetCategory(val string) {
-	s.Category = val
-}
-
-// SetFlowType sets the value of FlowType.
-func (s *PipelineEntryType) SetFlowType(val string) {
-	s.FlowType = val
-}
-
-// SetName sets the value of Name.
-func (s *PipelineEntryType) SetName(val string) {
-	s.Name = val
-}
-
-type PipelineEntryTypeListOK struct {
-	// List of Pipeline Type Entries.
-	Entries []PipelineEntryType `json:"entries"`
-}
-
-// GetEntries returns the value of Entries.
-func (s *PipelineEntryTypeListOK) GetEntries() []PipelineEntryType {
-	return s.Entries
-}
-
-// SetEntries sets the value of Entries.
-func (s *PipelineEntryTypeListOK) SetEntries(val []PipelineEntryType) {
-	s.Entries = val
-}
-
-type PipelineEntryUpdateReq struct {
-	// Params of the Entry.
-	Params PipelineEntryUpdateReqParams `json:"params"`
-}
-
-// GetParams returns the value of Params.
-func (s *PipelineEntryUpdateReq) GetParams() PipelineEntryUpdateReqParams {
-	return s.Params
-}
-
-// SetParams sets the value of Params.
-func (s *PipelineEntryUpdateReq) SetParams(val PipelineEntryUpdateReqParams) {
-	s.Params = val
-}
-
-// Params of the Entry.
-type PipelineEntryUpdateReqParams map[string]jx.Raw
-
-func (s *PipelineEntryUpdateReqParams) init() PipelineEntryUpdateReqParams {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PipelineEdgeType) UnmarshalText(data []byte) error {
+	switch PipelineEdgeType(data) {
+	case PipelineEdgeTypeDefault:
+		*s = PipelineEdgeTypeDefault
+		return nil
+	case PipelineEdgeTypeStep:
+		*s = PipelineEdgeTypeStep
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
 	}
-	return m
 }
 
-type PipelineFlow map[string]jx.Raw
+// JSON representation of the flow (compatible with @xyflow/react).
+type PipelineFlow struct {
+	Nodes []PipelineNode `json:"nodes"`
+	Edges []PipelineEdge `json:"edges"`
+}
 
-func (s *PipelineFlow) init() PipelineFlow {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
+// GetNodes returns the value of Nodes.
+func (s *PipelineFlow) GetNodes() []PipelineNode {
+	return s.Nodes
+}
+
+// GetEdges returns the value of Edges.
+func (s *PipelineFlow) GetEdges() []PipelineEdge {
+	return s.Edges
+}
+
+// SetNodes sets the value of Nodes.
+func (s *PipelineFlow) SetNodes(val []PipelineNode) {
+	s.Nodes = val
+}
+
+// SetEdges sets the value of Edges.
+func (s *PipelineFlow) SetEdges(val []PipelineEdge) {
+	s.Edges = val
 }
 
 type PipelineListOK struct {
-	// List of pipelines.
 	Pipelines []Pipeline `json:"pipelines"`
 }
 
@@ -5722,43 +5680,127 @@ func (s *PipelineListOK) SetPipelines(val []Pipeline) {
 	s.Pipelines = val
 }
 
-type PipelineUpdateReq struct {
-	// Updated name of the pipeline.
-	Name string `json:"name"`
-	// Updated flow JSON.
-	Flow PipelineUpdateReqFlow `json:"flow"`
+// Ref: #
+type PipelineNode struct {
+	ID string `json:"id"`
+	// Required. Ex datasource, extractor, filter, storage.
+	Type     string               `json:"type"`
+	Position PipelineNodePosition `json:"position"`
+	Data     PipelineNodeData     `json:"data"`
 }
 
-// GetName returns the value of Name.
-func (s *PipelineUpdateReq) GetName() string {
-	return s.Name
+// GetID returns the value of ID.
+func (s *PipelineNode) GetID() string {
+	return s.ID
 }
 
-// GetFlow returns the value of Flow.
-func (s *PipelineUpdateReq) GetFlow() PipelineUpdateReqFlow {
-	return s.Flow
+// GetType returns the value of Type.
+func (s *PipelineNode) GetType() string {
+	return s.Type
 }
 
-// SetName sets the value of Name.
-func (s *PipelineUpdateReq) SetName(val string) {
-	s.Name = val
+// GetPosition returns the value of Position.
+func (s *PipelineNode) GetPosition() PipelineNodePosition {
+	return s.Position
 }
 
-// SetFlow sets the value of Flow.
-func (s *PipelineUpdateReq) SetFlow(val PipelineUpdateReqFlow) {
-	s.Flow = val
+// GetData returns the value of Data.
+func (s *PipelineNode) GetData() PipelineNodeData {
+	return s.Data
 }
 
-// Updated flow JSON.
-type PipelineUpdateReqFlow map[string]jx.Raw
+// SetID sets the value of ID.
+func (s *PipelineNode) SetID(val string) {
+	s.ID = val
+}
 
-func (s *PipelineUpdateReqFlow) init() PipelineUpdateReqFlow {
+// SetType sets the value of Type.
+func (s *PipelineNode) SetType(val string) {
+	s.Type = val
+}
+
+// SetPosition sets the value of Position.
+func (s *PipelineNode) SetPosition(val PipelineNodePosition) {
+	s.Position = val
+}
+
+// SetData sets the value of Data.
+func (s *PipelineNode) SetData(val PipelineNodeData) {
+	s.Data = val
+}
+
+type PipelineNodeData struct {
+	Label     OptString `json:"label"`
+	EntryUUID OptUUID   `json:"entry_uuid"`
+	// TODO @reactima stricter types.
+	Config OptPipelineNodeDataConfig `json:"config"`
+}
+
+// GetLabel returns the value of Label.
+func (s *PipelineNodeData) GetLabel() OptString {
+	return s.Label
+}
+
+// GetEntryUUID returns the value of EntryUUID.
+func (s *PipelineNodeData) GetEntryUUID() OptUUID {
+	return s.EntryUUID
+}
+
+// GetConfig returns the value of Config.
+func (s *PipelineNodeData) GetConfig() OptPipelineNodeDataConfig {
+	return s.Config
+}
+
+// SetLabel sets the value of Label.
+func (s *PipelineNodeData) SetLabel(val OptString) {
+	s.Label = val
+}
+
+// SetEntryUUID sets the value of EntryUUID.
+func (s *PipelineNodeData) SetEntryUUID(val OptUUID) {
+	s.EntryUUID = val
+}
+
+// SetConfig sets the value of Config.
+func (s *PipelineNodeData) SetConfig(val OptPipelineNodeDataConfig) {
+	s.Config = val
+}
+
+// TODO @reactima stricter types.
+type PipelineNodeDataConfig map[string]jx.Raw
+
+func (s *PipelineNodeDataConfig) init() PipelineNodeDataConfig {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
 		*s = m
 	}
 	return m
+}
+
+type PipelineNodePosition struct {
+	X OptFloat64 `json:"x"`
+	Y OptFloat64 `json:"y"`
+}
+
+// GetX returns the value of X.
+func (s *PipelineNodePosition) GetX() OptFloat64 {
+	return s.X
+}
+
+// GetY returns the value of Y.
+func (s *PipelineNodePosition) GetY() OptFloat64 {
+	return s.Y
+}
+
+// SetX sets the value of X.
+func (s *PipelineNodePosition) SetX(val OptFloat64) {
+	s.X = val
+}
+
+// SetY sets the value of Y.
+func (s *PipelineNodePosition) SetY(val OptFloat64) {
+	s.Y = val
 }
 
 type SessionCookieAuth struct {
@@ -5780,18 +5822,16 @@ func (s *SessionCookieAuth) SetAPIKey(val string) {
 type Storage struct {
 	// Unique identifier for the storage object.
 	UUID string `json:"uuid"`
-	// Unique identifier for the user associated with the storage object @reactima TODO rethink this.
-	UserUUID OptString `json:"user_uuid"`
-	// Name of the storage object.
-	Name OptString `json:"name"`
 	// Type of the storage object.
 	Type string `json:"type"`
+	// Name of the storage object.
+	Name OptString `json:"name"`
 	// Indicates whether the storage object is enabled.
 	IsEnabled bool `json:"is_enabled"`
-	// The date and time when the storage object was last updated.
-	UpdatedAt OptDateTime `json:"updated_at"`
 	// The date and time when the storage object was created.
 	CreatedAt OptDateTime `json:"created_at"`
+	// The date and time when the storage object was last updated.
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -5799,9 +5839,9 @@ func (s *Storage) GetUUID() string {
 	return s.UUID
 }
 
-// GetUserUUID returns the value of UserUUID.
-func (s *Storage) GetUserUUID() OptString {
-	return s.UserUUID
+// GetType returns the value of Type.
+func (s *Storage) GetType() string {
+	return s.Type
 }
 
 // GetName returns the value of Name.
@@ -5809,19 +5849,9 @@ func (s *Storage) GetName() OptString {
 	return s.Name
 }
 
-// GetType returns the value of Type.
-func (s *Storage) GetType() string {
-	return s.Type
-}
-
 // GetIsEnabled returns the value of IsEnabled.
 func (s *Storage) GetIsEnabled() bool {
 	return s.IsEnabled
-}
-
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *Storage) GetUpdatedAt() OptDateTime {
-	return s.UpdatedAt
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -5829,19 +5859,14 @@ func (s *Storage) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Storage) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
 // SetUUID sets the value of UUID.
 func (s *Storage) SetUUID(val string) {
 	s.UUID = val
-}
-
-// SetUserUUID sets the value of UserUUID.
-func (s *Storage) SetUserUUID(val OptString) {
-	s.UserUUID = val
-}
-
-// SetName sets the value of Name.
-func (s *Storage) SetName(val OptString) {
-	s.Name = val
 }
 
 // SetType sets the value of Type.
@@ -5849,19 +5874,24 @@ func (s *Storage) SetType(val string) {
 	s.Type = val
 }
 
+// SetName sets the value of Name.
+func (s *Storage) SetName(val OptString) {
+	s.Name = val
+}
+
 // SetIsEnabled sets the value of IsEnabled.
 func (s *Storage) SetIsEnabled(val bool) {
 	s.IsEnabled = val
 }
 
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *Storage) SetUpdatedAt(val OptDateTime) {
-	s.UpdatedAt = val
-}
-
 // SetCreatedAt sets the value of CreatedAt.
 func (s *Storage) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Storage) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
 }
 
 // Ref: #
@@ -6216,9 +6246,13 @@ type SyncPolicy struct {
 	// Unique identifier for the sync policy.
 	UUID OptString `json:"uuid"`
 	// Unique identifier for the user associated with the sync policy.
-	UserUUID OptString `json:"user_uuid"`
-	// The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin).
-	Service string `json:"service"`
+	PipelineUUID string `json:"pipeline_uuid"`
+	// Policy type (email, telegram, whatsapp, linkedin).
+	Type string `json:"type"`
+	// Sync policy name.
+	Name string `json:"name"`
+	// Whether this policy is currently active.
+	IsEnabled OptBool `json:"is_enabled"`
 	// List of blocked emails or contact identifiers.
 	Blocklist []string `json:"blocklist"`
 	// List of contacts to exclude from syncing.
@@ -6238,14 +6272,24 @@ func (s *SyncPolicy) GetUUID() OptString {
 	return s.UUID
 }
 
-// GetUserUUID returns the value of UserUUID.
-func (s *SyncPolicy) GetUserUUID() OptString {
-	return s.UserUUID
+// GetPipelineUUID returns the value of PipelineUUID.
+func (s *SyncPolicy) GetPipelineUUID() string {
+	return s.PipelineUUID
 }
 
-// GetService returns the value of Service.
-func (s *SyncPolicy) GetService() string {
-	return s.Service
+// GetType returns the value of Type.
+func (s *SyncPolicy) GetType() string {
+	return s.Type
+}
+
+// GetName returns the value of Name.
+func (s *SyncPolicy) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *SyncPolicy) GetIsEnabled() OptBool {
+	return s.IsEnabled
 }
 
 // GetBlocklist returns the value of Blocklist.
@@ -6283,14 +6327,24 @@ func (s *SyncPolicy) SetUUID(val OptString) {
 	s.UUID = val
 }
 
-// SetUserUUID sets the value of UserUUID.
-func (s *SyncPolicy) SetUserUUID(val OptString) {
-	s.UserUUID = val
+// SetPipelineUUID sets the value of PipelineUUID.
+func (s *SyncPolicy) SetPipelineUUID(val string) {
+	s.PipelineUUID = val
 }
 
-// SetService sets the value of Service.
-func (s *SyncPolicy) SetService(val string) {
-	s.Service = val
+// SetType sets the value of Type.
+func (s *SyncPolicy) SetType(val string) {
+	s.Type = val
+}
+
+// SetName sets the value of Name.
+func (s *SyncPolicy) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *SyncPolicy) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
 }
 
 // SetBlocklist sets the value of Blocklist.

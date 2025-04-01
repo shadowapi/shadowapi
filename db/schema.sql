@@ -60,41 +60,31 @@ CREATE TABLE "oauth2_subject"(
 );
 
 CREATE TABLE datasource(
-  "uuid"            UUID PRIMARY KEY,
-  user_uuid         UUID NOT NULL,
-  name              VARCHAR NOT NULL,
-  "type"            VARCHAR NOT NULL,
-  is_enabled        BOOLEAN NOT NULL,
-  provider VARCHAR NOT NULL,
-  settings          JSONB,
+                           "uuid"            UUID PRIMARY KEY,
+                           user_uuid   UUID NOT NULL,
+                           name              VARCHAR NOT NULL,
+                           "type"            VARCHAR NOT NULL,
+                           is_enabled        BOOLEAN NOT NULL DEFAULT TRUE,
+                           provider VARCHAR NOT NULL,
+                           settings          JSONB,
 
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE
+                           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                           updated_at TIMESTAMP WITH TIME ZONE
 );
 
-CREATE TABLE pipeline(
-  "uuid"            UUID PRIMARY KEY,
-  user_uuid    UUID,
-  name              VARCHAR NOT NULL,
-  flow              JSONB NOT NULL,
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE
+-- Pipelines table
+CREATE TABLE pipeline (
+                          uuid UUID PRIMARY KEY,
+                          datasource_uuid UUID NOT NULL,
+                          name VARCHAR NOT NULL,
+                          type VARCHAR NOT NULL,
+                          is_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+                          flow JSONB NOT NULL,
+                          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                          updated_at TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT fk_pipeline_datasource FOREIGN KEY("datasource_uuid") REFERENCES datasource("uuid") ON DELETE CASCADE
 );
 
-CREATE TABLE pipeline_entry(
-  "uuid"            UUID PRIMARY KEY,
-  pipeline_uuid     UUID NOT NULL,
-  parent_uuid       UUID,
-  "type"            TEXT NOT NULL,
-  params            JSONB,
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE,
-
-  CONSTRAINT fk_pipeline_entry_pipeline_uuid
-  FOREIGN KEY(pipeline_uuid) REFERENCES pipeline("uuid") ON DELETE CASCADE
-);
 
 CREATE TABLE storage(
   "uuid"            UUID PRIMARY KEY,
@@ -109,15 +99,16 @@ CREATE TABLE storage(
 
 CREATE TABLE "sync_policy" (
                                "uuid" UUID PRIMARY KEY,
-                               "user_uuid" UUID NOT NULL,
-                               "service" VARCHAR NOT NULL,
+                               pipeline_uuid   UUID NOT NULL,
+                               "type" VARCHAR NOT NULL,
                                "blocklist" TEXT[],
                                "exclude_list" TEXT[],
                                "sync_all" BOOLEAN NOT NULL,
+                               is_enabled        BOOLEAN NOT NULL DEFAULT TRUE,
                                "settings" JSONB,
                                "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                                "updated_at" TIMESTAMP WITH TIME ZONE,
-                               CONSTRAINT fk_sync_policy_user FOREIGN KEY("user_uuid") REFERENCES "user"("uuid") ON DELETE CASCADE
+                               CONSTRAINT fk_sync_policy_pipeline FOREIGN KEY("pipeline_uuid") REFERENCES "pipeline"("uuid") ON DELETE CASCADE
 );
 
 -- 2025-03-28 @reactima
@@ -314,3 +305,4 @@ CREATE TABLE IF NOT EXISTS contact (
                                        edit_date                   timestamptz,
                                        last_kpi_entry_date         timestamptz
 );
+

@@ -841,42 +841,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'e': // Prefix: "entry/types"
-						origElem := elem
-						if l := len("entry/types"); len(elem) >= l && elem[0:l] == "entry/types" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handlePipelineEntryTypeListRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-
-						elem = origElem
-					}
 					// Param: "uuid"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
 
 					if len(elem) == 0 {
+						// Leaf node.
 						switch r.Method {
 						case "DELETE":
 							s.handlePipelineDeleteRequest([1]string{
@@ -895,75 +866,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/entry"
-						origElem := elem
-						if l := len("/entry"); len(elem) >= l && elem[0:l] == "/entry" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handlePipelineEntryListRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "POST":
-								s.handlePipelineEntryCreateRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET,POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "entry_uuid"
-							// Leaf parameter
-							args[1] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handlePipelineEntryDeleteRequest([2]string{
-										args[0],
-										args[1],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handlePipelineEntryGetRequest([2]string{
-										args[0],
-										args[1],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handlePipelineEntryUpdateRequest([2]string{
-										args[0],
-										args[1],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
@@ -2465,7 +2367,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					switch method {
 					case "GET":
 						r.name = PipelineListOperation
-						r.summary = ""
+						r.summary = "List pipelines"
 						r.operationID = "pipeline-list"
 						r.pathPattern = "/pipeline"
 						r.args = args
@@ -2473,7 +2375,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						return r, true
 					case "POST":
 						r.name = PipelineCreateOperation
-						r.summary = ""
+						r.summary = "Create a new pipeline"
 						r.operationID = "pipeline-create"
 						r.pathPattern = "/pipeline"
 						r.args = args
@@ -2492,50 +2394,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'e': // Prefix: "entry/types"
-						origElem := elem
-						if l := len("entry/types"); len(elem) >= l && elem[0:l] == "entry/types" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = PipelineEntryTypeListOperation
-								r.summary = ""
-								r.operationID = "pipeline-entry-type-list"
-								r.pathPattern = "/pipeline/entry/types"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					}
 					// Param: "uuid"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
 
 					if len(elem) == 0 {
+						// Leaf node.
 						switch method {
 						case "DELETE":
 							r.name = PipelineDeleteOperation
-							r.summary = ""
+							r.summary = "Delete pipeline"
 							r.operationID = "pipeline-delete"
 							r.pathPattern = "/pipeline/{uuid}"
 							r.args = args
@@ -2543,7 +2412,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							return r, true
 						case "GET":
 							r.name = PipelineGetOperation
-							r.summary = ""
+							r.summary = "Get pipeline by UUID"
 							r.operationID = "pipeline-get"
 							r.pathPattern = "/pipeline/{uuid}"
 							r.args = args
@@ -2551,7 +2420,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							return r, true
 						case "PUT":
 							r.name = PipelineUpdateOperation
-							r.summary = ""
+							r.summary = "Update pipeline"
 							r.operationID = "pipeline-update"
 							r.pathPattern = "/pipeline/{uuid}"
 							r.args = args
@@ -2560,88 +2429,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						default:
 							return
 						}
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/entry"
-						origElem := elem
-						if l := len("/entry"); len(elem) >= l && elem[0:l] == "/entry" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								r.name = PipelineEntryListOperation
-								r.summary = ""
-								r.operationID = "pipeline-entry-list"
-								r.pathPattern = "/pipeline/{uuid}/entry"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "POST":
-								r.name = PipelineEntryCreateOperation
-								r.summary = ""
-								r.operationID = "pipeline-entry-create"
-								r.pathPattern = "/pipeline/{uuid}/entry"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "entry_uuid"
-							// Leaf parameter
-							args[1] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = PipelineEntryDeleteOperation
-									r.summary = ""
-									r.operationID = "pipeline-entry-delete"
-									r.pathPattern = "/pipeline/{uuid}/entry/{entry_uuid}"
-									r.args = args
-									r.count = 2
-									return r, true
-								case "GET":
-									r.name = PipelineEntryGetOperation
-									r.summary = ""
-									r.operationID = "pipeline-entry-get"
-									r.pathPattern = "/pipeline/{uuid}/entry/{entry_uuid}"
-									r.args = args
-									r.count = 2
-									return r, true
-								case "PUT":
-									r.name = PipelineEntryUpdateOperation
-									r.summary = ""
-									r.operationID = "pipeline-entry-update"
-									r.pathPattern = "/pipeline/{uuid}/entry/{entry_uuid}"
-									r.args = args
-									r.count = 2
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem

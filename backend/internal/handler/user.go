@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -33,7 +34,7 @@ func (h *Handler) CreateUser(ctx context.Context, req *api.User) (*api.User, err
 		}
 
 		created, err := query.New(tx).CreateUser(ctx, query.CreateUserParams{
-			UUID:      userUUID,
+			UUID:      pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true},
 			Email:     req.Email,
 			Password:  req.Password,
 			FirstName: req.FirstName,
@@ -84,7 +85,7 @@ func (h *Handler) DeleteUser(ctx context.Context, params api.DeleteUserParams) e
 		h.log.Error("failed to parse user UUID", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
 	}
-	if err := query.New(h.dbp).DeleteUser(ctx, userUUID); err != nil {
+	if err := query.New(h.dbp).DeleteUser(ctx, pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true}); err != nil {
 		h.log.Error("failed to delete user", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete user"))
 	}
@@ -102,7 +103,7 @@ func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (*api.U
 		h.log.Error("failed to parse user UUID", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
 	}
-	user, err := query.New(h.dbp).GetUser(ctx, userUUID)
+	user, err := query.New(h.dbp).GetUser(ctx, pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true})
 	if err == pgx.ErrNoRows {
 		return nil, ErrWithCode(http.StatusNotFound, E("user not found"))
 	} else if err != nil {
@@ -141,8 +142,8 @@ func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (*api.U
 // GET /user
 func (h *Handler) ListUsers(ctx context.Context) ([]api.User, error) {
 	users, err := query.New(h.dbp).ListUsers(ctx, query.ListUsersParams{
-		OffsetRecords: 0,
-		LimitRecords:  10000, // TODO @reactima worry about paging later
+		Offset: 0,
+		Limit:  10000, // TODO @reactima worry about paging later
 	})
 	if err != nil && err != pgx.ErrNoRows {
 		h.log.Error("failed to list users", "error", err)
@@ -187,7 +188,7 @@ func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.Upda
 	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.User, error) {
 		updateParams := query.UpdateUserParams{
-			UUID:      userUUID,
+			UUID:      pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true},
 			Email:     req.Email,
 			Password:  req.Password,
 			FirstName: req.FirstName,
@@ -209,7 +210,7 @@ func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.Upda
 			h.log.Error("failed to update user", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update user"))
 		}
-		user, err := query.New(tx).GetUser(ctx, userUUID)
+		user, err := query.New(tx).GetUser(ctx, pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true})
 		if err != nil {
 			h.log.Error("failed to get updated user", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated user"))

@@ -1,34 +1,36 @@
 get:
-  description: List pipelines
+  summary: List pipelines
+  description: Get all pipelines for the current user
   operationId: pipeline-list
   parameters:
+    - name: datasource_uuid
+      in: query
+      description: Filter pipelines by datasource UUID
+      required: false
+      schema:
+        type: string
+        format: uuid
     - description: Offset records.
       in: query
       name: offset
-      explode: false
       schema:
-        description: Offset records.
-        format: int32
         type: integer
+        format: int32
     - description: Limit records.
       in: query
       name: limit
-      explode: false
       schema:
-        description: Limit records.
-        format: int32
         type: integer
+        format: int32
   responses:
-    "200":
-      description: Pipelines retrieved successfully.
+    '200':
+      description: List of pipelines
       content:
         application/json:
           schema:
             type: object
-            additionalProperties: false
             properties:
               pipelines:
-                description: List of pipelines.
                 type: array
                 items:
                   $ref: "../openapi.yaml#/components/schemas/Pipeline"
@@ -44,32 +46,18 @@ get:
     - pipeline
 
 post:
-  description: Create Pipeline
+  summary: Create a new pipeline
+  description: Create a new pipeline for a datasource
   operationId: pipeline-create
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          type: object
-          additionalProperties: false
-          properties:
-            user_uuid:
-              type: string
-              description: The user or account that owns this pipeline.
-            name:
-              type: string
-              description: Name of the pipeline.
-            flow:
-              type: object
-              additionalProperties: true
-              description: Flow JSON to draw.
-          required:
-            - name
-            - flow
+          $ref: "../openapi.yaml#/components/schemas/Pipeline"
   responses:
-    "200":
-      description: Pipeline created successfully.
+    '201':
+      description: Pipeline created successfully
       content:
         application/json:
           schema:

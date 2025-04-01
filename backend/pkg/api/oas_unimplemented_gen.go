@@ -474,79 +474,25 @@ func (UnimplementedHandler) OAuth2ClientUpdate(ctx context.Context, req *OAuth2C
 
 // PipelineCreate implements pipeline-create operation.
 //
-// Create Pipeline.
+// Create a new pipeline for a datasource.
 //
 // POST /pipeline
-func (UnimplementedHandler) PipelineCreate(ctx context.Context, req *PipelineCreateReq) (r *Pipeline, _ error) {
+func (UnimplementedHandler) PipelineCreate(ctx context.Context, req *Pipeline) (r *Pipeline, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // PipelineDelete implements pipeline-delete operation.
 //
-// Delete a pipeline.
+// Delete a specific pipeline by UUID.
 //
 // DELETE /pipeline/{uuid}
 func (UnimplementedHandler) PipelineDelete(ctx context.Context, params PipelineDeleteParams) error {
 	return ht.ErrNotImplemented
 }
 
-// PipelineEntryCreate implements pipeline-entry-create operation.
-//
-// Create a pipeline entry.
-//
-// POST /pipeline/{uuid}/entry
-func (UnimplementedHandler) PipelineEntryCreate(ctx context.Context, req *PipelineEntryCreateReq, params PipelineEntryCreateParams) (r *PipelineEntry, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// PipelineEntryDelete implements pipeline-entry-delete operation.
-//
-// Delete pipeline entry.
-//
-// DELETE /pipeline/{uuid}/entry/{entry_uuid}
-func (UnimplementedHandler) PipelineEntryDelete(ctx context.Context, params PipelineEntryDeleteParams) error {
-	return ht.ErrNotImplemented
-}
-
-// PipelineEntryGet implements pipeline-entry-get operation.
-//
-// Get pipeline entry.
-//
-// GET /pipeline/{uuid}/entry/{entry_uuid}
-func (UnimplementedHandler) PipelineEntryGet(ctx context.Context, params PipelineEntryGetParams) (r *PipelineEntry, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// PipelineEntryList implements pipeline-entry-list operation.
-//
-// Get all entries for a pipeline.
-//
-// GET /pipeline/{uuid}/entry
-func (UnimplementedHandler) PipelineEntryList(ctx context.Context, params PipelineEntryListParams) (r []PipelineEntry, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// PipelineEntryTypeList implements pipeline-entry-type-list operation.
-//
-// Get Pipeline Entry Types.
-//
-// GET /pipeline/entry/types
-func (UnimplementedHandler) PipelineEntryTypeList(ctx context.Context) (r *PipelineEntryTypeListOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// PipelineEntryUpdate implements pipeline-entry-update operation.
-//
-// Update a pipeline entry.
-//
-// PUT /pipeline/{uuid}/entry/{entry_uuid}
-func (UnimplementedHandler) PipelineEntryUpdate(ctx context.Context, req *PipelineEntryUpdateReq, params PipelineEntryUpdateParams) (r *PipelineEntry, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // PipelineGet implements pipeline-get operation.
 //
-// Get pipeline by UUID (optionally filter by user).
+// Retrieve a specific pipeline by its UUID.
 //
 // GET /pipeline/{uuid}
 func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetParams) (r *Pipeline, _ error) {
@@ -555,7 +501,7 @@ func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetP
 
 // PipelineList implements pipeline-list operation.
 //
-// List pipelines.
+// Get all pipelines for the current user.
 //
 // GET /pipeline
 func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineListParams) (r *PipelineListOK, _ error) {
@@ -564,10 +510,10 @@ func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineLis
 
 // PipelineUpdate implements pipeline-update operation.
 //
-// Update pipeline.
+// Update an existing pipeline.
 //
 // PUT /pipeline/{uuid}
-func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *PipelineUpdateReq, params PipelineUpdateParams) (r *Pipeline, _ error) {
+func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (r *Pipeline, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

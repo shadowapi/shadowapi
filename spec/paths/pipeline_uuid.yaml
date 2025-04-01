@@ -1,22 +1,19 @@
+parameters:
+  - name: uuid
+    in: path
+    required: true
+    description: UUID of the pipeline
+    schema:
+      type: string
+      format: uuid
+
 get:
-  description: Get pipeline by UUID (optionally filter by user)
+  summary: Get pipeline by UUID
+  description: Retrieve a specific pipeline by its UUID
   operationId: pipeline-get
-  parameters:
-    - description: UUID of the pipeline.
-      in: path
-      name: uuid
-      required: true
-      schema:
-        type: string
-    - description: (Optional) UUID of the user that owns the pipeline.
-      in: query
-      name: user_uuid
-      required: false
-      schema:
-        type: string
   responses:
-    "200":
-      description: OK
+    '200':
+      description: Pipeline found
       content:
         application/json:
           schema:
@@ -31,36 +28,18 @@ get:
     - pipeline
 
 put:
-  description: Update pipeline
+  summary: Update pipeline
+  description: Update an existing pipeline
   operationId: pipeline-update
-  parameters:
-    - description: UUID of the pipeline.
-      in: path
-      name: uuid
-      required: true
-      schema:
-        type: string
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          type: object
-          additionalProperties: false
-          properties:
-            name:
-              description: Updated name of the pipeline.
-              type: string
-            flow:
-              description: Updated flow JSON.
-              type: object
-              additionalProperties: true
-          required:
-            - name
-            - flow
+          $ref: "../openapi.yaml#/components/schemas/Pipeline"
   responses:
-    "200":
-      description: Pipeline updated successfully.
+    '200':
+      description: Pipeline updated successfully
       content:
         application/json:
           schema:
@@ -75,18 +54,12 @@ put:
     - pipeline
 
 delete:
-  description: Delete a pipeline
+  summary: Delete pipeline
+  description: Delete a specific pipeline by UUID
   operationId: pipeline-delete
-  parameters:
-    - description: UUID of the pipeline.
-      in: path
-      name: uuid
-      required: true
-      schema:
-        type: string
   responses:
-    "200":
-      description: Pipeline deleted successfully.
+    '200':
+      description: Pipeline deleted successfully
     default:
       description: Error
       content:

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -13,173 +14,192 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) PipelineCreate(ctx context.Context, req *api.PipelineCreateReq) (*api.Pipeline, error) {
+func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.Pipeline, error) {
 	log := h.log.With("handler", "PipelineCreate")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
-		pipelineUUID, err := uuid.NewV7()
+		pipelineUUID := uuid.Must(uuid.NewV7())
+		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID.String())
 		if err != nil {
-			log.Error("failed to generate pipeline uuid", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to generate pipeline uuid"))
+			log.Error("failed to convert datasource uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
 		}
-		flowData, err := req.Flow.MarshalJSON()
-		if err != nil {
-			log.Error("failed to marshal pipeline flow data", "error", err)
-			return nil, ErrWithCode(http.StatusBadRequest, E("failed to marshal pipeline flow data"))
+		var flowData []byte
+		if req.Flow.IsSet() {
+			flowData, err = json.Marshal(req.Flow.Value)
+			if err != nil {
+				log.Error("failed to marshal pipeline flow", "error", err)
+				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal pipeline flow"))
+			}
 		}
-		pipeline, err := query.New(tx).CreatePipeline(ctx, query.CreatePipelineParams{
-			UUID: pipelineUUID,
-			Name: req.Name,
-			Flow: flowData,
-		})
+		qParams := query.CreatePipelineParams{
+			UUID:           pgtype.UUID{Bytes: uToBytes(pipelineUUID), Valid: true},
+			DatasourceUUID: pgDatasourceUUID,
+			Name:           req.Name,
+			Type:           req.Type,
+			IsEnabled:      req.IsEnabled.Or(false),
+			Flow:           flowData,
+		}
+		pip, err := query.New(tx).CreatePipeline(ctx, qParams)
 		if err != nil {
 			log.Error("failed to create pipeline", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create pipeline"))
 		}
-		ap, err := h.pipelineQueryToAPI(pipeline)
+		out, err := qToApiPipeline(pip)
 		if err != nil {
-			log.Error("failed to convert pipeline query to api", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to convert pipeline query to api"))
+			log.Error("failed to map pipeline", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map pipeline"))
 		}
-		return &ap, nil
-	})
-}
-
-func (h *Handler) PipelineUpdate(
-	ctx context.Context,
-	req *api.PipelineUpdateReq,
-	params api.PipelineUpdateParams,
-) (*api.Pipeline, error) {
-	log := h.log.With("handler", "PipelineUpdate")
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
-		pipelineUUID, err := uuid.FromString(params.UUID)
-		if err != nil {
-			log.Error("failed to parse pipeline uuid", "error", err)
-			return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse pipeline uuid"))
-		}
-		flowData, err := req.Flow.MarshalJSON()
-		if err != nil {
-			log.Error("failed to marshal pipeline flow data", "error", err)
-			return nil, ErrWithCode(http.StatusBadRequest, E("failed to marshal pipeline flow data"))
-		}
-		err = query.New(tx).UpdatePipeline(ctx, query.UpdatePipelineParams{
-			UUID: pipelineUUID,
-			Name: req.Name,
-			Flow: flowData,
-		})
-		if err != nil {
-			log.Error("failed to update pipeline", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update pipeline"))
-		}
-		pipelines, err := query.New(tx).GetPipelines(ctx, query.GetPipelinesParams{
-			UUID:  pgtype.Text{String: pipelineUUID.String(), Valid: true},
-			Limit: pgtype.Int4{Int32: 1, Valid: true},
-		})
-		if err != nil {
-			log.Error("failed to get pipeline", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get pipeline"))
-		}
-		if len(pipelines) == 0 {
-			log.Error("pipeline not found")
-			return nil, ErrWithCode(http.StatusNotFound, E("pipeline not found"))
-		}
-		result, err := h.pipelineQueryToAPI(pipelines[0])
-		if err != nil {
-			log.Error("failed to convert pipeline query to api", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to convert pipeline query to api"))
-		}
-		return &result, nil
-	})
-}
-
-func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParams) (*api.PipelineListOK, error) {
-	log := h.log.With("handler", "PipelineList")
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.PipelineListOK, error) {
-		qrParams := query.GetPipelinesParams{}
-		if params.Limit.IsSet() {
-			qrParams.Limit = pgtype.Int4{Int32: params.Limit.Value, Valid: true}
-		}
-		if params.Offset.IsSet() {
-			qrParams.Offset = pgtype.Int4{Int32: params.Offset.Value, Valid: true}
-		}
-		out, err := query.New(tx).GetPipelines(ctx, qrParams)
-		if err != nil {
-			log.Error("failed to get pipeline", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get pipeline"))
-		}
-		result := &api.PipelineListOK{
-			Pipelines: []api.Pipeline{},
-		}
-		for _, o := range out {
-			resultItem, err := h.pipelineQueryToAPI(o)
-			if err != nil {
-				log.Error("failed to convert pipeline query to api", "error", err)
-				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to convert pipeline query to api"))
-			}
-			result.Pipelines = append(result.Pipelines, resultItem)
-		}
-		return result, nil
+		return &out, nil
 	})
 }
 
 func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams) (*api.Pipeline, error) {
 	log := h.log.With("handler", "PipelineGet")
+	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	if err != nil {
+		log.Error("invalid pipeline uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
+	}
+	row, err := query.New(h.dbp).GetPipeline(ctx, pipelineUUID)
+	if err != nil {
+		log.Error("failed to get pipeline", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get pipeline"))
+	}
+	out, err := qToApiPipeline(row.Pipeline)
+	if err != nil {
+		log.Error("failed to map pipeline", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map pipeline"))
+	}
+	return &out, nil
+}
+
+func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParams) (*api.PipelineListOK, error) {
+	log := h.log.With("handler", "PipelineList")
+	limit := int32(50)
+	offset := int32(0)
+	if params.Limit.IsSet() {
+		limit = params.Limit.Value
+	}
+	if params.Offset.IsSet() {
+		offset = params.Offset.Value
+	}
+	qParams := query.ListPipelinesParams{
+		Offset: offset,
+		Limit:  limit,
+	}
+	rows, err := query.New(h.dbp).ListPipelines(ctx, qParams)
+	if err != nil {
+		log.Error("failed to list pipelines", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list pipelines"))
+	}
+	out := &api.PipelineListOK{}
+	for _, row := range rows {
+		p, err := qToApiPipeline(row.Pipeline)
+		if err != nil {
+			log.Error("failed to map pipeline row", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map pipeline row"))
+		}
+		out.Pipelines = append(out.Pipelines, p)
+	}
+	return out, nil
+}
+
+func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params api.PipelineUpdateParams) (*api.Pipeline, error) {
+	log := h.log.With("handler", "PipelineUpdate")
+	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	if err != nil {
+		log.Error("invalid pipeline uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
+	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
-		pipelineUUID, err := uuid.FromString(params.UUID)
+		existingRow, err := query.New(tx).GetPipeline(ctx, pipelineUUID)
 		if err != nil {
-			log.Error("failed to parse pipeline uuid", "error", err)
-			return nil, ErrWithCode(http.StatusBadRequest, E("failed to parse pipeline uuid"))
+			log.Error("failed to get existing pipeline", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get existing pipeline"))
 		}
-		pipelines, err := query.New(tx).GetPipelines(ctx, query.GetPipelinesParams{
-			UUID:  pgtype.Text{String: pipelineUUID.String(), Valid: true},
-			Limit: pgtype.Int4{Int32: 1, Valid: true},
-		})
+		var flowData []byte
+		if req.Flow.IsSet() {
+			flowData, err = json.Marshal(req.Flow.Value)
+			if err != nil {
+				log.Error("failed to marshal pipeline flow", "error", err)
+				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal pipeline flow"))
+			}
+		} else {
+			flowData = existingRow.Pipeline.Flow
+		}
+		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID.String())
 		if err != nil {
-			log.Error("failed to get pipeline", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get pipeline"))
+			log.Error("failed to convert datasource uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
 		}
-		if len(pipelines) == 0 {
-			log.Error("pipeline not found")
-			return nil, ErrWithCode(http.StatusNotFound, E("pipeline not found"))
+		uParams := query.UpdatePipelineParams{
+			Name:           req.Name,
+			Type:           req.Type,
+			DatasourceUUID: pgDatasourceUUID,
+			IsEnabled:      req.IsEnabled.Or(false),
+			Flow:           flowData,
+			UUID:           pipelineUUID,
 		}
-		result, err := h.pipelineQueryToAPI(pipelines[0])
+		err = query.New(tx).UpdatePipeline(ctx, uParams)
 		if err != nil {
-			log.Error("failed to convert pipeline query to api", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to convert pipeline query to api"))
+			log.Error("failed to update pipeline", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update pipeline"))
 		}
-		return &result, nil
+		row, err := query.New(tx).GetPipeline(ctx, pipelineUUID)
+		if err != nil {
+			log.Error("failed to get updated pipeline", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated pipeline"))
+		}
+		out, err := qToApiPipeline(row.Pipeline)
+		if err != nil {
+			log.Error("failed to map updated pipeline", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map updated pipeline"))
+		}
+		return &out, nil
 	})
 }
 
-func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) error {
-	log := h.log.With("handler", "PipelineGet")
-	pipelineUUID, err := uuid.FromString(params.UUID)
-	if err != nil {
-		log.Error("failed to parse pipeline uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("failed to parse pipeline uuid"))
+func qToApiPipelineRow(row query.GetPipelinesRow) (api.Pipeline, error) {
+	p := query.Pipeline{
+		UUID:           row.UUID,
+		DatasourceUUID: row.DatasourceUUID,
+		Name:           row.Name,
+		Type:           row.Type,
+		IsEnabled:      row.IsEnabled,
+		Flow:           row.Flow,
+		CreatedAt:      row.CreatedAt,
+		UpdatedAt:      row.UpdatedAt,
 	}
-	err = query.New(h.dbp).DeletePipeline(ctx, pipelineUUID)
-	if err != nil {
-		log.Error("failed to delete pipeline", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete pipeline"))
-	}
-	return nil
+	return qToApiPipeline(p)
 }
 
-func (h *Handler) pipelineQueryToAPI(from query.Pipeline) (to api.Pipeline, err error) {
-	flow := api.PipelineFlow{}
-	if err = flow.UnmarshalJSON(from.Flow); err != nil {
-		return
+// TODO finish convertion
+func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
+	out := api.Pipeline{
+		//UUID: api.NewOptUUID(dbp.UUID),
+		Name:      dbp.Name,
+		Type:      dbp.Type,
+		IsEnabled: api.NewOptBool(dbp.IsEnabled),
+		CreatedAt: api.NewOptDateTime(dbp.CreatedAt.Time),
+		UpdatedAt: api.NewOptDateTime(dbp.UpdatedAt.Time),
 	}
-	p := api.Pipeline{
-		UUID: from.UUID.String(),
-		Name: from.Name,
-		Flow: flow,
+	//u, err := uuid.FromString(dbp.UUID.String())
+	//if err != nil {
+	//	return out, err
+	//}
+	//out.UUID = api.NewOptUUID(u)
+	//if dbp.DatasourceUUID != nil {
+	//	out.DatasourceUUID = *dbp.DatasourceUUID
+	//} else {
+	//	out.DatasourceUUID = uuid.Nil
+	//}
+
+	if len(dbp.Flow) > 0 {
+		var flowObj api.PipelineFlow
+		if err := json.Unmarshal(dbp.Flow, &flowObj); err != nil {
+			return out, err
+		}
+		out.Flow.SetTo(flowObj)
 	}
-	if from.CreatedAt.Valid {
-		p.CreatedAt = api.NewOptDateTime(from.CreatedAt.Time)
-	}
-	if from.UpdatedAt.Valid {
-		p.UpdatedAt = api.NewOptDateTime(from.UpdatedAt.Time)
-	}
-	return p, nil
+	return out, nil
 }

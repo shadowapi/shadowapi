@@ -22,10 +22,10 @@ INSERT INTO storage (
   created_at,
   updated_at
 ) VALUES (
-  $1,
-  $2,
-  $3,
-  $4,
+ $1::uuid,
+ NULLIF($2, ''),
+ NULLIF($3, ''),
+ $4::boolean,
   $5,
   NOW(),
   NOW()
@@ -33,11 +33,11 @@ INSERT INTO storage (
 `
 
 type CreateStorageParams struct {
-	UUID      uuid.UUID `json:"uuid"`
-	Name      string    `json:"name"`
-	Type      string    `json:"type"`
-	IsEnabled bool      `json:"is_enabled"`
-	Settings  []byte    `json:"settings"`
+	UUID      pgtype.UUID `json:"uuid"`
+	Name      interface{} `json:"name"`
+	Type      interface{} `json:"type"`
+	IsEnabled bool        `json:"is_enabled"`
+	Settings  []byte      `json:"settings"`
 }
 
 func (q *Queries) CreateStorage(ctx context.Context, arg CreateStorageParams) (Storage, error) {
@@ -62,39 +62,36 @@ func (q *Queries) CreateStorage(ctx context.Context, arg CreateStorageParams) (S
 }
 
 const deleteStorage = `-- name: DeleteStorage :exec
-DELETE FROM storage WHERE uuid = $1
+DELETE FROM storage WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeleteStorage(ctx context.Context, argUuid uuid.UUID) error {
+func (q *Queries) DeleteStorage(ctx context.Context, argUuid pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteStorage, argUuid)
 	return err
 }
 
 const getStorage = `-- name: GetStorage :one
 SELECT
-    uuid,
-    name,
-    "type",
-    is_enabled,
-    settings,
-    created_at,
-    updated_at
+    storage.uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
 FROM storage
-WHERE uuid = $1
-LIMIT 1
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetStorage(ctx context.Context, argUuid uuid.UUID) (Storage, error) {
+type GetStorageRow struct {
+	Storage Storage `json:"storage"`
+}
+
+func (q *Queries) GetStorage(ctx context.Context, argUuid pgtype.UUID) (GetStorageRow, error) {
 	row := q.db.QueryRow(ctx, getStorage, argUuid)
-	var i Storage
+	var i GetStorageRow
 	err := row.Scan(
-		&i.UUID,
-		&i.Name,
-		&i.Type,
-		&i.IsEnabled,
-		&i.Settings,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.Storage.UUID,
+		&i.Storage.Name,
+		&i.Storage.Type,
+		&i.Storage.IsEnabled,
+		&i.Storage.Settings,
+		&i.Storage.CreatedAt,
+		&i.Storage.UpdatedAt,
 	)
 	return i, err
 }
@@ -118,7 +115,7 @@ ORDER BY
     CASE WHEN $1 = 'created_at' AND $2 = 'desc' THEN created_at END DESC,
     created_at DESC
 LIMIT NULLIF($4::int, 0)
-    OFFSET $3
+    OFFSET $3::int
 `
 
 type GetStoragesParams struct {
@@ -186,13 +183,13 @@ SELECT
     storage.uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
 FROM storage
 ORDER BY created_at DESC
-LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-    OFFSET $1::int
+LIMIT NULLIF($2::int, 0)
+    OFFSET $1
 `
 
 type ListStoragesParams struct {
-	OffsetRecords int32 `json:"offset_records"`
-	LimitRecords  int32 `json:"limit_records"`
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
 type ListStoragesRow struct {
@@ -200,7 +197,7 @@ type ListStoragesRow struct {
 }
 
 func (q *Queries) ListStorages(ctx context.Context, arg ListStoragesParams) ([]ListStoragesRow, error) {
-	rows, err := q.db.Query(ctx, listStorages, arg.OffsetRecords, arg.LimitRecords)
+	rows, err := q.db.Query(ctx, listStorages, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -229,26 +226,26 @@ func (q *Queries) ListStorages(ctx context.Context, arg ListStoragesParams) ([]L
 
 const updateStorage = `-- name: UpdateStorage :exec
 UPDATE storage SET
-  "type" = $1,
-  name = $2,
-  is_enabled = $3,
+  name = NULLIF($1, ''),
+  "type" = NULLIF($2, ''),
+  is_enabled = $3::boolean,
   settings = $4,
   updated_at = NOW()
-WHERE uuid = $5
+WHERE uuid = $5::uuid
 `
 
 type UpdateStorageParams struct {
-	Type      string    `json:"type"`
-	Name      string    `json:"name"`
-	IsEnabled bool      `json:"is_enabled"`
-	Settings  []byte    `json:"settings"`
-	UUID      uuid.UUID `json:"uuid"`
+	Name      interface{} `json:"name"`
+	Type      interface{} `json:"type"`
+	IsEnabled bool        `json:"is_enabled"`
+	Settings  []byte      `json:"settings"`
+	UUID      pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateStorage(ctx context.Context, arg UpdateStorageParams) error {
 	_, err := q.db.Exec(ctx, updateStorage,
-		arg.Type,
 		arg.Name,
+		arg.Type,
 		arg.IsEnabled,
 		arg.Settings,
 		arg.UUID,

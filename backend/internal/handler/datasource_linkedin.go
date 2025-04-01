@@ -23,9 +23,14 @@ func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.Datasou
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 	isEnabled := req.IsEnabled.Or(false)
+	pgUserUUID, err := ConvertStringToPgUUID(req.UserUUID)
+	if err != nil {
+		log.Error("failed to convert user uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
+	}
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
-		UUID:      dsUUID,
-		UserUUID:  ConvertUUID(req.UserUUID),
+		UUID:      pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true},
+		UserUUID:  pgUserUUID,
 		Name:      req.Name,
 		IsEnabled: isEnabled,
 		Provider:  string(req.Provider),
@@ -48,7 +53,7 @@ func (h *Handler) DatasourceLinkedinDelete(ctx context.Context, params api.Datas
 		log.Error("failed to parse datasource uuid", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	if err := query.New(h.dbp).DeleteDatasource(ctx, dsUUID); err != nil {
+	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true}); err != nil {
 		log.Error("failed to delete datasource", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
 	}
@@ -57,13 +62,13 @@ func (h *Handler) DatasourceLinkedinDelete(ctx context.Context, params api.Datas
 
 func (h *Handler) DatasourceLinkedinGet(ctx context.Context, params api.DatasourceLinkedinGetParams) (*api.DatasourceLinkedin, error) {
 	log := h.log.With("handler", "DatasourceLinkedinGet")
-	id, err := uuid.FromString(params.UUID)
+	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
 	dses, err := query.New(h.dbp).GetDatasources(ctx, query.GetDatasourcesParams{
-		UUID:   pgtype.UUID{Bytes: [16]byte(id.Bytes()), Valid: true},
+		UUID:   pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
 		Limit:  1,
 		Offset: 0,
 	})
@@ -102,9 +107,15 @@ func (h *Handler) DatasourceLinkedinUpdate(ctx context.Context, req *api.Datasou
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
+		pgUserUUID, err := ConvertStringToPgUUID(req.UserUUID)
+		if err != nil {
+			log.Error("failed to convert user uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
+		}
+
 		if err := query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
-			UUID:      dsUUID,
-			UserUUID:  ConvertUUID(req.UserUUID),
+			UUID:      pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true},
+			UserUUID:  pgUserUUID,
 			Name:      req.Name,
 			IsEnabled: isEnabled,
 			Provider:  string(req.Provider),

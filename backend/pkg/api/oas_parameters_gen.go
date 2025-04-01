@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
@@ -2720,7 +2721,7 @@ func decodeOAuth2ClientUpdateParams(args [1]string, argsEscaped bool, r *http.Re
 // PipelineDeleteParams is parameters of pipeline-delete operation.
 type PipelineDeleteParams struct {
 	// UUID of the pipeline.
-	UUID string
+	UUID uuid.UUID
 }
 
 func unpackPipelineDeleteParams(packed middleware.Parameters) (params PipelineDeleteParams) {
@@ -2729,7 +2730,7 @@ func unpackPipelineDeleteParams(packed middleware.Parameters) (params PipelineDe
 			Name: "uuid",
 			In:   "path",
 		}
-		params.UUID = packed[key].(string)
+		params.UUID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -2759,7 +2760,7 @@ func decodePipelineDeleteParams(args [1]string, argsEscaped bool, r *http.Reques
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -2776,498 +2777,6 @@ func decodePipelineDeleteParams(args [1]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// PipelineEntryCreateParams is parameters of pipeline-entry-create operation.
-type PipelineEntryCreateParams struct {
-	// UUID of the pipeline.
-	UUID string
-}
-
-func unpackPipelineEntryCreateParams(packed middleware.Parameters) (params PipelineEntryCreateParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(string)
-	}
-	return params
-}
-
-func decodePipelineEntryCreateParams(args [1]string, argsEscaped bool, r *http.Request) (params PipelineEntryCreateParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// PipelineEntryDeleteParams is parameters of pipeline-entry-delete operation.
-type PipelineEntryDeleteParams struct {
-	// UUID of the pipeline.
-	UUID string
-	// Entry UUID of the pipeline.
-	EntryUUID string
-}
-
-func unpackPipelineEntryDeleteParams(packed middleware.Parameters) (params PipelineEntryDeleteParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "entry_uuid",
-			In:   "path",
-		}
-		params.EntryUUID = packed[key].(string)
-	}
-	return params
-}
-
-func decodePipelineEntryDeleteParams(args [2]string, argsEscaped bool, r *http.Request) (params PipelineEntryDeleteParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: entry_uuid.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "entry_uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.EntryUUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "entry_uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// PipelineEntryGetParams is parameters of pipeline-entry-get operation.
-type PipelineEntryGetParams struct {
-	// UUID of the pipeline.
-	UUID string
-	// Entry UUID of the pipeline.
-	EntryUUID string
-}
-
-func unpackPipelineEntryGetParams(packed middleware.Parameters) (params PipelineEntryGetParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "entry_uuid",
-			In:   "path",
-		}
-		params.EntryUUID = packed[key].(string)
-	}
-	return params
-}
-
-func decodePipelineEntryGetParams(args [2]string, argsEscaped bool, r *http.Request) (params PipelineEntryGetParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: entry_uuid.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "entry_uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.EntryUUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "entry_uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// PipelineEntryListParams is parameters of pipeline-entry-list operation.
-type PipelineEntryListParams struct {
-	// UUID of the pipeline.
-	UUID string
-}
-
-func unpackPipelineEntryListParams(packed middleware.Parameters) (params PipelineEntryListParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(string)
-	}
-	return params
-}
-
-func decodePipelineEntryListParams(args [1]string, argsEscaped bool, r *http.Request) (params PipelineEntryListParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// PipelineEntryUpdateParams is parameters of pipeline-entry-update operation.
-type PipelineEntryUpdateParams struct {
-	// UUID of the pipeline.
-	UUID string
-	// Entry UUID of the pipeline.
-	EntryUUID string
-}
-
-func unpackPipelineEntryUpdateParams(packed middleware.Parameters) (params PipelineEntryUpdateParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "entry_uuid",
-			In:   "path",
-		}
-		params.EntryUUID = packed[key].(string)
-	}
-	return params
-}
-
-func decodePipelineEntryUpdateParams(args [2]string, argsEscaped bool, r *http.Request) (params PipelineEntryUpdateParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: entry_uuid.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "entry_uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.EntryUUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "entry_uuid",
 			In:   "path",
 			Err:  err,
 		}
@@ -3278,9 +2787,7 @@ func decodePipelineEntryUpdateParams(args [2]string, argsEscaped bool, r *http.R
 // PipelineGetParams is parameters of pipeline-get operation.
 type PipelineGetParams struct {
 	// UUID of the pipeline.
-	UUID string
-	// (Optional) UUID of the user that owns the pipeline.
-	UserUUID OptString
+	UUID uuid.UUID
 }
 
 func unpackPipelineGetParams(packed middleware.Parameters) (params PipelineGetParams) {
@@ -3289,22 +2796,12 @@ func unpackPipelineGetParams(packed middleware.Parameters) (params PipelineGetPa
 			Name: "uuid",
 			In:   "path",
 		}
-		params.UUID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "user_uuid",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.UserUUID = v.(OptString)
-		}
+		params.UUID = packed[key].(uuid.UUID)
 	}
 	return params
 }
 
 func decodePipelineGetParams(args [1]string, argsEscaped bool, r *http.Request) (params PipelineGetParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
@@ -3329,7 +2826,7 @@ func decodePipelineGetParams(args [1]string, argsEscaped bool, r *http.Request) 
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -3350,52 +2847,13 @@ func decodePipelineGetParams(args [1]string, argsEscaped bool, r *http.Request) 
 			Err:  err,
 		}
 	}
-	// Decode query: user_uuid.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "user_uuid",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotUserUUIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotUserUUIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.UserUUID.SetTo(paramsDotUserUUIDVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "user_uuid",
-			In:   "query",
-			Err:  err,
-		}
-	}
 	return params, nil
 }
 
 // PipelineListParams is parameters of pipeline-list operation.
 type PipelineListParams struct {
+	// Filter pipelines by datasource UUID.
+	DatasourceUUID OptUUID
 	// Offset records.
 	Offset OptInt32
 	// Limit records.
@@ -3403,6 +2861,15 @@ type PipelineListParams struct {
 }
 
 func unpackPipelineListParams(packed middleware.Parameters) (params PipelineListParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "datasource_uuid",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.DatasourceUUID = v.(OptUUID)
+		}
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "offset",
@@ -3426,12 +2893,53 @@ func unpackPipelineListParams(packed middleware.Parameters) (params PipelineList
 
 func decodePipelineListParams(args [0]string, argsEscaped bool, r *http.Request) (params PipelineListParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: datasource_uuid.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "datasource_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotDatasourceUUIDVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDatasourceUUIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DatasourceUUID.SetTo(paramsDotDatasourceUUIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "datasource_uuid",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	// Decode query: offset.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "offset",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
@@ -3472,7 +2980,7 @@ func decodePipelineListParams(args [0]string, argsEscaped bool, r *http.Request)
 		cfg := uri.QueryParameterDecodingConfig{
 			Name:    "limit",
 			Style:   uri.QueryStyleForm,
-			Explode: false,
+			Explode: true,
 		}
 
 		if err := q.HasParam(cfg); err == nil {
@@ -3514,7 +3022,7 @@ func decodePipelineListParams(args [0]string, argsEscaped bool, r *http.Request)
 // PipelineUpdateParams is parameters of pipeline-update operation.
 type PipelineUpdateParams struct {
 	// UUID of the pipeline.
-	UUID string
+	UUID uuid.UUID
 }
 
 func unpackPipelineUpdateParams(packed middleware.Parameters) (params PipelineUpdateParams) {
@@ -3523,7 +3031,7 @@ func unpackPipelineUpdateParams(packed middleware.Parameters) (params PipelineUp
 			Name: "uuid",
 			In:   "path",
 		}
-		params.UUID = packed[key].(string)
+		params.UUID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -3553,7 +3061,7 @@ func decodePipelineUpdateParams(args [1]string, argsEscaped bool, r *http.Reques
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}

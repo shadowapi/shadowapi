@@ -4,12 +4,18 @@ properties:
   uuid:
     type: string
     description: "Unique identifier for the sync policy."
-  user_uuid:
+  pipeline_uuid:
     type: string
     description: "Unique identifier for the user associated with the sync policy."
-  service:
+  type:
     type: string
-    description: "The service this sync policy applies to (e.g., gmail, telegram, whatsapp, linkedin)."
+    description: Policy type (email, telegram, whatsapp, linkedin)
+  name:
+    type: string
+    description: Sync policy name
+  is_enabled:
+    type: boolean
+    description: Whether this policy is currently active
   blocklist:
     type: array
     description: "List of blocked emails or contact identifiers."
@@ -36,5 +42,6 @@ properties:
     format: date-time
     description: "Timestamp when the policy was last updated."
 required:
-  - user_id
-  - service
+  - pipeline_uuid
+  - name
+  - type

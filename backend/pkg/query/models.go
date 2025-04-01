@@ -223,22 +223,14 @@ type Oauth2Token struct {
 }
 
 type Pipeline struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	UserUUID  *uuid.UUID         `json:"user_uuid"`
-	Name      string             `json:"name"`
-	Flow      []byte             `json:"flow"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-}
-
-type PipelineEntry struct {
-	UUID         uuid.UUID          `json:"uuid"`
-	PipelineUuid *uuid.UUID         `json:"pipeline_uuid"`
-	ParentUuid   *uuid.UUID         `json:"parent_uuid"`
-	Type         string             `json:"type"`
-	Params       []byte             `json:"params"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	UUID           uuid.UUID          `json:"uuid"`
+	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
+	Name           string             `json:"name"`
+	Type           string             `json:"type"`
+	IsEnabled      bool               `json:"is_enabled"`
+	Flow           []byte             `json:"flow"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Storage struct {
@@ -252,15 +244,16 @@ type Storage struct {
 }
 
 type SyncPolicy struct {
-	UUID        uuid.UUID          `json:"uuid"`
-	UserUUID    *uuid.UUID         `json:"user_uuid"`
-	Service     string             `json:"service"`
-	Blocklist   []string           `json:"blocklist"`
-	ExcludeList []string           `json:"exclude_list"`
-	SyncAll     bool               `json:"sync_all"`
-	Settings    []byte             `json:"settings"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	UUID         uuid.UUID          `json:"uuid"`
+	PipelineUuid *uuid.UUID         `json:"pipeline_uuid"`
+	Type         string             `json:"type"`
+	Blocklist    []string           `json:"blocklist"`
+	ExcludeList  []string           `json:"exclude_list"`
+	SyncAll      bool               `json:"sync_all"`
+	IsEnabled    bool               `json:"is_enabled"`
+	Settings     []byte             `json:"settings"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
 type TgAccount struct {

@@ -8,23 +8,28 @@ INSERT INTO storage (
   created_at,
   updated_at
 ) VALUES (
-  @uuid,
-  @name,
-  @type,
-  @is_enabled,
-  @settings,
+ sqlc.arg('uuid')::uuid,
+ NULLIF(sqlc.arg('name'), ''),
+ NULLIF(sqlc.arg('type'), ''),
+ sqlc.arg('is_enabled')::boolean,
+  sqlc.arg('settings'),
   NOW(),
   NOW()
 ) RETURNING *;
+
+-- name: GetStorage :one
+SELECT
+    sqlc.embed(storage)
+FROM storage
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: ListStorages :many
 SELECT
     sqlc.embed(storage)
 FROM storage
 ORDER BY created_at DESC
-LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
-    OFFSET @offset_records::int;
-
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
 
 -- name: GetStorages :many
 WITH filtered_storages AS (
@@ -45,30 +50,17 @@ ORDER BY
     CASE WHEN sqlc.arg('order_by') = 'created_at' AND sqlc.arg('order_direction') = 'desc' THEN created_at END DESC,
     created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
-    OFFSET sqlc.arg('offset');
+    OFFSET sqlc.arg('offset')::int;
 
-
--- name: GetStorage :one
-SELECT
-    uuid,
-    name,
-    "type",
-    is_enabled,
-    settings,
-    created_at,
-    updated_at
-FROM storage
-WHERE uuid = $1
-LIMIT 1;
 
 -- name: UpdateStorage :exec
 UPDATE storage SET
-  "type" = @type,
-  name = @name,
-  is_enabled = @is_enabled,
-  settings = @settings,
+  name = NULLIF(sqlc.arg('name'), ''),
+  "type" = NULLIF(sqlc.arg('type'), ''),
+  is_enabled = sqlc.arg('is_enabled')::boolean,
+  settings = sqlc.arg('settings'),
   updated_at = NOW()
-WHERE uuid = @uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: DeleteStorage :exec
-DELETE FROM storage WHERE uuid = @uuid;
+DELETE FROM storage WHERE uuid = sqlc.arg('uuid')::uuid;

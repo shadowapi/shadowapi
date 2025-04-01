@@ -4,6 +4,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -31,7 +32,7 @@ func (h *Handler) StorageS3Create(ctx context.Context, req *api.StorageS3) (*api
 	}
 
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:      storageUUID,
+		UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
 		Name:      req.Name,
 		Type:      "s3",
 		IsEnabled: isEnabled,
@@ -56,7 +57,7 @@ func (h *Handler) StorageS3Delete(ctx context.Context, params api.StorageS3Delet
 		return ErrWithCode(http.StatusBadRequest, E("invalid s3 storage UUID"))
 	}
 
-	if err := query.New(h.dbp).DeleteStorage(ctx, s3UUID); err != nil {
+	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: uToBytes(s3UUID), Valid: true}); err != nil {
 		log.Error("failed to delete s3 storage", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete s3 storage"))
 	}
@@ -72,7 +73,7 @@ func (h *Handler) StorageS3Get(ctx context.Context, params api.StorageS3GetParam
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid s3 storage UUID"))
 	}
 
-	storage, err := query.New(h.dbp).GetStorage(ctx, [16]byte(id.Bytes()))
+	storage, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(id), Valid: true})
 	if err != nil {
 		log.Error("failed to get s3 storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get s3 storage"))
@@ -90,7 +91,7 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageS3, error) {
-		storage, err := query.New(tx).GetStorage(ctx, [16]byte(s3UUID.Bytes()))
+		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(s3UUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get s3 storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get s3 storage"))
@@ -100,7 +101,7 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 		if req.IsEnabled.IsSet() {
 			isEnabled = req.IsEnabled.Value
 		} else {
-			isEnabled = storage.IsEnabled
+			isEnabled = storage.Storage.IsEnabled
 		}
 
 		newSettings, err := json.Marshal(req)
@@ -110,7 +111,7 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 		}
 
 		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      s3UUID,
+			UUID:      pgtype.UUID{Bytes: uToBytes(s3UUID), Valid: true},
 			Type:      "s3",
 			Name:      req.Name,
 			IsEnabled: isEnabled,
@@ -122,4 +123,15 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 
 		return h.StorageS3Get(ctx, api.StorageS3GetParams{UUID: params.UUID})
 	})
+}
+
+func QToStorageS3(row query.GetStorageRow) (*api.StorageS3, error) {
+	var stored api.StorageS3
+	if err := json.Unmarshal(row.Storage.Settings, &stored); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings", err.Error()))
+	}
+	stored.UUID = api.NewOptString(row.Storage.UUID.String())
+	stored.Name = row.Storage.Name
+	stored.IsEnabled = api.NewOptBool(row.Storage.IsEnabled)
+	return &stored, nil
 }

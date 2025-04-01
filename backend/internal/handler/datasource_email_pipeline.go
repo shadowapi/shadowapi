@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -27,7 +28,7 @@ func (h *Handler) DatasourceEmailRunPipeline(
 		return nil, ErrWithCode(http.StatusBadRequest, E("wrong connectionUUID"))
 	}
 
-	ce, err := query.New(h.dbp).GetDatasource(ctx, connectionUUID)
+	ce, err := query.New(h.dbp).GetDatasource(ctx, pgtype.UUID{Bytes: [16]byte(connectionUUID.Bytes()), Valid: true})
 	if err != nil && err != pgx.ErrNoRows {
 		log.Error("no such connection", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("no such connection"))

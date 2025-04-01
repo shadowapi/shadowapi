@@ -23,21 +23,21 @@ INSERT INTO "file" (
     created_at,
     updated_at
 ) VALUES (
-             $1,
+             $1::uuid,
              $2,
-             $3,
-             $4,
+             $3::uuid,
+            $4,
              $5,
              $6,
-             NOW(),
-             NULL
+          NOW(),
+             NOW()
          ) RETURNING uuid, storage_type, storage_uuid, name, mime_type, size, created_at, updated_at
 `
 
 type CreateFileParams struct {
-	UUID        uuid.UUID   `json:"uuid"`
+	UUID        pgtype.UUID `json:"uuid"`
 	StorageType string      `json:"storage_type"`
-	StorageUuid *uuid.UUID  `json:"storage_uuid"`
+	StorageUuid pgtype.UUID `json:"storage_uuid"`
 	Name        string      `json:"name"`
 	MimeType    pgtype.Text `json:"mime_type"`
 	Size        pgtype.Int8 `json:"size"`
@@ -80,12 +80,10 @@ const getFile = `-- name: GetFile :one
 SELECT
     uuid, storage_type, storage_uuid, name, mime_type, size, created_at, updated_at
 FROM "file"
-WHERE
-    uuid = $1
-LIMIT 1
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetFile(ctx context.Context, argUuid uuid.UUID) (File, error) {
+func (q *Queries) GetFile(ctx context.Context, argUuid pgtype.UUID) (File, error) {
 	row := q.db.QueryRow(ctx, getFile, argUuid)
 	var i File
 	err := row.Scan(
@@ -106,17 +104,17 @@ SELECT
     uuid, storage_type, storage_uuid, name, mime_type, size, created_at, updated_at
 FROM "file"
 ORDER BY created_at DESC
-LIMIT CASE WHEN $2::int = 0 THEN NULL ELSE $2::int END
-    OFFSET $1::int
+LIMIT NULLIF($2::int, 0)
+    OFFSET $1
 `
 
 type ListFilesParams struct {
-	OffsetRecords int32 `json:"offset_records"`
-	LimitRecords  int32 `json:"limit_records"`
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
 func (q *Queries) ListFiles(ctx context.Context, arg ListFilesParams) ([]File, error) {
-	rows, err := q.db.Query(ctx, listFiles, arg.OffsetRecords, arg.LimitRecords)
+	rows, err := q.db.Query(ctx, listFiles, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -147,22 +145,22 @@ func (q *Queries) ListFiles(ctx context.Context, arg ListFilesParams) ([]File, e
 const updateFile = `-- name: UpdateFile :exec
 UPDATE "file"
 SET
-    storage_type = COALESCE($1, storage_type),
-    storage_uuid = COALESCE($2, storage_uuid),
-    name         = COALESCE($3, name),
-    mime_type    = COALESCE($4, mime_type),
-    size         = COALESCE($5, size),
-    updated_at   = NOW()
-WHERE uuid = $6
+    storage_type = $1,
+    storage_uuid = $2::uuid,
+    name         = $3,
+    mime_type    = $4,
+    size         = $5,
+    updated_at = NOW()
+WHERE uuid = $6::uuid
 `
 
 type UpdateFileParams struct {
 	StorageType string      `json:"storage_type"`
-	StorageUuid *uuid.UUID  `json:"storage_uuid"`
+	StorageUuid pgtype.UUID `json:"storage_uuid"`
 	Name        string      `json:"name"`
 	MimeType    pgtype.Text `json:"mime_type"`
 	Size        pgtype.Int8 `json:"size"`
-	UUID        uuid.UUID   `json:"uuid"`
+	UUID        pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateFile(ctx context.Context, arg UpdateFileParams) error {

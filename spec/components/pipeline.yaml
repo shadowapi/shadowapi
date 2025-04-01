@@ -3,22 +3,42 @@ additionalProperties: false
 properties:
   uuid:
     type: string
-  user_uuid:
+    format: uuid
+    description: Unique identifier
+  datasource_uuid:
     type: string
-    description: The user (or account) that owns this pipeline.
-    readOnly: true
+    format: uuid
+    description: Optional. Required for datasources based pipelines
+  type:
+    type: string
+    description: Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching contacts outside of pipelines
   name:
     type: string
+    description: Pipeline name. Ex gmail_ilya@reactima.com
+  is_enabled:
+    type: boolean
+    description: Whether this pipeline is currently active
   flow:
     type: object
-    additionalProperties: true
+    description: JSON representation of the flow (compatible with @xyflow/react)
+    properties:
+      nodes:
+        type: array
+        items:
+          $ref: "../openapi.yaml#/components/schemas/PipelineNode"
+      edges:
+        type: array
+        items:
+          $ref: "../openapi.yaml#/components/schemas/PipelineEdge"
   created_at:
-    format: date-time
     type: string
+    format: date-time
+    description: "Timestamp when the policy was created."
   updated_at:
-    format: date-time
     type: string
+    format: date-time
+    description: "Timestamp when the policy was last updated."
 required:
-  - uuid
+  - type
   - name
-  - flow
+  - datasource_uuid

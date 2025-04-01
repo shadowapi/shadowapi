@@ -4,6 +4,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -32,7 +33,7 @@ func (h *Handler) StorageHostfilesCreate(ctx context.Context, req *api.StorageHo
 	}
 
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:      storageUUID,
+		UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
 		Name:      req.Name,
 		Type:      "hostfiles",
 		IsEnabled: isEnabled,
@@ -59,7 +60,7 @@ func (h *Handler) StorageHostfilesDelete(ctx context.Context, params api.Storage
 		return ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	if err := query.New(h.dbp).DeleteStorage(ctx, hostfilesUUID); err != nil {
+	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: uToBytes(hostfilesUUID), Valid: true}); err != nil {
 		log.Error("failed to delete hostfiles storage", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete hostfiles storage"))
 	}
@@ -76,7 +77,7 @@ func (h *Handler) StorageHostfilesGet(ctx context.Context, params api.StorageHos
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	storage, err := query.New(h.dbp).GetStorage(ctx, [16]byte(id.Bytes()))
+	storage, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(id), Valid: true})
 	if err != nil {
 		log.Error("failed to get hostfiles storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -95,7 +96,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageHostfiles, error) {
-		storage, err := query.New(tx).GetStorage(ctx, [16]byte(hostfilesUUID.Bytes()))
+		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(hostfilesUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get hostfiles storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -106,7 +107,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 		if req.IsEnabled.IsSet() {
 			isEnabled = req.IsEnabled.Value
 		} else {
-			isEnabled = storage.IsEnabled
+			isEnabled = storage.Storage.IsEnabled
 		}
 
 		updatedSettings, err := json.Marshal(req)
@@ -116,7 +117,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 		}
 
 		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      hostfilesUUID,
+			UUID:      pgtype.UUID{Bytes: uToBytes(hostfilesUUID), Valid: true},
 			Type:      "hostfiles",
 			Name:      req.Name,
 			IsEnabled: isEnabled,
@@ -128,4 +129,15 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 
 		return h.StorageHostfilesGet(ctx, api.StorageHostfilesGetParams{UUID: params.UUID})
 	})
+}
+
+func QToStorageHostfile(row query.GetStorageRow) (*api.StorageHostfiles, error) {
+	var stored api.StorageHostfiles
+	if err := json.Unmarshal(row.Storage.Settings, &stored); err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings", err.Error()))
+	}
+	stored.UUID = api.NewOptString(row.Storage.UUID.String())
+	stored.Name = row.Storage.Name
+	stored.IsEnabled = api.NewOptBool(row.Storage.IsEnabled)
+	return &stored, nil
 }

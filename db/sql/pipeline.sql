@@ -1,73 +1,75 @@
 -- name: CreatePipeline :one
 INSERT INTO pipeline (
-  uuid, user_uuid, name, flow,
-  created_at, updated_at
-)
-VALUES (
-  @uuid,
-  @user_uuid,        -- new
-  @name,
-  @flow,
-  NOW(),
+  uuid,
+  datasource_uuid,
+  name,
+  type,
+  is_enabled,
+  flow,
+  created_at,
+  updated_at
+) VALUES (
+             sqlc.arg('uuid')::uuid,
+             sqlc.arg('datasource_uuid')::uuid,
+             NULLIF(sqlc.arg('name'), ''),
+             NULLIF(sqlc.arg('type'), ''),
+  sqlc.arg('is_enabled')::boolean,
+              sqlc.arg('flow'),
+             NOW(),
   NOW()
 ) RETURNING *;
 
--- name: UpdatePipeline :exec
-UPDATE pipeline SET
-  name = COALESCE(@name, name),
-  flow = COALESCE(@flow, flow),
-  updated_at = NOW()
-WHERE uuid = @uuid
-  AND (
-    -- only the owning user can update
-    user_uuid = @user_uuid
-  );
+-- name: GetPipeline :one
+SELECT
+    sqlc.embed(pipeline)
+FROM pipeline
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
--- name: DeletePipeline :exec
-DELETE FROM pipeline WHERE uuid = @uuid;
+-- name: ListPipelines :many
+SELECT
+    sqlc.embed(pipeline)
+FROM pipeline
+ORDER BY created_at DESC
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
 
 -- name: GetPipelines :many
+WITH filtered_pipelines AS (
+    SELECT p.*
+    FROM pipeline p
+    WHERE
+        (NULLIF(sqlc.arg('uuid'), '') IS NULL OR p.uuid = sqlc.arg('uuid')::uuid)
+      AND (NULLIF(sqlc.arg('datasource_uuid'), '') IS NULL OR p.datasource_uuid = sqlc.arg('datasource_uuid')::uuid)
+      AND (NULLIF(sqlc.arg('type'), '') IS NULL OR p.type = sqlc.arg('type'))
+      AND (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR p.is_enabled = sqlc.arg('is_enabled')::boolean)
+      AND (NULLIF(sqlc.arg('name'), '') IS NULL OR p.name ILIKE '%' || sqlc.arg('name') || '%')
+)
 SELECT
-*
-FROM pipeline
-WHERE 
-  -- if all params are null, select all
-  (sqlc.narg('uuid')::text IS NULL
-   AND sqlc.narg('name')::text IS NULL
-   AND sqlc.narg('created_at_from')::timestamp IS NULL
-  ) OR
-  -- if any param is not null, filter
-  (@uuid IS NOT NULL AND "uuid"::text = @uuid::text)
-  OR (@name IS NOT NULL AND "name"::text like @name::text)
-  OR (@created_at_from IS NOT NULL AND "created_at" >= @created_at_from)
-LIMIT sqlc.narg('limit') OFFSET sqlc.narg('offset');
+    *,
+    (SELECT count(*) FROM filtered_pipelines) AS total_count
+FROM filtered_pipelines
+ORDER BY
+    CASE WHEN sqlc.arg('order_by') = 'created_at' AND sqlc.arg('order_direction') = 'asc' THEN created_at END ASC,
+    CASE WHEN sqlc.arg('order_by') = 'created_at' AND sqlc.arg('order_direction') = 'desc' THEN created_at END DESC,
+    CASE WHEN sqlc.arg('order_by') = 'name' AND sqlc.arg('order_direction') = 'asc' THEN name END ASC,
+    CASE WHEN sqlc.arg('order_by') = 'name' AND sqlc.arg('order_direction') = 'desc' THEN name END DESC,
+    CASE WHEN sqlc.arg('order_by') = 'type' AND sqlc.arg('order_direction') = 'asc' THEN type END ASC,
+    CASE WHEN sqlc.arg('order_by') = 'type' AND sqlc.arg('order_direction') = 'desc' THEN type END DESC,
+    created_at DESC
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset')::int;
 
--- name: AddPipelineEntry :exec
-INSERT INTO pipeline_entry (
-  uuid, pipeline_uuid, parent_uuid, "type", params, created_at
-) VALUES (
-  @uuid, @pipeline_uuid, @parent_uuid, @type, @params, NOW()
-) RETURNING *;
 
--- name: GetPipelineEntryByUUID :one
-SELECT * FROM pipeline_entry
-WHERE uuid = @uuid;
 
--- name: DeletePipelineEntry :exec
-DELETE FROM pipeline_entry
-WHERE uuid = @uuid;
-
--- name: GetPipelineEntries :many
-SELECT * FROM pipeline_entry
-WHERE
-	(@pipeline_uuid <> '' AND "pipeline_uuid" = @pipeline_uuid) OR
-	(@parent_uuid <> '' AND "parent_uuid" = @parent_uuid) OR
-	(@type <> '' AND "type" = @type) OR
-	(@name <> '' AND "name" like @name )
-ORDER BY created_at DESC;
-
--- name: UpdatePipelineEntry :exec
-UPDATE pipeline_entry SET
-  params = COALESCE(@params, params),
+-- name: UpdatePipeline :exec
+UPDATE pipeline SET
+  "name" = NULLIF(sqlc.arg('name'), ''),
+  "type" = NULLIF(sqlc.arg('type'), ''),
+  datasource_uuid = sqlc.arg('datasource_uuid')::uuid,
+  is_enabled = sqlc.arg('is_enabled')::boolean,
+  flow = sqlc.arg('flow'),
   updated_at = NOW()
-WHERE uuid = @uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: DeletePipeline :exec
+DELETE FROM pipeline WHERE uuid = sqlc.arg('uuid')::uuid;

@@ -15,8 +15,9 @@ import (
 )
 
 // TODO @reactima see possible issues!
-// FileCreate implements file-create operation.
-// Upload a new file and create its record.
+// DEDUBLICATE!
+// 1. FileCreate implements file-create operation.
+// 2. Upload a new file and create its record.
 // POST /file
 //
 // Possible issues or limitations:
@@ -41,7 +42,7 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 			log.Error("invalid storage_uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 		}
-		storageRow, err := query.New(tx).GetStorage(ctx, sUUID)
+		storageRow, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(sUUID), Valid: true})
 		if err == pgx.ErrNoRows {
 			log.Error("storage row not found", "uuid", req.StorageUUID)
 			return nil, ErrWithCode(http.StatusBadRequest, E("storage not found"))
@@ -57,9 +58,9 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 
 		// 3. Insert into DB using the type from the storage row
 		fileRow, err := query.New(tx).CreateFile(ctx, query.CreateFileParams{
-			UUID:        fileUUID,
-			StorageType: storageRow.Type, // read from the DB row
-			StorageUuid: &sUUID,
+			UUID:        pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true},
+			StorageUuid: pgtype.UUID{Bytes: uToBytes(sUUID), Valid: true},
+			StorageType: storageRow.Storage.Type,
 			Name:        name,
 			MimeType: pgtype.Text{
 				String: mimeType,
@@ -80,7 +81,7 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 			File: api.NewOptFileObject(api.FileObject{
 				UUID:        api.NewOptString(fileRow.UUID.String()),
 				StorageUUID: api.NewOptString(req.StorageUUID),
-				StorageType: api.NewOptFileObjectStorageType(api.FileObjectStorageType(storageRow.Type)),
+				StorageType: api.NewOptString(storageRow.Storage.Type),
 				Name:        api.NewOptString(fileRow.Name),
 				MimeType:    api.NewOptString(fileRow.MimeType.String),
 				Size:        api.NewOptInt(int(fileRow.Size.Int64)),
@@ -137,7 +138,7 @@ func (h *Handler) FileGet(ctx context.Context, params api.FileGetParams) (*api.F
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid file UUID"))
 	}
 
-	fileRow, err := query.New(h.dbp).GetFile(ctx, fileUUID)
+	fileRow, err := query.New(h.dbp).GetFile(ctx, pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true})
 	if err == pgx.ErrNoRows {
 		return nil, ErrWithCode(http.StatusNotFound, E("file not found"))
 	} else if err != nil {
@@ -150,8 +151,8 @@ func (h *Handler) FileGet(ctx context.Context, params api.FileGetParams) (*api.F
 		Name:        api.NewOptString(fileRow.Name),
 		MimeType:    api.NewOptString(fileRow.MimeType.String),
 		Size:        api.NewOptInt(int(fileRow.Size.Int64)),
-		StorageType: api.NewOptFileObjectStorageType(api.FileObjectStorageType(fileRow.StorageType)),
-		StorageUUID: api.NewOptString(""), // Not set if we didn't store it
+		StorageType: api.NewOptString(""), // TODO @reactima
+		StorageUUID: api.NewOptString(""), // TODO @reactima Not set if we didn't store it
 	}
 	if fileRow.CreatedAt.Valid {
 		out.CreatedAt = api.NewOptDateTime(fileRow.CreatedAt.Time)
@@ -183,8 +184,8 @@ func (h *Handler) FileList(ctx context.Context, params api.FileListParams) ([]ap
 	}
 
 	files, err := query.New(h.dbp).ListFiles(ctx, query.ListFilesParams{
-		OffsetRecords: offset,
-		LimitRecords:  limit,
+		Offset: offset,
+		Limit:  limit,
 	})
 	if err != nil && err != pgx.ErrNoRows {
 		log.Error("failed to list files", "error", err)
@@ -198,7 +199,7 @@ func (h *Handler) FileList(ctx context.Context, params api.FileListParams) ([]ap
 			Name:        api.NewOptString(f.Name),
 			MimeType:    api.NewOptString(f.MimeType.String),
 			Size:        api.NewOptInt(int(f.Size.Int64)),
-			StorageType: api.NewOptFileObjectStorageType(api.FileObjectStorageType(f.StorageType)),
+			StorageType: api.NewOptString(f.StorageType),
 			StorageUUID: api.NewOptString(""),
 		}
 		if f.CreatedAt.Valid {
@@ -233,7 +234,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.FileObject, error) {
 		// We'll fetch the record first to see if it exists
-		_, err := query.New(tx).GetFile(ctx, fileUUID)
+		_, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true})
 		if err == pgx.ErrNoRows {
 			return nil, ErrWithCode(http.StatusNotFound, E("file not found"))
 		} else if err != nil {
@@ -243,12 +244,11 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 
 		// Now update it
 		err = query.New(tx).UpdateFile(ctx, query.UpdateFileParams{
-			StorageType: "", // keep existing
-			StorageUuid: nil,
+			StorageType: "",            // keep existing
+			StorageUuid: pgtype.UUID{}, // keep existing
 			Name:        req.Name,      // use the new name from the request
 			MimeType:    pgtype.Text{}, // keep existing mime type
 			Size:        pgtype.Int8{}, // keep existing size
-			UUID:        fileUUID,
 		})
 		if err != nil {
 			log.Error("failed to update file", "error", err)
@@ -256,7 +256,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 		}
 
 		// Retrieve the updated file
-		fileRow, err := query.New(tx).GetFile(ctx, fileUUID)
+		fileRow, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get file post-update", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get file post-update"))
@@ -267,7 +267,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 			Name:        api.NewOptString(fileRow.Name),
 			MimeType:    api.NewOptString(fileRow.MimeType.String),
 			Size:        api.NewOptInt(int(fileRow.Size.Int64)),
-			StorageType: api.NewOptFileObjectStorageType(api.FileObjectStorageType(fileRow.StorageType)),
+			StorageType: api.NewOptString(fileRow.StorageType),
 			StorageUUID: api.NewOptString(""),
 		}
 		if fileRow.CreatedAt.Valid {
@@ -343,7 +343,7 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 		}
 
 		// 2. Look up the storage row in the DB.
-		storageRow, queryErr := query.New(tx).GetStorage(ctx, sUUID)
+		storageRow, queryErr := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(sUUID), Valid: true})
 		if queryErr == pgx.ErrNoRows {
 			log.Error("storage row not found", "uuid", req.StorageUUID)
 			return nil, ErrWithCode(http.StatusBadRequest, E("storage not found"))
@@ -358,9 +358,9 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 		mimeType := req.MimeType.Or("application/octet-stream")
 
 		fileRow, createErr := query.New(tx).CreateFile(ctx, query.CreateFileParams{
-			UUID:        fileUUID,
-			StorageType: storageRow.Type, // from the DB row
-			StorageUuid: &sUUID,
+			UUID:        pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true},
+			StorageType: storageRow.Storage.Type, // keep existing
+			StorageUuid: pgtype.UUID{},           // keep existing
 			Name:        name,
 			MimeType: pgtype.Text{
 				String: mimeType,
@@ -381,7 +381,7 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 			File: api.NewOptFileObject(api.FileObject{
 				UUID:        api.NewOptString(fileRow.UUID.String()),
 				StorageUUID: api.NewOptString(req.StorageUUID),
-				StorageType: api.NewOptFileObjectStorageType(api.FileObjectStorageType(storageRow.Type)),
+				StorageType: api.NewOptString(fileRow.StorageType),
 				Name:        api.NewOptString(fileRow.Name),
 				MimeType:    api.NewOptString(fileRow.MimeType.String),
 				Size:        api.NewOptInt(int(fileRow.Size.Int64)),

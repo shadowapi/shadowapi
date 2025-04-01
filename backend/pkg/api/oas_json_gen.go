@@ -2655,26 +2655,28 @@ func (s *Datasource) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Datasource) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
 	}
 	{
-		if s.UserUUID.Set {
-			e.FieldStart("user_uuid")
-			s.UserUUID.Encode(e)
-		}
+		e.FieldStart("user_uuid")
+		e.Str(s.UserUUID)
+	}
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
 	}
 	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
 	{
-		e.FieldStart("is_enabled")
-		e.Bool(s.IsEnabled)
-	}
-	{
-		e.FieldStart("type")
-		e.Str(s.Type)
+		if s.IsEnabled.Set {
+			e.FieldStart("is_enabled")
+			s.IsEnabled.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("provider")
@@ -2697,9 +2699,9 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 var jsonFieldsNameOfDatasource = [8]string{
 	0: "uuid",
 	1: "user_uuid",
-	2: "name",
-	3: "is_enabled",
-	4: "type",
+	2: "type",
+	3: "name",
+	4: "is_enabled",
 	5: "provider",
 	6: "created_at",
 	7: "updated_at",
@@ -2715,11 +2717,9 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "uuid":
-			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.UUID = string(v)
-				if err != nil {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -2727,17 +2727,31 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.UserUUID.Reset()
-				if err := s.UserUUID.Decode(d); err != nil {
+				v, err := d.Str()
+				s.UserUUID = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"user_uuid\"")
 			}
-		case "name":
+		case "type":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -2749,28 +2763,14 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "is_enabled":
-			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Bool()
-				s.IsEnabled = bool(v)
-				if err != nil {
+				s.IsEnabled.Reset()
+				if err := s.IsEnabled.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_enabled\"")
-			}
-		case "type":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "provider":
 			requiredBitSet[0] |= 1 << 5
@@ -2814,7 +2814,7 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111101,
+		0b00101110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -5258,48 +5258,6 @@ func (s *FileObject) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *FileObject) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes FileObjectStorageType as json.
-func (s FileObjectStorageType) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes FileObjectStorageType from json.
-func (s *FileObjectStorageType) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode FileObjectStorageType to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch FileObjectStorageType(v) {
-	case FileObjectStorageTypeS3:
-		*s = FileObjectStorageTypeS3
-	case FileObjectStorageTypePostgres:
-		*s = FileObjectStorageTypePostgres
-	case FileObjectStorageTypeHostfiles:
-		*s = FileObjectStorageTypeHostfiles
-	default:
-		*s = FileObjectStorageType(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s FileObjectStorageType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *FileObjectStorageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8643,35 +8601,37 @@ func (s *OptFileObject) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes FileObjectStorageType as json.
-func (o OptFileObjectStorageType) Encode(e *jx.Encoder) {
+// Encode encodes float64 as json.
+func (o OptFloat64) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
-	e.Str(string(o.Value))
+	e.Float64(float64(o.Value))
 }
 
-// Decode decodes FileObjectStorageType from json.
-func (o *OptFileObjectStorageType) Decode(d *jx.Decoder) error {
+// Decode decodes float64 from json.
+func (o *OptFloat64) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptFileObjectStorageType to nil")
+		return errors.New("invalid: unable to decode OptFloat64 to nil")
 	}
 	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
+	v, err := d.Float64()
+	if err != nil {
 		return err
 	}
+	o.Value = float64(v)
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptFileObjectStorageType) MarshalJSON() ([]byte, error) {
+func (s OptFloat64) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptFileObjectStorageType) UnmarshalJSON(data []byte) error {
+func (s *OptFloat64) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9099,6 +9059,106 @@ func (s *OptNilString) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes PipelineEdgeType as json.
+func (o OptPipelineEdgeType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes PipelineEdgeType from json.
+func (o *OptPipelineEdgeType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPipelineEdgeType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPipelineEdgeType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPipelineEdgeType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PipelineFlow as json.
+func (o OptPipelineFlow) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes PipelineFlow from json.
+func (o *OptPipelineFlow) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPipelineFlow to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPipelineFlow) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPipelineFlow) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PipelineNodeDataConfig as json.
+func (o OptPipelineNodeDataConfig) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes PipelineNodeDataConfig from json.
+func (o *OptPipelineNodeDataConfig) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPipelineNodeDataConfig to nil")
+	}
+	o.Set = true
+	o.Value = make(PipelineNodeDataConfig)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPipelineNodeDataConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPipelineNodeDataConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes string as json.
 func (o OptString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -9236,6 +9296,41 @@ func (s *OptTelegramSessionHistoryItemMeta) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes uuid.UUID as json.
+func (o OptUUID) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	json.EncodeUUID(e, o.Value)
+}
+
+// Decode decodes uuid.UUID from json.
+func (o *OptUUID) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUUID to nil")
+	}
+	o.Set = true
+	v, err := json.DecodeUUID(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUUID) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUUID) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes UploadPresignedUrlRequestStorageType as json.
 func (o OptUploadPresignedUrlRequestStorageType) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -9313,22 +9408,34 @@ func (s *Pipeline) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Pipeline) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
 	}
 	{
-		if s.UserUUID.Set {
-			e.FieldStart("user_uuid")
-			s.UserUUID.Encode(e)
-		}
+		e.FieldStart("datasource_uuid")
+		json.EncodeUUID(e, s.DatasourceUUID)
+	}
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
 	}
 	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
 	{
-		e.FieldStart("flow")
-		s.Flow.Encode(e)
+		if s.IsEnabled.Set {
+			e.FieldStart("is_enabled")
+			s.IsEnabled.Encode(e)
+		}
+	}
+	{
+		if s.Flow.Set {
+			e.FieldStart("flow")
+			s.Flow.Encode(e)
+		}
 	}
 	{
 		if s.CreatedAt.Set {
@@ -9344,13 +9451,15 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPipeline = [6]string{
+var jsonFieldsNameOfPipeline = [8]string{
 	0: "uuid",
-	1: "user_uuid",
-	2: "name",
-	3: "flow",
-	4: "created_at",
-	5: "updated_at",
+	1: "datasource_uuid",
+	2: "type",
+	3: "name",
+	4: "is_enabled",
+	5: "flow",
+	6: "created_at",
+	7: "updated_at",
 }
 
 // Decode decodes Pipeline from json.
@@ -9363,29 +9472,41 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "uuid":
-			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.UUID = string(v)
-				if err != nil {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
-		case "user_uuid":
+		case "datasource_uuid":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.UserUUID.Reset()
-				if err := s.UserUUID.Decode(d); err != nil {
+				v, err := json.DecodeUUID(d)
+				s.DatasourceUUID = v
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_uuid\"")
+				return errors.Wrap(err, "decode field \"datasource_uuid\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "name":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -9396,9 +9517,19 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "flow":
-			requiredBitSet[0] |= 1 << 3
+		case "is_enabled":
 			if err := func() error {
+				s.IsEnabled.Reset()
+				if err := s.IsEnabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_enabled\"")
+			}
+		case "flow":
+			if err := func() error {
+				s.Flow.Reset()
 				if err := s.Flow.Decode(d); err != nil {
 					return err
 				}
@@ -9436,7 +9567,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001101,
+		0b00001110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -9483,342 +9614,107 @@ func (s *Pipeline) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *PipelineCreateReq) Encode(e *jx.Encoder) {
+func (s *PipelineEdge) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *PipelineCreateReq) encodeFields(e *jx.Encoder) {
+func (s *PipelineEdge) encodeFields(e *jx.Encoder) {
 	{
-		if s.UserUUID.Set {
-			e.FieldStart("user_uuid")
-			s.UserUUID.Encode(e)
-		}
+		e.FieldStart("id")
+		e.Str(s.ID)
 	}
 	{
-		e.FieldStart("name")
-		e.Str(s.Name)
+		e.FieldStart("source")
+		e.Str(s.Source)
 	}
 	{
-		e.FieldStart("flow")
-		s.Flow.Encode(e)
+		e.FieldStart("target")
+		e.Str(s.Target)
 	}
-}
-
-var jsonFieldsNameOfPipelineCreateReq = [3]string{
-	0: "user_uuid",
-	1: "name",
-	2: "flow",
-}
-
-// Decode decodes PipelineCreateReq from json.
-func (s *PipelineCreateReq) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineCreateReq to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "user_uuid":
-			if err := func() error {
-				s.UserUUID.Reset()
-				if err := s.UserUUID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_uuid\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "flow":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.Flow.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"flow\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineCreateReq")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000110,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineCreateReq) {
-					name = jsonFieldsNameOfPipelineCreateReq[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineCreateReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineCreateReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s PipelineCreateReqFlow) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s PipelineCreateReqFlow) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
+	{
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
 		}
 	}
 }
 
-// Decode decodes PipelineCreateReqFlow from json.
-func (s *PipelineCreateReqFlow) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineCreateReqFlow to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineCreateReqFlow")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s PipelineCreateReqFlow) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineCreateReqFlow) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *PipelineEntry) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *PipelineEntry) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
-	}
-	{
-		e.FieldStart("pipeline_uuid")
-		e.Str(s.PipelineUUID)
-	}
-	{
-		if s.ParentUUID.Set {
-			e.FieldStart("parent_uuid")
-			s.ParentUUID.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("type")
-		e.Str(s.Type)
-	}
-	{
-		e.FieldStart("params")
-		s.Params.Encode(e)
-	}
-	{
-		if s.CreatedAt.Set {
-			e.FieldStart("created_at")
-			s.CreatedAt.Encode(e, json.EncodeDateTime)
-		}
-	}
-	{
-		if s.UpdatedAt.Set {
-			e.FieldStart("updated_at")
-			s.UpdatedAt.Encode(e, json.EncodeDateTime)
-		}
-	}
-}
-
-var jsonFieldsNameOfPipelineEntry = [7]string{
-	0: "uuid",
-	1: "pipeline_uuid",
-	2: "parent_uuid",
+var jsonFieldsNameOfPipelineEdge = [4]string{
+	0: "id",
+	1: "source",
+	2: "target",
 	3: "type",
-	4: "params",
-	5: "created_at",
-	6: "updated_at",
 }
 
-// Decode decodes PipelineEntry from json.
-func (s *PipelineEntry) Decode(d *jx.Decoder) error {
+// Decode decodes PipelineEdge from json.
+func (s *PipelineEdge) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntry to nil")
+		return errors.New("invalid: unable to decode PipelineEdge to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "uuid":
+		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.UUID = string(v)
+				s.ID = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"uuid\"")
+				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "pipeline_uuid":
+		case "source":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
-				s.PipelineUUID = string(v)
+				s.Source = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"pipeline_uuid\"")
+				return errors.Wrap(err, "decode field \"source\"")
 			}
-		case "parent_uuid":
-			if err := func() error {
-				s.ParentUUID.Reset()
-				if err := s.ParentUUID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"parent_uuid\"")
-			}
-		case "type":
-			requiredBitSet[0] |= 1 << 3
+		case "target":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
-				s.Type = string(v)
+				s.Target = string(v)
 				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"target\"")
+			}
+		case "type":
+			if err := func() error {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"type\"")
 			}
-		case "params":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.Params.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"params\"")
-			}
-		case "created_at":
-			if err := func() error {
-				s.CreatedAt.Reset()
-				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"created_at\"")
-			}
-		case "updated_at":
-			if err := func() error {
-				s.UpdatedAt.Reset()
-				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"updated_at\"")
-			}
 		default:
-			return errors.Errorf("unexpected field %q", k)
+			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntry")
+		return errors.Wrap(err, "decode PipelineEdge")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -9830,8 +9726,8 @@ func (s *PipelineEntry) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineEntry) {
-					name = jsonFieldsNameOfPipelineEntry[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfPipelineEdge) {
+					name = jsonFieldsNameOfPipelineEdge[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -9852,717 +9748,92 @@ func (s *PipelineEntry) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineEntry) MarshalJSON() ([]byte, error) {
+func (s *PipelineEdge) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntry) UnmarshalJSON(data []byte) error {
+func (s *PipelineEdge) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PipelineEdgeType as json.
+func (s PipelineEdgeType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PipelineEdgeType from json.
+func (s *PipelineEdgeType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PipelineEdgeType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PipelineEdgeType(v) {
+	case PipelineEdgeTypeDefault:
+		*s = PipelineEdgeTypeDefault
+	case PipelineEdgeTypeStep:
+		*s = PipelineEdgeTypeStep
+	default:
+		*s = PipelineEdgeType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PipelineEdgeType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PipelineEdgeType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *PipelineEntryCreateReq) Encode(e *jx.Encoder) {
+func (s *PipelineFlow) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *PipelineEntryCreateReq) encodeFields(e *jx.Encoder) {
+func (s *PipelineFlow) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
-	}
-	{
-		e.FieldStart("pipeline_uuid")
-		e.Str(s.PipelineUUID)
-	}
-	{
-		if s.ParentUUID.Set {
-			e.FieldStart("parent_uuid")
-			s.ParentUUID.Encode(e)
+		if s.Nodes != nil {
+			e.FieldStart("nodes")
+			e.ArrStart()
+			for _, elem := range s.Nodes {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
 		}
 	}
 	{
-		e.FieldStart("type")
-		e.Str(s.Type)
-	}
-	{
-		e.FieldStart("params")
-		s.Params.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfPipelineEntryCreateReq = [5]string{
-	0: "uuid",
-	1: "pipeline_uuid",
-	2: "parent_uuid",
-	3: "type",
-	4: "params",
-}
-
-// Decode decodes PipelineEntryCreateReq from json.
-func (s *PipelineEntryCreateReq) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryCreateReq to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "uuid":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.UUID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"uuid\"")
+		if s.Edges != nil {
+			e.FieldStart("edges")
+			e.ArrStart()
+			for _, elem := range s.Edges {
+				elem.Encode(e)
 			}
-		case "pipeline_uuid":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.PipelineUUID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"pipeline_uuid\"")
-			}
-		case "parent_uuid":
-			if err := func() error {
-				s.ParentUUID.Reset()
-				if err := s.ParentUUID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"parent_uuid\"")
-			}
-		case "type":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"type\"")
-			}
-		case "params":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.Params.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"params\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryCreateReq")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00011011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineEntryCreateReq) {
-					name = jsonFieldsNameOfPipelineEntryCreateReq[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineEntryCreateReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryCreateReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s PipelineEntryCreateReqParams) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s PipelineEntryCreateReqParams) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
+			e.ArrEnd()
 		}
 	}
 }
 
-// Decode decodes PipelineEntryCreateReqParams from json.
-func (s *PipelineEntryCreateReqParams) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryCreateReqParams to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryCreateReqParams")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s PipelineEntryCreateReqParams) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryCreateReqParams) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s PipelineEntryParams) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s PipelineEntryParams) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
-}
-
-// Decode decodes PipelineEntryParams from json.
-func (s *PipelineEntryParams) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryParams to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryParams")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s PipelineEntryParams) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryParams) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *PipelineEntryType) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *PipelineEntryType) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
-	}
-	{
-		e.FieldStart("category")
-		e.Str(s.Category)
-	}
-	{
-		e.FieldStart("flow_type")
-		e.Str(s.FlowType)
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-}
-
-var jsonFieldsNameOfPipelineEntryType = [4]string{
-	0: "uuid",
-	1: "category",
-	2: "flow_type",
-	3: "name",
-}
-
-// Decode decodes PipelineEntryType from json.
-func (s *PipelineEntryType) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryType to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "uuid":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.UUID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"uuid\"")
-			}
-		case "category":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Category = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"category\"")
-			}
-		case "flow_type":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.FlowType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"flow_type\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryType")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineEntryType) {
-					name = jsonFieldsNameOfPipelineEntryType[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineEntryType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryType) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *PipelineEntryTypeListOK) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *PipelineEntryTypeListOK) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("entries")
-		e.ArrStart()
-		for _, elem := range s.Entries {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-}
-
-var jsonFieldsNameOfPipelineEntryTypeListOK = [1]string{
-	0: "entries",
-}
-
-// Decode decodes PipelineEntryTypeListOK from json.
-func (s *PipelineEntryTypeListOK) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryTypeListOK to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "entries":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				s.Entries = make([]PipelineEntryType, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem PipelineEntryType
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Entries = append(s.Entries, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"entries\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryTypeListOK")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineEntryTypeListOK) {
-					name = jsonFieldsNameOfPipelineEntryTypeListOK[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineEntryTypeListOK) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryTypeListOK) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *PipelineEntryUpdateReq) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *PipelineEntryUpdateReq) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("params")
-		s.Params.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfPipelineEntryUpdateReq = [1]string{
-	0: "params",
-}
-
-// Decode decodes PipelineEntryUpdateReq from json.
-func (s *PipelineEntryUpdateReq) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryUpdateReq to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "params":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Params.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"params\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryUpdateReq")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineEntryUpdateReq) {
-					name = jsonFieldsNameOfPipelineEntryUpdateReq[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineEntryUpdateReq) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryUpdateReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s PipelineEntryUpdateReqParams) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s PipelineEntryUpdateReqParams) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
-}
-
-// Decode decodes PipelineEntryUpdateReqParams from json.
-func (s *PipelineEntryUpdateReqParams) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PipelineEntryUpdateReqParams to nil")
-	}
-	m := s.init()
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
-		}
-		m[string(k)] = elem
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PipelineEntryUpdateReqParams")
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s PipelineEntryUpdateReqParams) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineEntryUpdateReqParams) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s PipelineFlow) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields implements json.Marshaler.
-func (s PipelineFlow) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
-	}
+var jsonFieldsNameOfPipelineFlow = [2]string{
+	0: "nodes",
+	1: "edges",
 }
 
 // Decode decodes PipelineFlow from json.
@@ -10570,20 +9841,46 @@ func (s *PipelineFlow) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode PipelineFlow to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
+		switch string(k) {
+		case "nodes":
+			if err := func() error {
+				s.Nodes = make([]PipelineNode, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem PipelineNode
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Nodes = append(s.Nodes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nodes\"")
 			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		case "edges":
+			if err := func() error {
+				s.Edges = make([]PipelineEdge, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem PipelineEdge
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Edges = append(s.Edges, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"edges\"")
+			}
+		default:
+			return d.Skip()
 		}
-		m[string(k)] = elem
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode PipelineFlow")
@@ -10593,7 +9890,7 @@ func (s *PipelineFlow) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s PipelineFlow) MarshalJSON() ([]byte, error) {
+func (s *PipelineFlow) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -10656,7 +9953,7 @@ func (s *PipelineListOK) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"pipelines\"")
 			}
 		default:
-			return errors.Errorf("unexpected field %q", k)
+			return d.Skip()
 		}
 		return nil
 	}); err != nil {
@@ -10712,71 +10009,103 @@ func (s *PipelineListOK) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *PipelineUpdateReq) Encode(e *jx.Encoder) {
+func (s *PipelineNode) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *PipelineUpdateReq) encodeFields(e *jx.Encoder) {
+func (s *PipelineNode) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("name")
-		e.Str(s.Name)
+		e.FieldStart("id")
+		e.Str(s.ID)
 	}
 	{
-		e.FieldStart("flow")
-		s.Flow.Encode(e)
+		e.FieldStart("type")
+		e.Str(s.Type)
+	}
+	{
+		e.FieldStart("position")
+		s.Position.Encode(e)
+	}
+	{
+		e.FieldStart("data")
+		s.Data.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfPipelineUpdateReq = [2]string{
-	0: "name",
-	1: "flow",
+var jsonFieldsNameOfPipelineNode = [4]string{
+	0: "id",
+	1: "type",
+	2: "position",
+	3: "data",
 }
 
-// Decode decodes PipelineUpdateReq from json.
-func (s *PipelineUpdateReq) Decode(d *jx.Decoder) error {
+// Decode decodes PipelineNode from json.
+func (s *PipelineNode) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode PipelineUpdateReq to nil")
+		return errors.New("invalid: unable to decode PipelineNode to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "name":
+		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.Name = string(v)
+				s.ID = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
+				return errors.Wrap(err, "decode field \"id\"")
 			}
-		case "flow":
+		case "type":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				if err := s.Flow.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"flow\"")
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "position":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Position.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"position\"")
+			}
+		case "data":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Data.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data\"")
 			}
 		default:
-			return errors.Errorf("unexpected field %q", k)
+			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode PipelineUpdateReq")
+		return errors.Wrap(err, "decode PipelineNode")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -10788,8 +10117,8 @@ func (s *PipelineUpdateReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfPipelineUpdateReq) {
-					name = jsonFieldsNameOfPipelineUpdateReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfPipelineNode) {
+					name = jsonFieldsNameOfPipelineNode[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -10810,27 +10139,124 @@ func (s *PipelineUpdateReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *PipelineUpdateReq) MarshalJSON() ([]byte, error) {
+func (s *PipelineNode) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineUpdateReq) UnmarshalJSON(data []byte) error {
+func (s *PipelineNode) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s PipelineUpdateReqFlow) Encode(e *jx.Encoder) {
+func (s *PipelineNodeData) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PipelineNodeData) encodeFields(e *jx.Encoder) {
+	{
+		if s.Label.Set {
+			e.FieldStart("label")
+			s.Label.Encode(e)
+		}
+	}
+	{
+		if s.EntryUUID.Set {
+			e.FieldStart("entry_uuid")
+			s.EntryUUID.Encode(e)
+		}
+	}
+	{
+		if s.Config.Set {
+			e.FieldStart("config")
+			s.Config.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfPipelineNodeData = [3]string{
+	0: "label",
+	1: "entry_uuid",
+	2: "config",
+}
+
+// Decode decodes PipelineNodeData from json.
+func (s *PipelineNodeData) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PipelineNodeData to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "label":
+			if err := func() error {
+				s.Label.Reset()
+				if err := s.Label.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"label\"")
+			}
+		case "entry_uuid":
+			if err := func() error {
+				s.EntryUUID.Reset()
+				if err := s.EntryUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"entry_uuid\"")
+			}
+		case "config":
+			if err := func() error {
+				s.Config.Reset()
+				if err := s.Config.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"config\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PipelineNodeData")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PipelineNodeData) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PipelineNodeData) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s PipelineNodeDataConfig) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields implements json.Marshaler.
-func (s PipelineUpdateReqFlow) encodeFields(e *jx.Encoder) {
+func (s PipelineNodeDataConfig) encodeFields(e *jx.Encoder) {
 	for k, elem := range s {
 		e.FieldStart(k)
 
@@ -10840,10 +10266,10 @@ func (s PipelineUpdateReqFlow) encodeFields(e *jx.Encoder) {
 	}
 }
 
-// Decode decodes PipelineUpdateReqFlow from json.
-func (s *PipelineUpdateReqFlow) Decode(d *jx.Decoder) error {
+// Decode decodes PipelineNodeDataConfig from json.
+func (s *PipelineNodeDataConfig) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode PipelineUpdateReqFlow to nil")
+		return errors.New("invalid: unable to decode PipelineNodeDataConfig to nil")
 	}
 	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -10861,21 +10287,101 @@ func (s *PipelineUpdateReqFlow) Decode(d *jx.Decoder) error {
 		m[string(k)] = elem
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode PipelineUpdateReqFlow")
+		return errors.Wrap(err, "decode PipelineNodeDataConfig")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s PipelineUpdateReqFlow) MarshalJSON() ([]byte, error) {
+func (s PipelineNodeDataConfig) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PipelineUpdateReqFlow) UnmarshalJSON(data []byte) error {
+func (s *PipelineNodeDataConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PipelineNodePosition) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PipelineNodePosition) encodeFields(e *jx.Encoder) {
+	{
+		if s.X.Set {
+			e.FieldStart("x")
+			s.X.Encode(e)
+		}
+	}
+	{
+		if s.Y.Set {
+			e.FieldStart("y")
+			s.Y.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfPipelineNodePosition = [2]string{
+	0: "x",
+	1: "y",
+}
+
+// Decode decodes PipelineNodePosition from json.
+func (s *PipelineNodePosition) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PipelineNodePosition to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "x":
+			if err := func() error {
+				s.X.Reset()
+				if err := s.X.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"x\"")
+			}
+		case "y":
+			if err := func() error {
+				s.Y.Reset()
+				if err := s.Y.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"y\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PipelineNodePosition")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PipelineNodePosition) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PipelineNodePosition) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -10894,10 +10400,8 @@ func (s *Storage) encodeFields(e *jx.Encoder) {
 		e.Str(s.UUID)
 	}
 	{
-		if s.UserUUID.Set {
-			e.FieldStart("user_uuid")
-			s.UserUUID.Encode(e)
-		}
+		e.FieldStart("type")
+		e.Str(s.Type)
 	}
 	{
 		if s.Name.Set {
@@ -10906,18 +10410,8 @@ func (s *Storage) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("type")
-		e.Str(s.Type)
-	}
-	{
 		e.FieldStart("is_enabled")
 		e.Bool(s.IsEnabled)
-	}
-	{
-		if s.UpdatedAt.Set {
-			e.FieldStart("updated_at")
-			s.UpdatedAt.Encode(e, json.EncodeDateTime)
-		}
 	}
 	{
 		if s.CreatedAt.Set {
@@ -10925,16 +10419,21 @@ func (s *Storage) encodeFields(e *jx.Encoder) {
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
 		}
 	}
+	{
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
 }
 
-var jsonFieldsNameOfStorage = [7]string{
+var jsonFieldsNameOfStorage = [6]string{
 	0: "uuid",
-	1: "user_uuid",
+	1: "type",
 	2: "name",
-	3: "type",
-	4: "is_enabled",
+	3: "is_enabled",
+	4: "created_at",
 	5: "updated_at",
-	6: "created_at",
 }
 
 // Decode decodes Storage from json.
@@ -10958,15 +10457,17 @@ func (s *Storage) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
-		case "user_uuid":
+		case "type":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.UserUUID.Reset()
-				if err := s.UserUUID.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_uuid\"")
+				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "name":
 			if err := func() error {
@@ -10978,20 +10479,8 @@ func (s *Storage) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "type":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"type\"")
-			}
 		case "is_enabled":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Bool()
 				s.IsEnabled = bool(v)
@@ -11001,16 +10490,6 @@ func (s *Storage) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_enabled\"")
-			}
-		case "updated_at":
-			if err := func() error {
-				s.UpdatedAt.Reset()
-				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"updated_at\"")
 			}
 		case "created_at":
 			if err := func() error {
@@ -11022,6 +10501,16 @@ func (s *Storage) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"created_at\"")
 			}
+		case "updated_at":
+			if err := func() error {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
@@ -11032,7 +10521,7 @@ func (s *Storage) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011001,
+		0b00001011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -11671,14 +11160,22 @@ func (s *SyncPolicy) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.UserUUID.Set {
-			e.FieldStart("user_uuid")
-			s.UserUUID.Encode(e)
-		}
+		e.FieldStart("pipeline_uuid")
+		e.Str(s.PipelineUUID)
 	}
 	{
-		e.FieldStart("service")
-		e.Str(s.Service)
+		e.FieldStart("type")
+		e.Str(s.Type)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		if s.IsEnabled.Set {
+			e.FieldStart("is_enabled")
+			s.IsEnabled.Encode(e)
+		}
 	}
 	{
 		if s.Blocklist != nil {
@@ -11726,16 +11223,18 @@ func (s *SyncPolicy) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSyncPolicy = [9]string{
-	0: "uuid",
-	1: "user_uuid",
-	2: "service",
-	3: "blocklist",
-	4: "exclude_list",
-	5: "sync_all",
-	6: "settings",
-	7: "created_at",
-	8: "updated_at",
+var jsonFieldsNameOfSyncPolicy = [11]string{
+	0:  "uuid",
+	1:  "pipeline_uuid",
+	2:  "type",
+	3:  "name",
+	4:  "is_enabled",
+	5:  "blocklist",
+	6:  "exclude_list",
+	7:  "sync_all",
+	8:  "settings",
+	9:  "created_at",
+	10: "updated_at",
 }
 
 // Decode decodes SyncPolicy from json.
@@ -11757,27 +11256,51 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
-		case "user_uuid":
-			if err := func() error {
-				s.UserUUID.Reset()
-				if err := s.UserUUID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_uuid\"")
-			}
-		case "service":
-			requiredBitSet[0] |= 1 << 2
+		case "pipeline_uuid":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
-				s.Service = string(v)
+				s.PipelineUUID = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"service\"")
+				return errors.Wrap(err, "decode field \"pipeline_uuid\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "is_enabled":
+			if err := func() error {
+				s.IsEnabled.Reset()
+				if err := s.IsEnabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_enabled\"")
 			}
 		case "blocklist":
 			if err := func() error {
@@ -11867,7 +11390,7 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00000100,
+		0b00001110,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
