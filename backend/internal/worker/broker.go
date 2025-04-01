@@ -12,6 +12,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/scheduler"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 )
 
@@ -51,7 +52,9 @@ func Provide(i do.Injector) (*Broker, error) {
 		log.Error("failed to start broker", "error", err)
 		return nil, err
 	}
-	b.StartScheduler(ctx)
+	s := scheduler.NewScheduler(log, dbp, q)
+	s.StartEmailScheduler(ctx)
+
 	return b, nil
 }
 
