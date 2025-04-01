@@ -1107,7 +1107,7 @@ export interface components {
              */
             datasource_uuid: string;
             /** @description Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching contacts outside of pipelines */
-            type: string;
+            type?: string;
             /** @description Pipeline name. Ex gmail_ilya@reactima.com */
             name: string;
             /** @description Whether this pipeline is currently active */

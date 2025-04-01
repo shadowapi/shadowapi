@@ -100,6 +100,7 @@ CREATE TABLE storage(
 CREATE TABLE "sync_policy" (
                                "uuid" UUID PRIMARY KEY,
                                pipeline_uuid   UUID NOT NULL,
+                               name              VARCHAR NOT NULL,
                                "type" VARCHAR NOT NULL,
                                "blocklist" TEXT[],
                                "exclude_list" TEXT[],

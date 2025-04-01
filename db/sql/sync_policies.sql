@@ -1,7 +1,8 @@
 -- name: CreateSyncPolicy :one
 INSERT INTO sync_policy (
     uuid,
-    user_uuid,
+    pipeline_uuid,
+    name,
     "type",
     blocklist,
     exclude_list,
@@ -11,7 +12,8 @@ INSERT INTO sync_policy (
     updated_at
 ) VALUES (
     sqlc.arg('uuid')::uuid,
-    NULLIF(sqlc.arg('user_uuid'), '')::uuid,
+    sqlc.arg('pipeline_uuid')::uuid,
+    NULLIF(sqlc.arg('name'), ''),
     NULLIF(sqlc.arg('type'), ''),
     sqlc.arg('blocklist'),
     sqlc.arg('exclude_list'),
@@ -40,9 +42,8 @@ WITH filtered_sync_policies AS (
     SELECT sp.*
     FROM sync_policy sp
     WHERE
-        (NULLIF(sqlc.arg('type'), '') IS NULL OR d."type" = sqlc.arg('type')) AND
+        (NULLIF(sqlc.arg('type'), '') IS NULL OR sp."type" = sqlc.arg('type')) AND
         (NULLIF(sqlc.arg('uuid'), '') IS NULL OR sp.uuid = sqlc.arg('uuid')::uuid) AND
-        (NULLIF(sqlc.arg('user_uuid'), '') IS NULL OR sp.user_uuid = sqlc.arg('user_uuid')::uuid) AND
         (NULLIF(sqlc.arg('sync_all')::int, -1) IS NULL OR sp.sync_all = (sqlc.arg('sync_all')::int)::boolean)
 )
 SELECT
@@ -60,8 +61,7 @@ OFFSET sqlc.arg('offset')::int;
 
 -- name: UpdateSyncPolicy :exec
 UPDATE sync_policy SET
-    user_uuid = NULLIF(sqlc.arg('user_uuid'), '')::uuid,
-    "type" = NULLIF(sqlc.arg('type'), ''),
+    name = NULLIF(sqlc.arg('name'), ''),
     blocklist = sqlc.arg('blocklist'),
     exclude_list = sqlc.arg('exclude_list'),
     sync_all = sqlc.arg('sync_all')::boolean,

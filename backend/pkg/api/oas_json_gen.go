@@ -9418,8 +9418,10 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.DatasourceUUID)
 	}
 	{
-		e.FieldStart("type")
-		e.Str(s.Type)
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("name")
@@ -9494,11 +9496,9 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"datasource_uuid\"")
 			}
 		case "type":
-			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -9567,7 +9567,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001110,
+		0b00001010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

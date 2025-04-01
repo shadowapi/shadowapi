@@ -2,7 +2,18 @@ import '@xyflow/react/dist/style.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { ActionButton, DropZone, Flex, Form, TextField, useDragAndDrop, useListData, View } from '@adobe/react-spectrum'
+import {
+  ActionButton,
+  DropZone,
+  Flex,
+  Form,
+  Item,
+  Picker,
+  TextField,
+  useDragAndDrop,
+  useListData,
+  View,
+} from '@adobe/react-spectrum'
 import { DropEvent } from '@react-types/shared'
 import { DropOperation } from '@react-types/shared'
 import Delete from '@spectrum-icons/workflow/Delete'
@@ -52,14 +63,16 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
 
+  const isAdd = pipelineUUID === 'add'
+
   // ======== Queries & Mutations ========
-  const entryTypesQuery = useQuery({
-    queryKey: ['/pipeline/entry/types'],
+
+  const datasourceQuery = useQuery({
+    queryKey: ['datasources'],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET('/pipeline/entry/types', { signal })
-      return data
+      const { data } = await client.GET('/datasource', { signal })
+      return data as components['schemas']['datasource'][]
     },
-    // throwOnError: false,
   })
 
   const pipelineQuery = useQuery({
@@ -87,6 +100,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
         resp = await client.POST('/pipeline', {
           body: {
             name: data.name || '',
+            datasource_uuid: data.datasource_uuid || '',
             flow: data.flow || {},
           },
         })
@@ -95,6 +109,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
           params: { path: { uuid: pipelineUUID } }, // TODO @reactima , query: { user_uuid: userUUID }
           body: {
             name: data.name,
+            datasource_uuid: data.datasource_uuid,
             flow: data.flow,
           },
         })
@@ -134,15 +149,15 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   // --------------------- FLOWENTRIES DATA (ListView) ---------------------
   const flowEntries = useListData<FlowEntryItem>({})
 
-  // Only rebuild the flowEntries data when entryTypesQuery.data changes
   useEffect(() => {
+    console.log('useEffect pipelineQuery', { pipelineQuery })
     // If no data, clear and return
-    if (!entryTypesQuery.data) {
-      if (flowEntries.items.length > 0) {
-        flowEntries.remove(...flowEntries.items.map((item) => item.id))
-      }
-      return
-    }
+    // if (!entryTypesQuery.data) {
+    //   if (flowEntries.items.length > 0) {
+    //     flowEntries.remove(...flowEntries.items.map((item) => item.id))
+    //   }
+    //   return
+    // }
     // If we have data, remove existing items, then rebuild
     if (flowEntries.items.length > 0) {
       flowEntries.remove(...flowEntries.items.map((item) => item.id))
@@ -153,28 +168,28 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     const addLeaf = (categoryName: string, label: string) => {
       idx++
       const parentId = idx
-      const hasEntries = entryTypesQuery.data.entries.some((e) => e.category === categoryName)
-      const displayTitle = hasEntries ? label : `${label} (No entries)`
+      // const hasEntries = entryTypesQuery.data.entries.some((e) => e.category === categoryName)
+      // const displayTitle = hasEntries ? label : `${label} (No entries)`
 
       // Append "parent" category
-      flowEntries.append({ id: parentId, title: displayTitle })
-
-      // If none, stop
-      if (!hasEntries) return
+      // flowEntries.append({ id: parentId, title: displayTitle })
+      //
+      // // If none, stop
+      // if (!hasEntries) return
 
       // Child items for this category
-      entryTypesQuery.data.entries
-        .filter((entry) => entry.category === categoryName)
-        .forEach((entryType) => {
-          idx++
-          flowEntries.append({
-            id: idx,
-            parent: parentId,
-            uuid: entryType.uuid,
-            title: entryType.name,
-            type: entryType.flow_type,
-          })
-        })
+      // entryTypesQuery.data.entries
+      //   .filter((entry) => entry.category === categoryName)
+      //   .forEach((entryType) => {
+      //     idx++
+      //     flowEntries.append({
+      //       id: idx,
+      //       parent: parentId,
+      //       uuid: entryType.uuid,
+      //       title: entryType.name,
+      //       type: entryType.flow_type,
+      //     })
+      //   })
     }
 
     ;['datasource', 'extractor', 'filter', 'mapper', 'storage'].forEach((category) => {
@@ -182,7 +197,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     })
     // flowEntries removed from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryTypesQuery.data])
+  }, [pipelineQuery.data])
 
   // --------------------- PIPELINE DATA & REACT FLOW ---------------------
   // Populate form and React Flow with pipeline data
@@ -291,6 +306,10 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     setNodes((prev) => [...prev, newNode])
   }
 
+  if (datasourceQuery.isPending && !isAdd) return <></>
+
+  console.log('datasourceQuery', { datasourceQuery })
+
   return (
     <Flex direction="column" flexBasis="100%" rowGap="size-200">
       <View padding="size-75">
@@ -316,6 +335,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                 />
               )}
             />
+
             <ActionButton
               aria-label="Save or add pipeline"
               onPress={() => {
@@ -332,6 +352,40 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
             >
               <Delete />
             </ActionButton>
+          </Flex>
+          <Flex direction="row" width="size-4600" marginStart="size-400" gap="size-200">
+            <Controller
+              name="datasource_uuid"
+              control={form.control}
+              rules={{ required: 'Datasource is required' }}
+              render={({ field, fieldState }) => (
+                <Picker
+                  label="Pipeline"
+                  isRequired
+                  selectedKey={field.value}
+                  onSelectionChange={(key) => field.onChange(key.toString())}
+                  errorMessage={fieldState.error?.message}
+                  width="100%"
+                >
+                  {datasourceQuery &&
+                    datasourceQuery.data?.map((datasource: components['schemas']['datasource']) => 
+                      <Item key={datasource.uuid}>
+                        <span
+                          style={{
+                            whiteSpace: 'nowrap',
+                            height: '24px',
+                            lineHeight: '24px',
+                            marginLeft: 10,
+                            marginRight: 10,
+                          }}
+                        >
+                          {datasource.name} {datasource.type}
+                        </span>
+                      </Item>
+                    )}
+                </Picker>
+              )}
+            />
           </Flex>
         </Form>
       </View>

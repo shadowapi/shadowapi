@@ -8,8 +8,8 @@ import client from '@/api/client'
 import type { components } from '@/api/v1'
 
 type SyncPolicyFormData = {
-  user_uuid: string
-  service: string
+  pipeline_uuid: string
+  type: string
   blocklist?: string[]
   exclude_list?: string[]
   sync_all: boolean
@@ -27,11 +27,11 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
 
   const isAdd = policyUUID === 'add'
 
-  const usersQuery = useQuery({
-    queryKey: ['users'],
+  const pipelinesQuery = useQuery({
+    queryKey: ['pipelines'],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET('/user', { signal })
-      return data as components['schemas']['user'][]
+      const { data } = await client.GET('/pipeline', { signal })
+      return data as components['schemas']['pipeline'][]
     },
   })
 
@@ -64,14 +64,14 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
       if (isAdd) {
         const resp = await client.POST('/syncpolicy', { body: payload })
         if (resp.error) {
-          form.setError('service', { message: resp.error.detail })
+          form.setError('type', { message: resp.error.detail })
           throw new Error(resp.error.detail)
         }
         return resp
       } else {
         const resp = await client.PUT('/syncpolicy/' + policyUUID, { body: payload })
         if (resp.error) {
-          form.setError('service', { message: resp.error.detail })
+          form.setError('type', { message: resp.error.detail })
           throw new Error(resp.error.detail)
         }
         return resp
@@ -87,7 +87,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
     mutationFn: async (uuid: string) => {
       const resp = await client.DELETE('/syncpolicy/' + uuid)
       if (resp.error) {
-        form.setError('service', { message: resp.error.detail })
+        form.setError('type', { message: resp.error.detail })
         throw new Error(resp.error.detail)
       }
       return resp
@@ -106,7 +106,9 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
     deleteMutation.mutate(policyUUID)
   }
 
-  if (query.isPending && !isAdd) return <></>
+  if (query.isPending && pipelinesQuery.isPending && !isAdd) return <></>
+
+  console.log('pipelinesQuery', { pipelinesQuery })
 
   return (
     <Flex direction="row" justifyContent="center" height="100vh">
@@ -114,53 +116,50 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
         <Flex direction="column" width="size-4600" gap="size-100">
           <Header marginBottom="size-160">{isAdd ? 'Add Sync Policy' : 'Edit Sync Policy'}</Header>
           <Controller
-            name="user_uuid"
+            name="name"
             control={form.control}
-            rules={{ required: 'User is required' }}
+            rules={{ required: 'Name is required' }}
             render={({ field, fieldState }) => (
-              <Picker
-                label="User"
+              <TextField
+                label="Name"
                 isRequired
-                selectedKey={field.value}
-                onSelectionChange={(key) => field.onChange(key.toString())}
-                errorMessage={fieldState.error?.message}
+                type="text"
                 width="100%"
-              >
-                {usersQuery.data?.map((user: components['schemas']['user']) => 
-                  <Item key={user.uuid}>
-                    <span
-                      style={{
-                        whiteSpace: 'nowrap',
-                        height: '24px',
-                        lineHeight: '24px',
-                        marginLeft: 10,
-                        marginRight: 10,
-                      }}
-                    >
-                      {user.email} {user.first_name} {user.last_name}
-                    </span>
-                  </Item>
-                )}
-              </Picker>
+                validationState={fieldState.invalid ? 'invalid' : undefined}
+                errorMessage={fieldState.error?.message}
+                {...field}
+              />
             )}
           />
           <Controller
-            name="service"
+            name="pipeline_uuid"
             control={form.control}
-            rules={{ required: 'Service is required' }}
+            rules={{ required: 'Pipeline is required' }}
             render={({ field, fieldState }) => (
               <Picker
-                label="Service"
+                label="Pipeline"
                 isRequired
                 selectedKey={field.value}
                 onSelectionChange={(key) => field.onChange(key.toString())}
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                <Item key="gmail">Gmail</Item>
-                <Item key="telegram">Telegram</Item>
-                <Item key="whatsapp">WhatsApp</Item>
-                <Item key="linkedin">LinkedIn</Item>
+                {pipelinesQuery &&
+                  pipelinesQuery.data?.pipelines?.map((pipeline: components['schemas']['pipeline']) => (
+                    <Item key={pipeline.uuid}>
+                      <span
+                        style={{
+                          whiteSpace: 'nowrap',
+                          height: '24px',
+                          lineHeight: '24px',
+                          marginLeft: 10,
+                          marginRight: 10,
+                        }}
+                      >
+                        {pipeline.name} {pipeline.type}
+                      </span>
+                    </Item>
+                  ))}
               </Picker>
             )}
           />

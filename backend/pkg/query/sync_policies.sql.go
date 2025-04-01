@@ -15,7 +15,8 @@ import (
 const createSyncPolicy = `-- name: CreateSyncPolicy :one
 INSERT INTO sync_policy (
     uuid,
-    user_uuid,
+    pipeline_uuid,
+    name,
     "type",
     blocklist,
     exclude_list,
@@ -25,31 +26,34 @@ INSERT INTO sync_policy (
     updated_at
 ) VALUES (
     $1::uuid,
-    NULLIF($2, '')::uuid,
+    $2::uuid,
     NULLIF($3, ''),
-    $4,
+    NULLIF($4, ''),
     $5,
-    $6::boolean,
-    $7,
+    $6,
+    $7::boolean,
+    $8,
              NOW(),
              NOW()
-         ) RETURNING uuid, pipeline_uuid, type, blocklist, exclude_list, sync_all, is_enabled, settings, created_at, updated_at
+         ) RETURNING uuid, pipeline_uuid, name, type, blocklist, exclude_list, sync_all, is_enabled, settings, created_at, updated_at
 `
 
 type CreateSyncPolicyParams struct {
-	UUID        pgtype.UUID `json:"uuid"`
-	UserUUID    interface{} `json:"user_uuid"`
-	Type        interface{} `json:"type"`
-	Blocklist   []string    `json:"blocklist"`
-	ExcludeList []string    `json:"exclude_list"`
-	SyncAll     bool        `json:"sync_all"`
-	Settings    []byte      `json:"settings"`
+	UUID         pgtype.UUID `json:"uuid"`
+	PipelineUuid pgtype.UUID `json:"pipeline_uuid"`
+	Name         interface{} `json:"name"`
+	Type         interface{} `json:"type"`
+	Blocklist    []string    `json:"blocklist"`
+	ExcludeList  []string    `json:"exclude_list"`
+	SyncAll      bool        `json:"sync_all"`
+	Settings     []byte      `json:"settings"`
 }
 
 func (q *Queries) CreateSyncPolicy(ctx context.Context, arg CreateSyncPolicyParams) (SyncPolicy, error) {
 	row := q.db.QueryRow(ctx, createSyncPolicy,
 		arg.UUID,
-		arg.UserUUID,
+		arg.PipelineUuid,
+		arg.Name,
 		arg.Type,
 		arg.Blocklist,
 		arg.ExcludeList,
@@ -60,6 +64,7 @@ func (q *Queries) CreateSyncPolicy(ctx context.Context, arg CreateSyncPolicyPara
 	err := row.Scan(
 		&i.UUID,
 		&i.PipelineUuid,
+		&i.Name,
 		&i.Type,
 		&i.Blocklist,
 		&i.ExcludeList,
@@ -83,7 +88,7 @@ func (q *Queries) DeleteSyncPolicy(ctx context.Context, argUuid pgtype.UUID) err
 
 const getPolicy = `-- name: GetPolicy :one
 SELECT
-    sync_policy.uuid, sync_policy.pipeline_uuid, sync_policy.type, sync_policy.blocklist, sync_policy.exclude_list, sync_policy.sync_all, sync_policy.is_enabled, sync_policy.settings, sync_policy.created_at, sync_policy.updated_at
+    sync_policy.uuid, sync_policy.pipeline_uuid, sync_policy.name, sync_policy.type, sync_policy.blocklist, sync_policy.exclude_list, sync_policy.sync_all, sync_policy.is_enabled, sync_policy.settings, sync_policy.created_at, sync_policy.updated_at
 FROM sync_policy
 WHERE uuid = $1::uuid
 `
@@ -98,6 +103,7 @@ func (q *Queries) GetPolicy(ctx context.Context, argUuid pgtype.UUID) (GetPolicy
 	err := row.Scan(
 		&i.SyncPolicy.UUID,
 		&i.SyncPolicy.PipelineUuid,
+		&i.SyncPolicy.Name,
 		&i.SyncPolicy.Type,
 		&i.SyncPolicy.Blocklist,
 		&i.SyncPolicy.ExcludeList,
@@ -112,16 +118,15 @@ func (q *Queries) GetPolicy(ctx context.Context, argUuid pgtype.UUID) (GetPolicy
 
 const getSyncPolicies = `-- name: GetSyncPolicies :many
 WITH filtered_sync_policies AS (
-    SELECT sp.uuid, sp.pipeline_uuid, sp.type, sp.blocklist, sp.exclude_list, sp.sync_all, sp.is_enabled, sp.settings, sp.created_at, sp.updated_at
+    SELECT sp.uuid, sp.pipeline_uuid, sp.name, sp.type, sp.blocklist, sp.exclude_list, sp.sync_all, sp.is_enabled, sp.settings, sp.created_at, sp.updated_at
     FROM sync_policy sp
     WHERE
-        (NULLIF($5, '') IS NULL OR d."type" = $5) AND
+        (NULLIF($5, '') IS NULL OR sp."type" = $5) AND
         (NULLIF($6, '') IS NULL OR sp.uuid = $6::uuid) AND
-        (NULLIF($7, '') IS NULL OR sp.user_uuid = $7::uuid) AND
-        (NULLIF($8::int, -1) IS NULL OR sp.sync_all = ($8::int)::boolean)
+        (NULLIF($7::int, -1) IS NULL OR sp.sync_all = ($7::int)::boolean)
 )
 SELECT
-    uuid, pipeline_uuid, type, blocklist, exclude_list, sync_all, is_enabled, settings, created_at, updated_at,
+    uuid, pipeline_uuid, name, type, blocklist, exclude_list, sync_all, is_enabled, settings, created_at, updated_at,
     (SELECT count(*) FROM filtered_sync_policies) as total_count
 FROM filtered_sync_policies
 ORDER BY
@@ -141,13 +146,13 @@ type GetSyncPoliciesParams struct {
 	Limit          int32       `json:"limit"`
 	Type           interface{} `json:"type"`
 	UUID           interface{} `json:"uuid"`
-	UserUUID       interface{} `json:"user_uuid"`
 	SyncAll        int32       `json:"sync_all"`
 }
 
 type GetSyncPoliciesRow struct {
 	UUID         uuid.UUID          `json:"uuid"`
 	PipelineUuid *uuid.UUID         `json:"pipeline_uuid"`
+	Name         string             `json:"name"`
 	Type         string             `json:"type"`
 	Blocklist    []string           `json:"blocklist"`
 	ExcludeList  []string           `json:"exclude_list"`
@@ -167,7 +172,6 @@ func (q *Queries) GetSyncPolicies(ctx context.Context, arg GetSyncPoliciesParams
 		arg.Limit,
 		arg.Type,
 		arg.UUID,
-		arg.UserUUID,
 		arg.SyncAll,
 	)
 	if err != nil {
@@ -180,6 +184,7 @@ func (q *Queries) GetSyncPolicies(ctx context.Context, arg GetSyncPoliciesParams
 		if err := rows.Scan(
 			&i.UUID,
 			&i.PipelineUuid,
+			&i.Name,
 			&i.Type,
 			&i.Blocklist,
 			&i.ExcludeList,
@@ -202,7 +207,7 @@ func (q *Queries) GetSyncPolicies(ctx context.Context, arg GetSyncPoliciesParams
 
 const listSyncPolicies = `-- name: ListSyncPolicies :many
 SELECT
-    sync_policy.uuid, sync_policy.pipeline_uuid, sync_policy.type, sync_policy.blocklist, sync_policy.exclude_list, sync_policy.sync_all, sync_policy.is_enabled, sync_policy.settings, sync_policy.created_at, sync_policy.updated_at
+    sync_policy.uuid, sync_policy.pipeline_uuid, sync_policy.name, sync_policy.type, sync_policy.blocklist, sync_policy.exclude_list, sync_policy.sync_all, sync_policy.is_enabled, sync_policy.settings, sync_policy.created_at, sync_policy.updated_at
 FROM sync_policy
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -230,6 +235,7 @@ func (q *Queries) ListSyncPolicies(ctx context.Context, arg ListSyncPoliciesPara
 		if err := rows.Scan(
 			&i.SyncPolicy.UUID,
 			&i.SyncPolicy.PipelineUuid,
+			&i.SyncPolicy.Name,
 			&i.SyncPolicy.Type,
 			&i.SyncPolicy.Blocklist,
 			&i.SyncPolicy.ExcludeList,
@@ -251,19 +257,17 @@ func (q *Queries) ListSyncPolicies(ctx context.Context, arg ListSyncPoliciesPara
 
 const updateSyncPolicy = `-- name: UpdateSyncPolicy :exec
 UPDATE sync_policy SET
-    user_uuid = NULLIF($1, '')::uuid,
-    "type" = NULLIF($2, ''),
-    blocklist = $3,
-    exclude_list = $4,
-    sync_all = $5::boolean,
-    settings = $6,
+    name = NULLIF($1, ''),
+    blocklist = $2,
+    exclude_list = $3,
+    sync_all = $4::boolean,
+    settings = $5,
     updated_at = NOW()
-WHERE uuid = $7::uuid
+WHERE uuid = $6::uuid
 `
 
 type UpdateSyncPolicyParams struct {
-	UserUUID    interface{} `json:"user_uuid"`
-	Type        interface{} `json:"type"`
+	Name        interface{} `json:"name"`
 	Blocklist   []string    `json:"blocklist"`
 	ExcludeList []string    `json:"exclude_list"`
 	SyncAll     bool        `json:"sync_all"`
@@ -273,8 +277,7 @@ type UpdateSyncPolicyParams struct {
 
 func (q *Queries) UpdateSyncPolicy(ctx context.Context, arg UpdateSyncPolicyParams) error {
 	_, err := q.db.Exec(ctx, updateSyncPolicy,
-		arg.UserUUID,
-		arg.Type,
+		arg.Name,
 		arg.Blocklist,
 		arg.ExcludeList,
 		arg.SyncAll,

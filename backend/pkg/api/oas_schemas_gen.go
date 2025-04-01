@@ -5455,7 +5455,7 @@ type Pipeline struct {
 	DatasourceUUID uuid.UUID `json:"datasource_uuid"`
 	// Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching
 	// contacts outside of pipelines.
-	Type string `json:"type"`
+	Type OptString `json:"type"`
 	// Pipeline name. Ex gmail_ilya@reactima.com.
 	Name string `json:"name"`
 	// Whether this pipeline is currently active.
@@ -5479,7 +5479,7 @@ func (s *Pipeline) GetDatasourceUUID() uuid.UUID {
 }
 
 // GetType returns the value of Type.
-func (s *Pipeline) GetType() string {
+func (s *Pipeline) GetType() OptString {
 	return s.Type
 }
 
@@ -5519,7 +5519,7 @@ func (s *Pipeline) SetDatasourceUUID(val uuid.UUID) {
 }
 
 // SetType sets the value of Type.
-func (s *Pipeline) SetType(val string) {
+func (s *Pipeline) SetType(val OptString) {
 	s.Type = val
 }
 

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	uuidGoogle "github.com/google/uuid"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -31,11 +32,17 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal pipeline flow"))
 			}
 		}
+		ds, err := query.New(tx).GetDatasource(ctx, pgDatasourceUUID)
+		if err != nil {
+			log.Error("failed to get datasource", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
+		}
+
 		qParams := query.CreatePipelineParams{
 			UUID:           pgtype.UUID{Bytes: uToBytes(pipelineUUID), Valid: true},
 			DatasourceUUID: pgDatasourceUUID,
 			Name:           req.Name,
-			Type:           req.Type,
+			Type:           ds.Datasource.Type,
 			IsEnabled:      req.IsEnabled.Or(false),
 			Flow:           flowData,
 		}
@@ -159,6 +166,39 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 	})
 }
 
+/*
+
+func (h *Handler) SyncpolicyDelete(ctx context.Context, params api.SyncpolicyDeleteParams) error {
+	log := h.log.With("handler", "SyncpolicyDelete")
+	policyUUID, err := uuid.FromString(params.UUID)
+	if err != nil {
+		log.Error("invalid policy uuid", "error", err)
+		return ErrWithCode(http.StatusBadRequest, E("invalid sync policy uuid"))
+	}
+	err = query.New(h.dbp).DeleteSyncPolicy(ctx, pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true})
+	if err != nil {
+		log.Error("failed to delete sync policy", "error", err)
+		return ErrWithCode(http.StatusInternalServerError, E("failed to delete sync policy"))
+	}
+	return nil
+}
+*/
+
+func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) error {
+	log := h.log.With("handler", "PipelineDelete")
+	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	if err != nil {
+		log.Error("invalid pipeline uuid", "error", err)
+		return ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
+	}
+	err = query.New(h.dbp).DeletePipeline(ctx, pipelineUUID)
+	if err != nil {
+		log.Error("failed to delete pipeline", "error", err)
+		return ErrWithCode(http.StatusInternalServerError, E("failed to delete pipeline"))
+	}
+	return nil
+}
+
 func qToApiPipelineRow(row query.GetPipelinesRow) (api.Pipeline, error) {
 	p := query.Pipeline{
 		UUID:           row.UUID,
@@ -176,9 +216,9 @@ func qToApiPipelineRow(row query.GetPipelinesRow) (api.Pipeline, error) {
 // TODO finish convertion
 func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
 	out := api.Pipeline{
-		//UUID: api.NewOptUUID(dbp.UUID),
+		UUID:      api.NewOptUUID(uuidGoogle.UUID(dbp.UUID)), // TODO @reactima rethink the whole thing
 		Name:      dbp.Name,
-		Type:      dbp.Type,
+		Type:      api.NewOptString(dbp.Type),
 		IsEnabled: api.NewOptBool(dbp.IsEnabled),
 		CreatedAt: api.NewOptDateTime(dbp.CreatedAt.Time),
 		UpdatedAt: api.NewOptDateTime(dbp.UpdatedAt.Time),

@@ -19,6 +19,17 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 	log := h.log.With("handler", "SyncpolicyCreate")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.SyncPolicy, error) {
 		policyUUID := uuid.Must(uuid.NewV7())
+		pgPipelineUUID, err := ConvertStringToPgUUID(req.PipelineUUID)
+		if err != nil {
+			log.Error("failed to convert datasource uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
+		}
+
+		pipe, err := query.New(tx).GetPipeline(ctx, pgPipelineUUID)
+		if err != nil {
+			log.Error("failed to get datasource", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
+		}
 
 		var settingsData []byte
 		if req.Settings.IsSet() {
@@ -30,12 +41,13 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 			settingsData = j
 		}
 		qParams := query.CreateSyncPolicyParams{
-			UUID:        pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
-			Type:        req.Type,
-			Blocklist:   req.Blocklist,
-			ExcludeList: req.ExcludeList,
-			SyncAll:     req.SyncAll.Or(false),
-			Settings:    settingsData,
+			UUID:         pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
+			PipelineUuid: pgPipelineUUID,
+			Type:         pipe.Pipeline.Type,
+			Blocklist:    req.Blocklist,
+			ExcludeList:  req.ExcludeList,
+			SyncAll:      req.SyncAll.Or(false),
+			Settings:     settingsData,
 		}
 		pol, err := query.New(tx).CreateSyncPolicy(ctx, qParams)
 		if err != nil {
@@ -80,7 +92,6 @@ func (h *Handler) SyncpolicyGet(ctx context.Context, params api.SyncpolicyGetPar
 		Limit:          1,
 		Type:           "",
 		UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
-		UserUUID:       "",
 		SyncAll:        -1,
 	})
 	if err != nil {
@@ -115,7 +126,6 @@ func (h *Handler) SyncpolicyList(ctx context.Context, params api.SyncpolicyListP
 		Limit:          limit,
 		Type:           "",
 		UUID:           "",
-		UserUUID:       "",
 		SyncAll:        -1,
 	}
 	pols, err := query.New(h.dbp).GetSyncPolicies(ctx, qParams)
@@ -150,7 +160,6 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			Limit:          1,
 			Type:           "",
 			UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
-			UserUUID:       "",
 			SyncAll:        -1,
 		})
 		if err != nil {
@@ -172,7 +181,6 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			settingsData = existing[0].Settings
 		}
 		uParams := query.UpdateSyncPolicyParams{
-			Type:        req.Type,
 			Blocklist:   req.Blocklist,
 			ExcludeList: req.ExcludeList,
 			SyncAll:     req.SyncAll.Or(false),
@@ -191,7 +199,6 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			Limit:          1,
 			Type:           "",
 			UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
-			UserUUID:       "",
 			SyncAll:        -1,
 		})
 		if err != nil {

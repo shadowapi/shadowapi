@@ -246,6 +246,7 @@ type Storage struct {
 type SyncPolicy struct {
 	UUID         uuid.UUID          `json:"uuid"`
 	PipelineUuid *uuid.UUID         `json:"pipeline_uuid"`
+	Name         string             `json:"name"`
 	Type         string             `json:"type"`
 	Blocklist    []string           `json:"blocklist"`
 	ExcludeList  []string           `json:"exclude_list"`

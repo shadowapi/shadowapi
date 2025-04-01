@@ -39,6 +39,5 @@ properties:
     format: date-time
     description: "Timestamp when the policy was last updated."
 required:
-  - type
-  - name
   - datasource_uuid
+  - name
