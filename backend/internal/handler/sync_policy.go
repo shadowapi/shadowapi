@@ -40,6 +40,8 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 			}
 			settingsData = j
 		}
+		log.Error("pip!", "req.PipelineUUID", req.PipelineUUID, "pgPipelineUUID", pgPipelineUUID, "pipe", pipe)
+
 		qParams := query.CreateSyncPolicyParams{
 			UUID:         pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
 			PipelineUuid: pgPipelineUUID,
@@ -220,6 +222,8 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 func qToApiSyncPolicyRow(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
 	var sp query.SyncPolicy
 	sp.UUID = row.UUID
+	sp.PipelineUuid = row.PipelineUuid
+	sp.Name = row.Name
 	sp.Type = row.Type
 	sp.Blocklist = row.Blocklist
 	sp.ExcludeList = row.ExcludeList
@@ -233,7 +237,8 @@ func qToApiSyncPolicyRow(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
 func qToApiSyncPolicy(dbp query.SyncPolicy) (api.SyncPolicy, error) {
 	out := api.SyncPolicy{
 		UUID:        api.NewOptString(dbp.UUID.String()),
-		Type:        dbp.Type,
+		Type:        api.NewOptString(dbp.Type),
+		Name:        dbp.Name,
 		Blocklist:   dbp.Blocklist,
 		ExcludeList: dbp.ExcludeList,
 		SyncAll:     api.NewOptBool(dbp.SyncAll),

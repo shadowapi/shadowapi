@@ -44,4 +44,3 @@ properties:
 required:
   - pipeline_uuid
   - name
-  - type

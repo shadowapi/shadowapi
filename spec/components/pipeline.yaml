@@ -11,10 +11,10 @@ properties:
     description: Optional. Required for datasources based pipelines
   type:
     type: string
-    description: Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching contacts outside of pipelines
+    description: Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid
   name:
     type: string
-    description: Pipeline name. Ex gmail_ilya@reactima.com
+    description: Pipeline name
   is_enabled:
     type: boolean
     description: Whether this pipeline is currently active

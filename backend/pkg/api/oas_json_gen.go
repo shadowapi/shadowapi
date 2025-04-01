@@ -11164,8 +11164,10 @@ func (s *SyncPolicy) encodeFields(e *jx.Encoder) {
 		e.Str(s.PipelineUUID)
 	}
 	{
-		e.FieldStart("type")
-		e.Str(s.Type)
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("name")
@@ -11269,11 +11271,9 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"pipeline_uuid\"")
 			}
 		case "type":
-			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.Type = string(v)
-				if err != nil {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -11390,7 +11390,7 @@ func (s *SyncPolicy) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00001110,
+		0b00001010,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {

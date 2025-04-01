@@ -13,8 +13,8 @@ INSERT INTO sync_policy (
 ) VALUES (
     sqlc.arg('uuid')::uuid,
     sqlc.arg('pipeline_uuid')::uuid,
-    NULLIF(sqlc.arg('name'), ''),
-    NULLIF(sqlc.arg('type'), ''),
+    sqlc.arg('name'),
+    sqlc.arg('type'),
     sqlc.arg('blocklist'),
     sqlc.arg('exclude_list'),
     sqlc.arg('sync_all')::boolean,
@@ -61,7 +61,7 @@ OFFSET sqlc.arg('offset')::int;
 
 -- name: UpdateSyncPolicy :exec
 UPDATE sync_policy SET
-    name = NULLIF(sqlc.arg('name'), ''),
+    name = sqlc.arg('name'),
     blocklist = sqlc.arg('blocklist'),
     exclude_list = sqlc.arg('exclude_list'),
     sync_all = sqlc.arg('sync_all')::boolean,

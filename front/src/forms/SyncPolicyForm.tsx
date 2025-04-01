@@ -9,7 +9,6 @@ import type { components } from '@/api/v1'
 
 type SyncPolicyFormData = {
   pipeline_uuid: string
-  type: string
   blocklist?: string[]
   exclude_list?: string[]
   sync_all: boolean
@@ -64,14 +63,14 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
       if (isAdd) {
         const resp = await client.POST('/syncpolicy', { body: payload })
         if (resp.error) {
-          form.setError('type', { message: resp.error.detail })
+          form.setError('pipeline_uuid', { message: resp.error.detail })
           throw new Error(resp.error.detail)
         }
         return resp
       } else {
         const resp = await client.PUT('/syncpolicy/' + policyUUID, { body: payload })
         if (resp.error) {
-          form.setError('type', { message: resp.error.detail })
+          form.setError('pipeline_uuid', { message: resp.error.detail })
           throw new Error(resp.error.detail)
         }
         return resp
@@ -87,7 +86,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
     mutationFn: async (uuid: string) => {
       const resp = await client.DELETE('/syncpolicy/' + uuid)
       if (resp.error) {
-        form.setError('type', { message: resp.error.detail })
+        form.setError('pipeline_uuid', { message: resp.error.detail })
         throw new Error(resp.error.detail)
       }
       return resp
@@ -145,7 +144,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
                 width="100%"
               >
                 {pipelinesQuery &&
-                  pipelinesQuery.data?.pipelines?.map((pipeline: components['schemas']['pipeline']) => (
+                  pipelinesQuery.data?.pipelines?.map((pipeline: components['schemas']['pipeline']) => 
                     <Item key={pipeline.uuid}>
                       <span
                         style={{
@@ -159,7 +158,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
                         {pipeline.name} {pipeline.type}
                       </span>
                     </Item>
-                  ))}
+                  )}
               </Picker>
             )}
           />

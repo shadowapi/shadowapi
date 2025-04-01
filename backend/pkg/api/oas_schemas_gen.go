@@ -5453,10 +5453,9 @@ type Pipeline struct {
 	UUID OptUUID `json:"uuid"`
 	// Optional. Required for datasources based pipelines.
 	DatasourceUUID uuid.UUID `json:"datasource_uuid"`
-	// Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching
-	// contacts outside of pipelines.
+	// Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid.
 	Type OptString `json:"type"`
-	// Pipeline name. Ex gmail_ilya@reactima.com.
+	// Pipeline name.
 	Name string `json:"name"`
 	// Whether this pipeline is currently active.
 	IsEnabled OptBool `json:"is_enabled"`
@@ -6248,7 +6247,7 @@ type SyncPolicy struct {
 	// Unique identifier for the user associated with the sync policy.
 	PipelineUUID string `json:"pipeline_uuid"`
 	// Policy type (email, telegram, whatsapp, linkedin).
-	Type string `json:"type"`
+	Type OptString `json:"type"`
 	// Sync policy name.
 	Name string `json:"name"`
 	// Whether this policy is currently active.
@@ -6278,7 +6277,7 @@ func (s *SyncPolicy) GetPipelineUUID() string {
 }
 
 // GetType returns the value of Type.
-func (s *SyncPolicy) GetType() string {
+func (s *SyncPolicy) GetType() OptString {
 	return s.Type
 }
 
@@ -6333,7 +6332,7 @@ func (s *SyncPolicy) SetPipelineUUID(val string) {
 }
 
 // SetType sets the value of Type.
-func (s *SyncPolicy) SetType(val string) {
+func (s *SyncPolicy) SetType(val OptString) {
 	s.Type = val
 }
 

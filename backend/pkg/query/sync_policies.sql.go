@@ -27,8 +27,8 @@ INSERT INTO sync_policy (
 ) VALUES (
     $1::uuid,
     $2::uuid,
-    NULLIF($3, ''),
-    NULLIF($4, ''),
+    $3,
+    $4,
     $5,
     $6,
     $7::boolean,
@@ -41,8 +41,8 @@ INSERT INTO sync_policy (
 type CreateSyncPolicyParams struct {
 	UUID         pgtype.UUID `json:"uuid"`
 	PipelineUuid pgtype.UUID `json:"pipeline_uuid"`
-	Name         interface{} `json:"name"`
-	Type         interface{} `json:"type"`
+	Name         string      `json:"name"`
+	Type         string      `json:"type"`
 	Blocklist    []string    `json:"blocklist"`
 	ExcludeList  []string    `json:"exclude_list"`
 	SyncAll      bool        `json:"sync_all"`
@@ -257,7 +257,7 @@ func (q *Queries) ListSyncPolicies(ctx context.Context, arg ListSyncPoliciesPara
 
 const updateSyncPolicy = `-- name: UpdateSyncPolicy :exec
 UPDATE sync_policy SET
-    name = NULLIF($1, ''),
+    name = $1,
     blocklist = $2,
     exclude_list = $3,
     sync_all = $4::boolean,
@@ -267,7 +267,7 @@ WHERE uuid = $6::uuid
 `
 
 type UpdateSyncPolicyParams struct {
-	Name        interface{} `json:"name"`
+	Name        string      `json:"name"`
 	Blocklist   []string    `json:"blocklist"`
 	ExcludeList []string    `json:"exclude_list"`
 	SyncAll     bool        `json:"sync_all"`

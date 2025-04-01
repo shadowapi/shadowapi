@@ -1106,9 +1106,9 @@ export interface components {
              * @description Optional. Required for datasources based pipelines
              */
             datasource_uuid: string;
-            /** @description Required. Pipeline type (email, telegram, whatsapp, linkedin) or anything else like enriching contacts outside of pipelines */
+            /** @description Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid */
             type?: string;
-            /** @description Pipeline name. Ex gmail_ilya@reactima.com */
+            /** @description Pipeline name */
             name: string;
             /** @description Whether this pipeline is currently active */
             is_enabled?: boolean;
@@ -1347,7 +1347,7 @@ export interface components {
             /** @description Unique identifier for the user associated with the sync policy. */
             pipeline_uuid: string;
             /** @description Policy type (email, telegram, whatsapp, linkedin) */
-            type: string;
+            type?: string;
             /** @description Sync policy name */
             name: string;
             /** @description Whether this policy is currently active */

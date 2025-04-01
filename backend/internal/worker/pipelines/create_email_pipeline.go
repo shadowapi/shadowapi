@@ -60,7 +60,7 @@ func convertSyncPolicy(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
 	var policy api.SyncPolicy
 	policy.SetUUID(api.NewOptString(row.UUID.String()))
 
-	policy.SetType(row.Type)
+	policy.SetType(api.NewOptString(row.Type))
 	policy.SetBlocklist(row.Blocklist)
 	policy.SetExcludeList(row.ExcludeList)
 	policy.SetSyncAll(api.NewOptBool(row.SyncAll))
@@ -102,13 +102,13 @@ func CreateEmailPipeline(ctx context.Context, log *slog.Logger, dbp *pgxpool.Poo
 		log.Error("Failed to get sync policy from DB", "error", err)
 		// If error occurs, default to a policy that allows all messages.
 		apiPolicy = api.SyncPolicy{
-			Type:    "email",
+			Type:    api.NewOptString("email"),
 			SyncAll: api.NewOptBool(true),
 		}
 	} else if len(policies) == 0 {
 		// No policy exists; default to allowing all messages.
 		apiPolicy = api.SyncPolicy{
-			Type:    "email",
+			Type:    api.NewOptString("email"),
 			SyncAll: api.NewOptBool(true),
 		}
 	} else {
@@ -118,7 +118,7 @@ func CreateEmailPipeline(ctx context.Context, log *slog.Logger, dbp *pgxpool.Poo
 			log.Error("Failed to convert sync policy", "error", err)
 			// Fallback to allow all messages.
 			apiPolicy = api.SyncPolicy{
-				Type:    "email",
+				Type:    api.NewOptString("email"),
 				SyncAll: api.NewOptBool(true),
 			}
 		} else {

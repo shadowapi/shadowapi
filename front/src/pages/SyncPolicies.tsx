@@ -60,7 +60,8 @@ export function SyncPolicies() {
         </ActionButton>
         <TableView aria-label="Policies list table" overflowMode="wrap" maxWidth={1000}>
           <TableHeader>
-            <Column key="service">Service</Column>
+            <Column key="name">Name</Column>
+            <Column key="type">Type</Column>
             <Column key="sync_all">Sync All</Column>
             <Column key="created_at">Created At</Column>
             <Column key="actions" width={50} hideHeader>
@@ -70,7 +71,8 @@ export function SyncPolicies() {
           <TableBody items={query.data}>
             {(item: components['schemas']['sync_policy']) => (
               <Row key={item.uuid}>
-                <Cell>{item.service}</Cell>
+                <Cell>{item.name}</Cell>
+                <Cell>{item.type}</Cell>
                 <Cell>{item.sync_all ? 'Yes' : 'No'}</Cell>
                 <Cell>{item.created_at}</Cell>
                 <Cell>
