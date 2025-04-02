@@ -55,6 +55,12 @@ func Provide(i do.Injector) (*Broker, error) {
 	s := scheduler.NewScheduler(log, dbp, q)
 	s.StartEmailScheduler(ctx)
 
+	// TODO @reactima implement multi-account email pipeline
+	// Start multi-account email pipelines.
+	//if err := StartMultiAccountEmailPipeline(ctx, log, dbp, q); err != nil {
+	//	log.Error("failed to start multi-account email pipeline", "error", err)
+	//}
+
 	return b, nil
 }
 

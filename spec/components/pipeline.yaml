@@ -3,11 +3,9 @@ additionalProperties: false
 properties:
   uuid:
     type: string
-    format: uuid
     description: Unique identifier
   datasource_uuid:
     type: string
-    format: uuid
     description: Optional. Required for datasources based pipelines
   type:
     type: string

@@ -344,6 +344,36 @@ type Handler interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
+	// SchedulerCreate implements scheduler-create operation.
+	//
+	// Create scheduler.
+	//
+	// POST /scheduler
+	SchedulerCreate(ctx context.Context, req *Scheduler) (*Scheduler, error)
+	// SchedulerDelete implements scheduler-delete operation.
+	//
+	// Delete scheduler.
+	//
+	// DELETE /scheduler/{uuid}
+	SchedulerDelete(ctx context.Context, params SchedulerDeleteParams) error
+	// SchedulerGet implements scheduler-get operation.
+	//
+	// Get scheduler by UUID.
+	//
+	// GET /scheduler/{uuid}
+	SchedulerGet(ctx context.Context, params SchedulerGetParams) (*Scheduler, error)
+	// SchedulerList implements scheduler-list operation.
+	//
+	// Retrieve all schedulers for the authenticated user.
+	//
+	// GET /scheduler
+	SchedulerList(ctx context.Context, params SchedulerListParams) ([]Scheduler, error)
+	// SchedulerUpdate implements scheduler-update operation.
+	//
+	// Update scheduler.
+	//
+	// PUT /scheduler/{uuid}
+	SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (*Scheduler, error)
 	// StorageHostfilesCreate implements storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.

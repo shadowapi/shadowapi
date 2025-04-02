@@ -4786,6 +4786,69 @@ func (o OptMessageType) Or(d MessageType) MessageType {
 	return d
 }
 
+// NewOptNilDateTime returns new OptNilDateTime with value set to v.
+func NewOptNilDateTime(v time.Time) OptNilDateTime {
+	return OptNilDateTime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDateTime is optional nullable time.Time.
+type OptNilDateTime struct {
+	Value time.Time
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDateTime was set.
+func (o OptNilDateTime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDateTime) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDateTime) SetTo(v time.Time) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o OptNilDateTime) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilDateTime) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v time.Time
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDateTime) Get() (v time.Time, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilString returns new OptNilString with value set to v.
 func NewOptNilString(v string) OptNilString {
 	return OptNilString{
@@ -5450,9 +5513,9 @@ func (o OptUserMeta) Or(d UserMeta) UserMeta {
 // Ref: #
 type Pipeline struct {
 	// Unique identifier.
-	UUID OptUUID `json:"uuid"`
+	UUID OptString `json:"uuid"`
 	// Optional. Required for datasources based pipelines.
-	DatasourceUUID uuid.UUID `json:"datasource_uuid"`
+	DatasourceUUID string `json:"datasource_uuid"`
 	// Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid.
 	Type OptString `json:"type"`
 	// Pipeline name.
@@ -5468,12 +5531,12 @@ type Pipeline struct {
 }
 
 // GetUUID returns the value of UUID.
-func (s *Pipeline) GetUUID() OptUUID {
+func (s *Pipeline) GetUUID() OptString {
 	return s.UUID
 }
 
 // GetDatasourceUUID returns the value of DatasourceUUID.
-func (s *Pipeline) GetDatasourceUUID() uuid.UUID {
+func (s *Pipeline) GetDatasourceUUID() string {
 	return s.DatasourceUUID
 }
 
@@ -5508,12 +5571,12 @@ func (s *Pipeline) GetUpdatedAt() OptDateTime {
 }
 
 // SetUUID sets the value of UUID.
-func (s *Pipeline) SetUUID(val OptUUID) {
+func (s *Pipeline) SetUUID(val OptString) {
 	s.UUID = val
 }
 
 // SetDatasourceUUID sets the value of DatasourceUUID.
-func (s *Pipeline) SetDatasourceUUID(val uuid.UUID) {
+func (s *Pipeline) SetDatasourceUUID(val string) {
 	s.DatasourceUUID = val
 }
 
@@ -5730,7 +5793,7 @@ func (s *PipelineNode) SetData(val PipelineNodeData) {
 
 type PipelineNodeData struct {
 	Label     OptString `json:"label"`
-	EntryUUID OptUUID   `json:"entry_uuid"`
+	EntryUUID OptString `json:"entry_uuid"`
 	// TODO @reactima stricter types.
 	Config OptPipelineNodeDataConfig `json:"config"`
 }
@@ -5741,7 +5804,7 @@ func (s *PipelineNodeData) GetLabel() OptString {
 }
 
 // GetEntryUUID returns the value of EntryUUID.
-func (s *PipelineNodeData) GetEntryUUID() OptUUID {
+func (s *PipelineNodeData) GetEntryUUID() OptString {
 	return s.EntryUUID
 }
 
@@ -5756,7 +5819,7 @@ func (s *PipelineNodeData) SetLabel(val OptString) {
 }
 
 // SetEntryUUID sets the value of EntryUUID.
-func (s *PipelineNodeData) SetEntryUUID(val OptUUID) {
+func (s *PipelineNodeData) SetEntryUUID(val OptString) {
 	s.EntryUUID = val
 }
 
@@ -5801,6 +5864,134 @@ func (s *PipelineNodePosition) SetX(val OptFloat64) {
 func (s *PipelineNodePosition) SetY(val OptFloat64) {
 	s.Y = val
 }
+
+// Ref: #
+type Scheduler struct {
+	ID             OptString      `json:"id"`
+	PipelineUUID   string         `json:"pipeline_uuid"`
+	ScheduleType   string         `json:"schedule_type"`
+	CronExpression OptNilString   `json:"cron_expression"`
+	RunAt          OptNilDateTime `json:"run_at"`
+	Timezone       OptString      `json:"timezone"`
+	NextRun        OptDateTime    `json:"next_run"`
+	LastRun        OptDateTime    `json:"last_run"`
+	IsEnabled      OptBool        `json:"is_enabled"`
+	CreatedAt      OptDateTime    `json:"created_at"`
+	UpdatedAt      OptDateTime    `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *Scheduler) GetID() OptString {
+	return s.ID
+}
+
+// GetPipelineUUID returns the value of PipelineUUID.
+func (s *Scheduler) GetPipelineUUID() string {
+	return s.PipelineUUID
+}
+
+// GetScheduleType returns the value of ScheduleType.
+func (s *Scheduler) GetScheduleType() string {
+	return s.ScheduleType
+}
+
+// GetCronExpression returns the value of CronExpression.
+func (s *Scheduler) GetCronExpression() OptNilString {
+	return s.CronExpression
+}
+
+// GetRunAt returns the value of RunAt.
+func (s *Scheduler) GetRunAt() OptNilDateTime {
+	return s.RunAt
+}
+
+// GetTimezone returns the value of Timezone.
+func (s *Scheduler) GetTimezone() OptString {
+	return s.Timezone
+}
+
+// GetNextRun returns the value of NextRun.
+func (s *Scheduler) GetNextRun() OptDateTime {
+	return s.NextRun
+}
+
+// GetLastRun returns the value of LastRun.
+func (s *Scheduler) GetLastRun() OptDateTime {
+	return s.LastRun
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *Scheduler) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Scheduler) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Scheduler) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *Scheduler) SetID(val OptString) {
+	s.ID = val
+}
+
+// SetPipelineUUID sets the value of PipelineUUID.
+func (s *Scheduler) SetPipelineUUID(val string) {
+	s.PipelineUUID = val
+}
+
+// SetScheduleType sets the value of ScheduleType.
+func (s *Scheduler) SetScheduleType(val string) {
+	s.ScheduleType = val
+}
+
+// SetCronExpression sets the value of CronExpression.
+func (s *Scheduler) SetCronExpression(val OptNilString) {
+	s.CronExpression = val
+}
+
+// SetRunAt sets the value of RunAt.
+func (s *Scheduler) SetRunAt(val OptNilDateTime) {
+	s.RunAt = val
+}
+
+// SetTimezone sets the value of Timezone.
+func (s *Scheduler) SetTimezone(val OptString) {
+	s.Timezone = val
+}
+
+// SetNextRun sets the value of NextRun.
+func (s *Scheduler) SetNextRun(val OptDateTime) {
+	s.NextRun = val
+}
+
+// SetLastRun sets the value of LastRun.
+func (s *Scheduler) SetLastRun(val OptDateTime) {
+	s.LastRun = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *Scheduler) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Scheduler) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Scheduler) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// SchedulerDeleteOK is response for SchedulerDelete operation.
+type SchedulerDeleteOK struct{}
 
 type SessionCookieAuth struct {
 	APIKey string

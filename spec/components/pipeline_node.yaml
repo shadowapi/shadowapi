@@ -19,7 +19,6 @@ properties:
         type: string
       entry_uuid:
         type: string
-        format: uuid
       config:
         description: TODO @reactima stricter types
         type: object

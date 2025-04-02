@@ -16,9 +16,12 @@ import {
 } from '@adobe/react-spectrum'
 import { DropEvent } from '@react-types/shared'
 import { DropOperation } from '@react-types/shared'
+import CalendarAdd from '@spectrum-icons/workflow/CalendarAdd'
 import Delete from '@spectrum-icons/workflow/Delete'
+import Play from '@spectrum-icons/workflow/Play'
 import SaveAsFloppy from '@spectrum-icons/workflow/SaveAsFloppy'
 import SaveFloppy from '@spectrum-icons/workflow/SaveFloppy'
+import TestProfile from '@spectrum-icons/workflow/TestProfile'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   addEdge,
@@ -72,6 +75,14 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/datasource', { signal })
       return data as components['schemas']['datasource'][]
+    },
+  })
+
+  const storageQuery = useQuery({
+    queryKey: ['storages'],
+    queryFn: async ({ signal }) => {
+      const { data } = await client.GET('/storage', { signal })
+      return data as components['schemas']['storage'][]
     },
   })
 
@@ -306,99 +317,157 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     setNodes((prev) => [...prev, newNode])
   }
 
-  if (datasourceQuery.isPending && !isAdd) return <></>
+  if (datasourceQuery.isPending && storageQuery.isPending && !isAdd) return <></>
 
   console.log('datasourceQuery', { datasourceQuery })
 
   return (
-    <Flex direction="column" flexBasis="100%" rowGap="size-200">
-      <View padding="size-75">
+    <Flex direction="row" width="100%" height="100%" gap="size-200">
+      {/* Left: Form section with fixed width */}
+      <View width="360px" padding="size-200" borderEndWidth="thin" borderColor="dark">
         <Form onSubmit={form.handleSubmit(onSubmit)} aria-label="Update flow">
-          <Flex direction="row" width="size-4600" marginStart="size-400" gap="size-200">
-            <Controller
-              name="name"
-              control={form.control}
-              rules={{ required: 'Name is required' }}
-              render={({ field, fieldState }) => (
-                <TextField
-                  labelPosition="side"
-                  isRequired
-                  // Ensure we always have a string instead of undefined
-                  value={field.value ?? ''}
-                  // Wire up React Hook Form's onChange/onBlur
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  // Mark invalid in Spectrum if there's an error
-                  validationState={fieldState.invalid ? 'invalid' : undefined}
-                  errorMessage={fieldState.error?.message}
-                  aria-label={`Enter ${field.name} value`}
-                />
-              )}
-            />
+          <Flex direction="column" rowGap="size-200">
+            <Flex direction="row" gap="size-200">
+              <Controller
+                name="name"
+                control={form.control}
+                rules={{ required: 'Name is required' }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    labelPosition="side"
+                    isRequired
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    validationState={fieldState.invalid ? 'invalid' : undefined}
+                    errorMessage={fieldState.error?.message}
+                    aria-label={`Enter ${field.name} value`}
+                  />
+                )}
+              />
 
-            <ActionButton
-              aria-label="Save or add pipeline"
-              onPress={() => {
-                form.handleSubmit(onSubmit)()
-              }}
-            >
-              {pipelineUUID !== 'add' ? <SaveFloppy /> : <SaveAsFloppy />}
-            </ActionButton>
+              <ActionButton aria-label="Save or add pipeline" onPress={() => form.handleSubmit(onSubmit)()}>
+                {pipelineUUID !== 'add' ? <SaveFloppy /> : <SaveAsFloppy />}
+              </ActionButton>
 
-            <ActionButton
-              onPress={onDelete}
-              aria-label="Delete pipeline"
-              isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
-            >
-              <Delete />
-            </ActionButton>
-          </Flex>
-          <Flex direction="row" width="size-4600" marginStart="size-400" gap="size-200">
+              <ActionButton
+                onPress={onDelete}
+                aria-label="Delete pipeline"
+                isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
+              >
+                <Delete />
+              </ActionButton>
+            </Flex>
+
             <Controller
               name="datasource_uuid"
               control={form.control}
               rules={{ required: 'Datasource is required' }}
               render={({ field, fieldState }) => (
                 <Picker
-                  label="Pipeline"
+                  label="Data Source"
                   isRequired
                   selectedKey={field.value}
                   onSelectionChange={(key) => field.onChange(key.toString())}
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {datasourceQuery &&
-                    datasourceQuery.data?.map((datasource: components['schemas']['datasource']) => 
-                      <Item key={datasource.uuid}>
-                        <span
-                          style={{
-                            whiteSpace: 'nowrap',
-                            height: '24px',
-                            lineHeight: '24px',
-                            marginLeft: 10,
-                            marginRight: 10,
-                          }}
-                        >
-                          {datasource.name} {datasource.type}
-                        </span>
-                      </Item>
-                    )}
+                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => (
+                    <Item key={datasource.uuid}>
+                      <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
+                        {datasource.name} {datasource.type}
+                      </span>
+                    </Item>
+                  ))}
                 </Picker>
               )}
             />
+
+            <Controller
+              name="contact_extractor"
+              control={form.control}
+              rules={{ required: 'Datasource is required' }}
+              render={({ field, fieldState }) => (
+                <Picker
+                  label="Contact Extractor"
+                  isRequired
+                  selectedKey={field.value}
+                  onSelectionChange={(key) => field.onChange(key.toString())}
+                  errorMessage={fieldState.error?.message}
+                  width="100%"
+                >
+                  <Item key="extractor1">
+                    <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
+                      Standard Extractor
+                    </span>
+                  </Item>
+                </Picker>
+              )}
+            />
+
+            <Controller
+              name="storage_uuid"
+              control={form.control}
+              rules={{ required: 'Storage is required' }}
+              render={({ field, fieldState }) => (
+                <Picker
+                  label="Storage"
+                  isRequired
+                  selectedKey={field.value}
+                  onSelectionChange={(key) => field.onChange(key.toString())}
+                  errorMessage={fieldState.error?.message}
+                  width="100%"
+                >
+                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => (
+                    <Item key={storage.uuid}>
+                      <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
+                        {storage.name} {storage.type}
+                      </span>
+                    </Item>
+                  ))}
+                </Picker>
+              )}
+            />
+
+            <Flex direction="row" gap="size-200">
+              <ActionButton
+                onPress={() => {}}
+                aria-label="Run pipeline"
+                isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
+              >
+                Run <Play />
+              </ActionButton>
+              <ActionButton
+                onPress={() => {}}
+                aria-label="Run pipeline"
+                isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
+              >
+                Test Run <TestProfile />
+              </ActionButton>
+              <ActionButton
+                onPress={() => {}}
+                aria-label="Schedule pipeline"
+                isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
+              >
+                Schedule <CalendarAdd />
+              </ActionButton>
+            </Flex>
           </Flex>
         </Form>
       </View>
 
-      <Flex direction="row" flexGrow={1}>
-        <View padding="size-200" minWidth="size-4600" marginStart="size-300">
+      {/* Right: Flow section taking remaining space */}
+      <Flex direction="row" flexGrow={1} overflow="auto" gap="size-200">
+        {/* Left column: FlowEntries */}
+        <View padding="size-200" width="240px" overflow="auto">
           <FlowEntries list={flowEntries} dragAndDropOptions={dragAndDropHooks} />
         </View>
 
+        {/* Right column: DropZone + ReactFlow */}
         <DropZone
           isFilled
           onDrop={onDrop}
-          flexBasis="100%"
+          flexGrow={1}
           aria-label="Drop pipeline step here"
           UNSAFE_style={{ padding: 0 }}
           replaceMessage="Add pipeline step here"

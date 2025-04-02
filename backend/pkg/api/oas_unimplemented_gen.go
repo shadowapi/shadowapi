@@ -517,6 +517,51 @@ func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, p
 	return r, ht.ErrNotImplemented
 }
 
+// SchedulerCreate implements scheduler-create operation.
+//
+// Create scheduler.
+//
+// POST /scheduler
+func (UnimplementedHandler) SchedulerCreate(ctx context.Context, req *Scheduler) (r *Scheduler, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SchedulerDelete implements scheduler-delete operation.
+//
+// Delete scheduler.
+//
+// DELETE /scheduler/{uuid}
+func (UnimplementedHandler) SchedulerDelete(ctx context.Context, params SchedulerDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// SchedulerGet implements scheduler-get operation.
+//
+// Get scheduler by UUID.
+//
+// GET /scheduler/{uuid}
+func (UnimplementedHandler) SchedulerGet(ctx context.Context, params SchedulerGetParams) (r *Scheduler, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SchedulerList implements scheduler-list operation.
+//
+// Retrieve all schedulers for the authenticated user.
+//
+// GET /scheduler
+func (UnimplementedHandler) SchedulerList(ctx context.Context, params SchedulerListParams) (r []Scheduler, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SchedulerUpdate implements scheduler-update operation.
+//
+// Update scheduler.
+//
+// PUT /scheduler/{uuid}
+func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (r *Scheduler, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StorageHostfilesCreate implements storage-hostfiles-create operation.
 //
 // Create a new Host Files storage instance.

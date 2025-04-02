@@ -233,6 +233,20 @@ type Pipeline struct {
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
+type Scheduler struct {
+	UUID           uuid.UUID          `json:"uuid"`
+	PipelineUuid   *uuid.UUID         `json:"pipeline_uuid"`
+	ScheduleType   string             `json:"schedule_type"`
+	CronExpression pgtype.Text        `json:"cron_expression"`
+	RunAt          pgtype.Timestamptz `json:"run_at"`
+	Timezone       string             `json:"timezone"`
+	NextRun        pgtype.Timestamptz `json:"next_run"`
+	LastRun        pgtype.Timestamptz `json:"last_run"`
+	IsEnabled      bool               `json:"is_enabled"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Storage struct {
 	UUID      uuid.UUID          `json:"uuid"`
 	Name      string             `json:"name"`

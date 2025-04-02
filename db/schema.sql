@@ -307,3 +307,19 @@ CREATE TABLE IF NOT EXISTS contact (
                                        last_kpi_entry_date         timestamptz
 );
 
+CREATE TABLE "scheduler" (
+                             "uuid"             UUID PRIMARY KEY,
+                             pipeline_uuid      UUID NOT NULL,
+                             schedule_type      VARCHAR NOT NULL, -- 'cron' or 'one_time'
+                             cron_expression    VARCHAR,
+                             run_at             TIMESTAMP WITH TIME ZONE,
+                             timezone           VARCHAR NOT NULL DEFAULT 'UTC',
+                             next_run           TIMESTAMP WITH TIME ZONE,
+                             last_run           TIMESTAMP WITH TIME ZONE,
+                             is_enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+
+                             created_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                             updated_at         TIMESTAMP WITH TIME ZONE,
+
+                             CONSTRAINT fk_scheduler_pipeline FOREIGN KEY(pipeline_uuid) REFERENCES pipeline("uuid") ON DELETE CASCADE
+);

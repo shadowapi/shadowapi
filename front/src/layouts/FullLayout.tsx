@@ -10,26 +10,35 @@ import Organize from '@spectrum-icons/workflow/Organize'
 import User from '@spectrum-icons/workflow/User'
 import Workflow from '@spectrum-icons/workflow/Workflow'
 
+import type { NavbarProps } from '@/components/Navbar'
 import { Navbar } from '@/components/Navbar'
 import { useLogout } from '@/shauth'
 
 export function FullLayout({ children }: { children: ReactNode }) {
   const logout = useLogout()
   // Main navigation items
-  const navItems = [
+  const navItems: NavbarProps = [
     { Label: 'Dashboard', AriaLabel: 'Go to dashboard page', Icon: <Homepage />, URL: '/' },
     { Label: 'Users', AriaLabel: 'Go to data users page', Icon: <User />, URL: '/users' },
-    { Label: 'Data Sources', AriaLabel: 'Go to data sources page', Icon: <EmailGear />, URL: '/datasources' },
-    { Label: 'Data Pipelines', AriaLabel: 'Go to data pipelines page', Icon: <Workflow />, URL: '/pipelines' },
-    { Label: 'Data Storages', AriaLabel: 'Go to data storages page', Icon: <Data />, URL: '/storages' },
     {
-      Label: 'OAuth2 Credentials',
-      AriaLabel: 'Go to OAuth2 credentials page',
-      Icon: <Login />,
-      URL: '/oauth2/credentials',
+      Label: 'Data Sources',
+      AriaLabel: 'Go to data sources page',
+      Icon: <EmailGear />,
+      URL: '/datasources',
+      Childrens: [
+        {
+          Label: 'OAuth2 Credentials',
+          AriaLabel: 'Go to OAuth2 credentials page',
+          Icon: <Login />,
+          URL: '/oauth2/credentials',
+        },
+      ],
     },
-    { Label: 'Workers', AriaLabel: 'Go to workers page', Icon: <Gears />, URL: '/workers' },
+
+    { Label: 'Data Storages', AriaLabel: 'Go to data storages page', Icon: <Data />, URL: '/storages' },
     { Label: 'SyncPolicies', AriaLabel: 'Go to sync policies page', Icon: <AssetsExpired />, URL: '/syncpolicies' },
+    { Label: 'Data Pipelines', AriaLabel: 'Go to data pipelines page', Icon: <Workflow />, URL: '/pipelines' },
+    { Label: 'Workers', AriaLabel: 'Go to workers page', Icon: <Gears />, URL: '/workers' },
     { Label: 'Logs', AriaLabel: 'Go to logs page', Icon: <Organize />, URL: '/logs' },
   ]
 

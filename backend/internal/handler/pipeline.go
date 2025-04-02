@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	uuidGoogle "github.com/google/uuid"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -19,7 +18,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 	log := h.log.With("handler", "PipelineCreate")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
 		pipelineUUID := uuid.Must(uuid.NewV7())
-		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID.String())
+		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID)
 		if err != nil {
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
@@ -134,7 +133,7 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 		} else {
 			flowData = existingRow.Pipeline.Flow
 		}
-		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID.String())
+		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID)
 		if err != nil {
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
@@ -166,24 +165,6 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 	})
 }
 
-/*
-
-func (h *Handler) SyncpolicyDelete(ctx context.Context, params api.SyncpolicyDeleteParams) error {
-	log := h.log.With("handler", "SyncpolicyDelete")
-	policyUUID, err := uuid.FromString(params.UUID)
-	if err != nil {
-		log.Error("invalid policy uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid sync policy uuid"))
-	}
-	err = query.New(h.dbp).DeleteSyncPolicy(ctx, pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true})
-	if err != nil {
-		log.Error("failed to delete sync policy", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete sync policy"))
-	}
-	return nil
-}
-*/
-
 func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) error {
 	log := h.log.With("handler", "PipelineDelete")
 	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
@@ -199,24 +180,10 @@ func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteP
 	return nil
 }
 
-func qToApiPipelineRow(row query.GetPipelinesRow) (api.Pipeline, error) {
-	p := query.Pipeline{
-		UUID:           row.UUID,
-		DatasourceUUID: row.DatasourceUUID,
-		Name:           row.Name,
-		Type:           row.Type,
-		IsEnabled:      row.IsEnabled,
-		Flow:           row.Flow,
-		CreatedAt:      row.CreatedAt,
-		UpdatedAt:      row.UpdatedAt,
-	}
-	return qToApiPipeline(p)
-}
-
 // TODO finish convertion
 func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
 	out := api.Pipeline{
-		UUID:      api.NewOptUUID(uuidGoogle.UUID(dbp.UUID)), // TODO @reactima rethink the whole thing
+		UUID:      api.NewOptString(dbp.UUID.String()), // TODO @reactima rethink the whole thing
 		Name:      dbp.Name,
 		Type:      api.NewOptString(dbp.Type),
 		IsEnabled: api.NewOptBool(dbp.IsEnabled),

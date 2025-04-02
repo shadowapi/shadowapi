@@ -1,0 +1,34 @@
+type: object
+properties:
+  id:
+    type: string
+  pipeline_uuid:
+    type: string
+  schedule_type:
+    type: string
+  cron_expression:
+    type: string
+    nullable: true
+  run_at:
+    type: string
+    format: date-time
+    nullable: true
+  timezone:
+    type: string
+  next_run:
+    type: string
+    format: date-time
+  last_run:
+    type: string
+    format: date-time
+  is_enabled:
+    type: boolean
+  created_at:
+    type: string
+    format: date-time
+  updated_at:
+    type: string
+    format: date-time
+required:
+  - pipeline_uuid
+  - schedule_type

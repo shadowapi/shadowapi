@@ -884,6 +884,66 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
+				case 'c': // Prefix: "cheduler"
+					origElem := elem
+					if l := len("cheduler"); len(elem) >= l && elem[0:l] == "cheduler" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleSchedulerListRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleSchedulerCreateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "DELETE":
+								s.handleSchedulerDeleteRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handleSchedulerGetRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handleSchedulerUpdateRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE,GET,PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
 				case 't': // Prefix: "torage"
 					origElem := elem
 					if l := len("torage"); len(elem) >= l && elem[0:l] == "torage" {
@@ -2447,6 +2507,86 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
+				case 'c': // Prefix: "cheduler"
+					origElem := elem
+					if l := len("cheduler"); len(elem) >= l && elem[0:l] == "cheduler" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = SchedulerListOperation
+							r.summary = "List schedulers"
+							r.operationID = "scheduler-list"
+							r.pathPattern = "/scheduler"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = SchedulerCreateOperation
+							r.summary = "Create scheduler"
+							r.operationID = "scheduler-create"
+							r.pathPattern = "/scheduler"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "DELETE":
+								r.name = SchedulerDeleteOperation
+								r.summary = "Delete scheduler"
+								r.operationID = "scheduler-delete"
+								r.pathPattern = "/scheduler/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = SchedulerGetOperation
+								r.summary = "Get scheduler by UUID"
+								r.operationID = "scheduler-get"
+								r.pathPattern = "/scheduler/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "PUT":
+								r.name = SchedulerUpdateOperation
+								r.summary = "Update scheduler"
+								r.operationID = "scheduler-update"
+								r.pathPattern = "/scheduler/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
 				case 't': // Prefix: "torage"
 					origElem := elem
 					if l := len("torage"); len(elem) >= l && elem[0:l] == "torage" {

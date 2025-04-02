@@ -1,0 +1,67 @@
+parameters:
+  - name: uuid
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+    description: UUID of the scheduler
+
+get:
+  summary: Get scheduler by UUID
+  operationId: scheduler-get
+  responses:
+    "200":
+      description: Scheduler fetched successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Scheduler"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - scheduler
+
+put:
+  summary: Update scheduler
+  operationId: scheduler-update
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Scheduler"
+  responses:
+    "200":
+      description: Scheduler updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Scheduler"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - scheduler
+
+delete:
+  summary: Delete scheduler
+  operationId: scheduler-delete
+  responses:
+    "200":
+      description: Scheduler deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - scheduler

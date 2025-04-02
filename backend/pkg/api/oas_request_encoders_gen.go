@@ -347,6 +347,34 @@ func encodePipelineUpdateRequest(
 	return nil
 }
 
+func encodeSchedulerCreateRequest(
+	req *Scheduler,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeSchedulerUpdateRequest(
+	req *Scheduler,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeStorageHostfilesCreateRequest(
 	req *StorageHostfiles,
 	r *http.Request,
