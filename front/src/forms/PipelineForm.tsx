@@ -42,6 +42,7 @@ import {
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 import { FlowEntries } from '@/components/FlowEntries'
+import { SchedulerForm } from '@/forms/SchedulerForm'
 
 interface PipelineProps {
   pipelineUUID: string
@@ -56,6 +57,33 @@ interface FlowEntryItem {
   title: string
 }
 
+const initialNodes = [
+  {
+    id: '1',
+    type: 'input',
+    data: { label: 'Input Node' },
+    position: { x: 250, y: 25 },
+  },
+
+  {
+    id: '2',
+    // you can also pass a React component as a label
+    data: { label: <div>Default Node</div> },
+    position: { x: 100, y: 125 },
+  },
+  {
+    id: '3',
+    type: 'output',
+    data: { label: 'Output Node' },
+    position: { x: 250, y: 250 },
+  },
+]
+
+const initialEdges = [
+  { id: 'e1-2', source: '1', target: '2' },
+  { id: 'e2-3', source: '2', target: '3', animated: true },
+]
+
 export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -63,8 +91,8 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   const rf = useReactFlow()
 
   // Track current nodes/edges in React Flow
-  const [nodes, setNodes] = useState<Node[]>([])
-  const [edges, setEdges] = useState<Edge[]>([])
+  const [nodes, setNodes] = useState<Node[]>(initialNodes)
+  const [edges, setEdges] = useState<Edge[]>(initialEdges)
 
   const isAdd = pipelineUUID === 'add'
 
@@ -372,13 +400,13 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => (
+                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => 
                     <Item key={datasource.uuid}>
                       <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
                         {datasource.name} {datasource.type}
                       </span>
                     </Item>
-                  ))}
+                  )}
                 </Picker>
               )}
             />
@@ -418,13 +446,13 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => (
+                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => 
                     <Item key={storage.uuid}>
                       <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
                         {storage.name} {storage.type}
                       </span>
                     </Item>
-                  ))}
+                  )}
                 </Picker>
               )}
             />
@@ -454,14 +482,16 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
             </Flex>
           </Flex>
         </Form>
+
+        <SchedulerForm schedulerUUID={'0'} />
       </View>
 
       {/* Right: Flow section taking remaining space */}
       <Flex direction="row" flexGrow={1} overflow="auto" gap="size-200">
         {/* Left column: FlowEntries */}
-        <View padding="size-200" width="240px" overflow="auto">
-          <FlowEntries list={flowEntries} dragAndDropOptions={dragAndDropHooks} />
-        </View>
+        {/*<View padding="size-200" width="240px" overflow="auto">*/}
+        {/*  <FlowEntries list={flowEntries} dragAndDropOptions={dragAndDropHooks} />*/}
+        {/*</View>*/}
 
         {/* Right column: DropZone + ReactFlow */}
         <DropZone

@@ -4,6 +4,7 @@ import AssetsExpired from '@spectrum-icons/workflow/AssetsExpired'
 import Data from '@spectrum-icons/workflow/Data'
 import EmailGear from '@spectrum-icons/workflow/EmailGear'
 import Gears from '@spectrum-icons/workflow/Gears'
+import GearsAdd from '@spectrum-icons/workflow/GearsAdd'
 import Homepage from '@spectrum-icons/workflow/Homepage'
 import Login from '@spectrum-icons/workflow/Login'
 import Organize from '@spectrum-icons/workflow/Organize'
@@ -38,7 +39,20 @@ export function FullLayout({ children }: { children: ReactNode }) {
     { Label: 'Data Storages', AriaLabel: 'Go to data storages page', Icon: <Data />, URL: '/storages' },
     { Label: 'SyncPolicies', AriaLabel: 'Go to sync policies page', Icon: <AssetsExpired />, URL: '/syncpolicies' },
     { Label: 'Data Pipelines', AriaLabel: 'Go to data pipelines page', Icon: <Workflow />, URL: '/pipelines' },
-    { Label: 'Workers', AriaLabel: 'Go to workers page', Icon: <Gears />, URL: '/workers' },
+    {
+      Label: 'Workers',
+      AriaLabel: 'Go to workers page',
+      Icon: <Gears />,
+      URL: '/workers',
+      Childrens: [
+        {
+          Label: 'Schedulers',
+          AriaLabel: 'Go to Schedulers',
+          Icon: <GearsAdd />,
+          URL: '/schedulers',
+        },
+      ],
+    },
     { Label: 'Logs', AriaLabel: 'Go to logs page', Icon: <Organize />, URL: '/logs' },
   ]
 

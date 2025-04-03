@@ -12,6 +12,8 @@ import {
   PipelineEdit,
   PipelineFlow,
   Pipelines,
+  SchedulerEdit,
+  Schedulers,
   StorageEdit,
   Storages,
   SyncPolicies,
@@ -62,6 +64,22 @@ function App() {
           element={
             <ProtectedRoute>
               <UserEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/schedulers"
+          element={
+            <ProtectedRoute>
+              <Schedulers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/schedulers/:uuid"
+          element={
+            <ProtectedRoute>
+              <SchedulerEdit />
             </ProtectedRoute>
           }
         />
