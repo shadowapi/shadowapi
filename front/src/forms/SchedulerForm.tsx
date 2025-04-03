@@ -82,18 +82,58 @@ function CronExpressionInput({ value, onChange, errorMessage }: CronExpressionIn
     setDayOfWeek(parts.dayOfWeek)
   }, [value, parseCron])
 
+  const monthOptions = [
+    { key: '*', label: '*' },
+    { key: '1', label: 'Jan' },
+    { key: '2', label: 'Feb' },
+    { key: '3', label: 'Mar' },
+    { key: '4', label: 'Apr' },
+    { key: '5', label: 'May' },
+    { key: '6', label: 'Jun' },
+    { key: '7', label: 'Jul' },
+    { key: '8', label: 'Aug' },
+    { key: '9', label: 'Sep' },
+    { key: '10', label: 'Oct' },
+    { key: '11', label: 'Nov' },
+    { key: '12', label: 'Dec' },
+  ]
+  const dayOfWeekOptions = [
+    { key: '*', label: '*' },
+    { key: '1', label: 'Mon' },
+    { key: '2', label: 'Tue' },
+    { key: '3', label: 'Wed' },
+    { key: '4', label: 'Thu' },
+    { key: '5', label: 'Fri' },
+    { key: '6', label: 'Sat' },
+    { key: '7', label: 'Sun' },
+  ]
+
   return (
     <>
-      <Grid columns="1fr" gap="size-100">
-        <TextField label="Minute" value={minute} onChange={setMinute} width="100%" />
-        <TextField label="Hour" value={hour} onChange={setHour} width="100%" />
-        <TextField label="Day of Month" value={dayOfMonth} onChange={setDayOfMonth} width="100%" />
-        <TextField label="Month" value={month} onChange={setMonth} width="100%" />
-        <TextField label="Day of Week" value={dayOfWeek} onChange={setDayOfWeek} width="100%" />
-      </Grid>
+      <Flex direction="column" gap="size-100">
+        <TextField label="Minute" value={minute} onChange={setMinute} width="48px" />
+        <TextField label="Hour" value={hour} onChange={setHour} width="48px" />
+        <TextField label="Day of Month" value={dayOfMonth} onChange={setDayOfMonth} width="128px" />
+
+        <Picker label="Month" selectedKey={month} onSelectionChange={(key) => setMonth(key.toString())} width="124px">
+          {monthOptions.map((opt) => (
+            <Item key={opt.key}>{opt.label}</Item>
+          ))}
+        </Picker>
+        <Picker
+          label="Day of Week"
+          selectedKey={dayOfWeek}
+          onSelectionChange={(key) => setDayOfWeek(key.toString())}
+          width="124px"
+        >
+          {dayOfWeekOptions.map((opt) => (
+            <Item key={opt.key}>{opt.label}</Item>
+          ))}
+        </Picker>
+      </Flex>
       {errorMessage && <Text UNSAFE_style={{ fontSize: '0.8rem', color: 'red' }}>{errorMessage}</Text>}
       <Text marginTop="size-100" UNSAFE_style={{ fontSize: '0.8rem', color: 'gray' }}>
-        Cron format: [Minute] [Hour] [Day of Month] [Month] [Day of Week]
+        Cron format: [Minute] [Hour] [Day of Month] [Month] [Day of Week] – Week starts from Monday
       </Text>
     </>
   )
