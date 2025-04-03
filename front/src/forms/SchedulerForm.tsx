@@ -152,6 +152,21 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
       is_enabled: true,
     },
   })
+
+  const scheduleType = form.watch('schedule_type')
+
+  // Set a dummy run_at value if not already set.
+  // (Since the datetime-local input only returns "YYYY-MM-DDTHH:mm",
+  // we'll override this in onSubmit so backend receives a valid RFC3339 timestamp.)
+  useEffect(() => {
+    if (!form.getValues('run_at')) {
+      const now = new Date()
+      // Use datetime-local format as default ("YYYY-MM-DDTHH:mm")
+      const formattedNow = now.toISOString().slice(0, 16)
+      form.setValue('run_at', formattedNow)
+    }
+  }, [scheduleType, form])
+
   const isAdd = schedulerUUID === 'add'
   const pipelinesQuery = useQuery({
     queryKey: ['pipelines'],
@@ -203,12 +218,25 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
     },
   })
   const onSubmit = (data: SchedulerFormData) => {
-    mutation.mutate(data)
+    const transformed = { ...data }
+    if (data.schedule_type === 'cron') {
+      // For cron type, set a dummy run_at value as current time (full ISO string)
+      transformed.run_at = new Date().toISOString()
+    } else {
+      // For one_time, convert the datetime-local value ("YYYY-MM-DDTHH:mm") into full ISO string
+      if (!data.run_at) {
+        transformed.run_at = new Date().toISOString()
+      } else if (data.run_at.length === 16) {
+        transformed.run_at = data.run_at + ':00Z'
+      } else {
+        transformed.run_at = data.run_at
+      }
+    }
+    mutation.mutate(transformed)
   }
   const onDelete = () => {
     deleteMutation.mutate(schedulerUUID)
   }
-  const scheduleType = form.watch('schedule_type')
   if (!isAdd && schedulerQuery.isPending) return <></>
   if (pipelinesQuery.isPending) return <></>
   return (
@@ -229,7 +257,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {pipelinesQuery.data?.pipelines?.map((pipeline) => (
+                {pipelinesQuery.data?.pipelines?.map((pipeline) => 
                   <Item key={pipeline.uuid}>
                     <span
                       style={{
@@ -243,7 +271,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                       {pipeline.name} {pipeline.type}
                     </span>
                   </Item>
-                ))}
+                )}
               </Picker>
             )}
           />
@@ -276,13 +304,13 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                   return parts.length === 5 || 'Cron expression must have exactly 5 fields'
                 },
               }}
-              render={({ field, fieldState }) => (
+              render={({ field, fieldState }) => 
                 <CronExpressionInput
                   value={field.value || ''}
                   onChange={field.onChange}
                   errorMessage={fieldState.error?.message}
                 />
-              )}
+              }
             />
           )}
           {scheduleType === 'one_time' && (
@@ -290,7 +318,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
               name="run_at"
               control={form.control}
               rules={{ required: 'Run At is required' }}
-              render={({ field, fieldState }) => (
+              render={({ field, fieldState }) => 
                 <TextField
                   label="Run At"
                   isRequired
@@ -300,7 +328,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                   errorMessage={fieldState.error?.message}
                   {...field}
                 />
-              )}
+              }
             />
           )}
           <Controller
@@ -316,9 +344,9 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {timezones.map((tz) => (
+                {timezones.map((tz) => 
                   <Item key={tz.value}>{tz.label}</Item>
-                ))}
+                )}
               </Picker>
             )}
           />

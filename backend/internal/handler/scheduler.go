@@ -38,11 +38,11 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 			UUID:           pgtype.UUID{Bytes: uToBytes(schedulerUUID), Valid: true},
 			PipelineUuid:   pgPipelineUUID,
 			ScheduleType:   req.ScheduleType, // 'cron' or 'one_time'
-			CronExpression: convertOptNilStringToPgText(req.CronExpression),
-			RunAt:          convertOptNilDateTimeToPgTimestamptz(req.RunAt),
+			CronExpression: ConvertOptNilStringToPgText(req.CronExpression),
+			RunAt:          NullTimestamptz(),
 			Timezone:       req.Timezone.Or("UTC"),
-			NextRun:        convertOptDateTimeToPgTimestamptz(req.NextRun),
-			LastRun:        convertOptDateTimeToPgTimestamptz(req.LastRun),
+			NextRun:        NullTimestamptz(),
+			LastRun:        NullTimestamptz(),
 			IsEnabled:      req.IsEnabled.Or(false),
 		}
 
@@ -123,8 +123,12 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 		Offset:         offset,
 		Limit:          limit,
 		// Optionally filter by datasource or pipeline UUID if provided:
+		ScheduleType: "",
+		UUID:         "",
 		PipelineUuid: "",
+		IsEnabled:    -1,
 	}
+
 	if params.PipelineUUID.IsSet() {
 		qParams.PipelineUuid = params.PipelineUUID.Value.String()
 	}
@@ -171,11 +175,11 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 		}
 
 		uParams := query.UpdateSchedulerParams{
-			CronExpression: convertOptNilStringToPgText(req.CronExpression),
-			RunAt:          convertOptNilDateTimeToPgTimestamptz(req.RunAt),
+			CronExpression: ConvertOptNilStringToPgText(req.CronExpression),
+			RunAt:          NullTimestamptz(),
 			Timezone:       req.Timezone.Or("UTC"),
-			NextRun:        convertOptDateTimeToPgTimestamptz(req.NextRun),
-			LastRun:        convertOptDateTimeToPgTimestamptz(req.LastRun),
+			NextRun:        NullTimestamptz(),
+			LastRun:        NullTimestamptz(),
 			IsEnabled:      isEnabled,
 			UUID:           schUUID,
 		}
@@ -252,27 +256,4 @@ func qToApiSchedulersRow(s query.GetSchedulersRow) (api.Scheduler, error) {
 		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
 	}
 	return out, nil
-}
-
-// --- Helper conversion functions ---
-
-func convertOptNilStringToPgText(o api.OptNilString) pgtype.Text {
-	if !o.IsSet() || o.IsNull() {
-		return pgtype.Text{Valid: false}
-	}
-	return pgtype.Text{String: o.Value, Valid: true}
-}
-
-func convertOptNilDateTimeToPgTimestamptz(o api.OptNilDateTime) pgtype.Timestamptz {
-	if !o.IsSet() || o.IsNull() {
-		return pgtype.Timestamptz{Valid: false}
-	}
-	return pgtype.Timestamptz{Time: o.Value, Valid: true}
-}
-
-func convertOptDateTimeToPgTimestamptz(o api.OptDateTime) pgtype.Timestamptz {
-	if !o.IsSet() {
-		return pgtype.Timestamptz{Valid: false}
-	}
-	return pgtype.Timestamptz{Time: o.Value, Valid: true}
 }

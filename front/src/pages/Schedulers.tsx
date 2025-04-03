@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import {
   ActionButton,
+  Badge,
   Cell,
   Column,
   Flex,
@@ -58,10 +59,16 @@ export function Schedulers() {
           <Add />
           <Text>Add Scheduler</Text>
         </ActionButton>
-        <TableView aria-label="Schedulers list table" overflowMode="wrap" maxWidth={1000}>
+        <TableView aria-label="Schedulers list table" overflowMode="wrap" maxWidth={1400}>
           <TableHeader>
-            <Column key="scheduleType">Schedule Type</Column>
-            <Column key="nextRun">Next Run</Column>
+            <Column key="pipeline_uuid">Pipeline UUID</Column>
+            <Column key="schedule_type">Schedule Type</Column>
+            <Column key="cron_expression">Cron Expression</Column>
+            <Column key="run_at">Run At</Column>
+            <Column key="timezone">Timezone</Column>
+            <Column key="next_run">Next Run</Column>
+            <Column key="last_run">Last Run</Column>
+            <Column key="is_enabled">Enabled</Column>
             <Column key="actions" width={50} hideHeader>
               Actions
             </Column>
@@ -69,8 +76,22 @@ export function Schedulers() {
           <TableBody items={query.data}>
             {(item: components['schemas']['scheduler']) => (
               <Row key={item.id}>
+                <Cell>
+                  <ActionButton onPress={() => navigate('/pipelines/' + item.pipeline_uuid)}>
+                    ...{item.pipeline_uuid.slice(-8)}
+                  </ActionButton>
+                </Cell>
                 <Cell>{item.schedule_type}</Cell>
+                <Cell>{item.cron_expression || 'N/A'}</Cell>
+                <Cell>{item.run_at ? new Date(item.run_at).toLocaleString() : 'N/A'}</Cell>
+                <Cell>{item.timezone}</Cell>
                 <Cell>{item.next_run ? new Date(item.next_run).toLocaleString() : 'N/A'}</Cell>
+                <Cell>{item.last_run ? new Date(item.last_run).toLocaleString() : 'N/A'}</Cell>
+                <Cell>
+                  <Badge variant={item.is_enabled ? 'positive' : 'negative'}>
+                    {item.is_enabled ? 'Enable' : 'Disable'}
+                  </Badge>
+                </Cell>
                 <Cell>
                   <ActionButton onPress={() => navigate('/schedulers/' + item.id)}>
                     <Edit />

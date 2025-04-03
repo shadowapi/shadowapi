@@ -7,8 +7,8 @@ import { FullLayout } from '@/layouts/FullLayout'
 
 export function SchedulerEdit() {
   const navigate = useNavigate()
-  const { id } = useParams()
-  const pageTitle = id === 'add' ? 'Add Scheduler' : 'Edit Scheduler'
+  const { uuid } = useParams()
+  const pageTitle = uuid === 'add' ? 'Add Scheduler' : 'Edit Scheduler'
   useTitle(pageTitle)
   console.log('params', { params: useParams() })
 
@@ -18,7 +18,7 @@ export function SchedulerEdit() {
         <Item key="/schedulers">Schedulers</Item>
         <Item key="/schedulers/edit">{pageTitle}</Item>
       </Breadcrumbs>
-      <SchedulerForm schedulerUUID={id!} />
+      <SchedulerForm schedulerUUID={uuid!} />
     </FullLayout>
   )
 }

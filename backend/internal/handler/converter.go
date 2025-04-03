@@ -45,3 +45,32 @@ func uToBytes(u uuid.UUID) [16]byte {
 	copy(arr[:], u.Bytes())
 	return arr
 }
+
+// --- Helper conversion functions ---
+
+func ConvertOptNilStringToPgText(o api.OptNilString) pgtype.Text {
+	if !o.IsSet() || o.IsNull() {
+		return pgtype.Text{Valid: false}
+	}
+	return pgtype.Text{String: o.Value, Valid: true}
+}
+
+func ConvertOptNilDateTimeToPgTimestamptz(o api.OptNilDateTime) pgtype.Timestamptz {
+	if !o.IsSet() || o.IsNull() {
+		return pgtype.Timestamptz{Valid: false}
+	}
+	return pgtype.Timestamptz{Time: o.Value, Valid: true}
+}
+
+func ConvertOptDateTimeToPgTimestamptz(o api.OptDateTime) pgtype.Timestamptz {
+	if !o.IsSet() {
+		return pgtype.Timestamptz{Valid: false}
+	}
+	return pgtype.Timestamptz{Time: o.Value, Valid: true}
+}
+
+// We now ignore any incoming run_at, next_run and last_run values.
+// They will be calculated by a worker, so we always pass null.
+func NullTimestamptz() pgtype.Timestamptz {
+	return pgtype.Timestamptz{Valid: false}
+}
