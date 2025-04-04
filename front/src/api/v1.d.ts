@@ -950,6 +950,7 @@ export interface components {
             /** Format: date-time */
             last_run?: string;
             is_enabled?: boolean;
+            is_paused?: boolean;
             /** Format: date-time */
             created_at?: string;
             /** Format: date-time */

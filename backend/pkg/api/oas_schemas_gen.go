@@ -5876,6 +5876,7 @@ type Scheduler struct {
 	NextRun        OptDateTime    `json:"next_run"`
 	LastRun        OptDateTime    `json:"last_run"`
 	IsEnabled      OptBool        `json:"is_enabled"`
+	IsPaused       OptBool        `json:"is_paused"`
 	CreatedAt      OptDateTime    `json:"created_at"`
 	UpdatedAt      OptDateTime    `json:"updated_at"`
 }
@@ -5923,6 +5924,11 @@ func (s *Scheduler) GetLastRun() OptDateTime {
 // GetIsEnabled returns the value of IsEnabled.
 func (s *Scheduler) GetIsEnabled() OptBool {
 	return s.IsEnabled
+}
+
+// GetIsPaused returns the value of IsPaused.
+func (s *Scheduler) GetIsPaused() OptBool {
+	return s.IsPaused
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -5978,6 +5984,11 @@ func (s *Scheduler) SetLastRun(val OptDateTime) {
 // SetIsEnabled sets the value of IsEnabled.
 func (s *Scheduler) SetIsEnabled(val OptBool) {
 	s.IsEnabled = val
+}
+
+// SetIsPaused sets the value of IsPaused.
+func (s *Scheduler) SetIsPaused(val OptBool) {
+	s.IsPaused = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.

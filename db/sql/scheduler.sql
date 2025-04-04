@@ -9,6 +9,7 @@ INSERT INTO scheduler (
     next_run,
     last_run,
     is_enabled,
+    is_paused,
     created_at,
     updated_at
 ) VALUES (
@@ -21,6 +22,7 @@ INSERT INTO scheduler (
              sqlc.arg('next_run'),
              sqlc.arg('last_run'),
              sqlc.arg('is_enabled')::boolean,
+             sqlc.arg('is_paused')::boolean,
              NOW(),
              NOW()
          ) RETURNING *;
@@ -47,7 +49,8 @@ WITH filtered_schedulers AS (
         (NULLIF(sqlc.arg('schedule_type'), '') IS NULL OR s.schedule_type = sqlc.arg('schedule_type')) AND
         (NULLIF(sqlc.arg('uuid'), '') IS NULL OR s.uuid = sqlc.arg('uuid')::uuid) AND
         (NULLIF(sqlc.arg('pipeline_uuid'), '') IS NULL OR s.pipeline_uuid = sqlc.arg('pipeline_uuid')::uuid) AND
-        (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR s.is_enabled = (sqlc.arg('is_enabled')::int)::boolean)
+        (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR s.is_enabled = (sqlc.arg('is_enabled')::int)::boolean) AND
+        (NULLIF(sqlc.arg('is_paused')::int, -1) IS NULL OR s.is_enabled = (sqlc.arg('is_paused')::int)::boolean)
 )
 SELECT
     *,
@@ -70,6 +73,7 @@ UPDATE scheduler SET
                      next_run = sqlc.arg('next_run'),
                      last_run = sqlc.arg('last_run'),
                      is_enabled = sqlc.arg('is_enabled')::boolean,
+                     is_paused = sqlc.arg('is_paused')::boolean,
                      updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 

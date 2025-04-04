@@ -150,6 +150,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
       run_at: '',
       timezone: 'Europe/London',
       is_enabled: true,
+      is_paused: false,
     },
   })
 
@@ -257,7 +258,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {pipelinesQuery.data?.pipelines?.map((pipeline) => 
+                {pipelinesQuery.data?.pipelines?.map((pipeline) => (
                   <Item key={pipeline.uuid}>
                     <span
                       style={{
@@ -271,7 +272,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                       {pipeline.name} {pipeline.type}
                     </span>
                   </Item>
-                )}
+                ))}
               </Picker>
             )}
           />
@@ -304,13 +305,13 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                   return parts.length === 5 || 'Cron expression must have exactly 5 fields'
                 },
               }}
-              render={({ field, fieldState }) => 
+              render={({ field, fieldState }) => (
                 <CronExpressionInput
                   value={field.value || ''}
                   onChange={field.onChange}
                   errorMessage={fieldState.error?.message}
                 />
-              }
+              )}
             />
           )}
           {scheduleType === 'one_time' && (
@@ -318,7 +319,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
               name="run_at"
               control={form.control}
               rules={{ required: 'Run At is required' }}
-              render={({ field, fieldState }) => 
+              render={({ field, fieldState }) => (
                 <TextField
                   label="Run At"
                   isRequired
@@ -328,7 +329,7 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                   errorMessage={fieldState.error?.message}
                   {...field}
                 />
-              }
+              )}
             />
           )}
           <Controller
@@ -344,9 +345,9 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {timezones.map((tz) => 
+                {timezones.map((tz) => (
                   <Item key={tz.value}>{tz.label}</Item>
-                )}
+                ))}
               </Picker>
             )}
           />
@@ -356,6 +357,15 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
             render={({ field }) => (
               <Switch isSelected={field.value} onChange={field.onChange}>
                 Enabled
+              </Switch>
+            )}
+          />
+          <Controller
+            name="is_paused"
+            control={form.control}
+            render={({ field }) => (
+              <Switch isSelected={field.value} onChange={field.onChange}>
+                Paused
               </Switch>
             )}
           />

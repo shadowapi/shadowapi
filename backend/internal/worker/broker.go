@@ -2,9 +2,11 @@ package worker
 
 import (
 	"context"
+	"github.com/shadowapi/shadowapi/backend/internal/metrics"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/jobs"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/pipelines"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
@@ -41,25 +43,24 @@ func Provide(i do.Injector) (*Broker, error) {
 		queue: q,
 	}
 
-	// Create the email pipeline.
-	emailPipeline := pipelines.CreateEmailPipeline(ctx, log, dbp)
-	// Register  pipeline job factory.
-	registry.RegisterJob(registry.WorkerSubjectEmailFetch, jobs.EmailFetchJobFactory(log, emailPipeline, dbp, q))
-	registry.RegisterJob(registry.WorkerSubjectEmailSync, jobs.EmailPipelineJobFactory(emailPipeline, q, log))
+	// TODO @reactima different users - different policies
+	// pipelinesMap can be constructed with different Contact extractor, different Storages (archived in S3, or in DB), different filters (sync policies)
+	// Current implementation is broken
+	// Pipeline is attached to Datasource
+	// Datasource (email, whatsapp, etc) is attached to the user
+	pipelinesMap := pipelines.CreateEmailPipelines(ctx, log, dbp)
+
+	// register jobs
+	registry.RegisterJob(registry.WorkerSubjectEmailScheduledFetch, jobs.ScheduleEmailFetchJobFactory(dbp, log, q, pipelinesMap))
+	registry.RegisterJob(registry.WorkerSubjectEmailApplyPipeline, jobs.EmailPipelineMessageJobFactory(dbp, log, q, pipelinesMap))
 	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
 
 	if err := b.Start(ctx); err != nil {
 		log.Error("failed to start broker", "error", err)
 		return nil, err
 	}
-	s := scheduler.NewScheduler(log, dbp, q)
-	s.StartEmailScheduler(ctx)
-
-	// TODO @reactima implement multi-account email pipeline
-	// Start multi-account email pipelines.
-	//if err := StartMultiAccountEmailPipeline(ctx, log, dbp, q); err != nil {
-	//	log.Error("failed to start multi-account email pipeline", "error", err)
-	//}
+	s := scheduler.NewMultiEmailScheduler(log, dbp, q)
+	s.Start(ctx)
 
 	return b, nil
 }
@@ -96,6 +97,10 @@ func (b *Broker) Shutdown(ctx context.Context) error {
 // handleMessages routes incoming messages to the appropriate job.
 func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 	return func(msg queue.Msg) {
+
+		// TODO @reactima redo metrics, below is just a plug
+		start := time.Now()
+
 		b.log.Debug("Job received", "subject", msg.Subject())
 		job, err := registry.CreateJob(msg.Subject(), msg.Data())
 		if err != nil {
@@ -109,6 +114,9 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 			return
 		}
 		if err := job.Execute(ctx); err != nil {
+			duration := time.Since(start).Seconds()
+			metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
+
 			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
 				b.log.Debug("Job not ready upon execution, requeuing", "delay", notReadyErr.Delay)
 				_ = msg.NakWithDelay(notReadyErr.Delay)
@@ -118,6 +126,9 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 			_ = msg.Term()
 			return
 		}
+		duration := time.Since(start).Seconds()
+		metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
+
 		if err := msg.Ack(); err != nil {
 			b.log.Error("failed to acknowledge message", "error", err)
 		}

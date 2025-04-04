@@ -7,6 +7,7 @@ require (
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/google/uuid v1.6.0
 	github.com/gotd/contrib v0.21.0
 	github.com/gotd/td v0.120.0
 	github.com/jackc/pgx/v5 v5.7.1
@@ -18,6 +19,7 @@ require (
 	github.com/ory/ladon v1.3.0
 	github.com/phsym/console-slog v0.3.1
 	github.com/prometheus/client_golang v1.21.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/do/v2 v2.0.0-beta.7
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
@@ -51,7 +53,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect

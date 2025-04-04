@@ -317,6 +317,7 @@ CREATE TABLE "scheduler" (
                              next_run           TIMESTAMP WITH TIME ZONE,
                              last_run           TIMESTAMP WITH TIME ZONE,
                              is_enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+                             is_paused         BOOLEAN NOT NULL DEFAULT FALSE,
 
                              created_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                              updated_at         TIMESTAMP WITH TIME ZONE,

@@ -9,11 +9,11 @@ import (
 
 // Constants for our worker stream and job subjects.
 const (
-	WorkerStream              = "worker"
-	WorkerSubject             = "worker.jobs"
-	WorkerSubjectTokenRefresh = WorkerSubject + ".scheduleTokenRefresh"
-	WorkerSubjectEmailSync    = WorkerSubject + ".sync.email"
-	WorkerSubjectEmailFetch   = WorkerSubject + ".sync.emailFetch"
+	WorkerStream                     = "worker"
+	WorkerSubject                    = "worker.jobs"
+	WorkerSubjectTokenRefresh        = WorkerSubject + ".scheduleTokenRefresh"
+	WorkerSubjectEmailScheduledFetch = WorkerSubject + ".emailScheduledFetch"
+	WorkerSubjectEmailApplyPipeline  = WorkerSubject + ".emailApplyPipeline"
 )
 
 var (
@@ -22,8 +22,7 @@ var (
 
 	RegistrySubjects = []string{
 		WorkerSubjectTokenRefresh,
-		WorkerSubjectEmailSync,
-		WorkerSubjectEmailFetch,
+		WorkerSubjectEmailApplyPipeline,
 	}
 )
 

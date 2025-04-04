@@ -21,6 +21,8 @@ type Queue struct {
 	js  jetstream.JetStream
 }
 
+type Headers map[string]string
+
 // Provide queue service instance provider for dependency injection
 func Provide(injector do.Injector) (*Queue, error) {
 	ctx := do.MustInvoke[context.Context](injector)
@@ -61,6 +63,22 @@ func (q *Queue) Publish(ctx context.Context, subject string, data []byte) error 
 		log.Error("failed to publish message", "error", err)
 		return err
 	}
+	return err
+}
+
+func (q *Queue) PublishWithHeaders(ctx context.Context, subject string, headers Headers, data []byte) error {
+	msg := &nats.Msg{
+		Subject: subject,
+		Header:  nats.Header{},
+		Data:    data,
+	}
+	for k, v := range headers {
+		msg.Header.Set(k, v)
+	}
+	_, err := q.js.PublishMsg(ctx, &nats.Msg{
+		Subject: subject,
+		Data:    data,
+	})
 	return err
 }
 

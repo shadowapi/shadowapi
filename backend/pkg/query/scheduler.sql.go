@@ -23,6 +23,7 @@ INSERT INTO scheduler (
     next_run,
     last_run,
     is_enabled,
+    is_paused,
     created_at,
     updated_at
 ) VALUES (
@@ -35,9 +36,10 @@ INSERT INTO scheduler (
              $7,
              $8,
              $9::boolean,
+             $10::boolean,
              NOW(),
              NOW()
-         ) RETURNING uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, is_enabled, created_at, updated_at
+         ) RETURNING uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, is_enabled, is_paused, created_at, updated_at
 `
 
 type CreateSchedulerParams struct {
@@ -50,6 +52,7 @@ type CreateSchedulerParams struct {
 	NextRun        pgtype.Timestamptz `json:"next_run"`
 	LastRun        pgtype.Timestamptz `json:"last_run"`
 	IsEnabled      bool               `json:"is_enabled"`
+	IsPaused       bool               `json:"is_paused"`
 }
 
 func (q *Queries) CreateScheduler(ctx context.Context, arg CreateSchedulerParams) (Scheduler, error) {
@@ -63,6 +66,7 @@ func (q *Queries) CreateScheduler(ctx context.Context, arg CreateSchedulerParams
 		arg.NextRun,
 		arg.LastRun,
 		arg.IsEnabled,
+		arg.IsPaused,
 	)
 	var i Scheduler
 	err := row.Scan(
@@ -75,6 +79,7 @@ func (q *Queries) CreateScheduler(ctx context.Context, arg CreateSchedulerParams
 		&i.NextRun,
 		&i.LastRun,
 		&i.IsEnabled,
+		&i.IsPaused,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -92,7 +97,7 @@ func (q *Queries) DeleteScheduler(ctx context.Context, argUuid pgtype.UUID) erro
 
 const getScheduler = `-- name: GetScheduler :one
 SELECT
-    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.is_enabled, scheduler.created_at, scheduler.updated_at
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.is_enabled, scheduler.is_paused, scheduler.created_at, scheduler.updated_at
 FROM scheduler
 WHERE uuid = $1::uuid
 `
@@ -114,6 +119,7 @@ func (q *Queries) GetScheduler(ctx context.Context, argUuid pgtype.UUID) (GetSch
 		&i.Scheduler.NextRun,
 		&i.Scheduler.LastRun,
 		&i.Scheduler.IsEnabled,
+		&i.Scheduler.IsPaused,
 		&i.Scheduler.CreatedAt,
 		&i.Scheduler.UpdatedAt,
 	)
@@ -122,16 +128,17 @@ func (q *Queries) GetScheduler(ctx context.Context, argUuid pgtype.UUID) (GetSch
 
 const getSchedulers = `-- name: GetSchedulers :many
 WITH filtered_schedulers AS (
-    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.is_enabled, s.created_at, s.updated_at
+    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.is_enabled, s.is_paused, s.created_at, s.updated_at
     FROM scheduler s
     WHERE
         (NULLIF($5, '') IS NULL OR s.schedule_type = $5) AND
         (NULLIF($6, '') IS NULL OR s.uuid = $6::uuid) AND
         (NULLIF($7, '') IS NULL OR s.pipeline_uuid = $7::uuid) AND
-        (NULLIF($8::int, -1) IS NULL OR s.is_enabled = ($8::int)::boolean)
+        (NULLIF($8::int, -1) IS NULL OR s.is_enabled = ($8::int)::boolean) AND
+        (NULLIF($9::int, -1) IS NULL OR s.is_enabled = ($9::int)::boolean)
 )
 SELECT
-    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, is_enabled, created_at, updated_at,
+    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, is_enabled, is_paused, created_at, updated_at,
     (SELECT count(*) FROM filtered_schedulers) as total_count
 FROM filtered_schedulers
 ORDER BY
@@ -153,6 +160,7 @@ type GetSchedulersParams struct {
 	UUID           interface{} `json:"uuid"`
 	PipelineUuid   interface{} `json:"pipeline_uuid"`
 	IsEnabled      int32       `json:"is_enabled"`
+	IsPaused       int32       `json:"is_paused"`
 }
 
 type GetSchedulersRow struct {
@@ -165,6 +173,7 @@ type GetSchedulersRow struct {
 	NextRun        pgtype.Timestamptz `json:"next_run"`
 	LastRun        pgtype.Timestamptz `json:"last_run"`
 	IsEnabled      bool               `json:"is_enabled"`
+	IsPaused       bool               `json:"is_paused"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 	TotalCount     int64              `json:"total_count"`
@@ -180,6 +189,7 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 		arg.UUID,
 		arg.PipelineUuid,
 		arg.IsEnabled,
+		arg.IsPaused,
 	)
 	if err != nil {
 		return nil, err
@@ -198,6 +208,7 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 			&i.NextRun,
 			&i.LastRun,
 			&i.IsEnabled,
+			&i.IsPaused,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.TotalCount,
@@ -214,7 +225,7 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 
 const listSchedulers = `-- name: ListSchedulers :many
 SELECT
-    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.is_enabled, scheduler.created_at, scheduler.updated_at
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.is_enabled, scheduler.is_paused, scheduler.created_at, scheduler.updated_at
 FROM scheduler
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -249,6 +260,7 @@ func (q *Queries) ListSchedulers(ctx context.Context, arg ListSchedulersParams) 
 			&i.Scheduler.NextRun,
 			&i.Scheduler.LastRun,
 			&i.Scheduler.IsEnabled,
+			&i.Scheduler.IsPaused,
 			&i.Scheduler.CreatedAt,
 			&i.Scheduler.UpdatedAt,
 		); err != nil {
@@ -270,8 +282,9 @@ UPDATE scheduler SET
                      next_run = $4,
                      last_run = $5,
                      is_enabled = $6::boolean,
+                     is_paused = $7::boolean,
                      updated_at = NOW()
-WHERE uuid = $7::uuid
+WHERE uuid = $8::uuid
 `
 
 type UpdateSchedulerParams struct {
@@ -281,6 +294,7 @@ type UpdateSchedulerParams struct {
 	NextRun        pgtype.Timestamptz `json:"next_run"`
 	LastRun        pgtype.Timestamptz `json:"last_run"`
 	IsEnabled      bool               `json:"is_enabled"`
+	IsPaused       bool               `json:"is_paused"`
 	UUID           pgtype.UUID        `json:"uuid"`
 }
 
@@ -292,6 +306,7 @@ func (q *Queries) UpdateScheduler(ctx context.Context, arg UpdateSchedulerParams
 		arg.NextRun,
 		arg.LastRun,
 		arg.IsEnabled,
+		arg.IsPaused,
 		arg.UUID,
 	)
 	return err

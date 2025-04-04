@@ -10462,6 +10462,12 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.IsPaused.Set {
+			e.FieldStart("is_paused")
+			s.IsPaused.Encode(e)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -10475,7 +10481,7 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfScheduler = [11]string{
+var jsonFieldsNameOfScheduler = [12]string{
 	0:  "id",
 	1:  "pipeline_uuid",
 	2:  "schedule_type",
@@ -10485,8 +10491,9 @@ var jsonFieldsNameOfScheduler = [11]string{
 	6:  "next_run",
 	7:  "last_run",
 	8:  "is_enabled",
-	9:  "created_at",
-	10: "updated_at",
+	9:  "is_paused",
+	10: "created_at",
+	11: "updated_at",
 }
 
 // Decode decodes Scheduler from json.
@@ -10591,6 +10598,16 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_enabled\"")
+			}
+		case "is_paused":
+			if err := func() error {
+				s.IsPaused.Reset()
+				if err := s.IsPaused.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_paused\"")
 			}
 		case "created_at":
 			if err := func() error {

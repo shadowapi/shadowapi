@@ -23,6 +23,8 @@ properties:
     format: date-time
   is_enabled:
     type: boolean
+  is_paused:
+    type: boolean
   created_at:
     type: string
     format: date-time

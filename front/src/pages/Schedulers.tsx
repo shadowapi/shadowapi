@@ -69,6 +69,7 @@ export function Schedulers() {
             <Column key="next_run">Next Run</Column>
             <Column key="last_run">Last Run</Column>
             <Column key="is_enabled">Enabled</Column>
+            <Column key="is_paused">Paused</Column>
             <Column key="actions" width={50} hideHeader>
               Actions
             </Column>
@@ -90,6 +91,11 @@ export function Schedulers() {
                 <Cell>
                   <Badge variant={item.is_enabled ? 'positive' : 'negative'}>
                     {item.is_enabled ? 'Enable' : 'Disable'}
+                  </Badge>
+                </Cell>
+                <Cell>
+                  <Badge variant={item.is_paused ? 'positive' : 'negative'}>
+                    {item.is_enabled ? 'Running' : 'Paused'}
                   </Badge>
                 </Cell>
                 <Cell>

@@ -243,6 +243,7 @@ type Scheduler struct {
 	NextRun        pgtype.Timestamptz `json:"next_run"`
 	LastRun        pgtype.Timestamptz `json:"last_run"`
 	IsEnabled      bool               `json:"is_enabled"`
+	IsPaused       bool               `json:"is_paused"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
