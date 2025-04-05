@@ -3,10 +3,17 @@ package storage
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/shadowapi/shadowapi/backend/pkg/api"
-	"log/slog"
 	"os"
+	"path/filepath"
+
+	"log/slog"
+
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 type HostfilesStorage struct {
@@ -19,27 +26,105 @@ func NewHostfilesStorage(log *slog.Logger, folder string, dbp *pgxpool.Pool) *Ho
 	return &HostfilesStorage{log: log, rootFolder: folder, dbp: dbp}
 }
 
-// SaveMessage saves metadata in Postgres
 func (h *HostfilesStorage) SaveMessage(ctx context.Context, msg *api.Message) error {
-	h.log.Info("Saving message meta to Postgres (hostfiles mode)", "uuid", msg.UUID)
-	// For example: db.InsertMessageMetadata(msg.UUID, msg.Sender, msg.Body, "hostfiles")
+	h.log.Info("Saving message meta (hostfiles mode)", "message_uuid", msg.GetUUID())
+
+	// Insert into the message table (same as before).
+	u, err := uuid.FromString(msg.GetUUID())
+	if err != nil {
+		h.log.Error("invalid message UUID", "uuid", msg.GetUUID(), "error", err)
+		return err
+	}
+	var arr [16]byte
+	copy(arr[:], u.Bytes())
+	uid := pgtype.UUID{Bytes: arr, Valid: true}
+
+	q := query.New(h.dbp)
+	_, err = q.CreateMessage(ctx, query.CreateMessageParams{
+		UUID:       uid,
+		Sender:     msg.GetSender(),
+		Recipients: msg.GetRecipients(),
+		Subject:    optionalText(msg.GetSubject()),
+		Body:       msg.GetBody(),
+		// ... etc ...
+	})
+	if err != nil {
+		h.log.Error("failed to insert message record (hostfiles)", "error", err)
+		return err
+	}
+
+	for _, att := range msg.GetAttachments() {
+		if err := h.SaveAttachment(ctx, &att); err != nil {
+			h.log.Error("failed to save attachment (hostfiles)", "error", err)
+			return err
+		}
+	}
 	return nil
 }
 
-// SaveAttachment writes the file to local folder, then meta in Postgres
-func (h *HostfilesStorage) SaveAttachment(ctx context.Context, f *api.FileObject) error {
-	filePath := fmt.Sprintf("%s/%s", h.rootFolder, f.GetName().Or("attachment"))
+// SaveAttachment writes the file to disk and then inserts the metadata into "file".
+func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObject) error {
+	fileUUID := file.GetUUID().Or("")
+	u, err := uuid.FromString(fileUUID)
+	if err != nil {
+		h.log.Error("invalid file UUID", "uuid", fileUUID, "error", err)
+		return err
+	}
+
+	name := file.GetName() // .Or("attachment")
+	mime := file.GetMimeType().Or("application/octet-stream")
+	size := file.GetSize().Or(0)
+
+	// Subfolder approach: e.g. "ab" from the first 2 chars of the UUID, etc.
+	sub := fileUUID[:2]
+	dir := filepath.Join(h.rootFolder, sub)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create subdir: %w", err)
+	}
+	ext := filepath.Ext(name)
+	// We'll just store everything as "regular" attachments for now:
+	finalName := fmt.Sprintf("%s%s", fileUUID, ext)
+	if ext == "" {
+		finalName = fileUUID // no extension
+	}
+
+	filePath := filepath.Join(dir, finalName)
+	h.log.Info("Saving file locally", "filePath", filePath)
+
 	out, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 
-	// If there's data in memory
-	// io.Copy(out, someReader)
+	if file.GetData().IsSet() {
+		// If your .Data is raw or base64, decode if needed. Here we treat it as plain bytes.
+		fileBytes := []byte(file.GetData().Or(""))
+		if _, copyErr := out.Write(fileBytes); copyErr != nil {
+			return copyErr
+		}
+	}
 
-	// Insert metadata
-	// db.InsertAttachment(f.UUID, userID, filePath)
-	h.log.Info("Attachment saved to local disk, meta in Postgres", "filePath", filePath)
+	q := query.New(h.dbp)
+	var arr [16]byte
+	copy(arr[:], u.Bytes())
+	uid := pgtype.UUID{Bytes: arr, Valid: true}
+
+	_, err = q.CreateFile(ctx, query.CreateFileParams{
+		UUID:        uid,
+		StorageType: "hostfiles",
+		StorageUuid: pgtype.UUID{Valid: false}, // or set if you have a 'storage' record
+		Name:        name,
+		MimeType:    pgText(mime),
+		Size:        pgInt8(size),
+		Data:        nil, // no data in Postgres
+		Path:        pgText(filePath),
+		IsRaw:       pgBool(false), // or detect if raw
+	})
+	if err != nil {
+		return err
+	}
+
+	h.log.Info("Attachment saved locally, meta in Postgres", "filePath", filePath)
 	return nil
 }

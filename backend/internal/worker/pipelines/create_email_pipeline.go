@@ -128,7 +128,15 @@ func CreateEmailPipelines(ctx context.Context, log *slog.Logger, dbp *pgxpool.Po
 		var storageBackend types.Storage
 		switch storageRow.Storage.Type {
 		case "s3":
-			storageBackend = stor.NewS3Storage(log)
+			// Provide all required args to match the function signature:
+			// func NewS3Storage(log *slog.Logger, s3Client *s3.S3, bucketName string, pgdb *query.Queries) *S3Storage
+			storageBackend = stor.NewS3Storage(
+				log,
+				nil,                   // placeholder s3Client
+				"example-bucket-name", // or read from config
+				query.New(dbp),        // pass your Queries
+			)
+
 		case "hostfiles":
 			storageBackend = stor.NewHostfilesStorage(log, "./data", dbp)
 		case "postgres":

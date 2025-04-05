@@ -11,6 +11,9 @@ properties:
   is_enabled:
     type: boolean
     description: "Indicates whether this storage is enabled."
+  is_same_database:
+    type: boolean
+    description: "If true, reuse the app's primary Postgres connection. If false, use custom credentials below."
   user:
     description: "The username used to connect to the PostgreSQL database."
     type: string
@@ -28,7 +31,4 @@ properties:
     type: string
 required:
   - name
-  - user
-  - password
-  - host
-  - port
+

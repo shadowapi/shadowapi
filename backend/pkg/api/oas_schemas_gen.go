@@ -2480,16 +2480,22 @@ type FileDeleteOK struct{}
 type FileObject struct {
 	// Unique identifier for the file.
 	UUID OptString `json:"uuid"`
-	// The type of storage backend.
-	StorageType OptString `json:"storage_type"`
-	// Reference ID within the respective storage backend.
-	StorageUUID OptString `json:"storage_uuid"`
-	// Original filename.
-	Name OptString `json:"name"`
-	// MIME type of the file.
+	// Which storage backend is used, e.g. 's3', 'postgres', or 'hostfiles'.
+	StorageType string `json:"storage_type"`
+	// UUID referencing a 'storage' record (optional).
+	StorageUUID string `json:"storage_uuid"`
+	// Original filename. e.g. 'photo.jpg' or 'mail.raw'.
+	Name string `json:"name"`
+	// MIME type, e.g. 'application/pdf' or 'message/rfc822'.
 	MimeType OptString `json:"mime_type"`
-	// Size of the file in bytes.
+	// Size in bytes.
 	Size OptInt `json:"size"`
+	// Optional. If storage_type='postgres', file content can be provided here (base64-encoded).
+	Data OptString `json:"data"`
+	// Optional. If hostfiles or s3, the path or object key. e.g. 'my-bucket/xx/uuid.pdf'.
+	Path OptString `json:"path"`
+	// Indicates if this file is the entire raw email.
+	IsRaw OptBool `json:"is_raw"`
 	// Timestamp when the file was created.
 	CreatedAt OptDateTime `json:"created_at"`
 	// Timestamp when the file was last modified.
@@ -2502,17 +2508,17 @@ func (s *FileObject) GetUUID() OptString {
 }
 
 // GetStorageType returns the value of StorageType.
-func (s *FileObject) GetStorageType() OptString {
+func (s *FileObject) GetStorageType() string {
 	return s.StorageType
 }
 
 // GetStorageUUID returns the value of StorageUUID.
-func (s *FileObject) GetStorageUUID() OptString {
+func (s *FileObject) GetStorageUUID() string {
 	return s.StorageUUID
 }
 
 // GetName returns the value of Name.
-func (s *FileObject) GetName() OptString {
+func (s *FileObject) GetName() string {
 	return s.Name
 }
 
@@ -2524,6 +2530,21 @@ func (s *FileObject) GetMimeType() OptString {
 // GetSize returns the value of Size.
 func (s *FileObject) GetSize() OptInt {
 	return s.Size
+}
+
+// GetData returns the value of Data.
+func (s *FileObject) GetData() OptString {
+	return s.Data
+}
+
+// GetPath returns the value of Path.
+func (s *FileObject) GetPath() OptString {
+	return s.Path
+}
+
+// GetIsRaw returns the value of IsRaw.
+func (s *FileObject) GetIsRaw() OptBool {
+	return s.IsRaw
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -2542,17 +2563,17 @@ func (s *FileObject) SetUUID(val OptString) {
 }
 
 // SetStorageType sets the value of StorageType.
-func (s *FileObject) SetStorageType(val OptString) {
+func (s *FileObject) SetStorageType(val string) {
 	s.StorageType = val
 }
 
 // SetStorageUUID sets the value of StorageUUID.
-func (s *FileObject) SetStorageUUID(val OptString) {
+func (s *FileObject) SetStorageUUID(val string) {
 	s.StorageUUID = val
 }
 
 // SetName sets the value of Name.
-func (s *FileObject) SetName(val OptString) {
+func (s *FileObject) SetName(val string) {
 	s.Name = val
 }
 
@@ -2564,6 +2585,21 @@ func (s *FileObject) SetMimeType(val OptString) {
 // SetSize sets the value of Size.
 func (s *FileObject) SetSize(val OptInt) {
 	s.Size = val
+}
+
+// SetData sets the value of Data.
+func (s *FileObject) SetData(val OptString) {
+	s.Data = val
+}
+
+// SetPath sets the value of Path.
+func (s *FileObject) SetPath(val OptString) {
+	s.Path = val
+}
+
+// SetIsRaw sets the value of IsRaw.
+func (s *FileObject) SetIsRaw(val OptBool) {
+	s.IsRaw = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
@@ -6245,14 +6281,16 @@ type StoragePostgres struct {
 	Name string `json:"name"`
 	// Indicates whether this storage is enabled.
 	IsEnabled OptBool `json:"is_enabled"`
+	// If true, reuse the app's primary Postgres connection. If false, use custom credentials below.
+	IsSameDatabase OptBool `json:"is_same_database"`
 	// The username used to connect to the PostgreSQL database.
-	User string `json:"user"`
+	User OptString `json:"user"`
 	// The password used to connect to the PostgreSQL database.
-	Password string `json:"password"`
+	Password OptString `json:"password"`
 	// The hostname or IP address of the PostgreSQL database server.
-	Host string `json:"host"`
+	Host OptString `json:"host"`
 	// The port number on which the PostgreSQL database server is listening.
-	Port string `json:"port"`
+	Port OptString `json:"port"`
 	// Additional connection options in URL query format.
 	Options OptString `json:"options"`
 }
@@ -6272,23 +6310,28 @@ func (s *StoragePostgres) GetIsEnabled() OptBool {
 	return s.IsEnabled
 }
 
+// GetIsSameDatabase returns the value of IsSameDatabase.
+func (s *StoragePostgres) GetIsSameDatabase() OptBool {
+	return s.IsSameDatabase
+}
+
 // GetUser returns the value of User.
-func (s *StoragePostgres) GetUser() string {
+func (s *StoragePostgres) GetUser() OptString {
 	return s.User
 }
 
 // GetPassword returns the value of Password.
-func (s *StoragePostgres) GetPassword() string {
+func (s *StoragePostgres) GetPassword() OptString {
 	return s.Password
 }
 
 // GetHost returns the value of Host.
-func (s *StoragePostgres) GetHost() string {
+func (s *StoragePostgres) GetHost() OptString {
 	return s.Host
 }
 
 // GetPort returns the value of Port.
-func (s *StoragePostgres) GetPort() string {
+func (s *StoragePostgres) GetPort() OptString {
 	return s.Port
 }
 
@@ -6312,23 +6355,28 @@ func (s *StoragePostgres) SetIsEnabled(val OptBool) {
 	s.IsEnabled = val
 }
 
+// SetIsSameDatabase sets the value of IsSameDatabase.
+func (s *StoragePostgres) SetIsSameDatabase(val OptBool) {
+	s.IsSameDatabase = val
+}
+
 // SetUser sets the value of User.
-func (s *StoragePostgres) SetUser(val string) {
+func (s *StoragePostgres) SetUser(val OptString) {
 	s.User = val
 }
 
 // SetPassword sets the value of Password.
-func (s *StoragePostgres) SetPassword(val string) {
+func (s *StoragePostgres) SetPassword(val OptString) {
 	s.Password = val
 }
 
 // SetHost sets the value of Host.
-func (s *StoragePostgres) SetHost(val string) {
+func (s *StoragePostgres) SetHost(val OptString) {
 	s.Host = val
 }
 
 // SetPort sets the value of Port.
-func (s *StoragePostgres) SetPort(val string) {
+func (s *StoragePostgres) SetPort(val OptString) {
 	s.Port = val
 }
 

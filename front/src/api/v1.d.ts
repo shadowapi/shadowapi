@@ -863,16 +863,25 @@ export interface components {
         FileObject: {
             /** @description Unique identifier for the file. */
             uuid?: string;
-            /** @description The type of storage backend. */
-            storage_type?: string;
-            /** @description Reference ID within the respective storage backend. */
-            storage_uuid?: string;
-            /** @description Original filename. */
-            name?: string;
-            /** @description MIME type of the file. */
+            /** @description Which storage backend is used, e.g. 's3', 'postgres', or 'hostfiles'. */
+            storage_type: string;
+            /** @description UUID referencing a 'storage' record (optional). */
+            storage_uuid: string;
+            /** @description Original filename. e.g. 'photo.jpg' or 'mail.raw' */
+            name: string;
+            /** @description MIME type, e.g. 'application/pdf' or 'message/rfc822'. */
             mime_type?: string;
-            /** @description Size of the file in bytes. */
+            /** @description Size in bytes. */
             size?: number;
+            /**
+             * Format: binary
+             * @description Optional. If storage_type='postgres', file content can be provided here (base64-encoded).
+             */
+            data?: string;
+            /** @description Optional. If hostfiles or s3, the path or object key. e.g. 'my-bucket/xx/uuid.pdf'. */
+            path?: string;
+            /** @description Indicates if this file is the entire raw email. */
+            is_raw?: boolean;
             /**
              * Format: date-time
              * @description Timestamp when the file was created.
@@ -1211,14 +1220,16 @@ export interface components {
             name: string;
             /** @description Indicates whether this storage is enabled. */
             is_enabled?: boolean;
+            /** @description If true, reuse the app's primary Postgres connection. If false, use custom credentials below. */
+            is_same_database?: boolean;
             /** @description The username used to connect to the PostgreSQL database. */
-            user: string;
+            user?: string;
             /** @description The password used to connect to the PostgreSQL database. */
-            password: string;
+            password?: string;
             /** @description The hostname or IP address of the PostgreSQL database server. */
-            host: string;
+            host?: string;
             /** @description The port number on which the PostgreSQL database server is listening. */
-            port: string;
+            port?: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
         };

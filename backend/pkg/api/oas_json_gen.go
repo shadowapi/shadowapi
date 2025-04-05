@@ -5096,22 +5096,16 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.StorageType.Set {
-			e.FieldStart("storage_type")
-			s.StorageType.Encode(e)
-		}
+		e.FieldStart("storage_type")
+		e.Str(s.StorageType)
 	}
 	{
-		if s.StorageUUID.Set {
-			e.FieldStart("storage_uuid")
-			s.StorageUUID.Encode(e)
-		}
+		e.FieldStart("storage_uuid")
+		e.Str(s.StorageUUID)
 	}
 	{
-		if s.Name.Set {
-			e.FieldStart("name")
-			s.Name.Encode(e)
-		}
+		e.FieldStart("name")
+		e.Str(s.Name)
 	}
 	{
 		if s.MimeType.Set {
@@ -5123,6 +5117,24 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 		if s.Size.Set {
 			e.FieldStart("size")
 			s.Size.Encode(e)
+		}
+	}
+	{
+		if s.Data.Set {
+			e.FieldStart("data")
+			s.Data.Encode(e)
+		}
+	}
+	{
+		if s.Path.Set {
+			e.FieldStart("path")
+			s.Path.Encode(e)
+		}
+	}
+	{
+		if s.IsRaw.Set {
+			e.FieldStart("is_raw")
+			s.IsRaw.Encode(e)
 		}
 	}
 	{
@@ -5139,15 +5151,18 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfFileObject = [8]string{
-	0: "uuid",
-	1: "storage_type",
-	2: "storage_uuid",
-	3: "name",
-	4: "mime_type",
-	5: "size",
-	6: "created_at",
-	7: "updated_at",
+var jsonFieldsNameOfFileObject = [11]string{
+	0:  "uuid",
+	1:  "storage_type",
+	2:  "storage_uuid",
+	3:  "name",
+	4:  "mime_type",
+	5:  "size",
+	6:  "data",
+	7:  "path",
+	8:  "is_raw",
+	9:  "created_at",
+	10: "updated_at",
 }
 
 // Decode decodes FileObject from json.
@@ -5155,6 +5170,7 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode FileObject to nil")
 	}
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -5169,9 +5185,11 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "storage_type":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.StorageType.Reset()
-				if err := s.StorageType.Decode(d); err != nil {
+				v, err := d.Str()
+				s.StorageType = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -5179,9 +5197,11 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"storage_type\"")
 			}
 		case "storage_uuid":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				s.StorageUUID.Reset()
-				if err := s.StorageUUID.Decode(d); err != nil {
+				v, err := d.Str()
+				s.StorageUUID = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -5189,9 +5209,11 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"storage_uuid\"")
 			}
 		case "name":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.Name.Reset()
-				if err := s.Name.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -5217,6 +5239,36 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"size\"")
+			}
+		case "data":
+			if err := func() error {
+				s.Data.Reset()
+				if err := s.Data.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data\"")
+			}
+		case "path":
+			if err := func() error {
+				s.Path.Reset()
+				if err := s.Path.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"path\"")
+			}
+		case "is_raw":
+			if err := func() error {
+				s.IsRaw.Reset()
+				if err := s.IsRaw.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_raw\"")
 			}
 		case "created_at":
 			if err := func() error {
@@ -5244,6 +5296,39 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode FileObject")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00001110,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfFileObject) {
+					name = jsonFieldsNameOfFileObject[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 
 	return nil
@@ -11040,20 +11125,34 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user")
-		e.Str(s.User)
+		if s.IsSameDatabase.Set {
+			e.FieldStart("is_same_database")
+			s.IsSameDatabase.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("password")
-		e.Str(s.Password)
+		if s.User.Set {
+			e.FieldStart("user")
+			s.User.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("host")
-		e.Str(s.Host)
+		if s.Password.Set {
+			e.FieldStart("password")
+			s.Password.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("port")
-		e.Str(s.Port)
+		if s.Host.Set {
+			e.FieldStart("host")
+			s.Host.Encode(e)
+		}
+	}
+	{
+		if s.Port.Set {
+			e.FieldStart("port")
+			s.Port.Encode(e)
+		}
 	}
 	{
 		if s.Options.Set {
@@ -11063,15 +11162,16 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStoragePostgres = [8]string{
+var jsonFieldsNameOfStoragePostgres = [9]string{
 	0: "uuid",
 	1: "name",
 	2: "is_enabled",
-	3: "user",
-	4: "password",
-	5: "host",
-	6: "port",
-	7: "options",
+	3: "is_same_database",
+	4: "user",
+	5: "password",
+	6: "host",
+	7: "port",
+	8: "options",
 }
 
 // Decode decodes StoragePostgres from json.
@@ -11079,7 +11179,7 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode StoragePostgres to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -11115,12 +11215,20 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_enabled\"")
 			}
-		case "user":
-			requiredBitSet[0] |= 1 << 3
+		case "is_same_database":
 			if err := func() error {
-				v, err := d.Str()
-				s.User = string(v)
-				if err != nil {
+				s.IsSameDatabase.Reset()
+				if err := s.IsSameDatabase.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_same_database\"")
+			}
+		case "user":
+			if err := func() error {
+				s.User.Reset()
+				if err := s.User.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -11128,11 +11236,9 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"user\"")
 			}
 		case "password":
-			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Str()
-				s.Password = string(v)
-				if err != nil {
+				s.Password.Reset()
+				if err := s.Password.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -11140,11 +11246,9 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"password\"")
 			}
 		case "host":
-			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.Str()
-				s.Host = string(v)
-				if err != nil {
+				s.Host.Reset()
+				if err := s.Host.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -11152,11 +11256,9 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"host\"")
 			}
 		case "port":
-			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				v, err := d.Str()
-				s.Port = string(v)
-				if err != nil {
+				s.Port.Reset()
+				if err := s.Port.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -11182,8 +11284,9 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b01111010,
+	for i, mask := range [2]uint8{
+		0b00000010,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

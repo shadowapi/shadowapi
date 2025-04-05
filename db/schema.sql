@@ -119,15 +119,19 @@ ALTER TABLE oauth2_token
 
 -- Create table "file" (FileObject)
 CREATE TABLE IF NOT EXISTS "file" (
-                                      uuid         UUID PRIMARY KEY,
-                                      storage_type VARCHAR NOT NULL,
-                                      storage_uuid  VARCHAR NOT NULL,
-                                      name         VARCHAR NOT NULL,
-                                      mime_type    VARCHAR,
-                                      size         BIGINT,
-                                      created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                                      updated_at   TIMESTAMP WITH TIME ZONE
+                                      uuid          UUID PRIMARY KEY,
+                                      storage_type  VARCHAR NOT NULL,        -- "postgres", "s3", or "hostfiles"
+                                      storage_uuid  UUID,                    -- references some row in table "storage" if you want
+                                      name          VARCHAR NOT NULL,        -- e.g. "invoice.pdf" or "email.raw"
+                                      mime_type     VARCHAR,                 -- e.g. "application/pdf" or "message/rfc822"
+                                      size          BIGINT,
+                                      data          BYTEA,                   -- if storage_type='postgres', actual file stored here
+                                      path          VARCHAR,                 -- if hostfiles or s3, optional path or object key
+                                      is_raw        BOOLEAN DEFAULT false,   -- indicates if this is the entire raw email
+                                      created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                                      updated_at    TIMESTAMP WITH TIME ZONE
 );
+
 
 -- Create table "message" (Message)
 CREATE TABLE IF NOT EXISTS message (

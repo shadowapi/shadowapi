@@ -156,6 +156,9 @@ type File struct {
 	Name        string             `json:"name"`
 	MimeType    pgtype.Text        `json:"mime_type"`
 	Size        pgtype.Int8        `json:"size"`
+	Data        []byte             `json:"data"`
+	Path        pgtype.Text        `json:"path"`
+	IsRaw       pgtype.Bool        `json:"is_raw"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }

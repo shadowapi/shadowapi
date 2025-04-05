@@ -1,33 +1,48 @@
 FileObject:
   type: object
-  description: Represents a stored file, independent of the storage backend.
+  description: "Represents a stored file, independent of the storage backend."
   properties:
     uuid:
       type: string
-      description: Unique identifier for the file.
+      description: "Unique identifier for the file."
     storage_type:
       type: string
-      description: The type of storage backend.
+      description: "Which storage backend is used, e.g. 's3', 'postgres', or 'hostfiles'."
     storage_uuid:
       type: string
-      description: Reference ID within the respective storage backend.
+      description: "UUID referencing a 'storage' record (optional)."
     name:
       type: string
-      description: Original filename.
+      description: "Original filename. e.g. 'photo.jpg' or 'mail.raw'"
     mime_type:
       type: string
-      description: MIME type of the file.
+      description: "MIME type, e.g. 'application/pdf' or 'message/rfc822'."
     size:
       type: integer
-      description: Size of the file in bytes.
+      description: "Size in bytes."
+    data:
+      type: string
+      format: binary
+      description: "Optional. If storage_type='postgres', file content can be provided here (base64-encoded)."
+    path:
+      type: string
+      description: "Optional. If hostfiles or s3, the path or object key. e.g. 'my-bucket/xx/uuid.pdf'."
+    is_raw:
+      type: boolean
+      description: "Indicates if this file is the entire raw email."
     created_at:
       type: string
       format: date-time
-      description: Timestamp when the file was created.
+      description: "Timestamp when the file was created."
     updated_at:
       type: string
       format: date-time
-      description: Timestamp when the file was last modified.
+      description: "Timestamp when the file was last modified."
+  required:
+    - storage_type
+    - storage_uuid
+    - name
+
 
 UploadFileRequest:
   type: object

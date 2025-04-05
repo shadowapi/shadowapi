@@ -20,6 +20,9 @@ INSERT INTO "file" (
     name,
     mime_type,
     size,
+    data,
+    path,
+    is_raw,
     created_at,
     updated_at
 ) VALUES (
@@ -29,9 +32,12 @@ INSERT INTO "file" (
             $4,
              $5,
              $6,
+    $7,
+    $8,
+    $9,
           NOW(),
              NOW()
-         ) RETURNING uuid, storage_type, storage_uuid, name, mime_type, size, created_at, updated_at
+         ) RETURNING uuid, storage_type, storage_uuid, name, mime_type, size, data, path, is_raw, created_at, updated_at
 `
 
 type CreateFileParams struct {
@@ -41,6 +47,9 @@ type CreateFileParams struct {
 	Name        string      `json:"name"`
 	MimeType    pgtype.Text `json:"mime_type"`
 	Size        pgtype.Int8 `json:"size"`
+	Data        []byte      `json:"data"`
+	Path        pgtype.Text `json:"path"`
+	IsRaw       pgtype.Bool `json:"is_raw"`
 }
 
 func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, error) {
@@ -51,6 +60,9 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, e
 		arg.Name,
 		arg.MimeType,
 		arg.Size,
+		arg.Data,
+		arg.Path,
+		arg.IsRaw,
 	)
 	var i File
 	err := row.Scan(
@@ -60,6 +72,9 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, e
 		&i.Name,
 		&i.MimeType,
 		&i.Size,
+		&i.Data,
+		&i.Path,
+		&i.IsRaw,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -68,40 +83,172 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, e
 
 const deleteFile = `-- name: DeleteFile :exec
 DELETE FROM "file"
-WHERE uuid = $1
+WHERE uuid = $1::uuid
 `
 
-func (q *Queries) DeleteFile(ctx context.Context, argUuid uuid.UUID) error {
+func (q *Queries) DeleteFile(ctx context.Context, argUuid pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteFile, argUuid)
 	return err
 }
 
 const getFile = `-- name: GetFile :one
 SELECT
-    uuid, storage_type, storage_uuid, name, mime_type, size, created_at, updated_at
+    file.uuid, file.storage_type, file.storage_uuid, file.name, file.mime_type, file.size, file.data, file.path, file.is_raw, file.created_at, file.updated_at
 FROM "file"
 WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetFile(ctx context.Context, argUuid pgtype.UUID) (File, error) {
+type GetFileRow struct {
+	File File `json:"file"`
+}
+
+func (q *Queries) GetFile(ctx context.Context, argUuid pgtype.UUID) (GetFileRow, error) {
 	row := q.db.QueryRow(ctx, getFile, argUuid)
-	var i File
+	var i GetFileRow
 	err := row.Scan(
-		&i.UUID,
-		&i.StorageType,
-		&i.StorageUuid,
-		&i.Name,
-		&i.MimeType,
-		&i.Size,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.File.UUID,
+		&i.File.StorageType,
+		&i.File.StorageUuid,
+		&i.File.Name,
+		&i.File.MimeType,
+		&i.File.Size,
+		&i.File.Data,
+		&i.File.Path,
+		&i.File.IsRaw,
+		&i.File.CreatedAt,
+		&i.File.UpdatedAt,
 	)
 	return i, err
 }
 
+const getFiles = `-- name: GetFiles :many
+WITH filtered_files AS (
+    SELECT f.uuid, f.storage_type, f.storage_uuid, f.name, f.mime_type, f.size, f.data, f.path, f.is_raw, f.created_at, f.updated_at
+    FROM "file" f
+    WHERE
+      -- Filter by storage_type if not empty
+        (NULLIF($5, '') IS NULL OR f.storage_type = $5)
+
+      -- Filter by storage_uuid if not empty
+      AND (NULLIF($6, '') IS NULL OR f.storage_uuid = $6::uuid)
+
+      -- Filter by partial name if not empty (ILIKE for case-insensitive search)
+      AND (NULLIF($7, '') IS NULL OR f.name ILIKE '%' || $7 || '%')
+
+      -- Filter by mime_type if not empty (ILIKE for partial match)
+      AND (NULLIF($8, '') IS NULL OR f.mime_type ILIKE '%' || $8 || '%')
+
+      -- Filter by minimum size if size_min > 0
+      AND (COALESCE($9, 0) = 0 OR f.size >= $9)
+
+      -- Filter by maximum size if size_max > 0
+      AND (COALESCE($10, 0) = 0 OR f.size <= $10)
+
+      -- Filter by is_raw if not -1 (using integer approach, e.g. -1=ignore, 0=false, 1=true)
+      AND (
+        NULLIF($11::int, -1) IS NULL
+            OR f.is_raw = ($11::int)::boolean
+        )
+)
+SELECT
+    f.uuid, f.storage_type, f.storage_uuid, f.name, f.mime_type, f.size, f.data, f.path, f.is_raw, f.created_at, f.updated_at,
+    -- total_count of all matching rows (ignoring limit/offset)
+    (SELECT COUNT(*) FROM filtered_files) AS total_count
+FROM filtered_files f
+ORDER BY
+    CASE WHEN $1 = 'created_at' AND $2 = 'asc'  THEN f.created_at END ASC,
+    CASE WHEN $1 = 'created_at' AND $2 = 'desc' THEN f.created_at END DESC,
+
+    CASE WHEN $1 = 'updated_at' AND $2 = 'asc'  THEN f.updated_at END ASC,
+    CASE WHEN $1 = 'updated_at' AND $2 = 'desc' THEN f.updated_at END DESC,
+
+    CASE WHEN $1 = 'size' AND $2 = 'asc'       THEN f.size END ASC,
+    CASE WHEN $1 = 'size' AND $2 = 'desc'      THEN f.size END DESC,
+
+    -- fallback if no valid order_by specified
+    f.created_at DESC
+
+LIMIT NULLIF($4::int, 0)
+    OFFSET $3::int
+`
+
+type GetFilesParams struct {
+	OrderBy        interface{} `json:"order_by"`
+	OrderDirection interface{} `json:"order_direction"`
+	Offset         int32       `json:"offset"`
+	Limit          int32       `json:"limit"`
+	StorageType    interface{} `json:"storage_type"`
+	StorageUuid    interface{} `json:"storage_uuid"`
+	Name           interface{} `json:"name"`
+	MimeType       interface{} `json:"mime_type"`
+	SizeMin        interface{} `json:"size_min"`
+	SizeMax        interface{} `json:"size_max"`
+	IsRaw          int32       `json:"is_raw"`
+}
+
+type GetFilesRow struct {
+	UUID        uuid.UUID          `json:"uuid"`
+	StorageType string             `json:"storage_type"`
+	StorageUuid *uuid.UUID         `json:"storage_uuid"`
+	Name        string             `json:"name"`
+	MimeType    pgtype.Text        `json:"mime_type"`
+	Size        pgtype.Int8        `json:"size"`
+	Data        []byte             `json:"data"`
+	Path        pgtype.Text        `json:"path"`
+	IsRaw       pgtype.Bool        `json:"is_raw"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	TotalCount  int64              `json:"total_count"`
+}
+
+func (q *Queries) GetFiles(ctx context.Context, arg GetFilesParams) ([]GetFilesRow, error) {
+	rows, err := q.db.Query(ctx, getFiles,
+		arg.OrderBy,
+		arg.OrderDirection,
+		arg.Offset,
+		arg.Limit,
+		arg.StorageType,
+		arg.StorageUuid,
+		arg.Name,
+		arg.MimeType,
+		arg.SizeMin,
+		arg.SizeMax,
+		arg.IsRaw,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFilesRow
+	for rows.Next() {
+		var i GetFilesRow
+		if err := rows.Scan(
+			&i.UUID,
+			&i.StorageType,
+			&i.StorageUuid,
+			&i.Name,
+			&i.MimeType,
+			&i.Size,
+			&i.Data,
+			&i.Path,
+			&i.IsRaw,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listFiles = `-- name: ListFiles :many
 SELECT
-    uuid, storage_type, storage_uuid, name, mime_type, size, created_at, updated_at
+    file.uuid, file.storage_type, file.storage_uuid, file.name, file.mime_type, file.size, file.data, file.path, file.is_raw, file.created_at, file.updated_at
 FROM "file"
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -113,24 +260,31 @@ type ListFilesParams struct {
 	Limit  int32 `json:"limit"`
 }
 
-func (q *Queries) ListFiles(ctx context.Context, arg ListFilesParams) ([]File, error) {
+type ListFilesRow struct {
+	File File `json:"file"`
+}
+
+func (q *Queries) ListFiles(ctx context.Context, arg ListFilesParams) ([]ListFilesRow, error) {
 	rows, err := q.db.Query(ctx, listFiles, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []File
+	var items []ListFilesRow
 	for rows.Next() {
-		var i File
+		var i ListFilesRow
 		if err := rows.Scan(
-			&i.UUID,
-			&i.StorageType,
-			&i.StorageUuid,
-			&i.Name,
-			&i.MimeType,
-			&i.Size,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.File.UUID,
+			&i.File.StorageType,
+			&i.File.StorageUuid,
+			&i.File.Name,
+			&i.File.MimeType,
+			&i.File.Size,
+			&i.File.Data,
+			&i.File.Path,
+			&i.File.IsRaw,
+			&i.File.CreatedAt,
+			&i.File.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -145,13 +299,16 @@ func (q *Queries) ListFiles(ctx context.Context, arg ListFilesParams) ([]File, e
 const updateFile = `-- name: UpdateFile :exec
 UPDATE "file"
 SET
-    storage_type = $1,
-    storage_uuid = $2::uuid,
-    name         = $3,
-    mime_type    = $4,
-    size         = $5,
-    updated_at = NOW()
-WHERE uuid = $6::uuid
+    storage_type  = $1,
+    storage_uuid  = $2::uuid,
+    name          = $3,
+    mime_type     = $4,
+    size          = $5,
+    data          = $6,
+    path          = $7,
+    is_raw        = $8,
+    updated_at    = NOW()
+WHERE uuid = $9::uuid
 `
 
 type UpdateFileParams struct {
@@ -160,6 +317,9 @@ type UpdateFileParams struct {
 	Name        string      `json:"name"`
 	MimeType    pgtype.Text `json:"mime_type"`
 	Size        pgtype.Int8 `json:"size"`
+	Data        []byte      `json:"data"`
+	Path        pgtype.Text `json:"path"`
+	IsRaw       pgtype.Bool `json:"is_raw"`
 	UUID        pgtype.UUID `json:"uuid"`
 }
 
@@ -170,6 +330,9 @@ func (q *Queries) UpdateFile(ctx context.Context, arg UpdateFileParams) error {
 		arg.Name,
 		arg.MimeType,
 		arg.Size,
+		arg.Data,
+		arg.Path,
+		arg.IsRaw,
 		arg.UUID,
 	)
 	return err
