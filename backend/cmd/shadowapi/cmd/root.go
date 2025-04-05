@@ -61,6 +61,32 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		if modify != nil {
 			modify(do.MustInvoke[*config.Config](injector))
 		}
+
+		////---------------------------------------
+		//// Provide dynamic connections
+		////---------------------------------------
+		//// Build the map[string]*pgxpool.Pool from storages table
+		//pgConns, err := storages.ProvideDynamicPGConnections(injector)
+		//if err != nil {
+		//	// handle error, or log/fatal
+		//	panic(err) // or log and exit
+		//}
+		//// Register so other code can do: do.MustInvoke[map[string]*pgxpool.Pool](injector)
+		//do.ProvideValue(injector, pgConns)
+		//
+		//// Build the map[string]*s3.S3 from storages table
+		//s3Conns, err := storages.ProvideDynamicS3Connections(injector)
+		//if err != nil {
+		//	// handle error
+		//	panic(err)
+		//}
+		//do.ProvideValue(injector, s3Conns)
+		//
+		////---------------------------------------
+		//// Start the Postgres reconnect routine
+		////---------------------------------------
+		//storages.ReconnectDynamicPGConnections(cmd.Context(), pgConns, injector)
+
 	}
 	cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
 		// Close the database connection pool

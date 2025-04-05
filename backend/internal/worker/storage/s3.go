@@ -31,6 +31,7 @@ func NewS3Storage(log *slog.Logger, s3Client *s3.S3, bucketName string, pgdb *qu
 }
 
 func (s *S3Storage) SaveMessage(ctx context.Context, message *api.Message) error {
+
 	if s.pgdb == nil {
 		s.log.Warn("pgdb is nil, skipping DB insert for SaveMessage")
 		return nil
