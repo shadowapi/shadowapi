@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -18,7 +19,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 	log := h.log.With("handler", "PipelineCreate")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
 		pipelineUUID := uuid.Must(uuid.NewV7())
-		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID)
+		pgDatasourceUUID, err := converter.ConvertStringToPgUUID(req.DatasourceUUID)
 		if err != nil {
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
@@ -38,7 +39,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 		}
 
 		qParams := query.CreatePipelineParams{
-			UUID:           pgtype.UUID{Bytes: uToBytes(pipelineUUID), Valid: true},
+			UUID:           pgtype.UUID{Bytes: converter.UToBytes(pipelineUUID), Valid: true},
 			DatasourceUUID: pgDatasourceUUID,
 			Name:           req.Name,
 			Type:           ds.Datasource.Type,
@@ -61,7 +62,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 
 func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams) (*api.Pipeline, error) {
 	log := h.log.With("handler", "PipelineGet")
-	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
@@ -112,7 +113,7 @@ func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParam
 
 func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params api.PipelineUpdateParams) (*api.Pipeline, error) {
 	log := h.log.With("handler", "PipelineUpdate")
-	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
@@ -133,7 +134,7 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 		} else {
 			flowData = existingRow.Pipeline.Flow
 		}
-		pgDatasourceUUID, err := ConvertStringToPgUUID(req.DatasourceUUID)
+		pgDatasourceUUID, err := converter.ConvertStringToPgUUID(req.DatasourceUUID)
 		if err != nil {
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
@@ -167,7 +168,7 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 
 func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) error {
 	log := h.log.With("handler", "PipelineDelete")
-	pipelineUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))

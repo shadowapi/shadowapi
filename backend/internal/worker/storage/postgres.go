@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"log/slog"
 
 	"github.com/gofrs/uuid"
@@ -40,7 +41,7 @@ func (p *PostgresStorage) SaveMessage(ctx context.Context, message *api.Message)
 		UUID:       uid,
 		Sender:     message.GetSender(),
 		Recipients: message.GetRecipients(),
-		Subject:    optionalText(message.GetSubject()),
+		Subject:    converter.OptionalText(message.GetSubject()),
 		Body:       message.GetBody(),
 		Source:     nil,
 		Type:       nil,
@@ -101,14 +102,14 @@ func (p *PostgresStorage) SaveAttachment(ctx context.Context, file *api.FileObje
 		StorageType: "postgres",
 		StorageUuid: pgtype.UUID{Valid: false}, // or set if you have a storage record
 		Name:        name,
-		MimeType:    pgText(mime),
-		Size:        pgInt8(size),
+		MimeType:    converter.PgText(mime),
+		Size:        converter.PgInt8(size),
 		Data:        fileBytes,
 		Path:        pgtype.Text{Valid: false},
-		IsRaw:       pgBool(false), // or detect if raw
+		IsRaw:       converter.PgBool(false), // or detect if raw
 	})
 	if err != nil {
-		p.log.Error("failed to insert file record (postgres)", "error", err)
+		p.log.Error("failed to insert file record in DB (postgres)", "error", err)
 		return err
 	}
 

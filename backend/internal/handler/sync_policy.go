@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/go-faster/jx"
@@ -19,7 +20,7 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 	log := h.log.With("handler", "SyncpolicyCreate")
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.SyncPolicy, error) {
 		policyUUID := uuid.Must(uuid.NewV7())
-		pgPipelineUUID, err := ConvertStringToPgUUID(req.PipelineUUID)
+		pgPipelineUUID, err := converter.ConvertStringToPgUUID(req.PipelineUUID)
 		if err != nil {
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
@@ -43,7 +44,7 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 		log.Error("pip!", "req.PipelineUUID", req.PipelineUUID, "pgPipelineUUID", pgPipelineUUID, "pipe", pipe)
 
 		qParams := query.CreateSyncPolicyParams{
-			UUID:         pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
+			UUID:         pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true},
 			PipelineUuid: pgPipelineUUID,
 			Type:         pipe.Pipeline.Type,
 			Blocklist:    req.Blocklist,
@@ -72,7 +73,7 @@ func (h *Handler) SyncpolicyDelete(ctx context.Context, params api.SyncpolicyDel
 		log.Error("invalid policy uuid", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid sync policy uuid"))
 	}
-	err = query.New(h.dbp).DeleteSyncPolicy(ctx, pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true})
+	err = query.New(h.dbp).DeleteSyncPolicy(ctx, pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true})
 	if err != nil {
 		log.Error("failed to delete sync policy", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete sync policy"))
@@ -93,7 +94,7 @@ func (h *Handler) SyncpolicyGet(ctx context.Context, params api.SyncpolicyGetPar
 		Offset:         0,
 		Limit:          1,
 		Type:           "",
-		UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
+		UUID:           pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true},
 		SyncAll:        -1,
 	})
 	if err != nil {
@@ -161,7 +162,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			Offset:         0,
 			Limit:          1,
 			Type:           "",
-			UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
+			UUID:           pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true},
 			SyncAll:        -1,
 		})
 		if err != nil {
@@ -187,7 +188,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			ExcludeList: req.ExcludeList,
 			SyncAll:     req.SyncAll.Or(false),
 			Settings:    settingsData,
-			UUID:        pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
+			UUID:        pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true},
 		}
 		err = query.New(tx).UpdateSyncPolicy(ctx, uParams)
 		if err != nil {
@@ -200,7 +201,7 @@ func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, par
 			Offset:         0,
 			Limit:          1,
 			Type:           "",
-			UUID:           pgtype.UUID{Bytes: uToBytes(policyUUID), Valid: true},
+			UUID:           pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true},
 			SyncAll:        -1,
 		})
 		if err != nil {

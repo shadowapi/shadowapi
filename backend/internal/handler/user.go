@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -34,7 +35,7 @@ func (h *Handler) CreateUser(ctx context.Context, req *api.User) (*api.User, err
 		}
 
 		created, err := query.New(tx).CreateUser(ctx, query.CreateUserParams{
-			UUID:      pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true},
+			UUID:      pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true},
 			Email:     req.Email,
 			Password:  req.Password,
 			FirstName: req.FirstName,
@@ -85,7 +86,7 @@ func (h *Handler) DeleteUser(ctx context.Context, params api.DeleteUserParams) e
 		h.log.Error("failed to parse user UUID", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
 	}
-	if err := query.New(h.dbp).DeleteUser(ctx, pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true}); err != nil {
+	if err := query.New(h.dbp).DeleteUser(ctx, pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true}); err != nil {
 		h.log.Error("failed to delete user", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete user"))
 	}
@@ -103,7 +104,7 @@ func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (*api.U
 		h.log.Error("failed to parse user UUID", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
 	}
-	user, err := query.New(h.dbp).GetUser(ctx, pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true})
+	user, err := query.New(h.dbp).GetUser(ctx, pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true})
 	if err == pgx.ErrNoRows {
 		return nil, ErrWithCode(http.StatusNotFound, E("user not found"))
 	} else if err != nil {
@@ -188,7 +189,7 @@ func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.Upda
 	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.User, error) {
 		updateParams := query.UpdateUserParams{
-			UUID:      pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true},
+			UUID:      pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true},
 			Email:     req.Email,
 			Password:  req.Password,
 			FirstName: req.FirstName,
@@ -210,7 +211,7 @@ func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.Upda
 			h.log.Error("failed to update user", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update user"))
 		}
-		user, err := query.New(tx).GetUser(ctx, pgtype.UUID{Bytes: uToBytes(userUUID), Valid: true})
+		user, err := query.New(tx).GetUser(ctx, pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true})
 		if err != nil {
 			h.log.Error("failed to get updated user", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated user"))

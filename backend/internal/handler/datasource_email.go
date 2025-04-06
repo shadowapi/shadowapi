@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -23,13 +24,13 @@ func (h *Handler) DatasourceEmailCreate(ctx context.Context, req *api.Datasource
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 	isEnabled := req.IsEnabled.Or(false)
-	pgUserUUID, err := ConvertStringToPgUUID(req.UserUUID)
+	pgUserUUID, err := converter.ConvertStringToPgUUID(req.UserUUID)
 	if err != nil {
 		log.Error("failed to convert user uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
 	}
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
-		UUID:      pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true},
+		UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
 		UserUUID:  pgUserUUID,
 		Name:      req.Name,
 		IsEnabled: isEnabled,
@@ -53,7 +54,7 @@ func (h *Handler) DatasourceEmailDelete(ctx context.Context, params api.Datasour
 		log.Error("failed to parse datasource uuid", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true}); err != nil {
+	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true}); err != nil {
 		log.Error("failed to delete datasource", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
 	}
@@ -107,14 +108,14 @@ func (h *Handler) DatasourceEmailUpdate(ctx context.Context, req *api.Datasource
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
-		pgUserUUID, err := ConvertStringToPgUUID(req.UserUUID)
+		pgUserUUID, err := converter.ConvertStringToPgUUID(req.UserUUID)
 		if err != nil {
 			log.Error("failed to convert user uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
 		}
 
 		if err := query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
-			UUID:      pgtype.UUID{Bytes: uToBytes(dsUUID), Valid: true},
+			UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
 			UserUUID:  pgUserUUID,
 			Name:      req.Name,
 			IsEnabled: isEnabled,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -46,7 +47,7 @@ func (h *Handler) DatasourceEmailRunPipeline(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal settings"))
 	}
 
-	tokenUUID, err := ConvertOptStringToUUID(ds.OAuth2TokenUUID)
+	tokenUUID, err := converter.ConvertOptStringToUUID(ds.OAuth2TokenUUID)
 	if err != nil {
 		log.Error("invalid OAuth2TokenUUID", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid oauth2 token uuid"))

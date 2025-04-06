@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"os"
 	"path/filepath"
 
@@ -44,7 +45,7 @@ func (h *HostfilesStorage) SaveMessage(ctx context.Context, msg *api.Message) er
 		UUID:       uid,
 		Sender:     msg.GetSender(),
 		Recipients: msg.GetRecipients(),
-		Subject:    optionalText(msg.GetSubject()),
+		Subject:    converter.OptionalText(msg.GetSubject()),
 		Body:       msg.GetBody(),
 		// ... etc ...
 	})
@@ -115,11 +116,11 @@ func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObj
 		StorageType: "hostfiles",
 		StorageUuid: pgtype.UUID{Valid: false}, // or set if you have a 'storage' record
 		Name:        name,
-		MimeType:    pgText(mime),
-		Size:        pgInt8(size),
+		MimeType:    converter.PgText(mime),
+		Size:        converter.PgInt8(size),
 		Data:        nil, // no data in Postgres
-		Path:        pgText(filePath),
-		IsRaw:       pgBool(false), // or detect if raw
+		Path:        converter.PgText(filePath),
+		IsRaw:       converter.PgBool(false), // or detect if raw
 	})
 	if err != nil {
 		return err

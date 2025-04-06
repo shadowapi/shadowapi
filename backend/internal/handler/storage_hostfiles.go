@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -33,7 +34,7 @@ func (h *Handler) StorageHostfilesCreate(ctx context.Context, req *api.StorageHo
 	}
 
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
+		UUID:      pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
 		Name:      req.Name,
 		Type:      "hostfiles",
 		IsEnabled: isEnabled,
@@ -60,7 +61,7 @@ func (h *Handler) StorageHostfilesDelete(ctx context.Context, params api.Storage
 		return ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: uToBytes(hostfilesUUID), Valid: true}); err != nil {
+	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(hostfilesUUID), Valid: true}); err != nil {
 		log.Error("failed to delete hostfiles storage", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete hostfiles storage"))
 	}
@@ -77,7 +78,7 @@ func (h *Handler) StorageHostfilesGet(ctx context.Context, params api.StorageHos
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	storage, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(id), Valid: true})
+	storage, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(id), Valid: true})
 	if err != nil {
 		log.Error("failed to get hostfiles storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -96,7 +97,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageHostfiles, error) {
-		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(hostfilesUUID), Valid: true})
+		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(hostfilesUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get hostfiles storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -117,7 +118,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 		}
 
 		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      pgtype.UUID{Bytes: uToBytes(hostfilesUUID), Valid: true},
+			UUID:      pgtype.UUID{Bytes: converter.UToBytes(hostfilesUUID), Valid: true},
 			Type:      "hostfiles",
 			Name:      req.Name,
 			IsEnabled: isEnabled,

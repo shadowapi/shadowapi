@@ -2,12 +2,11 @@ package handler
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgtype"
-	"net/http"
-	"time"
-
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
+	"net/http"
 
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -42,7 +41,7 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 			log.Error("invalid storage_uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 		}
-		storageRow, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(sUUID), Valid: true})
+		storageRow, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(sUUID), Valid: true})
 		if err == pgx.ErrNoRows {
 			log.Error("storage row not found", "uuid", req.StorageUUID)
 			return nil, ErrWithCode(http.StatusBadRequest, E("storage not found"))
@@ -58,8 +57,8 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 
 		// 3. Insert into DB using the type from the storage row
 		fileRow, err := query.New(tx).CreateFile(ctx, query.CreateFileParams{
-			UUID:        pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true},
-			StorageUuid: pgtype.UUID{Bytes: uToBytes(sUUID), Valid: true},
+			UUID:        pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true},
+			StorageUuid: pgtype.UUID{Bytes: converter.UToBytes(sUUID), Valid: true},
 			StorageType: storageRow.Storage.Type,
 			Name:        name,
 			MimeType: pgtype.Text{
@@ -137,7 +136,7 @@ func (h *Handler) FileGet(ctx context.Context, params api.FileGetParams) (*api.F
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid file UUID"))
 	}
 
-	fileRow, err := query.New(h.dbp).GetFile(ctx, pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true})
+	fileRow, err := query.New(h.dbp).GetFile(ctx, pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true})
 	if err == pgx.ErrNoRows {
 		return nil, ErrWithCode(http.StatusNotFound, E("file not found"))
 	} else if err != nil {
@@ -231,7 +230,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.FileObject, error) {
 		// 1. Fetch the record to ensure it exists
-		oldFileRow, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true})
+		oldFileRow, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true})
 		if err == pgx.ErrNoRows {
 			return nil, ErrWithCode(http.StatusNotFound, E("file not found"))
 		} else if err != nil {
@@ -249,7 +248,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 			Data:        oldFileRow.File.Data,
 			Path:        oldFileRow.File.Path,
 			IsRaw:       oldFileRow.File.IsRaw,
-			UUID:        pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true},
+			UUID:        pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true},
 		})
 		if err != nil {
 			log.Error("failed to update file", "error", err)
@@ -257,7 +256,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 		}
 
 		// 3. Fetch the updated record
-		updatedRow, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true})
+		updatedRow, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to fetch file post-update", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to retrieve updated record"))
@@ -342,7 +341,7 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 		}
 
-		storageRow, queryErr := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(sUUID), Valid: true})
+		storageRow, queryErr := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(sUUID), Valid: true})
 		if queryErr == pgx.ErrNoRows {
 			log.Error("storage row not found", "uuid", req.StorageUUID)
 			return nil, ErrWithCode(http.StatusBadRequest, E("storage not found"))
@@ -356,7 +355,7 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 		mimeType := req.MimeType.Or("application/octet-stream")
 
 		fileRow, createErr := query.New(tx).CreateFile(ctx, query.CreateFileParams{
-			UUID:        pgtype.UUID{Bytes: uToBytes(fileUUID), Valid: true},
+			UUID:        pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true},
 			StorageType: storageRow.Storage.Type,
 			StorageUuid: pgtype.UUID{}, // keep existing?
 			Name:        name,
@@ -393,9 +392,4 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 		return nil, err
 	}
 	return resp, nil
-}
-
-// nowUTC is a simple helper returning current time in UTC.
-func nowUTC() time.Time {
-	return time.Now().UTC()
 }

@@ -1559,6 +1559,8 @@ func mapAPIContactToUpdateParams(apiC *api.Contact, existing query.Contact) (que
 	return u, nil
 }
 
+// TODO @reactima move to converter.go
+
 /* ---------------------------------------------------------
    Small helper methods for bridging pgtype.* with Opt*
 --------------------------------------------------------- */

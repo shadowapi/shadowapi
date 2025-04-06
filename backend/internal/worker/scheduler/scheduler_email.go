@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/metrics"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
@@ -105,14 +105,14 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		if err != nil {
 			s.log.Error("Failed to publish job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)
 			backoffDelay := s.calculateBackoff(sched)
-			s.updateNextRun(ctx, queries, uuidToPgUUID(sched.UUID), now.Add(backoffDelay))
+			s.updateNextRun(ctx, queries, converter.UuidToPgUUID(sched.UUID), now.Add(backoffDelay))
 			continue
 		}
 
 		// Calculate the next run time.
 		nextRun := s.nextRunTime(sched, now)
 		// Update the scheduler record with the new run time.
-		s.updateSchedulerRun(ctx, queries, uuidToPgUUID(sched.UUID), now, nextRun)
+		s.updateSchedulerRun(ctx, queries, converter.UuidToPgUUID(sched.UUID), now, nextRun)
 		// Increase the scheduled jobs metric.
 		metrics.JobScheduledTotal.WithLabelValues(sched.PipelineUuid.String(), "").Inc()
 	}
@@ -167,12 +167,4 @@ func (s *MultiEmailScheduler) updateNextRun(ctx context.Context, queries *query.
 	if err != nil {
 		s.log.Error("Failed to update scheduler next run", "error", err)
 	}
-}
-
-// Helper function to convert gofrs/uuid.UUID to pgx/pgtype.UUID.
-func uuidToPgUUID(u uuid.UUID) pgtype.UUID {
-	var pg pgtype.UUID
-	copy(pg.Bytes[:], u.Bytes())
-	pg.Valid = true
-	return pg
 }

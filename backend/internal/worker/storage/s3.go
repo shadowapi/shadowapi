@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"log/slog"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -51,7 +52,7 @@ func (s *S3Storage) SaveMessage(ctx context.Context, message *api.Message) error
 		UUID:       uid,
 		Sender:     message.GetSender(),
 		Recipients: message.GetRecipients(),
-		Subject:    optionalText(message.GetSubject()),
+		Subject:    converter.OptionalText(message.GetSubject()),
 		Body:       message.GetBody(),
 		Source:     nil,
 		Type:       nil,
@@ -98,7 +99,7 @@ func (s *S3Storage) SaveAttachment(ctx context.Context, file *api.FileObject) er
 		_, s3Err := s.s3Client.PutObjectWithContext(ctx, &s3.PutObjectInput{
 			Bucket:      aws.String(s.bucket),
 			Key:         aws.String(key),
-			Body:        bytesToReader(dataBytes),
+			Body:        converter.BytesToReader(dataBytes),
 			ContentType: aws.String(mime),
 		})
 		if s3Err != nil {
@@ -115,11 +116,11 @@ func (s *S3Storage) SaveAttachment(ctx context.Context, file *api.FileObject) er
 			StorageType: "s3",
 			StorageUuid: pgtype.UUID{Valid: false},
 			Name:        name,
-			MimeType:    pgText(mime),
-			Size:        pgInt8(size),
+			MimeType:    converter.PgText(mime),
+			Size:        converter.PgInt8(size),
 			Data:        nil,
-			Path:        pgText(key),
-			IsRaw:       pgBool(false),
+			Path:        converter.PgText(key),
+			IsRaw:       converter.PgBool(false),
 		})
 		if err != nil {
 			s.log.Error("failed to insert file record in DB (S3)", "error", err)
@@ -132,7 +133,7 @@ func (s *S3Storage) SaveAttachment(ctx context.Context, file *api.FileObject) er
 }
 
 func (s *S3Storage) generateObjectKey(fileUUID, originalName string) string {
-	ext := fileExt(originalName)
+	ext := converter.FileExt(originalName)
 	sub := fileUUID[:2]
 	return fmt.Sprintf("files/%s/%s%s", sub, fileUUID, ext)
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -34,7 +35,7 @@ func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePos
 	}
 
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
+		UUID:      pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
 		Name:      req.Name,
 		Type:      "postgres",
 		IsEnabled: isEnabled,
@@ -60,7 +61,7 @@ func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StorageP
 		return ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true}); err != nil {
+	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true}); err != nil {
 		log.Error("failed to delete storage", "error", err)
 		return ErrWithCode(http.StatusInternalServerError, E("failed to delete storage"))
 	}
@@ -78,7 +79,7 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 	}
 	fmt.Println("id", id)
 
-	storages, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(id), Valid: true})
+	storages, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(id), Valid: true})
 	if err != nil {
 		log.Error("failed to get storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -97,7 +98,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StoragePostgres, error) {
-		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true})
+		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -118,7 +119,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 		}
 
 		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      pgtype.UUID{Bytes: uToBytes(storageUUID), Valid: true},
+			UUID:      pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
 			Type:      "postgres",
 			Name:      req.Name,
 			IsEnabled: isEnabled,

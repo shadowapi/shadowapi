@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -63,7 +64,7 @@ func (e *EmailScheduledFetchJob) Execute(ctx context.Context) error {
 		return nil
 	}
 
-	dsRow, err := queries.GetDatasource(ctx, uuidPtrToPgUUID(pipeRow.Pipeline.DatasourceUUID))
+	dsRow, err := queries.GetDatasource(ctx, converter.UuidPtrToPgUUID(pipeRow.Pipeline.DatasourceUUID))
 	if err != nil {
 		e.log.Error("failed to get datasource", "error", err)
 		return err
@@ -125,13 +126,4 @@ func ScheduleEmailFetchJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.
 		}
 		return NewEmailScheduledFetchJob(args, dbp, log, q, pipelinesMap), nil
 	}
-}
-
-func uuidPtrToPgUUID(u *uuid.UUID) pgtype.UUID {
-	if u == nil {
-		return pgtype.UUID{Valid: false}
-	}
-	var arr [16]byte
-	copy(arr[:], u.Bytes())
-	return pgtype.UUID{Bytes: arr, Valid: true}
 }

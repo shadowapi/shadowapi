@@ -5,6 +5,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/shadowapi/shadowapi/backend/internal/db"
@@ -20,7 +21,7 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Scheduler, error) {
 		// Generate a new UUID for the scheduler
 		schedulerUUID := uuid.Must(uuid.NewV7())
-		pgPipelineUUID, err := ConvertStringToPgUUID(req.PipelineUUID)
+		pgPipelineUUID, err := converter.ConvertStringToPgUUID(req.PipelineUUID)
 		if err != nil {
 			log.Error("failed to convert scheduler uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
@@ -35,14 +36,14 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 
 		// Build query parameters for the new scheduler.
 		qParams := query.CreateSchedulerParams{
-			UUID:           pgtype.UUID{Bytes: uToBytes(schedulerUUID), Valid: true},
+			UUID:           pgtype.UUID{Bytes: converter.UToBytes(schedulerUUID), Valid: true},
 			PipelineUuid:   pgPipelineUUID,
 			ScheduleType:   req.ScheduleType, // 'cron' or 'one_time'
-			CronExpression: ConvertOptNilStringToPgText(req.CronExpression),
-			RunAt:          NullTimestamptz(),
+			CronExpression: converter.ConvertOptNilStringToPgText(req.CronExpression),
+			RunAt:          converter.NullTimestamptz(),
 			Timezone:       req.Timezone.Or("UTC"),
-			NextRun:        NullTimestamptz(),
-			LastRun:        NullTimestamptz(),
+			NextRun:        converter.NullTimestamptz(),
+			LastRun:        converter.NullTimestamptz(),
 			IsEnabled:      req.IsEnabled.Or(false),
 		}
 
@@ -66,7 +67,7 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 // DELETE /scheduler/{uuid}
 func (h *Handler) SchedulerDelete(ctx context.Context, params api.SchedulerDeleteParams) error {
 	log := h.log.With("handler", "SchedulerDelete")
-	schUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
@@ -84,7 +85,7 @@ func (h *Handler) SchedulerDelete(ctx context.Context, params api.SchedulerDelet
 // GET /scheduler/{uuid}
 func (h *Handler) SchedulerGet(ctx context.Context, params api.SchedulerGetParams) (*api.Scheduler, error) {
 	log := h.log.With("handler", "SchedulerGet")
-	schUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
@@ -156,7 +157,7 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 // PUT /scheduler/{uuid}
 func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, params api.SchedulerUpdateParams) (*api.Scheduler, error) {
 	log := h.log.With("handler", "SchedulerUpdate")
-	schUUID, err := ConvertStringToPgUUID(params.UUID.String())
+	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
@@ -175,11 +176,11 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 		}
 
 		uParams := query.UpdateSchedulerParams{
-			CronExpression: ConvertOptNilStringToPgText(req.CronExpression),
-			RunAt:          NullTimestamptz(),
+			CronExpression: converter.ConvertOptNilStringToPgText(req.CronExpression),
+			RunAt:          converter.NullTimestamptz(),
 			Timezone:       req.Timezone.Or("UTC"),
-			NextRun:        NullTimestamptz(),
-			LastRun:        NullTimestamptz(),
+			NextRun:        converter.NullTimestamptz(),
+			LastRun:        converter.NullTimestamptz(),
 			IsEnabled:      isEnabled,
 			UUID:           schUUID,
 		}

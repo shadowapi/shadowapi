@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/extractors"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/filters"
 	stor "github.com/shadowapi/shadowapi/backend/internal/worker/storage"
@@ -105,7 +105,7 @@ func CreateEmailPipelines(ctx context.Context, log *slog.Logger, dbp *pgxpool.Po
 			log.Error("Pipeline has nil DatasourceUUID")
 			continue
 		}
-		dsRow, err := q.GetDatasource(ctx, uuidToPgUUID(*pipe.DatasourceUUID))
+		dsRow, err := q.GetDatasource(ctx, converter.UuidToPgUUID(*pipe.DatasourceUUID))
 		if err != nil {
 			log.Error("Failed to get datasource", "error", err)
 			continue
@@ -115,7 +115,7 @@ func CreateEmailPipelines(ctx context.Context, log *slog.Logger, dbp *pgxpool.Po
 			log.Error("Failed to extract storage UUID from datasource settings", "error", err)
 			continue
 		}
-		uuidArr, err := bytesToUUID(storageUUID)
+		uuidArr, err := converter.BytesToUUID(storageUUID)
 		if err != nil {
 			log.Error("Invalid storage UUID", "error", err)
 			continue
@@ -157,22 +157,6 @@ func extractStorageUUID(settings []byte) ([]byte, error) {
 	}
 	// In a real implementation, parse JSON to extract a 16-byte UUID.
 	return settings, nil
-}
-
-func bytesToUUID(b []byte) ([16]byte, error) {
-	var arr [16]byte
-	if len(b) != 16 {
-		return arr, errors.New("invalid UUID length")
-	}
-	copy(arr[:], b)
-	return arr, nil
-}
-
-func uuidToPgUUID(u uuid.UUID) pgtype.UUID {
-	var pg pgtype.UUID
-	copy(pg.Bytes[:], u.Bytes())
-	pg.Valid = true
-	return pg
 }
 
 func convertSyncPolicy(row query.GetSyncPoliciesRow) (api.SyncPolicy, error) {
