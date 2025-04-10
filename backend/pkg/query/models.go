@@ -165,7 +165,7 @@ type File struct {
 
 type Message struct {
 	UUID                   uuid.UUID          `json:"uuid"`
-	Source                 string             `json:"source"`
+	Format                 string             `json:"format"`
 	Type                   string             `json:"type"`
 	ChatUuid               *uuid.UUID         `json:"chat_uuid"`
 	ThreadUuid             *uuid.UUID         `json:"thread_uuid"`

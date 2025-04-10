@@ -69,6 +69,19 @@ func ConvertOptStringToUUID(opt api.OptString) (uuid.UUID, error) {
 	return uuid.FromString(opt.Value)
 }
 
+// ConvertOptStringToPgUUID converts an api.OptString to a pgtype.UUID.
+// If the OptString is not set or is empty, a null (invalid) pgtype.UUID is returned.
+func ConvertOptStringToPgUUID(opt api.OptString) (pgtype.UUID, error) {
+	if !opt.IsSet() || opt.Value == "" {
+		return pgtype.UUID{Valid: false}, nil
+	}
+	u, err := uuid.FromString(opt.Value)
+	if err != nil {
+		return pgtype.UUID{}, err
+	}
+	return UuidToPgUUID(u), nil
+}
+
 func UToBytes(u uuid.UUID) [16]byte {
 	var arr [16]byte
 	copy(arr[:], u.Bytes())

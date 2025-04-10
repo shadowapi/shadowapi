@@ -1351,17 +1351,11 @@ export interface components {
         };
         message: {
             /** @description Unique identifier for the message. */
-            uuid: string;
-            /**
-             * @description Data source or platform the message originated from.
-             * @enum {string}
-             */
-            source: "email" | "whatsapp" | "telegram" | "linkedin" | "custom";
-            /**
-             * @description Specifies the type or classification of the message.
-             * @enum {string}
-             */
-            type?: "text" | "media" | "system" | "notification" | "attachment" | "invite" | "event" | "call";
+            uuid?: string;
+            /** @description Data source or platform the message originated from - email, whatsapp, telegram, linkedin, custom */
+            type: string;
+            /** @description Specifies the type or classification of the message - text, media, system, notification, attachment, invite, event, call */
+            format: string;
             /** @description ID of the chat/conversation this message belongs to. */
             chat_uuid?: string;
             /** @description ID of a sub-thread if this message is part of a threaded conversation. */
@@ -1401,12 +1395,12 @@ export interface components {
              * Format: date-time
              * @description The date and time when the object was created.
              */
-            readonly created_at: string;
+            readonly created_at?: string;
             /**
              * Format: date-time
              * @description The date and time when the message was last updated.
              */
-            updated_at: string;
+            updated_at?: string;
         };
         sync_policy: {
             /** @description Unique identifier for the sync policy. */

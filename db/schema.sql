@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS "file" (
 -- Create table "message" (Message)
 CREATE TABLE IF NOT EXISTS message (
                                        uuid                       UUID PRIMARY KEY,
-                                       source                     VARCHAR NOT NULL,
+                                       format                     VARCHAR NOT NULL,
                                        type                       VARCHAR NOT NULL,
                                        chat_uuid                  VARCHAR,
                                        thread_uuid                VARCHAR,

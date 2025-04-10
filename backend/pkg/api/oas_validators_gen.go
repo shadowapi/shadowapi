@@ -102,35 +102,6 @@ func (s *Message) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Source.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "source",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.Type.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "type",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if s.Recipients == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -327,23 +298,6 @@ func (s MessageQueryStorageType) Validate() error {
 	}
 }
 
-func (s MessageSource) Validate() error {
-	switch s {
-	case "email":
-		return nil
-	case "whatsapp":
-		return nil
-	case "telegram":
-		return nil
-	case "linkedin":
-		return nil
-	case "custom":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *MessageTelegramQueryOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -382,29 +336,6 @@ func (s *MessageTelegramQueryOK) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s MessageType) Validate() error {
-	switch s {
-	case "text":
-		return nil
-	case "media":
-		return nil
-	case "system":
-		return nil
-	case "notification":
-		return nil
-	case "attachment":
-		return nil
-	case "invite":
-		return nil
-	case "event":
-		return nil
-	case "call":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
 }
 
 func (s *MessageWhatsappQueryOK) Validate() error {

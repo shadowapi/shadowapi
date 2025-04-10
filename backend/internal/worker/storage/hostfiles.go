@@ -21,42 +21,59 @@ type HostfilesStorage struct {
 	log        *slog.Logger
 	rootFolder string
 	dbp        *pgxpool.Pool
+	pgdb       *query.Queries
 }
 
 func NewHostfilesStorage(log *slog.Logger, folder string, dbp *pgxpool.Pool) *HostfilesStorage {
 	return &HostfilesStorage{log: log, rootFolder: folder, dbp: dbp}
 }
 
-func (h *HostfilesStorage) SaveMessage(ctx context.Context, msg *api.Message) error {
-	h.log.Info("Saving message meta (hostfiles mode)", "message_uuid", msg.GetUUID())
+func (s *HostfilesStorage) SaveMessage(ctx context.Context, message *api.Message) error {
+	s.log.Info("Saving message meta (hostfiles mode)", "message_uuid", message.GetUUID())
 
 	// Insert into the message table (same as before).
-	u, err := uuid.FromString(msg.GetUUID())
+	u, err := uuid.FromString(message.UUID.Value)
 	if err != nil {
-		h.log.Error("invalid message UUID", "uuid", msg.GetUUID(), "error", err)
+		s.log.Error("invalid message UUID", "uuid", message.GetUUID(), "error", err)
 		return err
 	}
 	var arr [16]byte
 	copy(arr[:], u.Bytes())
 	uid := pgtype.UUID{Bytes: arr, Valid: true}
 
-	q := query.New(h.dbp)
-	_, err = q.CreateMessage(ctx, query.CreateMessageParams{
-		UUID:       uid,
-		Sender:     msg.GetSender(),
-		Recipients: msg.GetRecipients(),
-		Subject:    converter.OptionalText(msg.GetSubject()),
-		Body:       msg.GetBody(),
-		// ... etc ...
-	})
+	chatUUID, err := converter.ConvertOptStringToPgUUID(message.ChatUUID)
 	if err != nil {
-		h.log.Error("failed to insert message record (hostfiles)", "error", err)
+		s.log.Error("invalid chat UUID", "error", err)
+		return err
+	}
+	threadUuid, err := converter.ConvertOptStringToPgUUID(message.ThreadUUID)
+	if err != nil {
+		s.log.Error("invalid thread UUID", "error", err)
 		return err
 	}
 
-	for _, att := range msg.GetAttachments() {
-		if err := h.SaveAttachment(ctx, &att); err != nil {
-			h.log.Error("failed to save attachment (hostfiles)", "error", err)
+	_, err = s.pgdb.CreateMessage(ctx, query.CreateMessageParams{
+		UUID:       uid,
+		Sender:     message.GetSender(),
+		Recipients: message.GetRecipients(),
+		Subject:    converter.OptionalText(message.GetSubject()),
+		Body:       message.GetBody(),
+		Format:     message.Format,
+		Type:       message.Type,
+		ChatUuid:   chatUUID,
+		ThreadUuid: threadUuid,
+		BodyParsed: nil,
+		Reactions:  nil,
+	})
+
+	if err != nil {
+		s.log.Error("failed to insert message record (hostfiles)", "error", err)
+		return err
+	}
+
+	for _, att := range message.GetAttachments() {
+		if err := s.SaveAttachment(ctx, &att); err != nil {
+			s.log.Error("failed to save attachment (hostfiles)", "error", err)
 			return err
 		}
 	}
@@ -64,11 +81,11 @@ func (h *HostfilesStorage) SaveMessage(ctx context.Context, msg *api.Message) er
 }
 
 // SaveAttachment writes the file to disk and then inserts the metadata into "file".
-func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObject) error {
+func (s *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObject) error {
 	fileUUID := file.GetUUID().Or("")
 	u, err := uuid.FromString(fileUUID)
 	if err != nil {
-		h.log.Error("invalid file UUID", "uuid", fileUUID, "error", err)
+		s.log.Error("invalid file UUID", "uuid", fileUUID, "error", err)
 		return err
 	}
 
@@ -78,7 +95,7 @@ func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObj
 
 	// Subfolder approach: e.g. "ab" from the first 2 chars of the UUID, etc.
 	sub := fileUUID[:2]
-	dir := filepath.Join(h.rootFolder, sub)
+	dir := filepath.Join(s.rootFolder, sub)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create subdir: %w", err)
 	}
@@ -90,7 +107,7 @@ func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObj
 	}
 
 	filePath := filepath.Join(dir, finalName)
-	h.log.Info("Saving file locally", "filePath", filePath)
+	s.log.Info("Saving file locally", "filePath", filePath)
 
 	out, err := os.Create(filePath)
 	if err != nil {
@@ -106,7 +123,7 @@ func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObj
 		}
 	}
 
-	q := query.New(h.dbp)
+	q := query.New(s.dbp)
 	var arr [16]byte
 	copy(arr[:], u.Bytes())
 	uid := pgtype.UUID{Bytes: arr, Valid: true}
@@ -126,6 +143,6 @@ func (h *HostfilesStorage) SaveAttachment(ctx context.Context, file *api.FileObj
 		return err
 	}
 
-	h.log.Info("Attachment saved locally, meta in Postgres", "filePath", filePath)
+	s.log.Info("Attachment saved locally, meta in Postgres", "filePath", filePath)
 	return nil
 }

@@ -5,14 +5,12 @@ properties:
   uuid:
     type: string
     description: "Unique identifier for the message."
-  source:
-    type: string
-    enum: ["email", "whatsapp", "telegram", "linkedin", "custom"]
-    description: "Data source or platform the message originated from."
   type:
     type: string
-    enum: ["text", "media", "system", "notification", "attachment", "invite", "event", "call"]
-    description: "Specifies the type or classification of the message."
+    description: "Data source or platform the message originated from - email, whatsapp, telegram, linkedin, custom"
+  format:
+    type: string
+    description: "Specifies the type or classification of the message - text, media, system, notification, attachment, invite, event, call"
   chat_uuid:
     type: string
     description: "ID of the chat/conversation this message belongs to."
@@ -77,10 +75,8 @@ properties:
     description: "The date and time when the message was last updated."
 
 required:
-  - uuid
-  - source
+  - type
+  - format
   - sender
   - recipients
   - body
-  - created_at
-  - updated_at

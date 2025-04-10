@@ -108,7 +108,7 @@ func fetchEmails(datasourceUUID string, since time.Time) []api.Message {
 	// Replace with real IMAP / Gmail API / etc.
 	return []api.Message{
 		{
-			UUID:   "email-" + datasourceUUID + "-001",
+			UUID:   api.NewOptString("email-" + datasourceUUID + "-001"),
 			Sender: "test-sender@example.com",
 			Body:   `{"first":"Tester","last":"Email"}`,
 		},

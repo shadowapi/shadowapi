@@ -5596,18 +5596,18 @@ func (s *Message) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Message) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("uuid")
-		e.Str(s.UUID)
-	}
-	{
-		e.FieldStart("source")
-		s.Source.Encode(e)
-	}
-	{
-		if s.Type.Set {
-			e.FieldStart("type")
-			s.Type.Encode(e)
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
 		}
+	}
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
+	}
+	{
+		e.FieldStart("format")
+		e.Str(s.Format)
 	}
 	{
 		if s.ChatUUID.Set {
@@ -5702,19 +5702,23 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("created_at")
-		json.EncodeDateTime(e, s.CreatedAt)
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
 	}
 	{
-		e.FieldStart("updated_at")
-		json.EncodeDateTime(e, s.UpdatedAt)
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
 	}
 }
 
 var jsonFieldsNameOfMessage = [20]string{
 	0:  "uuid",
-	1:  "source",
-	2:  "type",
+	1:  "type",
+	2:  "format",
 	3:  "chat_uuid",
 	4:  "thread_uuid",
 	5:  "sender",
@@ -5744,36 +5748,38 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "uuid":
-			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.UUID = string(v)
-				if err != nil {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
-		case "source":
+		case "type":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				if err := s.Source.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"source\"")
-			}
-		case "type":
-			if err := func() error {
-				s.Type.Reset()
-				if err := s.Type.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "format":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Format = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"format\"")
 			}
 		case "chat_uuid":
 			if err := func() error {
@@ -5947,11 +5953,9 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"meta\"")
 			}
 		case "created_at":
-			requiredBitSet[2] |= 1 << 2
 			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.CreatedAt = v
-				if err != nil {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
 					return err
 				}
 				return nil
@@ -5959,11 +5963,9 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_at\"")
 			}
 		case "updated_at":
-			requiredBitSet[2] |= 1 << 3
 			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.UpdatedAt = v
-				if err != nil {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
 					return err
 				}
 				return nil
@@ -5980,9 +5982,9 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [3]uint8{
-		0b01100011,
+		0b01100110,
 		0b00000001,
-		0b00001100,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -7084,52 +7086,6 @@ func (s *MessageReactions) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes MessageSource as json.
-func (s MessageSource) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes MessageSource from json.
-func (s *MessageSource) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MessageSource to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch MessageSource(v) {
-	case MessageSourceEmail:
-		*s = MessageSourceEmail
-	case MessageSourceWhatsapp:
-		*s = MessageSourceWhatsapp
-	case MessageSourceTelegram:
-		*s = MessageSourceTelegram
-	case MessageSourceLinkedin:
-		*s = MessageSourceLinkedin
-	case MessageSourceCustom:
-		*s = MessageSourceCustom
-	default:
-		*s = MessageSource(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s MessageSource) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MessageSource) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *MessageTelegramQueryOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -7232,58 +7188,6 @@ func (s *MessageTelegramQueryOK) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MessageTelegramQueryOK) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes MessageType as json.
-func (s MessageType) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes MessageType from json.
-func (s *MessageType) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode MessageType to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch MessageType(v) {
-	case MessageTypeText:
-		*s = MessageTypeText
-	case MessageTypeMedia:
-		*s = MessageTypeMedia
-	case MessageTypeSystem:
-		*s = MessageTypeSystem
-	case MessageTypeNotification:
-		*s = MessageTypeNotification
-	case MessageTypeAttachment:
-		*s = MessageTypeAttachment
-	case MessageTypeInvite:
-		*s = MessageTypeInvite
-	case MessageTypeEvent:
-		*s = MessageTypeEvent
-	case MessageTypeCall:
-		*s = MessageTypeCall
-	default:
-		*s = MessageType(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s MessageType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *MessageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9056,39 +8960,6 @@ func (s OptMessageReactions) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMessageReactions) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes MessageType as json.
-func (o OptMessageType) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes MessageType from json.
-func (o *OptMessageType) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptMessageType to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptMessageType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptMessageType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

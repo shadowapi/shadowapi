@@ -2675,11 +2675,12 @@ func (s *GenerateDownloadLinkResponse) SetURL(val OptString) {
 // Ref: #
 type Message struct {
 	// Unique identifier for the message.
-	UUID string `json:"uuid"`
-	// Data source or platform the message originated from.
-	Source MessageSource `json:"source"`
-	// Specifies the type or classification of the message.
-	Type OptMessageType `json:"type"`
+	UUID OptString `json:"uuid"`
+	// Data source or platform the message originated from - email, whatsapp, telegram, linkedin, custom.
+	Type string `json:"type"`
+	// Specifies the type or classification of the message - text, media, system, notification,
+	// attachment, invite, event, call.
+	Format string `json:"format"`
 	// ID of the chat/conversation this message belongs to.
 	ChatUUID OptString `json:"chat_uuid"`
 	// ID of a sub-thread if this message is part of a threaded conversation.
@@ -2710,24 +2711,24 @@ type Message struct {
 	// Additional metadata relevant to the message.
 	Meta OptMessageMeta `json:"meta"`
 	// The date and time when the object was created.
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt OptDateTime `json:"created_at"`
 	// The date and time when the message was last updated.
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *Message) GetUUID() string {
+func (s *Message) GetUUID() OptString {
 	return s.UUID
 }
 
-// GetSource returns the value of Source.
-func (s *Message) GetSource() MessageSource {
-	return s.Source
+// GetType returns the value of Type.
+func (s *Message) GetType() string {
+	return s.Type
 }
 
-// GetType returns the value of Type.
-func (s *Message) GetType() OptMessageType {
-	return s.Type
+// GetFormat returns the value of Format.
+func (s *Message) GetFormat() string {
+	return s.Format
 }
 
 // GetChatUUID returns the value of ChatUUID.
@@ -2806,28 +2807,28 @@ func (s *Message) GetMeta() OptMessageMeta {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Message) GetCreatedAt() time.Time {
+func (s *Message) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *Message) GetUpdatedAt() time.Time {
+func (s *Message) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
 // SetUUID sets the value of UUID.
-func (s *Message) SetUUID(val string) {
+func (s *Message) SetUUID(val OptString) {
 	s.UUID = val
 }
 
-// SetSource sets the value of Source.
-func (s *Message) SetSource(val MessageSource) {
-	s.Source = val
+// SetType sets the value of Type.
+func (s *Message) SetType(val string) {
+	s.Type = val
 }
 
-// SetType sets the value of Type.
-func (s *Message) SetType(val OptMessageType) {
-	s.Type = val
+// SetFormat sets the value of Format.
+func (s *Message) SetFormat(val string) {
+	s.Format = val
 }
 
 // SetChatUUID sets the value of ChatUUID.
@@ -2906,12 +2907,12 @@ func (s *Message) SetMeta(val OptMessageMeta) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Message) SetCreatedAt(val time.Time) {
+func (s *Message) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *Message) SetUpdatedAt(val time.Time) {
+func (s *Message) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -3359,69 +3360,6 @@ func (s *MessageReactions) init() MessageReactions {
 	return m
 }
 
-// Data source or platform the message originated from.
-type MessageSource string
-
-const (
-	MessageSourceEmail    MessageSource = "email"
-	MessageSourceWhatsapp MessageSource = "whatsapp"
-	MessageSourceTelegram MessageSource = "telegram"
-	MessageSourceLinkedin MessageSource = "linkedin"
-	MessageSourceCustom   MessageSource = "custom"
-)
-
-// AllValues returns all MessageSource values.
-func (MessageSource) AllValues() []MessageSource {
-	return []MessageSource{
-		MessageSourceEmail,
-		MessageSourceWhatsapp,
-		MessageSourceTelegram,
-		MessageSourceLinkedin,
-		MessageSourceCustom,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s MessageSource) MarshalText() ([]byte, error) {
-	switch s {
-	case MessageSourceEmail:
-		return []byte(s), nil
-	case MessageSourceWhatsapp:
-		return []byte(s), nil
-	case MessageSourceTelegram:
-		return []byte(s), nil
-	case MessageSourceLinkedin:
-		return []byte(s), nil
-	case MessageSourceCustom:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *MessageSource) UnmarshalText(data []byte) error {
-	switch MessageSource(data) {
-	case MessageSourceEmail:
-		*s = MessageSourceEmail
-		return nil
-	case MessageSourceWhatsapp:
-		*s = MessageSourceWhatsapp
-		return nil
-	case MessageSourceTelegram:
-		*s = MessageSourceTelegram
-		return nil
-	case MessageSourceLinkedin:
-		*s = MessageSourceLinkedin
-		return nil
-	case MessageSourceCustom:
-		*s = MessageSourceCustom
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 type MessageTelegramQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -3435,90 +3373,6 @@ func (s *MessageTelegramQueryOK) GetMessages() []Message {
 // SetMessages sets the value of Messages.
 func (s *MessageTelegramQueryOK) SetMessages(val []Message) {
 	s.Messages = val
-}
-
-// Specifies the type or classification of the message.
-type MessageType string
-
-const (
-	MessageTypeText         MessageType = "text"
-	MessageTypeMedia        MessageType = "media"
-	MessageTypeSystem       MessageType = "system"
-	MessageTypeNotification MessageType = "notification"
-	MessageTypeAttachment   MessageType = "attachment"
-	MessageTypeInvite       MessageType = "invite"
-	MessageTypeEvent        MessageType = "event"
-	MessageTypeCall         MessageType = "call"
-)
-
-// AllValues returns all MessageType values.
-func (MessageType) AllValues() []MessageType {
-	return []MessageType{
-		MessageTypeText,
-		MessageTypeMedia,
-		MessageTypeSystem,
-		MessageTypeNotification,
-		MessageTypeAttachment,
-		MessageTypeInvite,
-		MessageTypeEvent,
-		MessageTypeCall,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s MessageType) MarshalText() ([]byte, error) {
-	switch s {
-	case MessageTypeText:
-		return []byte(s), nil
-	case MessageTypeMedia:
-		return []byte(s), nil
-	case MessageTypeSystem:
-		return []byte(s), nil
-	case MessageTypeNotification:
-		return []byte(s), nil
-	case MessageTypeAttachment:
-		return []byte(s), nil
-	case MessageTypeInvite:
-		return []byte(s), nil
-	case MessageTypeEvent:
-		return []byte(s), nil
-	case MessageTypeCall:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *MessageType) UnmarshalText(data []byte) error {
-	switch MessageType(data) {
-	case MessageTypeText:
-		*s = MessageTypeText
-		return nil
-	case MessageTypeMedia:
-		*s = MessageTypeMedia
-		return nil
-	case MessageTypeSystem:
-		*s = MessageTypeSystem
-		return nil
-	case MessageTypeNotification:
-		*s = MessageTypeNotification
-		return nil
-	case MessageTypeAttachment:
-		*s = MessageTypeAttachment
-		return nil
-	case MessageTypeInvite:
-		*s = MessageTypeInvite
-		return nil
-	case MessageTypeEvent:
-		*s = MessageTypeEvent
-		return nil
-	case MessageTypeCall:
-		*s = MessageTypeCall
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 type MessageWhatsappQueryOK struct {
@@ -4770,52 +4624,6 @@ func (o OptMessageReactions) Get() (v MessageReactions, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageReactions) Or(d MessageReactions) MessageReactions {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptMessageType returns new OptMessageType with value set to v.
-func NewOptMessageType(v MessageType) OptMessageType {
-	return OptMessageType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptMessageType is optional MessageType.
-type OptMessageType struct {
-	Value MessageType
-	Set   bool
-}
-
-// IsSet returns true if OptMessageType was set.
-func (o OptMessageType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptMessageType) Reset() {
-	var v MessageType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptMessageType) SetTo(v MessageType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptMessageType) Get() (v MessageType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptMessageType) Or(d MessageType) MessageType {
 	if v, ok := o.Get(); ok {
 		return v
 	}

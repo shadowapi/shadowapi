@@ -39,7 +39,7 @@ func (s *S3Storage) SaveMessage(ctx context.Context, message *api.Message) error
 	}
 	s.log.Info("Saving message to S3 (metadata in Postgres)", "message_uuid", message.GetUUID())
 
-	u, err := uuid.FromString(message.GetUUID())
+	u, err := uuid.FromString(message.UUID.Value)
 	if err != nil {
 		s.log.Error("invalid message UUID", "error", err)
 		return err
@@ -48,16 +48,27 @@ func (s *S3Storage) SaveMessage(ctx context.Context, message *api.Message) error
 	copy(arr[:], u.Bytes())
 	uid := pgtype.UUID{Bytes: arr, Valid: true}
 
+	chatUUID, err := converter.ConvertOptStringToPgUUID(message.ChatUUID)
+	if err != nil {
+		s.log.Error("invalid chat UUID", "error", err)
+		return err
+	}
+	threadUuid, err := converter.ConvertOptStringToPgUUID(message.ThreadUUID)
+	if err != nil {
+		s.log.Error("invalid thread UUID", "error", err)
+		return err
+	}
+
 	_, err = s.pgdb.CreateMessage(ctx, query.CreateMessageParams{
 		UUID:       uid,
 		Sender:     message.GetSender(),
 		Recipients: message.GetRecipients(),
 		Subject:    converter.OptionalText(message.GetSubject()),
 		Body:       message.GetBody(),
-		Source:     nil,
-		Type:       nil,
-		ChatUuid:   nil,
-		ThreadUuid: nil,
+		Format:     message.Format,
+		Type:       message.Type,
+		ChatUuid:   chatUUID,
+		ThreadUuid: threadUuid,
 		BodyParsed: nil,
 		Reactions:  nil,
 	})
