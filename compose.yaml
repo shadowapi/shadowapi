@@ -73,6 +73,21 @@ services:
       - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`)&&PathPrefix(`/api/`)||PathPrefix(`/assets/`)
       - traefik.http.routers.shadowapi-api.entrypoints=${TRAEFIK_ENTRYPOINT}
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
+
+  backend-loader:
+    build:
+      context: .
+      dockerfile: devops/backend-loader.Dockerfile
+    container_name: sa-backend-loader
+    environment:
+      - SA_HOST=0.0.0.0
+      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
+      - SA_LOG_LEVEL=DEBUG
+    networks:
+      - shadowapi
+    volumes:
+      - ./backend:/app
+
   kratos:
     container_name: sa-kratos
     restart: always

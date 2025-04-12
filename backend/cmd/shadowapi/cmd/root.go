@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
+	"github.com/shadowapi/shadowapi/backend/internal/loader"
 	"github.com/shadowapi/shadowapi/backend/internal/log"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
@@ -48,16 +50,32 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 	cmd.PersistentPreRun = func(cmd *cobra.Command, _ []string) {
 		injector = do.New()
 		do.ProvideNamedValue(injector, "defaultConfigPath", defaultConfigPath)
+
 		do.ProvideValue(injector, cmd.Context())
 		do.Provide(injector, config.Provide)
 		do.Provide(injector, log.Provide)
 		do.Provide(injector, db.Provide)
-		do.Provide(injector, queue.Provide)
-		do.Provide(injector, worker.Provide)
-		do.Provide(injector, auth.Provide)
-		do.Provide(injector, session.Provide)
-		do.Provide(injector, handler.Provide)
-		do.Provide(injector, server.Provide)
+		do.Provide(injector, loader.Provide)
+
+		fmt.Println("cmd.Name:", cmd.Name())
+		fmt.Println("cmd.Use:", cmd.Use)
+		fmt.Println("SA_SKIP_WORKER:", os.Getenv("SA_SKIP_WORKER"))
+
+		// Skip server when subcommand is loader
+		if cmd.Name() != "loader" {
+			do.Provide(injector, queue.Provide)
+			do.Provide(injector, auth.Provide)
+			do.Provide(injector, session.Provide)
+			do.Provide(injector, handler.Provide)
+			do.Provide(injector, server.Provide)
+		}
+
+		if os.Getenv("SA_SKIP_WORKER") == "true" {
+			do.Provide(injector, worker.ProvideLazy)
+		} else {
+			do.Provide(injector, worker.Provide)
+		}
+
 		if modify != nil {
 			modify(do.MustInvoke[*config.Config](injector))
 		}
