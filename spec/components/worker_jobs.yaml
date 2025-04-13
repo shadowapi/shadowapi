@@ -1,0 +1,32 @@
+# spec/components/worker_jobs.yaml
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    description: "Unique identifier for the worker job."
+  scheduler_uuid:
+    type: string
+    description: "UUID of the associated scheduler."
+  subject:
+    type: string
+    description: "NATS subject or job type."
+  status:
+    type: string
+    description: "Current status of the job (e.g. 'running', 'completed', 'failed', 'retry')."
+  data:
+    type: object
+    description: "Arbitrary JSON data about job details, logs, errors, etc."
+    additionalProperties: true
+  started_at:
+    type: string
+    format: date-time
+    description: "Timestamp when the job was started."
+  finished_at:
+    type: string
+    format: date-time
+    description: "Timestamp when the job finished (if it has)."
+required:
+  - scheduler_uuid
+  - subject
+  - status

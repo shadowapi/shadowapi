@@ -33,7 +33,7 @@ func QToDatasourceEmail(row query.GetDatasourcesRow) (*api.DatasourceEmail, erro
 	return &ds, nil
 }
 
-func QToDatasourceEmail2(row query.GetDatasourceRow) (*api.DatasourceEmail, error) {
+func QToDatasourceEmailRow(row query.GetDatasourceRow) (*api.DatasourceEmail, error) {
 	var ds api.DatasourceEmail
 	// Unmarshal the settings JSON into the DatasourceEmail fields.
 	if err := json.Unmarshal(row.Datasource.Settings, &ds); err != nil {
@@ -84,6 +84,30 @@ func QToDatasourceLinkedin(row query.GetDatasourcesRow) (*api.DatasourceLinkedin
 	return &ds, nil
 }
 
+func QToDatasourceLinkedinRow(row query.GetDatasourceRow) (*api.DatasourceLinkedin, error) {
+	var ds api.DatasourceLinkedin
+	// Unmarshal the settings JSON into the DatasourceLinkedin fields.
+	if err := json.Unmarshal(row.Datasource.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
+	if row.Datasource.UserUUID != nil {
+		ds.UserUUID = row.Datasource.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+	ds.Name = row.Datasource.Name
+	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
+	ds.Provider = row.Datasource.Provider
+	if row.Datasource.CreatedAt.Valid {
+		ds.CreatedAt = api.NewOptDateTime(row.Datasource.CreatedAt.Time)
+	}
+	if row.Datasource.UpdatedAt.Valid {
+		ds.UpdatedAt = api.NewOptDateTime(row.Datasource.UpdatedAt.Time)
+	}
+	return &ds, nil
+}
+
 // QToDatasourceTelegram converts a query datasource row into an API DatasourceTelegram.
 func QToDatasourceTelegram(row query.GetDatasourcesRow) (*api.DatasourceTelegram, error) {
 	var ds api.DatasourceTelegram
@@ -106,6 +130,29 @@ func QToDatasourceTelegram(row query.GetDatasourcesRow) (*api.DatasourceTelegram
 	}
 	if row.UpdatedAt.Valid {
 		ds.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
+	}
+	return &ds, nil
+}
+func QToDatasourceTelegramRow(row query.GetDatasourceRow) (*api.DatasourceTelegram, error) {
+	var ds api.DatasourceTelegram
+	// Unmarshal the settings JSON into the DatasourceTelegram fields.
+	if err := json.Unmarshal(row.Datasource.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
+	if row.Datasource.UserUUID != nil {
+		ds.UserUUID = row.Datasource.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+	ds.Name = row.Datasource.Name
+	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
+	ds.Provider = row.Datasource.Provider
+	if row.Datasource.CreatedAt.Valid {
+		ds.CreatedAt = api.NewOptDateTime(row.Datasource.CreatedAt.Time)
+	}
+	if row.Datasource.UpdatedAt.Valid {
+		ds.UpdatedAt = api.NewOptDateTime(row.Datasource.UpdatedAt.Time)
 	}
 	return &ds, nil
 }
@@ -132,6 +179,30 @@ func QToDatasourceWhatsapp(row query.GetDatasourcesRow) (*api.DatasourceWhatsapp
 	}
 	if row.UpdatedAt.Valid {
 		ds.UpdatedAt = api.NewOptDateTime(row.UpdatedAt.Time)
+	}
+	return &ds, nil
+}
+
+func QToDatasourceWhatsappRow(row query.GetDatasourceRow) (*api.DatasourceWhatsapp, error) {
+	var ds api.DatasourceWhatsapp
+	// Unmarshal the settings JSON into the DatasourceWhatsapp fields.
+	if err := json.Unmarshal(row.Datasource.Settings, &ds); err != nil {
+		return nil, err
+	}
+	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
+	if row.Datasource.UserUUID != nil {
+		ds.UserUUID = row.Datasource.UserUUID.String()
+	} else {
+		ds.UserUUID = ""
+	}
+	ds.Name = row.Datasource.Name
+	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
+	ds.Provider = row.Datasource.Provider
+	if row.Datasource.CreatedAt.Valid {
+		ds.CreatedAt = api.NewOptDateTime(row.Datasource.CreatedAt.Time)
+	}
+	if row.Datasource.UpdatedAt.Valid {
+		ds.UpdatedAt = api.NewOptDateTime(row.Datasource.UpdatedAt.Time)
 	}
 	return &ds, nil
 }

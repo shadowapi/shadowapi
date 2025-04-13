@@ -365,3 +365,13 @@ type User struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
+
+type WorkerJob struct {
+	JobID         pgtype.UUID        `json:"job_id"`
+	SchedulerUuid *uuid.UUID         `json:"scheduler_uuid"`
+	Subject       string             `json:"subject"`
+	Status        string             `json:"status"`
+	Data          []byte             `json:"data"`
+	StartedAt     pgtype.Timestamptz `json:"started_at"`
+	FinishedAt    pgtype.Timestamptz `json:"finished_at"`
+}

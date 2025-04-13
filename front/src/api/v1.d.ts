@@ -833,6 +833,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/workerjobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve a list of worker jobs */
+        get: operations["worker-jobs-list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workerjobs/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve a specific worker job by uuid. */
+        get: operations["worker-jobs-get"];
+        put?: never;
+        post?: never;
+        /** @description Delete a worker job by uuid. */
+        delete: operations["worker-jobs-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -942,6 +977,7 @@ export interface components {
         };
         SyncPolicy: components["schemas"]["sync_policy"];
         User: components["schemas"]["user"];
+        WorkerJobs: components["schemas"]["worker_jobs"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -1612,6 +1648,30 @@ export interface components {
              * @description Timestamp of last update
              */
             readonly updated_at?: string;
+        };
+        worker_jobs: {
+            /** @description Unique identifier for the worker job. */
+            uuid?: string;
+            /** @description UUID of the associated scheduler. */
+            scheduler_uuid: string;
+            /** @description NATS subject or job type. */
+            subject: string;
+            /** @description Current status of the job (e.g. 'running', 'completed', 'failed', 'retry'). */
+            status: string;
+            /** @description Arbitrary JSON data about job details, logs, errors, etc. */
+            data?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: date-time
+             * @description Timestamp when the job was started.
+             */
+            started_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the job finished (if it has).
+             */
+            finished_at?: string;
         };
     };
     responses: never;
@@ -4478,6 +4538,104 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description User deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "worker-jobs-list": {
+        parameters: {
+            query?: {
+                /** @description The number of records to skip for pagination. */
+                offset?: number;
+                /** @description The maximum number of records to return. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of worker jobs. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        jobs: components["schemas"]["worker_jobs"][];
+                    };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "worker-jobs-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the worker job. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker job details. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_jobs"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "worker-jobs-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the worker job. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker job deleted successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;

@@ -1,0 +1,40 @@
+# spec/paths/worker_jobs.yaml
+
+get:
+  description: Retrieve a list of worker jobs
+  operationId: worker-jobs-list
+  parameters:
+    - description: The number of records to skip for pagination.
+      in: query
+      name: offset
+      schema:
+        type: integer
+        format: int32
+    - description: The maximum number of records to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        format: int32
+  responses:
+    "200":
+      description: A list of worker jobs.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              jobs:
+                type: array
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/WorkerJobs"
+            required:
+              - jobs
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - worker-jobs

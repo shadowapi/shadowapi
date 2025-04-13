@@ -518,6 +518,24 @@ type Handler interface {
 	//
 	// POST /storage/upload
 	UploadFile(ctx context.Context, req *UploadFileRequest) (*UploadFileResponse, error)
+	// WorkerJobsDelete implements worker-jobs-delete operation.
+	//
+	// Delete a worker job by uuid.
+	//
+	// DELETE /workerjobs/{uuid}
+	WorkerJobsDelete(ctx context.Context, params WorkerJobsDeleteParams) error
+	// WorkerJobsGet implements worker-jobs-get operation.
+	//
+	// Retrieve a specific worker job by uuid.
+	//
+	// GET /workerjobs/{uuid}
+	WorkerJobsGet(ctx context.Context, params WorkerJobsGetParams) (*WorkerJobs, error)
+	// WorkerJobsList implements worker-jobs-list operation.
+	//
+	// Retrieve a list of worker jobs.
+	//
+	// GET /workerjobs
+	WorkerJobsList(ctx context.Context, params WorkerJobsListParams) (*WorkerJobsListOK, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

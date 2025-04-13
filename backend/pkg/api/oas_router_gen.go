@@ -1394,6 +1394,60 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'w': // Prefix: "workerjobs"
+				origElem := elem
+				if l := len("workerjobs"); len(elem) >= l && elem[0:l] == "workerjobs" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch r.Method {
+					case "GET":
+						s.handleWorkerJobsListRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "DELETE":
+							s.handleWorkerJobsDeleteRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						case "GET":
+							s.handleWorkerJobsGetRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "DELETE,GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			}
 
 			elem = origElem
@@ -3135,6 +3189,70 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = "Update user details"
 							r.operationID = "updateUser"
 							r.pathPattern = "/user/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
+			case 'w': // Prefix: "workerjobs"
+				origElem := elem
+				if l := len("workerjobs"); len(elem) >= l && elem[0:l] == "workerjobs" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					switch method {
+					case "GET":
+						r.name = WorkerJobsListOperation
+						r.summary = ""
+						r.operationID = "worker-jobs-list"
+						r.pathPattern = "/workerjobs"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+				switch elem[0] {
+				case '/': // Prefix: "/"
+					origElem := elem
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "DELETE":
+							r.name = WorkerJobsDeleteOperation
+							r.summary = ""
+							r.operationID = "worker-jobs-delete"
+							r.pathPattern = "/workerjobs/{uuid}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "GET":
+							r.name = WorkerJobsGetOperation
+							r.summary = ""
+							r.operationID = "worker-jobs-get"
+							r.pathPattern = "/workerjobs/{uuid}"
 							r.args = args
 							r.count = 1
 							return r, true

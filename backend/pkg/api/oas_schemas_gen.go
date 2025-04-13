@@ -5418,6 +5418,52 @@ func (o OptUserMeta) Or(d UserMeta) UserMeta {
 	return d
 }
 
+// NewOptWorkerJobsData returns new OptWorkerJobsData with value set to v.
+func NewOptWorkerJobsData(v WorkerJobsData) OptWorkerJobsData {
+	return OptWorkerJobsData{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkerJobsData is optional WorkerJobsData.
+type OptWorkerJobsData struct {
+	Value WorkerJobsData
+	Set   bool
+}
+
+// IsSet returns true if OptWorkerJobsData was set.
+func (o OptWorkerJobsData) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkerJobsData) Reset() {
+	var v WorkerJobsData
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkerJobsData) SetTo(v WorkerJobsData) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkerJobsData) Get() (v WorkerJobsData, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkerJobsData) Or(d WorkerJobsData) WorkerJobsData {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #
 type Pipeline struct {
 	// Unique identifier.
@@ -7161,4 +7207,121 @@ func (s *UserMeta) init() UserMeta {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #
+type WorkerJobs struct {
+	// Unique identifier for the worker job.
+	UUID OptString `json:"uuid"`
+	// UUID of the associated scheduler.
+	SchedulerUUID string `json:"scheduler_uuid"`
+	// NATS subject or job type.
+	Subject string `json:"subject"`
+	// Current status of the job (e.g. 'running', 'completed', 'failed', 'retry').
+	Status string `json:"status"`
+	// Arbitrary JSON data about job details, logs, errors, etc.
+	Data OptWorkerJobsData `json:"data"`
+	// Timestamp when the job was started.
+	StartedAt OptDateTime `json:"started_at"`
+	// Timestamp when the job finished (if it has).
+	FinishedAt OptDateTime `json:"finished_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *WorkerJobs) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetSchedulerUUID returns the value of SchedulerUUID.
+func (s *WorkerJobs) GetSchedulerUUID() string {
+	return s.SchedulerUUID
+}
+
+// GetSubject returns the value of Subject.
+func (s *WorkerJobs) GetSubject() string {
+	return s.Subject
+}
+
+// GetStatus returns the value of Status.
+func (s *WorkerJobs) GetStatus() string {
+	return s.Status
+}
+
+// GetData returns the value of Data.
+func (s *WorkerJobs) GetData() OptWorkerJobsData {
+	return s.Data
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *WorkerJobs) GetStartedAt() OptDateTime {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *WorkerJobs) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *WorkerJobs) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetSchedulerUUID sets the value of SchedulerUUID.
+func (s *WorkerJobs) SetSchedulerUUID(val string) {
+	s.SchedulerUUID = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *WorkerJobs) SetSubject(val string) {
+	s.Subject = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WorkerJobs) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetData sets the value of Data.
+func (s *WorkerJobs) SetData(val OptWorkerJobsData) {
+	s.Data = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *WorkerJobs) SetStartedAt(val OptDateTime) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *WorkerJobs) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
+}
+
+// Arbitrary JSON data about job details, logs, errors, etc.
+type WorkerJobsData map[string]jx.Raw
+
+func (s *WorkerJobsData) init() WorkerJobsData {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// WorkerJobsDeleteOK is response for WorkerJobsDelete operation.
+type WorkerJobsDeleteOK struct{}
+
+type WorkerJobsListOK struct {
+	Jobs []WorkerJobs `json:"jobs"`
+}
+
+// GetJobs returns the value of Jobs.
+func (s *WorkerJobsListOK) GetJobs() []WorkerJobs {
+	return s.Jobs
+}
+
+// SetJobs sets the value of Jobs.
+func (s *WorkerJobsListOK) SetJobs(val []WorkerJobs) {
+	s.Jobs = val
 }

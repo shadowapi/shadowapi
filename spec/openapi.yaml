@@ -71,6 +71,8 @@ components:
       $ref: "components/sync_policy.yaml"
     User:
       $ref: "components/user.yaml"
+    WorkerJobs:
+      $ref: "components/worker_jobs.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Ory Kratos sessions)
@@ -176,7 +178,10 @@ paths:
     $ref: "paths/user.yaml"
   /user/{uuid}:
     $ref: "paths/user_uuid.yaml"
-
+  /workerjobs:
+    $ref: "paths/worker_jobs.yaml"
+  /workerjobs/{uuid}:
+    $ref: "paths/worker_jobs_uuid.yaml"
 
 servers:
   - description: Local development server

@@ -40,12 +40,12 @@ WITH filtered_datasource AS (
     SELECT d.*
     FROM datasource d
     WHERE
-        (@uuid::uuid IS NULL OR d.uuid = @uuid)
-      AND (@user_uuid::uuid IS NULL OR d.user_uuid = @user_uuid)
-      AND (@type::text IS NULL OR d."type" = @type)
-      AND (@provider::text IS NULL OR d.provider ILIKE @provider)
-      AND (@is_enabled::bool IS NULL OR d.is_enabled = @is_enabled)
-      AND (@name::text IS NULL OR d.name ILIKE @name)
+        (NULLIF(sqlc.arg('uuid'), '') IS NULL OR sp.uuid = sqlc.arg('uuid')::uuid) AND
+        (NULLIF(sqlc.arg('user_uuid'), '') IS NULL OR sp.uuid = sqlc.arg('user_uuid')::uuid) AND
+        (NULLIF(sqlc.arg('name'), '') IS NULL OR sp."type" = sqlc.arg('name')) AND
+        (NULLIF(sqlc.arg('type'), '') IS NULL OR sp."type" = sqlc.arg('type')) AND
+        (NULLIF(sqlc.arg('provider'), '') IS NULL OR sp."type" = sqlc.arg('provider')) AND
+        (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR sp.sync_all = (sqlc.arg('sync_all')::int)::boolean)
 )
 SELECT
     *,

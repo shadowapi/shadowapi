@@ -68,19 +68,12 @@ func (h *Handler) DatasourceTelegramGet(ctx context.Context, params api.Datasour
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	dses, err := query.New(h.dbp).GetDatasources(ctx, query.GetDatasourcesParams{
-		UUID:   pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
-		Limit:  1,
-		Offset: 0,
-	})
+	dse, err := query.New(h.dbp).GetDatasource(ctx, pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true})
 	if err != nil {
 		log.Error("failed to get datasource", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
 	}
-	if len(dses) == 0 {
-		return nil, ErrWithCode(http.StatusNotFound, E("datasource not found"))
-	}
-	return QToDatasourceTelegram(dses[0])
+	return QToDatasourceTelegramRow(dse)
 }
 
 func (h *Handler) DatasourceTelegramUpdate(ctx context.Context, req *api.DatasourceTelegram, params api.DatasourceTelegramUpdateParams) (*api.DatasourceTelegram, error) {
@@ -91,18 +84,12 @@ func (h *Handler) DatasourceTelegramUpdate(ctx context.Context, req *api.Datasou
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceTelegram, error) {
-		dses, err := query.New(tx).GetDatasources(ctx, query.GetDatasourcesParams{
-			UUID:  pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
-			Limit: 1,
-		})
+		dse, err := query.New(tx).GetDatasource(ctx, pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true})
 		if err != nil {
 			log.Error("failed to get datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
 		}
-		if len(dses) == 0 {
-			return nil, ErrWithCode(http.StatusNotFound, E("datasource not found"))
-		}
-		isEnabled := req.IsEnabled.Or(dses[0].IsEnabled)
+		isEnabled := req.IsEnabled.Or(dse.Datasource.IsEnabled)
 		newSettings, err := json.Marshal(req)
 		if err != nil {
 			log.Error("failed to marshal settings", "error", err)
@@ -121,6 +108,7 @@ func (h *Handler) DatasourceTelegramUpdate(ctx context.Context, req *api.Datasou
 			IsEnabled: isEnabled,
 			Provider:  string(req.Provider),
 			Settings:  newSettings,
+			Type:      "telegram",
 		}); err != nil {
 			log.Error("failed to update datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update datasource"))

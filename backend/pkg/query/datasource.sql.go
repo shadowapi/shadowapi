@@ -113,12 +113,12 @@ WITH filtered_datasource AS (
     SELECT d.uuid, d.user_uuid, d.name, d.type, d.is_enabled, d.provider, d.settings, d.created_at, d.updated_at
     FROM datasource d
     WHERE
-        ($5::uuid IS NULL OR d.uuid = $5)
-      AND ($6::uuid IS NULL OR d.user_uuid = $6)
-      AND ($7::text IS NULL OR d."type" = $7)
-      AND ($8::text IS NULL OR d.provider ILIKE $8)
-      AND ($9::bool IS NULL OR d.is_enabled = $9)
-      AND ($10::text IS NULL OR d.name ILIKE $10)
+        (NULLIF($5, '') IS NULL OR sp.uuid = $5::uuid) AND
+        (NULLIF($6, '') IS NULL OR sp.uuid = $6::uuid) AND
+        (NULLIF($7, '') IS NULL OR sp."type" = $7) AND
+        (NULLIF($8, '') IS NULL OR sp."type" = $8) AND
+        (NULLIF($9, '') IS NULL OR sp."type" = $9) AND
+        (NULLIF($10::int, -1) IS NULL OR sp.sync_all = ($11::int)::boolean)
 )
 SELECT
     uuid, user_uuid, name, type, is_enabled, provider, settings, created_at, updated_at,
@@ -141,12 +141,13 @@ type GetDatasourcesParams struct {
 	OrderDirection string      `json:"order_direction"`
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
-	UUID           pgtype.UUID `json:"uuid"`
-	UserUUID       pgtype.UUID `json:"user_uuid"`
-	Type           string      `json:"type"`
-	Provider       string      `json:"provider"`
-	IsEnabled      bool        `json:"is_enabled"`
-	Name           string      `json:"name"`
+	UUID           interface{} `json:"uuid"`
+	UserUUID       interface{} `json:"user_uuid"`
+	Name           interface{} `json:"name"`
+	Type           interface{} `json:"type"`
+	Provider       interface{} `json:"provider"`
+	IsEnabled      int32       `json:"is_enabled"`
+	SyncAll        int32       `json:"sync_all"`
 }
 
 type GetDatasourcesRow struct {
@@ -170,10 +171,11 @@ func (q *Queries) GetDatasources(ctx context.Context, arg GetDatasourcesParams) 
 		arg.Limit,
 		arg.UUID,
 		arg.UserUUID,
+		arg.Name,
 		arg.Type,
 		arg.Provider,
 		arg.IsEnabled,
-		arg.Name,
+		arg.SyncAll,
 	)
 	if err != nil {
 		return nil, err

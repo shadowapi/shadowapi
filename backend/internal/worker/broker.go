@@ -4,28 +4,31 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
-
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/metrics"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/jobs"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/pipelines"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/scheduler"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 )
 
+// Broker routes messages to worker jobs.
 type Broker struct {
-	ctx    context.Context
-	cfg    *config.Config
-	log    *slog.Logger
-	dbp    *pgxpool.Pool
-	queue  *queue.Queue
-	cancel func()
+	ctx     context.Context
+	cfg     *config.Config
+	log     *slog.Logger
+	dbp     *pgxpool.Pool
+	queue   *queue.Queue
+	monitor *monitor.WorkerMonitor
+	cancel  func()
 }
 
 // ProvideLazy creates a new Broker without starting it.
@@ -38,14 +41,17 @@ func ProvideLazy(i do.Injector) (*Broker, error) {
 	log := do.MustInvoke[*slog.Logger](i).With("service", "broker")
 	q := do.MustInvoke[*queue.Queue](i)
 
+	monitoring := monitor.NewWorkerMonitor(log, dbp, false) // phase2 = false for now
+
 	log.Info("Creating broker in lazy mode (worker disabled)")
 
 	b := &Broker{
-		ctx:   ctx,
-		cfg:   cfg,
-		dbp:   dbp,
-		log:   log,
-		queue: q,
+		ctx:     ctx,
+		cfg:     cfg,
+		dbp:     dbp,
+		log:     log,
+		queue:   q,
+		monitor: monitoring,
 	}
 
 	// Register jobs without starting the broker
@@ -142,19 +148,28 @@ func (b *Broker) Shutdown(ctx context.Context) error {
 func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 	return func(msg queue.Msg) {
 
-		// TODO @reactima redo metrics, below is just a plug
 		start := time.Now()
 
-		b.log.Debug("Job received", "subject", msg.Subject())
+		// Extract a jobID from the message headers, fallback if not present
+		jobID := msgHeaderToString(msg, "X-Job-ID")
+		if jobID == "" {
+			// e.g. fallback to a unique ID or do an error
+			// For demonstration, let's do a random fallback
+			jobID = "job-" + randomShortID()
+		}
+
+		b.monitor.RecordJobStart(ctx, jobID, msg.Subject())
+
 		job, err := registry.CreateJob(msg.Subject(), msg.Data())
 		if err != nil {
 			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
-				b.log.Debug("Job not ready, requeuing", "delay", notReadyErr.Delay)
 				_ = msg.NakWithDelay(notReadyErr.Delay)
+				b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "not_ready", notReadyErr.Error())
 				return
 			}
 			b.log.Error("Failed to create job", "error", err)
 			_ = msg.Term()
+			b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "failed", err.Error())
 			return
 		}
 		if err := job.Execute(ctx); err != nil {
@@ -162,19 +177,32 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 			metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
 
 			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
-				b.log.Debug("Job not ready upon execution, requeuing", "delay", notReadyErr.Delay)
 				_ = msg.NakWithDelay(notReadyErr.Delay)
+				b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "retry", notReadyErr.Error())
 				return
 			}
 			b.log.Error("Job execution failed", "error", err)
 			_ = msg.Term()
+			b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "failed", err.Error())
 			return
 		}
 		duration := time.Since(start).Seconds()
 		metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
+		_ = msg.Ack()
 
-		if err := msg.Ack(); err != nil {
-			b.log.Error("Failed to acknowledge message", "error", err)
-		}
+		b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "completed", "")
 	}
+}
+
+// msgHeaderToString attempts to extract the header value using the HeaderGetter interface.
+func msgHeaderToString(m queue.Msg, key string) string {
+	if h, ok := m.(queue.HeaderGetter); ok {
+		return h.GetHeader(key)
+	}
+	return ""
+}
+
+// randomShortID returns a short identifier based on the current time.
+func randomShortID() string {
+	return strings.ReplaceAll(time.Now().Format("150405.000"), ".", "")
 }

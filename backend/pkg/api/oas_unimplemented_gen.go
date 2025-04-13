@@ -778,6 +778,33 @@ func (UnimplementedHandler) UploadFile(ctx context.Context, req *UploadFileReque
 	return r, ht.ErrNotImplemented
 }
 
+// WorkerJobsDelete implements worker-jobs-delete operation.
+//
+// Delete a worker job by uuid.
+//
+// DELETE /workerjobs/{uuid}
+func (UnimplementedHandler) WorkerJobsDelete(ctx context.Context, params WorkerJobsDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// WorkerJobsGet implements worker-jobs-get operation.
+//
+// Retrieve a specific worker job by uuid.
+//
+// GET /workerjobs/{uuid}
+func (UnimplementedHandler) WorkerJobsGet(ctx context.Context, params WorkerJobsGetParams) (r *WorkerJobs, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// WorkerJobsList implements worker-jobs-list operation.
+//
+// Retrieve a list of worker jobs.
+//
+// GET /workerjobs
+func (UnimplementedHandler) WorkerJobsList(ctx context.Context, params WorkerJobsListParams) (r *WorkerJobsListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // NewError creates *ErrorStatusCode from error returned by handler.
 //
 // Used for common default response.

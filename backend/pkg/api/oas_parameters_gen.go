@@ -5011,3 +5011,252 @@ func decodeUpdateUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 	}
 	return params, nil
 }
+
+// WorkerJobsDeleteParams is parameters of worker-jobs-delete operation.
+type WorkerJobsDeleteParams struct {
+	// Unique identifier of the worker job.
+	UUID string
+}
+
+func unpackWorkerJobsDeleteParams(packed middleware.Parameters) (params WorkerJobsDeleteParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeWorkerJobsDeleteParams(args [1]string, argsEscaped bool, r *http.Request) (params WorkerJobsDeleteParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// WorkerJobsGetParams is parameters of worker-jobs-get operation.
+type WorkerJobsGetParams struct {
+	// Unique identifier of the worker job.
+	UUID string
+}
+
+func unpackWorkerJobsGetParams(packed middleware.Parameters) (params WorkerJobsGetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeWorkerJobsGetParams(args [1]string, argsEscaped bool, r *http.Request) (params WorkerJobsGetParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// WorkerJobsListParams is parameters of worker-jobs-list operation.
+type WorkerJobsListParams struct {
+	// The number of records to skip for pagination.
+	Offset OptInt32
+	// The maximum number of records to return.
+	Limit OptInt32
+}
+
+func unpackWorkerJobsListParams(packed middleware.Parameters) (params WorkerJobsListParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt32)
+		}
+	}
+	return params
+}
+
+func decodeWorkerJobsListParams(args [0]string, argsEscaped bool, r *http.Request) (params WorkerJobsListParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: offset.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}

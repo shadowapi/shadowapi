@@ -1,0 +1,49 @@
+# spec/paths/worker_jobs_uuid.yaml
+
+get:
+  description: Retrieve a specific worker job by uuid.
+  operationId: worker-jobs-get
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: "Unique identifier of the worker job."
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Worker job details.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkerJobs"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - worker-jobs
+
+delete:
+  description: Delete a worker job by uuid.
+  operationId: worker-jobs-delete
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: "Unique identifier of the worker job."
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Worker job deleted successfully.
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - worker-jobs

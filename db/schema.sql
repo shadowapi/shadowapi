@@ -334,3 +334,13 @@ CREATE TABLE "scheduler" (
 
                              CONSTRAINT fk_scheduler_pipeline FOREIGN KEY(pipeline_uuid) REFERENCES pipeline("uuid") ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS worker_jobs (
+                                           job_id             UUID PRIMARY KEY,
+                                           scheduler_uuid      UUID NOT NULL,
+                                           subject     VARCHAR NOT NULL,
+                                           status      VARCHAR NOT NULL,            -- e.g. "running", "completed", "failed", "retry"
+                                           data        JSONB DEFAULT '{}'::jsonb,-- used for error details, logs, or metadata
+                                           started_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                                           finished_at         TIMESTAMP WITH TIME ZONE
+);

@@ -37,9 +37,8 @@ export function DataSources() {
       key: item.uuid,
       name: item.name,
       type: item.type,
-      accountId: item.email,
-      state: item.is_enabled,
-      authFailed: !item.oauth2_client_id || (item.oauth2_client_id && !item.oauth2_token_uuid) ? true : false,
+      provider: item.provider,
+      state: item.is_enabled ? 'Enabled' : 'Disabled',
     }
   })
 
@@ -88,7 +87,7 @@ export function DataSources() {
         <TableView aria-label="Example table with dynamic content" overflowMode="wrap" maxWidth={1000}>
           <TableHeader>
             <Column key="name">Name</Column>
-            <Column key="accountId">Account ID</Column>
+            <Column key="provider">Provider</Column>
             <Column key="type" maxWidth={130}>
               Type
             </Column>
@@ -103,9 +102,11 @@ export function DataSources() {
             {(item) => (
               <Row>
                 <Cell>{item.name}</Cell>
-                <Cell>{item.accountId}</Cell>
+                <Cell>{item.provider}</Cell>
                 <Cell>{typeRender(item.type)}</Cell>
-                <Cell>{stateRedner(item)}</Cell>
+                <Cell>
+                  <Badge variant={item.state === 'Enabled' ? 'positive' : 'negative'}>{item.state}</Badge>
+                </Cell>
                 <Cell>
                   <ActionButton onPress={() => navigate('/datasources/' + item.key)}>
                     <Edit />

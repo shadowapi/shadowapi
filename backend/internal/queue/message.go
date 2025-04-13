@@ -1,6 +1,8 @@
 package queue
 
-import "time"
+import (
+	"time"
+)
 
 type Msg interface {
 	// Subject returns a subject on which a message was published/received.
