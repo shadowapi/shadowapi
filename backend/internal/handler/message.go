@@ -217,17 +217,18 @@ func qToApiMessage(r query.GetMessagesRow) (api.Message, error) {
 		}
 		msg.ForwardMeta.SetTo(api.MessageForwardMeta{"data": b})
 	}
-	if len(r.Meta) > 0 {
-		var meta map[string]interface{}
-		if err := json.Unmarshal(r.Meta, &meta); err != nil {
-			return msg, err
-		}
-		b, err := json.Marshal(meta)
-		if err != nil {
-			return msg, err
-		}
-		msg.Meta.SetTo(api.MessageMeta{"data": b})
-	}
+	// TODO @reactima
+	//if len(r.Meta) > 0 {
+	//	var meta map[string]interface{}
+	//	if err := json.Unmarshal(r.Meta, &meta); err != nil {
+	//		return msg, err
+	//	}
+	//	b, err := json.Marshal(meta)
+	//	if err != nil {
+	//		return msg, err
+	//	}
+	//	msg.Meta.SetTo(api.MessageMeta{"data": b})
+	//}
 	if r.CreatedAt.Valid {
 		msg.CreatedAt = api.NewOptDateTime(r.CreatedAt.Time)
 	} else {

@@ -32,6 +32,7 @@ INSERT INTO message (
     forward_from_message_uuid,
     forward_meta,
     meta,
+    external_message_id,
     created_at,
     updated_at
 ) VALUES (
@@ -53,9 +54,10 @@ INSERT INTO message (
              $16::uuid,
              $17,
              $18,
+    $19,
              NOW(),
              NOW()
-         ) RETURNING uuid, format, type, chat_uuid, thread_uuid, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at
+         ) RETURNING uuid, format, type, chat_uuid, thread_uuid, external_message_id, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at
 `
 
 type CreateMessageParams struct {
@@ -77,6 +79,7 @@ type CreateMessageParams struct {
 	ForwardFromMessageUuid pgtype.UUID `json:"forward_from_message_uuid"`
 	ForwardMeta            []byte      `json:"forward_meta"`
 	Meta                   []byte      `json:"meta"`
+	ExternalMessageID      pgtype.Text `json:"external_message_id"`
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
@@ -99,6 +102,7 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 		arg.ForwardFromMessageUuid,
 		arg.ForwardMeta,
 		arg.Meta,
+		arg.ExternalMessageID,
 	)
 	var i Message
 	err := row.Scan(
@@ -107,6 +111,7 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 		&i.Type,
 		&i.ChatUuid,
 		&i.ThreadUuid,
+		&i.ExternalMessageID,
 		&i.Sender,
 		&i.Recipients,
 		&i.Subject,
@@ -138,7 +143,7 @@ func (q *Queries) DeleteMessage(ctx context.Context, argUuid pgtype.UUID) error 
 
 const getMessage = `-- name: GetMessage :one
 SELECT
-    message.uuid, message.format, message.type, message.chat_uuid, message.thread_uuid, message.sender, message.recipients, message.subject, message.body, message.body_parsed, message.reactions, message.attachments, message.forward_from, message.reply_to_message_uuid, message.forward_from_chat_uuid, message.forward_from_message_uuid, message.forward_meta, message.meta, message.created_at, message.updated_at
+    message.uuid, message.format, message.type, message.chat_uuid, message.thread_uuid, message.external_message_id, message.sender, message.recipients, message.subject, message.body, message.body_parsed, message.reactions, message.attachments, message.forward_from, message.reply_to_message_uuid, message.forward_from_chat_uuid, message.forward_from_message_uuid, message.forward_meta, message.meta, message.created_at, message.updated_at
 FROM message
 WHERE uuid = $1::uuid
 `
@@ -156,6 +161,7 @@ func (q *Queries) GetMessage(ctx context.Context, argUuid pgtype.UUID) (GetMessa
 		&i.Message.Type,
 		&i.Message.ChatUuid,
 		&i.Message.ThreadUuid,
+		&i.Message.ExternalMessageID,
 		&i.Message.Sender,
 		&i.Message.Recipients,
 		&i.Message.Subject,
@@ -177,7 +183,7 @@ func (q *Queries) GetMessage(ctx context.Context, argUuid pgtype.UUID) (GetMessa
 
 const getMessages = `-- name: GetMessages :many
 WITH filtered_messages AS (
-    SELECT m.uuid, m.format, m.type, m.chat_uuid, m.thread_uuid, m.sender, m.recipients, m.subject, m.body, m.body_parsed, m.reactions, m.attachments, m.forward_from, m.reply_to_message_uuid, m.forward_from_chat_uuid, m.forward_from_message_uuid, m.forward_meta, m.meta, m.created_at, m.updated_at
+    SELECT m.uuid, m.format, m.type, m.chat_uuid, m.thread_uuid, m.external_message_id, m.sender, m.recipients, m.subject, m.body, m.body_parsed, m.reactions, m.attachments, m.forward_from, m.reply_to_message_uuid, m.forward_from_chat_uuid, m.forward_from_message_uuid, m.forward_meta, m.meta, m.created_at, m.updated_at
     FROM message m
     WHERE
         (NULLIF($5, '') IS NULL OR m.type = $5) AND
@@ -187,7 +193,7 @@ WITH filtered_messages AS (
         (NULLIF($9, '') IS NULL OR m.sender = $9)
 )
 SELECT
-    uuid, format, type, chat_uuid, thread_uuid, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at,
+    uuid, format, type, chat_uuid, thread_uuid, external_message_id, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at,
     (SELECT count(*) FROM filtered_messages) as total_count
 FROM filtered_messages
 ORDER BY
@@ -218,6 +224,7 @@ type GetMessagesRow struct {
 	Type                   string             `json:"type"`
 	ChatUuid               *uuid.UUID         `json:"chat_uuid"`
 	ThreadUuid             *uuid.UUID         `json:"thread_uuid"`
+	ExternalMessageID      pgtype.Text        `json:"external_message_id"`
 	Sender                 string             `json:"sender"`
 	Recipients             []string           `json:"recipients"`
 	Subject                pgtype.Text        `json:"subject"`
@@ -261,6 +268,7 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Get
 			&i.Type,
 			&i.ChatUuid,
 			&i.ThreadUuid,
+			&i.ExternalMessageID,
 			&i.Sender,
 			&i.Recipients,
 			&i.Subject,
@@ -290,7 +298,7 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Get
 
 const listMessages = `-- name: ListMessages :many
 SELECT
-    message.uuid, message.format, message.type, message.chat_uuid, message.thread_uuid, message.sender, message.recipients, message.subject, message.body, message.body_parsed, message.reactions, message.attachments, message.forward_from, message.reply_to_message_uuid, message.forward_from_chat_uuid, message.forward_from_message_uuid, message.forward_meta, message.meta, message.created_at, message.updated_at
+    message.uuid, message.format, message.type, message.chat_uuid, message.thread_uuid, message.external_message_id, message.sender, message.recipients, message.subject, message.body, message.body_parsed, message.reactions, message.attachments, message.forward_from, message.reply_to_message_uuid, message.forward_from_chat_uuid, message.forward_from_message_uuid, message.forward_meta, message.meta, message.created_at, message.updated_at
 FROM message
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -321,6 +329,7 @@ func (q *Queries) ListMessages(ctx context.Context, arg ListMessagesParams) ([]L
 			&i.Message.Type,
 			&i.Message.ChatUuid,
 			&i.Message.ThreadUuid,
+			&i.Message.ExternalMessageID,
 			&i.Message.Sender,
 			&i.Message.Recipients,
 			&i.Message.Subject,
@@ -367,8 +376,9 @@ SET
     forward_from_message_uuid = $15::uuid,
     forward_meta              = $16,
     meta                      = $17,
+    external_message_id       = $18,
     updated_at = NOW()
-WHERE uuid = $18::uuid
+WHERE uuid = $19::uuid
 `
 
 type UpdateMessageParams struct {
@@ -389,6 +399,7 @@ type UpdateMessageParams struct {
 	ForwardFromMessageUuid pgtype.UUID `json:"forward_from_message_uuid"`
 	ForwardMeta            []byte      `json:"forward_meta"`
 	Meta                   []byte      `json:"meta"`
+	ExternalMessageID      pgtype.Text `json:"external_message_id"`
 	UUID                   pgtype.UUID `json:"uuid"`
 }
 
@@ -411,6 +422,7 @@ func (q *Queries) UpdateMessage(ctx context.Context, arg UpdateMessageParams) er
 		arg.ForwardFromMessageUuid,
 		arg.ForwardMeta,
 		arg.Meta,
+		arg.ExternalMessageID,
 		arg.UUID,
 	)
 	return err

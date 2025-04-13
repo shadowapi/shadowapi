@@ -18,6 +18,7 @@ INSERT INTO message (
     forward_from_message_uuid,
     forward_meta,
     meta,
+    external_message_id,
     created_at,
     updated_at
 ) VALUES (
@@ -39,6 +40,7 @@ INSERT INTO message (
              sqlc.arg('forward_from_message_uuid')::uuid,
              sqlc.arg('forward_meta'),
              sqlc.arg('meta'),
+    sqlc.arg('external_message_id'),
              NOW(),
              NOW()
          ) RETURNING *;
@@ -101,6 +103,7 @@ SET
     forward_from_message_uuid = sqlc.arg('forward_from_message_uuid')::uuid,
     forward_meta              = sqlc.arg('forward_meta'),
     meta                      = sqlc.arg('meta'),
+    external_message_id       = sqlc.arg('external_message_id'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 

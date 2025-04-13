@@ -23,6 +23,9 @@ INSERT INTO "file" (
     data,
     path,
     is_raw,
+    raw_headers,
+    has_raw_email,
+    is_inline,
     created_at,
     updated_at
 ) VALUES (
@@ -35,9 +38,12 @@ INSERT INTO "file" (
     $7,
     $8,
     $9,
+    $10,
+    $11,
+    $12,
           NOW(),
              NOW()
-         ) RETURNING uuid, storage_type, storage_uuid, name, mime_type, size, data, path, is_raw, created_at, updated_at
+         ) RETURNING uuid, storage_type, storage_uuid, name, mime_type, size, data, path, is_raw, raw_headers, has_raw_email, is_inline, created_at, updated_at
 `
 
 type CreateFileParams struct {
@@ -50,6 +56,9 @@ type CreateFileParams struct {
 	Data        []byte      `json:"data"`
 	Path        pgtype.Text `json:"path"`
 	IsRaw       pgtype.Bool `json:"is_raw"`
+	RawHeaders  pgtype.Text `json:"raw_headers"`
+	HasRawEmail pgtype.Bool `json:"has_raw_email"`
+	IsInline    pgtype.Bool `json:"is_inline"`
 }
 
 func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, error) {
@@ -63,6 +72,9 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, e
 		arg.Data,
 		arg.Path,
 		arg.IsRaw,
+		arg.RawHeaders,
+		arg.HasRawEmail,
+		arg.IsInline,
 	)
 	var i File
 	err := row.Scan(
@@ -75,6 +87,9 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, e
 		&i.Data,
 		&i.Path,
 		&i.IsRaw,
+		&i.RawHeaders,
+		&i.HasRawEmail,
+		&i.IsInline,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -93,7 +108,7 @@ func (q *Queries) DeleteFile(ctx context.Context, argUuid pgtype.UUID) error {
 
 const getFile = `-- name: GetFile :one
 SELECT
-    file.uuid, file.storage_type, file.storage_uuid, file.name, file.mime_type, file.size, file.data, file.path, file.is_raw, file.created_at, file.updated_at
+    file.uuid, file.storage_type, file.storage_uuid, file.name, file.mime_type, file.size, file.data, file.path, file.is_raw, file.raw_headers, file.has_raw_email, file.is_inline, file.created_at, file.updated_at
 FROM "file"
 WHERE uuid = $1::uuid
 `
@@ -115,6 +130,9 @@ func (q *Queries) GetFile(ctx context.Context, argUuid pgtype.UUID) (GetFileRow,
 		&i.File.Data,
 		&i.File.Path,
 		&i.File.IsRaw,
+		&i.File.RawHeaders,
+		&i.File.HasRawEmail,
+		&i.File.IsInline,
 		&i.File.CreatedAt,
 		&i.File.UpdatedAt,
 	)
@@ -123,7 +141,7 @@ func (q *Queries) GetFile(ctx context.Context, argUuid pgtype.UUID) (GetFileRow,
 
 const getFiles = `-- name: GetFiles :many
 WITH filtered_files AS (
-    SELECT f.uuid, f.storage_type, f.storage_uuid, f.name, f.mime_type, f.size, f.data, f.path, f.is_raw, f.created_at, f.updated_at
+    SELECT f.uuid, f.storage_type, f.storage_uuid, f.name, f.mime_type, f.size, f.data, f.path, f.is_raw, f.raw_headers, f.has_raw_email, f.is_inline, f.created_at, f.updated_at
     FROM "file" f
     WHERE
       -- Filter by storage_type if not empty
@@ -151,7 +169,7 @@ WITH filtered_files AS (
         )
 )
 SELECT
-    f.uuid, f.storage_type, f.storage_uuid, f.name, f.mime_type, f.size, f.data, f.path, f.is_raw, f.created_at, f.updated_at,
+    f.uuid, f.storage_type, f.storage_uuid, f.name, f.mime_type, f.size, f.data, f.path, f.is_raw, f.raw_headers, f.has_raw_email, f.is_inline, f.created_at, f.updated_at,
     -- total_count of all matching rows (ignoring limit/offset)
     (SELECT COUNT(*) FROM filtered_files) AS total_count
 FROM filtered_files f
@@ -196,6 +214,9 @@ type GetFilesRow struct {
 	Data        []byte             `json:"data"`
 	Path        pgtype.Text        `json:"path"`
 	IsRaw       pgtype.Bool        `json:"is_raw"`
+	RawHeaders  pgtype.Text        `json:"raw_headers"`
+	HasRawEmail pgtype.Bool        `json:"has_raw_email"`
+	IsInline    pgtype.Bool        `json:"is_inline"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 	TotalCount  int64              `json:"total_count"`
@@ -232,6 +253,9 @@ func (q *Queries) GetFiles(ctx context.Context, arg GetFilesParams) ([]GetFilesR
 			&i.Data,
 			&i.Path,
 			&i.IsRaw,
+			&i.RawHeaders,
+			&i.HasRawEmail,
+			&i.IsInline,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.TotalCount,
@@ -248,7 +272,7 @@ func (q *Queries) GetFiles(ctx context.Context, arg GetFilesParams) ([]GetFilesR
 
 const listFiles = `-- name: ListFiles :many
 SELECT
-    file.uuid, file.storage_type, file.storage_uuid, file.name, file.mime_type, file.size, file.data, file.path, file.is_raw, file.created_at, file.updated_at
+    file.uuid, file.storage_type, file.storage_uuid, file.name, file.mime_type, file.size, file.data, file.path, file.is_raw, file.raw_headers, file.has_raw_email, file.is_inline, file.created_at, file.updated_at
 FROM "file"
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -283,6 +307,9 @@ func (q *Queries) ListFiles(ctx context.Context, arg ListFilesParams) ([]ListFil
 			&i.File.Data,
 			&i.File.Path,
 			&i.File.IsRaw,
+			&i.File.RawHeaders,
+			&i.File.HasRawEmail,
+			&i.File.IsInline,
 			&i.File.CreatedAt,
 			&i.File.UpdatedAt,
 		); err != nil {
@@ -307,8 +334,11 @@ SET
     data          = $6,
     path          = $7,
     is_raw        = $8,
+    raw_headers    = $9,
+    has_raw_email  = $10,
+    is_inline      = $11,
     updated_at    = NOW()
-WHERE uuid = $9::uuid
+WHERE uuid = $12::uuid
 `
 
 type UpdateFileParams struct {
@@ -320,6 +350,9 @@ type UpdateFileParams struct {
 	Data        []byte      `json:"data"`
 	Path        pgtype.Text `json:"path"`
 	IsRaw       pgtype.Bool `json:"is_raw"`
+	RawHeaders  pgtype.Text `json:"raw_headers"`
+	HasRawEmail pgtype.Bool `json:"has_raw_email"`
+	IsInline    pgtype.Bool `json:"is_inline"`
 	UUID        pgtype.UUID `json:"uuid"`
 }
 
@@ -333,6 +366,9 @@ func (q *Queries) UpdateFile(ctx context.Context, arg UpdateFileParams) error {
 		arg.Data,
 		arg.Path,
 		arg.IsRaw,
+		arg.RawHeaders,
+		arg.HasRawEmail,
+		arg.IsInline,
 		arg.UUID,
 	)
 	return err

@@ -126,8 +126,8 @@ tasks:
     cmds:
       - npx playwright show-report
 
-  run-loader:
+  backend-loader:
     desc: "Run the prebuilt loader command inside backend container"
     cmds:
       - >-
-        docker compose run --rm -e SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi -e SA_LOG_LEVEL=DEBUG -e SA_HOST=0.0.0.0 -e SA_SKIP_WORKER=true backend-loader
+        docker compose run --rm backend-loader

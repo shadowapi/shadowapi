@@ -128,6 +128,9 @@ CREATE TABLE IF NOT EXISTS "file" (
                                       data          BYTEA,                   -- if storage_type='postgres', actual file stored here
                                       path          VARCHAR,                 -- if hostfiles or s3, optional path or object key
                                       is_raw        BOOLEAN DEFAULT false,   -- indicates if this is the entire raw email
+                                      raw_headers   TEXT,                   -- optional raw headers if needed
+                                      has_raw_email BOOLEAN DEFAULT false,  -- indicates whether the raw email is contained
+                                      is_inline     BOOLEAN DEFAULT false,  -- indicates if this is an inline/embedded file
                                       created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                                       updated_at    TIMESTAMP WITH TIME ZONE
 );
@@ -140,6 +143,7 @@ CREATE TABLE IF NOT EXISTS message (
                                        type                       VARCHAR NOT NULL,
                                        chat_uuid                  VARCHAR,
                                        thread_uuid                VARCHAR,
+                                       external_message_id TEXT,  -- original system’s message ID (e.g. Gmail "messageId")
                                        sender                     VARCHAR NOT NULL,
                                        recipients                 TEXT[] NOT NULL,
                                        subject                    TEXT,
@@ -153,6 +157,8 @@ CREATE TABLE IF NOT EXISTS message (
                                        forward_from_message_uuid  VARCHAR,
                                        forward_meta               JSONB,
                                        meta                       JSONB,
+
+
                                        created_at                 TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                                        updated_at                 TIMESTAMP WITH TIME ZONE
 );

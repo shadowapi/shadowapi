@@ -47,6 +47,8 @@ components:
       $ref: "components/contact.yaml"
     Message:
       $ref: "components/message.yaml"
+    MessageMeta:
+      $ref: "components/message_meta.yaml"
     MessageBodyParsed:
       $ref: "components/message_body_parsed.yaml"
     MessageQuery:

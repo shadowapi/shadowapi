@@ -159,6 +159,9 @@ type File struct {
 	Data        []byte             `json:"data"`
 	Path        pgtype.Text        `json:"path"`
 	IsRaw       pgtype.Bool        `json:"is_raw"`
+	RawHeaders  pgtype.Text        `json:"raw_headers"`
+	HasRawEmail pgtype.Bool        `json:"has_raw_email"`
+	IsInline    pgtype.Bool        `json:"is_inline"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
@@ -169,6 +172,7 @@ type Message struct {
 	Type                   string             `json:"type"`
 	ChatUuid               *uuid.UUID         `json:"chat_uuid"`
 	ThreadUuid             *uuid.UUID         `json:"thread_uuid"`
+	ExternalMessageID      pgtype.Text        `json:"external_message_id"`
 	Sender                 string             `json:"sender"`
 	Recipients             []string           `json:"recipients"`
 	Subject                pgtype.Text        `json:"subject"`

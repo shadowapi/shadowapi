@@ -857,6 +857,7 @@ export interface components {
         EmailLabel: components["schemas"]["email_label"];
         Contact: components["schemas"]["contact"];
         Message: components["schemas"]["message"];
+        MessageMeta: components["schemas"]["message_meta"];
         MessageBodyParsed: components["schemas"]["message_body_parsed"];
         MessageQuery: components["schemas"]["message_query"];
         /** @description Represents a stored file, independent of the storage backend. */
@@ -867,7 +868,7 @@ export interface components {
             storage_type: string;
             /** @description UUID referencing a 'storage' record (optional). */
             storage_uuid: string;
-            /** @description Original filename. e.g. 'photo.jpg' or 'mail.raw' */
+            /** @description Original filename. e.g. 'photo.jpg' or 'mail.raw'. */
             name: string;
             /** @description MIME type, e.g. 'application/pdf' or 'message/rfc822'. */
             mime_type?: string;
@@ -882,6 +883,12 @@ export interface components {
             path?: string;
             /** @description Indicates if this file is the entire raw email. */
             is_raw?: boolean;
+            /** @description Raw headers if needed (for emails or similar). */
+            raw_headers?: string;
+            /** @description Indicates whether the raw email is contained in this file. */
+            has_raw_email?: boolean;
+            /** @description Indicates if this is an inline/embedded file (e.g. images in HTML emails). */
+            is_inline?: boolean;
             /**
              * Format: date-time
              * @description Timestamp when the file was created.
@@ -1349,6 +1356,12 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        message_meta: {
+            /** @description Indicates whether this message has a complete raw email stored as an attachment (with FileObject.is_raw=true). */
+            has_raw_email?: boolean;
+            /** @description Optional flag indicating if it's inbound (true) or outbound (false). */
+            is_incoming?: boolean;
+        };
         message: {
             /** @description Unique identifier for the message. */
             uuid?: string;
@@ -1360,6 +1373,8 @@ export interface components {
             chat_uuid?: string;
             /** @description ID of a sub-thread if this message is part of a threaded conversation. */
             thread_uuid?: string;
+            /** @description Original system's message ID (e.g., Gmail 'messageId'). */
+            external_message_id?: string;
             /** @description Identifier of the user or account sending the message. */
             sender: string;
             /** @description List of users or accounts receiving the message (e.g., To, CC). */
@@ -1387,10 +1402,7 @@ export interface components {
             forward_meta?: {
                 [key: string]: unknown;
             };
-            /** @description Additional metadata relevant to the message. */
-            meta?: {
-                [key: string]: unknown;
-            };
+            meta?: components["schemas"]["message_meta"];
             /**
              * Format: date-time
              * @description The date and time when the object was created.

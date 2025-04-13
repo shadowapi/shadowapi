@@ -9,6 +9,9 @@ INSERT INTO "file" (
     data,
     path,
     is_raw,
+    raw_headers,
+    has_raw_email,
+    is_inline,
     created_at,
     updated_at
 ) VALUES (
@@ -21,6 +24,9 @@ INSERT INTO "file" (
     sqlc.arg('data'),
     sqlc.arg('path'),
     sqlc.arg('is_raw'),
+    sqlc.arg('raw_headers'),
+    sqlc.arg('has_raw_email'),
+    sqlc.arg('is_inline'),
           NOW(),
              NOW()
          ) RETURNING *;
@@ -102,6 +108,9 @@ SET
     data          = sqlc.arg('data'),
     path          = sqlc.arg('path'),
     is_raw        = sqlc.arg('is_raw'),
+    raw_headers    = sqlc.arg('raw_headers'),
+    has_raw_email  = sqlc.arg('has_raw_email'),
+    is_inline      = sqlc.arg('is_inline'),
     updated_at    = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 

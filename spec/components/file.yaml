@@ -13,7 +13,7 @@ FileObject:
       description: "UUID referencing a 'storage' record (optional)."
     name:
       type: string
-      description: "Original filename. e.g. 'photo.jpg' or 'mail.raw'"
+      description: "Original filename. e.g. 'photo.jpg' or 'mail.raw'."
     mime_type:
       type: string
       description: "MIME type, e.g. 'application/pdf' or 'message/rfc822'."
@@ -30,6 +30,15 @@ FileObject:
     is_raw:
       type: boolean
       description: "Indicates if this file is the entire raw email."
+    raw_headers:
+      type: string
+      description: "Raw headers if needed (for emails or similar)."
+    has_raw_email:
+      type: boolean
+      description: "Indicates whether the raw email is contained in this file."
+    is_inline:
+      type: boolean
+      description: "Indicates if this is an inline/embedded file (e.g. images in HTML emails)."
     created_at:
       type: string
       format: date-time

@@ -5138,6 +5138,24 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.RawHeaders.Set {
+			e.FieldStart("raw_headers")
+			s.RawHeaders.Encode(e)
+		}
+	}
+	{
+		if s.HasRawEmail.Set {
+			e.FieldStart("has_raw_email")
+			s.HasRawEmail.Encode(e)
+		}
+	}
+	{
+		if s.IsInline.Set {
+			e.FieldStart("is_inline")
+			s.IsInline.Encode(e)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -5151,7 +5169,7 @@ func (s *FileObject) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfFileObject = [11]string{
+var jsonFieldsNameOfFileObject = [14]string{
 	0:  "uuid",
 	1:  "storage_type",
 	2:  "storage_uuid",
@@ -5161,8 +5179,11 @@ var jsonFieldsNameOfFileObject = [11]string{
 	6:  "data",
 	7:  "path",
 	8:  "is_raw",
-	9:  "created_at",
-	10: "updated_at",
+	9:  "raw_headers",
+	10: "has_raw_email",
+	11: "is_inline",
+	12: "created_at",
+	13: "updated_at",
 }
 
 // Decode decodes FileObject from json.
@@ -5269,6 +5290,36 @@ func (s *FileObject) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_raw\"")
+			}
+		case "raw_headers":
+			if err := func() error {
+				s.RawHeaders.Reset()
+				if err := s.RawHeaders.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"raw_headers\"")
+			}
+		case "has_raw_email":
+			if err := func() error {
+				s.HasRawEmail.Reset()
+				if err := s.HasRawEmail.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"has_raw_email\"")
+			}
+		case "is_inline":
+			if err := func() error {
+				s.IsInline.Reset()
+				if err := s.IsInline.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_inline\"")
 			}
 		case "created_at":
 			if err := func() error {
@@ -5622,6 +5673,12 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.ExternalMessageID.Set {
+			e.FieldStart("external_message_id")
+			s.ExternalMessageID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("sender")
 		e.Str(s.Sender)
 	}
@@ -5715,27 +5772,28 @@ func (s *Message) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMessage = [20]string{
+var jsonFieldsNameOfMessage = [21]string{
 	0:  "uuid",
 	1:  "type",
 	2:  "format",
 	3:  "chat_uuid",
 	4:  "thread_uuid",
-	5:  "sender",
-	6:  "recipients",
-	7:  "subject",
-	8:  "body",
-	9:  "body_parsed",
-	10: "reactions",
-	11: "attachments",
-	12: "forward_from",
-	13: "reply_to_message_uuid",
-	14: "forward_from_chat_uuid",
-	15: "forward_from_message_uuid",
-	16: "forward_meta",
-	17: "meta",
-	18: "created_at",
-	19: "updated_at",
+	5:  "external_message_id",
+	6:  "sender",
+	7:  "recipients",
+	8:  "subject",
+	9:  "body",
+	10: "body_parsed",
+	11: "reactions",
+	12: "attachments",
+	13: "forward_from",
+	14: "reply_to_message_uuid",
+	15: "forward_from_chat_uuid",
+	16: "forward_from_message_uuid",
+	17: "forward_meta",
+	18: "meta",
+	19: "created_at",
+	20: "updated_at",
 }
 
 // Decode decodes Message from json.
@@ -5801,8 +5859,18 @@ func (s *Message) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"thread_uuid\"")
 			}
+		case "external_message_id":
+			if err := func() error {
+				s.ExternalMessageID.Reset()
+				if err := s.ExternalMessageID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"external_message_id\"")
+			}
 		case "sender":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.Sender = string(v)
@@ -5814,7 +5882,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sender\"")
 			}
 		case "recipients":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				s.Recipients = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -5844,7 +5912,7 @@ func (s *Message) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"subject\"")
 			}
 		case "body":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Body = string(v)
@@ -5982,8 +6050,8 @@ func (s *Message) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [3]uint8{
-		0b01100110,
-		0b00000001,
+		0b11000110,
+		0b00000010,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -6580,21 +6648,31 @@ func (s *MessageLinkedinQueryOK) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s MessageMeta) Encode(e *jx.Encoder) {
+func (s *MessageMeta) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields implements json.Marshaler.
-func (s MessageMeta) encodeFields(e *jx.Encoder) {
-	for k, elem := range s {
-		e.FieldStart(k)
-
-		if len(elem) != 0 {
-			e.Raw(elem)
+// encodeFields encodes fields.
+func (s *MessageMeta) encodeFields(e *jx.Encoder) {
+	{
+		if s.HasRawEmail.Set {
+			e.FieldStart("has_raw_email")
+			s.HasRawEmail.Encode(e)
 		}
 	}
+	{
+		if s.IsIncoming.Set {
+			e.FieldStart("is_incoming")
+			s.IsIncoming.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfMessageMeta = [2]string{
+	0: "has_raw_email",
+	1: "is_incoming",
 }
 
 // Decode decodes MessageMeta from json.
@@ -6602,20 +6680,32 @@ func (s *MessageMeta) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode MessageMeta to nil")
 	}
-	m := s.init()
+
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
-		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
-			if err != nil {
-				return err
+		switch string(k) {
+		case "has_raw_email":
+			if err := func() error {
+				s.HasRawEmail.Reset()
+				if err := s.HasRawEmail.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"has_raw_email\"")
 			}
-			return nil
-		}(); err != nil {
-			return errors.Wrapf(err, "decode field %q", k)
+		case "is_incoming":
+			if err := func() error {
+				s.IsIncoming.Reset()
+				if err := s.IsIncoming.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_incoming\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
 		}
-		m[string(k)] = elem
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode MessageMeta")
@@ -6625,7 +6715,7 @@ func (s *MessageMeta) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s MessageMeta) MarshalJSON() ([]byte, error) {
+func (s *MessageMeta) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -8844,7 +8934,6 @@ func (o *OptMessageMeta) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode OptMessageMeta to nil")
 	}
 	o.Set = true
-	o.Value = make(MessageMeta)
 	if err := o.Value.Decode(d); err != nil {
 		return err
 	}

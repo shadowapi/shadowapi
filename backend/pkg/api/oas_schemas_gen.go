@@ -2496,6 +2496,12 @@ type FileObject struct {
 	Path OptString `json:"path"`
 	// Indicates if this file is the entire raw email.
 	IsRaw OptBool `json:"is_raw"`
+	// Raw headers if needed (for emails or similar).
+	RawHeaders OptString `json:"raw_headers"`
+	// Indicates whether the raw email is contained in this file.
+	HasRawEmail OptBool `json:"has_raw_email"`
+	// Indicates if this is an inline/embedded file (e.g. images in HTML emails).
+	IsInline OptBool `json:"is_inline"`
 	// Timestamp when the file was created.
 	CreatedAt OptDateTime `json:"created_at"`
 	// Timestamp when the file was last modified.
@@ -2545,6 +2551,21 @@ func (s *FileObject) GetPath() OptString {
 // GetIsRaw returns the value of IsRaw.
 func (s *FileObject) GetIsRaw() OptBool {
 	return s.IsRaw
+}
+
+// GetRawHeaders returns the value of RawHeaders.
+func (s *FileObject) GetRawHeaders() OptString {
+	return s.RawHeaders
+}
+
+// GetHasRawEmail returns the value of HasRawEmail.
+func (s *FileObject) GetHasRawEmail() OptBool {
+	return s.HasRawEmail
+}
+
+// GetIsInline returns the value of IsInline.
+func (s *FileObject) GetIsInline() OptBool {
+	return s.IsInline
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -2600,6 +2621,21 @@ func (s *FileObject) SetPath(val OptString) {
 // SetIsRaw sets the value of IsRaw.
 func (s *FileObject) SetIsRaw(val OptBool) {
 	s.IsRaw = val
+}
+
+// SetRawHeaders sets the value of RawHeaders.
+func (s *FileObject) SetRawHeaders(val OptString) {
+	s.RawHeaders = val
+}
+
+// SetHasRawEmail sets the value of HasRawEmail.
+func (s *FileObject) SetHasRawEmail(val OptBool) {
+	s.HasRawEmail = val
+}
+
+// SetIsInline sets the value of IsInline.
+func (s *FileObject) SetIsInline(val OptBool) {
+	s.IsInline = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
@@ -2685,6 +2721,8 @@ type Message struct {
 	ChatUUID OptString `json:"chat_uuid"`
 	// ID of a sub-thread if this message is part of a threaded conversation.
 	ThreadUUID OptString `json:"thread_uuid"`
+	// Original system's message ID (e.g., Gmail 'messageId').
+	ExternalMessageID OptString `json:"external_message_id"`
 	// Identifier of the user or account sending the message.
 	Sender string `json:"sender"`
 	// List of users or accounts receiving the message (e.g., To, CC).
@@ -2708,8 +2746,7 @@ type Message struct {
 	ForwardFromMessageUUID OptString `json:"forward_from_message_uuid"`
 	// Additional context or metadata about the forwarded message.
 	ForwardMeta OptMessageForwardMeta `json:"forward_meta"`
-	// Additional metadata relevant to the message.
-	Meta OptMessageMeta `json:"meta"`
+	Meta        OptMessageMeta        `json:"meta"`
 	// The date and time when the object was created.
 	CreatedAt OptDateTime `json:"created_at"`
 	// The date and time when the message was last updated.
@@ -2739,6 +2776,11 @@ func (s *Message) GetChatUUID() OptString {
 // GetThreadUUID returns the value of ThreadUUID.
 func (s *Message) GetThreadUUID() OptString {
 	return s.ThreadUUID
+}
+
+// GetExternalMessageID returns the value of ExternalMessageID.
+func (s *Message) GetExternalMessageID() OptString {
+	return s.ExternalMessageID
 }
 
 // GetSender returns the value of Sender.
@@ -2839,6 +2881,11 @@ func (s *Message) SetChatUUID(val OptString) {
 // SetThreadUUID sets the value of ThreadUUID.
 func (s *Message) SetThreadUUID(val OptString) {
 	s.ThreadUUID = val
+}
+
+// SetExternalMessageID sets the value of ExternalMessageID.
+func (s *Message) SetExternalMessageID(val OptString) {
+	s.ExternalMessageID = val
 }
 
 // SetSender sets the value of Sender.
@@ -3046,16 +3093,33 @@ func (s *MessageLinkedinQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
-// Additional metadata relevant to the message.
-type MessageMeta map[string]jx.Raw
+// Ref: #
+type MessageMeta struct {
+	// Indicates whether this message has a complete raw email stored as an attachment (with FileObject.
+	// is_raw=true).
+	HasRawEmail OptBool `json:"has_raw_email"`
+	// Optional flag indicating if it's inbound (true) or outbound (false).
+	IsIncoming OptBool `json:"is_incoming"`
+}
 
-func (s *MessageMeta) init() MessageMeta {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
+// GetHasRawEmail returns the value of HasRawEmail.
+func (s *MessageMeta) GetHasRawEmail() OptBool {
+	return s.HasRawEmail
+}
+
+// GetIsIncoming returns the value of IsIncoming.
+func (s *MessageMeta) GetIsIncoming() OptBool {
+	return s.IsIncoming
+}
+
+// SetHasRawEmail sets the value of HasRawEmail.
+func (s *MessageMeta) SetHasRawEmail(val OptBool) {
+	s.HasRawEmail = val
+}
+
+// SetIsIncoming sets the value of IsIncoming.
+func (s *MessageMeta) SetIsIncoming(val OptBool) {
+	s.IsIncoming = val
 }
 
 // Ref: #

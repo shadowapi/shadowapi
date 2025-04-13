@@ -17,6 +17,9 @@ properties:
   thread_uuid:
     type: string
     description: "ID of a sub-thread if this message is part of a threaded conversation."
+  external_message_id:
+    type: string
+    description: "Original system's message ID (e.g., Gmail 'messageId')."
   sender:
     type: string
     description: "Identifier of the user or account sending the message."
@@ -61,9 +64,7 @@ properties:
     additionalProperties: true
     description: "Additional context or metadata about the forwarded message."
   meta:
-    type: object
-    additionalProperties: true
-    description: "Additional metadata relevant to the message."
+    $ref: "../openapi.yaml#/components/schemas/MessageMeta"
   created_at:
     description: The date and time when the object was created.
     format: date-time

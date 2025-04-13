@@ -1,0 +1,10 @@
+# spec/components/message_meta.yaml
+type: object
+additionalProperties: false
+properties:
+  has_raw_email:
+    type: boolean
+    description: "Indicates whether this message has a complete raw email stored as an attachment (with FileObject.is_raw=true)."
+  is_incoming:
+    type: boolean
+    description: "Optional flag indicating if it's inbound (true) or outbound (false)."
