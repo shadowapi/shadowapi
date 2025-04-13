@@ -30,7 +30,7 @@ INSERT INTO worker_jobs (
              NOW(),
              $6
          )
-RETURNING job_id, scheduler_uuid, subject, status, data, started_at, finished_at
+RETURNING uuid, scheduler_uuid, subject, status, data, started_at, finished_at
 `
 
 type CreateWorkerJobParams struct {
@@ -53,7 +53,7 @@ func (q *Queries) CreateWorkerJob(ctx context.Context, arg CreateWorkerJobParams
 	)
 	var i WorkerJob
 	err := row.Scan(
-		&i.JobID,
+		&i.UUID,
 		&i.SchedulerUuid,
 		&i.Subject,
 		&i.Status,
@@ -76,7 +76,7 @@ func (q *Queries) DeleteWorkerJob(ctx context.Context, argUuid pgtype.UUID) erro
 
 const getWorkerJob = `-- name: GetWorkerJob :one
 SELECT
-    worker_jobs.job_id, worker_jobs.scheduler_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
+    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
 FROM worker_jobs
 WHERE uuid = $1::uuid
 `
@@ -89,7 +89,7 @@ func (q *Queries) GetWorkerJob(ctx context.Context, argUuid pgtype.UUID) (GetWor
 	row := q.db.QueryRow(ctx, getWorkerJob, argUuid)
 	var i GetWorkerJobRow
 	err := row.Scan(
-		&i.WorkerJob.JobID,
+		&i.WorkerJob.UUID,
 		&i.WorkerJob.SchedulerUuid,
 		&i.WorkerJob.Subject,
 		&i.WorkerJob.Status,
@@ -102,7 +102,7 @@ func (q *Queries) GetWorkerJob(ctx context.Context, argUuid pgtype.UUID) (GetWor
 
 const getWorkerJobs = `-- name: GetWorkerJobs :many
 WITH filtered_worker_jobs AS (
-    SELECT w.job_id, w.scheduler_uuid, w.subject, w.status, w.data, w.started_at, w.finished_at
+    SELECT w.uuid, w.scheduler_uuid, w.subject, w.status, w.data, w.started_at, w.finished_at
     FROM worker_jobs w
     WHERE
         ($5::uuid IS NULL
@@ -113,7 +113,7 @@ WITH filtered_worker_jobs AS (
         OR w.status = $7)
 )
 SELECT
-    job_id, scheduler_uuid, subject, status, data, started_at, finished_at,
+    uuid, scheduler_uuid, subject, status, data, started_at, finished_at,
     (SELECT COUNT(*) FROM filtered_worker_jobs) AS total_count
 FROM filtered_worker_jobs
 ORDER BY
@@ -139,7 +139,7 @@ type GetWorkerJobsParams struct {
 }
 
 type GetWorkerJobsRow struct {
-	JobID         pgtype.UUID        `json:"job_id"`
+	UUID          uuid.UUID          `json:"uuid"`
 	SchedulerUuid *uuid.UUID         `json:"scheduler_uuid"`
 	Subject       string             `json:"subject"`
 	Status        string             `json:"status"`
@@ -167,7 +167,7 @@ func (q *Queries) GetWorkerJobs(ctx context.Context, arg GetWorkerJobsParams) ([
 	for rows.Next() {
 		var i GetWorkerJobsRow
 		if err := rows.Scan(
-			&i.JobID,
+			&i.UUID,
 			&i.SchedulerUuid,
 			&i.Subject,
 			&i.Status,
@@ -188,7 +188,7 @@ func (q *Queries) GetWorkerJobs(ctx context.Context, arg GetWorkerJobsParams) ([
 
 const listWorkerJobs = `-- name: ListWorkerJobs :many
 SELECT
-    worker_jobs.job_id, worker_jobs.scheduler_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
+    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
 FROM worker_jobs
 ORDER BY started_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -214,7 +214,7 @@ func (q *Queries) ListWorkerJobs(ctx context.Context, arg ListWorkerJobsParams) 
 	for rows.Next() {
 		var i ListWorkerJobsRow
 		if err := rows.Scan(
-			&i.WorkerJob.JobID,
+			&i.WorkerJob.UUID,
 			&i.WorkerJob.SchedulerUuid,
 			&i.WorkerJob.Subject,
 			&i.WorkerJob.Status,

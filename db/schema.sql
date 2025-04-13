@@ -336,7 +336,7 @@ CREATE TABLE "scheduler" (
 );
 
 CREATE TABLE IF NOT EXISTS worker_jobs (
-                                           job_id             UUID PRIMARY KEY,
+                                           uuid             UUID PRIMARY KEY,
                                            scheduler_uuid      UUID NOT NULL,
                                            subject     VARCHAR NOT NULL,
                                            status      VARCHAR NOT NULL,            -- e.g. "running", "completed", "failed", "retry"

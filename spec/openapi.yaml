@@ -152,6 +152,8 @@ paths:
     $ref: "paths/telegram.yaml#/telegram"
   /telegram/{id}:
     $ref: "paths/telegram.yaml#/telegramId"
+  /message/query:
+    $ref: "paths/message_query.yaml"
   /message/email/query:
     $ref: "paths/message_email_query.yaml"
   /message/whatsapp/query:

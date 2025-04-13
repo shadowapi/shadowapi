@@ -367,7 +367,7 @@ type User struct {
 }
 
 type WorkerJob struct {
-	JobID         pgtype.UUID        `json:"job_id"`
+	UUID          uuid.UUID          `json:"uuid"`
 	SchedulerUuid *uuid.UUID         `json:"scheduler_uuid"`
 	Subject       string             `json:"subject"`
 	Status        string             `json:"status"`

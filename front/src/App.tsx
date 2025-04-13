@@ -6,7 +6,9 @@ import {
   DataSourceAuth,
   DataSourceEdit,
   DataSources,
+  Files,
   Logs,
+  Messages,
   OAuth2CredentialEdit,
   OAuth2Credentials,
   PipelineEdit,
@@ -20,7 +22,7 @@ import {
   SyncPolicyEdit,
   UserEdit,
   Users,
-  Workers,
+  WorkerJobs,
 } from '@/pages'
 import { LoginPage, ProtectedRoute, SignupPage } from '@/shauth'
 
@@ -174,14 +176,6 @@ function App() {
           }
         />
         <Route
-          path="/workers"
-          element={
-            <ProtectedRoute>
-              <Workers />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/syncpolicies"
           element={
             <ProtectedRoute>
@@ -194,6 +188,32 @@ function App() {
           element={
             <ProtectedRoute>
               <SyncPolicyEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/files"
+          element={
+            <ProtectedRoute>
+              <Files />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/workers"
+          element={
+            <ProtectedRoute>
+              <WorkerJobs />
             </ProtectedRoute>
           }
         />

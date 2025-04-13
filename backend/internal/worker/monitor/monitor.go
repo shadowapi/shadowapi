@@ -22,7 +22,7 @@ type WorkerMonitor struct {
 
 // WorkerJobStatus defines a simple status representation for UI display.
 type WorkerJobStatus struct {
-	JobID       string                 `json:"job_id"`
+	UUID        string                 `json:"uuid"`
 	SchedulerID string                 `json:"scheduler_id,omitempty"`
 	Subject     string                 `json:"subject"`
 	Status      string                 `json:"status"`
@@ -93,52 +93,6 @@ func (wm *WorkerMonitor) RecordJobEnd(ctx context.Context, jobID, subject, final
 	if err != nil {
 		wm.log.Error("RecordJobEnd: failed to update worker job", "error", err)
 	}
-}
-
-// ListRecentJobs returns the most recent jobs for UI display.
-func (wm *WorkerMonitor) ListRecentJobs(ctx context.Context, limit int) ([]WorkerJobStatus, error) {
-	q := query.New(wm.dbp)
-	params := query.ListWorkerJobsParams{
-		Offset: 0,
-		Limit:  int32(limit),
-	}
-	rows, err := q.ListWorkerJobs(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	var statuses []WorkerJobStatus
-	for _, row := range rows {
-		wj := row.WorkerJob
-		// Convert pgtype.UUID to a uuid.UUID for string display.
-		parsed, err := uuid.FromBytes(wj.JobID.Bytes[:])
-		var jobIDStr string
-		if err != nil {
-			jobIDStr = ""
-		} else {
-			jobIDStr = parsed.String()
-		}
-		status := WorkerJobStatus{
-			JobID:     jobIDStr,
-			Subject:   wj.Subject,
-			Status:    wj.Status,
-			StartedAt: wj.StartedAt.Time,
-		}
-		// Check if SchedulerUuid is non-nil.
-		if wj.SchedulerUuid != nil {
-			status.SchedulerID = wj.SchedulerUuid.String()
-		}
-		if wj.FinishedAt.Valid {
-			status.FinishedAt = wj.FinishedAt.Time
-		}
-		if len(wj.Data) > 0 {
-			var data map[string]interface{}
-			if err := json.Unmarshal(wj.Data, &data); err == nil {
-				status.Data = data
-			}
-		}
-		statuses = append(statuses, status)
-	}
-	return statuses, nil
 }
 
 // NullTimestamptz returns a null pgtype.Timestamptz.

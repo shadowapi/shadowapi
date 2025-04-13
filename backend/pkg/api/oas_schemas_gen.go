@@ -3258,6 +3258,21 @@ func (s *MessageQuery) SetFuzzy(val OptBool) {
 	s.Fuzzy = val
 }
 
+type MessageQueryOK struct {
+	// List of messages matching the query.
+	Messages []Message `json:"messages"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *MessageQueryOK) GetMessages() []Message {
+	return s.Messages
+}
+
+// SetMessages sets the value of Messages.
+func (s *MessageQueryOK) SetMessages(val []Message) {
+	s.Messages = val
+}
+
 // Sort order by timestamp ('asc' or 'desc').
 type MessageQueryOrder string
 
@@ -3309,6 +3324,7 @@ const (
 	MessageQuerySourceTelegram MessageQuerySource = "telegram"
 	MessageQuerySourceLinkedin MessageQuerySource = "linkedin"
 	MessageQuerySourceCustom   MessageQuerySource = "custom"
+	MessageQuerySourceUnified  MessageQuerySource = "unified"
 )
 
 // AllValues returns all MessageQuerySource values.
@@ -3319,6 +3335,7 @@ func (MessageQuerySource) AllValues() []MessageQuerySource {
 		MessageQuerySourceTelegram,
 		MessageQuerySourceLinkedin,
 		MessageQuerySourceCustom,
+		MessageQuerySourceUnified,
 	}
 }
 
@@ -3334,6 +3351,8 @@ func (s MessageQuerySource) MarshalText() ([]byte, error) {
 	case MessageQuerySourceLinkedin:
 		return []byte(s), nil
 	case MessageQuerySourceCustom:
+		return []byte(s), nil
+	case MessageQuerySourceUnified:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -3357,6 +3376,9 @@ func (s *MessageQuerySource) UnmarshalText(data []byte) error {
 		return nil
 	case MessageQuerySourceCustom:
 		*s = MessageQuerySourceCustom
+		return nil
+	case MessageQuerySourceUnified:
+		*s = MessageQuerySourceUnified
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

@@ -35,6 +35,13 @@ export function FullLayout({ children }: { children: ReactNode }) {
         },
       ],
     },
+    {
+      Label: 'Messages',
+      AriaLabel: 'Go to data messages page',
+      Icon: <Data />,
+      URL: '/messages',
+      Childrens: [{ Label: 'Files', AriaLabel: 'Go to data files page', Icon: <Data />, URL: '/files' }],
+    },
 
     { Label: 'Data Storages', AriaLabel: 'Go to data storages page', Icon: <Data />, URL: '/storages' },
     { Label: 'SyncPolicies', AriaLabel: 'Go to sync policies page', Icon: <AssetsExpired />, URL: '/syncpolicies' },

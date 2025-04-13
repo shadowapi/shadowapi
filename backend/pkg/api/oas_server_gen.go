@@ -248,6 +248,12 @@ type Handler interface {
 	//
 	// POST /message/linkedin/query
 	MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (*MessageLinkedinQueryOK, error)
+	// MessageQuery implements messageQuery operation.
+	//
+	// Execute a search query on unified messages.
+	//
+	// POST /message/query
+	MessageQuery(ctx context.Context, req *MessageQuery) (*MessageQueryOK, error)
 	// MessageTelegramQuery implements messageTelegramQuery operation.
 	//
 	// Execute a search query on Telegram messages.

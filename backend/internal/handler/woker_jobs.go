@@ -6,6 +6,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -94,30 +95,50 @@ func (h *Handler) WorkerJobsDelete(ctx context.Context, params api.WorkerJobsDel
 	return nil
 }
 
-// qToApiWorkerJobsRow converts a query.WorkerJob DB row into api.WorkerJobs object.
 func qToApiWorkerJobsRow(dbRow query.WorkerJob) (api.WorkerJobs, error) {
 	var res api.WorkerJobs
-	// TODO @reactima finish conversion
-	//res.UUID.SetTo(dbRow.JobID.Bytes)
+
+	// Convert the UUID to string and set it on WorkerJobs.UUID (which is an OptString).
+	res.UUID.SetTo(dbRow.UUID.String())
+
+	// If there's a scheduler UUID, convert it to string.
 	if dbRow.SchedulerUuid != nil {
 		res.SchedulerUUID = dbRow.SchedulerUuid.String()
 	}
+
+	// Basic fields
 	res.Subject = dbRow.Subject
 	res.Status = dbRow.Status
 
-	//if len(dbRow.Data) > 0 {
-	//	var dataMap map[string]any
-	//	if err := json.Unmarshal(dbRow.Data, &dataMap); err != nil {
-	//		return res, err
-	//	}
-	//	opt := api.NewOptWorkerJobsData()
-	//	opt.Value = dataMap
-	//	res.Data = opt
-	//}
+	// If the Data field is present, unmarshal it into map[string]any (or map[string]jx.Raw).
+	if len(dbRow.Data) > 0 {
+		var dataMap map[string]interface{}
+		if err := json.Unmarshal(dbRow.Data, &dataMap); err != nil {
+			return res, err
+		}
+		// Use the “optional” type for data in WorkerJobs (OptWorkerJobsData).
+		optData := api.NewOptWorkerJobsData(nil) // Initialize empty
+		// WorkerJobsData is defined as map[string]jx.Raw, but you can store a normal map if needed.
+		// Either re-marshal or directly use a cast, e.g. dataMap to map[string]jx.Raw.
+		// For simplicity, you can re-marshal then unmarshal into map[string]jx.Raw:
+		rawJSON, err := json.Marshal(dataMap)
+		if err != nil {
+			return res, err
+		}
+		var workerData api.WorkerJobsData
+		if err := json.Unmarshal(rawJSON, &workerData); err != nil {
+			return res, err
+		}
+		optData.Value = workerData
+		optData.Set = true
+		res.Data = optData
+	}
 
+	// Set started_at if valid
 	if dbRow.StartedAt.Valid {
 		res.StartedAt.SetTo(dbRow.StartedAt.Time)
 	}
+	// Set finished_at if valid
 	if dbRow.FinishedAt.Valid {
 		res.FinishedAt.SetTo(dbRow.FinishedAt.Time)
 	}

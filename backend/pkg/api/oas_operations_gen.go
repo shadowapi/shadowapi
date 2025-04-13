@@ -46,6 +46,7 @@ const (
 	ListUsersOperation                  OperationName = "ListUsers"
 	MessageEmailQueryOperation          OperationName = "MessageEmailQuery"
 	MessageLinkedinQueryOperation       OperationName = "MessageLinkedinQuery"
+	MessageQueryOperation               OperationName = "MessageQuery"
 	MessageTelegramQueryOperation       OperationName = "MessageTelegramQuery"
 	MessageWhatsappQueryOperation       OperationName = "MessageWhatsappQuery"
 	OAuth2ClientCallbackOperation       OperationName = "OAuth2ClientCallback"

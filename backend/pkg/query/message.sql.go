@@ -188,9 +188,7 @@ WITH filtered_messages AS (
     WHERE
         (NULLIF($5, '') IS NULL OR m.type = $5) AND
         (NULLIF($6, '') IS NULL OR m.format = $6) AND
-        ($7::uuid IS NULL OR m.chat_uuid = $7::uuid) AND
-        ($8::uuid IS NULL OR m.thread_uuid = $8::uuid) AND
-        (NULLIF($9, '') IS NULL OR m.sender = $9)
+        (NULLIF($7, '') IS NULL OR m.sender = $7)
 )
 SELECT
     uuid, format, type, chat_uuid, thread_uuid, external_message_id, sender, recipients, subject, body, body_parsed, reactions, attachments, forward_from, reply_to_message_uuid, forward_from_chat_uuid, forward_from_message_uuid, forward_meta, meta, created_at, updated_at,
@@ -213,8 +211,6 @@ type GetMessagesParams struct {
 	Limit          int32       `json:"limit"`
 	Type           interface{} `json:"type"`
 	Format         interface{} `json:"format"`
-	ChatUuid       pgtype.UUID `json:"chat_uuid"`
-	ThreadUuid     pgtype.UUID `json:"thread_uuid"`
 	Sender         interface{} `json:"sender"`
 }
 
@@ -243,6 +239,8 @@ type GetMessagesRow struct {
 	TotalCount             int64              `json:"total_count"`
 }
 
+// (NULLIF(sqlc.arg('chat_uuid'), ”) IS NULL OR sp.chat_uuid = sqlc.arg('chat_uuid')::uuid) AND
+// (NULLIF(sqlc.arg('thread_uuid'), ”) IS NULL OR sp.thread_uuid = sqlc.arg('thread_uuid')::uuid) AND
 func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]GetMessagesRow, error) {
 	rows, err := q.db.Query(ctx, getMessages,
 		arg.OrderBy,
@@ -251,8 +249,6 @@ func (q *Queries) GetMessages(ctx context.Context, arg GetMessagesParams) ([]Get
 		arg.Limit,
 		arg.Type,
 		arg.Format,
-		arg.ChatUuid,
-		arg.ThreadUuid,
 		arg.Sender,
 	)
 	if err != nil {

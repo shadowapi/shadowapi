@@ -5,7 +5,7 @@ additionalProperties: false
 properties:
   source:
     type: string
-    enum: ["email", "whatsapp", "telegram", "linkedin", "custom"]
+    enum: ["email", "whatsapp", "telegram", "linkedin", "custom", "unified"]
     description: "Platform or data source to query from."
   query:
     type: string

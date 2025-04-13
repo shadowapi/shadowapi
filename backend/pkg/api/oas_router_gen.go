@@ -577,6 +577,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
+				case 'q': // Prefix: "query"
+					origElem := elem
+					if l := len("query"); len(elem) >= l && elem[0:l] == "query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleMessageQueryRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
 				case 't': // Prefix: "telegram/query"
 					origElem := elem
 					if l := len("telegram/query"); len(elem) >= l && elem[0:l] == "telegram/query" {
@@ -2186,6 +2207,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.summary = ""
 							r.operationID = "messageLinkedinQuery"
 							r.pathPattern = "/message/linkedin/query"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'q': // Prefix: "query"
+					origElem := elem
+					if l := len("query"); len(elem) >= l && elem[0:l] == "query" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = MessageQueryOperation
+							r.summary = ""
+							r.operationID = "messageQuery"
+							r.pathPattern = "/message/query"
 							r.args = args
 							r.count = 0
 							return r, true

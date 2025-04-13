@@ -66,8 +66,8 @@ WITH filtered_messages AS (
     WHERE
         (NULLIF(sqlc.arg('type'), '') IS NULL OR m.type = sqlc.arg('type')) AND
         (NULLIF(sqlc.arg('format'), '') IS NULL OR m.format = sqlc.arg('format')) AND
-        (sqlc.arg('chat_uuid')::uuid IS NULL OR m.chat_uuid = sqlc.arg('chat_uuid')::uuid) AND
-        (sqlc.arg('thread_uuid')::uuid IS NULL OR m.thread_uuid = sqlc.arg('thread_uuid')::uuid) AND
+--         (NULLIF(sqlc.arg('chat_uuid'), '') IS NULL OR sp.chat_uuid = sqlc.arg('chat_uuid')::uuid) AND
+--         (NULLIF(sqlc.arg('thread_uuid'), '') IS NULL OR sp.thread_uuid = sqlc.arg('thread_uuid')::uuid) AND
         (NULLIF(sqlc.arg('sender'), '') IS NULL OR m.sender = sqlc.arg('sender'))
 )
 SELECT

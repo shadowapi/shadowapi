@@ -373,6 +373,15 @@ func (UnimplementedHandler) MessageLinkedinQuery(ctx context.Context, req *Messa
 	return r, ht.ErrNotImplemented
 }
 
+// MessageQuery implements messageQuery operation.
+//
+// Execute a search query on unified messages.
+//
+// POST /message/query
+func (UnimplementedHandler) MessageQuery(ctx context.Context, req *MessageQuery) (r *MessageQueryOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // MessageTelegramQuery implements messageTelegramQuery operation.
 //
 // Execute a search query on Telegram messages.

@@ -603,6 +603,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/message/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Execute a search query on unified messages. */
+        post: operations["messageQuery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/message/email/query": {
         parameters: {
             query?: never;
@@ -1339,7 +1356,7 @@ export interface components {
              * @description Platform or data source to query from.
              * @enum {string}
              */
-            source: "email" | "whatsapp" | "telegram" | "linkedin" | "custom";
+            source: "email" | "whatsapp" | "telegram" | "linkedin" | "custom" | "unified";
             /** @description Free-text or advanced operator query. E.g., 'from:', 'to:', 'subject:', 'after:', 'before:'. */
             query?: string;
             /** @description ID of the chat/conversation to filter messages from. */
@@ -3819,6 +3836,42 @@ export interface operations {
                 };
             };
             /** @description Error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    messageQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["message_query"];
+            };
+        };
+        responses: {
+            /** @description List of matching unified messages. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description List of messages matching the query. */
+                        messages: components["schemas"]["message"][];
+                    };
+                };
+            };
+            /** @description Query execution error. */
             default: {
                 headers: {
                     [name: string]: unknown;
