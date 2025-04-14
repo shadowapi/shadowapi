@@ -50,7 +50,7 @@ export function WorkerJobs() {
     <FullLayout>
       <Flex direction="row" gap="size-200" margin="size-200" flex>
         {/* LEFT SIDE: Worker Jobs Table */}
-        <View flex>
+        <View flex={1} minWidth={0}>
           <Heading level={3} marginBottom="size-100">
             Worker Jobs
           </Heading>
@@ -98,11 +98,17 @@ export function WorkerJobs() {
           <View
             backgroundColor="gray-100"
             padding="size-200"
-            width="size-4600"
             borderStartWidth="thin"
             borderColor="dark"
             overflow="auto"
-            UNSAFE_style={{ boxSizing: 'border-box' }}
+            width="460px"
+            flexShrink={0}
+            flexGrow={0}
+            flexBasis="460px"
+            UNSAFE_style={{
+              boxSizing: 'border-box',
+              minWidth: '460px',
+            }}
           >
             <Flex justifyContent="space-between" alignItems="center" marginBottom="size-100">
               <Heading level={4}>Preview Worker Job</Heading>

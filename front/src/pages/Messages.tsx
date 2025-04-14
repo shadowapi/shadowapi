@@ -44,7 +44,7 @@ export function Messages() {
   return (
     <FullLayout>
       <Flex direction="row" gap="size-200" margin="size-200" flex>
-        <View flex>
+        <View flex={1} minWidth={0}>
           <Heading level={3} marginBottom="size-100">
             Messages
           </Heading>

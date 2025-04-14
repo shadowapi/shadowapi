@@ -50,7 +50,7 @@ export function Files() {
     <FullLayout>
       <Flex direction="row" gap="size-200" margin="size-200" flex>
         {/* LEFT SIDE: Files Table */}
-        <View flex>
+        <View flex={1} minWidth={0}>
           <Heading level={3} marginBottom="size-100">
             Files
           </Heading>
