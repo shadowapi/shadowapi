@@ -580,72 +580,6 @@ func decodeDatasourceEmailOAuthUpdateParams(args [1]string, argsEscaped bool, r 
 	return params, nil
 }
 
-// DatasourceEmailRunPipelineParams is parameters of datasource-email-run-pipeline operation.
-type DatasourceEmailRunPipelineParams struct {
-	// UUID of the datasource base object.
-	UUID string
-}
-
-func unpackDatasourceEmailRunPipelineParams(packed middleware.Parameters) (params DatasourceEmailRunPipelineParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeDatasourceEmailRunPipelineParams(args [1]string, argsEscaped bool, r *http.Request) (params DatasourceEmailRunPipelineParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // DatasourceEmailUpdateParams is parameters of datasource-email-update operation.
 type DatasourceEmailUpdateParams struct {
 	// UUID of the datasource.
@@ -2535,22 +2469,22 @@ func decodeOAuth2ClientCallbackParams(args [0]string, argsEscaped bool, r *http.
 // OAuth2ClientDeleteParams is parameters of oauth2-client-delete operation.
 type OAuth2ClientDeleteParams struct {
 	// ID of the connection base object.
-	ID string
+	UUID string
 }
 
 func unpackOAuth2ClientDeleteParams(packed middleware.Parameters) (params OAuth2ClientDeleteParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "id",
+			Name: "uuid",
 			In:   "path",
 		}
-		params.ID = packed[key].(string)
+		params.UUID = packed[key].(string)
 	}
 	return params
 }
 
 func decodeOAuth2ClientDeleteParams(args [1]string, argsEscaped bool, r *http.Request) (params OAuth2ClientDeleteParams, _ error) {
-	// Decode path: id.
+	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
@@ -2562,7 +2496,7 @@ func decodeOAuth2ClientDeleteParams(args [1]string, argsEscaped bool, r *http.Re
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "id",
+				Param:   "uuid",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -2579,7 +2513,7 @@ func decodeOAuth2ClientDeleteParams(args [1]string, argsEscaped bool, r *http.Re
 					return err
 				}
 
-				params.ID = c
+				params.UUID = c
 				return nil
 			}(); err != nil {
 				return err
@@ -2590,7 +2524,7 @@ func decodeOAuth2ClientDeleteParams(args [1]string, argsEscaped bool, r *http.Re
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "id",
+			Name: "uuid",
 			In:   "path",
 			Err:  err,
 		}
@@ -2601,22 +2535,22 @@ func decodeOAuth2ClientDeleteParams(args [1]string, argsEscaped bool, r *http.Re
 // OAuth2ClientGetParams is parameters of oauth2-client-get operation.
 type OAuth2ClientGetParams struct {
 	// ClientID of the OAuth2 client.
-	ID string
+	UUID string
 }
 
 func unpackOAuth2ClientGetParams(packed middleware.Parameters) (params OAuth2ClientGetParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "id",
+			Name: "uuid",
 			In:   "path",
 		}
-		params.ID = packed[key].(string)
+		params.UUID = packed[key].(string)
 	}
 	return params
 }
 
 func decodeOAuth2ClientGetParams(args [1]string, argsEscaped bool, r *http.Request) (params OAuth2ClientGetParams, _ error) {
-	// Decode path: id.
+	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
@@ -2628,7 +2562,7 @@ func decodeOAuth2ClientGetParams(args [1]string, argsEscaped bool, r *http.Reque
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "id",
+				Param:   "uuid",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -2645,7 +2579,7 @@ func decodeOAuth2ClientGetParams(args [1]string, argsEscaped bool, r *http.Reque
 					return err
 				}
 
-				params.ID = c
+				params.UUID = c
 				return nil
 			}(); err != nil {
 				return err
@@ -2656,7 +2590,7 @@ func decodeOAuth2ClientGetParams(args [1]string, argsEscaped bool, r *http.Reque
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "id",
+			Name: "uuid",
 			In:   "path",
 			Err:  err,
 		}
@@ -2970,22 +2904,22 @@ func decodeOAuth2ClientTokenListParams(args [1]string, argsEscaped bool, r *http
 // OAuth2ClientUpdateParams is parameters of oauth2-client-update operation.
 type OAuth2ClientUpdateParams struct {
 	// ClientID of the OAuth2 client details.
-	ID string
+	UUID string
 }
 
 func unpackOAuth2ClientUpdateParams(packed middleware.Parameters) (params OAuth2ClientUpdateParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "id",
+			Name: "uuid",
 			In:   "path",
 		}
-		params.ID = packed[key].(string)
+		params.UUID = packed[key].(string)
 	}
 	return params
 }
 
 func decodeOAuth2ClientUpdateParams(args [1]string, argsEscaped bool, r *http.Request) (params OAuth2ClientUpdateParams, _ error) {
-	// Decode path: id.
+	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
@@ -2997,7 +2931,7 @@ func decodeOAuth2ClientUpdateParams(args [1]string, argsEscaped bool, r *http.Re
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "id",
+				Param:   "uuid",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -3014,7 +2948,7 @@ func decodeOAuth2ClientUpdateParams(args [1]string, argsEscaped bool, r *http.Re
 					return err
 				}
 
-				params.ID = c
+				params.UUID = c
 				return nil
 			}(); err != nil {
 				return err
@@ -3025,7 +2959,7 @@ func decodeOAuth2ClientUpdateParams(args [1]string, argsEscaped bool, r *http.Re
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "id",
+			Name: "uuid",
 			In:   "path",
 			Err:  err,
 		}

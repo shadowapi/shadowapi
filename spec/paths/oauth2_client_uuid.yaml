@@ -4,7 +4,7 @@ get:
   parameters:
     - description: ClientID of the OAuth2 client.
       in: path
-      name: id
+      name: uuid
       required: true
       schema:
         description: ClientID of the OAuth2 client.
@@ -30,7 +30,7 @@ put:
   parameters:
     - description: ClientID of the OAuth2 client details.
       in: path
-      name: id
+      name: uuid
       required: true
       schema:
         description: ClientID of the OAuth2 client details.
@@ -51,10 +51,14 @@ put:
             secret:
               description: Secret of the client.
               type: string
+            client_id:
+              description: Client ID.
+              type: string
           required:
             - name
             - provider
             - secret
+            - client_id
     required: true
   responses:
     "200":
@@ -77,7 +81,7 @@ delete:
   parameters:
     - description: ID of the connection base object.
       in: path
-      name: id
+      name: uuid
       required: true
       schema:
         description: ID of the connection base object.

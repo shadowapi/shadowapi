@@ -17,7 +17,6 @@ const (
 	DatasourceEmailOAuthGetOperation    OperationName = "DatasourceEmailOAuthGet"
 	DatasourceEmailOAuthListOperation   OperationName = "DatasourceEmailOAuthList"
 	DatasourceEmailOAuthUpdateOperation OperationName = "DatasourceEmailOAuthUpdate"
-	DatasourceEmailRunPipelineOperation OperationName = "DatasourceEmailRunPipeline"
 	DatasourceEmailUpdateOperation      OperationName = "DatasourceEmailUpdate"
 	DatasourceLinkedinCreateOperation   OperationName = "DatasourceLinkedinCreate"
 	DatasourceLinkedinDeleteOperation   OperationName = "DatasourceLinkedinDelete"

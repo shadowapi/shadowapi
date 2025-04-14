@@ -95,12 +95,6 @@ type Invoker interface {
 	//
 	// PUT /datasource/email_oauth/{uuid}
 	DatasourceEmailOAuthUpdate(ctx context.Context, request *DatasourceEmailOAuth, params DatasourceEmailOAuthUpdateParams) (*DatasourceEmailOAuth, error)
-	// DatasourceEmailRunPipeline invokes datasource-email-run-pipeline operation.
-	//
-	// Run datasource email pipeline.
-	//
-	// POST /datasource/email/{uuid}/run/pipeline
-	DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (*DatasourceEmailRunPipelineOK, error)
 	// DatasourceEmailUpdate invokes datasource-email-update operation.
 	//
 	// Update an email datasource.
@@ -333,13 +327,13 @@ type Invoker interface {
 	//
 	// Delete OAuth2 client.
 	//
-	// DELETE /oauth2/client/{id}
+	// DELETE /oauth2/client/{uuid}
 	OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error
 	// OAuth2ClientGet invokes oauth2-client-get operation.
 	//
 	// Get OAuth2 client details.
 	//
-	// GET /oauth2/client/{id}
+	// GET /oauth2/client/{uuid}
 	OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (*OAuth2Client, error)
 	// OAuth2ClientList invokes oauth2-client-list operation.
 	//
@@ -369,7 +363,7 @@ type Invoker interface {
 	//
 	// Update OAuth2 client.
 	//
-	// PUT /oauth2/client/{id}
+	// PUT /oauth2/client/{uuid}
 	OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error)
 	// PipelineCreate invokes pipeline-create operation.
 	//
@@ -2105,142 +2099,6 @@ func (c *Client) sendDatasourceEmailOAuthUpdate(ctx context.Context, request *Da
 
 	stage = "DecodeResponse"
 	result, err := decodeDatasourceEmailOAuthUpdateResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// DatasourceEmailRunPipeline invokes datasource-email-run-pipeline operation.
-//
-// Run datasource email pipeline.
-//
-// POST /datasource/email/{uuid}/run/pipeline
-func (c *Client) DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (*DatasourceEmailRunPipelineOK, error) {
-	res, err := c.sendDatasourceEmailRunPipeline(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendDatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (res *DatasourceEmailRunPipelineOK, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("datasource-email-run-pipeline"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/datasource/email/{uuid}/run/pipeline"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, DatasourceEmailRunPipelineOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/datasource/email/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/run/pipeline"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailRunPipelineOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailRunPipelineOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDatasourceEmailRunPipelineResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7305,7 +7163,7 @@ func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2Clie
 //
 // Delete OAuth2 client.
 //
-// DELETE /oauth2/client/{id}
+// DELETE /oauth2/client/{uuid}
 func (c *Client) OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error {
 	_, err := c.sendOAuth2ClientDelete(ctx, params)
 	return err
@@ -7315,7 +7173,7 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-delete"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/oauth2/client/{id}"),
+		semconv.HTTPRouteKey.String("/oauth2/client/{uuid}"),
 	}
 
 	// Run stopwatch.
@@ -7350,14 +7208,14 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 	var pathParts [2]string
 	pathParts[0] = "/oauth2/client/"
 	{
-		// Encode "id" parameter.
+		// Encode "uuid" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
+			Param:   "uuid",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.UUID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -7440,7 +7298,7 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 //
 // Get OAuth2 client details.
 //
-// GET /oauth2/client/{id}
+// GET /oauth2/client/{uuid}
 func (c *Client) OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (*OAuth2Client, error) {
 	res, err := c.sendOAuth2ClientGet(ctx, params)
 	return res, err
@@ -7450,7 +7308,7 @@ func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGet
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-get"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/oauth2/client/{id}"),
+		semconv.HTTPRouteKey.String("/oauth2/client/{uuid}"),
 	}
 
 	// Run stopwatch.
@@ -7485,14 +7343,14 @@ func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGet
 	var pathParts [2]string
 	pathParts[0] = "/oauth2/client/"
 	{
-		// Encode "id" parameter.
+		// Encode "uuid" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
+			Param:   "uuid",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.UUID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -8140,7 +7998,7 @@ func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2Cli
 //
 // Update OAuth2 client.
 //
-// PUT /oauth2/client/{id}
+// PUT /oauth2/client/{uuid}
 func (c *Client) OAuth2ClientUpdate(ctx context.Context, request *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error) {
 	res, err := c.sendOAuth2ClientUpdate(ctx, request, params)
 	return res, err
@@ -8150,7 +8008,7 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("oauth2-client-update"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/oauth2/client/{id}"),
+		semconv.HTTPRouteKey.String("/oauth2/client/{uuid}"),
 	}
 
 	// Run stopwatch.
@@ -8185,14 +8043,14 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 	var pathParts [2]string
 	pathParts[0] = "/oauth2/client/"
 	{
-		// Encode "id" parameter.
+		// Encode "uuid" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
+			Param:   "uuid",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.UUID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

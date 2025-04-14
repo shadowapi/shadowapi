@@ -155,23 +155,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/datasource/email/{uuid}/run/pipeline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Run datasource email pipeline */
-        post: operations["datasource-email-run-pipeline"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/datasource/telegram": {
         parameters: {
             query?: never;
@@ -318,7 +301,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/oauth2/client/{id}": {
+    "/oauth2/client/{uuid}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1110,30 +1093,6 @@ export interface components {
             /** Format: date-time */
             readonly updated_at?: string;
         };
-        email_label: {
-            /** Format: int64 */
-            HTTPStatusCode: number;
-            Header: {
-                [key: string]: string[];
-            };
-            id?: string;
-            color?: {
-                backgroundColor?: string;
-                textColor?: string;
-            };
-            labelListVisibility?: string;
-            messageListVisibility?: string;
-            /** Format: int64 */
-            messagesTotal?: number;
-            /** Format: int64 */
-            messagesUnread?: number;
-            name?: string;
-            /** Format: int64 */
-            threadsTotal?: number;
-            /** Format: int64 */
-            threadsUnread?: number;
-            type?: string;
-        };
         /** @description List of session logs for an account */
         telegram_session_history: {
             /** @description Unique session identifier */
@@ -1745,6 +1704,30 @@ export interface components {
              */
             finished_at?: string;
         };
+        email_label: {
+            /** Format: int64 */
+            HTTPStatusCode: number;
+            Header: {
+                [key: string]: string[];
+            };
+            id?: string;
+            color?: {
+                backgroundColor?: string;
+                textColor?: string;
+            };
+            labelListVisibility?: string;
+            messageListVisibility?: string;
+            /** Format: int64 */
+            messagesTotal?: number;
+            /** Format: int64 */
+            messagesUnread?: number;
+            name?: string;
+            /** Format: int64 */
+            threadsTotal?: number;
+            /** Format: int64 */
+            threadsUnread?: number;
+            type?: string;
+        };
         oauth2_state: {
             uuid?: string;
             client_uuid: string;
@@ -2343,41 +2326,6 @@ export interface operations {
             };
         };
     };
-    "datasource-email-run-pipeline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the datasource base object. */
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description List of labels. */
-                        labels: components["schemas"]["email_label"][];
-                    };
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
     "datasource-telegram-list": {
         parameters: {
             query?: {
@@ -2962,6 +2910,8 @@ export interface operations {
                     provider: string;
                     /** @description Secret of the client. */
                     secret: string;
+                    /** @description Client ID. */
+                    client_id: string;
                 };
             };
         };
@@ -2992,7 +2942,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description ClientID of the OAuth2 client. */
-                id: string;
+                uuid: string;
             };
             cookie?: never;
         };
@@ -3024,7 +2974,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description ClientID of the OAuth2 client details. */
-                id: string;
+                uuid: string;
             };
             cookie?: never;
         };
@@ -3037,6 +2987,8 @@ export interface operations {
                     provider: string;
                     /** @description Secret of the client. */
                     secret: string;
+                    /** @description Client ID. */
+                    client_id: string;
                 };
             };
         };
@@ -3067,7 +3019,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description ID of the connection base object. */
-                id: string;
+                uuid: string;
             };
             cookie?: never;
         };

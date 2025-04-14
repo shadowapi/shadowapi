@@ -3,6 +3,7 @@ package oauth2
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"log/slog"
 	"time"
 
@@ -72,7 +73,7 @@ func (t *tokenStore) saveToken(token *oauth2.Token) error {
 	}
 
 	update := query.UpdateOauth2TokenParams{
-		UUID:  t.tokenUUID,
+		UUID:  converter.UuidToPgUUID(t.tokenUUID),
 		Token: tokenData,
 	}
 	if err := tx.UpdateOauth2Token(t.ctx, update); err != nil {
@@ -84,14 +85,14 @@ func (t *tokenStore) saveToken(token *oauth2.Token) error {
 
 func (t *tokenStore) loadToken() (*oauth2.Token, error) {
 	tx := query.New(t.dbp)
-	tokenData, err := tx.GetOauth2TokenByUUID(t.ctx, t.tokenUUID)
+	tokenData, err := tx.GetOauth2TokenByUUID(t.ctx, converter.UuidToPgUUID(t.tokenUUID))
 	if err != nil {
 		slog.Error("failed to get token by uuid", "uuid", t.tokenUUID)
 		return nil, err
 	}
 
 	var token oauth2.Token
-	if err := json.Unmarshal([]byte(tokenData.Token), &token); err != nil {
+	if err := json.Unmarshal([]byte(tokenData.Oauth2Token.Token), &token); err != nil {
 		slog.Error("failed to unmarshal token", "error", err)
 		return nil, err
 	}

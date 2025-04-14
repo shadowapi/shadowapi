@@ -64,10 +64,14 @@ post:
             secret:
               description: Secret of the client.
               type: string
+            client_id:
+              description: Client ID.
+              type: string
           required:
             - id
             - name
             - secret
+            - client_id
             - provider
     required: true
   responses:

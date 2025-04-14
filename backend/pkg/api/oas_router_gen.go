@@ -182,15 +182,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							// Param: "uuid"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
 
 							if len(elem) == 0 {
+								// Leaf node.
 								switch r.Method {
 								case "DELETE":
 									s.handleDatasourceEmailDeleteRequest([1]string{
@@ -209,31 +206,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								}
 
 								return
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/run/pipeline"
-								origElem := elem
-								if l := len("/run/pipeline"); len(elem) >= l && elem[0:l] == "/run/pipeline" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "POST":
-										s.handleDatasourceEmailRunPipelineRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "POST")
-									}
-
-									return
-								}
-
-								elem = origElem
 							}
 
 							elem = origElem
@@ -777,7 +749,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								break
 							}
 
-							// Param: "id"
+							// Param: "uuid"
 							// Match until "/"
 							idx := strings.IndexByte(elem, '/')
 							if idx < 0 {
@@ -1779,15 +1751,12 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 
 							// Param: "uuid"
-							// Match until "/"
-							idx := strings.IndexByte(elem, '/')
-							if idx < 0 {
-								idx = len(elem)
-							}
-							args[0] = elem[:idx]
-							elem = elem[idx:]
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
 
 							if len(elem) == 0 {
+								// Leaf node.
 								switch method {
 								case "DELETE":
 									r.name = DatasourceEmailDeleteOperation
@@ -1816,33 +1785,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								default:
 									return
 								}
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/run/pipeline"
-								origElem := elem
-								if l := len("/run/pipeline"); len(elem) >= l && elem[0:l] == "/run/pipeline" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "POST":
-										r.name = DatasourceEmailRunPipelineOperation
-										r.summary = ""
-										r.operationID = "datasource-email-run-pipeline"
-										r.pathPattern = "/datasource/email/{uuid}/run/pipeline"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
-
-								elem = origElem
 							}
 
 							elem = origElem
@@ -2522,7 +2464,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								break
 							}
 
-							// Param: "id"
+							// Param: "uuid"
 							// Match until "/"
 							idx := strings.IndexByte(elem, '/')
 							if idx < 0 {
@@ -2537,7 +2479,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = OAuth2ClientDeleteOperation
 									r.summary = ""
 									r.operationID = "oauth2-client-delete"
-									r.pathPattern = "/oauth2/client/{id}"
+									r.pathPattern = "/oauth2/client/{uuid}"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -2545,7 +2487,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = OAuth2ClientGetOperation
 									r.summary = ""
 									r.operationID = "oauth2-client-get"
-									r.pathPattern = "/oauth2/client/{id}"
+									r.pathPattern = "/oauth2/client/{uuid}"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -2553,7 +2495,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = OAuth2ClientUpdateOperation
 									r.summary = ""
 									r.operationID = "oauth2-client-update"
-									r.pathPattern = "/oauth2/client/{id}"
+									r.pathPattern = "/oauth2/client/{uuid}"
 									r.args = args
 									r.count = 1
 									return r, true

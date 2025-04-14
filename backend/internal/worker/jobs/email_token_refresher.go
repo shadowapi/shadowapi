@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"log/slog"
@@ -52,19 +53,20 @@ func NewTokenRefresherJob(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, a
 func (t *TokenRefresherJob) Execute(ctx context.Context) error {
 	log := t.log.With("token_uuid", t.args.TokenUUID, "worker", "TokenRefresherJob")
 	log.Debug("Starting token refresh job")
-	token, err := db.InTx(ctx, t.dbp, func(tx pgx.Tx) (*oauth2.Token, error) {
-		// Use the query helper with the transaction.
+	refreshedToken, err := db.InTx(ctx, t.dbp, func(tx pgx.Tx) (*oauth2.Token, error) {
 		qh := query.New(t.dbp).WithTx(tx)
-		tokenData, err := qh.GetOauth2TokenByUUID(ctx, t.args.TokenUUID)
+		tokenRow, err := qh.GetOauth2TokenByUUID(ctx, converter.UuidToPgUUID(t.args.TokenUUID))
 		if err != nil {
 			return nil, err
 		}
 		var token oauth2.Token
-		if err = json.Unmarshal(tokenData.Token, &token); err != nil {
+		if err = json.Unmarshal(tokenRow.Oauth2Token.Token, &token); err != nil {
 			log.Error("Failed to unmarshal token data", "error", err)
 			return nil, err
 		}
-		config, err := oauthTools.GetClientConfig(ctx, t.dbp, tokenData.ClientID)
+		// Use the associated client UUID as the OAuth2 client identifier.
+		clientID := tokenRow.Oauth2Token.ClientUuid.String()
+		config, err := oauthTools.GetClientConfig(ctx, t.dbp, clientID)
 		if err != nil {
 			log.Error("Failed to get OAuth2 client config", "error", err)
 			return nil, err
@@ -72,7 +74,7 @@ func (t *TokenRefresherJob) Execute(ctx context.Context) error {
 		refreshedToken, err := config.TokenSource(ctx, &token).Token()
 		if err != nil {
 			log.Error("Failed to refresh token, deleting it", "error", err)
-			if delErr := qh.DeleteOauth2Token(ctx, t.args.TokenUUID); delErr != nil {
+			if delErr := qh.DeleteOauth2Token(ctx, converter.UuidToPgUUID(t.args.TokenUUID)); delErr != nil {
 				log.Error("Failed to delete broken token", "error", delErr)
 			}
 			return nil, err
@@ -85,13 +87,11 @@ func (t *TokenRefresherJob) Execute(ctx context.Context) error {
 	} else if err != nil {
 		return err
 	}
-
 	log.Debug("Token refreshed successfully", "token_uuid", t.args.TokenUUID)
-	// Reschedule the next token refresh.
-	return ScheduleTokenRefresh(ctx, t.queue, t.args.TokenUUID, token.Expiry, t.log)
+	return ScheduleTokenRefresh(ctx, t.queue, t.args.TokenUUID, refreshedToken.Expiry, t.log)
 }
 
-// scheduleTokenRefresh schedules a new token refresh job by publishing a message.
+// ScheduleTokenRefresh schedules a new token refresh job by publishing a message.
 func ScheduleTokenRefresh(ctx context.Context, q *queue.Queue, tokenUUID uuid.UUID, expiry time.Time, log *slog.Logger) error {
 	delay := time.Until(expiry)
 	log.Debug("Scheduling next token refresh", "delay", delay)
@@ -104,7 +104,6 @@ func ScheduleTokenRefresh(ctx context.Context, q *queue.Queue, tokenUUID uuid.UU
 		log.Error("Failed to marshal token refresh args", "error", err)
 		return err
 	}
-	// Publish using the registered worker subject.
 	return q.Publish(ctx, registry.WorkerSubjectTokenRefresh, msg)
 }
 
@@ -115,7 +114,6 @@ func TokenRefresherJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queu
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err
 		}
-		// If the job is not yet ready, return a JobNotReadyError.
 		if time.Now().UTC().Before(args.Expiry) {
 			return nil, types.JobNotReadyError{Delay: time.Until(args.Expiry)}
 		}

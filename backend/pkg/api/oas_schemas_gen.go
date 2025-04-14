@@ -1790,21 +1790,6 @@ func (s *DatasourceEmailOAuth) SetUpdatedAt(val OptDateTime) {
 // DatasourceEmailOAuthDeleteOK is response for DatasourceEmailOAuthDelete operation.
 type DatasourceEmailOAuthDeleteOK struct{}
 
-type DatasourceEmailRunPipelineOK struct {
-	// List of labels.
-	Labels []EmailLabel `json:"labels"`
-}
-
-// GetLabels returns the value of Labels.
-func (s *DatasourceEmailRunPipelineOK) GetLabels() []EmailLabel {
-	return s.Labels
-}
-
-// SetLabels sets the value of Labels.
-func (s *DatasourceEmailRunPipelineOK) SetLabels(val []EmailLabel) {
-	s.Labels = val
-}
-
 // LinkedIn datasource object representation.
 // Ref: #
 type DatasourceLinkedin struct {
@@ -2302,178 +2287,6 @@ type DeleteContactOK struct{}
 
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
-
-// Ref: #
-type EmailLabel struct {
-	HTTPStatusCode        int64              `json:"HTTPStatusCode"`
-	Header                EmailLabelHeader   `json:"Header"`
-	ID                    OptString          `json:"id"`
-	Color                 OptEmailLabelColor `json:"color"`
-	LabelListVisibility   OptString          `json:"labelListVisibility"`
-	MessageListVisibility OptString          `json:"messageListVisibility"`
-	MessagesTotal         OptInt64           `json:"messagesTotal"`
-	MessagesUnread        OptInt64           `json:"messagesUnread"`
-	Name                  OptString          `json:"name"`
-	ThreadsTotal          OptInt64           `json:"threadsTotal"`
-	ThreadsUnread         OptInt64           `json:"threadsUnread"`
-	Type                  OptString          `json:"type"`
-}
-
-// GetHTTPStatusCode returns the value of HTTPStatusCode.
-func (s *EmailLabel) GetHTTPStatusCode() int64 {
-	return s.HTTPStatusCode
-}
-
-// GetHeader returns the value of Header.
-func (s *EmailLabel) GetHeader() EmailLabelHeader {
-	return s.Header
-}
-
-// GetID returns the value of ID.
-func (s *EmailLabel) GetID() OptString {
-	return s.ID
-}
-
-// GetColor returns the value of Color.
-func (s *EmailLabel) GetColor() OptEmailLabelColor {
-	return s.Color
-}
-
-// GetLabelListVisibility returns the value of LabelListVisibility.
-func (s *EmailLabel) GetLabelListVisibility() OptString {
-	return s.LabelListVisibility
-}
-
-// GetMessageListVisibility returns the value of MessageListVisibility.
-func (s *EmailLabel) GetMessageListVisibility() OptString {
-	return s.MessageListVisibility
-}
-
-// GetMessagesTotal returns the value of MessagesTotal.
-func (s *EmailLabel) GetMessagesTotal() OptInt64 {
-	return s.MessagesTotal
-}
-
-// GetMessagesUnread returns the value of MessagesUnread.
-func (s *EmailLabel) GetMessagesUnread() OptInt64 {
-	return s.MessagesUnread
-}
-
-// GetName returns the value of Name.
-func (s *EmailLabel) GetName() OptString {
-	return s.Name
-}
-
-// GetThreadsTotal returns the value of ThreadsTotal.
-func (s *EmailLabel) GetThreadsTotal() OptInt64 {
-	return s.ThreadsTotal
-}
-
-// GetThreadsUnread returns the value of ThreadsUnread.
-func (s *EmailLabel) GetThreadsUnread() OptInt64 {
-	return s.ThreadsUnread
-}
-
-// GetType returns the value of Type.
-func (s *EmailLabel) GetType() OptString {
-	return s.Type
-}
-
-// SetHTTPStatusCode sets the value of HTTPStatusCode.
-func (s *EmailLabel) SetHTTPStatusCode(val int64) {
-	s.HTTPStatusCode = val
-}
-
-// SetHeader sets the value of Header.
-func (s *EmailLabel) SetHeader(val EmailLabelHeader) {
-	s.Header = val
-}
-
-// SetID sets the value of ID.
-func (s *EmailLabel) SetID(val OptString) {
-	s.ID = val
-}
-
-// SetColor sets the value of Color.
-func (s *EmailLabel) SetColor(val OptEmailLabelColor) {
-	s.Color = val
-}
-
-// SetLabelListVisibility sets the value of LabelListVisibility.
-func (s *EmailLabel) SetLabelListVisibility(val OptString) {
-	s.LabelListVisibility = val
-}
-
-// SetMessageListVisibility sets the value of MessageListVisibility.
-func (s *EmailLabel) SetMessageListVisibility(val OptString) {
-	s.MessageListVisibility = val
-}
-
-// SetMessagesTotal sets the value of MessagesTotal.
-func (s *EmailLabel) SetMessagesTotal(val OptInt64) {
-	s.MessagesTotal = val
-}
-
-// SetMessagesUnread sets the value of MessagesUnread.
-func (s *EmailLabel) SetMessagesUnread(val OptInt64) {
-	s.MessagesUnread = val
-}
-
-// SetName sets the value of Name.
-func (s *EmailLabel) SetName(val OptString) {
-	s.Name = val
-}
-
-// SetThreadsTotal sets the value of ThreadsTotal.
-func (s *EmailLabel) SetThreadsTotal(val OptInt64) {
-	s.ThreadsTotal = val
-}
-
-// SetThreadsUnread sets the value of ThreadsUnread.
-func (s *EmailLabel) SetThreadsUnread(val OptInt64) {
-	s.ThreadsUnread = val
-}
-
-// SetType sets the value of Type.
-func (s *EmailLabel) SetType(val OptString) {
-	s.Type = val
-}
-
-type EmailLabelColor struct {
-	BackgroundColor OptString `json:"backgroundColor"`
-	TextColor       OptString `json:"textColor"`
-}
-
-// GetBackgroundColor returns the value of BackgroundColor.
-func (s *EmailLabelColor) GetBackgroundColor() OptString {
-	return s.BackgroundColor
-}
-
-// GetTextColor returns the value of TextColor.
-func (s *EmailLabelColor) GetTextColor() OptString {
-	return s.TextColor
-}
-
-// SetBackgroundColor sets the value of BackgroundColor.
-func (s *EmailLabelColor) SetBackgroundColor(val OptString) {
-	s.BackgroundColor = val
-}
-
-// SetTextColor sets the value of TextColor.
-func (s *EmailLabelColor) SetTextColor(val OptString) {
-	s.TextColor = val
-}
-
-type EmailLabelHeader map[string][]string
-
-func (s *EmailLabelHeader) init() EmailLabelHeader {
-	m := *s
-	if m == nil {
-		m = map[string][]string{}
-		*s = m
-	}
-	return m
-}
 
 // Ref: #
 type Error struct {
@@ -3689,6 +3502,8 @@ type OAuth2ClientCreateReq struct {
 	Provider string `json:"provider"`
 	// Secret of the client.
 	Secret string `json:"secret"`
+	// Client ID.
+	ClientID string `json:"client_id"`
 }
 
 // GetID returns the value of ID.
@@ -3711,6 +3526,11 @@ func (s *OAuth2ClientCreateReq) GetSecret() string {
 	return s.Secret
 }
 
+// GetClientID returns the value of ClientID.
+func (s *OAuth2ClientCreateReq) GetClientID() string {
+	return s.ClientID
+}
+
 // SetID sets the value of ID.
 func (s *OAuth2ClientCreateReq) SetID(val string) {
 	s.ID = val
@@ -3729,6 +3549,11 @@ func (s *OAuth2ClientCreateReq) SetProvider(val string) {
 // SetSecret sets the value of Secret.
 func (s *OAuth2ClientCreateReq) SetSecret(val string) {
 	s.Secret = val
+}
+
+// SetClientID sets the value of ClientID.
+func (s *OAuth2ClientCreateReq) SetClientID(val string) {
+	s.ClientID = val
 }
 
 // OAuth2ClientDeleteOK is response for OAuth2ClientDelete operation.
@@ -3874,6 +3699,8 @@ type OAuth2ClientUpdateReq struct {
 	Provider string `json:"provider"`
 	// Secret of the client.
 	Secret string `json:"secret"`
+	// Client ID.
+	ClientID string `json:"client_id"`
 }
 
 // GetName returns the value of Name.
@@ -3891,6 +3718,11 @@ func (s *OAuth2ClientUpdateReq) GetSecret() string {
 	return s.Secret
 }
 
+// GetClientID returns the value of ClientID.
+func (s *OAuth2ClientUpdateReq) GetClientID() string {
+	return s.ClientID
+}
+
 // SetName sets the value of Name.
 func (s *OAuth2ClientUpdateReq) SetName(val string) {
 	s.Name = val
@@ -3904,6 +3736,11 @@ func (s *OAuth2ClientUpdateReq) SetProvider(val string) {
 // SetSecret sets the value of Secret.
 func (s *OAuth2ClientUpdateReq) SetSecret(val string) {
 	s.Secret = val
+}
+
+// SetClientID sets the value of ClientID.
+func (s *OAuth2ClientUpdateReq) SetClientID(val string) {
+	s.ClientID = val
 }
 
 // NewOptBool returns new OptBool with value set to v.
@@ -4176,52 +4013,6 @@ func (o OptDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDateTime) Or(d time.Time) time.Time {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptEmailLabelColor returns new OptEmailLabelColor with value set to v.
-func NewOptEmailLabelColor(v EmailLabelColor) OptEmailLabelColor {
-	return OptEmailLabelColor{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptEmailLabelColor is optional EmailLabelColor.
-type OptEmailLabelColor struct {
-	Value EmailLabelColor
-	Set   bool
-}
-
-// IsSet returns true if OptEmailLabelColor was set.
-func (o OptEmailLabelColor) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptEmailLabelColor) Reset() {
-	var v EmailLabelColor
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptEmailLabelColor) SetTo(v EmailLabelColor) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptEmailLabelColor) Get() (v EmailLabelColor, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptEmailLabelColor) Or(d EmailLabelColor) EmailLabelColor {
 	if v, ok := o.Get(); ok {
 		return v
 	}

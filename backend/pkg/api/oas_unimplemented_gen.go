@@ -112,15 +112,6 @@ func (UnimplementedHandler) DatasourceEmailOAuthUpdate(ctx context.Context, req 
 	return r, ht.ErrNotImplemented
 }
 
-// DatasourceEmailRunPipeline implements datasource-email-run-pipeline operation.
-//
-// Run datasource email pipeline.
-//
-// POST /datasource/email/{uuid}/run/pipeline
-func (UnimplementedHandler) DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (r *DatasourceEmailRunPipelineOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // DatasourceEmailUpdate implements datasource-email-update operation.
 //
 // Update an email datasource.
@@ -467,7 +458,7 @@ func (UnimplementedHandler) OAuth2ClientCreate(ctx context.Context, req *OAuth2C
 //
 // Delete OAuth2 client.
 //
-// DELETE /oauth2/client/{id}
+// DELETE /oauth2/client/{uuid}
 func (UnimplementedHandler) OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error {
 	return ht.ErrNotImplemented
 }
@@ -476,7 +467,7 @@ func (UnimplementedHandler) OAuth2ClientDelete(ctx context.Context, params OAuth
 //
 // Get OAuth2 client details.
 //
-// GET /oauth2/client/{id}
+// GET /oauth2/client/{uuid}
 func (UnimplementedHandler) OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (r *OAuth2Client, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -521,7 +512,7 @@ func (UnimplementedHandler) OAuth2ClientTokenList(ctx context.Context, params OA
 //
 // Update OAuth2 client.
 //
-// PUT /oauth2/client/{id}
+// PUT /oauth2/client/{uuid}
 func (UnimplementedHandler) OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (r *OAuth2Client, _ error) {
 	return r, ht.ErrNotImplemented
 }

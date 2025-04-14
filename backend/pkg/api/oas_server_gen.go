@@ -74,12 +74,6 @@ type Handler interface {
 	//
 	// PUT /datasource/email_oauth/{uuid}
 	DatasourceEmailOAuthUpdate(ctx context.Context, req *DatasourceEmailOAuth, params DatasourceEmailOAuthUpdateParams) (*DatasourceEmailOAuth, error)
-	// DatasourceEmailRunPipeline implements datasource-email-run-pipeline operation.
-	//
-	// Run datasource email pipeline.
-	//
-	// POST /datasource/email/{uuid}/run/pipeline
-	DatasourceEmailRunPipeline(ctx context.Context, params DatasourceEmailRunPipelineParams) (*DatasourceEmailRunPipelineOK, error)
 	// DatasourceEmailUpdate implements datasource-email-update operation.
 	//
 	// Update an email datasource.
@@ -312,13 +306,13 @@ type Handler interface {
 	//
 	// Delete OAuth2 client.
 	//
-	// DELETE /oauth2/client/{id}
+	// DELETE /oauth2/client/{uuid}
 	OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error
 	// OAuth2ClientGet implements oauth2-client-get operation.
 	//
 	// Get OAuth2 client details.
 	//
-	// GET /oauth2/client/{id}
+	// GET /oauth2/client/{uuid}
 	OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (*OAuth2Client, error)
 	// OAuth2ClientList implements oauth2-client-list operation.
 	//
@@ -348,7 +342,7 @@ type Handler interface {
 	//
 	// Update OAuth2 client.
 	//
-	// PUT /oauth2/client/{id}
+	// PUT /oauth2/client/{uuid}
 	OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (*OAuth2Client, error)
 	// PipelineCreate implements pipeline-create operation.
 	//

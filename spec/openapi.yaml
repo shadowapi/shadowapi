@@ -110,8 +110,6 @@ paths:
     $ref: "paths/datasource_email_oauth_uuid.yaml"
   /datasource/{uuid}/oauth2/client:
     $ref: "paths/datasource_uuid_oauth2_client.yaml"
-  /datasource/email/{uuid}/run/pipeline:
-    $ref: "paths/datasource_email_uuid_run_pipeline.yaml"
   /datasource/telegram:
     $ref: "paths/datasource_telegram.yaml"
   /datasource/telegram/{uuid}:
@@ -128,8 +126,8 @@ paths:
     $ref: "paths/oauth2_callback.yaml"
   /oauth2/client:
     $ref: "paths/oauth2_client.yaml"
-  /oauth2/client/{id}:
-    $ref: "paths/oauth2_client_id.yaml"
+  /oauth2/client/{uuid}:
+    $ref: "paths/oauth2_client_uuid.yaml"
   /oauth2/client/{datasource_uuid}/token:
     $ref: "paths/oauth2_client_datasource_uuid_token.yaml"
   /oauth2/client/{datasource_uuid}/token/{uuid}:
