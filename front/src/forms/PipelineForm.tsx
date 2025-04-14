@@ -102,7 +102,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     queryKey: ['datasources'],
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/datasource', { signal })
-      return data as components['schemas']['datasource'][]
+      return data ?? ([] as components['schemas']['datasource'][])
     },
   })
 
@@ -110,7 +110,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     queryKey: ['storages'],
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/storage', { signal })
-      return data as components['schemas']['storage'][]
+      return data ?? ([] as components['schemas']['storage'][])
     },
   })
 
@@ -126,7 +126,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
         },
         signal,
       })
-      return data
+      return data ?? ({} as components['schemas']['pipeline'])
     },
     // throwOnError: false,
     enabled: pipelineUUID !== 'add',
@@ -396,13 +396,19 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   label="Data Source"
                   isRequired
                   selectedKey={field.value}
-                  onSelectionChange={(key) => field.onChange(key.toString())}
+                  onSelectionChange={(key) => field.onChange(key ? key.toString() : '')}
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
                   {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => 
-                    <Item key={datasource.uuid}>
-                      <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
+                    <Item key={datasource.uuid} textValue={`${datasource.name} ${datasource.type}`}>
+                      <span
+                        style={{
+                          whiteSpace: 'nowrap',
+                          margin: '0 10px',
+                          lineHeight: '24px',
+                        }}
+                      >
                         {datasource.name} {datasource.type}
                       </span>
                     </Item>
@@ -446,13 +452,13 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => 
+                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => (
                     <Item key={storage.uuid}>
                       <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
                         {storage.name} {storage.type}
                       </span>
                     </Item>
-                  )}
+                  ))}
                 </Picker>
               )}
             />

@@ -9,6 +9,9 @@ export default defineConfig({
       '@': path.resolve('./src'),
     },
   },
+  define: {
+    'process.env': {},
+  },
   build: {
     sourcemap: true,
   },
