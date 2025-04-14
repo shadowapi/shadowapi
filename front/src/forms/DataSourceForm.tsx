@@ -16,16 +16,16 @@ type DataSourceBase = {
 
 export type DataSourceKind = 'email' | 'email_oauth' | 'telegram' | 'whatsapp' | 'linkedin'
 
-type DataSourceFormData =
+export type DataSourceFormData =
   | (DataSourceBase & { type: 'email' } & components['schemas']['datasource_email'])
-  | (DataSourceBase & { type: 'email_oauth' } & components['schemas']['datasource_email'])
+  | (DataSourceBase & { type: 'email_oauth' } & components['schemas']['datasource_email_oauth'])
   | (DataSourceBase & { type: 'telegram' } & components['schemas']['datasource_telegram'])
   | (DataSourceBase & { type: 'whatsapp' } & components['schemas']['datasource_whatsapp'])
   | (DataSourceBase & { type: 'linkedin' } & components['schemas']['datasource_linkedin'])
 
 const createEndpoints: Record<DataSourceKind, keyof paths> = {
   email: '/datasource/email',
-  email_oauth: '/datasource/email',
+  email_oauth: '/datasource/email_oauth',
   telegram: '/datasource/telegram',
   whatsapp: '/datasource/whatsapp',
   linkedin: '/datasource/linkedin',
@@ -41,7 +41,7 @@ const updateEndpoints: Record<DataSourceKind, keyof paths> = {
 
 const deleteEndpoints: Record<DataSourceKind, keyof paths> = {
   email: '/datasource/email/{uuid}',
-  email_oauth: '/datasource/email/{uuid}',
+  email_oauth: '/datasource/email_oauth/{uuid}',
   telegram: '/datasource/telegram/{uuid}',
   whatsapp: '/datasource/whatsapp/{uuid}',
   linkedin: '/datasource/linkedin/{uuid}',
@@ -60,6 +60,16 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/user', { signal })
       return data as components['schemas']['user'][]
+    },
+  })
+
+  // Fetch OAuth2 clients from the backend.
+  const oauth2ClientsQuery = useQuery({
+    queryKey: ['oauth2Clients'],
+    queryFn: async ({ signal }) => {
+      const { data } = await client.GET('/oauth2/client', { signal })
+      // Expecting data to have a "clients" property.
+      return data.clients as components['schemas']['oauth2_client'][]
     },
   })
 
@@ -116,6 +126,8 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
       if (datasourceUUID === 'add') {
         const currentKind = data.type as DataSourceKind
         const endpoint = createEndpoints[currentKind]
+
+        console.log({ currentKind, data, endpoint })
         if (data.type === 'email') {
           const resp = await client.POST(endpoint, {
             body: {
@@ -127,6 +139,22 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
               smtp_server: data.smtp_server,
               smtp_tls: data.smtp_tls,
               password: data.password,
+              user_uuid: data.user_uuid,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
+        } else if (data.type === 'email_oauth') {
+          const resp = await client.POST(endpoint, {
+            body: {
+              name: data.name,
+              is_enabled: data.is_enabled,
+              email: data.email,
+              provider: data.provider,
+              oauth2_client_uuid: data.oauth2_client_uuid,
               user_uuid: data.user_uuid,
             },
           })
@@ -170,6 +198,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
           }
           return resp
         } else {
+          // linkedin
           const resp = await client.POST(endpoint, {
             body: {
               name: data.name,
@@ -208,6 +237,23 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
             throw new Error(resp.error.detail)
           }
           return resp
+        } else if (data.type === 'email_oauth') {
+          const resp = await client.PUT(endpoint, {
+            params: { path: { uuid: datasourceUUID } },
+            body: {
+              name: data.name,
+              is_enabled: data.is_enabled,
+              email: data.email,
+              provider: data.provider,
+              oauth2_client_uuid: data.oauth2_client_uuid,
+              user_uuid: data.user_uuid,
+            },
+          })
+          if (resp.error) {
+            form.setError('name', { message: resp.error.detail })
+            throw new Error(resp.error.detail)
+          }
+          return resp
         } else if (data.type === 'telegram') {
           const resp = await client.PUT(endpoint, {
             params: { path: { uuid: datasourceUUID } },
@@ -245,6 +291,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
           }
           return resp
         } else {
+          // linkedin
           const resp = await client.PUT(endpoint, {
             params: { path: { uuid: datasourceUUID } },
             body: {
@@ -341,7 +388,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {usersQuery.data?.map((user: components['schemas']['user']) => (
+                {usersQuery.data?.map((user: components['schemas']['user']) => 
                   <Item key={user.uuid}>
                     <span
                       style={{
@@ -355,7 +402,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                       {user.email} {user.first_name} {user.last_name}
                     </span>
                   </Item>
-                ))}
+                )}
               </Picker>
             )}
           />
@@ -374,7 +421,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                 width="100%"
               >
                 <Item key="email">Email IMAP</Item>
-                <Item key="email">Email</Item>
+                <Item key="email_oauth">Email OAuth</Item>
                 <Item key="telegram">Telegram</Item>
                 <Item key="whatsapp">WhatsApp</Item>
                 <Item key="linkedin">LinkedIn</Item>
@@ -415,11 +462,11 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
               <Controller
                 name="smtp_tls"
                 control={form.control}
-                render={({ field }) => 
+                render={({ field }) => (
                   <Switch isSelected={field.value} onChange={field.onChange}>
                     SMTP TLS
                   </Switch>
-                }
+                )}
               />
               <Controller
                 name="password"
@@ -441,9 +488,23 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                 render={({ field }) => <TextField label="Provider" {...field} width="100%" />}
               />
               <Controller
-                name="oauth2_token_uuid"
+                name="oauth2_client_uuid"
                 control={form.control}
-                render={({ field }) => <TextField label="OAuth2 Token" {...field} width="100%" />}
+                render={({ field, fieldState }) => (
+                  <Picker
+                    label="OAuth2 Client"
+                    selectedKey={field.value}
+                    onSelectionChange={(key) => field.onChange(key.toString())}
+                    errorMessage={fieldState.error?.message}
+                    width="100%"
+                  >
+                    {oauth2ClientsQuery.data?.map((client) => 
+                      <Item key={client.uuid}>
+                        {client.name} ({client.client_id})
+                      </Item>
+                    )}
+                  </Picker>
+                )}
               />
             </Flex>
           )}

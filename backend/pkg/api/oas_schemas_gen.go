@@ -3494,8 +3494,6 @@ func (s *OAuth2ClientCallbackFound) SetLocation(val OptURI) {
 }
 
 type OAuth2ClientCreateReq struct {
-	// ID of the client.
-	ID string `json:"id"`
 	// Name of the client.
 	Name string `json:"name"`
 	// Provider of the client.
@@ -3504,11 +3502,6 @@ type OAuth2ClientCreateReq struct {
 	Secret string `json:"secret"`
 	// Client ID.
 	ClientID string `json:"client_id"`
-}
-
-// GetID returns the value of ID.
-func (s *OAuth2ClientCreateReq) GetID() string {
-	return s.ID
 }
 
 // GetName returns the value of Name.
@@ -3529,11 +3522,6 @@ func (s *OAuth2ClientCreateReq) GetSecret() string {
 // GetClientID returns the value of ClientID.
 func (s *OAuth2ClientCreateReq) GetClientID() string {
 	return s.ClientID
-}
-
-// SetID sets the value of ID.
-func (s *OAuth2ClientCreateReq) SetID(val string) {
-	s.ID = val
 }
 
 // SetName sets the value of Name.

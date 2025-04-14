@@ -145,6 +145,7 @@ func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGe
 		Name:     details.Oauth2Client.Name,
 		Provider: details.Oauth2Client.Provider,
 		ClientID: details.Oauth2Client.ClientID,
+		Secret:   details.Oauth2Client.Secret,
 	}
 	if details.Oauth2Client.CreatedAt.Valid {
 		result.CreatedAt = api.NewOptDateTime(details.Oauth2Client.CreatedAt.Time)
@@ -177,6 +178,7 @@ func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientL
 			Name:     c.Oauth2Client.Name,
 			Provider: c.Oauth2Client.Provider,
 			ClientID: c.Oauth2Client.ClientID,
+			Secret:   c.Oauth2Client.Secret,
 		}
 		if c.Oauth2Client.CreatedAt.Valid {
 			a.CreatedAt = api.NewOptDateTime(c.Oauth2Client.CreatedAt.Time)
@@ -285,12 +287,18 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 	}
 	var out []api.OAuth2ClientToken
 	for _, t := range tokens {
+		// Convert the token field (stored as JSONB []byte) into a string.
+		tokenStr := string(t.Token)
+		// TODO @reactima define structure token in spec
+		var tokenObj api.OAuth2ClientTokenToken
+		if err := tokenObj.UnmarshalJSON([]byte(tokenStr)); err != nil {
+			log.Error("failed to unmarshal oauth token", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to decode oauth token"))
+		}
 		token := api.OAuth2ClientToken{
 			UUID:       api.NewOptString(t.UUID.String()),
 			ClientUUID: t.ClientUuid.String(),
-			// TODO @reactima !!! fix first
-			// Fixed conversion: convert []byte to string then to OAuth2ClientTokenToken.
-			//Token: api.OAuth2ClientTokenToken(string(t.Token)),
+			Token:      tokenObj,
 		}
 		if t.CreatedAt.Valid {
 			token.CreatedAt = api.NewOptDateTime(t.CreatedAt.Time)

@@ -14,8 +14,8 @@ export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string 
   const query = useQuery({
     queryKey: ['/oauth2/client/{id}', { id: clientID }],
     queryFn: async ({ signal }) => {
-      const { data } = await client.GET('/oauth2/client/{id}', {
-        params: { path: { id: clientID } },
+      const { data } = await client.GET('/oauth2/client/{uuid}', {
+        params: { path: { uuid: clientID } },
         signal,
       })
       return data
@@ -29,18 +29,19 @@ export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string 
         resp = await client.POST('/oauth2/client', {
           body: {
             provider: data.provider,
-            id: data.id,
+            client_id: data.client_id,
             name: data.name,
             secret: data.secret,
           },
         })
       } else {
-        resp = await client.PUT('/oauth2/client/{id}', {
-          params: { path: { id: clientID } },
+        resp = await client.PUT('/oauth2/client/{uuid}', {
+          params: { path: { uuid: clientID } },
           body: {
             provider: data.provider,
             name: data.name,
             secret: data.secret,
+            client_id: data.client_id,
           },
         })
       }
@@ -59,8 +60,8 @@ export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string 
   })
   const deleteMutation = useMutation({
     mutationFn: async (clientID: string) => {
-      const resp = await client.DELETE('/oauth2/client/{id}', {
-        params: { path: { id: clientID } },
+      const resp = await client.DELETE('/oauth2/client/{uuid}', {
+        params: { path: { uuid: clientID } },
       })
       if (resp.error) {
         methods.setError('name', { message: resp.error.detail })
@@ -87,7 +88,7 @@ export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string 
         queryClient.invalidateQueries({ queryKey: ['/oauth2/credentials'] })
         const datasourceUUID = searchParams.get('datasource_uuid')
         if (datasourceUUID) {
-          navigate(`/datasource/${datasourceUUID}/auth?client_id=${variables.id}`)
+          navigate(`/datasource/${datasourceUUID}/auth?client_id=${variables.uuid}`)
           return
         }
         navigate('/oauth2/credentials')
@@ -145,7 +146,7 @@ export function OAuth2CredentialForm({ clientID: clientID }: { clientID: string 
           />
 
           <Controller
-            name="id"
+            name="client_id"
             control={methods.control}
             rules={{ required: 'Client ID is required' }}
             render={({ field, fieldState }) => (

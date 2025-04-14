@@ -70,11 +70,11 @@ export function OAuth2Credentials() {
           </TableHeader>
           <TableBody items={query.data}>
             {(item) => (
-              <Row>
+              <Row key={item.uuid}>
                 <Cell>{item.name}</Cell>
                 <Cell>{item.provider}</Cell>
                 <Cell>
-                  <ActionButton onPress={() => navigate('/oauth2/credentials/' + item.id)}>
+                  <ActionButton onPress={() => navigate('/oauth2/credentials/' + item.uuid)}>
                     <Edit />
                   </ActionButton>
                 </Cell>

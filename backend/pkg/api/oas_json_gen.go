@@ -7401,10 +7401,6 @@ func (s *OAuth2ClientCreateReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *OAuth2ClientCreateReq) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("id")
-		e.Str(s.ID)
-	}
-	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
@@ -7422,12 +7418,11 @@ func (s *OAuth2ClientCreateReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOAuth2ClientCreateReq = [5]string{
-	0: "id",
-	1: "name",
-	2: "provider",
-	3: "secret",
-	4: "client_id",
+var jsonFieldsNameOfOAuth2ClientCreateReq = [4]string{
+	0: "name",
+	1: "provider",
+	2: "secret",
+	3: "client_id",
 }
 
 // Decode decodes OAuth2ClientCreateReq from json.
@@ -7439,20 +7434,8 @@ func (s *OAuth2ClientCreateReq) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
 		case "name":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -7464,7 +7447,7 @@ func (s *OAuth2ClientCreateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Provider = string(v)
@@ -7476,7 +7459,7 @@ func (s *OAuth2ClientCreateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"provider\"")
 			}
 		case "secret":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Secret = string(v)
@@ -7488,7 +7471,7 @@ func (s *OAuth2ClientCreateReq) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"secret\"")
 			}
 		case "client_id":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.ClientID = string(v)
@@ -7509,7 +7492,7 @@ func (s *OAuth2ClientCreateReq) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

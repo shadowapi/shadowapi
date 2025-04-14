@@ -2902,8 +2902,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description ID of the client. */
-                    id: string;
                     /** @description Name of the client. */
                     name: string;
                     /** @description Provider of the client. */
