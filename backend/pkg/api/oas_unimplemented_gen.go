@@ -67,6 +67,51 @@ func (UnimplementedHandler) DatasourceEmailList(ctx context.Context, params Data
 	return r, ht.ErrNotImplemented
 }
 
+// DatasourceEmailOAuthCreate implements datasource-email-oauth-create operation.
+//
+// Create a new email OAuth datasource.
+//
+// POST /datasource/email_oauth
+func (UnimplementedHandler) DatasourceEmailOAuthCreate(ctx context.Context, req *DatasourceEmailOAuth) (r *DatasourceEmailOAuth, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceEmailOAuthDelete implements datasource-email-oauth-delete operation.
+//
+// Delete an email OAuth datasource.
+//
+// DELETE /datasource/email_oauth/{uuid}
+func (UnimplementedHandler) DatasourceEmailOAuthDelete(ctx context.Context, params DatasourceEmailOAuthDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DatasourceEmailOAuthGet implements datasource-email-oauth-get operation.
+//
+// Retrieve an OAuth2‑based email datasource.
+//
+// GET /datasource/email_oauth/{uuid}
+func (UnimplementedHandler) DatasourceEmailOAuthGet(ctx context.Context, params DatasourceEmailOAuthGetParams) (r *DatasourceEmailOAuth, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceEmailOAuthList implements datasource-email-oauth-list operation.
+//
+// List OAuth2‑based email datasources.
+//
+// GET /datasource/email_oauth
+func (UnimplementedHandler) DatasourceEmailOAuthList(ctx context.Context, params DatasourceEmailOAuthListParams) (r []DatasourceEmailOAuth, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DatasourceEmailOAuthUpdate implements datasource-email-oauth-update operation.
+//
+// Update an existing email OAuth datasource.
+//
+// PUT /datasource/email_oauth/{uuid}
+func (UnimplementedHandler) DatasourceEmailOAuthUpdate(ctx context.Context, req *DatasourceEmailOAuth, params DatasourceEmailOAuthUpdateParams) (r *DatasourceEmailOAuth, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DatasourceEmailRunPipeline implements datasource-email-run-pipeline operation.
 //
 // Run datasource email pipeline.

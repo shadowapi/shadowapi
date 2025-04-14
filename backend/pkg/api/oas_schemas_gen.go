@@ -1682,6 +1682,114 @@ func (s *DatasourceEmail) SetUpdatedAt(val OptDateTime) {
 // DatasourceEmailDeleteOK is response for DatasourceEmailDelete operation.
 type DatasourceEmailDeleteOK struct{}
 
+// OAuth2‑enabled email datasource object representation.
+// Ref: #
+type DatasourceEmailOAuth struct {
+	UUID      OptString `json:"uuid"`
+	UserUUID  string    `json:"user_uuid"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	IsEnabled OptBool   `json:"is_enabled"`
+	Provider  string    `json:"provider"`
+	// Identifier of the OAuth2 client bound to this datasource.
+	OAuth2ClientUUID string      `json:"oauth2_client_uuid"`
+	CreatedAt        OptDateTime `json:"created_at"`
+	UpdatedAt        OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *DatasourceEmailOAuth) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *DatasourceEmailOAuth) GetUserUUID() string {
+	return s.UserUUID
+}
+
+// GetEmail returns the value of Email.
+func (s *DatasourceEmailOAuth) GetEmail() string {
+	return s.Email
+}
+
+// GetName returns the value of Name.
+func (s *DatasourceEmailOAuth) GetName() string {
+	return s.Name
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *DatasourceEmailOAuth) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetProvider returns the value of Provider.
+func (s *DatasourceEmailOAuth) GetProvider() string {
+	return s.Provider
+}
+
+// GetOAuth2ClientUUID returns the value of OAuth2ClientUUID.
+func (s *DatasourceEmailOAuth) GetOAuth2ClientUUID() string {
+	return s.OAuth2ClientUUID
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *DatasourceEmailOAuth) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *DatasourceEmailOAuth) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *DatasourceEmailOAuth) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *DatasourceEmailOAuth) SetUserUUID(val string) {
+	s.UserUUID = val
+}
+
+// SetEmail sets the value of Email.
+func (s *DatasourceEmailOAuth) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetName sets the value of Name.
+func (s *DatasourceEmailOAuth) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *DatasourceEmailOAuth) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetProvider sets the value of Provider.
+func (s *DatasourceEmailOAuth) SetProvider(val string) {
+	s.Provider = val
+}
+
+// SetOAuth2ClientUUID sets the value of OAuth2ClientUUID.
+func (s *DatasourceEmailOAuth) SetOAuth2ClientUUID(val string) {
+	s.OAuth2ClientUUID = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *DatasourceEmailOAuth) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *DatasourceEmailOAuth) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// DatasourceEmailOAuthDeleteOK is response for DatasourceEmailOAuthDelete operation.
+type DatasourceEmailOAuthDeleteOK struct{}
+
 type DatasourceEmailRunPipelineOK struct {
 	// List of labels.
 	Labels []EmailLabel `json:"labels"`
@@ -3478,17 +3586,18 @@ func (s *MessageWhatsappQueryOK) SetMessages(val []Message) {
 
 // Ref: #
 type OAuth2Client struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Provider  string    `json:"provider"`
-	Secret    string    `json:"secret"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UUID      OptString   `json:"uuid"`
+	Name      string      `json:"name"`
+	Provider  string      `json:"provider"`
+	ClientID  string      `json:"client_id"`
+	Secret    string      `json:"secret"`
+	CreatedAt OptDateTime `json:"created_at"`
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
-// GetID returns the value of ID.
-func (s *OAuth2Client) GetID() string {
-	return s.ID
+// GetUUID returns the value of UUID.
+func (s *OAuth2Client) GetUUID() OptString {
+	return s.UUID
 }
 
 // GetName returns the value of Name.
@@ -3501,24 +3610,29 @@ func (s *OAuth2Client) GetProvider() string {
 	return s.Provider
 }
 
+// GetClientID returns the value of ClientID.
+func (s *OAuth2Client) GetClientID() string {
+	return s.ClientID
+}
+
 // GetSecret returns the value of Secret.
 func (s *OAuth2Client) GetSecret() string {
 	return s.Secret
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *OAuth2Client) GetCreatedAt() time.Time {
+func (s *OAuth2Client) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *OAuth2Client) GetUpdatedAt() time.Time {
+func (s *OAuth2Client) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
-// SetID sets the value of ID.
-func (s *OAuth2Client) SetID(val string) {
-	s.ID = val
+// SetUUID sets the value of UUID.
+func (s *OAuth2Client) SetUUID(val OptString) {
+	s.UUID = val
 }
 
 // SetName sets the value of Name.
@@ -3531,18 +3645,23 @@ func (s *OAuth2Client) SetProvider(val string) {
 	s.Provider = val
 }
 
+// SetClientID sets the value of ClientID.
+func (s *OAuth2Client) SetClientID(val string) {
+	s.ClientID = val
+}
+
 // SetSecret sets the value of Secret.
 func (s *OAuth2Client) SetSecret(val string) {
 	s.Secret = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *OAuth2Client) SetCreatedAt(val time.Time) {
+func (s *OAuth2Client) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *OAuth2Client) SetUpdatedAt(val time.Time) {
+func (s *OAuth2Client) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
@@ -3686,76 +3805,67 @@ func (s *OAuth2ClientLoginReqQuery) init() OAuth2ClientLoginReqQuery {
 
 // Ref: #
 type OAuth2ClientToken struct {
-	UUID      string    `json:"uuid"`
-	ClientID  string    `json:"client_id"`
-	Name      string    `json:"name"`
-	Token     string    `json:"token"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UUID       OptString              `json:"uuid"`
+	ClientUUID string                 `json:"client_uuid"`
+	Token      OAuth2ClientTokenToken `json:"token"`
+	CreatedAt  OptDateTime            `json:"created_at"`
+	UpdatedAt  OptDateTime            `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *OAuth2ClientToken) GetUUID() string {
+func (s *OAuth2ClientToken) GetUUID() OptString {
 	return s.UUID
 }
 
-// GetClientID returns the value of ClientID.
-func (s *OAuth2ClientToken) GetClientID() string {
-	return s.ClientID
-}
-
-// GetName returns the value of Name.
-func (s *OAuth2ClientToken) GetName() string {
-	return s.Name
+// GetClientUUID returns the value of ClientUUID.
+func (s *OAuth2ClientToken) GetClientUUID() string {
+	return s.ClientUUID
 }
 
 // GetToken returns the value of Token.
-func (s *OAuth2ClientToken) GetToken() string {
+func (s *OAuth2ClientToken) GetToken() OAuth2ClientTokenToken {
 	return s.Token
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *OAuth2ClientToken) GetCreatedAt() time.Time {
+func (s *OAuth2ClientToken) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *OAuth2ClientToken) GetUpdatedAt() time.Time {
+func (s *OAuth2ClientToken) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
 // SetUUID sets the value of UUID.
-func (s *OAuth2ClientToken) SetUUID(val string) {
+func (s *OAuth2ClientToken) SetUUID(val OptString) {
 	s.UUID = val
 }
 
-// SetClientID sets the value of ClientID.
-func (s *OAuth2ClientToken) SetClientID(val string) {
-	s.ClientID = val
-}
-
-// SetName sets the value of Name.
-func (s *OAuth2ClientToken) SetName(val string) {
-	s.Name = val
+// SetClientUUID sets the value of ClientUUID.
+func (s *OAuth2ClientToken) SetClientUUID(val string) {
+	s.ClientUUID = val
 }
 
 // SetToken sets the value of Token.
-func (s *OAuth2ClientToken) SetToken(val string) {
+func (s *OAuth2ClientToken) SetToken(val OAuth2ClientTokenToken) {
 	s.Token = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *OAuth2ClientToken) SetCreatedAt(val time.Time) {
+func (s *OAuth2ClientToken) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *OAuth2ClientToken) SetUpdatedAt(val time.Time) {
+func (s *OAuth2ClientToken) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
 // OAuth2ClientTokenDeleteOK is response for OAuth2ClientTokenDelete operation.
 type OAuth2ClientTokenDeleteOK struct{}
+
+type OAuth2ClientTokenToken struct{}
 
 type OAuth2ClientUpdateReq struct {
 	// Name of the client.

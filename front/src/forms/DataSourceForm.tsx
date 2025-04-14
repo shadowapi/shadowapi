@@ -14,16 +14,18 @@ type DataSourceBase = {
   user_uuid?: string
 }
 
-export type DataSourceKind = 'email' | 'telegram' | 'whatsapp' | 'linkedin'
+export type DataSourceKind = 'email' | 'email_oauth' | 'telegram' | 'whatsapp' | 'linkedin'
 
 type DataSourceFormData =
   | (DataSourceBase & { type: 'email' } & components['schemas']['datasource_email'])
+  | (DataSourceBase & { type: 'email_oauth' } & components['schemas']['datasource_email'])
   | (DataSourceBase & { type: 'telegram' } & components['schemas']['datasource_telegram'])
   | (DataSourceBase & { type: 'whatsapp' } & components['schemas']['datasource_whatsapp'])
   | (DataSourceBase & { type: 'linkedin' } & components['schemas']['datasource_linkedin'])
 
 const createEndpoints: Record<DataSourceKind, keyof paths> = {
   email: '/datasource/email',
+  email_oauth: '/datasource/email',
   telegram: '/datasource/telegram',
   whatsapp: '/datasource/whatsapp',
   linkedin: '/datasource/linkedin',
@@ -31,6 +33,7 @@ const createEndpoints: Record<DataSourceKind, keyof paths> = {
 
 const updateEndpoints: Record<DataSourceKind, keyof paths> = {
   email: '/datasource/email/{uuid}',
+  email_oauth: '/datasource/email_oauth/{uuid}',
   telegram: '/datasource/telegram/{uuid}',
   whatsapp: '/datasource/whatsapp/{uuid}',
   linkedin: '/datasource/linkedin/{uuid}',
@@ -38,6 +41,7 @@ const updateEndpoints: Record<DataSourceKind, keyof paths> = {
 
 const deleteEndpoints: Record<DataSourceKind, keyof paths> = {
   email: '/datasource/email/{uuid}',
+  email_oauth: '/datasource/email/{uuid}',
   telegram: '/datasource/telegram/{uuid}',
   whatsapp: '/datasource/whatsapp/{uuid}',
   linkedin: '/datasource/linkedin/{uuid}',
@@ -337,7 +341,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
-                {usersQuery.data?.map((user: components['schemas']['user']) => 
+                {usersQuery.data?.map((user: components['schemas']['user']) => (
                   <Item key={user.uuid}>
                     <span
                       style={{
@@ -351,7 +355,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                       {user.email} {user.first_name} {user.last_name}
                     </span>
                   </Item>
-                )}
+                ))}
               </Picker>
             )}
           />
@@ -369,6 +373,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                 errorMessage={fieldState.error?.message}
                 width="100%"
               >
+                <Item key="email">Email IMAP</Item>
                 <Item key="email">Email</Item>
                 <Item key="telegram">Telegram</Item>
                 <Item key="whatsapp">WhatsApp</Item>
@@ -410,16 +415,35 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
               <Controller
                 name="smtp_tls"
                 control={form.control}
-                render={({ field }) => (
+                render={({ field }) => 
                   <Switch isSelected={field.value} onChange={field.onChange}>
                     SMTP TLS
                   </Switch>
-                )}
+                }
               />
               <Controller
                 name="password"
                 control={form.control}
                 render={({ field }) => <TextField label="Password" {...field} width="100%" type="password" />}
+              />
+            </Flex>
+          )}
+          {currentType === 'email_oauth' && (
+            <Flex direction="column" gap="size-100" marginTop="size-200">
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field }) => <TextField label="Email" {...field} width="100%" />}
+              />
+              <Controller
+                name="provider"
+                control={form.control}
+                render={({ field }) => <TextField label="Provider" {...field} width="100%" />}
+              />
+              <Controller
+                name="oauth2_token_uuid"
+                control={form.control}
+                render={({ field }) => <TextField label="OAuth2 Token" {...field} width="100%" />}
               />
             </Flex>
           )}

@@ -33,7 +33,7 @@ func ResolveClientConfig(provider query.Oauth2Client) (cfg *Config, err error) {
 	case "gmail":
 		cfg = &Config{
 			Config: oauth2.Config{
-				ClientID:     provider.ID,
+				ClientID:     provider.Provider,
 				ClientSecret: provider.Secret,
 				Endpoint:     googleOAuth2.Endpoint,
 				Scopes: []string{

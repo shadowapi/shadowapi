@@ -13,6 +13,8 @@ components:
       $ref: "components/datasource.yaml"
     DatasourceEmail:
       $ref: "components/datasource_email.yaml"
+    DatasourceEmailOauth:
+      $ref: "components/datasource_email_oauth.yaml"
     DatasourceTelegram:
       $ref: "components/datasource_telegram.yaml"
     DatasourceWhatsapp:
@@ -27,6 +29,10 @@ components:
       $ref: "components/oauth2_client.yaml"
     Oauth2ClientToken:
       $ref: "components/oauth2_client_token.yaml"
+    Oauth2State:
+      $ref: "components/oauth2_state.yaml"
+    Oauth2Subject:
+      $ref: "components/oauth2_subject.yaml"
     Pipeline:
       $ref: "components/pipeline.yaml"
     PipelineEdge:
@@ -98,6 +104,10 @@ paths:
     $ref: "paths/datasource_email.yaml"
   /datasource/email/{uuid}:
     $ref: "paths/datasource_email_uuid.yaml"
+  /datasource/email_oauth:
+    $ref: "paths/datasource_email_oauth.yaml"
+  /datasource/email_oauth/{uuid}:
+    $ref: "paths/datasource_email_oauth_uuid.yaml"
   /datasource/{uuid}/oauth2/client:
     $ref: "paths/datasource_uuid_oauth2_client.yaml"
   /datasource/email/{uuid}/run/pipeline:

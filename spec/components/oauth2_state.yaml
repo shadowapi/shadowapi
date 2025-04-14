@@ -5,7 +5,7 @@ properties:
     type: string
   client_uuid:
     type: string
-  token:
+  state:
     type: object
   created_at:
     type: string
@@ -13,6 +13,9 @@ properties:
   updated_at:
     type: string
     format: date-time
+  expired_at:
+    type: string
+    format: date-time
 required:
   - client_uuid
-  - token
+  - state

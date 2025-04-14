@@ -3,6 +3,8 @@ additionalProperties: false
 properties:
   uuid:
     type: string
+  user_uuid:
+    type: string
   client_uuid:
     type: string
   token:
@@ -13,6 +15,10 @@ properties:
   updated_at:
     type: string
     format: date-time
+  expired_at:
+    type: string
+    format: date-time
 required:
+  - user_uuid
   - client_uuid
   - token

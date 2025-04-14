@@ -1,0 +1,60 @@
+get:
+  description: List OAuth2‑based email datasources.
+  operationId: datasource-email-oauth-list
+  parameters:
+    - name: offset
+      in: query
+      description: Offset records.
+      schema:
+        type: integer
+        format: int32
+    - name: limit
+      in: query
+      description: Limit records.
+      schema:
+        type: integer
+        format: int32
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/DatasourceEmailOauth"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-email-oauth
+
+post:
+  description: Create a new email OAuth datasource.
+  operationId: datasource-email-oauth-create
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceEmailOauth"
+  responses:
+    "201":
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/DatasourceEmailOauth"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-email-oauth

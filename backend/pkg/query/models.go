@@ -191,9 +191,10 @@ type Message struct {
 }
 
 type Oauth2Client struct {
-	ID        string             `json:"id"`
+	UUID      uuid.UUID          `json:"uuid"`
 	Name      string             `json:"name"`
 	Provider  string             `json:"provider"`
+	ClientID  string             `json:"client_id"`
 	Secret    string             `json:"secret"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
@@ -201,8 +202,7 @@ type Oauth2Client struct {
 
 type Oauth2State struct {
 	UUID       uuid.UUID          `json:"uuid"`
-	ClientName string             `json:"client_name"`
-	ClientID   string             `json:"client_id"`
+	ClientUuid *uuid.UUID         `json:"client_uuid"`
 	State      []byte             `json:"state"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
@@ -212,8 +212,7 @@ type Oauth2State struct {
 type Oauth2Subject struct {
 	UUID       uuid.UUID          `json:"uuid"`
 	UserUUID   *uuid.UUID         `json:"user_uuid"`
-	ClientName string             `json:"client_name"`
-	ClientID   string             `json:"client_id"`
+	ClientUuid *uuid.UUID         `json:"client_uuid"`
 	Token      []byte             `json:"token"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
@@ -221,12 +220,12 @@ type Oauth2Subject struct {
 }
 
 type Oauth2Token struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	ClientID  string             `json:"client_id"`
-	Token     []byte             `json:"token"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	Name      pgtype.Text        `json:"name"`
+	UUID       uuid.UUID          `json:"uuid"`
+	ClientUuid *uuid.UUID         `json:"client_uuid"`
+	Token      []byte             `json:"token"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	Name       pgtype.Text        `json:"name"`
 }
 
 type Pipeline struct {

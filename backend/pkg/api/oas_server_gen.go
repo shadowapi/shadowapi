@@ -44,6 +44,36 @@ type Handler interface {
 	//
 	// GET /datasource/email
 	DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) ([]DatasourceEmail, error)
+	// DatasourceEmailOAuthCreate implements datasource-email-oauth-create operation.
+	//
+	// Create a new email OAuth datasource.
+	//
+	// POST /datasource/email_oauth
+	DatasourceEmailOAuthCreate(ctx context.Context, req *DatasourceEmailOAuth) (*DatasourceEmailOAuth, error)
+	// DatasourceEmailOAuthDelete implements datasource-email-oauth-delete operation.
+	//
+	// Delete an email OAuth datasource.
+	//
+	// DELETE /datasource/email_oauth/{uuid}
+	DatasourceEmailOAuthDelete(ctx context.Context, params DatasourceEmailOAuthDeleteParams) error
+	// DatasourceEmailOAuthGet implements datasource-email-oauth-get operation.
+	//
+	// Retrieve an OAuth2‑based email datasource.
+	//
+	// GET /datasource/email_oauth/{uuid}
+	DatasourceEmailOAuthGet(ctx context.Context, params DatasourceEmailOAuthGetParams) (*DatasourceEmailOAuth, error)
+	// DatasourceEmailOAuthList implements datasource-email-oauth-list operation.
+	//
+	// List OAuth2‑based email datasources.
+	//
+	// GET /datasource/email_oauth
+	DatasourceEmailOAuthList(ctx context.Context, params DatasourceEmailOAuthListParams) ([]DatasourceEmailOAuth, error)
+	// DatasourceEmailOAuthUpdate implements datasource-email-oauth-update operation.
+	//
+	// Update an existing email OAuth datasource.
+	//
+	// PUT /datasource/email_oauth/{uuid}
+	DatasourceEmailOAuthUpdate(ctx context.Context, req *DatasourceEmailOAuth, params DatasourceEmailOAuthUpdateParams) (*DatasourceEmailOAuth, error)
 	// DatasourceEmailRunPipeline implements datasource-email-run-pipeline operation.
 	//
 	// Run datasource email pipeline.

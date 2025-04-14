@@ -1,9 +1,9 @@
 package handler
 
+/*
 import (
 	"context"
 	"encoding/json"
-	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,14 +34,14 @@ func (h *Handler) OAuth2ClientCallback(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed query state object"))
 	}
 
+	// we expect that state contains all query parameters
 	var stateQuery url.Values
 	if err = json.Unmarshal(state.State, &stateQuery); err != nil {
 		log.Error("unmarshal state query", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed unmarshal state query"))
 	}
 
-	// Use the updated field ClientUuid instead of ClientID.
-	config, err := oauthTools.GetClientConfig(ctx, h.dbp, state.ClientUuid.String())
+	config, err := oauthTools.GetClientConfig(ctx, h.dbp, state.ClientID)
 	if err != nil {
 		log.Error("get client config", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed get client config"))
@@ -61,8 +61,7 @@ func (h *Handler) OAuth2ClientCallback(
 
 	switch strings.ToLower(config.Provider) {
 	case "gmail":
-		// Pass the updated client UUID string.
-		return h.handleGmailToken(ctx, log, token, stateQuery, state.ClientUuid.String())
+		return h.handleGmailToken(ctx, log, token, stateQuery, state.ClientID)
 	}
 	return nil, ErrWithCode(http.StatusInternalServerError, E("unknown provider"))
 }
@@ -72,7 +71,7 @@ func (h *Handler) OAuth2ClientCreate(
 ) (*api.OAuth2Client, error) {
 	log := h.log.With("handler", "OAuth2ClientCreate")
 	create := query.CreateOauth2ClientParams{
-		UUID:     req.ID, // use UUID field rather than ID
+		ID:       req.ID,
 		Name:     req.Name,
 		Secret:   req.Secret,
 		Provider: req.Provider,
@@ -83,25 +82,22 @@ func (h *Handler) OAuth2ClientCreate(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 	out := api.OAuth2Client{
-		ID:       obj.UUID.String(),
+		ID:       obj.ID,
 		Name:     obj.Name,
 		Provider: obj.Provider,
 	}
-
 	if obj.CreatedAt.Valid {
-		out.CreatedAt = api.NewOptDateTime(obj.CreatedAt.Time)
+		out.CreatedAt = obj.CreatedAt.Time
 	}
 	if obj.UpdatedAt.Valid {
-		out.UpdatedAt = api.NewOptDateTime(obj.UpdatedAt.Time)
+		out.UpdatedAt = obj.UpdatedAt.Time
 	}
 	return &out, nil
 }
 
 func (h *Handler) OAuth2ClientDelete(ctx context.Context, params api.OAuth2ClientDeleteParams) error {
 	log := h.log.With("handler", "OAuth2ClientDelete")
-	// Convert incoming UUID string to pgtype.UUID.
-	clientUUID := pgtype.UUID{UUID: uuid.MustParse(params.ID), Status: pgtype.Present}
-	err := query.New(h.dbp).DeleteOauth2Client(ctx, clientUUID)
+	err := query.New(h.dbp).DeleteOauth2Client(ctx, params.ID)
 	if err == pgx.ErrNoRows {
 		log.Error("no such oauth2 client", "uuid", params.ID)
 		return ErrWithCode(http.StatusNotFound, E("no such oauth2 client"))
@@ -114,26 +110,26 @@ func (h *Handler) OAuth2ClientDelete(ctx context.Context, params api.OAuth2Clien
 
 func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGetParams) (*api.OAuth2Client, error) {
 	log := h.log.With("handler", "OAuth2ClientGet")
-	clientUUID := pgtype.UUID{UUID: uuid.MustParse(params.ID), Status: pgtype.Present}
-	details, err := query.New(h.dbp).GetOauth2Client(ctx, clientUUID)
+	tx := query.New(h.dbp)
+	details, err := tx.GetOauth2Client(ctx, params.ID)
 	if err != nil {
 		log.Error("failed to get client details", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client details"))
 	}
 	result := &api.OAuth2Client{
-		ID:       details.UUID.String(),
+		ID:       details.ID,
 		Name:     details.Name,
 		Provider: details.Provider,
 	}
 	if details.CreatedAt.Valid {
-		result.CreatedAt = api.NewOptDateTime(result.CreatedAt.Time)
+		result.CreatedAt = details.CreatedAt.Time
 	}
 	if details.UpdatedAt.Valid {
-		result.UpdatedAt = api.NewOptDateTime(result.UpdatedAt.Time)
+		result.UpdatedAt = details.UpdatedAt.Time
 	}
-
 	return result, nil
 }
+
 func (h *Handler) OAuth2ClientList(
 	ctx context.Context, params api.OAuth2ClientListParams,
 ) (*api.OAuth2ClientListOK, error) {
@@ -159,6 +155,7 @@ func (h *Handler) OAuth2ClientList(
 		if c.UpdatedAt.Valid {
 			a.UpdatedAt = c.UpdatedAt.Time
 		}
+
 		out.Clients = append(out.Clients, a)
 	}
 	return out, nil
@@ -181,11 +178,10 @@ func (h *Handler) OAuth2ClientLogin(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal query values"))
 	}
 
-	// When creating state, pass the client UUID using the updated parameter key.
 	state, err := tx.CreateOauth2State(ctx, query.CreateOauth2StateParams{
 		UUID:       uuid.Must(uuid.NewV7()),
 		ClientName: provider.Name,
-		ClientUuid: pgtype.UUID{UUID: uuid.MustParse(provider.ClientID), Status: pgtype.Present},
+		ClientID:   provider.ClientID,
 		State:      queryData,
 	})
 	if err != nil {
@@ -193,7 +189,7 @@ func (h *Handler) OAuth2ClientLogin(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create oauth2 state"))
 	}
 
-	h.log.Info("redirecting to oauth2 provider", "clientUUID", provider.ClientID)
+	h.log.Info("redirecting to oauth2 provider", "clientID", provider.ClientID)
 	return &api.OAuth2ClientLoginOK{
 		AuthCodeURL: provider.AuthCodeURL(state.UUID.String(), oauth2.AccessTypeOffline),
 	}, nil
@@ -204,7 +200,7 @@ func (h *Handler) OAuth2ClientTokenDelete(
 ) error {
 	log := h.log.With("handler", "OAuth2ClientTokenDelete", "tokenUUID", params.UUID)
 	tx := query.New(h.dbp)
-	tokenUUID := pgtype.UUID{UUID: uuid.MustParse(params.UUID), Status: pgtype.Present}
+	tokenUUID := uuid.Must(uuid.FromString(params.UUID))
 	if err := tx.DeleteOauth2Token(ctx, tokenUUID); err == pgx.ErrNoRows {
 		log.Error("no such oauth2 token")
 		return ErrWithCode(http.StatusNotFound, E("no such oauth2 token"))
@@ -221,8 +217,7 @@ func (h *Handler) OAuth2ClientTokenList(
 	log := h.log.With("handler", "OAuth2ClientTokenList", "datasourceUUID", params.DatasourceUUID)
 	tx := query.New(h.dbp)
 
-	// Retrieve the client using the datasource UUID.
-	client, err := tx.GetOauth2Client(ctx, pgtype.UUID{UUID: uuid.MustParse(params.DatasourceUUID), Status: pgtype.Present})
+	client, err := tx.GetOauth2Client(ctx, params.DatasourceUUID)
 	if err == pgx.ErrNoRows {
 		log.Error("no oauth2 client")
 		return nil, ErrWithCode(http.StatusNotFound, E("client not found"))
@@ -231,19 +226,20 @@ func (h *Handler) OAuth2ClientTokenList(
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 
-	// Get tokens using the client UUID.
-	tokens, err := tx.GetOauth2ClientTokens(ctx, pgtype.UUID{UUID: uuid.MustParse(client.UUID.String()), Status: pgtype.Present})
+	tokens, err := tx.GetOauth2ClientTokens(ctx, client.ID)
 	if err != nil && err != pgx.ErrNoRows {
+		log.Error("no client tokens")
+		return []api.OAuth2ClientToken{}, nil
+	} else if err != nil {
 		log.Error("get client tokens", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
-
 	out := []api.OAuth2ClientToken{}
 	for _, t := range tokens {
 		a := api.OAuth2ClientToken{
 			UUID:     t.UUID.String(),
-			ClientID: t.ClientUuid.String(),
-			Name:     t.Name.String(),
+			ClientID: t.ClientID,
+			Name:     t.Name.String,
 			Token:    string(t.Token),
 		}
 		if t.CreatedAt.Valid {
@@ -252,6 +248,7 @@ func (h *Handler) OAuth2ClientTokenList(
 		if t.UpdatedAt.Valid {
 			a.UpdatedAt = t.UpdatedAt.Time
 		}
+
 		out = append(out, a)
 	}
 	return out, nil
@@ -260,13 +257,13 @@ func (h *Handler) OAuth2ClientTokenList(
 func (h *Handler) OAuth2ClientUpdate(
 	ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams,
 ) (*api.OAuth2Client, error) {
-	log := h.log.With("handler", "OAuth2ClientUpdate", "clientUUID", params.ID)
+	log := h.log.With("handler", "OAuth2ClientUpdate", "clientID", params.ID)
 	tx := query.New(h.dbp)
 	update := query.UpdateOauth2ClientParams{
+		ID:       params.ID,
 		Name:     req.Name,
 		Provider: req.Provider,
 		Secret:   req.Secret,
-		UUID:     pgtype.UUID{UUID: uuid.MustParse(params.ID), Status: pgtype.Present},
 	}
 	if err := tx.UpdateOauth2Client(ctx, update); err == pgx.ErrNoRows {
 		log.Error("no such oauth2 client")
@@ -275,13 +272,13 @@ func (h *Handler) OAuth2ClientUpdate(
 		log.Error("update oauth2 client", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
-	raw, err := tx.GetOauth2Client(ctx, pgtype.UUID{UUID: uuid.MustParse(params.ID), Status: pgtype.Present})
+	raw, err := tx.GetOauth2Client(ctx, params.ID)
 	if err != nil {
 		log.Error("get oauth2 client", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 	out := api.OAuth2Client{
-		ID:       raw.UUID.String(),
+		ID:       raw.ID,
 		Name:     raw.Name,
 		Provider: raw.Provider,
 	}
@@ -291,5 +288,7 @@ func (h *Handler) OAuth2ClientUpdate(
 	if raw.UpdatedAt.Valid {
 		out.UpdatedAt = raw.UpdatedAt.Time
 	}
+
 	return &out, nil
 }
+*/

@@ -1,0 +1,35 @@
+type: object
+description: OAuth2‑enabled email datasource object representation.
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    readOnly: true
+  user_uuid:
+    type: string
+    readOnly: true
+  email:
+    type: string
+  name:
+    type: string
+  is_enabled:
+    type: boolean
+  provider:
+    type: string
+  oauth2_client_uuid:
+    type: string
+    description: Identifier of the OAuth2 client bound to this datasource.
+  created_at:
+    type: string
+    format: date-time
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    readOnly: true
+required:
+  - email
+  - name
+  - provider
+  - user_uuid
+  - oauth2_client_uuid

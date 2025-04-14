@@ -237,6 +237,66 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							elem = origElem
+						case '_': // Prefix: "_oauth"
+							origElem := elem
+							if l := len("_oauth"); len(elem) >= l && elem[0:l] == "_oauth" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleDatasourceEmailOAuthListRequest([0]string{}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleDatasourceEmailOAuthCreateRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET,POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleDatasourceEmailOAuthDeleteRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleDatasourceEmailOAuthGetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleDatasourceEmailOAuthUpdateRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE,GET,PUT")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
@@ -1774,6 +1834,86 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.summary = ""
 										r.operationID = "datasource-email-run-pipeline"
 										r.pathPattern = "/datasource/email/{uuid}/run/pipeline"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case '_': // Prefix: "_oauth"
+							origElem := elem
+							if l := len("_oauth"); len(elem) >= l && elem[0:l] == "_oauth" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = DatasourceEmailOAuthListOperation
+									r.summary = ""
+									r.operationID = "datasource-email-oauth-list"
+									r.pathPattern = "/datasource/email_oauth"
+									r.args = args
+									r.count = 0
+									return r, true
+								case "POST":
+									r.name = DatasourceEmailOAuthCreateOperation
+									r.summary = ""
+									r.operationID = "datasource-email-oauth-create"
+									r.pathPattern = "/datasource/email_oauth"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = DatasourceEmailOAuthDeleteOperation
+										r.summary = ""
+										r.operationID = "datasource-email-oauth-delete"
+										r.pathPattern = "/datasource/email_oauth/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "GET":
+										r.name = DatasourceEmailOAuthGetOperation
+										r.summary = ""
+										r.operationID = "datasource-email-oauth-get"
+										r.pathPattern = "/datasource/email_oauth/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "PUT":
+										r.name = DatasourceEmailOAuthUpdateOperation
+										r.summary = ""
+										r.operationID = "datasource-email-oauth-update"
+										r.pathPattern = "/datasource/email_oauth/{uuid}"
 										r.args = args
 										r.count = 1
 										return r, true

@@ -41,6 +41,7 @@ type SchedulerFormData = {
   run_at?: string | null
   timezone?: string
   is_enabled: boolean
+  is_paused: boolean
   next_run?: string
   last_run?: string
 }
@@ -111,9 +112,9 @@ function CronExpressionInput({ value, onChange, errorMessage }: CronExpressionIn
   return (
     <>
       <Flex direction="column" gap="size-100">
-        <TextField label="Minute" value={minute} onChange={setMinute} width="48px" />
-        <TextField label="Hour" value={hour} onChange={setHour} width="48px" />
-        <TextField label="Day of Month" value={dayOfMonth} onChange={setDayOfMonth} width="128px" />
+        <TextField label="Minute" value={minute} onChange={setMinute} width="124px" />
+        <TextField label="Hour" value={hour} onChange={setHour} width="124px" />
+        <TextField label="Day of Month" value={dayOfMonth} onChange={setDayOfMonth} width="124px" />
 
         <Picker label="Month" selectedKey={month} onSelectionChange={(key) => setMonth(key.toString())} width="124px">
           {monthOptions.map((opt) => (
@@ -295,24 +296,58 @@ export function SchedulerForm({ schedulerUUID }: { schedulerUUID: string }): Rea
             )}
           />
           {scheduleType === 'cron' && (
-            <Controller
-              name="cron_expression"
-              control={form.control}
-              rules={{
-                required: 'Cron expression is required',
-                validate: (value: string) => {
-                  const parts = value.trim().split(/\s+/)
-                  return parts.length === 5 || 'Cron expression must have exactly 5 fields'
-                },
-              }}
-              render={({ field, fieldState }) => (
-                <CronExpressionInput
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  errorMessage={fieldState.error?.message}
-                />
-              )}
-            />
+            <>
+              {/* Cron Templates Picker */}
+              <Picker
+                label="Select a Cron Template"
+                placeholder="Pick a scenario"
+                onSelectionChange={(val) => {
+                  switch (val) {
+                    case 'every_10_min':
+                      form.setValue('cron_expression', '*/10 * * * *')
+                      break
+                    case 'every_hour':
+                      form.setValue('cron_expression', '0 * * * *')
+                      break
+                    case 'every_6_hours':
+                      form.setValue('cron_expression', '0 */6 * * *')
+                      break
+                    case 'every_night_2am':
+                      form.setValue('cron_expression', '0 2 * * *')
+                      break
+                    case 'every_sunday_2am':
+                      form.setValue('cron_expression', '0 2 * * 7')
+                      break
+                  }
+                }}
+                width="100%"
+              >
+                <Item key="every_10_min">Every 10 mins</Item>
+                <Item key="every_hour">Every Hour</Item>
+                <Item key="every_6_hours">Every 6 Hours</Item>
+                <Item key="every_night_2am">Every night at 2am</Item>
+                <Item key="every_sunday_2am">Every Sunday at 2am</Item>
+              </Picker>
+
+              <Controller
+                name="cron_expression"
+                control={form.control}
+                rules={{
+                  required: 'Cron expression is required',
+                  validate: (value: string) => {
+                    const parts = value.trim().split(/\s+/)
+                    return parts.length === 5 || 'Cron expression must have exactly 5 fields'
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <CronExpressionInput
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    errorMessage={fieldState.error?.message}
+                  />
+                )}
+              />
+            </>
           )}
           {scheduleType === 'one_time' && (
             <Controller

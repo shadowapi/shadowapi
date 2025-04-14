@@ -1,0 +1,82 @@
+get:
+  description: Retrieve an OAuth2‑based email datasource.
+  operationId: datasource-email-oauth-get
+  parameters:
+    - name: uuid
+      in: path
+      description: UUID of the email OAuth datasource.
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/DatasourceEmailOauth"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-email-oauth
+
+put:
+  description: Update an existing email OAuth datasource.
+  operationId: datasource-email-oauth-update
+  parameters:
+    - name: uuid
+      in: path
+      description: UUID of the email OAuth datasource.
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/DatasourceEmailOauth"
+  responses:
+    "200":
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/DatasourceEmailOauth"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-email-oauth
+
+delete:
+  description: Delete an email OAuth datasource.
+  operationId: datasource-email-oauth-delete
+  parameters:
+    - name: uuid
+      in: path
+      description: UUID of the email OAuth datasource.
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Deleted successfully.
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - datasource
+    - datasource-email-oauth

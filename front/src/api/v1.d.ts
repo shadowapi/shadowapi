@@ -101,6 +101,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/datasource/email_oauth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List OAuth2‑based email datasources. */
+        get: operations["datasource-email-oauth-list"];
+        put?: never;
+        /** @description Create a new email OAuth datasource. */
+        post: operations["datasource-email-oauth-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/datasource/email_oauth/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retrieve an OAuth2‑based email datasource. */
+        get: operations["datasource-email-oauth-get"];
+        /** @description Update an existing email OAuth datasource. */
+        put: operations["datasource-email-oauth-update"];
+        post?: never;
+        /** @description Delete an email OAuth datasource. */
+        delete: operations["datasource-email-oauth-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/datasource/{uuid}/oauth2/client": {
         parameters: {
             query?: never;
@@ -892,6 +929,7 @@ export interface components {
         Scheduler: components["schemas"]["scheduler"];
         Datasource: components["schemas"]["datasource"];
         DatasourceEmail: components["schemas"]["datasource_email"];
+        DatasourceEmailOauth: components["schemas"]["datasource_email_oauth"];
         DatasourceTelegram: components["schemas"]["datasource_telegram"];
         DatasourceWhatsapp: components["schemas"]["datasource_whatsapp"];
         DatasourceLinkedin: components["schemas"]["datasource_linkedin"];
@@ -899,6 +937,8 @@ export interface components {
         MailLabel: components["schemas"]["email_label"];
         Oauth2Client: components["schemas"]["oauth2_client"];
         Oauth2ClientToken: components["schemas"]["oauth2_client_token"];
+        Oauth2State: components["schemas"]["oauth2_state"];
+        Oauth2Subject: components["schemas"]["oauth2_subject"];
         Pipeline: components["schemas"]["pipeline"];
         PipelineEdge: components["schemas"]["pipeline_edge"];
         PipelineNode: components["schemas"]["pipeline_node"];
@@ -1055,6 +1095,21 @@ export interface components {
             /** Format: date-time */
             readonly updated_at?: string;
         };
+        /** @description OAuth2‑enabled email datasource object representation. */
+        datasource_email_oauth: {
+            readonly uuid?: string;
+            readonly user_uuid: string;
+            email: string;
+            name: string;
+            is_enabled?: boolean;
+            provider: string;
+            /** @description Identifier of the OAuth2 client bound to this datasource. */
+            oauth2_client_uuid: string;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
         email_label: {
             /** Format: int64 */
             HTTPStatusCode: number;
@@ -1183,24 +1238,24 @@ export interface components {
             readonly updated_at?: string;
         };
         oauth2_client: {
-            id: string;
+            uuid?: string;
             name: string;
             provider: string;
+            client_id: string;
             secret: string;
             /** Format: date-time */
-            created_at: string;
+            created_at?: string;
             /** Format: date-time */
-            updated_at: string;
+            updated_at?: string;
         };
         oauth2_client_token: {
-            uuid: string;
-            client_id: string;
-            name: string;
-            token: string;
+            uuid?: string;
+            client_uuid: string;
+            token: Record<string, never>;
             /** Format: date-time */
-            created_at: string;
+            created_at?: string;
             /** Format: date-time */
-            updated_at: string;
+            updated_at?: string;
         };
         pipeline_node: {
             id: string;
@@ -1690,6 +1745,29 @@ export interface components {
              */
             finished_at?: string;
         };
+        oauth2_state: {
+            uuid?: string;
+            client_uuid: string;
+            state: Record<string, never>;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+            /** Format: date-time */
+            expired_at?: string;
+        };
+        oauth2_subject: {
+            uuid?: string;
+            user_uuid: string;
+            client_uuid: string;
+            token: Record<string, never>;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+            /** Format: date-time */
+            expired_at?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2046,6 +2124,171 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-email-oauth-list": {
+        parameters: {
+            query?: {
+                /** @description Offset records. */
+                offset?: number;
+                /** @description Limit records. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_email_oauth"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-email-oauth-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_email_oauth"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_email_oauth"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-email-oauth-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the email OAuth datasource. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_email_oauth"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-email-oauth-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the email OAuth datasource. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["datasource_email_oauth"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["datasource_email_oauth"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "datasource-email-oauth-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID of the email OAuth datasource. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted successfully. */
             200: {
                 headers: {
                     [name: string]: unknown;

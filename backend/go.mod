@@ -5,6 +5,7 @@ go 1.24
 require (
 	github.com/aws/aws-sdk-go v1.55.6
 	github.com/caarlos0/env/v9 v9.0.0
+	github.com/emersion/go-imap v1.2.1
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -45,6 +46,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coder/websocket v1.8.12 // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
+	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
