@@ -20,6 +20,7 @@ import (
 )
 
 // OAuth2ClientCallback handles the OAuth2 callback and processes the token exchange.
+// defined in spec/paths/oauth2_callback.yaml
 func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2ClientCallbackParams) (*api.OAuth2ClientCallbackFound, error) {
 	log := h.log.With("handler", "OAuth2ClientCallback")
 	q := query.New(h.dbp)
@@ -31,7 +32,8 @@ func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2Cli
 		return nil, ErrWithCode(http.StatusBadRequest, E("broken state parameter"))
 	}
 
-	// Retrieve the state row using generated sqlc method.
+	// Retrieve the state row using the generated sqlc method.
+	// Note: The returned row now wraps the state fields in "Oauth2State".
 	stateRow, err := q.GetOauth2State(ctx, stateUUID)
 	if err != nil {
 		log.Error("failed to query state object", "error", err)
@@ -300,7 +302,7 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 			UUID:         api.NewOptString(t.UUID.String()),
 			ClientUUID:   t.ClientUuid.String(),
 			AccessToken:  t.AccessToken,                              // new access token field
-			RefreshToken: api.NewOptString(t.RefreshToken.String),    // new refresh token field wrapped as OptString
+			RefreshToken: api.NewOptString(t.RefreshToken.String),    // new refresh token wrapped as OptString
 			ExpiresAt:    t.ExpiresAt.Time,                           // new expires_at field
 			Token:        api.NewOptOAuth2ClientTokenToken(tokenObj), // wrap the token JSON
 		}
@@ -314,63 +316,6 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 	}
 	return out, nil
 }
-
-/*
-// TODO @reactima uncomment or remove
-// OAuth2ClientTokenUpdate updates an OAuth2 token record and demonstrates how to update the new fields.
-func (h *Handler) OAuth2ClientTokenUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (*api.OAuth2Client, error) {
-	log := h.log.With("handler", "OAuth2ClientTokenUpdate", "tokenUUID", params.UUID)
-	q := query.New(h.dbp)
-	tokenUUID, err := converter.ConvertStringToPgUUID(params.UUID)
-	if err != nil {
-		log.Error("invalid token UUID", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("invalid token UUID"))
-	}
-
-	// Prepare update parameters using the new fields.
-	updateParams := query.UpdateOauth2TokenParams{
-		UUID:         tokenUUID,
-		AccessToken:  req.AccessToken,
-		RefreshToken: req.RefreshToken,
-		ExpiresAt:    req.ExpiresAt,
-		Token:        req.Token, // assumed to be of type OptOAuth2ClientTokenToken
-	}
-
-	if err := q.UpdateOauth2Token(ctx, updateParams); err != nil {
-		log.Error("failed to update oauth2 token", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update token"))
-	}
-
-	updatedToken, err := q.GetOauth2TokenByUUID(ctx, tokenUUID)
-	if err != nil {
-		log.Error("failed to get updated oauth2 token", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to retrieve updated token"))
-	}
-
-	var tokenObj api.OAuth2ClientTokenToken
-	tokenStr := string(updatedToken.Token)
-	if err := tokenObj.UnmarshalJSON([]byte(tokenStr)); err != nil {
-		log.Error("failed to unmarshal updated token", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to decode updated token"))
-	}
-
-	token := api.OAuth2ClientToken{
-		UUID:         api.NewOptString(updatedToken.UUID.String()),
-		ClientUUID:   updatedToken.ClientUuid.String(),
-		AccessToken:  updatedToken.AccessToken,
-		RefreshToken: api.NewOptString(updatedToken.RefreshToken),
-		ExpiresAt:    updatedToken.ExpiresAt,
-		Token:        api.NewOptOAuth2ClientTokenToken(tokenObj),
-	}
-	if updatedToken.CreatedAt.Valid {
-		token.CreatedAt = api.NewOptDateTime(updatedToken.CreatedAt.Time)
-	}
-	if updatedToken.UpdatedAt.Valid {
-		token.UpdatedAt = api.NewOptDateTime(updatedToken.UpdatedAt.Time)
-	}
-	return &token, nil
-}
-*/
 
 // OAuth2ClientUpdate updates an OAuth2 client.
 func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (*api.OAuth2Client, error) {

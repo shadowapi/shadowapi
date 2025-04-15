@@ -16,26 +16,46 @@ const createOauth2Token = `-- name: CreateOauth2Token :one
 INSERT INTO oauth2_token (
     uuid,
     client_uuid,
+    user_uuid,
+    access_token,
+    refresh_token,
+    expires_at,
     token,
     created_at,
     updated_at
 ) VALUES (
     $1::uuid,
     $2::uuid,
-    $3,
+    $3::uuid,
+    $4,
+    $5,
+    $6,
+    $7,
     NOW(),
     NOW()
 ) RETURNING uuid, client_uuid, user_uuid, access_token, refresh_token, expires_at, token, created_at, updated_at, name
 `
 
 type CreateOauth2TokenParams struct {
-	UUID       pgtype.UUID `json:"uuid"`
-	ClientUuid pgtype.UUID `json:"client_uuid"`
-	Token      []byte      `json:"token"`
+	UUID         pgtype.UUID        `json:"uuid"`
+	ClientUuid   pgtype.UUID        `json:"client_uuid"`
+	UserUUID     pgtype.UUID        `json:"user_uuid"`
+	AccessToken  string             `json:"access_token"`
+	RefreshToken pgtype.Text        `json:"refresh_token"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	Token        []byte             `json:"token"`
 }
 
 func (q *Queries) CreateOauth2Token(ctx context.Context, arg CreateOauth2TokenParams) (Oauth2Token, error) {
-	row := q.db.QueryRow(ctx, createOauth2Token, arg.UUID, arg.ClientUuid, arg.Token)
+	row := q.db.QueryRow(ctx, createOauth2Token,
+		arg.UUID,
+		arg.ClientUuid,
+		arg.UserUUID,
+		arg.AccessToken,
+		arg.RefreshToken,
+		arg.ExpiresAt,
+		arg.Token,
+	)
 	var i Oauth2Token
 	err := row.Scan(
 		&i.UUID,
@@ -326,17 +346,35 @@ func (q *Queries) GetTokensToRefresh(ctx context.Context, clientUuid interface{}
 
 const updateOauth2Token = `-- name: UpdateOauth2Token :exec
 UPDATE oauth2_token SET
-    token = $1,
+                        client_uuid = $1::uuid,
+    user_uuid = $2::uuid,
+    access_token = $3,
+    refresh_token = $4,
+    expires_at = $5,
+    token = $6,
     updated_at = NOW()
-WHERE uuid = $2::uuid
+WHERE uuid = $7::uuid
 `
 
 type UpdateOauth2TokenParams struct {
-	Token []byte      `json:"token"`
-	UUID  pgtype.UUID `json:"uuid"`
+	ClientUuid   pgtype.UUID        `json:"client_uuid"`
+	UserUUID     pgtype.UUID        `json:"user_uuid"`
+	AccessToken  string             `json:"access_token"`
+	RefreshToken pgtype.Text        `json:"refresh_token"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	Token        []byte             `json:"token"`
+	UUID         pgtype.UUID        `json:"uuid"`
 }
 
 func (q *Queries) UpdateOauth2Token(ctx context.Context, arg UpdateOauth2TokenParams) error {
-	_, err := q.db.Exec(ctx, updateOauth2Token, arg.Token, arg.UUID)
+	_, err := q.db.Exec(ctx, updateOauth2Token,
+		arg.ClientUuid,
+		arg.UserUUID,
+		arg.AccessToken,
+		arg.RefreshToken,
+		arg.ExpiresAt,
+		arg.Token,
+		arg.UUID,
+	)
 	return err
 }
