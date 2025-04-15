@@ -3,19 +3,27 @@ additionalProperties: false
 properties:
   uuid:
     type: string
+    description: "Internal unique ID for the state record."
   client_uuid:
     type: string
+    description: "UUID of the OAuth2 client associated with this state."
   state:
     type: object
+    additionalProperties: true
+    description: "The state value (may include nonce, redirect_uri, etc.) used to prevent CSRF."
   created_at:
     type: string
     format: date-time
+    description: "Timestamp when the state was created."
   updated_at:
     type: string
     format: date-time
+    description: "Timestamp when the state was last updated."
   expired_at:
     type: string
     format: date-time
+    description: "Timestamp when the state should be invalidated."
 required:
   - client_uuid
   - state
+  - expired_at

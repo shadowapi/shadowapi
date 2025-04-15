@@ -3,18 +3,14 @@ INSERT INTO oauth2_subject (
     uuid,
     user_uuid,
     client_uuid,
-    token,
     created_at,
-    updated_at,
-    expired_at
+    updated_at
 ) VALUES (
              sqlc.arg('uuid')::uuid,
              sqlc.arg('user_uuid')::uuid,
              sqlc.arg('client_uuid')::uuid,
-             sqlc.arg('token'),
              NOW(),
-             NOW(),
-             sqlc.arg('expired_at')
+             NOW()
          ) RETURNING *;
 
 -- name: GetOauth2Subject :one
@@ -54,9 +50,9 @@ LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 
 -- name: UpdateOauth2Subject :exec
 UPDATE oauth2_subject SET
-                          token = sqlc.arg('token'),
-                          updated_at = NOW(),
-                          expired_at = sqlc.arg('expired_at')
+                          user_uuid = sqlc.arg('user_uuid')::uuid,
+                          client_uuid= sqlc.arg('client_uuid')::uuid,
+                          updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: DeleteOauth2Subject :exec

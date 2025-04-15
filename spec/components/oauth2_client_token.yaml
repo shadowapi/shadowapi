@@ -3,16 +3,36 @@ additionalProperties: false
 properties:
   uuid:
     type: string
+    description: "Internal unique ID for the token record."
   client_uuid:
     type: string
+    description: "UUID of the OAuth2 client that issued this token."
+  user_uuid:
+    type: string
+    description: "Optional. UUID of the user for whom the token was issued."
+  access_token:
+    type: string
+    description: "Access token (JWT or opaque string)."
+  refresh_token:
+    type: string
+    description: "Refresh token, if available."
+  expires_at:
+    type: string
+    format: date-time
+    description: "Timestamp when the access token expires."
   token:
     type: object
+    additionalProperties: true
+    description: "Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata)."
   created_at:
     type: string
     format: date-time
+    description: "Timestamp when the token record was stored."
   updated_at:
     type: string
     format: date-time
+    description: "Timestamp when the token record was last updated."
 required:
   - client_uuid
-  - token
+  - access_token
+  - expires_at

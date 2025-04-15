@@ -17,46 +17,32 @@ INSERT INTO oauth2_subject (
     uuid,
     user_uuid,
     client_uuid,
-    token,
     created_at,
-    updated_at,
-    expired_at
+    updated_at
 ) VALUES (
              $1::uuid,
              $2::uuid,
              $3::uuid,
-             $4,
              NOW(),
-             NOW(),
-             $5
-         ) RETURNING uuid, user_uuid, client_uuid, token, created_at, updated_at, expired_at
+             NOW()
+         ) RETURNING uuid, user_uuid, token_uuid, created_at, updated_at
 `
 
 type CreateOauth2SubjectParams struct {
-	UUID       pgtype.UUID        `json:"uuid"`
-	UserUUID   pgtype.UUID        `json:"user_uuid"`
-	ClientUuid pgtype.UUID        `json:"client_uuid"`
-	Token      []byte             `json:"token"`
-	ExpiredAt  pgtype.Timestamptz `json:"expired_at"`
+	UUID       pgtype.UUID `json:"uuid"`
+	UserUUID   pgtype.UUID `json:"user_uuid"`
+	ClientUuid pgtype.UUID `json:"client_uuid"`
 }
 
 func (q *Queries) CreateOauth2Subject(ctx context.Context, arg CreateOauth2SubjectParams) (Oauth2Subject, error) {
-	row := q.db.QueryRow(ctx, createOauth2Subject,
-		arg.UUID,
-		arg.UserUUID,
-		arg.ClientUuid,
-		arg.Token,
-		arg.ExpiredAt,
-	)
+	row := q.db.QueryRow(ctx, createOauth2Subject, arg.UUID, arg.UserUUID, arg.ClientUuid)
 	var i Oauth2Subject
 	err := row.Scan(
 		&i.UUID,
 		&i.UserUUID,
-		&i.ClientUuid,
-		&i.Token,
+		&i.TokenUuid,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.ExpiredAt,
 	)
 	return i, err
 }
@@ -73,7 +59,7 @@ func (q *Queries) DeleteOauth2Subject(ctx context.Context, argUuid pgtype.UUID) 
 
 const getOauth2Subject = `-- name: GetOauth2Subject :one
 SELECT
-    oauth2_subject.uuid, oauth2_subject.user_uuid, oauth2_subject.client_uuid, oauth2_subject.token, oauth2_subject.created_at, oauth2_subject.updated_at, oauth2_subject.expired_at
+    oauth2_subject.uuid, oauth2_subject.user_uuid, oauth2_subject.token_uuid, oauth2_subject.created_at, oauth2_subject.updated_at
 FROM oauth2_subject
 WHERE uuid = $1::uuid
 `
@@ -88,25 +74,23 @@ func (q *Queries) GetOauth2Subject(ctx context.Context, argUuid pgtype.UUID) (Ge
 	err := row.Scan(
 		&i.Oauth2Subject.UUID,
 		&i.Oauth2Subject.UserUUID,
-		&i.Oauth2Subject.ClientUuid,
-		&i.Oauth2Subject.Token,
+		&i.Oauth2Subject.TokenUuid,
 		&i.Oauth2Subject.CreatedAt,
 		&i.Oauth2Subject.UpdatedAt,
-		&i.Oauth2Subject.ExpiredAt,
 	)
 	return i, err
 }
 
 const getOauth2Subjects = `-- name: GetOauth2Subjects :many
 WITH filtered_oauth2_subjects AS (
-    SELECT os.uuid, os.user_uuid, os.client_uuid, os.token, os.created_at, os.updated_at, os.expired_at
+    SELECT os.uuid, os.user_uuid, os.token_uuid, os.created_at, os.updated_at
     FROM oauth2_subject os
     WHERE
         (NULLIF($5, '') IS NULL OR os.user_uuid = $5::uuid)
       AND (NULLIF($6, '') IS NULL OR os.client_uuid = $6::uuid)
 )
 SELECT
-    uuid, user_uuid, client_uuid, token, created_at, updated_at, expired_at,
+    uuid, user_uuid, token_uuid, created_at, updated_at,
     (SELECT count(*) FROM filtered_oauth2_subjects) as total_count
 FROM filtered_oauth2_subjects
 ORDER BY
@@ -131,11 +115,9 @@ type GetOauth2SubjectsParams struct {
 type GetOauth2SubjectsRow struct {
 	UUID       uuid.UUID          `json:"uuid"`
 	UserUUID   *uuid.UUID         `json:"user_uuid"`
-	ClientUuid *uuid.UUID         `json:"client_uuid"`
-	Token      []byte             `json:"token"`
+	TokenUuid  *uuid.UUID         `json:"token_uuid"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	ExpiredAt  pgtype.Timestamptz `json:"expired_at"`
 	TotalCount int64              `json:"total_count"`
 }
 
@@ -158,11 +140,9 @@ func (q *Queries) GetOauth2Subjects(ctx context.Context, arg GetOauth2SubjectsPa
 		if err := rows.Scan(
 			&i.UUID,
 			&i.UserUUID,
-			&i.ClientUuid,
-			&i.Token,
+			&i.TokenUuid,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.ExpiredAt,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -177,7 +157,7 @@ func (q *Queries) GetOauth2Subjects(ctx context.Context, arg GetOauth2SubjectsPa
 
 const listOauth2Subjects = `-- name: ListOauth2Subjects :many
 SELECT
-    oauth2_subject.uuid, oauth2_subject.user_uuid, oauth2_subject.client_uuid, oauth2_subject.token, oauth2_subject.created_at, oauth2_subject.updated_at, oauth2_subject.expired_at
+    oauth2_subject.uuid, oauth2_subject.user_uuid, oauth2_subject.token_uuid, oauth2_subject.created_at, oauth2_subject.updated_at
 FROM oauth2_subject
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -205,11 +185,9 @@ func (q *Queries) ListOauth2Subjects(ctx context.Context, arg ListOauth2Subjects
 		if err := rows.Scan(
 			&i.Oauth2Subject.UUID,
 			&i.Oauth2Subject.UserUUID,
-			&i.Oauth2Subject.ClientUuid,
-			&i.Oauth2Subject.Token,
+			&i.Oauth2Subject.TokenUuid,
 			&i.Oauth2Subject.CreatedAt,
 			&i.Oauth2Subject.UpdatedAt,
-			&i.Oauth2Subject.ExpiredAt,
 		); err != nil {
 			return nil, err
 		}
@@ -223,19 +201,19 @@ func (q *Queries) ListOauth2Subjects(ctx context.Context, arg ListOauth2Subjects
 
 const updateOauth2Subject = `-- name: UpdateOauth2Subject :exec
 UPDATE oauth2_subject SET
-                          token = $1,
-                          updated_at = NOW(),
-                          expired_at = $2
+                          user_uuid = $1::uuid,
+                          client_uuid= $2::uuid,
+                          updated_at = NOW()
 WHERE uuid = $3::uuid
 `
 
 type UpdateOauth2SubjectParams struct {
-	Token     []byte             `json:"token"`
-	ExpiredAt pgtype.Timestamptz `json:"expired_at"`
-	UUID      pgtype.UUID        `json:"uuid"`
+	UserUUID   pgtype.UUID `json:"user_uuid"`
+	ClientUuid pgtype.UUID `json:"client_uuid"`
+	UUID       pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateOauth2Subject(ctx context.Context, arg UpdateOauth2SubjectParams) error {
-	_, err := q.db.Exec(ctx, updateOauth2Subject, arg.Token, arg.ExpiredAt, arg.UUID)
+	_, err := q.db.Exec(ctx, updateOauth2Subject, arg.UserUUID, arg.ClientUuid, arg.UUID)
 	return err
 }

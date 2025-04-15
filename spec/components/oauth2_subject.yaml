@@ -3,22 +3,21 @@ additionalProperties: false
 properties:
   uuid:
     type: string
+    description: "Internal unique ID for the subject record."
   user_uuid:
     type: string
-  client_uuid:
+    description: "UUID of the user in the system."
+  token_uuid:
     type: string
-  token:
-    type: object
+    description: "UUID of the associated OAuth2 token record."
   created_at:
     type: string
     format: date-time
+    description: "Timestamp when the subject record was created."
   updated_at:
     type: string
     format: date-time
-  expired_at:
-    type: string
-    format: date-time
+    description: "Timestamp when the subject record was last updated."
 required:
   - user_uuid
-  - client_uuid
-  - token
+  - token_uuid

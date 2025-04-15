@@ -14,69 +14,51 @@ CREATE TABLE "user" (
   CONSTRAINT uq_users_email unique(email)
 );
 
+CREATE TABLE oauth2_client (
+  uuid UUID PRIMARY KEY, -- Internal unique ID for the client
+  name VARCHAR NOT NULL, -- Friendly name for admin UI
+  provider VARCHAR NOT NULL, -- e.g. "github", "google", "zitadel"
+  client_id VARCHAR NOT NULL UNIQUE, -- OAuth2 client ID
+  secret VARCHAR NOT NULL, -- OAuth2 client secret (store encrypted in production)
 
--- TODO @reactima move to documentation
--- Separating oauth2_state and oauth2_subject can be a good practice because it enforces a clear separation of concerns and reflects the distinct roles these tables play in an OAuth2 workflow. Here are some points to consider:
---
--- • Separation of concerns:
---  – The oauth2_state table typically handles ephemeral data used during the initial OAuth2 flow (for example, managing CSRF protection via the state parameter and tracking temporary authentication sessions).
---  – The oauth2_subject table is used to store longer-lived data reflecting a completed authorization, such as tokens associated with a user and client. Keeping them separate makes it clearer what each dataset is intended for.
---
--- • Different lifecycles:
---  – State data is short-lived—it expires quickly and should be purged soon after it has served its purpose.
---  – Subject records, which include tokens and user associations, are managed over a longer duration. This separation allows for implementing distinct cleanup or expiration strategies for each type of data.
---
--- • Security considerations:
---      – By segregating temporary state from persistent tokens, you can apply different security measures (e.g., tighter caching, dedicated indexing, or specific audit trails) tailored to each use case.
---      – Ephemeral state can be stored with minimal overhead, while subject records can be designed with additional integrity and audit requirements in mind.
---
--- • Query performance and maintainability:
---  – Since the two tables are likely queried differently, having them separate avoids mixing transient state with more permanent authorization data. This can simplify both query logic and database maintenance.
---  – Future changes to one part of the flow (such as adjustments to state expiration logic) can be made without affecting the storage or processing of persistent tokens.
-
-CREATE TABLE "oauth2_client"(
-  "uuid"          UUID PRIMARY KEY,
-  name       VARCHAR NOT NULL,
-  provider   VARCHAR NOT NULL,
-  client_id      VARCHAR NOT NULL UNIQUE,
-  secret     VARCHAR NOT NULL,
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE
+  created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- When the client was registered
+  updated_at TIMESTAMP WITH TIME ZONE  -- Last time client config was updated
 );
 
-CREATE TABLE "oauth2_token"(
-  "uuid"          UUID PRIMARY KEY,
-  client_uuid        UUID NOT NULL,
-  token           JSONB,
+-- Stores issued tokens (access + refresh) per client and optionally user
+CREATE TABLE oauth2_token (
+  uuid UUID PRIMARY KEY, -- Internal unique ID for token record
+  client_uuid UUID NOT NULL REFERENCES oauth2_client(uuid) ON DELETE CASCADE, -- OAuth2 client that issued this token
+  user_uuid UUID, -- Optional: the user this token was issued for (nullable for machine tokens)
 
-  created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at  TIMESTAMP WITH TIME ZONE
+  access_token TEXT NOT NULL, -- Access token (JWT or opaque string)
+  refresh_token TEXT, -- Refresh token, if available
+  expires_at TIMESTAMP WITH TIME ZONE  NOT NULL, -- When the access token expires
+
+  token JSONB, -- Raw OAuth2 token response (useful for debugging or extra metadata)
+  created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- When the token was stored
+  updated_at TIMESTAMP WITH TIME ZONE  -- Last refresh/update of this token
 );
 
+-- Stores OAuth2 state values to prevent CSRF during login flows
+CREATE TABLE oauth2_state (
+  uuid UUID PRIMARY KEY, -- Internal ID
+  client_uuid UUID NOT NULL REFERENCES oauth2_client(uuid) ON DELETE CASCADE, -- Client the state is related to
 
-CREATE TABLE "oauth2_state"(
-  "uuid"      UUID PRIMARY KEY,
-  client_uuid    UUID NOT NULL,
-  state       JSONB,
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE,
-  expired_at TIMESTAMP WITH TIME ZONE NOT NULL
+  state JSONB, -- Actual state value (may include nonce, redirect_uri, etc.)
+  created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- Created when auth flow started
+  updated_at TIMESTAMP WITH TIME ZONE , -- Optional updates (rarely used)
+  expired_at TIMESTAMP WITH TIME ZONE  NOT NULL -- When this state should be invalidated
 );
 
-CREATE TABLE "oauth2_subject"(
-  "uuid"      UUID PRIMARY KEY,
-  user_uuid   UUID NOT NULL,
-  client_uuid   UUID NOT NULL,
-  token       JSONB,
+-- Represents a persistent subject relationship (user ↔ client), e.g. for user linking or re-authentication
+CREATE TABLE oauth2_subject (
+  uuid UUID PRIMARY KEY, -- Internal ID
+  user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE, -- The user in your system
+  token_uuid UUID NOT NULL REFERENCES oauth2_token(uuid) ON DELETE CASCADE, -- Link to their most recent token
 
-  created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at  TIMESTAMP WITH TIME ZONE,
-  expired_at  TIMESTAMP WITH TIME ZONE NOT NULL,
-
-  CONSTRAINT fk_oauth2_subject_user_uuid
-  FOREIGN KEY(user_uuid) REFERENCES "user"("uuid") ON DELETE CASCADE
+  created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- When the user linked this client
+  updated_at TIMESTAMP WITH TIME ZONE  -- Last update to the relationship
 );
 
 CREATE TABLE datasource(

@@ -19,6 +19,15 @@ SELECT
 FROM oauth2_token
 WHERE client_uuid = sqlc.arg('client_uuid')::uuid;
 
+-- name: GetTokensToRefresh :many
+SELECT
+    sqlc.embed(oauth2_token)
+FROM oauth2_token
+WHERE
+   (NULLIF(sqlc.arg('client_uuid'), '') IS NULL OR os.client_uuid = sqlc.arg('client_uuid')::uuid) AND
+    expires_at < NOW() AND
+    (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 hour');
+
 -- name: GetOauth2TokenByUUID :one
 SELECT
     sqlc.embed(oauth2_token)

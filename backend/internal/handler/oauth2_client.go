@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/oauth2"
 
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	oauthTools "github.com/shadowapi/shadowapi/backend/internal/oauth2"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -285,20 +285,24 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 		log.Error("failed to get client tokens", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
+
 	var out []api.OAuth2ClientToken
 	for _, t := range tokens {
-		// Convert the token field (stored as JSONB []byte) into a string.
+		// Convert the raw JSONB token field into a string.
 		tokenStr := string(t.Token)
-		// TODO @reactima define structure token in spec
+		// Unmarshal the token JSON into tokenObj.
 		var tokenObj api.OAuth2ClientTokenToken
 		if err := tokenObj.UnmarshalJSON([]byte(tokenStr)); err != nil {
 			log.Error("failed to unmarshal oauth token", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to decode oauth token"))
 		}
 		token := api.OAuth2ClientToken{
-			UUID:       api.NewOptString(t.UUID.String()),
-			ClientUUID: t.ClientUuid.String(),
-			Token:      tokenObj,
+			UUID:         api.NewOptString(t.UUID.String()),
+			ClientUUID:   t.ClientUuid.String(),
+			AccessToken:  t.AccessToken,                              // new access token field
+			RefreshToken: api.NewOptString(t.RefreshToken.String),    // new refresh token field wrapped as OptString
+			ExpiresAt:    t.ExpiresAt.Time,                           // new expires_at field
+			Token:        api.NewOptOAuth2ClientTokenToken(tokenObj), // wrap the token JSON
 		}
 		if t.CreatedAt.Valid {
 			token.CreatedAt = api.NewOptDateTime(t.CreatedAt.Time)
@@ -310,6 +314,63 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 	}
 	return out, nil
 }
+
+/*
+// TODO @reactima uncomment or remove
+// OAuth2ClientTokenUpdate updates an OAuth2 token record and demonstrates how to update the new fields.
+func (h *Handler) OAuth2ClientTokenUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (*api.OAuth2Client, error) {
+	log := h.log.With("handler", "OAuth2ClientTokenUpdate", "tokenUUID", params.UUID)
+	q := query.New(h.dbp)
+	tokenUUID, err := converter.ConvertStringToPgUUID(params.UUID)
+	if err != nil {
+		log.Error("invalid token UUID", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid token UUID"))
+	}
+
+	// Prepare update parameters using the new fields.
+	updateParams := query.UpdateOauth2TokenParams{
+		UUID:         tokenUUID,
+		AccessToken:  req.AccessToken,
+		RefreshToken: req.RefreshToken,
+		ExpiresAt:    req.ExpiresAt,
+		Token:        req.Token, // assumed to be of type OptOAuth2ClientTokenToken
+	}
+
+	if err := q.UpdateOauth2Token(ctx, updateParams); err != nil {
+		log.Error("failed to update oauth2 token", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update token"))
+	}
+
+	updatedToken, err := q.GetOauth2TokenByUUID(ctx, tokenUUID)
+	if err != nil {
+		log.Error("failed to get updated oauth2 token", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to retrieve updated token"))
+	}
+
+	var tokenObj api.OAuth2ClientTokenToken
+	tokenStr := string(updatedToken.Token)
+	if err := tokenObj.UnmarshalJSON([]byte(tokenStr)); err != nil {
+		log.Error("failed to unmarshal updated token", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to decode updated token"))
+	}
+
+	token := api.OAuth2ClientToken{
+		UUID:         api.NewOptString(updatedToken.UUID.String()),
+		ClientUUID:   updatedToken.ClientUuid.String(),
+		AccessToken:  updatedToken.AccessToken,
+		RefreshToken: api.NewOptString(updatedToken.RefreshToken),
+		ExpiresAt:    updatedToken.ExpiresAt,
+		Token:        api.NewOptOAuth2ClientTokenToken(tokenObj),
+	}
+	if updatedToken.CreatedAt.Valid {
+		token.CreatedAt = api.NewOptDateTime(updatedToken.CreatedAt.Time)
+	}
+	if updatedToken.UpdatedAt.Valid {
+		token.UpdatedAt = api.NewOptDateTime(updatedToken.UpdatedAt.Time)
+	}
+	return &token, nil
+}
+*/
 
 // OAuth2ClientUpdate updates an OAuth2 client.
 func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (*api.OAuth2Client, error) {

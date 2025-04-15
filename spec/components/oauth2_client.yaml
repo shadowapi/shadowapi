@@ -3,20 +3,27 @@ additionalProperties: false
 properties:
   uuid:
     type: string
+    description: "Internal unique ID for the client."
   name:
     type: string
+    description: "Friendly name for the admin UI."
   provider:
     type: string
+    description: "Name of the OAuth2 provider (e.g., 'github', 'google', 'zitadel')."
   client_id:
     type: string
+    description: "OAuth2 client ID provided by the external provider."
   secret:
     type: string
+    description: "OAuth2 client secret (should be stored securely, e.g. encrypted)."
   created_at:
     type: string
     format: date-time
+    description: "Timestamp when the client was registered."
   updated_at:
     type: string
     format: date-time
+    description: "Timestamp when the client was last updated."
 required:
   - name
   - provider

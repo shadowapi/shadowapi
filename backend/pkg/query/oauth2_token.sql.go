@@ -25,7 +25,7 @@ INSERT INTO oauth2_token (
     $3,
     NOW(),
     NOW()
-) RETURNING uuid, client_uuid, token, created_at, updated_at, name
+) RETURNING uuid, client_uuid, user_uuid, access_token, refresh_token, expires_at, token, created_at, updated_at, name
 `
 
 type CreateOauth2TokenParams struct {
@@ -40,6 +40,10 @@ func (q *Queries) CreateOauth2Token(ctx context.Context, arg CreateOauth2TokenPa
 	err := row.Scan(
 		&i.UUID,
 		&i.ClientUuid,
+		&i.UserUUID,
+		&i.AccessToken,
+		&i.RefreshToken,
+		&i.ExpiresAt,
 		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -70,7 +74,7 @@ func (q *Queries) DeleteOauth2TokenByClientUUID(ctx context.Context, clientUuid 
 
 const getOauth2ClientTokens = `-- name: GetOauth2ClientTokens :many
 SELECT
-    ot.uuid, ot.client_uuid, ot.token, ot.created_at, ot.updated_at, ot.name,
+    ot.uuid, ot.client_uuid, ot.user_uuid, ot.access_token, ot.refresh_token, ot.expires_at, ot.token, ot.created_at, ot.updated_at, ot.name,
     c.name
 FROM oauth2_token AS ot
          LEFT JOIN datasource AS c ON c.oauth2_token_uuid = ot.uuid
@@ -78,13 +82,17 @@ WHERE ot.client_uuid = $1::uuid
 `
 
 type GetOauth2ClientTokensRow struct {
-	UUID       uuid.UUID          `json:"uuid"`
-	ClientUuid *uuid.UUID         `json:"client_uuid"`
-	Token      []byte             `json:"token"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	Name       pgtype.Text        `json:"name"`
-	Name_2     pgtype.Text        `json:"name_2"`
+	UUID         uuid.UUID          `json:"uuid"`
+	ClientUuid   *uuid.UUID         `json:"client_uuid"`
+	UserUUID     *uuid.UUID         `json:"user_uuid"`
+	AccessToken  string             `json:"access_token"`
+	RefreshToken pgtype.Text        `json:"refresh_token"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	Token        []byte             `json:"token"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	Name         pgtype.Text        `json:"name"`
+	Name_2       pgtype.Text        `json:"name_2"`
 }
 
 func (q *Queries) GetOauth2ClientTokens(ctx context.Context, clientUuid pgtype.UUID) ([]GetOauth2ClientTokensRow, error) {
@@ -99,6 +107,10 @@ func (q *Queries) GetOauth2ClientTokens(ctx context.Context, clientUuid pgtype.U
 		if err := rows.Scan(
 			&i.UUID,
 			&i.ClientUuid,
+			&i.UserUUID,
+			&i.AccessToken,
+			&i.RefreshToken,
+			&i.ExpiresAt,
 			&i.Token,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -117,7 +129,7 @@ func (q *Queries) GetOauth2ClientTokens(ctx context.Context, clientUuid pgtype.U
 
 const getOauth2TokenByUUID = `-- name: GetOauth2TokenByUUID :one
 SELECT
-    oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
+    oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.user_uuid, oauth2_token.access_token, oauth2_token.refresh_token, oauth2_token.expires_at, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
 FROM oauth2_token
 WHERE client_uuid = $1::uuid
 `
@@ -132,6 +144,10 @@ func (q *Queries) GetOauth2TokenByUUID(ctx context.Context, argUuid pgtype.UUID)
 	err := row.Scan(
 		&i.Oauth2Token.UUID,
 		&i.Oauth2Token.ClientUuid,
+		&i.Oauth2Token.UserUUID,
+		&i.Oauth2Token.AccessToken,
+		&i.Oauth2Token.RefreshToken,
+		&i.Oauth2Token.ExpiresAt,
 		&i.Oauth2Token.Token,
 		&i.Oauth2Token.CreatedAt,
 		&i.Oauth2Token.UpdatedAt,
@@ -142,13 +158,13 @@ func (q *Queries) GetOauth2TokenByUUID(ctx context.Context, argUuid pgtype.UUID)
 
 const getOauth2Tokens = `-- name: GetOauth2Tokens :many
 WITH filtered_oauth2_tokens AS (
-    SELECT ot.uuid, ot.client_uuid, ot.token, ot.created_at, ot.updated_at, ot.name
+    SELECT ot.uuid, ot.client_uuid, ot.user_uuid, ot.access_token, ot.refresh_token, ot.expires_at, ot.token, ot.created_at, ot.updated_at, ot.name
     FROM oauth2_token ot
     WHERE
         (NULLIF($5, '') IS NULL OR ot.client_uuid = $5::uuid)
 )
 SELECT
-    uuid, client_uuid, token, created_at, updated_at, name,
+    uuid, client_uuid, user_uuid, access_token, refresh_token, expires_at, token, created_at, updated_at, name,
     (SELECT count(*) FROM filtered_oauth2_tokens) as total_count
 FROM filtered_oauth2_tokens
 ORDER BY
@@ -170,13 +186,17 @@ type GetOauth2TokensParams struct {
 }
 
 type GetOauth2TokensRow struct {
-	UUID       uuid.UUID          `json:"uuid"`
-	ClientUuid *uuid.UUID         `json:"client_uuid"`
-	Token      []byte             `json:"token"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	Name       pgtype.Text        `json:"name"`
-	TotalCount int64              `json:"total_count"`
+	UUID         uuid.UUID          `json:"uuid"`
+	ClientUuid   *uuid.UUID         `json:"client_uuid"`
+	UserUUID     *uuid.UUID         `json:"user_uuid"`
+	AccessToken  string             `json:"access_token"`
+	RefreshToken pgtype.Text        `json:"refresh_token"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	Token        []byte             `json:"token"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	Name         pgtype.Text        `json:"name"`
+	TotalCount   int64              `json:"total_count"`
 }
 
 func (q *Queries) GetOauth2Tokens(ctx context.Context, arg GetOauth2TokensParams) ([]GetOauth2TokensRow, error) {
@@ -197,6 +217,10 @@ func (q *Queries) GetOauth2Tokens(ctx context.Context, arg GetOauth2TokensParams
 		if err := rows.Scan(
 			&i.UUID,
 			&i.ClientUuid,
+			&i.UserUUID,
+			&i.AccessToken,
+			&i.RefreshToken,
+			&i.ExpiresAt,
 			&i.Token,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -215,7 +239,7 @@ func (q *Queries) GetOauth2Tokens(ctx context.Context, arg GetOauth2TokensParams
 
 const getOauth2TokensByClientUUID = `-- name: GetOauth2TokensByClientUUID :many
 SELECT
-    oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
+    oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.user_uuid, oauth2_token.access_token, oauth2_token.refresh_token, oauth2_token.expires_at, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
 FROM oauth2_token
 WHERE client_uuid = $1::uuid
 `
@@ -236,6 +260,55 @@ func (q *Queries) GetOauth2TokensByClientUUID(ctx context.Context, clientUuid pg
 		if err := rows.Scan(
 			&i.Oauth2Token.UUID,
 			&i.Oauth2Token.ClientUuid,
+			&i.Oauth2Token.UserUUID,
+			&i.Oauth2Token.AccessToken,
+			&i.Oauth2Token.RefreshToken,
+			&i.Oauth2Token.ExpiresAt,
+			&i.Oauth2Token.Token,
+			&i.Oauth2Token.CreatedAt,
+			&i.Oauth2Token.UpdatedAt,
+			&i.Oauth2Token.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTokensToRefresh = `-- name: GetTokensToRefresh :many
+SELECT
+    oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.user_uuid, oauth2_token.access_token, oauth2_token.refresh_token, oauth2_token.expires_at, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
+FROM oauth2_token
+WHERE
+   (NULLIF($1, '') IS NULL OR os.client_uuid = $1::uuid) AND
+    expires_at < NOW() AND
+    (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 hour')
+`
+
+type GetTokensToRefreshRow struct {
+	Oauth2Token Oauth2Token `json:"oauth2_token"`
+}
+
+func (q *Queries) GetTokensToRefresh(ctx context.Context, clientUuid interface{}) ([]GetTokensToRefreshRow, error) {
+	rows, err := q.db.Query(ctx, getTokensToRefresh, clientUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTokensToRefreshRow
+	for rows.Next() {
+		var i GetTokensToRefreshRow
+		if err := rows.Scan(
+			&i.Oauth2Token.UUID,
+			&i.Oauth2Token.ClientUuid,
+			&i.Oauth2Token.UserUUID,
+			&i.Oauth2Token.AccessToken,
+			&i.Oauth2Token.RefreshToken,
+			&i.Oauth2Token.ExpiresAt,
 			&i.Oauth2Token.Token,
 			&i.Oauth2Token.CreatedAt,
 			&i.Oauth2Token.UpdatedAt,

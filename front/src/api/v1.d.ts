@@ -1197,23 +1197,56 @@ export interface components {
             readonly updated_at?: string;
         };
         oauth2_client: {
+            /** @description Internal unique ID for the client. */
             uuid?: string;
+            /** @description Friendly name for the admin UI. */
             name: string;
+            /** @description Name of the OAuth2 provider (e.g., 'github', 'google', 'zitadel'). */
             provider: string;
+            /** @description OAuth2 client ID provided by the external provider. */
             client_id: string;
+            /** @description OAuth2 client secret (should be stored securely, e.g. encrypted). */
             secret: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the client was registered.
+             */
             created_at?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the client was last updated.
+             */
             updated_at?: string;
         };
         oauth2_client_token: {
+            /** @description Internal unique ID for the token record. */
             uuid?: string;
+            /** @description UUID of the OAuth2 client that issued this token. */
             client_uuid: string;
-            token: Record<string, never>;
-            /** Format: date-time */
+            /** @description Optional. UUID of the user for whom the token was issued. */
+            user_uuid?: string;
+            /** @description Access token (JWT or opaque string). */
+            access_token: string;
+            /** @description Refresh token, if available. */
+            refresh_token?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the access token expires.
+             */
+            expires_at: string;
+            /** @description Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata). */
+            token?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: date-time
+             * @description Timestamp when the token record was stored.
+             */
             created_at?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the token record was last updated.
+             */
             updated_at?: string;
         };
         pipeline_node: {
@@ -1729,27 +1762,47 @@ export interface components {
             type?: string;
         };
         oauth2_state: {
+            /** @description Internal unique ID for the state record. */
             uuid?: string;
+            /** @description UUID of the OAuth2 client associated with this state. */
             client_uuid: string;
-            state: Record<string, never>;
-            /** Format: date-time */
+            /** @description The state value (may include nonce, redirect_uri, etc.) used to prevent CSRF. */
+            state: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: date-time
+             * @description Timestamp when the state was created.
+             */
             created_at?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the state was last updated.
+             */
             updated_at?: string;
-            /** Format: date-time */
-            expired_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the state should be invalidated.
+             */
+            expired_at: string;
         };
         oauth2_subject: {
+            /** @description Internal unique ID for the subject record. */
             uuid?: string;
+            /** @description UUID of the user in the system. */
             user_uuid: string;
-            client_uuid: string;
-            token: Record<string, never>;
-            /** Format: date-time */
+            /** @description UUID of the associated OAuth2 token record. */
+            token_uuid: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the subject record was created.
+             */
             created_at?: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the subject record was last updated.
+             */
             updated_at?: string;
-            /** Format: date-time */
-            expired_at?: string;
         };
     };
     responses: never;

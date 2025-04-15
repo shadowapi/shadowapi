@@ -110,6 +110,9 @@ func Provide(i do.Injector) (*Broker, error) {
 	s := scheduler.NewMultiEmailScheduler(b.log, b.dbp, b.queue)
 	s.Start(b.ctx)
 
+	tokenScheduler := scheduler.NewTokenRefresherScheduler(b.log, b.dbp, b.queue)
+	tokenScheduler.Start(b.ctx)
+
 	return b, nil
 }
 

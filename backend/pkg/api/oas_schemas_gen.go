@@ -3399,12 +3399,19 @@ func (s *MessageWhatsappQueryOK) SetMessages(val []Message) {
 
 // Ref: #
 type OAuth2Client struct {
-	UUID      OptString   `json:"uuid"`
-	Name      string      `json:"name"`
-	Provider  string      `json:"provider"`
-	ClientID  string      `json:"client_id"`
-	Secret    string      `json:"secret"`
+	// Internal unique ID for the client.
+	UUID OptString `json:"uuid"`
+	// Friendly name for the admin UI.
+	Name string `json:"name"`
+	// Name of the OAuth2 provider (e.g., 'github', 'google', 'zitadel').
+	Provider string `json:"provider"`
+	// OAuth2 client ID provided by the external provider.
+	ClientID string `json:"client_id"`
+	// OAuth2 client secret (should be stored securely, e.g. encrypted).
+	Secret string `json:"secret"`
+	// Timestamp when the client was registered.
 	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp when the client was last updated.
 	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
@@ -3618,11 +3625,24 @@ func (s *OAuth2ClientLoginReqQuery) init() OAuth2ClientLoginReqQuery {
 
 // Ref: #
 type OAuth2ClientToken struct {
-	UUID       OptString              `json:"uuid"`
-	ClientUUID string                 `json:"client_uuid"`
-	Token      OAuth2ClientTokenToken `json:"token"`
-	CreatedAt  OptDateTime            `json:"created_at"`
-	UpdatedAt  OptDateTime            `json:"updated_at"`
+	// Internal unique ID for the token record.
+	UUID OptString `json:"uuid"`
+	// UUID of the OAuth2 client that issued this token.
+	ClientUUID string `json:"client_uuid"`
+	// Optional. UUID of the user for whom the token was issued.
+	UserUUID OptString `json:"user_uuid"`
+	// Access token (JWT or opaque string).
+	AccessToken string `json:"access_token"`
+	// Refresh token, if available.
+	RefreshToken OptString `json:"refresh_token"`
+	// Timestamp when the access token expires.
+	ExpiresAt time.Time `json:"expires_at"`
+	// Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata).
+	Token OptOAuth2ClientTokenToken `json:"token"`
+	// Timestamp when the token record was stored.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp when the token record was last updated.
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -3635,8 +3655,28 @@ func (s *OAuth2ClientToken) GetClientUUID() string {
 	return s.ClientUUID
 }
 
+// GetUserUUID returns the value of UserUUID.
+func (s *OAuth2ClientToken) GetUserUUID() OptString {
+	return s.UserUUID
+}
+
+// GetAccessToken returns the value of AccessToken.
+func (s *OAuth2ClientToken) GetAccessToken() string {
+	return s.AccessToken
+}
+
+// GetRefreshToken returns the value of RefreshToken.
+func (s *OAuth2ClientToken) GetRefreshToken() OptString {
+	return s.RefreshToken
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *OAuth2ClientToken) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
 // GetToken returns the value of Token.
-func (s *OAuth2ClientToken) GetToken() OAuth2ClientTokenToken {
+func (s *OAuth2ClientToken) GetToken() OptOAuth2ClientTokenToken {
 	return s.Token
 }
 
@@ -3660,8 +3700,28 @@ func (s *OAuth2ClientToken) SetClientUUID(val string) {
 	s.ClientUUID = val
 }
 
+// SetUserUUID sets the value of UserUUID.
+func (s *OAuth2ClientToken) SetUserUUID(val OptString) {
+	s.UserUUID = val
+}
+
+// SetAccessToken sets the value of AccessToken.
+func (s *OAuth2ClientToken) SetAccessToken(val string) {
+	s.AccessToken = val
+}
+
+// SetRefreshToken sets the value of RefreshToken.
+func (s *OAuth2ClientToken) SetRefreshToken(val OptString) {
+	s.RefreshToken = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *OAuth2ClientToken) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
 // SetToken sets the value of Token.
-func (s *OAuth2ClientToken) SetToken(val OAuth2ClientTokenToken) {
+func (s *OAuth2ClientToken) SetToken(val OptOAuth2ClientTokenToken) {
 	s.Token = val
 }
 
@@ -3678,7 +3738,17 @@ func (s *OAuth2ClientToken) SetUpdatedAt(val OptDateTime) {
 // OAuth2ClientTokenDeleteOK is response for OAuth2ClientTokenDelete operation.
 type OAuth2ClientTokenDeleteOK struct{}
 
-type OAuth2ClientTokenToken struct{}
+// Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata).
+type OAuth2ClientTokenToken map[string]jx.Raw
+
+func (s *OAuth2ClientTokenToken) init() OAuth2ClientTokenToken {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 type OAuth2ClientUpdateReq struct {
 	// Name of the client.
@@ -4725,6 +4795,52 @@ func (o OptNilString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptOAuth2ClientTokenToken returns new OptOAuth2ClientTokenToken with value set to v.
+func NewOptOAuth2ClientTokenToken(v OAuth2ClientTokenToken) OptOAuth2ClientTokenToken {
+	return OptOAuth2ClientTokenToken{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptOAuth2ClientTokenToken is optional OAuth2ClientTokenToken.
+type OptOAuth2ClientTokenToken struct {
+	Value OAuth2ClientTokenToken
+	Set   bool
+}
+
+// IsSet returns true if OptOAuth2ClientTokenToken was set.
+func (o OptOAuth2ClientTokenToken) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptOAuth2ClientTokenToken) Reset() {
+	var v OAuth2ClientTokenToken
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptOAuth2ClientTokenToken) SetTo(v OAuth2ClientTokenToken) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptOAuth2ClientTokenToken) Get() (v OAuth2ClientTokenToken, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptOAuth2ClientTokenToken) Or(d OAuth2ClientTokenToken) OAuth2ClientTokenToken {
 	if v, ok := o.Get(); ok {
 		return v
 	}

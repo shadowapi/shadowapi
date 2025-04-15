@@ -18,6 +18,7 @@ import { DropEvent } from '@react-types/shared'
 import { DropOperation } from '@react-types/shared'
 import CalendarAdd from '@spectrum-icons/workflow/CalendarAdd'
 import Delete from '@spectrum-icons/workflow/Delete'
+import Fast from '@spectrum-icons/workflow/Fast'
 import Play from '@spectrum-icons/workflow/Play'
 import SaveAsFloppy from '@spectrum-icons/workflow/SaveAsFloppy'
 import SaveFloppy from '@spectrum-icons/workflow/SaveFloppy'
@@ -41,9 +42,9 @@ import {
 
 import client from '@/api/client'
 import type { components } from '@/api/v1'
+import { CustomNode } from '@/components/CustomeNode'
 import { FlowEntries } from '@/components/FlowEntries'
 import { SchedulerForm } from '@/forms/SchedulerForm'
-
 interface PipelineProps {
   pipelineUUID: string
   userUUID: string // or accountUUID, whichever your system uses
@@ -60,28 +61,35 @@ interface FlowEntryItem {
 const initialNodes = [
   {
     id: '1',
-    type: 'input',
-    data: { label: 'Input Node' },
+    type: 'customNode',
+    data: { label: 'Data Source' },
     position: { x: 250, y: 25 },
   },
 
   {
     id: '2',
-    // you can also pass a React component as a label
-    data: { label: <div>Default Node</div> },
+    type: 'customNode',
+    data: { label: 'Scheduler' },
     position: { x: 100, y: 125 },
   },
   {
     id: '3',
-    type: 'output',
-    data: { label: 'Output Node' },
-    position: { x: 250, y: 250 },
+    type: 'customNode',
+    data: { label: 'Contact Extractor' },
+    position: { x: 100, y: 225 },
+  },
+  {
+    id: '4',
+    type: 'customNode',
+    data: { label: 'Storage' },
+    position: { x: 250, y: 350 },
   },
 ]
 
 const initialEdges = [
   { id: 'e1-2', source: '1', target: '2' },
   { id: 'e2-3', source: '2', target: '3', animated: true },
+  { id: 'e2-4', source: '3', target: '4' },
 ]
 
 export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
@@ -346,13 +354,14 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   }
 
   if (datasourceQuery.isPending && storageQuery.isPending && !isAdd) return <></>
+  const nodeTypes = useMemo(() => ({ customNode: CustomNode }), [])
 
-  console.log('datasourceQuery', { datasourceQuery })
+  console.log('PipelineForm!', { datasourceQuery, initialEdges, initialNodes, nodes, edges })
 
   return (
-    <Flex direction="row" width="100%" height="100%" gap="size-200">
+    <Flex direction="row" width="100%" height="100%">
       {/* Left: Form section with fixed width */}
-      <View width="360px" padding="size-200" borderEndWidth="thin" borderColor="dark">
+      <View width="360px" padding="size-500" borderEndWidth="thin" borderColor="dark">
         <Form onSubmit={form.handleSubmit(onSubmit)} aria-label="Update flow">
           <Flex direction="column" rowGap="size-200">
             <Flex direction="row" gap="size-200">
@@ -469,21 +478,28 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                 aria-label="Run pipeline"
                 isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
               >
-                Run <Play />
+                <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  Run
+                  <Play />
+                </span>
               </ActionButton>
               <ActionButton
                 onPress={() => {}}
                 aria-label="Run pipeline"
                 isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
               >
-                Test Run <TestProfile />
+                <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  Test Run <Fast />
+                </span>
               </ActionButton>
               <ActionButton
                 onPress={() => {}}
                 aria-label="Schedule pipeline"
                 isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
               >
-                Schedule <CalendarAdd />
+                <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  Schedule <CalendarAdd />
+                </span>
               </ActionButton>
             </Flex>
           </Flex>
@@ -493,7 +509,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
       </View>
 
       {/* Right: Flow section taking remaining space */}
-      <Flex direction="row" flexGrow={1} overflow="auto" gap="size-200">
+      <Flex direction="row" flexGrow={1} overflow="auto">
         {/* Left column: FlowEntries */}
         {/*<View padding="size-200" width="240px" overflow="auto">*/}
         {/*  <FlowEntries list={flowEntries} dragAndDropOptions={dragAndDropHooks} />*/}
@@ -514,6 +530,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            nodeTypes={nodeTypes}
             ref={dropZoneRef}
             fitView
           >
