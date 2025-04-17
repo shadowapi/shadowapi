@@ -126,6 +126,11 @@ tasks:
     cmds:
       - npx playwright show-report
 
+  local-certs:
+    desc: "Generate local ssl certs"
+    cmds:
+      - openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout localtest.me.key -out localtest.me.crt -subj "/CN=localtest.me"
+
   backend-loader:
     desc: "Run the prebuilt loader command inside backend container"
     cmds:

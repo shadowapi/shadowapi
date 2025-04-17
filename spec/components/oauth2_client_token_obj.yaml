@@ -1,0 +1,21 @@
+type: object
+additionalProperties: false
+properties:
+  access_token:
+    type: string
+    description: "Access token (JWT or opaque string)."
+  refresh_token:
+    type: string
+    description: "Refresh token, if available."
+  expires_at:
+    type: string
+    format: date-time
+    description: "Timestamp when the access token expires."
+  token:
+    type: object
+    additionalProperties: true
+    description: "Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata)."
+required:
+  - access_token
+  - refresh_token
+  - expires_at

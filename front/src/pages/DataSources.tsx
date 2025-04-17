@@ -15,55 +15,111 @@ import {
 import Add from '@spectrum-icons/workflow/Add'
 import Edit from '@spectrum-icons/workflow/Edit'
 import Email from '@spectrum-icons/workflow/Email'
-import { useQuery } from '@tanstack/react-query'
+import Login from '@spectrum-icons/workflow/Login'
+import Remove from '@spectrum-icons/workflow/Remove'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import client from '@/api/client'
+import type { components } from '@/api/v1'
 import { FullLayout } from '@/layouts/FullLayout'
+
+type Datasource = components['schemas']['datasource'] &
+  Partial<components['schemas']['datasource_email']> &
+  Partial<components['schemas']['datasource_email_oauth']>
+
+type Row = {
+  key: string
+  name: string
+  type: string
+  state: 'Enabled' | 'Disabled'
+}
 
 export function DataSources() {
   const navigate = useNavigate()
-  const query = useQuery({
+  const queryClient = useQueryClient()
+
+  const listQuery = useQuery({
     queryKey: ['/datasource'],
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/datasource', { signal })
-      return data || []
+      return (data || []) as Datasource[]
     },
     retry: false,
     throwOnError: false,
   })
 
-  const rows = query.data?.map((item) => {
-    return {
-      key: item.uuid,
-      name: item.name,
-      type: item.type,
-      provider: item.provider,
-      state: item.is_enabled ? 'Enabled' : 'Disabled',
-    }
+  // Revoke **all** OAuth2 tokens from datasourceUUID
+
+  const mutationRevokeTokens = useMutation({
+    mutationKey: ['revokeTokens'],
+    mutationFn: async (datasourceUUID: string) => {
+      // TODO @reactima simplify
+      /* 1. fetch every token bound to the datasource */
+      const listResp = await client.GET('/oauth2/client/{datasource_uuid}/token', {
+        params: { path: { datasource_uuid: datasourceUUID } },
+      })
+      if (listResp.error) throw new Error(listResp.error.detail)
+
+      const tokens = listResp.data ?? []
+      /* 2. delete them one by one */
+      for (const tok of tokens) {
+        await client.DELETE('/oauth2/client/{datasource_uuid}/token/{uuid}', {
+          params: { path: { datasource_uuid: datasourceUUID, uuid: tok.uuid! } },
+        })
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/datasource'] })
+    },
   })
 
-  const typeRender = (type: string) => {
+  // Start Gmail OAuth2 login
+  const handleOauthLogin = async (ds: Row) => {
+    if (ds.type !== 'email_oauth') return
+
+    /* 2. ask backend for auth_code_url */
+    const loginResp = await client.POST('/oauth2/login', {
+      body: {
+        query: { datasource_uuid: [ds.key] },
+      },
+    })
+    if (loginResp.error) {
+      alert(loginResp.error.detail || 'Failed to initiate login')
+      return
+    }
+    if (loginResp.data?.auth_code_url) window.location.href = loginResp.data.auth_code_url
+  }
+
+  const typeBadge = (type: string) => {
     if (type === 'email') {
       return (
         <Badge variant="neutral">
-          <Email /> <Text>Email</Text>
+          <Email /> <Text UNSAFE_style={{ textWrap: 'nowrap' }}>Email IMAP</Text>
         </Badge>
       )
     }
-    return type
-  }
-
-  const stateRedner = ({ state, authFailed }: { state: boolean; authFailed: boolean }) => {
-    if (state) {
-      if (authFailed) {
-        return <Badge variant="negative">Not Authenticated</Badge>
-      }
-      return <Badge variant="positive">Authenticated</Badge>
+    if (type === 'email_oauth') {
+      return (
+        <Badge variant="neutral">
+          <Email /> <Text UNSAFE_style={{ textWrap: 'nowrap' }}>Email OAuth</Text>
+        </Badge>
+      )
     }
-    return <Badge variant="negative">Disabled</Badge>
+    return (
+      <Badge variant="neutral">
+        <Text UNSAFE_style={{ textWrap: 'nowrap' }}>{type}</Text>
+      </Badge>
+    )
   }
 
-  if (query.isError) {
+  const rows: Row[] | undefined = listQuery.data?.map((ds) => ({
+    key: ds.uuid!,
+    name: ds.name,
+    type: ds.type,
+    state: ds.is_enabled ? 'Enabled' : 'Disabled',
+  }))
+
+  if (listQuery.isError) {
     return (
       <FullLayout>
         <View padding="size-500">
@@ -73,9 +129,9 @@ export function DataSources() {
     )
   }
 
-  if (query.isPending) {
-    return <></>
-  }
+  if (listQuery.isPending) return <></>
+
+  console.log({ rows, listQuery })
 
   return (
     <FullLayout>
@@ -84,17 +140,23 @@ export function DataSources() {
           <Add />
           <Text>Add Data Source</Text>
         </ActionButton>
-        <TableView aria-label="Example table with dynamic content" overflowMode="wrap" maxWidth={1000}>
+
+        <TableView aria-label="Data sources table" overflowMode="wrap" maxWidth={1000}>
           <TableHeader>
             <Column key="name">Name</Column>
-            <Column key="provider">Provider</Column>
-            <Column key="type" maxWidth={130}>
+            <Column key="type" maxWidth={160}>
               Type
             </Column>
             <Column key="state" maxWidth={160}>
               State
             </Column>
-            <Column key="actions" width={50} hideHeader>
+            <Column key="login" width={120}>
+              Re/Auth
+            </Column>
+            <Column key="revoke" width={120}>
+              Revoke
+            </Column>
+            <Column key="actions" width={120} hideHeader>
               Actions
             </Column>
           </TableHeader>
@@ -102,10 +164,27 @@ export function DataSources() {
             {(item) => (
               <Row>
                 <Cell>{item.name}</Cell>
-                <Cell>{item.provider}</Cell>
-                <Cell>{typeRender(item.type)}</Cell>
+                <Cell>{typeBadge(item.type)}</Cell>
                 <Cell>
                   <Badge variant={item.state === 'Enabled' ? 'positive' : 'negative'}>{item.state}</Badge>
+                </Cell>
+                <Cell>
+                  {item.type == 'email_oauth' ? (
+                    <ActionButton onPress={() => handleOauthLogin(item)}>
+                      <Login />
+                    </ActionButton>
+                  ) : (
+                    <span>-</span>
+                  )}
+                </Cell>
+                <Cell>
+                  {item.type == 'email_oauth' ? (
+                    <ActionButton onPress={() => mutationRevokeTokens.mutate(item.key)}>
+                      <Remove />
+                    </ActionButton>
+                  ) : (
+                    <span>-</span>
+                  )}
                 </Cell>
                 <Cell>
                   <ActionButton onPress={() => navigate('/datasources/' + item.key)}>

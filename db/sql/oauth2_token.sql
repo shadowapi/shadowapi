@@ -1,26 +1,8 @@
-CREATE TABLE oauth2_token (
-                              uuid UUID PRIMARY KEY, -- Internal unique ID for token record
-                              client_uuid UUID NOT NULL REFERENCES oauth2_client(uuid) ON DELETE CASCADE, -- OAuth2 client that issued this token
-                              user_uuid UUID, -- Optional: the user this token was issued for (nullable for machine tokens)
-
-                              access_token TEXT NOT NULL, -- Access token (JWT or opaque string)
-                              refresh_token TEXT, -- Refresh token, if available
-                              expires_at TIMESTAMP WITH TIME ZONE  NOT NULL, -- When the access token expires
-
-                              token JSONB, -- Raw OAuth2 token response (useful for debugging or extra metadata)
-                              created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- When the token was stored
-                              updated_at TIMESTAMP WITH TIME ZONE  -- Last refresh/update of this token
-);
-
-
 -- name: CreateOauth2Token :one
 INSERT INTO oauth2_token (
     uuid,
     client_uuid,
     user_uuid,
-    access_token,
-    refresh_token,
-    expires_at,
     token,
     created_at,
     updated_at
@@ -28,9 +10,6 @@ INSERT INTO oauth2_token (
     sqlc.arg('uuid')::uuid,
     sqlc.arg('client_uuid')::uuid,
     sqlc.arg('user_uuid')::uuid,
-    sqlc.arg('access_token'),
-    sqlc.arg('refresh_token'),
-    sqlc.arg('expires_at'),
     sqlc.arg('token'),
     NOW(),
     NOW()
@@ -89,9 +68,6 @@ OFFSET sqlc.arg('offset')::int;
 UPDATE oauth2_token SET
                         client_uuid = sqlc.arg('client_uuid')::uuid,
     user_uuid = sqlc.arg('user_uuid')::uuid,
-    access_token = sqlc.arg('access_token'),
-    refresh_token = sqlc.arg('refresh_token'),
-    expires_at = sqlc.arg('expires_at'),
     token = sqlc.arg('token'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;

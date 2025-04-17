@@ -8,9 +8,6 @@ post:
           type: object
           additionalProperties: false
           properties:
-            client_id:
-              description: Client ID.
-              type: string
             query:
               type: object
               additionalProperties:
@@ -19,7 +16,6 @@ post:
                 type: array
               description: Query parameters.
           required:
-            - client_id
             - query
     required: true
   responses:

@@ -7750,18 +7750,13 @@ func (s *OAuth2ClientLoginReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *OAuth2ClientLoginReq) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("client_id")
-		e.Str(s.ClientID)
-	}
-	{
 		e.FieldStart("query")
 		s.Query.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfOAuth2ClientLoginReq = [2]string{
-	0: "client_id",
-	1: "query",
+var jsonFieldsNameOfOAuth2ClientLoginReq = [1]string{
+	0: "query",
 }
 
 // Decode decodes OAuth2ClientLoginReq from json.
@@ -7773,20 +7768,8 @@ func (s *OAuth2ClientLoginReq) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "client_id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ClientID = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"client_id\"")
-			}
 		case "query":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				if err := s.Query.Decode(d); err != nil {
 					return err
@@ -7805,7 +7788,7 @@ func (s *OAuth2ClientLoginReq) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -7945,24 +7928,8 @@ func (s *OAuth2ClientToken) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("access_token")
-		e.Str(s.AccessToken)
-	}
-	{
-		if s.RefreshToken.Set {
-			e.FieldStart("refresh_token")
-			s.RefreshToken.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("expires_at")
-		json.EncodeDateTime(e, s.ExpiresAt)
-	}
-	{
-		if s.Token.Set {
-			e.FieldStart("token")
-			s.Token.Encode(e)
-		}
+		e.FieldStart("token")
+		s.Token.Encode(e)
 	}
 	{
 		if s.CreatedAt.Set {
@@ -7978,16 +7945,13 @@ func (s *OAuth2ClientToken) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOAuth2ClientToken = [9]string{
+var jsonFieldsNameOfOAuth2ClientToken = [6]string{
 	0: "uuid",
 	1: "client_uuid",
 	2: "user_uuid",
-	3: "access_token",
-	4: "refresh_token",
-	5: "expires_at",
-	6: "token",
-	7: "created_at",
-	8: "updated_at",
+	3: "token",
+	4: "created_at",
+	5: "updated_at",
 }
 
 // Decode decodes OAuth2ClientToken from json.
@@ -7995,7 +7959,7 @@ func (s *OAuth2ClientToken) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode OAuth2ClientToken to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -8031,43 +7995,9 @@ func (s *OAuth2ClientToken) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"user_uuid\"")
 			}
-		case "access_token":
+		case "token":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := d.Str()
-				s.AccessToken = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_token\"")
-			}
-		case "refresh_token":
-			if err := func() error {
-				s.RefreshToken.Reset()
-				if err := s.RefreshToken.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"refresh_token\"")
-			}
-		case "expires_at":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				v, err := json.DecodeDateTime(d)
-				s.ExpiresAt = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"expires_at\"")
-			}
-		case "token":
-			if err := func() error {
-				s.Token.Reset()
 				if err := s.Token.Decode(d); err != nil {
 					return err
 				}
@@ -8104,9 +8034,8 @@ func (s *OAuth2ClientToken) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b00101010,
-		0b00000000,
+	for i, mask := range [1]uint8{
+		0b00001010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -8153,14 +8082,161 @@ func (s *OAuth2ClientToken) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s OAuth2ClientTokenToken) Encode(e *jx.Encoder) {
+func (s *OAuth2ClientTokenObj) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *OAuth2ClientTokenObj) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("access_token")
+		e.Str(s.AccessToken)
+	}
+	{
+		e.FieldStart("refresh_token")
+		e.Str(s.RefreshToken)
+	}
+	{
+		e.FieldStart("expires_at")
+		json.EncodeDateTime(e, s.ExpiresAt)
+	}
+	{
+		if s.Token.Set {
+			e.FieldStart("token")
+			s.Token.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfOAuth2ClientTokenObj = [4]string{
+	0: "access_token",
+	1: "refresh_token",
+	2: "expires_at",
+	3: "token",
+}
+
+// Decode decodes OAuth2ClientTokenObj from json.
+func (s *OAuth2ClientTokenObj) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OAuth2ClientTokenObj to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "access_token":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.AccessToken = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_token\"")
+			}
+		case "refresh_token":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.RefreshToken = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"refresh_token\"")
+			}
+		case "expires_at":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.ExpiresAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"expires_at\"")
+			}
+		case "token":
+			if err := func() error {
+				s.Token.Reset()
+				if err := s.Token.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"token\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode OAuth2ClientTokenObj")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfOAuth2ClientTokenObj) {
+					name = jsonFieldsNameOfOAuth2ClientTokenObj[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *OAuth2ClientTokenObj) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OAuth2ClientTokenObj) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s OAuth2ClientTokenObjToken) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields implements json.Marshaler.
-func (s OAuth2ClientTokenToken) encodeFields(e *jx.Encoder) {
+func (s OAuth2ClientTokenObjToken) encodeFields(e *jx.Encoder) {
 	for k, elem := range s {
 		e.FieldStart(k)
 
@@ -8170,10 +8246,10 @@ func (s OAuth2ClientTokenToken) encodeFields(e *jx.Encoder) {
 	}
 }
 
-// Decode decodes OAuth2ClientTokenToken from json.
-func (s *OAuth2ClientTokenToken) Decode(d *jx.Decoder) error {
+// Decode decodes OAuth2ClientTokenObjToken from json.
+func (s *OAuth2ClientTokenObjToken) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OAuth2ClientTokenToken to nil")
+		return errors.New("invalid: unable to decode OAuth2ClientTokenObjToken to nil")
 	}
 	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -8191,21 +8267,21 @@ func (s *OAuth2ClientTokenToken) Decode(d *jx.Decoder) error {
 		m[string(k)] = elem
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode OAuth2ClientTokenToken")
+		return errors.Wrap(err, "decode OAuth2ClientTokenObjToken")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OAuth2ClientTokenToken) MarshalJSON() ([]byte, error) {
+func (s OAuth2ClientTokenObjToken) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OAuth2ClientTokenToken) UnmarshalJSON(data []byte) error {
+func (s *OAuth2ClientTokenObjToken) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9071,21 +9147,21 @@ func (s *OptNilString) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes OAuth2ClientTokenToken as json.
-func (o OptOAuth2ClientTokenToken) Encode(e *jx.Encoder) {
+// Encode encodes OAuth2ClientTokenObjToken as json.
+func (o OptOAuth2ClientTokenObjToken) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
 	o.Value.Encode(e)
 }
 
-// Decode decodes OAuth2ClientTokenToken from json.
-func (o *OptOAuth2ClientTokenToken) Decode(d *jx.Decoder) error {
+// Decode decodes OAuth2ClientTokenObjToken from json.
+func (o *OptOAuth2ClientTokenObjToken) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptOAuth2ClientTokenToken to nil")
+		return errors.New("invalid: unable to decode OptOAuth2ClientTokenObjToken to nil")
 	}
 	o.Set = true
-	o.Value = make(OAuth2ClientTokenToken)
+	o.Value = make(OAuth2ClientTokenObjToken)
 	if err := o.Value.Decode(d); err != nil {
 		return err
 	}
@@ -9093,14 +9169,14 @@ func (o *OptOAuth2ClientTokenToken) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptOAuth2ClientTokenToken) MarshalJSON() ([]byte, error) {
+func (s OptOAuth2ClientTokenObjToken) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptOAuth2ClientTokenToken) UnmarshalJSON(data []byte) error {
+func (s *OptOAuth2ClientTokenObjToken) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

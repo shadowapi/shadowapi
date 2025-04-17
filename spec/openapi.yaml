@@ -29,6 +29,8 @@ components:
       $ref: "components/oauth2_client.yaml"
     Oauth2ClientToken:
       $ref: "components/oauth2_client_token.yaml"
+    Oauth2ClientTokenObj:
+      $ref: "components/oauth2_client_token_obj.yaml"
     Oauth2State:
       $ref: "components/oauth2_state.yaml"
     Oauth2Subject:

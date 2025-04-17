@@ -1,5 +1,4 @@
 export { Dashboard } from './Dashboard'
-export { DataSourceAuth } from './DataSourceAuth'
 export { DataSourceEdit } from './DataSourceEdit'
 export { DataSources } from './DataSources'
 export { Logs } from './Logs'

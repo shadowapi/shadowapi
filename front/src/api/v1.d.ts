@@ -920,6 +920,7 @@ export interface components {
         MailLabel: components["schemas"]["email_label"];
         Oauth2Client: components["schemas"]["oauth2_client"];
         Oauth2ClientToken: components["schemas"]["oauth2_client_token"];
+        Oauth2ClientTokenObj: components["schemas"]["oauth2_client_token_obj"];
         Oauth2State: components["schemas"]["oauth2_state"];
         Oauth2Subject: components["schemas"]["oauth2_subject"];
         Pipeline: components["schemas"]["pipeline"];
@@ -1218,17 +1219,11 @@ export interface components {
              */
             updated_at?: string;
         };
-        oauth2_client_token: {
-            /** @description Internal unique ID for the token record. */
-            uuid?: string;
-            /** @description UUID of the OAuth2 client that issued this token. */
-            client_uuid: string;
-            /** @description Optional. UUID of the user for whom the token was issued. */
-            user_uuid?: string;
+        oauth2_client_token_obj: {
             /** @description Access token (JWT or opaque string). */
             access_token: string;
             /** @description Refresh token, if available. */
-            refresh_token?: string;
+            refresh_token: string;
             /**
              * Format: date-time
              * @description Timestamp when the access token expires.
@@ -1238,6 +1233,15 @@ export interface components {
             token?: {
                 [key: string]: unknown;
             };
+        };
+        oauth2_client_token: {
+            /** @description Internal unique ID for the token record. */
+            uuid?: string;
+            /** @description UUID of the OAuth2 client that issued this token. */
+            client_uuid: string;
+            /** @description Optional. UUID of the user for whom the token was issued. */
+            user_uuid?: string;
+            token: components["schemas"]["oauth2_client_token_obj"];
             /**
              * Format: date-time
              * @description Timestamp when the token record was stored.
@@ -3168,8 +3172,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description Client ID. */
-                    client_id: string;
                     /** @description Query parameters. */
                     query: {
                         [key: string]: string[];

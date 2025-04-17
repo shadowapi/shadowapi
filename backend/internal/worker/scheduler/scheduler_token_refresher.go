@@ -23,13 +23,15 @@ type TokenRefresherScheduler struct {
 	interval   time.Duration
 }
 
+var defaultRefreshInterval = 5 * time.Minute
+
 func NewTokenRefresherScheduler(log *slog.Logger, dbp *pgxpool.Pool, q *queue.Queue) *TokenRefresherScheduler {
 	return &TokenRefresherScheduler{
 		log:        log,
 		dbp:        dbp,
 		queue:      q,
 		cronParser: cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow),
-		interval:   5 * time.Minute,
+		interval:   defaultRefreshInterval,
 	}
 }
 
@@ -51,8 +53,10 @@ func (s *TokenRefresherScheduler) Start(ctx context.Context) {
 
 func (s *TokenRefresherScheduler) run(ctx context.Context) {
 	queries := query.New(s.dbp)
-	// Query tokens expiring within the next 5 minutes.
-	// TODO @reactive, cut off disabled
+	// TODO @reactive
+	// - review
+	// - cut off disabled
+	// Query tokens expiring within the next 5 minutes
 	tokens, err := queries.GetTokensToRefresh(ctx, nil)
 	if err != nil {
 		s.log.Error("Failed fetching tokens to refresh", "err", err)
@@ -61,7 +65,8 @@ func (s *TokenRefresherScheduler) run(ctx context.Context) {
 	for _, tokenRow := range tokens {
 		jobArgs := jobs.TokenRefresherJobArgs{
 			TokenUUID: tokenRow.Oauth2Token.UUID,
-			Expiry:    tokenRow.Oauth2Token.ExpiresAt.Time,
+			// TODO @reactive review
+			Expiry: time.Now().Add(defaultRefreshInterval),
 		}
 		payload, err := json.Marshal(jobArgs)
 		if err != nil {

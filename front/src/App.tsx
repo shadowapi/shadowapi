@@ -3,7 +3,6 @@ import { defaultTheme, Provider } from '@adobe/react-spectrum'
 
 import {
   Dashboard,
-  DataSourceAuth,
   DataSourceEdit,
   DataSources,
   Files,
@@ -90,14 +89,6 @@ function App() {
           element={
             <ProtectedRoute>
               <DataSourceEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/datasources/:uuid/auth"
-          element={
-            <ProtectedRoute>
-              <DataSourceAuth />
             </ProtectedRoute>
           }
         />

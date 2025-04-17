@@ -2,80 +2,15 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/jackc/pgx/v5/pgtype"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
-
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"golang.org/x/oauth2"
-
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
-	oauthTools "github.com/shadowapi/shadowapi/backend/internal/oauth2"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
+	"net/http"
 )
 
-// OAuth2ClientCallback handles the OAuth2 callback and processes the token exchange.
-// defined in spec/paths/oauth2_callback.yaml
-func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2ClientCallbackParams) (*api.OAuth2ClientCallbackFound, error) {
-	log := h.log.With("handler", "OAuth2ClientCallback")
-	q := query.New(h.dbp)
-
-	// Parse the state parameter as a UUID.
-	stateUUID, err := converter.ConvertStringToPgUUID(params.State.Value)
-	if err != nil {
-		log.Error("broken state parameter", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("broken state parameter"))
-	}
-
-	// Retrieve the state row using the generated sqlc method.
-	// Note: The returned row now wraps the state fields in "Oauth2State".
-	stateRow, err := q.GetOauth2State(ctx, stateUUID)
-	if err != nil {
-		log.Error("failed to query state object", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to query state object"))
-	}
-
-	// Unmarshal the JSON state field.
-	var stateQuery url.Values
-	if err = json.Unmarshal(stateRow.Oauth2State.State, &stateQuery); err != nil {
-		log.Error("failed to unmarshal state query", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal state query"))
-	}
-
-	// Use the ClientUuid from the state row to get client config.
-	config, err := oauthTools.GetClientConfig(ctx, h.dbp, stateRow.Oauth2State.ClientUuid.String())
-	if err != nil {
-		log.Error("failed to get client config", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client config"))
-	}
-
-	// Exchange the code for a token.
-	token, err := config.Exchange(ctx, params.Code.Value)
-	if err != nil {
-		log.Error("token exchange failed", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("failed token exchange"))
-	}
-
-	// Refresh the token to ensure up-to-date details.
-	token, err = config.TokenSource(ctx, token).Token()
-	if err != nil {
-		log.Error("failed to get token from token source", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get token from token source"))
-	}
-
-	switch strings.ToLower(config.Provider) {
-	case "gmail":
-		// Handle Gmail-specific logic passing the ClientUuid.
-		return h.handleGmailToken(ctx, log, token, stateQuery, stateRow.Oauth2State.ClientUuid.String())
-	default:
-		return nil, ErrWithCode(http.StatusInternalServerError, E("unknown provider"))
-	}
-}
+// Standard code generate CRUD
 
 // OAuth2ClientCreate creates a new OAuth2 client.
 func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientCreateReq) (*api.OAuth2Client, error) {
@@ -193,47 +128,6 @@ func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientL
 	return out, nil
 }
 
-// OAuth2ClientLogin starts the OAuth2 login flow.
-func (h *Handler) OAuth2ClientLogin(ctx context.Context, req *api.OAuth2ClientLoginReq) (*api.OAuth2ClientLoginOK, error) {
-	log := h.log.With("handler", "OAuth2ClientLogin")
-	q := query.New(h.dbp)
-	// Look up the client using the provided client_id.
-	provider, err := oauthTools.GetClientConfig(ctx, h.dbp, req.ClientID)
-	if err != nil {
-		log.Error("failed to get client config", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client config"))
-	}
-	queryData, err := json.Marshal(req.Query)
-	if err != nil {
-		log.Error("failed to marshal query values", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal query values"))
-	}
-
-	oauth2StateUUID := uuid.Must(uuid.NewV7())
-
-	clientUuid, err := converter.ConvertStringToPgUUID(provider.ClientID)
-	if err != nil {
-		log.Error("invalid UUID", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
-	}
-
-	// Create state using the provider's client id.
-	state, err := q.CreateOauth2State(ctx, query.CreateOauth2StateParams{
-		UUID:       converter.UuidToPgUUID(oauth2StateUUID),
-		ClientUuid: clientUuid,
-		State:      queryData,
-		ExpiredAt:  pgtype.Timestamptz{Time: time.Now().Add(10 * time.Minute), Valid: true},
-	})
-	if err != nil {
-		log.Error("failed to create oauth2 state", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create oauth2 state"))
-	}
-	log.Info("redirecting to oauth2 provider", "clientUUID", provider.ClientID)
-	return &api.OAuth2ClientLoginOK{
-		AuthCodeURL: provider.AuthCodeURL(state.UUID.String(), oauth2.AccessTypeOffline),
-	}, nil
-}
-
 // OAuth2ClientTokenDelete deletes an OAuth2 token.
 func (h *Handler) OAuth2ClientTokenDelete(ctx context.Context, params api.OAuth2ClientTokenDeleteParams) error {
 	log := h.log.With("handler", "OAuth2ClientTokenDelete", "tokenUUID", params.UUID)
@@ -293,18 +187,15 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 		// Convert the raw JSONB token field into a string.
 		tokenStr := string(t.Token)
 		// Unmarshal the token JSON into tokenObj.
-		var tokenObj api.OAuth2ClientTokenToken
+		var tokenObj api.OAuth2ClientTokenObj
 		if err := tokenObj.UnmarshalJSON([]byte(tokenStr)); err != nil {
 			log.Error("failed to unmarshal oauth token", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to decode oauth token"))
 		}
 		token := api.OAuth2ClientToken{
-			UUID:         api.NewOptString(t.UUID.String()),
-			ClientUUID:   t.ClientUuid.String(),
-			AccessToken:  t.AccessToken,                              // new access token field
-			RefreshToken: api.NewOptString(t.RefreshToken.String),    // new refresh token wrapped as OptString
-			ExpiresAt:    t.ExpiresAt.Time,                           // new expires_at field
-			Token:        api.NewOptOAuth2ClientTokenToken(tokenObj), // wrap the token JSON
+			UUID:       api.NewOptString(t.UUID.String()),
+			ClientUUID: t.ClientUuid.String(), // new expires_at field
+			Token:      tokenObj,              // wrap the token JSON
 		}
 		if t.CreatedAt.Valid {
 			token.CreatedAt = api.NewOptDateTime(t.CreatedAt.Time)
@@ -345,10 +236,15 @@ func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientU
 		log.Error("failed to get oauth2 client after update", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
+
 	out := api.OAuth2Client{
-		Name:     raw.Oauth2Client.Name,
-		Provider: raw.Oauth2Client.Provider,
-		ClientID: raw.Oauth2Client.ClientID,
+		UUID:      api.NewOptString(raw.Oauth2Client.UUID.String()),
+		Name:      raw.Oauth2Client.Name,
+		Provider:  raw.Oauth2Client.Provider,
+		ClientID:  raw.Oauth2Client.ClientID,
+		Secret:    raw.Oauth2Client.Secret,
+		CreatedAt: api.NewOptDateTime(raw.Oauth2Client.CreatedAt.Time),
+		UpdatedAt: api.NewOptDateTime(raw.Oauth2Client.UpdatedAt.Time),
 	}
 	if raw.Oauth2Client.CreatedAt.Valid {
 		out.CreatedAt = api.NewOptDateTime(raw.Oauth2Client.CreatedAt.Time)

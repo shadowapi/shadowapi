@@ -218,16 +218,13 @@ type Oauth2Subject struct {
 }
 
 type Oauth2Token struct {
-	UUID         uuid.UUID          `json:"uuid"`
-	ClientUuid   *uuid.UUID         `json:"client_uuid"`
-	UserUUID     *uuid.UUID         `json:"user_uuid"`
-	AccessToken  string             `json:"access_token"`
-	RefreshToken pgtype.Text        `json:"refresh_token"`
-	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
-	Token        []byte             `json:"token"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	Name         pgtype.Text        `json:"name"`
+	UUID       uuid.UUID          `json:"uuid"`
+	ClientUuid *uuid.UUID         `json:"client_uuid"`
+	UserUUID   *uuid.UUID         `json:"user_uuid"`
+	Token      []byte             `json:"token"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	Name       pgtype.Text        `json:"name"`
 }
 
 type Pipeline struct {
