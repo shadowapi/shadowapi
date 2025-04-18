@@ -84,13 +84,13 @@ const initialNodes = [
     id: '2',
     type: 'customNode',
     data: { label: 'Data Source' },
-    position: { x: 100, y: 125 },
+    position: { x: 250, y: 125 },
   },
   {
     id: '3',
     type: 'customNode',
     data: { label: 'Contact Extractor' },
-    position: { x: 100, y: 225 },
+    position: { x: 250, y: 225 },
   },
   {
     id: '4',
@@ -200,6 +200,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
           body: {
             name: data.name || '',
             datasource_uuid: data.datasource_uuid || '',
+            storage_uuid: data.storage_uuid || '',
             flow: data.flow || {},
           },
         })
@@ -209,6 +210,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
           body: {
             name: data.name,
             datasource_uuid: data.datasource_uuid,
+            storage_uuid: data.storage_uuid,
             flow: data.flow,
           },
         })
