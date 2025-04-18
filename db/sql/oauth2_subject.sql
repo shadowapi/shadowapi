@@ -2,13 +2,13 @@
 INSERT INTO oauth2_subject (
     uuid,
     user_uuid,
-    client_uuid,
+    token_uuid,
     created_at,
     updated_at
 ) VALUES (
              sqlc.arg('uuid')::uuid,
              sqlc.arg('user_uuid')::uuid,
-             sqlc.arg('client_uuid')::uuid,
+             sqlc.arg('token_uuid')::uuid,
              NOW(),
              NOW()
          ) RETURNING *;
@@ -33,7 +33,7 @@ WITH filtered_oauth2_subjects AS (
     FROM oauth2_subject os
     WHERE
         (NULLIF(sqlc.arg('user_uuid'), '') IS NULL OR os.user_uuid = sqlc.arg('user_uuid')::uuid)
-      AND (NULLIF(sqlc.arg('client_uuid'), '') IS NULL OR os.client_uuid = sqlc.arg('client_uuid')::uuid)
+      AND (NULLIF(sqlc.arg('token_uuid'), '') IS NULL OR os.token_uuid = sqlc.arg('token_uuid')::uuid)
 )
 SELECT
     *,
@@ -51,7 +51,7 @@ LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 -- name: UpdateOauth2Subject :exec
 UPDATE oauth2_subject SET
                           user_uuid = sqlc.arg('user_uuid')::uuid,
-                          client_uuid= sqlc.arg('client_uuid')::uuid,
+                          token_uuid= sqlc.arg('token_uuid')::uuid,
                           updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 

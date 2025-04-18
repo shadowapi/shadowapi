@@ -128,27 +128,6 @@ func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientL
 	return out, nil
 }
 
-// OAuth2ClientTokenDelete deletes an OAuth2 token.
-func (h *Handler) OAuth2ClientTokenDelete(ctx context.Context, params api.OAuth2ClientTokenDeleteParams) error {
-	log := h.log.With("handler", "OAuth2ClientTokenDelete", "tokenUUID", params.UUID)
-	q := query.New(h.dbp)
-
-	tokenUUID, err := converter.ConvertStringToPgUUID(params.UUID)
-	if err != nil {
-		log.Error("invalid UUID", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
-	}
-
-	if err := q.DeleteOauth2Token(ctx, tokenUUID); err == pgx.ErrNoRows {
-		log.Error("no such oauth2 token")
-		return ErrWithCode(http.StatusNotFound, E("no such oauth2 token"))
-	} else if err != nil {
-		log.Error("failed to delete oauth2 token", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("internal server error"))
-	}
-	return nil
-}
-
 // OAuth2ClientTokenList lists tokens for the OAuth2 client associated with a datasource.
 func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2ClientTokenListParams) ([]api.OAuth2ClientToken, error) {
 	log := h.log.With("handler", "OAuth2ClientTokenList", "datasourceUUID", params.DatasourceUUID)

@@ -16,7 +16,7 @@ const createOauth2Subject = `-- name: CreateOauth2Subject :one
 INSERT INTO oauth2_subject (
     uuid,
     user_uuid,
-    client_uuid,
+    token_uuid,
     created_at,
     updated_at
 ) VALUES (
@@ -29,13 +29,13 @@ INSERT INTO oauth2_subject (
 `
 
 type CreateOauth2SubjectParams struct {
-	UUID       pgtype.UUID `json:"uuid"`
-	UserUUID   pgtype.UUID `json:"user_uuid"`
-	ClientUuid pgtype.UUID `json:"client_uuid"`
+	UUID      pgtype.UUID `json:"uuid"`
+	UserUUID  pgtype.UUID `json:"user_uuid"`
+	TokenUuid pgtype.UUID `json:"token_uuid"`
 }
 
 func (q *Queries) CreateOauth2Subject(ctx context.Context, arg CreateOauth2SubjectParams) (Oauth2Subject, error) {
-	row := q.db.QueryRow(ctx, createOauth2Subject, arg.UUID, arg.UserUUID, arg.ClientUuid)
+	row := q.db.QueryRow(ctx, createOauth2Subject, arg.UUID, arg.UserUUID, arg.TokenUuid)
 	var i Oauth2Subject
 	err := row.Scan(
 		&i.UUID,
@@ -87,7 +87,7 @@ WITH filtered_oauth2_subjects AS (
     FROM oauth2_subject os
     WHERE
         (NULLIF($5, '') IS NULL OR os.user_uuid = $5::uuid)
-      AND (NULLIF($6, '') IS NULL OR os.client_uuid = $6::uuid)
+      AND (NULLIF($6, '') IS NULL OR os.token_uuid = $6::uuid)
 )
 SELECT
     uuid, user_uuid, token_uuid, created_at, updated_at,
@@ -109,7 +109,7 @@ type GetOauth2SubjectsParams struct {
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
 	UserUUID       interface{} `json:"user_uuid"`
-	ClientUuid     interface{} `json:"client_uuid"`
+	TokenUuid      interface{} `json:"token_uuid"`
 }
 
 type GetOauth2SubjectsRow struct {
@@ -128,7 +128,7 @@ func (q *Queries) GetOauth2Subjects(ctx context.Context, arg GetOauth2SubjectsPa
 		arg.Offset,
 		arg.Limit,
 		arg.UserUUID,
-		arg.ClientUuid,
+		arg.TokenUuid,
 	)
 	if err != nil {
 		return nil, err
@@ -202,18 +202,18 @@ func (q *Queries) ListOauth2Subjects(ctx context.Context, arg ListOauth2Subjects
 const updateOauth2Subject = `-- name: UpdateOauth2Subject :exec
 UPDATE oauth2_subject SET
                           user_uuid = $1::uuid,
-                          client_uuid= $2::uuid,
+                          token_uuid= $2::uuid,
                           updated_at = NOW()
 WHERE uuid = $3::uuid
 `
 
 type UpdateOauth2SubjectParams struct {
-	UserUUID   pgtype.UUID `json:"user_uuid"`
-	ClientUuid pgtype.UUID `json:"client_uuid"`
-	UUID       pgtype.UUID `json:"uuid"`
+	UserUUID  pgtype.UUID `json:"user_uuid"`
+	TokenUuid pgtype.UUID `json:"token_uuid"`
+	UUID      pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateOauth2Subject(ctx context.Context, arg UpdateOauth2SubjectParams) error {
-	_, err := q.db.Exec(ctx, updateOauth2Subject, arg.UserUUID, arg.ClientUuid, arg.UUID)
+	_, err := q.db.Exec(ctx, updateOauth2Subject, arg.UserUUID, arg.TokenUuid, arg.UUID)
 	return err
 }
