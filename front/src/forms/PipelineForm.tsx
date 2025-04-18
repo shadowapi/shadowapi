@@ -353,8 +353,9 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     setNodes((prev) => [...prev, newNode])
   }
 
-  if (datasourceQuery.isPending && storageQuery.isPending && !isAdd) return <></>
   const nodeTypes = useMemo(() => ({ customNode: CustomNode }), [])
+
+  if (datasourceQuery.isPending && storageQuery.isPending && !isAdd) return <></>
 
   console.log('PipelineForm!', { datasourceQuery, initialEdges, initialNodes, nodes, edges })
 
@@ -409,7 +410,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => 
+                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => (
                     <Item key={datasource.uuid} textValue={`${datasource.name} ${datasource.type}`}>
                       <span
                         style={{
@@ -421,7 +422,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                         {datasource.name} {datasource.type}
                       </span>
                     </Item>
-                  )}
+                  ))}
                 </Picker>
               )}
             />
@@ -461,13 +462,13 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => (
+                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => 
                     <Item key={storage.uuid}>
                       <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
                         {storage.name} {storage.type}
                       </span>
                     </Item>
-                  ))}
+                  )}
                 </Picker>
               )}
             />
