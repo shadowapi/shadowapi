@@ -6,7 +6,8 @@ properties:
     description: Unique identifier
   datasource_uuid:
     type: string
-    description: Optional. Required for datasources based pipelines
+  storage_uuid:
+    type: string
   type:
     type: string
     description: Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid
@@ -38,4 +39,5 @@ properties:
     description: "Timestamp when the policy was last updated."
 required:
   - datasource_uuid
+  - storage_uuid
   - name

@@ -74,6 +74,7 @@ CREATE TABLE datasource(
 CREATE TABLE pipeline (
                           uuid UUID PRIMARY KEY,
                           datasource_uuid UUID NOT NULL,
+                          storage_uuid UUID NOT NULL,
                           name VARCHAR NOT NULL,
                           type VARCHAR NOT NULL,
                           is_enabled BOOLEAN NOT NULL DEFAULT FALSE,

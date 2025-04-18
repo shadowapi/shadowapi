@@ -76,7 +76,7 @@ export function Schedulers() {
           </TableHeader>
           <TableBody items={query.data}>
             {(item: components['schemas']['scheduler']) => (
-              <Row key={item.id}>
+              <Row key={item.uuid}>
                 <Cell>
                   <ActionButton onPress={() => navigate('/pipelines/' + item.pipeline_uuid)}>
                     ...{item.pipeline_uuid.slice(-8)}

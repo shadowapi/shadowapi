@@ -46,11 +46,11 @@ WITH filtered_schedulers AS (
     SELECT s.*
     FROM scheduler s
     WHERE
-        (NULLIF(sqlc.arg('schedule_type'), '') IS NULL OR s.schedule_type = sqlc.arg('schedule_type')) AND
         (NULLIF(sqlc.arg('uuid'), '') IS NULL OR s.uuid = sqlc.arg('uuid')::uuid) AND
+        (NULLIF(sqlc.arg('schedule_type'), '') IS NULL OR s.schedule_type = sqlc.arg('schedule_type')) AND
         (NULLIF(sqlc.arg('pipeline_uuid'), '') IS NULL OR s.pipeline_uuid = sqlc.arg('pipeline_uuid')::uuid) AND
         (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR s.is_enabled = (sqlc.arg('is_enabled')::int)::boolean) AND
-        (NULLIF(sqlc.arg('is_paused')::int, -1) IS NULL OR s.is_enabled = (sqlc.arg('is_paused')::int)::boolean)
+        (NULLIF(sqlc.arg('is_paused')::int, -1) IS NULL OR s.is_paused = (sqlc.arg('is_paused')::int)::boolean)
 )
 SELECT
     *,

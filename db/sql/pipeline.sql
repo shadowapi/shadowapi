@@ -2,6 +2,7 @@
 INSERT INTO pipeline (
   uuid,
   datasource_uuid,
+  storage_uuid,
   name,
   type,
   is_enabled,
@@ -11,6 +12,7 @@ INSERT INTO pipeline (
 ) VALUES (
              sqlc.arg('uuid')::uuid,
              sqlc.arg('datasource_uuid')::uuid,
+             sqlc.arg('storage_uuid')::uuid,
              NULLIF(sqlc.arg('name'), ''),
              NULLIF(sqlc.arg('type'), ''),
   sqlc.arg('is_enabled')::boolean,
@@ -40,6 +42,7 @@ WITH filtered_pipelines AS (
     WHERE
         (NULLIF(sqlc.arg('uuid'), '') IS NULL OR p.uuid = sqlc.arg('uuid')::uuid)
       AND (NULLIF(sqlc.arg('datasource_uuid'), '') IS NULL OR p.datasource_uuid = sqlc.arg('datasource_uuid')::uuid)
+      AND (NULLIF(sqlc.arg('storage_uuid'), '') IS NULL OR p.storage_uuid = sqlc.arg('storage_uuid')::uuid)
       AND (NULLIF(sqlc.arg('type'), '') IS NULL OR p.type = sqlc.arg('type'))
       AND (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR p.is_enabled = sqlc.arg('is_enabled')::boolean)
       AND (NULLIF(sqlc.arg('name'), '') IS NULL OR p.name ILIKE '%' || sqlc.arg('name') || '%')
@@ -66,6 +69,7 @@ UPDATE pipeline SET
   "name" = NULLIF(sqlc.arg('name'), ''),
   "type" = NULLIF(sqlc.arg('type'), ''),
   datasource_uuid = sqlc.arg('datasource_uuid')::uuid,
+  storage_uuid = sqlc.arg('storage_uuid')::uuid,
   is_enabled = sqlc.arg('is_enabled')::boolean,
   flow = sqlc.arg('flow'),
   updated_at = NOW()

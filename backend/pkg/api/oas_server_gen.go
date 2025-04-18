@@ -364,7 +364,7 @@ type Handler interface {
 	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList implements pipeline-list operation.
 	//
-	// Get all pipelines for the current user.
+	// Get all pipelines.
 	//
 	// GET /pipeline
 	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)

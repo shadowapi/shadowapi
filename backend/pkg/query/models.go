@@ -230,6 +230,7 @@ type Oauth2Token struct {
 type Pipeline struct {
 	UUID           uuid.UUID          `json:"uuid"`
 	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
+	StorageUuid    *uuid.UUID         `json:"storage_uuid"`
 	Name           string             `json:"name"`
 	Type           string             `json:"type"`
 	IsEnabled      bool               `json:"is_enabled"`

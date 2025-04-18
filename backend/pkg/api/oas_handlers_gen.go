@@ -12788,7 +12788,7 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 
 // handlePipelineListRequest handles pipeline-list operation.
 //
-// Get all pipelines for the current user.
+// Get all pipelines.
 //
 // GET /pipeline
 func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12949,6 +12949,10 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 					Name: "datasource_uuid",
 					In:   "query",
 				}: params.DatasourceUUID,
+				{
+					Name: "storage_uuid",
+					In:   "query",
+				}: params.StorageUUID,
 				{
 					Name: "offset",
 					In:   "query",

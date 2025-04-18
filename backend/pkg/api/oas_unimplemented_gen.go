@@ -546,7 +546,7 @@ func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetP
 
 // PipelineList implements pipeline-list operation.
 //
-// Get all pipelines for the current user.
+// Get all pipelines.
 //
 // GET /pipeline
 func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineListParams) (r *PipelineListOK, _ error) {

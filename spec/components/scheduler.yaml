@@ -1,7 +1,8 @@
 type: object
 properties:
-  id:
+  uuid:
     type: string
+    description: Unique identifier
   pipeline_uuid:
     type: string
   schedule_type:

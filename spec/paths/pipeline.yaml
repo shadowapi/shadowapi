@@ -1,11 +1,18 @@
 get:
   summary: List pipelines
-  description: Get all pipelines for the current user
+  description: Get all pipelines
   operationId: pipeline-list
   parameters:
     - name: datasource_uuid
       in: query
       description: Filter pipelines by datasource UUID
+      required: false
+      schema:
+        type: string
+        format: uuid
+    - name: storage_uuid
+      in: query
+      description: Filter pipelines by storage UUID
       required: false
       schema:
         type: string

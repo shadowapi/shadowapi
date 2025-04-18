@@ -9539,6 +9539,10 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 		e.Str(s.DatasourceUUID)
 	}
 	{
+		e.FieldStart("storage_uuid")
+		e.Str(s.StorageUUID)
+	}
+	{
 		if s.Type.Set {
 			e.FieldStart("type")
 			s.Type.Encode(e)
@@ -9574,15 +9578,16 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPipeline = [8]string{
+var jsonFieldsNameOfPipeline = [9]string{
 	0: "uuid",
 	1: "datasource_uuid",
-	2: "type",
-	3: "name",
-	4: "is_enabled",
-	5: "flow",
-	6: "created_at",
-	7: "updated_at",
+	2: "storage_uuid",
+	3: "type",
+	4: "name",
+	5: "is_enabled",
+	6: "flow",
+	7: "created_at",
+	8: "updated_at",
 }
 
 // Decode decodes Pipeline from json.
@@ -9590,7 +9595,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Pipeline to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -9616,6 +9621,18 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"datasource_uuid\"")
 			}
+		case "storage_uuid":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.StorageUUID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"storage_uuid\"")
+			}
 		case "type":
 			if err := func() error {
 				s.Type.Reset()
@@ -9627,7 +9644,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "name":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -9687,8 +9704,9 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001010,
+	for i, mask := range [2]uint8{
+		0b00010110,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -10517,9 +10535,9 @@ func (s *Scheduler) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Scheduler) encodeFields(e *jx.Encoder) {
 	{
-		if s.ID.Set {
-			e.FieldStart("id")
-			s.ID.Encode(e)
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
 		}
 	}
 	{
@@ -10587,7 +10605,7 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfScheduler = [12]string{
-	0:  "id",
+	0:  "uuid",
 	1:  "pipeline_uuid",
 	2:  "schedule_type",
 	3:  "cron_expression",
@@ -10610,15 +10628,15 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
+		case "uuid":
 			if err := func() error {
-				s.ID.Reset()
-				if err := s.ID.Decode(d); err != nil {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "pipeline_uuid":
 			requiredBitSet[0] |= 1 << 1

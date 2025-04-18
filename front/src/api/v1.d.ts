@@ -380,7 +380,7 @@ export interface paths {
         };
         /**
          * List pipelines
-         * @description Get all pipelines for the current user
+         * @description Get all pipelines
          */
         get: operations["pipeline-list"];
         put?: never;
@@ -1031,7 +1031,8 @@ export interface components {
             status?: number;
         };
         scheduler: {
-            id?: string;
+            /** @description Unique identifier */
+            uuid?: string;
             pipeline_uuid: string;
             schedule_type: string;
             cron_expression?: string | null;
@@ -1280,8 +1281,8 @@ export interface components {
         pipeline: {
             /** @description Unique identifier */
             uuid?: string;
-            /** @description Optional. Required for datasources based pipelines */
             datasource_uuid: string;
+            storage_uuid: string;
             /** @description Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid */
             type?: string;
             /** @description Pipeline name */
@@ -3208,6 +3209,8 @@ export interface operations {
             query?: {
                 /** @description Filter pipelines by datasource UUID */
                 datasource_uuid?: string;
+                /** @description Filter pipelines by storage UUID */
+                storage_uuid?: string;
                 /** @description Offset records. */
                 offset?: number;
                 /** @description Limit records. */

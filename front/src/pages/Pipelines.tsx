@@ -60,6 +60,10 @@ export function Pipelines() {
         <TableView aria-label="Pipelines list table" overflowMode="wrap" maxWidth={1000}>
           <TableHeader>
             <Column key="name">Name</Column>
+            <Column key="type">Type</Column>
+            <Column key="datasource_uuid">Data Source</Column>
+            <Column key="storage_uuid">Storage</Column>
+            <Column key="schedulers">Schedulers</Column>
             <Column key="actions" width={50} hideHeader>
               Actions
             </Column>
@@ -68,6 +72,18 @@ export function Pipelines() {
             {(item: components['schemas']['pipeline']) => (
               <Row key={item.uuid}>
                 <Cell>{item.name}</Cell>
+                <Cell>{item.type}</Cell>
+                <Cell>
+                  <ActionButton onPress={() => navigate('/datasources/' + item.datasource_uuid)}>
+                    {item.datasource_uuid}
+                  </ActionButton>
+                </Cell>
+                <Cell>
+                  <ActionButton onPress={() => navigate('/storages/' + item.storage_uuid + '/storageKind/hostfiles')}>
+                    TODO @reactima {item.storage_uuid}
+                  </ActionButton>
+                </Cell>
+                <Cell>-</Cell>
                 <Cell>
                   <ActionButton onPress={() => navigate('/pipelines/' + item.uuid)}>
                     <Edit />

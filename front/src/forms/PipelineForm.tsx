@@ -4,11 +4,24 @@ import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import {
   ActionButton,
+  Badge,
+  Button,
+  Cell,
+  Column,
+  Content,
+  Dialog,
+  DialogTrigger,
   DropZone,
   Flex,
   Form,
+  Heading,
   Item,
   Picker,
+  Row,
+  TableBody,
+  TableHeader,
+  TableView,
+  Text,
   TextField,
   useDragAndDrop,
   useListData,
@@ -18,11 +31,12 @@ import { DropEvent } from '@react-types/shared'
 import { DropOperation } from '@react-types/shared'
 import CalendarAdd from '@spectrum-icons/workflow/CalendarAdd'
 import Delete from '@spectrum-icons/workflow/Delete'
+import Trash from '@spectrum-icons/workflow/Delete'
+import Edit from '@spectrum-icons/workflow/Edit'
 import Fast from '@spectrum-icons/workflow/Fast'
 import Play from '@spectrum-icons/workflow/Play'
 import SaveAsFloppy from '@spectrum-icons/workflow/SaveAsFloppy'
 import SaveFloppy from '@spectrum-icons/workflow/SaveFloppy'
-import TestProfile from '@spectrum-icons/workflow/TestProfile'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   addEdge,
@@ -43,8 +57,8 @@ import {
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 import { CustomNode } from '@/components/CustomeNode'
-import { FlowEntries } from '@/components/FlowEntries'
 import { SchedulerForm } from '@/forms/SchedulerForm'
+
 interface PipelineProps {
   pipelineUUID: string
   userUUID: string // or accountUUID, whichever your system uses
@@ -62,14 +76,14 @@ const initialNodes = [
   {
     id: '1',
     type: 'customNode',
-    data: { label: 'Data Source' },
+    data: { label: 'Scheduler' },
     position: { x: 250, y: 25 },
   },
 
   {
     id: '2',
     type: 'customNode',
-    data: { label: 'Scheduler' },
+    data: { label: 'Data Source' },
     position: { x: 100, y: 125 },
   },
   {
@@ -81,14 +95,14 @@ const initialNodes = [
   {
     id: '4',
     type: 'customNode',
-    data: { label: 'Storage' },
+    data: { label: 'Storage S3' },
     position: { x: 250, y: 350 },
   },
 ]
 
 const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2' },
-  { id: 'e2-3', source: '2', target: '3', animated: true },
+  { id: 'e1-2', source: '1', target: '2', animated: true },
+  { id: 'e2-3', source: '2', target: '3' },
   { id: 'e2-4', source: '3', target: '4' },
 ]
 
@@ -101,6 +115,19 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   // Track current nodes/edges in React Flow
   const [nodes, setNodes] = useState<Node[]>(initialNodes)
   const [edges, setEdges] = useState<Edge[]>(initialEdges)
+
+  // ----------------------- Scheduler local state -----------------------
+  const [showSchedulerForm, setShowSchedulerForm] = useState(false)
+  const [editingSchedulerUUID, setEditingSchedulerUUID] = useState<'add' | string>('add')
+
+  const openScheduler = (uuid: 'add' | string) => {
+    setEditingSchedulerUUID(uuid)
+    setShowSchedulerForm(true)
+  }
+
+  const closeScheduler = () => {
+    setShowSchedulerForm(false)
+  }
 
   const isAdd = pipelineUUID === 'add'
 
@@ -119,6 +146,31 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
     queryFn: async ({ signal }) => {
       const { data } = await client.GET('/storage', { signal })
       return data ?? ([] as components['schemas']['storage'][])
+    },
+  })
+
+  // --- Schedulers for this pipeline ---
+  const schedulersQuery = useQuery({
+    queryKey: ['schedulers', pipelineUUID],
+    enabled: !isAdd,
+    queryFn: async ({ signal }) => {
+      if (isAdd) return []
+      const { data } = await client.GET('/scheduler', {
+        params: { query: { pipeline_uuid: pipelineUUID } },
+        signal,
+      })
+      return data as components['schemas']['scheduler'][]
+    },
+  })
+
+  const deleteSchedulerMutation = useMutation({
+    mutationFn: async (uuid: string) => {
+      const resp = await client.DELETE('/scheduler/' + uuid)
+      if (resp.error) throw new Error(resp.error.detail)
+      return resp
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedulers', pipelineUUID] })
     },
   })
 
@@ -362,7 +414,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
   return (
     <Flex direction="row" width="100%" height="100%">
       {/* Left: Form section with fixed width */}
-      <View width="360px" padding="size-500" borderEndWidth="thin" borderColor="dark">
+      <View width="50%" padding="size-500" borderEndWidth="thin" borderColor="dark">
         <Form onSubmit={form.handleSubmit(onSubmit)} aria-label="Update flow">
           <Flex direction="column" rowGap="size-200">
             <Flex direction="row" gap="size-200">
@@ -410,7 +462,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => (
+                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => 
                     <Item key={datasource.uuid} textValue={`${datasource.name} ${datasource.type}`}>
                       <span
                         style={{
@@ -422,7 +474,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                         {datasource.name} {datasource.type}
                       </span>
                     </Item>
-                  ))}
+                  )}
                 </Picker>
               )}
             />
@@ -462,13 +514,13 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => 
+                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => (
                     <Item key={storage.uuid}>
                       <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
                         {storage.name} {storage.type}
                       </span>
                     </Item>
-                  )}
+                  ))}
                 </Picker>
               )}
             />
@@ -490,11 +542,11 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                 isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  Test Run <Fast />
+                  Test <Fast />
                 </span>
               </ActionButton>
               <ActionButton
-                onPress={() => {}}
+                onPress={() => openScheduler('add')}
                 aria-label="Schedule pipeline"
                 isDisabled={deleteMutation.isPending || pipelineQuery.isFetching || pipelineUUID === 'add'}
               >
@@ -503,10 +555,74 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                 </span>
               </ActionButton>
             </Flex>
+
+            {/* --- Schedulers Table --- */}
+            {!isAdd && (
+              <View marginTop="size-300">
+                <Heading level={3}>Schedulers</Heading>
+                <TableView aria-label="Schedulers list" overflowMode="wrap">
+                  <TableHeader>
+                    <Column key="type">Type</Column>
+                    <Column key="expr">Cron / RunAt</Column>
+                    <Column key="next">Next Run</Column>
+                    <Column key="enabled">Enabled</Column>
+                    <Column key="actions" width={60}>
+                      Actions
+                    </Column>
+                  </TableHeader>
+                  <TableBody items={schedulersQuery.data ?? []}>
+                    {(item: components['schemas']['scheduler']) => (
+                      <Row key={item.uuid!}>
+                        <Cell>{item.schedule_type}</Cell>
+                        <Cell>
+                          {item.schedule_type === 'cron'
+                            ? item.cron_expression
+                            : new Date(item.run_at ?? '').toLocaleString()}
+                        </Cell>
+                        <Cell>{item.next_run ? new Date(item.next_run).toLocaleString() : '—'}</Cell>
+                        <Cell>
+                          <Badge variant={item.is_enabled ? 'positive' : 'negative'}>
+                            {item.is_enabled ? 'On' : 'Off'}
+                          </Badge>
+                        </Cell>
+                        <Cell>
+                          <Flex direction="row" gap="size-75">
+                            <ActionButton aria-label="Edit" isQuiet onPress={() => openScheduler(item.uuid!)}>
+                              <Edit />
+                            </ActionButton>
+                            <ActionButton
+                              aria-label="Remove"
+                              isQuiet
+                              onPress={() => deleteSchedulerMutation.mutate(item.uuid!)}
+                            >
+                              <Trash />
+                            </ActionButton>
+                          </Flex>
+                        </Cell>
+                      </Row>
+                    )}
+                  </TableBody>
+                </TableView>
+              </View>
+            )}
+
+            {/* Inline Scheduler Form in a modal */}
+            <DialogTrigger isOpen={showSchedulerForm} type="modal" onOpenChange={setShowSchedulerForm}>
+              <></>
+              <Dialog isDismissable onDismiss={closeScheduler} width="size-6000">
+                <Content>
+                  {/* Pass schedulerUUID, SchedulerForm will handle add/edit */}
+                  <SchedulerForm schedulerUUID={editingSchedulerUUID} />
+                  <Flex direction="row" gap="size-200" marginTop="size-200" justifyContent="end">
+                    <ActionButton variant="secondary" onPress={closeScheduler}>
+                      Close
+                    </ActionButton>
+                  </Flex>
+                </Content>
+              </Dialog>
+            </DialogTrigger>
           </Flex>
         </Form>
-
-        <SchedulerForm schedulerUUID={'0'} />
       </View>
 
       {/* Right: Flow section taking remaining space */}

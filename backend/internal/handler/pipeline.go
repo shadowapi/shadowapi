@@ -24,6 +24,11 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
 		}
+		pgStorageUUID, err := converter.ConvertStringToPgUUID(req.StorageUUID)
+		if err != nil {
+			log.Error("failed to convert storage uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage uuid"))
+		}
 		var flowData []byte
 		if req.Flow.IsSet() {
 			flowData, err = json.Marshal(req.Flow.Value)
@@ -41,6 +46,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 		qParams := query.CreatePipelineParams{
 			UUID:           pgtype.UUID{Bytes: converter.UToBytes(pipelineUUID), Valid: true},
 			DatasourceUUID: pgDatasourceUUID,
+			StorageUuid:    pgStorageUUID,
 			Name:           req.Name,
 			Type:           ds.Datasource.Type,
 			IsEnabled:      req.IsEnabled.Or(false),
@@ -139,10 +145,22 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 			log.Error("failed to convert datasource uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
 		}
+		pgStorageUUID, err := converter.ConvertStringToPgUUID(req.StorageUUID)
+		if err != nil {
+			log.Error("failed to convert storage uuid", "error", err)
+			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
+		}
+
+		newType := existingRow.Pipeline.Type // default
+		if req.Type.IsSet() {                // only overwrite if client sent it
+			newType = req.Type.Value
+		}
+
 		uParams := query.UpdatePipelineParams{
 			Name:           req.Name,
-			Type:           req.Type,
+			Type:           newType,
 			DatasourceUUID: pgDatasourceUUID,
+			StorageUuid:    pgStorageUUID,
 			IsEnabled:      req.IsEnabled.Or(false),
 			Flow:           flowData,
 			UUID:           pipelineUUID,
@@ -182,26 +200,30 @@ func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteP
 }
 
 // TODO finish convertion
+// qToApiPipeline converts a db pipeline row into an API pipeline, handling nullable fields safely.
 func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
-	out := api.Pipeline{
-		UUID:      api.NewOptString(dbp.UUID.String()), // TODO @reactima rethink the whole thing
-		Name:      dbp.Name,
-		Type:      api.NewOptString(dbp.Type),
-		IsEnabled: api.NewOptBool(dbp.IsEnabled),
-		CreatedAt: api.NewOptDateTime(dbp.CreatedAt.Time),
-		UpdatedAt: api.NewOptDateTime(dbp.UpdatedAt.Time),
+	// Safely handle potential nil UUID pointers for datasource and storage
+	dsUUID := ""
+	if dbp.DatasourceUUID != nil {
+		dsUUID = dbp.DatasourceUUID.String()
 	}
-	//u, err := uuid.FromString(dbp.UUID.String())
-	//if err != nil {
-	//	return out, err
-	//}
-	//out.UUID = api.NewOptUUID(u)
-	//if dbp.DatasourceUUID != nil {
-	//	out.DatasourceUUID = *dbp.DatasourceUUID
-	//} else {
-	//	out.DatasourceUUID = uuid.Nil
-	//}
+	storageUUID := ""
+	if dbp.StorageUuid != nil {
+		storageUUID = dbp.StorageUuid.String()
+	}
 
+	out := api.Pipeline{
+		UUID:           api.NewOptString(dbp.UUID.String()),
+		DatasourceUUID: dsUUID,
+		StorageUUID:    storageUUID,
+		Name:           dbp.Name,
+		Type:           api.NewOptString(dbp.Type),
+		IsEnabled:      api.NewOptBool(dbp.IsEnabled),
+		CreatedAt:      api.NewOptDateTime(dbp.CreatedAt.Time),
+		UpdatedAt:      api.NewOptDateTime(dbp.UpdatedAt.Time),
+	}
+
+	// Unmarshal Flow JSON if present
 	if len(dbp.Flow) > 0 {
 		var flowObj api.PipelineFlow
 		if err := json.Unmarshal(dbp.Flow, &flowObj); err != nil {
@@ -209,5 +231,6 @@ func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
 		}
 		out.Flow.SetTo(flowObj)
 	}
+
 	return out, nil
 }

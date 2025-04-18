@@ -3103,6 +3103,8 @@ func decodePipelineGetParams(args [1]string, argsEscaped bool, r *http.Request) 
 type PipelineListParams struct {
 	// Filter pipelines by datasource UUID.
 	DatasourceUUID OptUUID
+	// Filter pipelines by storage UUID.
+	StorageUUID OptUUID
 	// Offset records.
 	Offset OptInt32
 	// Limit records.
@@ -3117,6 +3119,15 @@ func unpackPipelineListParams(packed middleware.Parameters) (params PipelineList
 		}
 		if v, ok := packed[key]; ok {
 			params.DatasourceUUID = v.(OptUUID)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "storage_uuid",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.StorageUUID = v.(OptUUID)
 		}
 	}
 	{
@@ -3179,6 +3190,47 @@ func decodePipelineListParams(args [0]string, argsEscaped bool, r *http.Request)
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "datasource_uuid",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: storage_uuid.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "storage_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStorageUUIDVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStorageUUIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.StorageUUID.SetTo(paramsDotStorageUUIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "storage_uuid",
 			In:   "query",
 			Err:  err,
 		}

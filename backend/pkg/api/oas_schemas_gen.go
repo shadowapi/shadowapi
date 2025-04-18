@@ -5497,9 +5497,9 @@ func (o OptWorkerJobsData) Or(d WorkerJobsData) WorkerJobsData {
 // Ref: #
 type Pipeline struct {
 	// Unique identifier.
-	UUID OptString `json:"uuid"`
-	// Optional. Required for datasources based pipelines.
-	DatasourceUUID string `json:"datasource_uuid"`
+	UUID           OptString `json:"uuid"`
+	DatasourceUUID string    `json:"datasource_uuid"`
+	StorageUUID    string    `json:"storage_uuid"`
 	// Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid.
 	Type OptString `json:"type"`
 	// Pipeline name.
@@ -5522,6 +5522,11 @@ func (s *Pipeline) GetUUID() OptString {
 // GetDatasourceUUID returns the value of DatasourceUUID.
 func (s *Pipeline) GetDatasourceUUID() string {
 	return s.DatasourceUUID
+}
+
+// GetStorageUUID returns the value of StorageUUID.
+func (s *Pipeline) GetStorageUUID() string {
+	return s.StorageUUID
 }
 
 // GetType returns the value of Type.
@@ -5562,6 +5567,11 @@ func (s *Pipeline) SetUUID(val OptString) {
 // SetDatasourceUUID sets the value of DatasourceUUID.
 func (s *Pipeline) SetDatasourceUUID(val string) {
 	s.DatasourceUUID = val
+}
+
+// SetStorageUUID sets the value of StorageUUID.
+func (s *Pipeline) SetStorageUUID(val string) {
+	s.StorageUUID = val
 }
 
 // SetType sets the value of Type.
@@ -5851,7 +5861,8 @@ func (s *PipelineNodePosition) SetY(val OptFloat64) {
 
 // Ref: #
 type Scheduler struct {
-	ID             OptString      `json:"id"`
+	// Unique identifier.
+	UUID           OptString      `json:"uuid"`
 	PipelineUUID   string         `json:"pipeline_uuid"`
 	ScheduleType   string         `json:"schedule_type"`
 	CronExpression OptNilString   `json:"cron_expression"`
@@ -5865,9 +5876,9 @@ type Scheduler struct {
 	UpdatedAt      OptDateTime    `json:"updated_at"`
 }
 
-// GetID returns the value of ID.
-func (s *Scheduler) GetID() OptString {
-	return s.ID
+// GetUUID returns the value of UUID.
+func (s *Scheduler) GetUUID() OptString {
+	return s.UUID
 }
 
 // GetPipelineUUID returns the value of PipelineUUID.
@@ -5925,9 +5936,9 @@ func (s *Scheduler) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
-// SetID sets the value of ID.
-func (s *Scheduler) SetID(val OptString) {
-	s.ID = val
+// SetUUID sets the value of UUID.
+func (s *Scheduler) SetUUID(val OptString) {
+	s.UUID = val
 }
 
 // SetPipelineUUID sets the value of PipelineUUID.

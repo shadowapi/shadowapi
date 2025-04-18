@@ -16,6 +16,7 @@ const createPipeline = `-- name: CreatePipeline :one
 INSERT INTO pipeline (
   uuid,
   datasource_uuid,
+  storage_uuid,
   name,
   type,
   is_enabled,
@@ -25,18 +26,20 @@ INSERT INTO pipeline (
 ) VALUES (
              $1::uuid,
              $2::uuid,
-             NULLIF($3, ''),
+             $3::uuid,
              NULLIF($4, ''),
-  $5::boolean,
-              $6,
+             NULLIF($5, ''),
+  $6::boolean,
+              $7,
              NOW(),
   NOW()
-) RETURNING uuid, datasource_uuid, name, type, is_enabled, flow, created_at, updated_at
+) RETURNING uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at
 `
 
 type CreatePipelineParams struct {
 	UUID           pgtype.UUID `json:"uuid"`
 	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
+	StorageUuid    pgtype.UUID `json:"storage_uuid"`
 	Name           interface{} `json:"name"`
 	Type           interface{} `json:"type"`
 	IsEnabled      bool        `json:"is_enabled"`
@@ -47,6 +50,7 @@ func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) 
 	row := q.db.QueryRow(ctx, createPipeline,
 		arg.UUID,
 		arg.DatasourceUUID,
+		arg.StorageUuid,
 		arg.Name,
 		arg.Type,
 		arg.IsEnabled,
@@ -56,6 +60,7 @@ func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) 
 	err := row.Scan(
 		&i.UUID,
 		&i.DatasourceUUID,
+		&i.StorageUuid,
 		&i.Name,
 		&i.Type,
 		&i.IsEnabled,
@@ -77,7 +82,7 @@ func (q *Queries) DeletePipeline(ctx context.Context, argUuid pgtype.UUID) error
 
 const getPipeline = `-- name: GetPipeline :one
 SELECT
-    pipeline.uuid, pipeline.datasource_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 WHERE uuid = $1::uuid
 `
@@ -92,6 +97,7 @@ func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipe
 	err := row.Scan(
 		&i.Pipeline.UUID,
 		&i.Pipeline.DatasourceUUID,
+		&i.Pipeline.StorageUuid,
 		&i.Pipeline.Name,
 		&i.Pipeline.Type,
 		&i.Pipeline.IsEnabled,
@@ -104,17 +110,18 @@ func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipe
 
 const getPipelines = `-- name: GetPipelines :many
 WITH filtered_pipelines AS (
-    SELECT p.uuid, p.datasource_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
+    SELECT p.uuid, p.datasource_uuid, p.storage_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
     FROM pipeline p
     WHERE
         (NULLIF($5, '') IS NULL OR p.uuid = $5::uuid)
       AND (NULLIF($6, '') IS NULL OR p.datasource_uuid = $6::uuid)
-      AND (NULLIF($7, '') IS NULL OR p.type = $7)
-      AND (NULLIF($8::int, -1) IS NULL OR p.is_enabled = $8::boolean)
-      AND (NULLIF($9, '') IS NULL OR p.name ILIKE '%' || $9 || '%')
+      AND (NULLIF($7, '') IS NULL OR p.storage_uuid = $7::uuid)
+      AND (NULLIF($8, '') IS NULL OR p.type = $8)
+      AND (NULLIF($9::int, -1) IS NULL OR p.is_enabled = $9::boolean)
+      AND (NULLIF($10, '') IS NULL OR p.name ILIKE '%' || $10 || '%')
 )
 SELECT
-    uuid, datasource_uuid, name, type, is_enabled, flow, created_at, updated_at,
+    uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at,
     (SELECT count(*) FROM filtered_pipelines) AS total_count
 FROM filtered_pipelines
 ORDER BY
@@ -136,6 +143,7 @@ type GetPipelinesParams struct {
 	Limit          int32       `json:"limit"`
 	UUID           interface{} `json:"uuid"`
 	DatasourceUUID interface{} `json:"datasource_uuid"`
+	StorageUuid    interface{} `json:"storage_uuid"`
 	Type           interface{} `json:"type"`
 	IsEnabled      int32       `json:"is_enabled"`
 	Name           interface{} `json:"name"`
@@ -144,6 +152,7 @@ type GetPipelinesParams struct {
 type GetPipelinesRow struct {
 	UUID           uuid.UUID          `json:"uuid"`
 	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
+	StorageUuid    *uuid.UUID         `json:"storage_uuid"`
 	Name           string             `json:"name"`
 	Type           string             `json:"type"`
 	IsEnabled      bool               `json:"is_enabled"`
@@ -161,6 +170,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 		arg.Limit,
 		arg.UUID,
 		arg.DatasourceUUID,
+		arg.StorageUuid,
 		arg.Type,
 		arg.IsEnabled,
 		arg.Name,
@@ -175,6 +185,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 		if err := rows.Scan(
 			&i.UUID,
 			&i.DatasourceUUID,
+			&i.StorageUuid,
 			&i.Name,
 			&i.Type,
 			&i.IsEnabled,
@@ -195,7 +206,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 
 const listPipelines = `-- name: ListPipelines :many
 SELECT
-    pipeline.uuid, pipeline.datasource_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -223,6 +234,7 @@ func (q *Queries) ListPipelines(ctx context.Context, arg ListPipelinesParams) ([
 		if err := rows.Scan(
 			&i.Pipeline.UUID,
 			&i.Pipeline.DatasourceUUID,
+			&i.Pipeline.StorageUuid,
 			&i.Pipeline.Name,
 			&i.Pipeline.Type,
 			&i.Pipeline.IsEnabled,
@@ -245,16 +257,18 @@ UPDATE pipeline SET
   "name" = NULLIF($1, ''),
   "type" = NULLIF($2, ''),
   datasource_uuid = $3::uuid,
-  is_enabled = $4::boolean,
-  flow = $5,
+  storage_uuid = $4::uuid,
+  is_enabled = $5::boolean,
+  flow = $6,
   updated_at = NOW()
-WHERE uuid = $6::uuid
+WHERE uuid = $7::uuid
 `
 
 type UpdatePipelineParams struct {
 	Name           interface{} `json:"name"`
 	Type           interface{} `json:"type"`
 	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
+	StorageUuid    pgtype.UUID `json:"storage_uuid"`
 	IsEnabled      bool        `json:"is_enabled"`
 	Flow           []byte      `json:"flow"`
 	UUID           pgtype.UUID `json:"uuid"`
@@ -265,6 +279,7 @@ func (q *Queries) UpdatePipeline(ctx context.Context, arg UpdatePipelineParams) 
 		arg.Name,
 		arg.Type,
 		arg.DatasourceUUID,
+		arg.StorageUuid,
 		arg.IsEnabled,
 		arg.Flow,
 		arg.UUID,

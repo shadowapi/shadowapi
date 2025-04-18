@@ -207,7 +207,7 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 func qToApiScheduler(s query.Scheduler) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		ID:             api.NewOptString(s.UUID.String()),
+		UUID:           api.NewOptString(s.UUID.String()),
 		PipelineUUID:   s.PipelineUuid.String(),
 		ScheduleType:   s.ScheduleType,
 		CronExpression: api.NewOptNilString(s.CronExpression.String),
@@ -226,7 +226,7 @@ func qToApiScheduler(s query.Scheduler) (api.Scheduler, error) {
 func qToApiSchedulerRow(s query.GetSchedulerRow) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		ID:             api.NewOptString(s.Scheduler.UUID.String()),
+		UUID:           api.NewOptString(s.Scheduler.UUID.String()),
 		PipelineUUID:   s.Scheduler.PipelineUuid.String(),
 		ScheduleType:   s.Scheduler.ScheduleType,
 		CronExpression: api.NewOptNilString(s.Scheduler.CronExpression.String),
@@ -244,7 +244,7 @@ func qToApiSchedulerRow(s query.GetSchedulerRow) (api.Scheduler, error) {
 func qToApiSchedulersRow(s query.GetSchedulersRow) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		ID:             api.NewOptString(s.UUID.String()),
+		UUID:           api.NewOptString(s.UUID.String()),
 		PipelineUUID:   s.PipelineUuid.String(),
 		ScheduleType:   s.ScheduleType,
 		CronExpression: api.NewOptNilString(s.CronExpression.String),

@@ -385,7 +385,7 @@ type Invoker interface {
 	PipelineGet(ctx context.Context, params PipelineGetParams) (*Pipeline, error)
 	// PipelineList invokes pipeline-list operation.
 	//
-	// Get all pipelines for the current user.
+	// Get all pipelines.
 	//
 	// GET /pipeline
 	PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error)
@@ -8524,7 +8524,7 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 
 // PipelineList invokes pipeline-list operation.
 //
-// Get all pipelines for the current user.
+// Get all pipelines.
 //
 // GET /pipeline
 func (c *Client) PipelineList(ctx context.Context, params PipelineListParams) (*PipelineListOK, error) {
@@ -8584,6 +8584,23 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.DatasourceUUID.Get(); ok {
+				return e.EncodeValue(conv.UUIDToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "storage_uuid" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "storage_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.StorageUUID.Get(); ok {
 				return e.EncodeValue(conv.UUIDToString(val))
 			}
 			return nil
