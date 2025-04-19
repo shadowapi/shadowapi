@@ -1,8 +1,15 @@
 # ShadowAPI
 
-ShadowAPI is a spin-off of Reactima CRM (https://reactima.com/).
+ShadowAPI is a **unified messaging API** that enables seamless integration with Gmail, Telegram, WhatsApp, and LinkedIn in your applications.
 
-If you're interested in streaming all your communications from IMAP, Telegram, WhatsApp, and Signal into your system—tagging, processing, and making them available for LLM usage—let's develop it together.
+It provides a single interface for managing both personal and team‑shared messages across platforms, letting you tag, process, and expose communications via REST endpoints, large language models (LLMs), or message‑centric processing (MCP) workflows.
+
+![Screenshot of ShadowAPI](docs/img/screenshot1.jpg)
+
+
+# Contact 
+
+ShadowAPI is a spin-off project of Reactima CRM (https://reactima.com/).
 
 Your feature requests will be prioritized if you can sponsor 20 hours of development per week. Project ownership, licences, and other details can be discussed.
 
