@@ -1821,7 +1821,6 @@ export interface operations {
     "scheduler-list": {
         parameters: {
             query?: {
-                datasource_uuid?: string;
                 pipeline_uuid?: string;
                 offset?: number;
                 limit?: number;

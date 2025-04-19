@@ -131,11 +131,9 @@ WITH filtered_schedulers AS (
     SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.is_enabled, s.is_paused, s.created_at, s.updated_at
     FROM scheduler s
     WHERE
-        (NULLIF($5, '') IS NULL OR s.uuid = $5::uuid) AND
-        (NULLIF($6, '') IS NULL OR s.schedule_type = $6) AND
-        (NULLIF($7, '') IS NULL OR s.pipeline_uuid = $7::uuid) AND
-        (NULLIF($8::int, -1) IS NULL OR s.is_enabled = ($8::int)::boolean) AND
-        (NULLIF($9::int, -1) IS NULL OR s.is_paused = ($9::int)::boolean)
+        (NULLIF($5, '') IS NULL OR s.pipeline_uuid = $5::uuid) AND
+        (NULLIF($6::int, -1) IS NULL OR s.is_enabled = $6::boolean) AND
+        (NULLIF($7::int, -1) IS NULL OR s.is_paused = $7::boolean)
 )
 SELECT
     uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, is_enabled, is_paused, created_at, updated_at,
@@ -156,8 +154,6 @@ type GetSchedulersParams struct {
 	OrderDirection interface{} `json:"order_direction"`
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
-	UUID           interface{} `json:"uuid"`
-	ScheduleType   interface{} `json:"schedule_type"`
 	PipelineUuid   interface{} `json:"pipeline_uuid"`
 	IsEnabled      int32       `json:"is_enabled"`
 	IsPaused       int32       `json:"is_paused"`
@@ -185,8 +181,6 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 		arg.OrderDirection,
 		arg.Offset,
 		arg.Limit,
-		arg.UUID,
-		arg.ScheduleType,
 		arg.PipelineUuid,
 		arg.IsEnabled,
 		arg.IsPaused,

@@ -1,4 +1,3 @@
-// internal/worker/scheduler/scheduler_token_refresher.go
 package scheduler
 
 import (

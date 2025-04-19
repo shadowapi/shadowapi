@@ -9,11 +9,11 @@ import (
 
 // Constants for our worker stream and job subjects.
 const (
-	WorkerStream                     = "worker"
-	WorkerSubject                    = "worker.jobs"
-	WorkerSubjectTokenRefresh        = WorkerSubject + ".scheduleTokenRefresh"
-	WorkerSubjectEmailScheduledFetch = WorkerSubject + ".emailScheduledFetch"
-	WorkerSubjectEmailApplyPipeline  = WorkerSubject + ".emailApplyPipeline"
+	WorkerStream                    = "worker"
+	WorkerSubject                   = "worker.jobs"
+	WorkerSubjectTokenRefresh       = WorkerSubject + ".scheduleTokenRefresh"
+	WorkerSubjectEmailOAuthFetch    = WorkerSubject + ".emailOAuthFetch"
+	WorkerSubjectEmailApplyPipeline = WorkerSubject + ".emailApplyPipeline"
 )
 
 var (
@@ -22,6 +22,7 @@ var (
 
 	RegistrySubjects = []string{
 		WorkerSubjectTokenRefresh,
+		WorkerSubjectEmailOAuthFetch, // enable scheduled Gmail OAuth2 fetch jobs
 		WorkerSubjectEmailApplyPipeline,
 	}
 )

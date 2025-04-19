@@ -54,15 +54,15 @@ func ProvideLazy(i do.Injector) (*Broker, error) {
 		monitor: monitoring,
 	}
 
-	// Register jobs without starting the broker
+	// pipelinesMap is map of Datasource UUID to Pipeline
+	// - can be constructed with different Contact extractor, different Storages (archived in S3, or in DB)
+	//.- can have different filters (sync policies)
+	// Pipeline is attached to Datasource
+	// Datasource (email, whatsapp, etc) is attached to User
 	pipelinesMap := pipelines.CreateEmailPipelines(ctx, log, dbp)
 
-	// TODO @reactima different users - different policies
-	// pipelinesMap can be constructed with different Contact extractor, different Storages (archived in S3, or in DB), different filters (sync policies)
-	// Current implementation is broken
-	// Pipeline is attached to Datasource
-	// Datasource (email, whatsapp, etc) is attached to the user	pipelinesMap := pipelines.CreateEmailPipelines(ctx, log, dbp)
-	registry.RegisterJob(registry.WorkerSubjectEmailScheduledFetch, jobs.ScheduleEmailFetchJobFactory(dbp, log, q, pipelinesMap))
+	// Register jobs without starting the broker
+	registry.RegisterJob(registry.WorkerSubjectEmailOAuthFetch, jobs.ScheduleEmailFetchJobFactory(dbp, log, q, pipelinesMap))
 	registry.RegisterJob(registry.WorkerSubjectEmailApplyPipeline, jobs.EmailPipelineMessageJobFactory(dbp, log, q, pipelinesMap))
 	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
 
@@ -106,10 +106,13 @@ func Provide(i do.Injector) (*Broker, error) {
 		return nil, err
 	}
 
-	// Start the scheduler
+	// Start Schedulers one by one
+	// MultiEmailScheduler will activate either email or email_oauth type of pipelines
 	s := scheduler.NewMultiEmailScheduler(b.log, b.dbp, b.queue)
 	s.Start(b.ctx)
 
+	// TODO @reactima rethink
+	// this will schedule to token refresh jobs even if no active pipelines
 	tokenScheduler := scheduler.NewTokenRefresherScheduler(b.log, b.dbp, b.queue)
 	tokenScheduler.Start(b.ctx)
 

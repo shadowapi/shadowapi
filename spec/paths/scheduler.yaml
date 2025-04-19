@@ -3,12 +3,6 @@ get:
   operationId: scheduler-list
   description: Retrieve all schedulers for the authenticated user.
   parameters:
-    - name: datasource_uuid
-      in: query
-      required: false
-      schema:
-        type: string
-        format: uuid
     - name: pipeline_uuid
       in: query
       required: false

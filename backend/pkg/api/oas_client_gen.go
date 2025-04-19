@@ -9292,23 +9292,6 @@ func (c *Client) sendSchedulerList(ctx context.Context, params SchedulerListPara
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "datasource_uuid" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "datasource_uuid",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.DatasourceUUID.Get(); ok {
-				return e.EncodeValue(conv.UUIDToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
 		// Encode "pipeline_uuid" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "pipeline_uuid",

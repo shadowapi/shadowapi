@@ -113,12 +113,12 @@ WITH filtered_pipelines AS (
     SELECT p.uuid, p.datasource_uuid, p.storage_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
     FROM pipeline p
     WHERE
-        (NULLIF($5, '') IS NULL OR p.uuid = $5::uuid)
-      AND (NULLIF($6, '') IS NULL OR p.datasource_uuid = $6::uuid)
-      AND (NULLIF($7, '') IS NULL OR p.storage_uuid = $7::uuid)
-      AND (NULLIF($8, '') IS NULL OR p.type = $8)
-      AND (NULLIF($9::int, -1) IS NULL OR p.is_enabled = $9::boolean)
-      AND (NULLIF($10, '') IS NULL OR p.name ILIKE '%' || $10 || '%')
+        (NULLIF($5, '') IS NULL OR p.uuid = $5::uuid) AND
+        (NULLIF($6, '') IS NULL OR p.datasource_uuid = $6::uuid) AND
+        (NULLIF($7, '') IS NULL OR p.storage_uuid = $7::uuid) AND
+        (NULLIF($8, '') IS NULL OR p.type = $8) AND
+        (NULLIF($9::int, -1) IS NULL OR p.is_enabled = $9::boolean) AND
+        (NULLIF($10, '') IS NULL OR p.name ILIKE '%' || $10 || '%')
 )
 SELECT
     uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at,

@@ -40,12 +40,12 @@ WITH filtered_pipelines AS (
     SELECT p.*
     FROM pipeline p
     WHERE
-        (NULLIF(sqlc.arg('uuid'), '') IS NULL OR p.uuid = sqlc.arg('uuid')::uuid)
-      AND (NULLIF(sqlc.arg('datasource_uuid'), '') IS NULL OR p.datasource_uuid = sqlc.arg('datasource_uuid')::uuid)
-      AND (NULLIF(sqlc.arg('storage_uuid'), '') IS NULL OR p.storage_uuid = sqlc.arg('storage_uuid')::uuid)
-      AND (NULLIF(sqlc.arg('type'), '') IS NULL OR p.type = sqlc.arg('type'))
-      AND (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR p.is_enabled = sqlc.arg('is_enabled')::boolean)
-      AND (NULLIF(sqlc.arg('name'), '') IS NULL OR p.name ILIKE '%' || sqlc.arg('name') || '%')
+        (NULLIF(sqlc.arg('uuid'), '') IS NULL OR p.uuid = sqlc.arg('uuid')::uuid) AND
+        (NULLIF(sqlc.arg('datasource_uuid'), '') IS NULL OR p.datasource_uuid = sqlc.arg('datasource_uuid')::uuid) AND
+        (NULLIF(sqlc.arg('storage_uuid'), '') IS NULL OR p.storage_uuid = sqlc.arg('storage_uuid')::uuid) AND
+        (NULLIF(sqlc.arg('type'), '') IS NULL OR p.type = sqlc.arg('type')) AND
+        (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR p.is_enabled = sqlc.arg('is_enabled')::boolean) AND
+        (NULLIF(sqlc.arg('name'), '') IS NULL OR p.name ILIKE '%' || sqlc.arg('name') || '%')
 )
 SELECT
     *,

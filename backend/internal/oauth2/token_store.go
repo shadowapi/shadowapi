@@ -14,7 +14,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-type tokenStore struct {
+type TokenStore struct {
 	ctx context.Context
 	dbp *pgxpool.Pool
 	cfg *oauth2.Config
@@ -23,14 +23,14 @@ type tokenStore struct {
 	refreshThreshold time.Duration
 }
 
-func newTokenStore(
+func NewTokenStore(
 	ctx context.Context,
 	cfg *oauth2.Config,
 	dbp *pgxpool.Pool,
 	tokenUUID uuid.UUID,
 	refreshThreshold time.Duration,
-) (*tokenStore, error) {
-	return &tokenStore{
+) (*TokenStore, error) {
+	return &TokenStore{
 		ctx: ctx,
 		cfg: cfg,
 		dbp: dbp,
@@ -40,7 +40,7 @@ func newTokenStore(
 	}, nil
 }
 
-func (t *tokenStore) Token() (*oauth2.Token, error) {
+func (t *TokenStore) Token() (*oauth2.Token, error) {
 	token, err := t.loadToken()
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (t *tokenStore) Token() (*oauth2.Token, error) {
 	return token, nil
 }
 
-func (t *tokenStore) saveToken(token *oauth2.Token) error {
+func (t *TokenStore) saveToken(token *oauth2.Token) error {
 	tx := query.New(t.dbp)
 	tokenData, err := json.Marshal(token)
 	if err != nil {
@@ -83,7 +83,7 @@ func (t *tokenStore) saveToken(token *oauth2.Token) error {
 	return nil
 }
 
-func (t *tokenStore) loadToken() (*oauth2.Token, error) {
+func (t *TokenStore) loadToken() (*oauth2.Token, error) {
 	tx := query.New(t.dbp)
 	tokenData, err := tx.GetOauth2TokenByUUID(t.ctx, converter.UuidToPgUUID(t.tokenUUID))
 	if err != nil {

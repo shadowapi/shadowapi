@@ -3520,22 +3520,12 @@ func decodeSchedulerGetParams(args [1]string, argsEscaped bool, r *http.Request)
 
 // SchedulerListParams is parameters of scheduler-list operation.
 type SchedulerListParams struct {
-	DatasourceUUID OptUUID
-	PipelineUUID   OptUUID
-	Offset         OptInt32
-	Limit          OptInt32
+	PipelineUUID OptUUID
+	Offset       OptInt32
+	Limit        OptInt32
 }
 
 func unpackSchedulerListParams(packed middleware.Parameters) (params SchedulerListParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "datasource_uuid",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.DatasourceUUID = v.(OptUUID)
-		}
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "pipeline_uuid",
@@ -3568,47 +3558,6 @@ func unpackSchedulerListParams(packed middleware.Parameters) (params SchedulerLi
 
 func decodeSchedulerListParams(args [0]string, argsEscaped bool, r *http.Request) (params SchedulerListParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: datasource_uuid.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "datasource_uuid",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotDatasourceUUIDVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotDatasourceUUIDVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.DatasourceUUID.SetTo(paramsDotDatasourceUUIDVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "datasource_uuid",
-			In:   "query",
-			Err:  err,
-		}
-	}
 	// Decode query: pipeline_uuid.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{

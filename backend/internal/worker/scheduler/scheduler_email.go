@@ -69,8 +69,6 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		OrderDirection: "asc",
 		Offset:         0,
 		Limit:          100,
-		ScheduleType:   "email",
-		UUID:           "",
 		PipelineUuid:   "",
 		IsEnabled:      1,
 		IsPaused:       0,
@@ -99,9 +97,13 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 			continue
 		}
 
+		// TODO @reactima
+		// 1. Check if the pipeline is enabled and not paused, check if pipeline is email_oauth
+		// 2. Consider to check if previous is not running, and decide what to do ... , research best practices first ????
+
 		// Publish the email scheduled fetch job,
 		// once
-		err = s.queue.Publish(ctx, registry.WorkerSubjectEmailScheduledFetch, jobPayload)
+		err = s.queue.Publish(ctx, registry.WorkerSubjectEmailOAuthFetch, jobPayload)
 		if err != nil {
 			s.log.Error("Failed to publish job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)
 			backoffDelay := s.calculateBackoff(sched)

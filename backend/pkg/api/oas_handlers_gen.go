@@ -14043,10 +14043,6 @@ func (s *Server) handleSchedulerListRequest(args [0]string, argsEscaped bool, w 
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
-					Name: "datasource_uuid",
-					In:   "query",
-				}: params.DatasourceUUID,
-				{
 					Name: "pipeline_uuid",
 					In:   "query",
 				}: params.PipelineUUID,

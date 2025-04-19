@@ -123,26 +123,30 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 		OrderDirection: "desc",
 		Offset:         offset,
 		Limit:          limit,
-		// Optionally filter by datasource or pipeline UUID if provided:
-		ScheduleType: "",
-		UUID:         "",
-		PipelineUuid: "",
-		IsEnabled:    -1,
+
+		PipelineUuid: "", // set further below if query has ?pipeline_uuid
+		IsEnabled:    -1, // -1 means "either"
+		IsPaused:     -1, // FIX: use -1 so we don’t implicitly filter out paused rows
 	}
 
 	if params.PipelineUUID.IsSet() {
 		qParams.PipelineUuid = params.PipelineUUID.Value.String()
 	}
 
-	schs, err := query.New(h.dbp).GetSchedulers(ctx, qParams)
+	schRows, err := query.New(h.dbp).GetSchedulers(ctx, qParams)
+	//schRows, err := query.New(h.dbp).ListSchedulers(ctx, query.ListSchedulersParams{
+	//	Offset: int32(0),
+	//	Limit:  int32(50),
+	//})
 	if err != nil {
 		log.Error("failed to list schedulers", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list schedulers"))
 	}
 
-	out := []api.Scheduler{}
-	for _, row := range schs {
+	out := make([]api.Scheduler, 0, len(schRows))
+	for _, row := range schRows {
 		apiItem, err := qToApiSchedulersRow(row)
+		//apiItem, err := qToApiListSchedulersRow(row)
 		if err != nil {
 			log.Error("failed to map scheduler row", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map scheduler row"))
@@ -255,6 +259,24 @@ func qToApiSchedulersRow(s query.GetSchedulersRow) (api.Scheduler, error) {
 		IsEnabled:      api.NewOptBool(s.IsEnabled),
 		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
+	}
+	return out, nil
+}
+
+func qToApiListSchedulersRow(s query.ListSchedulersRow) (api.Scheduler, error) {
+	// Map fields from the query type to your API type.
+	out := api.Scheduler{
+		UUID:           api.NewOptString(s.Scheduler.UUID.String()),
+		PipelineUUID:   s.Scheduler.PipelineUuid.String(),
+		ScheduleType:   s.Scheduler.ScheduleType,
+		CronExpression: api.NewOptNilString(s.Scheduler.CronExpression.String),
+		RunAt:          api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
+		Timezone:       api.NewOptString(s.Scheduler.Timezone),
+		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
+		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
+		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
+		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
+		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
 	}
 	return out, nil
 }
