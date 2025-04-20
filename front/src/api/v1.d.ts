@@ -905,6 +905,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/workerjobs/{uuid}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a running worker job
+         * @description Signal cancellation for a running job; returns 204 if accepted.
+         */
+        post: operations["worker-jobs-cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1719,10 +1739,12 @@ export interface components {
             readonly updated_at?: string;
         };
         worker_jobs: {
-            /** @description Unique identifier for the worker job. */
+            /** @description Unique identifier */
             uuid?: string;
             /** @description UUID of the associated scheduler. */
             scheduler_uuid: string;
+            /** @description UUID of the associated scheduler. */
+            job_uuid?: string;
             /** @description NATS subject or job type. */
             subject: string;
             /** @description Current status of the job (e.g. 'running', 'completed', 'failed', 'retry'). */
@@ -4940,6 +4962,36 @@ export interface operations {
         responses: {
             /** @description Worker job deleted successfully. */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "worker-jobs-cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the worker job to cancel */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancellation requested */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

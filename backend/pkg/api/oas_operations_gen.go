@@ -96,6 +96,7 @@ const (
 	UpdateContactOperation              OperationName = "UpdateContact"
 	UpdateUserOperation                 OperationName = "UpdateUser"
 	UploadFileOperation                 OperationName = "UploadFile"
+	WorkerJobsCancelOperation           OperationName = "WorkerJobsCancel"
 	WorkerJobsDeleteOperation           OperationName = "WorkerJobsDelete"
 	WorkerJobsGetOperation              OperationName = "WorkerJobsGet"
 	WorkerJobsListOperation             OperationName = "WorkerJobsList"

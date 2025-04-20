@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   ActionButton,
   Cell,
@@ -21,7 +22,8 @@ import type { components } from '@/api/v1'
 import { FullLayout } from '@/layouts/FullLayout'
 
 export function WorkerJobs() {
-  // Store paging values
+  const navigate = useNavigate()
+
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(20)
 
@@ -58,6 +60,8 @@ export function WorkerJobs() {
             <TableHeader>
               <Column key="subject">Subject</Column>
               <Column key="status">Status</Column>
+              <Column key="scheduler_uuid">Scheduler</Column>
+              <Column key="job_uuid">Job</Column>
               <Column key="startedAt">Started</Column>
               <Column key="finishedAt">Finished</Column>
               <Column key="actions" align="end">
@@ -69,6 +73,12 @@ export function WorkerJobs() {
                 <Row key={item.uuid}>
                   <Cell>{item.subject}</Cell>
                   <Cell>{item.status}</Cell>
+                  <Cell>
+                    <ActionButton onPress={() => navigate('/schedulers/' + item.scheduler_uuid)}>
+                      {item.scheduler_uuid}
+                    </ActionButton>
+                  </Cell>
+                  <Cell>{item.job_uuid}</Cell>
                   <Cell>{item.started_at ? item.started_at.slice(0, 19) : ''}</Cell>
                   <Cell>{item.finished_at ? item.finished_at.slice(0, 19) : ''}</Cell>
                   <Cell>

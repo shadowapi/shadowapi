@@ -823,6 +823,15 @@ func (UnimplementedHandler) UploadFile(ctx context.Context, req *UploadFileReque
 	return r, ht.ErrNotImplemented
 }
 
+// WorkerJobsCancel implements worker-jobs-cancel operation.
+//
+// Signal cancellation for a running job; returns 204 if accepted.
+//
+// POST /workerjobs/{uuid}/cancel
+func (UnimplementedHandler) WorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) error {
+	return ht.ErrNotImplemented
+}
+
 // WorkerJobsDelete implements worker-jobs-delete operation.
 //
 // Delete a worker job by uuid.

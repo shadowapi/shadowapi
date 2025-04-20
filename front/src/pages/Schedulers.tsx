@@ -99,7 +99,7 @@ export function Schedulers() {
                   </Badge>
                 </Cell>
                 <Cell>
-                  <ActionButton onPress={() => navigate('/schedulers/' + item.id)}>
+                  <ActionButton onPress={() => navigate('/schedulers/' + item.uuid)}>
                     <Edit />
                   </ActionButton>
                 </Cell>

@@ -1,0 +1,22 @@
+post:
+  summary: Cancel a running worker job
+  description: Signal cancellation for a running job; returns 204 if accepted.
+  operationId: worker-jobs-cancel
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      description: Unique identifier of the worker job to cancel
+      schema:
+        type: string
+  responses:
+    "204":
+      description: Cancellation requested
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - worker-jobs

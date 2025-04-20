@@ -1216,6 +1216,13 @@ func encodeUploadFileResponse(response *UploadFileResponse, w http.ResponseWrite
 	return nil
 }
 
+func encodeWorkerJobsCancelResponse(response *WorkerJobsCancelNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
 func encodeWorkerJobsDeleteResponse(response *WorkerJobsDeleteOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

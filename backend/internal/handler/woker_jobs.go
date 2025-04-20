@@ -105,6 +105,9 @@ func qToApiWorkerJobsRow(dbRow query.WorkerJob) (api.WorkerJobs, error) {
 	if dbRow.SchedulerUuid != nil {
 		res.SchedulerUUID = dbRow.SchedulerUuid.String()
 	}
+	if dbRow.JobUuid != nil {
+		res.JobUUID = api.NewOptString(dbRow.JobUuid.String())
+	}
 
 	// Basic fields
 	res.Subject = dbRow.Subject

@@ -4,8 +4,11 @@ additionalProperties: false
 properties:
   uuid:
     type: string
-    description: "Unique identifier for the worker job."
+    description: "Unique identifier"
   scheduler_uuid:
+    type: string
+    description: "UUID of the associated scheduler."
+  job_uuid:
     type: string
     description: "UUID of the associated scheduler."
   subject:

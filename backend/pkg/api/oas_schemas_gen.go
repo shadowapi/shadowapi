@@ -7252,10 +7252,12 @@ func (s *UserMeta) init() UserMeta {
 
 // Ref: #
 type WorkerJobs struct {
-	// Unique identifier for the worker job.
+	// Unique identifier.
 	UUID OptString `json:"uuid"`
 	// UUID of the associated scheduler.
 	SchedulerUUID string `json:"scheduler_uuid"`
+	// UUID of the associated scheduler.
+	JobUUID OptString `json:"job_uuid"`
 	// NATS subject or job type.
 	Subject string `json:"subject"`
 	// Current status of the job (e.g. 'running', 'completed', 'failed', 'retry').
@@ -7276,6 +7278,11 @@ func (s *WorkerJobs) GetUUID() OptString {
 // GetSchedulerUUID returns the value of SchedulerUUID.
 func (s *WorkerJobs) GetSchedulerUUID() string {
 	return s.SchedulerUUID
+}
+
+// GetJobUUID returns the value of JobUUID.
+func (s *WorkerJobs) GetJobUUID() OptString {
+	return s.JobUUID
 }
 
 // GetSubject returns the value of Subject.
@@ -7313,6 +7320,11 @@ func (s *WorkerJobs) SetSchedulerUUID(val string) {
 	s.SchedulerUUID = val
 }
 
+// SetJobUUID sets the value of JobUUID.
+func (s *WorkerJobs) SetJobUUID(val OptString) {
+	s.JobUUID = val
+}
+
 // SetSubject sets the value of Subject.
 func (s *WorkerJobs) SetSubject(val string) {
 	s.Subject = val
@@ -7337,6 +7349,9 @@ func (s *WorkerJobs) SetStartedAt(val OptDateTime) {
 func (s *WorkerJobs) SetFinishedAt(val OptDateTime) {
 	s.FinishedAt = val
 }
+
+// WorkerJobsCancelNoContent is response for WorkerJobsCancel operation.
+type WorkerJobsCancelNoContent struct{}
 
 // Arbitrary JSON data about job details, logs, errors, etc.
 type WorkerJobsData map[string]jx.Raw

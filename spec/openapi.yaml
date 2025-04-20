@@ -194,6 +194,8 @@ paths:
     $ref: "paths/worker_jobs.yaml"
   /workerjobs/{uuid}:
     $ref: "paths/worker_jobs_uuid.yaml"
+  /workerjobs/{uuid}/cancel:
+    $ref: "paths/worker_jobs_cancel.yaml"
 
 servers:
   - description: Local development server

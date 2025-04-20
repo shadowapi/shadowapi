@@ -548,6 +548,12 @@ type Handler interface {
 	//
 	// POST /storage/upload
 	UploadFile(ctx context.Context, req *UploadFileRequest) (*UploadFileResponse, error)
+	// WorkerJobsCancel implements worker-jobs-cancel operation.
+	//
+	// Signal cancellation for a running job; returns 204 if accepted.
+	//
+	// POST /workerjobs/{uuid}/cancel
+	WorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) error
 	// WorkerJobsDelete implements worker-jobs-delete operation.
 	//
 	// Delete a worker job by uuid.

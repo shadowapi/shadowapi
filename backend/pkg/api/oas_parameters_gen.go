@@ -5262,6 +5262,72 @@ func decodeUpdateUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// WorkerJobsCancelParams is parameters of worker-jobs-cancel operation.
+type WorkerJobsCancelParams struct {
+	// Unique identifier of the worker job to cancel.
+	UUID string
+}
+
+func unpackWorkerJobsCancelParams(packed middleware.Parameters) (params WorkerJobsCancelParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeWorkerJobsCancelParams(args [1]string, argsEscaped bool, r *http.Request) (params WorkerJobsCancelParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // WorkerJobsDeleteParams is parameters of worker-jobs-delete operation.
 type WorkerJobsDeleteParams struct {
 	// Unique identifier of the worker job.

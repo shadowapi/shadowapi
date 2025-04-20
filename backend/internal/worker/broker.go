@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,6 +20,39 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/worker/scheduler"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 )
+
+var (
+	jobCancelsMu sync.RWMutex
+	jobCancels   = make(map[string]context.CancelFunc)
+)
+
+// registerCancel stores the cancel func under jobUUID,
+// and removes it when the jobCtx is done.
+func registerCancel(jobUUID string, cancel context.CancelFunc, jobCtx context.Context) {
+	jobCancelsMu.Lock()
+	jobCancels[jobUUID] = cancel
+	jobCancelsMu.Unlock()
+
+	go func() {
+		<-jobCtx.Done()
+		jobCancelsMu.Lock()
+		delete(jobCancels, jobUUID)
+		jobCancelsMu.Unlock()
+	}()
+}
+
+// CancelJob cancels a running job by its UUID.
+// Returns true if the job was found and cancelled.
+func CancelJob(jobUUID string) bool {
+	jobCancelsMu.RLock()
+	cancel, ok := jobCancels[jobUUID]
+	jobCancelsMu.RUnlock()
+	if !ok {
+		return false
+	}
+	cancel()
+	return true
+}
 
 // Broker routes messages to worker jobs.
 type Broker struct {
@@ -165,6 +199,9 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 		}
 		b.log.Info("natsJobID extracted", "natsJobID", natsJobID)
 
+		jobCtx, cancel := context.WithCancel(ctx)
+		registerCancel(natsJobID, cancel, jobCtx)
+
 		job, err := registry.CreateJob(msg.Subject(), natsJobID, msg.Data())
 		if err != nil {
 			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
@@ -175,7 +212,8 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 			_ = msg.Term()
 			return
 		}
-		if err := job.Execute(ctx); err != nil {
+
+		if err := job.Execute(jobCtx); err != nil {
 			duration := time.Since(start).Seconds()
 			metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
 
@@ -187,6 +225,7 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 			_ = msg.Term()
 			return
 		}
+
 		duration := time.Since(start).Seconds()
 		metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
 		_ = msg.Ack()

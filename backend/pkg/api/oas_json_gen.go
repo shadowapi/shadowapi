@@ -13796,6 +13796,12 @@ func (s *WorkerJobs) encodeFields(e *jx.Encoder) {
 		e.Str(s.SchedulerUUID)
 	}
 	{
+		if s.JobUUID.Set {
+			e.FieldStart("job_uuid")
+			s.JobUUID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("subject")
 		e.Str(s.Subject)
 	}
@@ -13823,14 +13829,15 @@ func (s *WorkerJobs) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfWorkerJobs = [7]string{
+var jsonFieldsNameOfWorkerJobs = [8]string{
 	0: "uuid",
 	1: "scheduler_uuid",
-	2: "subject",
-	3: "status",
-	4: "data",
-	5: "started_at",
-	6: "finished_at",
+	2: "job_uuid",
+	3: "subject",
+	4: "status",
+	5: "data",
+	6: "started_at",
+	7: "finished_at",
 }
 
 // Decode decodes WorkerJobs from json.
@@ -13864,8 +13871,18 @@ func (s *WorkerJobs) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"scheduler_uuid\"")
 			}
+		case "job_uuid":
+			if err := func() error {
+				s.JobUUID.Reset()
+				if err := s.JobUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"job_uuid\"")
+			}
 		case "subject":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Subject = string(v)
@@ -13877,7 +13894,7 @@ func (s *WorkerJobs) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"subject\"")
 			}
 		case "status":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.Status = string(v)
@@ -13928,7 +13945,7 @@ func (s *WorkerJobs) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001110,
+		0b00011010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

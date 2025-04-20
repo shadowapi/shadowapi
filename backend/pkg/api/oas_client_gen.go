@@ -569,6 +569,12 @@ type Invoker interface {
 	//
 	// POST /storage/upload
 	UploadFile(ctx context.Context, request *UploadFileRequest) (*UploadFileResponse, error)
+	// WorkerJobsCancel invokes worker-jobs-cancel operation.
+	//
+	// Signal cancellation for a running job; returns 204 if accepted.
+	//
+	// POST /workerjobs/{uuid}/cancel
+	WorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) error
 	// WorkerJobsDelete invokes worker-jobs-delete operation.
 	//
 	// Delete a worker job by uuid.
@@ -12820,6 +12826,142 @@ func (c *Client) sendUploadFile(ctx context.Context, request *UploadFileRequest)
 
 	stage = "DecodeResponse"
 	result, err := decodeUploadFileResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// WorkerJobsCancel invokes worker-jobs-cancel operation.
+//
+// Signal cancellation for a running job; returns 204 if accepted.
+//
+// POST /workerjobs/{uuid}/cancel
+func (c *Client) WorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) error {
+	_, err := c.sendWorkerJobsCancel(ctx, params)
+	return err
+}
+
+func (c *Client) sendWorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) (res *WorkerJobsCancelNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("worker-jobs-cancel"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/workerjobs/{uuid}/cancel"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, WorkerJobsCancelOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/workerjobs/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/cancel"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:SessionCookieAuth"
+			switch err := c.securitySessionCookieAuth(ctx, WorkerJobsCancelOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, WorkerJobsCancelOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeWorkerJobsCancelResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
