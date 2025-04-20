@@ -62,9 +62,9 @@ func ProvideLazy(i do.Injector) (*Broker, error) {
 	pipelinesMap := pipelines.CreateEmailPipelines(ctx, log, dbp)
 
 	// Register jobs without starting the broker
-	registry.RegisterJob(registry.WorkerSubjectEmailOAuthFetch, jobs.ScheduleEmailFetchJobFactory(dbp, log, q, pipelinesMap))
-	registry.RegisterJob(registry.WorkerSubjectEmailApplyPipeline, jobs.EmailPipelineMessageJobFactory(dbp, log, q, pipelinesMap))
-	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q))
+	registry.RegisterJob(registry.WorkerSubjectEmailOAuthFetch, jobs.EmailOAuthFetchJobFactory(dbp, log, q, monitoring, pipelinesMap))
+	registry.RegisterJob(registry.WorkerSubjectEmailApplyPipeline, jobs.EmailPipelineMessageJobFactory(dbp, log, q, monitoring, pipelinesMap))
+	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q, monitoring))
 
 	return b, nil
 }
@@ -108,12 +108,12 @@ func Provide(i do.Injector) (*Broker, error) {
 
 	// Start Schedulers one by one
 	// MultiEmailScheduler will activate either email or email_oauth type of pipelines
-	s := scheduler.NewMultiEmailScheduler(b.log, b.dbp, b.queue)
+	s := scheduler.NewMultiEmailScheduler(b.log, b.dbp, b.queue, b.monitor)
 	s.Start(b.ctx)
 
 	// TODO @reactima rethink
 	// this will schedule to token refresh jobs even if no active pipelines
-	tokenScheduler := scheduler.NewTokenRefresherScheduler(b.log, b.dbp, b.queue)
+	tokenScheduler := scheduler.NewTokenRefresherScheduler(b.log, b.dbp, b.queue, b.monitor)
 	tokenScheduler.Start(b.ctx)
 
 	return b, nil
@@ -157,25 +157,22 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 		start := time.Now()
 
 		// Extract a jobID from the message headers, fallback if not present
-		jobID := msgHeaderToString(msg, "X-Job-ID")
-		if jobID == "" {
+		natsJobID := msgHeaderToString(msg, "X-Job-ID")
+		if natsJobID == "" {
 			// e.g. fallback to a unique ID or do an error
 			// For demonstration, let's do a random fallback
-			jobID = "job-" + randomShortID()
+			natsJobID = "job-" + randomShortID()
 		}
+		b.log.Info("natsJobID extracted", "natsJobID", natsJobID)
 
-		b.monitor.RecordJobStart(ctx, jobID, msg.Subject())
-
-		job, err := registry.CreateJob(msg.Subject(), msg.Data())
+		job, err := registry.CreateJob(msg.Subject(), natsJobID, msg.Data())
 		if err != nil {
 			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
 				_ = msg.NakWithDelay(notReadyErr.Delay)
-				b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "not_ready", notReadyErr.Error())
 				return
 			}
 			b.log.Error("Failed to create job", "error", err)
 			_ = msg.Term()
-			b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "failed", err.Error())
 			return
 		}
 		if err := job.Execute(ctx); err != nil {
@@ -184,19 +181,15 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 
 			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
 				_ = msg.NakWithDelay(notReadyErr.Delay)
-				b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "retry", notReadyErr.Error())
 				return
 			}
 			b.log.Error("Job execution failed", "error", err)
 			_ = msg.Term()
-			b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "failed", err.Error())
 			return
 		}
 		duration := time.Since(start).Seconds()
 		metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
 		_ = msg.Ack()
-
-		b.monitor.RecordJobEnd(ctx, jobID, msg.Subject(), "completed", "")
 	}
 }
 

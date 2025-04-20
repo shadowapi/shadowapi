@@ -16,6 +16,7 @@ const createWorkerJob = `-- name: CreateWorkerJob :one
 INSERT INTO worker_jobs (
     uuid,
     scheduler_uuid,
+    job_uuid,
     subject,
     status,
     data,
@@ -24,18 +25,20 @@ INSERT INTO worker_jobs (
 ) VALUES (
              $1::uuid,
              $2::uuid,
-             $3,
+             $3::uuid,
              $4,
              $5,
+             $6,
              NOW(),
-             $6
+             $7
          )
-RETURNING uuid, scheduler_uuid, subject, status, data, started_at, finished_at
+RETURNING uuid, scheduler_uuid, job_uuid, subject, status, data, started_at, finished_at
 `
 
 type CreateWorkerJobParams struct {
 	UUID          pgtype.UUID        `json:"uuid"`
 	SchedulerUuid pgtype.UUID        `json:"scheduler_uuid"`
+	JobUuid       pgtype.UUID        `json:"job_uuid"`
 	Subject       string             `json:"subject"`
 	Status        string             `json:"status"`
 	Data          []byte             `json:"data"`
@@ -46,6 +49,7 @@ func (q *Queries) CreateWorkerJob(ctx context.Context, arg CreateWorkerJobParams
 	row := q.db.QueryRow(ctx, createWorkerJob,
 		arg.UUID,
 		arg.SchedulerUuid,
+		arg.JobUuid,
 		arg.Subject,
 		arg.Status,
 		arg.Data,
@@ -55,6 +59,7 @@ func (q *Queries) CreateWorkerJob(ctx context.Context, arg CreateWorkerJobParams
 	err := row.Scan(
 		&i.UUID,
 		&i.SchedulerUuid,
+		&i.JobUuid,
 		&i.Subject,
 		&i.Status,
 		&i.Data,
@@ -76,7 +81,7 @@ func (q *Queries) DeleteWorkerJob(ctx context.Context, argUuid pgtype.UUID) erro
 
 const getWorkerJob = `-- name: GetWorkerJob :one
 SELECT
-    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
+    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.job_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
 FROM worker_jobs
 WHERE uuid = $1::uuid
 `
@@ -91,6 +96,7 @@ func (q *Queries) GetWorkerJob(ctx context.Context, argUuid pgtype.UUID) (GetWor
 	err := row.Scan(
 		&i.WorkerJob.UUID,
 		&i.WorkerJob.SchedulerUuid,
+		&i.WorkerJob.JobUuid,
 		&i.WorkerJob.Subject,
 		&i.WorkerJob.Status,
 		&i.WorkerJob.Data,
@@ -102,18 +108,16 @@ func (q *Queries) GetWorkerJob(ctx context.Context, argUuid pgtype.UUID) (GetWor
 
 const getWorkerJobs = `-- name: GetWorkerJobs :many
 WITH filtered_worker_jobs AS (
-    SELECT w.uuid, w.scheduler_uuid, w.subject, w.status, w.data, w.started_at, w.finished_at
+    SELECT w.uuid, w.scheduler_uuid, w.job_uuid, w.subject, w.status, w.data, w.started_at, w.finished_at
     FROM worker_jobs w
     WHERE
-        ($5::uuid IS NULL
-            OR w.scheduler_uuid = $5::uuid)
-      AND (NULLIF($6, '') IS NULL
-        OR w.subject = $6)
-      AND (NULLIF($7, '') IS NULL
-        OR w.status = $7)
+        ($5::uuid IS NULL OR w.scheduler_uuid = $5::uuid) AND
+        ($6::uuid IS NULL OR w.scheduler_uuid = $6::uuid) AND
+        (NULLIF($7, '') IS NULL OR w.subject = $7) AND
+        (NULLIF($8, '') IS NULL OR w.status = $8)
 )
 SELECT
-    uuid, scheduler_uuid, subject, status, data, started_at, finished_at,
+    uuid, scheduler_uuid, job_uuid, subject, status, data, started_at, finished_at,
     (SELECT COUNT(*) FROM filtered_worker_jobs) AS total_count
 FROM filtered_worker_jobs
 ORDER BY
@@ -134,6 +138,7 @@ type GetWorkerJobsParams struct {
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
 	SchedulerUuid  pgtype.UUID `json:"scheduler_uuid"`
+	JobUuid        pgtype.UUID `json:"job_uuid"`
 	Subject        interface{} `json:"subject"`
 	Status         interface{} `json:"status"`
 }
@@ -141,6 +146,7 @@ type GetWorkerJobsParams struct {
 type GetWorkerJobsRow struct {
 	UUID          uuid.UUID          `json:"uuid"`
 	SchedulerUuid *uuid.UUID         `json:"scheduler_uuid"`
+	JobUuid       *uuid.UUID         `json:"job_uuid"`
 	Subject       string             `json:"subject"`
 	Status        string             `json:"status"`
 	Data          []byte             `json:"data"`
@@ -156,6 +162,7 @@ func (q *Queries) GetWorkerJobs(ctx context.Context, arg GetWorkerJobsParams) ([
 		arg.Offset,
 		arg.Limit,
 		arg.SchedulerUuid,
+		arg.JobUuid,
 		arg.Subject,
 		arg.Status,
 	)
@@ -169,6 +176,7 @@ func (q *Queries) GetWorkerJobs(ctx context.Context, arg GetWorkerJobsParams) ([
 		if err := rows.Scan(
 			&i.UUID,
 			&i.SchedulerUuid,
+			&i.JobUuid,
 			&i.Subject,
 			&i.Status,
 			&i.Data,
@@ -188,7 +196,7 @@ func (q *Queries) GetWorkerJobs(ctx context.Context, arg GetWorkerJobsParams) ([
 
 const listWorkerJobs = `-- name: ListWorkerJobs :many
 SELECT
-    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
+    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.job_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
 FROM worker_jobs
 ORDER BY started_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -216,6 +224,7 @@ func (q *Queries) ListWorkerJobs(ctx context.Context, arg ListWorkerJobsParams) 
 		if err := rows.Scan(
 			&i.WorkerJob.UUID,
 			&i.WorkerJob.SchedulerUuid,
+			&i.WorkerJob.JobUuid,
 			&i.WorkerJob.Subject,
 			&i.WorkerJob.Status,
 			&i.WorkerJob.Data,
@@ -235,23 +244,30 @@ func (q *Queries) ListWorkerJobs(ctx context.Context, arg ListWorkerJobsParams) 
 const updateWorkerJob = `-- name: UpdateWorkerJob :exec
 UPDATE worker_jobs
 SET
-    subject     = $1,
-    status      = $2,
-    data        = $3,
-    finished_at = $4
-WHERE uuid = $5::uuid
+    scheduler_uuid = $1::uuid,
+    job_uuid = $2::uuid,
+
+    subject     = $3,
+    status      = $4,
+    data        = $5,
+    finished_at = $6
+WHERE uuid = $7::uuid
 `
 
 type UpdateWorkerJobParams struct {
-	Subject    string             `json:"subject"`
-	Status     string             `json:"status"`
-	Data       []byte             `json:"data"`
-	FinishedAt pgtype.Timestamptz `json:"finished_at"`
-	UUID       pgtype.UUID        `json:"uuid"`
+	SchedulerUuid pgtype.UUID        `json:"scheduler_uuid"`
+	JobUuid       pgtype.UUID        `json:"job_uuid"`
+	Subject       string             `json:"subject"`
+	Status        string             `json:"status"`
+	Data          []byte             `json:"data"`
+	FinishedAt    pgtype.Timestamptz `json:"finished_at"`
+	UUID          pgtype.UUID        `json:"uuid"`
 }
 
 func (q *Queries) UpdateWorkerJob(ctx context.Context, arg UpdateWorkerJobParams) error {
 	_, err := q.db.Exec(ctx, updateWorkerJob,
+		arg.SchedulerUuid,
+		arg.JobUuid,
 		arg.Subject,
 		arg.Status,
 		arg.Data,

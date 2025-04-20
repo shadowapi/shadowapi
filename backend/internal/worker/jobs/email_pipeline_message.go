@@ -3,73 +3,91 @@ package jobs
 import (
 	"context"
 	"encoding/json"
+
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"log/slog"
 )
 
-// EmailPipelineMessageJobArgs contains the incoming job data.
 type EmailPipelineMessageJobArgs struct {
-	PipelineUUID string          `json:"pipeline_uuid"`
-	MessageData  json.RawMessage `json:"message_data"`
+	PipelineUUID  string          `json:"pipeline_uuid"`
+	SchedulerUUID string          `json:"scheduler_uuid"`
+	JobUUID       string          `json:"job_uuid"`
+	MessageData   json.RawMessage `json:"message_data"`
 }
 
-// EmailPipelineMessageJob implements the worker.Job interface.
 type EmailPipelineMessageJob struct {
-	PipelineUUID string `json:"pipeline_uuid"`
-	// Save the raw message data so we can process it.
-	MessageData json.RawMessage
-
 	log          *slog.Logger
 	dbp          *pgxpool.Pool
 	queue        *queue.Queue
+	monitor      *monitor.WorkerMonitor
 	pipelinesMap *map[string]types.Pipeline
+
+	schedulerUUID string
+	jobUUID       string
+	pipelineUUID  string
+	messageData   json.RawMessage
 }
 
-func NewEmailPipelineMessageJob(args EmailPipelineMessageJobArgs, dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, pipelinesMap *map[string]types.Pipeline) *EmailPipelineMessageJob {
-	return &EmailPipelineMessageJob{
-		MessageData:  args.MessageData,
-		PipelineUUID: args.PipelineUUID,
-		log:          log,
-		dbp:          dbp,
-		queue:        q,
-		pipelinesMap: pipelinesMap,
-	}
-}
-
-func (ep *EmailPipelineMessageJob) Execute(ctx context.Context) error {
-	ep.log.Info("Running pipeline", "message", ep.MessageData)
-
-	// Parse the message data into an api.Message struct.
-	var message api.Message
-	if err := json.Unmarshal(ep.MessageData, &message); err != nil {
-		ep.log.Error("failed to unmarshal message data", "error", err)
-		return err
-	}
-
-	pl, ok := (*ep.pipelinesMap)[ep.PipelineUUID]
-	if !ok {
-		ep.log.Warn("pipeline not found for datasource", "ep.PipelineUUID", ep.PipelineUUID)
-		return nil
-	}
-
-	// Run the pipeline.
-	if err := pl.Run(ctx, &message); err != nil {
-		ep.log.Error("failed to run pipeline", "error", err)
-		return err
-	}
-	ep.log.Info("Pipeline completed successfully", "message_uuid", message.UUID)
-	return nil
-}
-
-func EmailPipelineMessageJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, pipelinesMap *map[string]types.Pipeline) types.JobFactory {
+func EmailPipelineMessageJobFactory(
+	dbp *pgxpool.Pool,
+	log *slog.Logger,
+	q *queue.Queue,
+	mon *monitor.WorkerMonitor,
+	pipelines *map[string]types.Pipeline,
+) types.JobFactory {
 	return func(data []byte) (types.Job, error) {
 		var args EmailPipelineMessageJobArgs
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err
 		}
-		return NewEmailPipelineMessageJob(args, dbp, log, q, pipelinesMap), nil
+		recordID := uuid.Must(uuid.NewV7())
+
+		return &EmailPipelineMessageJob{
+			log:           log,
+			dbp:           dbp,
+			queue:         q,
+			monitor:       mon,
+			pipelinesMap:  pipelines,
+			pipelineUUID:  args.PipelineUUID,
+			schedulerUUID: args.SchedulerUUID,
+			jobUUID:       recordID.String(),
+			messageData:   args.MessageData,
+		}, nil
 	}
+}
+
+func (e *EmailPipelineMessageJob) Execute(ctx context.Context) (err error) {
+	e.monitor.RecordJobStart(ctx, e.schedulerUUID, e.jobUUID, registry.WorkerSubjectEmailApplyPipeline)
+	defer func() {
+		status := monitor.StatusDone
+		if err != nil {
+			status = monitor.StatusFailed
+		}
+		e.monitor.RecordJobEnd(ctx, "", e.jobUUID, registry.WorkerSubjectEmailApplyPipeline, status, func() string {
+			if err != nil {
+				return err.Error()
+			}
+			return ""
+		}())
+	}()
+
+	var msg api.Message
+	if err = json.Unmarshal(e.messageData, &msg); err != nil {
+		e.log.Error("unmarshal message failed", "error", err)
+		return err
+	}
+
+	pl, ok := (*e.pipelinesMap)[e.pipelineUUID]
+	if !ok {
+		e.log.Error("pipeline not found", "uuid", e.pipelineUUID)
+		return nil
+	}
+	err = pl.Run(ctx, &msg)
+	return err
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -23,46 +24,66 @@ import (
 )
 
 type EmailOAuthFetchJobArgs struct {
-	PipelineUUID string    `json:"pipeline_uuid"`
-	LastFetched  time.Time `json:"last_fetched"`
+	SchedulerUUID string    `json:"scheduler_uuid"`
+	JobUUID       string    `json:"job_uuid"`
+	PipelineUUID  string    `json:"pipeline_uuid"`
+	LastFetched   time.Time `json:"last_fetched"`
 }
 
 type EmailOAuthFetchJob struct {
 	log          *slog.Logger
 	dbp          *pgxpool.Pool
 	queue        *queue.Queue
+	monitor      *monitor.WorkerMonitor
 	pipelinesMap *map[string]types.Pipeline
 
-	pipelineUUID string
-	lastFetched  time.Time
+	schedulerUUID string
+	jobUUID       string
+	pipelineUUID  string
+	lastFetched   time.Time
 }
 
-func NewEmailScheduledFetchJob(args EmailOAuthFetchJobArgs, dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, pipelinesMap *map[string]types.Pipeline) *EmailOAuthFetchJob {
-	return &EmailOAuthFetchJob{
-		log:          log,
-		dbp:          dbp,
-		queue:        q,
-		pipelinesMap: pipelinesMap,
-
-		pipelineUUID: args.PipelineUUID,
-		lastFetched:  args.LastFetched,
-	}
-}
-
-func ScheduleEmailFetchJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, pipelinesMap *map[string]types.Pipeline) types.JobFactory {
+func EmailOAuthFetchJobFactory(
+	dbp *pgxpool.Pool,
+	log *slog.Logger,
+	q *queue.Queue,
+	mon *monitor.WorkerMonitor,
+	pipelines *map[string]types.Pipeline,
+) types.JobFactory {
 	return func(data []byte) (types.Job, error) {
 		var args EmailOAuthFetchJobArgs
 		if err := json.Unmarshal(data, &args); err != nil {
 			return nil, err
 		}
-		if args.PipelineUUID == "" {
-			return nil, errors.New("missing pipeline_uuid in job args")
-		}
-		return NewEmailScheduledFetchJob(args, dbp, log, q, pipelinesMap), nil
+		return &EmailOAuthFetchJob{
+			log:           log,
+			dbp:           dbp,
+			queue:         q,
+			monitor:       mon,
+			pipelinesMap:  pipelines,
+			schedulerUUID: args.SchedulerUUID,
+			jobUUID:       args.JobUUID,
+			pipelineUUID:  args.PipelineUUID,
+			lastFetched:   args.LastFetched,
+		}, nil
 	}
 }
 
-func (e *EmailOAuthFetchJob) Execute(ctx context.Context) error {
+func (e *EmailOAuthFetchJob) Execute(ctx context.Context) (err error) {
+	e.monitor.RecordJobStart(ctx, e.schedulerUUID, e.jobUUID, registry.WorkerSubjectEmailOAuthFetch)
+	defer func() {
+		status := monitor.StatusDone
+		if err != nil {
+			status = monitor.StatusFailed
+		}
+		e.monitor.RecordJobEnd(ctx, e.schedulerUUID, e.jobUUID, registry.WorkerSubjectEmailOAuthFetch, status, func() string {
+			if err != nil {
+				return err.Error()
+			}
+			return ""
+		}())
+	}()
+
 	queries := query.New(e.dbp)
 	pipeUUID, err := uuid.FromString(e.pipelineUUID)
 	if err != nil {

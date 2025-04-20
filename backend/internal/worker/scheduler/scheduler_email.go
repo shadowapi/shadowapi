@@ -11,16 +11,17 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/metrics"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 	"log/slog"
 )
 
-// NOTE: The PipelineUUID in the job payload corresponds to the datasource UUID
-// used as key in the email pipeline map.
 type SchedulerEmailJobArgs struct {
-	PipelineUUID string    `json:"pipeline_uuid"`
-	LastFetched  time.Time `json:"last_fetched"`
+	SchedulerUUID string    `json:"scheduler_uuid"`
+	JobUUID       string    `json:"job_uuid"`
+	PipelineUUID  string    `json:"pipeline_uuid"`
+	LastFetched   time.Time `json:"last_fetched"`
 }
 
 type MultiEmailScheduler struct {
@@ -30,13 +31,15 @@ type MultiEmailScheduler struct {
 	cronParser cron.Parser
 	interval   time.Duration
 	maxBackoff time.Duration
+	monitor    *monitor.WorkerMonitor
 }
 
-func NewMultiEmailScheduler(log *slog.Logger, dbp *pgxpool.Pool, queue *queue.Queue) *MultiEmailScheduler {
+func NewMultiEmailScheduler(log *slog.Logger, dbp *pgxpool.Pool, queue *queue.Queue, monitor *monitor.WorkerMonitor) *MultiEmailScheduler {
 	return &MultiEmailScheduler{
 		log:        log,
 		dbp:        dbp,
 		queue:      queue,
+		monitor:    monitor,
 		cronParser: cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow),
 		interval:   time.Minute,
 		maxBackoff: 10 * time.Minute,
@@ -78,6 +81,11 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		return
 	}
 
+	if len(schedulers) == 0 {
+		s.log.Debug("No schedulers found")
+		return
+	}
+
 	// Loop over each scheduler row.
 	for _, sched := range schedulers {
 
@@ -87,9 +95,11 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		if sched.NextRun.Valid && sched.NextRun.Time.After(now) {
 			continue
 		}
+
 		jobArgs := SchedulerEmailJobArgs{
-			PipelineUUID: sched.PipelineUuid.String(),
-			LastFetched:  now,
+			SchedulerUUID: sched.UUID.String(),
+			PipelineUUID:  sched.PipelineUuid.String(),
+			LastFetched:   now,
 		}
 		jobPayload, err := json.Marshal(jobArgs)
 		if err != nil {
@@ -101,8 +111,6 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		// 1. Check if the pipeline is enabled and not paused, check if pipeline is email_oauth
 		// 2. Consider to check if previous is not running, and decide what to do ... , research best practices first ????
 
-		// Publish the email scheduled fetch job,
-		// once
 		err = s.queue.Publish(ctx, registry.WorkerSubjectEmailOAuthFetch, jobPayload)
 		if err != nil {
 			s.log.Error("Failed to publish job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)

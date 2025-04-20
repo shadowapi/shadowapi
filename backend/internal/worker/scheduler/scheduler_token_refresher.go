@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"encoding/json"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,15 +21,18 @@ type TokenRefresherScheduler struct {
 	queue      *queue.Queue
 	cronParser cron.Parser
 	interval   time.Duration
+	monitor    *monitor.WorkerMonitor
 }
 
 var defaultRefreshInterval = 5 * time.Minute
 
-func NewTokenRefresherScheduler(log *slog.Logger, dbp *pgxpool.Pool, q *queue.Queue) *TokenRefresherScheduler {
+func NewTokenRefresherScheduler(log *slog.Logger, dbp *pgxpool.Pool, q *queue.Queue,
+	monitor *monitor.WorkerMonitor) *TokenRefresherScheduler {
 	return &TokenRefresherScheduler{
 		log:        log,
 		dbp:        dbp,
 		queue:      q,
+		monitor:    monitor,
 		cronParser: cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow),
 		interval:   defaultRefreshInterval,
 	}

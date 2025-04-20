@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/types"
 	"log/slog"
@@ -22,25 +23,52 @@ import (
 
 // TokenRefresherJobArgs holds the arguments for a token refresh job.
 type TokenRefresherJobArgs struct {
-	TokenUUID uuid.UUID `json:"token_uuid"`
-	Expiry    time.Time `json:"expiry"`
+	SchedulerUUID string    `json:"scheduler_uuid"`
+	JobUUID       string    `json:"job_uuid"`
+	TokenUUID     uuid.UUID `json:"token_uuid"`
+	Expiry        time.Time `json:"expiry"`
 }
 
 // TokenRefresherJob implements the worker.Job interface.
 type TokenRefresherJob struct {
-	dbp   *pgxpool.Pool
-	log   *slog.Logger
-	queue *queue.Queue
-	args  TokenRefresherJobArgs
+	log     *slog.Logger
+	dbp     *pgxpool.Pool
+	queue   *queue.Queue
+	monitor *monitor.WorkerMonitor
+
+	schedulerUUID string
+	jobUUID       string
+	args          TokenRefresherJobArgs
 }
 
 // NewTokenRefresherJob creates a new TokenRefresherJob.
-func NewTokenRefresherJob(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, args TokenRefresherJobArgs) *TokenRefresherJob {
-	return &TokenRefresherJob{
-		dbp:   dbp,
-		log:   log,
-		queue: q,
-		args:  args,
+func TokenRefresherJobFactory(
+	dbp *pgxpool.Pool,
+	log *slog.Logger,
+	q *queue.Queue,
+	mon *monitor.WorkerMonitor,
+) types.JobFactory {
+	return func(data []byte) (types.Job, error) {
+		var args TokenRefresherJobArgs
+		if err := json.Unmarshal(data, &args); err != nil {
+			return nil, err
+		}
+
+		if time.Now().UTC().Before(args.Expiry) {
+			return nil, types.JobNotReadyError{Delay: time.Until(args.Expiry)}
+		}
+
+		recordID := uuid.Must(uuid.NewV7())
+
+		return &TokenRefresherJob{
+			log:           log,
+			dbp:           dbp,
+			queue:         q,
+			monitor:       mon,
+			schedulerUUID: args.SchedulerUUID,
+			jobUUID:       recordID.String(),
+			args:          args,
+		}, nil
 	}
 }
 
@@ -50,7 +78,21 @@ func NewTokenRefresherJob(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue, a
 //  2. Unmarshal the token.
 //  3. Get the OAuth2 client config and refresh the token.
 //  4. Reschedule the next refresh by publishing a new token refresh message.
-func (t *TokenRefresherJob) Execute(ctx context.Context) error {
+func (t *TokenRefresherJob) Execute(ctx context.Context) (err error) {
+	t.monitor.RecordJobStart(ctx, t.schedulerUUID, t.jobUUID, registry.WorkerSubjectTokenRefresh)
+	defer func() {
+		status := monitor.StatusDone
+		if err != nil {
+			status = monitor.StatusFailed
+		}
+		t.monitor.RecordJobEnd(ctx, t.schedulerUUID, t.jobUUID, registry.WorkerSubjectTokenRefresh, status, func() string {
+			if err != nil {
+				return err.Error()
+			}
+			return ""
+		}())
+	}()
+
 	log := t.log.With("token_uuid", t.args.TokenUUID, "worker", "TokenRefresherJob")
 	log.Debug("Starting token refresh job")
 	refreshedToken, err := db.InTx(ctx, t.dbp, func(tx pgx.Tx) (*oauth2.Token, error) {
@@ -107,38 +149,8 @@ func ScheduleTokenRefresh(ctx context.Context, q *queue.Queue, tokenUUID uuid.UU
 	return q.Publish(ctx, registry.WorkerSubjectTokenRefresh, msg)
 }
 
-// TokenRefresherJobFactory is the factory for token refresher jobs.
-func TokenRefresherJobFactory(dbp *pgxpool.Pool, log *slog.Logger, q *queue.Queue) types.JobFactory {
-	return func(data []byte) (types.Job, error) {
-		var args TokenRefresherJobArgs
-		if err := json.Unmarshal(data, &args); err != nil {
-			return nil, err
-		}
-		if time.Now().UTC().Before(args.Expiry) {
-			return nil, types.JobNotReadyError{Delay: time.Until(args.Expiry)}
-		}
-		return NewTokenRefresherJob(dbp, log, q, args), nil
-	}
-}
-
 /*
 // OLD CODE
-
-// ScheduleRefresh runs the token refresh worker after 30% of the expiration time
-func (b *Broker) ScheduleRefresh(ctx context.Context, tokenUUID uuid.UUID, expiresAt time.Time) error {
-	log := b.log.With("token_uuid", tokenUUID, "action", "scheduleTokenRefresh")
-	duration := expiresAt.Sub(time.Now().UTC())
-	duration = time.Duration(float64(duration) * 0.1)
-	log.Info("schedule token refresh", "token_uuid", tokenUUID, "scheduled_at", time.Now().UTC().Add(duration))
-
-	args := &tokenRefresherWorkerArgs{TokenUUID: tokenUUID, Expiry: time.Now().UTC().Add(duration)}
-	msg, err := json.Marshal(args)
-	if err != nil {
-		log.Error("failed to marshal token refresh args", "error", err)
-		return err
-	}
-	return b.queue.Publish(ctx, workerSubjectTokenRefresh, msg)
-}
 
 // tokenRefresherWorkerArgs for the token refresh worker
 func (b *Broker) tokenRefreshHandler(ctx context.Context, msg queue.Msg) {

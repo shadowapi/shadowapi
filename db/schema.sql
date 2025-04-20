@@ -337,6 +337,7 @@ CREATE TABLE "scheduler" (
 CREATE TABLE IF NOT EXISTS worker_jobs (
                                            uuid             UUID PRIMARY KEY,
                                            scheduler_uuid      UUID NOT NULL,
+                                           job_uuid      UUID NOT NULL,
                                            subject     VARCHAR NOT NULL,
                                            status      VARCHAR NOT NULL,            -- e.g. "running", "completed", "failed", "retry"
                                            data        JSONB DEFAULT '{}'::jsonb,-- used for error details, logs, or metadata

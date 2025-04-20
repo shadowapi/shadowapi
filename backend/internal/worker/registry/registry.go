@@ -35,7 +35,8 @@ func RegisterJob(subject string, factory types.JobFactory) {
 }
 
 // CreateJob returns a new job instance for a given subject.
-func CreateJob(subject string, data []byte) (types.Job, error) {
+func CreateJob(subject string, natsJobID string, data []byte) (types.Job, error) {
+	// TODO @reactima decide if it's worth to handle natsJobID
 	jobRegistryMu.RLock()
 	factory, ok := jobRegistry[subject]
 	jobRegistryMu.RUnlock()

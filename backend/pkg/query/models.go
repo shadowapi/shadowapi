@@ -368,6 +368,7 @@ type User struct {
 type WorkerJob struct {
 	UUID          uuid.UUID          `json:"uuid"`
 	SchedulerUuid *uuid.UUID         `json:"scheduler_uuid"`
+	JobUuid       *uuid.UUID         `json:"job_uuid"`
 	Subject       string             `json:"subject"`
 	Status        string             `json:"status"`
 	Data          []byte             `json:"data"`

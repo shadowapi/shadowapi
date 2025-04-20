@@ -2,6 +2,7 @@
 INSERT INTO worker_jobs (
     uuid,
     scheduler_uuid,
+    job_uuid,
     subject,
     status,
     data,
@@ -10,6 +11,7 @@ INSERT INTO worker_jobs (
 ) VALUES (
              sqlc.arg('uuid')::uuid,
              sqlc.arg('scheduler_uuid')::uuid,
+             sqlc.arg('job_uuid')::uuid,
              sqlc.arg('subject'),
              sqlc.arg('status'),
              sqlc.arg('data'),
@@ -37,12 +39,10 @@ WITH filtered_worker_jobs AS (
     SELECT w.*
     FROM worker_jobs w
     WHERE
-        (sqlc.arg('scheduler_uuid')::uuid IS NULL
-            OR w.scheduler_uuid = sqlc.arg('scheduler_uuid')::uuid)
-      AND (NULLIF(sqlc.arg('subject'), '') IS NULL
-        OR w.subject = sqlc.arg('subject'))
-      AND (NULLIF(sqlc.arg('status'), '') IS NULL
-        OR w.status = sqlc.arg('status'))
+        (sqlc.arg('scheduler_uuid')::uuid IS NULL OR w.scheduler_uuid = sqlc.arg('scheduler_uuid')::uuid) AND
+        (sqlc.arg('job_uuid')::uuid IS NULL OR w.scheduler_uuid = sqlc.arg('job_uuid')::uuid) AND
+        (NULLIF(sqlc.arg('subject'), '') IS NULL OR w.subject = sqlc.arg('subject')) AND
+        (NULLIF(sqlc.arg('status'), '') IS NULL OR w.status = sqlc.arg('status'))
 )
 SELECT
     *,
@@ -62,6 +62,9 @@ LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 -- name: UpdateWorkerJob :exec
 UPDATE worker_jobs
 SET
+    scheduler_uuid = sqlc.arg('scheduler_uuid')::uuid,
+    job_uuid = sqlc.arg('job_uuid')::uuid,
+
     subject     = sqlc.arg('subject'),
     status      = sqlc.arg('status'),
     data        = sqlc.arg('data'),
