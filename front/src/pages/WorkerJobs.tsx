@@ -14,12 +14,14 @@ import {
   Text,
   View,
 } from '@adobe/react-spectrum'
-import Edit from '@spectrum-icons/workflow/Edit'
+import { ToastContainer, ToastQueue } from '@react-spectrum/toast'
+import Copy from '@spectrum-icons/workflow/Copy'
 import { useQuery } from '@tanstack/react-query'
 
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 import { FullLayout } from '@/layouts/FullLayout'
+import { shortenUuid } from '@/shauth'
 
 export function WorkerJobs() {
   const navigate = useNavigate()
@@ -29,6 +31,15 @@ export function WorkerJobs() {
 
   // For preview panel
   const [selected, setSelected] = useState<components['schemas']['worker_jobs'] | null>(null)
+
+  const copyToClipboard = (uuid: string, label: string) => {
+    navigator.clipboard.writeText(uuid)
+    ToastQueue.positive(`${label} UUID copied`, { timeout: 250 })
+  }
+
+  const onCancel = (uuid: string) => {
+    alert('TODO implement job cancel! job_uuid ' + uuid)
+  }
 
   // Query worker jobs with offset and limit; assuming the GET /workerjobs endpoint returns a payload like: { jobs: [...] }
   const workerQuery = useQuery({
@@ -50,6 +61,7 @@ export function WorkerJobs() {
 
   return (
     <FullLayout>
+      <ToastContainer />
       <Flex direction="row" gap="size-200" margin="size-200" flex>
         {/* LEFT SIDE: Worker Jobs Table */}
         <View flex={1} minWidth={0}>
@@ -74,17 +86,32 @@ export function WorkerJobs() {
                   <Cell>{item.subject}</Cell>
                   <Cell>{item.status}</Cell>
                   <Cell>
-                    <ActionButton onPress={() => navigate('/schedulers/' + item.scheduler_uuid)}>
-                      {item.scheduler_uuid}
-                    </ActionButton>
+                    <Flex alignItems="center" gap="size-100">
+                      <ActionButton onPress={() => navigate('/schedulers/' + item.scheduler_uuid)}>
+                        {shortenUuid(item.scheduler_uuid)}
+                      </ActionButton>
+                      <ActionButton
+                        onPress={() => copyToClipboard(item.scheduler_uuid, 'Scheduler')}
+                        aria-label="Copy Scheduler UUID"
+                      >
+                        <Copy size="S" />
+                      </ActionButton>
+                    </Flex>
                   </Cell>
-                  <Cell>{item.job_uuid}</Cell>
+                  <Cell>
+                    <Flex alignItems="center" gap="size-100">
+                      <ActionButton onPress={() => onCancel(item.job_uuid)}>×</ActionButton>
+                      <Text>{shortenUuid(item.job_uuid)}</Text>
+                      <ActionButton onPress={() => copyToClipboard(item.job_uuid, 'Job')} aria-label="Copy Job UUID">
+                        <Copy size="S" />
+                      </ActionButton>
+                    </Flex>
+                  </Cell>
                   <Cell>{item.started_at ? item.started_at.slice(0, 19) : ''}</Cell>
                   <Cell>{item.finished_at ? item.finished_at.slice(0, 19) : ''}</Cell>
                   <Cell>
                     <ActionButton onPress={() => setSelected(item)}>
-                      <Edit />
-                      <Text>Preview</Text>
+                      <Text>Details</Text>
                     </ActionButton>
                   </Cell>
                 </Row>

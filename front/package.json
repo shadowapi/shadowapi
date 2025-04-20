@@ -13,10 +13,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@adobe/react-spectrum": "^3.39.0",
+    "@adobe/react-spectrum": "^3.41.0",
     "@ory/client": "^1.16.7",
     "@react-spectrum/tree": "^3.0.0-beta.3",
-    "@spectrum-icons/illustrations": "^3.6.18",
+    "@spectrum-icons/illustrations": "^3.6.21",
     "@tanstack/react-query": "^5.66.9",
     "@xyflow/react": "^12.4.3",
     "openapi-fetch": "^0.13.4",
