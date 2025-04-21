@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
@@ -89,15 +90,40 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 	// Loop over each scheduler row.
 	for _, sched := range schedulers {
 
+		jobUUID := uuid.Must(uuid.NewV7()).String()
 		// TODO @reactima consider to make in transaction
 
 		// If NextRun is set and still in the future, skip this scheduler.
 		if sched.NextRun.Valid && sched.NextRun.Time.After(now) {
+			s.log.Debug("MultiEmailScheduler Skipping scheduler", "schedulerUUID", sched.UUID.String(), "nextRun", sched.NextRun.Time)
+
+			// TODO @reactima remove dummy job
+			jobArgs := SchedulerEmailJobArgs{
+				SchedulerUUID: sched.UUID.String(),
+				JobUUID:       jobUUID,
+				PipelineUUID:  sched.PipelineUuid.String(),
+				LastFetched:   now,
+			}
+			jobPayload, err := json.Marshal(jobArgs)
+			if err != nil {
+				s.log.Error("Failed to marshal dummy job payload", "scheduler", sched.UUID.String(), "err", err)
+				continue
+			}
+			headers := queue.Headers{"X-Job-ID": jobUUID}
+
+			err = s.queue.PublishWithHeaders(ctx, registry.WorkerSubjectDummy, headers, jobPayload)
+			if err != nil {
+				s.log.Error("Failed to publish dummy job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)
+				continue
+			}
 			continue
 		}
 
+		s.log.Debug("MultiEmailScheduler Scheduling job", "start schedulerUUID", sched.UUID.String(), "jobUUID", jobUUID)
+
 		jobArgs := SchedulerEmailJobArgs{
 			SchedulerUUID: sched.UUID.String(),
+			JobUUID:       jobUUID,
 			PipelineUUID:  sched.PipelineUuid.String(),
 			LastFetched:   now,
 		}
@@ -110,8 +136,9 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		// TODO @reactima
 		// 1. Check if the pipeline is enabled and not paused, check if pipeline is email_oauth
 		// 2. Consider to check if previous is not running, and decide what to do ... , research best practices first ????
+		headers := queue.Headers{"X-Job-ID": jobUUID}
 
-		err = s.queue.Publish(ctx, registry.WorkerSubjectEmailOAuthFetch, jobPayload)
+		err = s.queue.PublishWithHeaders(ctx, registry.WorkerSubjectEmailOAuthFetch, headers, jobPayload)
 		if err != nil {
 			s.log.Error("Failed to publish job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)
 			backoffDelay := s.calculateBackoff(sched)

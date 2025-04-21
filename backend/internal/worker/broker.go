@@ -99,6 +99,7 @@ func ProvideLazy(i do.Injector) (*Broker, error) {
 	registry.RegisterJob(registry.WorkerSubjectEmailOAuthFetch, jobs.EmailOAuthFetchJobFactory(dbp, log, q, monitoring, pipelinesMap))
 	registry.RegisterJob(registry.WorkerSubjectEmailApplyPipeline, jobs.EmailPipelineMessageJobFactory(dbp, log, q, monitoring, pipelinesMap))
 	registry.RegisterJob(registry.WorkerSubjectTokenRefresh, jobs.TokenRefresherJobFactory(dbp, log, q, monitoring))
+	registry.RegisterJob(registry.WorkerSubjectDummy, jobs.DummyJobFactory(dbp, log, q, monitoring))
 
 	return b, nil
 }
@@ -189,45 +190,41 @@ func (b *Broker) handleMessages(ctx context.Context) func(msg queue.Msg) {
 	return func(msg queue.Msg) {
 
 		start := time.Now()
-
-		// Extract a jobID from the message headers, fallback if not present
-		natsJobID := msgHeaderToString(msg, "X-Job-ID")
-		if natsJobID == "" {
-			// e.g. fallback to a unique ID or do an error
-			// For demonstration, let's do a random fallback
-			natsJobID = "job-" + randomShortID()
+		jobID := msgHeaderToString(msg, "X-Job-ID")
+		if jobID == "" {
+			b.log.Error("Broker handleMessages missing X-Job-ID header", "subject", msg.Subject())
+			_ = msg.Term()
+			return
 		}
-		b.log.Info("natsJobID extracted", "natsJobID", natsJobID)
 
 		jobCtx, cancel := context.WithCancel(ctx)
-		registerCancel(natsJobID, cancel, jobCtx)
+		registerCancel(jobID, cancel, jobCtx)
 
-		job, err := registry.CreateJob(msg.Subject(), natsJobID, msg.Data())
+		job, err := registry.CreateJob(msg.Subject(), jobID, msg.Data())
 		if err != nil {
-			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
-				_ = msg.NakWithDelay(notReadyErr.Delay)
+			if notReady, ok := err.(types.JobNotReadyError); ok {
+				_ = msg.NakWithDelay(notReady.Delay)
 				return
 			}
-			b.log.Error("Failed to create job", "error", err)
+			b.log.Error("Broker handleMessages failed to create job", "error", err)
 			_ = msg.Term()
 			return
 		}
 
 		if err := job.Execute(jobCtx); err != nil {
 			duration := time.Since(start).Seconds()
-			metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
-
-			if notReadyErr, ok := err.(types.JobNotReadyError); ok {
-				_ = msg.NakWithDelay(notReadyErr.Delay)
+			metrics.JobExecutedDuration.WithLabelValues(msg.Subject(), "failure").Observe(duration)
+			if notReady, ok := err.(types.JobNotReadyError); ok {
+				_ = msg.NakWithDelay(notReady.Delay)
 				return
 			}
-			b.log.Error("Job execution failed", "error", err)
+			b.log.Error("Broker handleMessages job execution failed", "error", err)
 			_ = msg.Term()
 			return
 		}
 
 		duration := time.Since(start).Seconds()
-		metrics.JobExecutedDuration.WithLabelValues(msg.Subject()).Observe(duration)
+		metrics.JobExecutedDuration.WithLabelValues(msg.Subject(), "success").Observe(duration)
 		_ = msg.Ack()
 	}
 }

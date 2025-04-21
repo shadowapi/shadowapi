@@ -6,6 +6,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
@@ -66,17 +67,27 @@ func (s *TokenRefresherScheduler) run(ctx context.Context) {
 		return
 	}
 	for _, tokenRow := range tokens {
+
+		jobUUID := uuid.Must(uuid.NewV7()).String()
+
+		schedulerUUID := uuid.Must(uuid.NewV7()).String()
+		headers := queue.Headers{"X-Job-ID": jobUUID}
+
+		// TODO @reactima
+		// - fix schedulerUUID
+		// - review expire
 		jobArgs := jobs.TokenRefresherJobArgs{
-			TokenUUID: tokenRow.Oauth2Token.UUID,
-			// TODO @reactive review
-			Expiry: time.Now().Add(defaultRefreshInterval),
+			JobUUID:       jobUUID,
+			SchedulerUUID: schedulerUUID,
+			TokenUUID:     tokenRow.Oauth2Token.UUID,
+			Expiry:        time.Now().Add(defaultRefreshInterval),
 		}
 		payload, err := json.Marshal(jobArgs)
 		if err != nil {
 			s.log.Error("Failed to marshal token refresher job payload", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "err", err)
 			continue
 		}
-		err = s.queue.Publish(ctx, registry.WorkerSubjectTokenRefresh, payload)
+		err = s.queue.PublishWithHeaders(ctx, registry.WorkerSubjectTokenRefresh, headers, payload)
 		if err != nil {
 			s.log.Error("Failed to publish token refresher job", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "err", err)
 			continue

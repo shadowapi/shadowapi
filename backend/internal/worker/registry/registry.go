@@ -14,6 +14,7 @@ const (
 	WorkerSubjectTokenRefresh       = WorkerSubject + ".scheduleTokenRefresh"
 	WorkerSubjectEmailOAuthFetch    = WorkerSubject + ".emailOAuthFetch"
 	WorkerSubjectEmailApplyPipeline = WorkerSubject + ".emailApplyPipeline"
+	WorkerSubjectDummy              = WorkerSubject + ".dummy"
 )
 
 var (
@@ -22,6 +23,7 @@ var (
 
 	RegistrySubjects = []string{
 		WorkerSubjectTokenRefresh,
+		WorkerSubjectDummy,
 		WorkerSubjectEmailOAuthFetch, // enable scheduled Gmail OAuth2 fetch jobs
 		WorkerSubjectEmailApplyPipeline,
 	}

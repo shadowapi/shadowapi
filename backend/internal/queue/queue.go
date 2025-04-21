@@ -3,11 +3,10 @@ package queue
 import (
 	"context"
 	"fmt"
-	"log/slog"
-
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/samber/do/v2"
+	"log/slog"
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 )
@@ -65,20 +64,18 @@ func (q *Queue) Publish(ctx context.Context, subject string, data []byte) error 
 	}
 	return err
 }
-
 func (q *Queue) PublishWithHeaders(ctx context.Context, subject string, headers Headers, data []byte) error {
 	msg := &nats.Msg{
 		Subject: subject,
-		Header:  nats.Header{},
+		Header:  make(nats.Header),
 		Data:    data,
 	}
 	for k, v := range headers {
 		msg.Header.Set(k, v)
 	}
-	_, err := q.js.PublishMsg(ctx, &nats.Msg{
-		Subject: subject,
-		Data:    data,
-	})
+
+	// Correct argument order: msg first, then options
+	_, err := q.js.PublishMsg(ctx, msg)
 	return err
 }
 
@@ -99,7 +96,11 @@ func (q *Queue) Ensure(ctx context.Context, stream string, subjects []string) er
 
 // Consume messages from the stream with ability to filter by subjects
 func (q *Queue) Consume(
-	ctx context.Context, stream string, subjects []string, durable string, handler func(msg Msg),
+	ctx context.Context,
+	stream string,
+	subjects []string,
+	durable string,
+	handler func(msg Msg),
 ) (cancel func(), err error) {
 	log := q.log.With("method", "consume", "stream", stream, slog.Any("subjects", subjects))
 	log.Debug("start consuming messages")
@@ -119,7 +120,7 @@ func (q *Queue) Consume(
 		handler(msg)
 	})
 	if err != nil {
-		log.Error("failed to consume message", "error", err)
+		log.Error("failed to consume messages", "error", err)
 		return nil, err
 	}
 	return cc.Stop, nil

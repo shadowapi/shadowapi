@@ -34,21 +34,22 @@ func NewWorkerMonitor(log *slog.Logger, dbp *pgxpool.Pool, phase2 bool) *WorkerM
 
 // RecordJobStart inserts a row with scheduler and job UUIDs and status running
 func (wm *WorkerMonitor) RecordJobStart(ctx context.Context, schedulerUUID, jobUUID, subject string) {
-	recordID := uuid.Must(uuid.NewV7())
-	// convert scheduler UUID
-	var schedID pgtype.UUID
-	if schedulerUUID != "" {
-		var err error
-		schedID, err = converter.ConvertStringToPgUUID(schedulerUUID)
-		if err != nil {
-			wm.log.Error("invalid scheduler uuid", "error", err)
-			schedID = pgtype.UUID{Valid: false}
-		}
+	schedID, err := converter.ConvertStringToPgUUID(schedulerUUID)
+	if err != nil {
+		wm.log.Error("invalid scheduler uuid", "error", err)
+		schedID = pgtype.UUID{Valid: false}
 	}
+
+	jobID, err := converter.ConvertStringToPgUUID(jobUUID)
+	if err != nil {
+		wm.log.Error("invalid job uuid", "error", err)
+		return
+	}
+
 	params := query.CreateWorkerJobParams{
-		UUID:          converter.UuidToPgUUID(recordID),
+		UUID:          jobID,
 		SchedulerUuid: schedID,
-		JobUuid:       pgtype.UUID{Valid: false}, // jobID is created in job factory, nil means it didnt reach a factor
+		JobUuid:       jobID,
 		Subject:       subject,
 		Status:        StatusRunning,
 		Data:          []byte("{}"),
@@ -61,23 +62,18 @@ func (wm *WorkerMonitor) RecordJobStart(ctx context.Context, schedulerUUID, jobU
 
 // RecordJobEnd updates the row with final status and optional error
 func (wm *WorkerMonitor) RecordJobEnd(ctx context.Context, schedulerUUID, jobUUID, subject, finalStatus, errMsg string) {
-	// convert scheduler UUID
-	var schedID pgtype.UUID
-	if schedulerUUID != "" {
-		var err error
-		schedID, err = converter.ConvertStringToPgUUID(schedulerUUID)
-		if err != nil {
-			wm.log.Error("invalid scheduler uuid", "error", err)
-			schedID = pgtype.UUID{Valid: false}
-		}
+	schedID, err := converter.ConvertStringToPgUUID(schedulerUUID)
+	if err != nil {
+		wm.log.Error("invalid scheduler uuid", "error", err)
+		schedID = pgtype.UUID{Valid: false}
 	}
-	// convert job UUID
+
 	jobID, err := converter.ConvertStringToPgUUID(jobUUID)
 	if err != nil {
 		wm.log.Error("invalid job uuid", "error", err)
 		return
 	}
-	// prepare data payload
+
 	data := map[string]string{}
 	if errMsg != "" {
 		data["error"] = errMsg
@@ -86,14 +82,15 @@ func (wm *WorkerMonitor) RecordJobEnd(ctx context.Context, schedulerUUID, jobUUI
 	if err != nil {
 		wm.log.Error("failed to marshal error data", "error", err)
 	}
+
 	params := query.UpdateWorkerJobParams{
+		UUID:          jobID,
 		SchedulerUuid: schedID,
-		JobUuid:       pgtype.UUID{Valid: false},
+		JobUuid:       jobID,
 		Subject:       subject,
 		Status:        finalStatus,
 		Data:          b,
 		FinishedAt:    pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true},
-		UUID:          jobID,
 	}
 	if err := query.New(wm.dbp).UpdateWorkerJob(ctx, params); err != nil {
 		wm.log.Error("update worker job failed", "error", err)
