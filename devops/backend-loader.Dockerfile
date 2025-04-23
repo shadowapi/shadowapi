@@ -5,5 +5,4 @@ COPY ./backend /app
 RUN go build -o /app/shadowapi ./cmd/shadowapi
 ENV SA_SKIP_WORKER=true
 
-ENTRYPOINT ["/app/shadowapi"]
-CMD ["loader"]
+CMD ["/app/shadowapi", "loader"]

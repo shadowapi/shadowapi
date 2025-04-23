@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/samber/do/v2"
 	"github.com/shadowapi/shadowapi/backend/internal/loader"
 	"github.com/spf13/cobra"
@@ -18,6 +19,9 @@ var loaderCmd = &cobra.Command{
 			slog.Error("failed to start loader", "error", err)
 			return
 		}
+		// how to get here
+		fmt.Println("loaderCmd Run started")
+
 	},
 }
 

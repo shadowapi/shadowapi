@@ -83,10 +83,11 @@ services:
       - SA_HOST=0.0.0.0
       - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
       - SA_LOG_LEVEL=DEBUG
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - shadowapi
-    volumes:
-      - ./backend:/app
 
   kratos:
     container_name: sa-kratos
@@ -172,7 +173,7 @@ services:
     volumes:
       - ./db/schema.sql:/schema.sql
   nats:
-    image: nats:2.10.23
+    image: nats:2.11.1
     container_name: sa-nats
     command: ["-js", "--http_port=8222"]
     ports:
@@ -180,6 +181,7 @@ services:
       - "8222:8222"
     networks:
       - shadowapi
+
 volumes:
   postgres_data:
     driver: local
