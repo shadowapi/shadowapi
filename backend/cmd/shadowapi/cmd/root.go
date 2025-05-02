@@ -68,7 +68,8 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		do.Provide(injector, handler.Provide)
 		do.Provide(injector, server.Provide)
 
-		do.Provide(injector, worker.ProvideLazy)
+		// 		do.Provide(injector, worker.ProvideLazy)
+		do.Provide(injector, worker.Provide)
 
 		if modify != nil {
 			modify(do.MustInvoke[*config.Config](injector))
