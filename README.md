@@ -1,27 +1,35 @@
 # ShadowAPI
 
-ShadowAPI is a **unified messaging API** that enables seamless integration with Gmail, Telegram, WhatsApp, and LinkedIn in your applications.
+ShadowAPI is a **unified messaging API** that enables seamless integration with Gmail,
+Telegram, WhatsApp, and LinkedIn in your applications.
 
-It provides a single interface for managing both personal and team‑shared messages across platforms, letting you tag, process, and expose communications via REST endpoints, large language models (LLMs), or message‑centric processing (MCP) workflows.
+It provides a single interface for managing both personal and team‑shared messages
+across platforms, letting you tag, process, and expose communications via REST endpoints,
+large language models (LLMs), or message‑centric processing (MCP) workflows.
 
 ![Screenshot of ShadowAPI](docs/img/screenshot1.jpg)
 
+## Contact
 
-# Contact 
+ShadowAPI is a spin-off project of Reactima CRM [https://reactima.com/].
 
-ShadowAPI is a spin-off project of Reactima CRM (https://reactima.com/).
-
-Your feature requests will be prioritized if you can sponsor 20 hours of development per week. Project ownership, licences, and other details can be discussed.
+Your feature requests will be prioritized if you can sponsor 20 hours of development
+per week. Project ownership, licences, and other details can be discussed.
 
 Please contact [@reactima](https://github.com/reactima) for details.
 
 ## Development Setup
 
-We use [Task](https://taskfile.dev/installation/) instead of traditional Makefiles to manage the project. Make sure Task and Docker Compose are both installed.
+We use [Task](https://taskfile.dev/installation/) instead of traditional
+Makefiles to manage the project. Make sure Task and Docker Compose are both installed.
 
 ### 1. Initialize
 
+Copy [.env.example](.env.example) to `.env` and adjust the values as needed.
+
 ```bash
+cp .env.example .env
+# make sure to adjust the values
 task init
 ```
 
@@ -34,7 +42,8 @@ task init
 task dev-up
 ```
 
-- Spins up all services in development mode (frontend, backend with hot reload, database, etc.).
+- Spins up all services in development mode (frontend, backend with hot reload,
+database, etc.).
 
 ### 3. Apply Database Migrations
 
@@ -92,15 +101,21 @@ task prod-down
 - **Generate API Specs (Backend + Frontend):** `task api-gen`
 - **Run Playwright Tests (Frontend):** `task playwright-run`
 
+## Roadmap v0.1~1.0, Q1-Q4, 2025 scheduled features
 
-# Roadmap v0.1~1.0, Q1-Q4, 2025 scheduled features
+All messengers (Gmail, Telegram, WhatsApp, LinkedIn) should support the
+following functionalities:
 
-All messengers (Gmail, Telegram, WhatsApp, LinkedIn) should support the following functionalities:
+### **UserManagement**
 
-#### **UserManagement**
-- Each user can have multiple `accounts`, where each account represents a unique presence on a platform (e.g., Gmail, Telegram, WhatsApp, LinkedIn). The relationship is **1:N** (one user to many accounts). In a database, this can be modeled with a `Users` table storing user profiles and an `Accounts` table linking each account to a user via a `userId` foreign key.
+- Each user can have multiple `accounts`, where each account represents a unique
+presence on a platform (e.g., Gmail, Telegram, WhatsApp, LinkedIn).
+The relationship is **1:N** (one user to many accounts). In a database,
+this can be modeled with a `Users` table storing user profiles and an `Accounts`
+table linking each account to a user via a `userId` foreign key.
 
-#### **AccountManagement**
+### **AccountManagement**
+
 - Accounts can be of type `personal`, `business`, or `bot`.
 - Availability statuses include `online`, `offline`, `blocked`, and `muted`.
 - Sessions store `sessionHistory`, `participants`, and `meta`.
@@ -139,7 +154,7 @@ A **chat** represents a conversation channel, which can be either:
     - `join`, `left`: Logs user entries and exits.
     - `status`: Member states (`member`, `left`, `kicked`, etc.).
 
-    
+
 #### **Thread** (Focused Sub-Conversation)
 A **thread** represents a **nested** discussion within a chat.
 - Can be a **comment thread** on a message.

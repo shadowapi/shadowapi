@@ -43,3 +43,4 @@ backend/config.yaml
 ./config.yaml
 /localtest.me.crt
 /localtest.me.key
+.env

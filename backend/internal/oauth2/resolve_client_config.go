@@ -57,9 +57,6 @@ func ResolveClientConfig(provider query.Oauth2Client) (*Config, error) {
 		return nil, fmt.Errorf("unknown provider %s", provider.Provider)
 	}
 
-	// redirect uri must match google console; default to localhost variant.
-	base.RedirectURL = "http://localhost/api/v1/oauth2/callback"
-
 	return &Config{
 		Config:   base,
 		Name:     provider.Name,

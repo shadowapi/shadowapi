@@ -20,6 +20,9 @@ import (
 type Config struct {
 	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
 
+	// BaseURL root path for the system
+	BaseURL string `json:"base_url" yaml:"base_url" env:"SA_BASE_URL" envDefault:"http://localtest.me"`
+
 	// Log settings
 	Log struct {
 		// Level is the log level. Valid values are "debug", "info", "warn", "error".
