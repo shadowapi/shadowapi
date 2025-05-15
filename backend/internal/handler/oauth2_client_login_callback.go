@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -103,7 +104,14 @@ func (h *Handler) OAuth2ClientLogin(ctx context.Context, req *api.OAuth2ClientLo
 	// 4. Produce AuthCodeURL and hand it back to UI
 	// ------------------------------------------------------------------
 	return &api.OAuth2ClientLoginOK{
-		AuthCodeURL: provider.AuthCodeURL(stateID.String(), oauth2.AccessTypeOffline, oauth2.ApprovalForce),
+		AuthCodeURL: provider.AuthCodeURL(
+			stateID.String(),
+			oauth2.AccessTypeOffline,
+			oauth2.ApprovalForce,
+			oauth2.SetAuthURLParam(
+				"redirect_uri", fmt.Sprintf("%s/api/v1/oauth2/callback", h.cfg.BaseURL),
+			),
+		),
 	}, nil
 }
 
