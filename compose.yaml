@@ -31,9 +31,9 @@ services:
     container_name: sa-frontend
     networks:
       - shadowapi
-#    volumes:
-#      - ./front:/app
-#      - /app/node_modules
+    #    volumes:
+    #      - ./front:/app
+    #      - /app/node_modules
     develop:
       watch:
         - action: sync
