@@ -147,6 +147,7 @@ func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2Cli
 		log.Error("failed to get client config", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client config"))
 	}
+	config.RedirectURL = fmt.Sprintf("%s/api/v1/oauth2/callback", h.cfg.BaseURL)
 
 	// 4. Exchange code → token
 	tok, err := config.Exchange(ctx, params.Code.Value)
