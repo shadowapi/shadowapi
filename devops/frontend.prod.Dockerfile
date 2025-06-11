@@ -3,9 +3,9 @@ FROM node:20.10.0-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY front/package*.json ./
-RUN npm ci
+# Copy package files and install dependencies  
+COPY front/package.json ./
+RUN npm install
 
 # Copy the rest of the frontend source
 COPY front .

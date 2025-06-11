@@ -14,7 +14,7 @@ import {
   Text,
   View,
 } from '@adobe/react-spectrum'
-import { ToastContainer, ToastQueue } from '@react-spectrum/toast'
+// import { ToastContainer, ToastQueue } from '@react-spectrum/toast'
 import Copy from '@spectrum-icons/workflow/Copy'
 import { useQuery } from '@tanstack/react-query'
 
@@ -34,7 +34,8 @@ export function WorkerJobs() {
 
   const copyToClipboard = (uuid: string, label: string) => {
     navigator.clipboard.writeText(uuid)
-    ToastQueue.positive(`${label} UUID copied`, { timeout: 250 })
+    // ToastQueue.positive(`${label} UUID copied`, { timeout: 250 })
+    console.log(`${label} UUID copied: ${uuid}`)
   }
 
   const onCancel = (uuid: string) => {
@@ -61,7 +62,7 @@ export function WorkerJobs() {
 
   return (
     <FullLayout>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <Flex direction="row" gap="size-200" margin="size-200" flex>
         {/* LEFT SIDE: Worker Jobs Table */}
         <View flex={1} minWidth={0}>
