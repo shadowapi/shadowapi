@@ -17,7 +17,6 @@ require (
 	github.com/mdp/qrterminal v1.0.1
 	github.com/nats-io/nats.go v1.38.0
 	github.com/ogen-go/ogen v1.10.0
-	github.com/ory/kratos-client-go v1.2.1
 	github.com/ory/ladon v1.3.0
 	github.com/phsym/console-slog v0.3.1
 	github.com/prometheus/client_golang v1.21.0

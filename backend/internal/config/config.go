@@ -51,15 +51,27 @@ type Config struct {
 
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
-		// Ory identity provider settings
-		Ory struct {
-			// KratosUserAPI is the URL of the Ory Kratos public API
-			KratosUserAPI string `yaml:"frontend_api" json:"frontend_api" env:"SA_AUTH_ORY_KRATOS_USER_API" envDefault:"http://sa-traefik/auth/user"`
-		} `yaml:"ory" json:"ory"`
+		// ZITADEL identity provider settings
+		Zitadel struct {
+			// IntrospectURL is the OAuth2 introspection endpoint
+			IntrospectURL string `yaml:"introspect_url" json:"introspect_url" env:"SA_AUTH_ZITADEL_INTROSPECT_URL" envDefault:"https://reactima.com/oidc/v1/introspect"`
+			// ClientID used for introspection
+			ClientID string `yaml:"client_id" json:"client_id" env:"SA_AUTH_ZITADEL_CLIENT_ID"`
+			// ClientSecret used for introspection
+			ClientSecret string `yaml:"client_secret" json:"client_secret" env:"SA_AUTH_ZITADEL_CLIENT_SECRET"`
+			// CookieName containing the access token
+			CookieName string `yaml:"cookie_name" json:"cookie_name" env:"SA_AUTH_ZITADEL_COOKIE_NAME" envDefault:"zitadel_access_token"`
+		} `yaml:"zitadel" json:"zitadel"`
 
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
 		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN" envDefault:"mysecretapikey"`
 	} `yaml:"auth" json:"auth"`
+
+	// InitAdmin configures the first administrator account
+	InitAdmin struct {
+		Email    string `yaml:"email" json:"email"`
+		Password string `yaml:"password" json:"password"`
+	} `yaml:"init_admin" json:"init_admin"`
 
 	// Worker settings
 	Worker struct {

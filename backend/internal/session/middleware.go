@@ -1,40 +1,43 @@
 package session
 
 import (
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/samber/do/v2"
 
-	ory "github.com/ory/kratos-client-go"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 )
 
 // Middleware implements a pure Ogen middleware that checks for
-// either a valid Bearer token or a valid Ory Kratos session.
+// either a valid Bearer token or a valid ZITADEL session.
 type Middleware struct {
-	ory          *ory.APIClient
-	log          *slog.Logger
-	bearerSecret string
+	httpClient    *http.Client
+	log           *slog.Logger
+	bearerSecret  string
+	introspectURL string
+	clientID      string
+	clientSecret  string
+	cookieName    string
 }
 
 // Provide session middleware instance for the dependency injector
 func Provide(i do.Injector) (*Middleware, error) {
 	cfg := do.MustInvoke[*config.Config](i)
-	oryCfg := ory.NewConfiguration()
-	oryCfg.Servers = []ory.ServerConfiguration{
-		{
-			URL: cfg.Auth.Ory.KratosUserAPI,
-		},
-	}
 
 	return &Middleware{
-		ory:          ory.NewAPIClient(oryCfg),
-		log:          do.MustInvoke[*slog.Logger](i),
-		bearerSecret: cfg.Auth.BearerToken,
+		httpClient:    http.DefaultClient,
+		log:           do.MustInvoke[*slog.Logger](i),
+		bearerSecret:  cfg.Auth.BearerToken,
+		introspectURL: cfg.Auth.Zitadel.IntrospectURL,
+		clientID:      cfg.Auth.Zitadel.ClientID,
+		clientSecret:  cfg.Auth.Zitadel.ClientSecret,
+		cookieName:    cfg.Auth.Zitadel.CookieName,
 	}, nil
 }
 
@@ -56,25 +59,18 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 	}
 
 	// 2) Fallback to session validation
-	session, err := m.validateSession(req)
+	subject, err := m.validateSession(req)
 	if err != nil {
 		m.log.Debug("session validation failed", "error", err)
-		// Return an error to Ogen (could also return a redirect error if desired)
 		return middleware.Response{}, errors.New("session validation failed")
 	}
-	if session == nil || session.Active == nil || !*session.Active {
-		m.log.Debug("session is not active or nil")
+	if subject == "" {
+		m.log.Debug("empty subject from session")
 		return middleware.Response{}, errors.New("invalid session")
 	}
 
 	// 3) Attach identity to context
-	identity := session.GetIdentity()
-	if identity.Id == "" {
-		m.log.Debug("no Identity Id")
-		return middleware.Response{}, errors.New("no Identity Id")
-	}
-
-	newCtx := WithIdentity(req.Context, Identity{ID: identity.Id})
+	newCtx := WithIdentity(req.Context, Identity{ID: subject})
 	req.SetContext(newCtx)
 
 	return next(req)
@@ -93,20 +89,47 @@ func (m *Middleware) validateBearer(r *http.Request) bool {
 	return parts[1] == m.bearerSecret
 }
 
-// validateSession ensures we have a valid cookie-based Ory Kratos session
-func (m *Middleware) validateSession(req middleware.Request) (*ory.Session, error) {
-	cookie, err := req.Raw.Cookie("ory_kratos_session")
+// validateSession ensures we have a valid ZITADEL session cookie and returns the subject
+func (m *Middleware) validateSession(req middleware.Request) (string, error) {
+	cookie, err := req.Raw.Cookie(m.cookieName)
 	if err != nil {
 		m.log.Debug("error getting cookie", "error", err)
-		return nil, err
+		return "", err
 	}
 	if cookie == nil {
-		return nil, errors.New("no session found in cookie")
+		return "", errors.New("no session found in cookie")
 	}
-	resp, _, err := m.ory.FrontendAPI.ToSession(req.Context).Cookie(req.Raw.Header.Get("Cookie")).Execute()
+
+	data := url.Values{}
+	data.Set("token", cookie.Value)
+
+	r, err := http.NewRequestWithContext(req.Context, http.MethodPost, m.introspectURL, strings.NewReader(data.Encode()))
+	if err != nil {
+		return "", err
+	}
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if m.clientID != "" || m.clientSecret != "" {
+		r.SetBasicAuth(m.clientID, m.clientSecret)
+	}
+
+	resp, err := m.httpClient.Do(r)
 	if err != nil {
 		m.log.Debug("error validating session", "error", err)
-		return nil, err
+		return "", err
 	}
-	return resp, nil
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("introspection failed")
+	}
+	var out struct {
+		Active  bool   `json:"active"`
+		Subject string `json:"sub"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return "", err
+	}
+	if !out.Active {
+		return "", errors.New("inactive session")
+	}
+	return out.Subject, nil
 }

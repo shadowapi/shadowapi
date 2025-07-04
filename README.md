@@ -282,3 +282,6 @@ Automation helps manage chat interactions efficiently by handling **routing, bot
     - `PostgreSQL` (for full message history and attachments)
 
 Please contact [@reactima](https://github.com/reactima) if you would like to speed up the development.
+## ZITADEL Setup
+See [docs/zitadel/setup.md](docs/zitadel/setup.md) for recommended project and web application configuration.
+

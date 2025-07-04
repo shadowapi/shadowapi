@@ -9,9 +9,15 @@ api:
     specs_dir: ""
 jwt: {}
 auth:
-    ory:
-        frontend_api: ""
+    zitadel:
+        introspect_url: "https://reactima.com/oidc/v1/introspect"
+        client_id: ""
+        client_secret: ""
+        cookie_name: "zitadel_access_token"
     bearer_token: ""
+init_admin:
+    email: ""
+    password: ""
 worker:
     max_count: 0
 queue:
