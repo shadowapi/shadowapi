@@ -33,7 +33,7 @@ func Provide(c *config.Config) *Client {
 		RedirectURL: c.Auth.Zitadel.RedirectURI,
 		Scopes:      []string{"urn:zitadel:iam:org:project:id:zitadel:aud"},
 	}
-	return &Client{cfg: c, oauth2: oc, client: oc.Client(context.Background())}
+	return &Client{cfg: c, oauth2: oc, client: oc.Client(context.Background(), nil)}
 }
 
 // ExchangeCode exchanges authorization code for tokens

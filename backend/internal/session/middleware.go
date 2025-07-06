@@ -9,15 +9,13 @@ import (
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/samber/do/v2"
 
-	ory "github.com/ory/kratos-client-go"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
 )
 
 // Middleware implements a pure Ogen middleware that checks for
-// either a valid Bearer token or a valid Ory Kratos session.
+// either a valid Bearer token or a valid Zitadel session.
 type Middleware struct {
-	ory          *ory.APIClient
 	log          *slog.Logger
 	bearerSecret string
 	zitadel      *zitadel.Client
@@ -26,15 +24,7 @@ type Middleware struct {
 // Provide session middleware instance for the dependency injector
 func Provide(i do.Injector) (*Middleware, error) {
 	cfg := do.MustInvoke[*config.Config](i)
-	oryCfg := ory.NewConfiguration()
-	oryCfg.Servers = []ory.ServerConfiguration{
-		{
-			URL: cfg.Auth.Ory.KratosUserAPI,
-		},
-	}
-
 	return &Middleware{
-		ory:          ory.NewAPIClient(oryCfg),
 		log:          do.MustInvoke[*slog.Logger](i),
 		bearerSecret: cfg.Auth.BearerToken,
 		zitadel:      zitadel.Provide(cfg),
@@ -68,29 +58,7 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		}
 	}
 
-	// 2) Fallback to session validation
-	session, err := m.validateSession(req)
-	if err != nil {
-		m.log.Debug("session validation failed", "error", err)
-		// Return an error to Ogen (could also return a redirect error if desired)
-		return middleware.Response{}, errors.New("session validation failed")
-	}
-	if session == nil || session.Active == nil || !*session.Active {
-		m.log.Debug("session is not active or nil")
-		return middleware.Response{}, errors.New("invalid session")
-	}
-
-	// 3) Attach identity to context
-	identity := session.GetIdentity()
-	if identity.Id == "" {
-		m.log.Debug("no Identity Id")
-		return middleware.Response{}, errors.New("no Identity Id")
-	}
-
-	newCtx := WithIdentity(req.Context, Identity{ID: identity.Id})
-	req.SetContext(newCtx)
-
-	return next(req)
+	return middleware.Response{}, errors.New("unauthorized")
 }
 
 // validateBearer checks if the Authorization header has a valid Bearer token
@@ -121,22 +89,4 @@ func (m *Middleware) zitadelToken(r *http.Request) string {
 		return cookie.Value
 	}
 	return ""
-}
-
-// validateSession ensures we have a valid cookie-based Ory Kratos session
-func (m *Middleware) validateSession(req middleware.Request) (*ory.Session, error) {
-	cookie, err := req.Raw.Cookie("ory_kratos_session")
-	if err != nil {
-		m.log.Debug("error getting cookie", "error", err)
-		return nil, err
-	}
-	if cookie == nil {
-		return nil, errors.New("no session found in cookie")
-	}
-	resp, _, err := m.ory.FrontendAPI.ToSession(req.Context).Cookie(req.Raw.Header.Get("Cookie")).Execute()
-	if err != nil {
-		m.log.Debug("error validating session", "error", err)
-		return nil, err
-	}
-	return resp, nil
 }

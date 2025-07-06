@@ -16,8 +16,8 @@ import (
 type SecurityHandler interface {
 	// HandleBearerAuth handles BearerAuth security.
 	HandleBearerAuth(ctx context.Context, operationName OperationName, t BearerAuth) (context.Context, error)
-	// HandleSessionCookieAuth handles SessionCookieAuth security.
-	HandleSessionCookieAuth(ctx context.Context, operationName OperationName, t SessionCookieAuth) (context.Context, error)
+	// HandleZitadelCookieAuth handles ZitadelCookieAuth security.
+	HandleZitadelCookieAuth(ctx context.Context, operationName OperationName, t ZitadelCookieAuth) (context.Context, error)
 }
 
 func findAuthorization(h http.Header, prefix string) (string, bool) {
@@ -50,9 +50,9 @@ func (s *Server) securityBearerAuth(ctx context.Context, operationName Operation
 	}
 	return rctx, true, err
 }
-func (s *Server) securitySessionCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
-	var t SessionCookieAuth
-	const parameterName = "ory_kratos_session"
+func (s *Server) securityZitadelCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
+	var t ZitadelCookieAuth
+	const parameterName = "zitadel_access_token"
 	var value string
 	switch cookie, err := req.Cookie(parameterName); {
 	case err == nil: // if NO error
@@ -63,7 +63,7 @@ func (s *Server) securitySessionCookieAuth(ctx context.Context, operationName Op
 		return nil, false, errors.Wrap(err, "get cookie value")
 	}
 	t.APIKey = value
-	rctx, err := s.sec.HandleSessionCookieAuth(ctx, operationName, t)
+	rctx, err := s.sec.HandleZitadelCookieAuth(ctx, operationName, t)
 	if errors.Is(err, ogenerrors.ErrSkipServerSecurity) {
 		return nil, false, nil
 	} else if err != nil {
@@ -76,8 +76,8 @@ func (s *Server) securitySessionCookieAuth(ctx context.Context, operationName Op
 type SecuritySource interface {
 	// BearerAuth provides BearerAuth security value.
 	BearerAuth(ctx context.Context, operationName OperationName) (BearerAuth, error)
-	// SessionCookieAuth provides SessionCookieAuth security value.
-	SessionCookieAuth(ctx context.Context, operationName OperationName) (SessionCookieAuth, error)
+	// ZitadelCookieAuth provides ZitadelCookieAuth security value.
+	ZitadelCookieAuth(ctx context.Context, operationName OperationName) (ZitadelCookieAuth, error)
 }
 
 func (s *Client) securityBearerAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
@@ -88,13 +88,13 @@ func (s *Client) securityBearerAuth(ctx context.Context, operationName Operation
 	req.Header.Set("Authorization", "Bearer "+t.Token)
 	return nil
 }
-func (s *Client) securitySessionCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
-	t, err := s.sec.SessionCookieAuth(ctx, operationName)
+func (s *Client) securityZitadelCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
+	t, err := s.sec.ZitadelCookieAuth(ctx, operationName)
 	if err != nil {
-		return errors.Wrap(err, "security source \"SessionCookieAuth\"")
+		return errors.Wrap(err, "security source \"ZitadelCookieAuth\"")
 	}
 	req.AddCookie(&http.Cookie{
-		Name:  "ory_kratos_session",
+		Name:  "zitadel_access_token",
 		Value: t.APIKey,
 	})
 	return nil

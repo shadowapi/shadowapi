@@ -5999,20 +5999,6 @@ func (s *Scheduler) SetUpdatedAt(val OptDateTime) {
 // SchedulerDeleteOK is response for SchedulerDelete operation.
 type SchedulerDeleteOK struct{}
 
-type SessionCookieAuth struct {
-	APIKey string
-}
-
-// GetAPIKey returns the value of APIKey.
-func (s *SessionCookieAuth) GetAPIKey() string {
-	return s.APIKey
-}
-
-// SetAPIKey sets the value of APIKey.
-func (s *SessionCookieAuth) SetAPIKey(val string) {
-	s.APIKey = val
-}
-
 // Data storage settings object.
 // Ref: #
 type Storage struct {
@@ -7380,4 +7366,18 @@ func (s *WorkerJobsListOK) GetJobs() []WorkerJobs {
 // SetJobs sets the value of Jobs.
 func (s *WorkerJobsListOK) SetJobs(val []WorkerJobs) {
 	s.Jobs = val
+}
+
+type ZitadelCookieAuth struct {
+	APIKey string
+}
+
+// GetAPIKey returns the value of APIKey.
+func (s *ZitadelCookieAuth) GetAPIKey() string {
+	return s.APIKey
+}
+
+// SetAPIKey sets the value of APIKey.
+func (s *ZitadelCookieAuth) SetAPIKey(val string) {
+	s.APIKey = val
 }
