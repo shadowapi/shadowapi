@@ -96,7 +96,9 @@ task prod-down
 
 To enable login via [ZITADEL](https://zitadel.com) create a service user and grant it the
 `urn:zitadel:iam:org:project:id:zitadel:aud` scope. Set the following values in
-`backend/config.yaml`:
+`backend/config.yaml`. For local development point `instance_url` to a local
+ZITADEL instance (e.g. `http://localhost:8080`) and keep the `redirect_uri`
+using the same host. In production use your remote domain with `https`:
 
 ```yaml
 auth:
@@ -116,6 +118,13 @@ Use `https://` URLs for `redirect_uri` in production. `http://` is allowed only 
 The intercepted paths section is used by the reverse proxy middleware when a
 frontend proxy is required.
 
+You can also set these values via environment variables:
+`SA_AUTH_ZITADEL_INSTANCE_URL`, `SA_AUTH_ZITADEL_CLIENT_ID`,
+`SA_AUTH_ZITADEL_CLIENT_SECRET`, `SA_AUTH_ZITADEL_REDIRECT_URI`, and
+`SA_AUTH_ZITADEL_INTERCEPTED_PATHS`. The frontend expects matching variables
+`VITE_ZITADEL_INSTANCE_URL`, `VITE_ZITADEL_CLIENT_ID`, and
+`VITE_ZITADEL_REDIRECT_URI`.
+
 ### Example ZITADEL Project Setup
 Zitadel instance runs on **reactima.com**. When creating a project and web app
 in Zitadel, add the following redirect URIs:
@@ -123,6 +132,13 @@ in Zitadel, add the following redirect URIs:
 ```
 https://reactima.com/auth/callback
 https://reactima.com/logout/callback
+```
+
+For local development use:
+
+```
+http://localtest.me/auth/callback
+http://localtest.me/logout/callback
 ```
 
 Redirect URIs must begin with `https://` unless development mode is enabled.

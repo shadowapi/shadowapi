@@ -1,49 +1,54 @@
 package session
 
 import (
-    "errors"
-    "log/slog"
-    "net/http"
-    "strings"
-    "sync"
+	"errors"
+	"log/slog"
+	"net/http"
+	"strings"
+	"sync"
 
-    "github.com/ogen-go/ogen/middleware"
-    "github.com/samber/do/v2"
+	"github.com/ogen-go/ogen/middleware"
+	"github.com/samber/do/v2"
 
-    "github.com/jackc/pgx/v5/pgtype"
-    "github.com/jackc/pgx/v5/pgxpool"
-    "github.com/shadowapi/shadowapi/backend/internal/config"
-    "github.com/shadowapi/shadowapi/backend/internal/zitadel"
-    "github.com/shadowapi/shadowapi/backend/pkg/query"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // Middleware implements a pure Ogen middleware that checks for
 // either a valid Bearer token or a valid Zitadel session.
 type Middleware struct {
-        log          *slog.Logger
-        bearerSecret string
-        zitadel      *zitadel.Client
-        db           *pgxpool.Pool
-        sessions     map[string]string
-        sessionsMu   sync.RWMutex
+	log          *slog.Logger
+	bearerSecret string
+	zitadel      *zitadel.Client
+	db           *pgxpool.Pool
+	sessions     map[string]string
+	sessionsMu   sync.RWMutex
 }
 
 // Provide session middleware instance for the dependency injector
 func Provide(i do.Injector) (*Middleware, error) {
-        cfg := do.MustInvoke[*config.Config](i)
-        return &Middleware{
-                log:          do.MustInvoke[*slog.Logger](i),
-                bearerSecret: cfg.Auth.BearerToken,
-                zitadel:      zitadel.Provide(cfg),
-                db:           do.MustInvoke[*pgxpool.Pool](i),
-                sessions:     make(map[string]string),
-        }, nil
+	cfg := do.MustInvoke[*config.Config](i)
+	return &Middleware{
+		log:          do.MustInvoke[*slog.Logger](i),
+		bearerSecret: cfg.Auth.BearerToken,
+		zitadel:      zitadel.Provide(cfg),
+		db:           do.MustInvoke[*pgxpool.Pool](i),
+		sessions:     make(map[string]string),
+	}, nil
 }
 
 // OgenMiddleware satisfies Ogen's middleware.Middleware signature
 func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 	// 'req.Raw' is the original *http.Request
 	r := req.Raw
+
+	// Session status endpoint is public. Skip auth checks for it.
+	if r.URL.Path == "/api/v1/session" {
+		return next(req)
+	}
 
 	// 1) Check for Bearer token
 	if m.validateBearer(r) {
@@ -58,28 +63,28 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 	}
 
 	// Check for Zitadel token either in header or cookie
-        if token := m.zitadelToken(r); token != "" {
-                info, err := m.zitadel.Introspect(req.Context, token)
-                if err == nil && info.Active {
-                        q := query.New(m.db)
-                        user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true})
-                        if err == nil {
-                                newCtx := WithIdentity(req.Context, Identity{ID: user.UUID.String()})
-                                req.SetContext(newCtx)
-                                return next(req)
-                        }
-                }
-        }
+	if token := m.zitadelToken(r); token != "" {
+		info, err := m.zitadel.Introspect(req.Context, token)
+		if err == nil && info.Active {
+			q := query.New(m.db)
+			user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true})
+			if err == nil {
+				newCtx := WithIdentity(req.Context, Identity{ID: user.UUID.String()})
+				req.SetContext(newCtx)
+				return next(req)
+			}
+		}
+	}
 
-        if cookie, err := r.Cookie("sa_session"); err == nil {
-                m.sessionsMu.RLock()
-                uid, ok := m.sessions[cookie.Value]
-                m.sessionsMu.RUnlock()
-                if ok {
-                        newCtx := WithIdentity(req.Context, Identity{ID: uid})
-                        req.SetContext(newCtx)
-                        return next(req)
-                }
+	if cookie, err := r.Cookie("sa_session"); err == nil {
+		m.sessionsMu.RLock()
+		uid, ok := m.sessions[cookie.Value]
+		m.sessionsMu.RUnlock()
+		if ok {
+			newCtx := WithIdentity(req.Context, Identity{ID: uid})
+			req.SetContext(newCtx)
+			return next(req)
+		}
 	}
 
 	return middleware.Response{}, errors.New("unauthorized")
@@ -109,22 +114,22 @@ func (m *Middleware) zitadelToken(r *http.Request) string {
 			}
 		}
 	}
-        if cookie, err := r.Cookie("zitadel_access_token"); err == nil {
-                return cookie.Value
-        }
-        return ""
+	if cookie, err := r.Cookie("zitadel_access_token"); err == nil {
+		return cookie.Value
+	}
+	return ""
 }
 
 // AddSession registers a new session token for the given user ID.
 func (m *Middleware) AddSession(token, uid string) {
-        m.sessionsMu.Lock()
-        m.sessions[token] = uid
-        m.sessionsMu.Unlock()
+	m.sessionsMu.Lock()
+	m.sessions[token] = uid
+	m.sessionsMu.Unlock()
 }
 
 // DeleteSession removes the given session token.
 func (m *Middleware) DeleteSession(token string) {
-        m.sessionsMu.Lock()
-        delete(m.sessions, token)
-        m.sessionsMu.Unlock()
+	m.sessionsMu.Lock()
+	delete(m.sessions, token)
+	m.sessionsMu.Unlock()
 }

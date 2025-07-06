@@ -1,28 +1,28 @@
 package server
 
 import (
-        "context"
-        "encoding/json"
-        "errors"
-        "fmt"
-        "log/slog"
-        "net"
-        "net/http"
-        "strings"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net"
+	"net/http"
+	"strings"
 
-        "github.com/gofrs/uuid"
-        "github.com/jackc/pgx/v5"
-        "github.com/jackc/pgx/v5/pgtype"
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 
-        "github.com/samber/do/v2"
+	"github.com/samber/do/v2"
 
-        "github.com/shadowapi/shadowapi/backend/internal/auth"
-        "github.com/shadowapi/shadowapi/backend/internal/config"
-        "github.com/shadowapi/shadowapi/backend/internal/handler"
-        "github.com/shadowapi/shadowapi/backend/internal/session"
-        "github.com/shadowapi/shadowapi/backend/internal/zitadel"
-        "github.com/shadowapi/shadowapi/backend/pkg/query"
-        "github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/internal/auth"
+	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/internal/handler"
+	"github.com/shadowapi/shadowapi/backend/internal/session"
+	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
+	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 type Server struct {
@@ -32,9 +32,9 @@ type Server struct {
 	api          *api.Server
 	listener     net.Listener
 	specsHandler http.Handler
-        zitadel      *zitadel.Client
-        handler      *handler.Handler
-        sessions     *session.Middleware
+	zitadel      *zitadel.Client
+	handler      *handler.Handler
+	sessions     *session.Middleware
 }
 
 // Provide server instance for the dependency injector
@@ -67,15 +67,15 @@ func Provide(i do.Injector) (*Server, error) {
 		specsHandler = http.StripPrefix("/assets/docs/api", http.FileServer(http.Dir(cfg.API.SpecsDir)))
 	}
 
-        return &Server{
-                cfg:          cfg,
-                log:          do.MustInvoke[*slog.Logger](i),
-                api:          srv,
-                specsHandler: specsHandler,
-                zitadel:      zitadelClient,
-                handler:      handlerService,
-                sessions:     authMiddleware,
-        }, nil
+	return &Server{
+		cfg:          cfg,
+		log:          do.MustInvoke[*slog.Logger](i),
+		api:          srv,
+		specsHandler: specsHandler,
+		zitadel:      zitadelClient,
+		handler:      handlerService,
+		sessions:     authMiddleware,
+	}, nil
 }
 
 // Run starts the server
@@ -140,47 +140,47 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing code", http.StatusBadRequest)
 		return
 	}
-        tok, err := s.zitadel.ExchangeCode(r.Context(), code)
-        if err != nil {
-                s.log.Error("exchange code", "error", err)
-                http.Error(w, "exchange failed", http.StatusInternalServerError)
-                return
-        }
+	tok, err := s.zitadel.ExchangeCode(r.Context(), code)
+	if err != nil {
+		s.log.Error("exchange code", "error", err)
+		http.Error(w, "exchange failed", http.StatusInternalServerError)
+		return
+	}
 
-        // Associate Zitadel subject with a user record
-        info, err := s.zitadel.Introspect(r.Context(), tok.AccessToken)
-        if err == nil && info.Active {
-                q := query.New(s.handler.DB())
-                _, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: info.Subject, Valid: true})
-                if errors.Is(errUser, pgx.ErrNoRows) {
-                        uid := uuid.Must(uuid.NewV7())
-                        _, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
-                                UUID:           pgtype.UUID{Bytes: uid, Valid: true},
-                                Email:          fmt.Sprintf("zitadel_%s@example.com", uid.String()),
-                                Password:       "",
-                                FirstName:      "",
-                                LastName:       "",
-                                IsEnabled:      true,
-                                IsAdmin:        false,
-                                ZitadelSubject: pgtype.Text{String: info.Subject, Valid: true},
-                                Meta:           []byte(`{}`),
-                        })
-                        if errUser != nil {
-                                s.log.Error("create user", "error", errUser)
-                        }
-                } else if errUser != nil {
-                        s.log.Error("lookup user", "error", errUser)
-                }
-        }
+	// Associate Zitadel subject with a user record
+	info, err := s.zitadel.Introspect(r.Context(), tok.AccessToken)
+	if err == nil && info.Active {
+		q := query.New(s.handler.DB())
+		_, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: info.Subject, Valid: true})
+		if errors.Is(errUser, pgx.ErrNoRows) {
+			uid := uuid.Must(uuid.NewV7())
+			_, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
+				UUID:           pgtype.UUID{Bytes: uid, Valid: true},
+				Email:          fmt.Sprintf("zitadel_%s@example.com", uid.String()),
+				Password:       "",
+				FirstName:      "",
+				LastName:       "",
+				IsEnabled:      true,
+				IsAdmin:        false,
+				ZitadelSubject: pgtype.Text{String: info.Subject, Valid: true},
+				Meta:           []byte(`{}`),
+			})
+			if errUser != nil {
+				s.log.Error("create user", "error", errUser)
+			}
+		} else if errUser != nil {
+			s.log.Error("lookup user", "error", errUser)
+		}
+	}
 
-        http.SetCookie(w, &http.Cookie{
-                Name:     "zitadel_access_token",
-                Value:    tok.AccessToken,
-                Path:     "/",
-                HttpOnly: true,
-                SameSite: http.SameSiteLaxMode,
-        })
-        http.Redirect(w, r, "/", http.StatusFound)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "zitadel_access_token",
+		Value:    tok.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // handlePlainLogin verifies email/password and sets session cookie.
@@ -198,8 +198,8 @@ func (s *Server) handlePlainLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
-        token := uuid.Must(uuid.NewV7()).String()
-        s.sessions.AddSession(token, userID)
+	token := uuid.Must(uuid.NewV7()).String()
+	s.sessions.AddSession(token, userID)
 	http.SetCookie(w, &http.Cookie{
 		Name:     "sa_session",
 		Value:    token,
@@ -213,11 +213,17 @@ func (s *Server) handlePlainLogin(w http.ResponseWriter, r *http.Request) {
 // handleLogoutCallback clears session cookie.
 func (s *Server) handleLogoutCallback(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("sa_session")
-        if err == nil {
-                s.sessions.DeleteSession(cookie.Value)
-        }
+	if err == nil {
+		s.sessions.DeleteSession(cookie.Value)
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:   "sa_session",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:   "zitadel_access_token",
 		Value:  "",
 		Path:   "/",
 		MaxAge: -1,
