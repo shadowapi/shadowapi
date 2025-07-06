@@ -15,8 +15,10 @@ auth:
     bearer_token: ""
     zitadel:
         instance_url: ""
-        client_id: ""
-        client_secret: ""
+        service_client_id: ""
+        service_client_secret: ""
+        api_key_file: ""
+        audience: ""
         redirect_uri: ""
         intercepted_paths: []
 worker:

@@ -102,8 +102,10 @@ To enable login via [ZITADEL](https://zitadel.com) create a service user and gra
 auth:
   zitadel:
     instance_url: "https://<your-zitadel-domain>"
-    client_id: "<service-user-client-id>"
-    client_secret: "<service-user-client-secret>"
+    service_client_id: "<service-user-client-id>"
+    service_client_secret: "<service-user-client-secret>"
+    api_key_file: "/path/to/api-key.json"
+    audience: "<api-client-id>"
     redirect_uri: "http://localtest.me/auth/callback"
     intercepted_paths: ["/.well-known/", "/oauth/", "/oidc/"]
 init_admin:
