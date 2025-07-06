@@ -11,6 +11,7 @@ import (
 
 	ory "github.com/ory/kratos-client-go"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
 )
 
 // Middleware implements a pure Ogen middleware that checks for
@@ -19,6 +20,7 @@ type Middleware struct {
 	ory          *ory.APIClient
 	log          *slog.Logger
 	bearerSecret string
+	zitadel      *zitadel.Client
 }
 
 // Provide session middleware instance for the dependency injector
@@ -35,6 +37,7 @@ func Provide(i do.Injector) (*Middleware, error) {
 		ory:          ory.NewAPIClient(oryCfg),
 		log:          do.MustInvoke[*slog.Logger](i),
 		bearerSecret: cfg.Auth.BearerToken,
+		zitadel:      zitadel.Provide(cfg),
 	}, nil
 }
 
@@ -53,6 +56,16 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		req.SetContext(newCtx)
 
 		return next(req)
+	}
+
+	// Check for Zitadel token either in header or cookie
+	if token := m.zitadelToken(r); token != "" {
+		info, err := m.zitadel.Introspect(req.Context, token)
+		if err == nil && info.Active {
+			newCtx := WithIdentity(req.Context, Identity{ID: info.Subject})
+			req.SetContext(newCtx)
+			return next(req)
+		}
 	}
 
 	// 2) Fallback to session validation
@@ -91,6 +104,23 @@ func (m *Middleware) validateBearer(r *http.Request) bool {
 		return false
 	}
 	return parts[1] == m.bearerSecret
+}
+
+// zitadelToken extracts bearer token or cookie that may contain a Zitadel token
+func (m *Middleware) zitadelToken(r *http.Request) string {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" {
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+			if parts[1] != m.bearerSecret {
+				return parts[1]
+			}
+		}
+	}
+	if cookie, err := r.Cookie("zitadel_access_token"); err == nil {
+		return cookie.Value
+	}
+	return ""
 }
 
 // validateSession ensures we have a valid cookie-based Ory Kratos session

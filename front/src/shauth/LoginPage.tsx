@@ -159,6 +159,18 @@ export function LoginPage() {
             <Button variant="cta" alignSelf="end" marginTop="size-150" width="size-1250" type="submit">
               Login
             </Button>
+            <Button
+              variant="secondary"
+              alignSelf="end"
+              marginTop="size-100"
+              width="size-1250"
+              onPress={() => {
+                const url = `${import.meta.env.VITE_ZITADEL_INSTANCE_URL}/oauth/v2/authorize?client_id=${import.meta.env.VITE_ZITADEL_CLIENT_ID}&response_type=code&scope=openid&redirect_uri=${encodeURIComponent(import.meta.env.VITE_ZITADEL_REDIRECT_URI)}`
+                window.location.href = url
+              }}
+            >
+              Login with ZITADEL
+            </Button>
             <Text alignSelf="end" marginTop="size-100">
               Don&apos;t have an account?{' '}
               <Link href="/signup" alignSelf="end" marginTop="size-100">

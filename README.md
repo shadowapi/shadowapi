@@ -92,6 +92,25 @@ task prod-down
 - **Generate API Specs (Backend + Frontend):** `task api-gen`
 - **Run Playwright Tests (Frontend):** `task playwright-run`
 
+## ZITADEL Authentication
+
+To enable login via [ZITADEL](https://zitadel.com) create a service user and grant it the
+`urn:zitadel:iam:org:project:id:zitadel:aud` scope. Set the following values in
+`backend/config.yaml`:
+
+```yaml
+auth:
+  zitadel:
+    instance_url: "https://<your-zitadel-domain>"
+    client_id: "<service-user-client-id>"
+    client_secret: "<service-user-client-secret>"
+    redirect_uri: "http://localtest.me/auth/callback"
+    intercepted_paths: ["/.well-known/", "/oauth/", "/oidc/"]
+```
+
+The intercepted paths section is used by the reverse proxy middleware when a
+frontend proxy is required.
+
 
 # Roadmap v0.1~1.0, Q1-Q4, 2025 scheduled features
 
