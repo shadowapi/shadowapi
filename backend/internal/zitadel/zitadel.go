@@ -24,8 +24,8 @@ type Client struct {
 // Provide creates a new Client for dependency injection
 func Provide(c *config.Config) *Client {
 	oc := &oauth2.Config{
-		ClientID:     c.Auth.Zitadel.ClientID,
-		ClientSecret: c.Auth.Zitadel.ClientSecret,
+		ClientID:     c.Auth.Zitadel.Audience,
+		ClientSecret: "",
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/oauth/v2/authorize", c.Auth.Zitadel.InstanceURL),
 			TokenURL: fmt.Sprintf("%s/oauth/v2/token", c.Auth.Zitadel.InstanceURL),
@@ -38,7 +38,14 @@ func Provide(c *config.Config) *Client {
 
 // ExchangeCode exchanges authorization code for tokens
 func (c *Client) ExchangeCode(ctx context.Context, code string) (*oauth2.Token, error) {
-	return c.oauth2.Exchange(ctx, code)
+	tok, err := c.oauth2.Exchange(ctx, code)
+	if err != nil {
+		if rErr, ok := err.(*oauth2.RetrieveError); ok {
+			return nil, fmt.Errorf("exchange status %d: %s", rErr.Response.StatusCode, strings.TrimSpace(string(rErr.Body)))
+		}
+		return nil, err
+	}
+	return tok, nil
 }
 
 // IntrospectResponse describes subset of fields returned by /oauth/v2/introspect
@@ -58,7 +65,7 @@ func (c *Client) Introspect(ctx context.Context, token string) (*IntrospectRespo
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.SetBasicAuth(c.cfg.Auth.Zitadel.ClientID, c.cfg.Auth.Zitadel.ClientSecret)
+	req.SetBasicAuth(c.cfg.Auth.Zitadel.ServiceClientID, c.cfg.Auth.Zitadel.ServiceClientSecret)
 
 	resp, err := c.client.Do(req)
 	if err != nil {

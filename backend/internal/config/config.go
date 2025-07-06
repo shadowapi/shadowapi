@@ -63,23 +63,24 @@ type Config struct {
 
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
-			InstanceURL string `yaml:"instance_url" json:"instance_url" env:"SA_AUTH_ZITADEL_INSTANCE_URL"`
-			// DONT REMOVE
-			// Console → Projects → Service Users → New
-			// Fill username / display name → Create
-			// Top-right Actions → Generate Client Secret
-			// A modal shows Client ID and Client Secret exactly once → copy both and stash them in your vault.
-			ClientID     string `yaml:"client_id" json:"client_id" env:"SA_AUTH_ZITADEL_CLIENT_ID"`
-			ClientSecret string `yaml:"client_secret" json:"client_secret" env:"SA_AUTH_ZITADEL_CLIENT_SECRET"`
-			// Turn on dev model for localhost development
-			RedirectURI      string   `yaml:"redirect_uri" json:"redirect_uri" env:"SA_AUTH_ZITADEL_REDIRECT_URI"`
-			InterceptedPaths []string `yaml:"intercepted_paths" json:"intercepted_paths" env:"SA_AUTH_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
+			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"SA_ZITADEL_INSTANCE_URL"`
 
-			// TODO not used
-			APIClientID string `yaml:"api_client_id" env:"SA_AUTH_ZITADEL_API_CLIENT_ID"` // remove?
-			APIKeyFile  string `yaml:"api_key_file"  env:"SA_AUTH_ZITADEL_API_KEY_FILE"`  // remove?
+			// ---- machine-to-machine credentials ----
+			// Service user → Basic-Auth (client-credentials / introspect)
+			ServiceClientID     string `json:"service_client_id" yaml:"service_client_id" env:"SA_ZITADEL_SERVICE_CLIENT_ID"`
+			ServiceClientSecret string `json:"service_client_secret" yaml:"service_client_secret" env:"SA_ZITADEL_SERVICE_CLIENT_SECRET"`
 
-		} `yaml:"zitadel" json:"zitadel"`
+			// Optional JWT-Profile flow (no shared secret)
+			APIKeyFile string `json:"api_key_file" yaml:"api_key_file" env:"SA_ZITADEL_API_KEY_FILE"`
+
+			// ---- resource-server settings ----
+			// Audience API expects in incoming access-tokens
+			Audience string `json:"audience" yaml:"audience" env:"SA_ZITADEL_AUDIENCE"`
+
+			// ---- browser flow ----
+			RedirectURI      string   `json:"redirect_uri" yaml:"redirect_uri" env:"SA_ZITADEL_REDIRECT_URI"`
+			InterceptedPaths []string `json:"intercepted_paths" yaml:"intercepted_paths" env:"SA_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
+		} `json:"zitadel" yaml:"zitadel"`
 	} `yaml:"auth" json:"auth"`
 
 	// Worker settings
