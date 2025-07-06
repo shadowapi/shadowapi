@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gofrs/uuid"
+
 	"github.com/samber/do/v2"
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
@@ -27,6 +29,7 @@ type Server struct {
 	listener     net.Listener
 	specsHandler http.Handler
 	zitadel      *zitadel.Client
+	handler      *handler.Handler
 }
 
 // Provide server instance for the dependency injector
@@ -65,6 +68,7 @@ func Provide(i do.Injector) (*Server, error) {
 		api:          srv,
 		specsHandler: specsHandler,
 		zitadel:      zitadelClient,
+		handler:      handlerService,
 	}, nil
 }
 
@@ -95,6 +99,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path == "/auth/callback" {
 		s.handleAuthCallback(w, r)
+		return
+	}
+
+	if r.URL.Path == "/login" && r.Method == http.MethodPost {
+		s.handlePlainLogin(w, r)
+		return
+	}
+
+	if r.URL.Path == "/logout/callback" {
+		s.handleLogoutCallback(w, r)
 		return
 	}
 
@@ -132,6 +146,54 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// handlePlainLogin verifies email/password and sets session cookie.
+func (s *Server) handlePlainLogin(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	userID, err := s.handler.PlainLogin(r.Context(), req.Email, req.Password)
+	if err != nil {
+		http.Error(w, "invalid credentials", http.StatusUnauthorized)
+		return
+	}
+	token := uuid.Must(uuid.NewV7()).String()
+	h := s.handler
+	h.SessionsMu.Lock()
+	h.Sessions[token] = userID
+	h.SessionsMu.Unlock()
+	http.SetCookie(w, &http.Cookie{
+		Name:     "sa_session",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"active": true})
+}
+
+// handleLogoutCallback clears session cookie.
+func (s *Server) handleLogoutCallback(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("sa_session")
+	if err == nil {
+		h := s.handler
+		h.SessionsMu.Lock()
+		delete(h.Sessions, cookie.Value)
+		h.SessionsMu.Unlock()
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   "sa_session",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
 	})
 	http.Redirect(w, r, "/", http.StatusFound)
 }

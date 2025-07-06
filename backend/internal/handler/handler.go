@@ -5,11 +5,13 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"sync"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
@@ -19,10 +21,16 @@ import (
 
 // Handler is the server handler
 type Handler struct {
-	cfg *config.Config
-	log *slog.Logger
-	dbp *pgxpool.Pool
-	wbr *worker.Broker
+	cfg        *config.Config
+	log        *slog.Logger
+	dbp        *pgxpool.Pool
+	wbr        *worker.Broker
+	sessions   map[string]string
+	sessionsMu sync.Mutex
+}
+
+func (h *Handler) DB() *pgxpool.Pool {
+	return h.dbp
 }
 
 // ensureInitAdmin creates the first admin user if the DB has no users yet.
@@ -38,10 +46,14 @@ func (h *Handler) ensureInitAdmin(ctx context.Context) error {
 	if len(users) > 0 {
 		return nil
 	}
+	hashed, err := bcrypt.GenerateFromPassword([]byte(h.cfg.InitAdmin.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
 	_, err = q.CreateUser(ctx, query.CreateUserParams{
 		UUID:           pgtype.UUID{Bytes: uuid.Must(uuid.NewV7()).Bytes(), Valid: true},
 		Email:          h.cfg.InitAdmin.Email,
-		Password:       h.cfg.InitAdmin.Password,
+		Password:       string(hashed),
 		FirstName:      "Admin",
 		LastName:       "User",
 		IsEnabled:      true,
@@ -55,10 +67,11 @@ func (h *Handler) ensureInitAdmin(ctx context.Context) error {
 // Provide API handler instance for the dependency injector
 func Provide(i do.Injector) (*Handler, error) {
 	h := &Handler{
-		cfg: do.MustInvoke[*config.Config](i),
-		log: do.MustInvoke[*slog.Logger](i),
-		dbp: do.MustInvoke[*pgxpool.Pool](i),
-		wbr: do.MustInvoke[*worker.Broker](i),
+		cfg:      do.MustInvoke[*config.Config](i),
+		log:      do.MustInvoke[*slog.Logger](i),
+		dbp:      do.MustInvoke[*pgxpool.Pool](i),
+		wbr:      do.MustInvoke[*worker.Broker](i),
+		sessions: make(map[string]string),
 	}
 	if err := h.ensureInitAdmin(context.Background()); err != nil {
 		h.log.Error("init admin", "error", err)

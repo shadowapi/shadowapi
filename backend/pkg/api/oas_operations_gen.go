@@ -72,6 +72,7 @@ const (
 	SchedulerGetOperation               OperationName = "SchedulerGet"
 	SchedulerListOperation              OperationName = "SchedulerList"
 	SchedulerUpdateOperation            OperationName = "SchedulerUpdate"
+	SessionStatusOperation              OperationName = "SessionStatus"
 	StorageHostfilesCreateOperation     OperationName = "StorageHostfilesCreate"
 	StorageHostfilesDeleteOperation     OperationName = "StorageHostfilesDelete"
 	StorageHostfilesGetOperation        OperationName = "StorageHostfilesGet"
