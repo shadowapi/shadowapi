@@ -8,14 +8,14 @@ db: {}
 api:
     specs_dir: ""
 jwt: {}
-  auth:
-      bearer_token: ""
-      zitadel:
-          instance_url: ""
-          client_id: ""
-          client_secret: ""
-          redirect_uri: ""
-          intercepted_paths: []
+auth:
+    bearer_token: ""
+    zitadel:
+        instance_url: ""
+        client_id: ""
+        client_secret: ""
+        redirect_uri: ""
+        intercepted_paths: []
 worker:
     max_count: 0
 queue:

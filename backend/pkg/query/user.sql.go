@@ -31,9 +31,9 @@ INSERT INTO "user" (
              $4,
              $5,
              $6::boolean,
-             $7::boolean,
-             $8,
-             $9,
+            $7::boolean,
+            $8,
+            $9,
              NOW(),
              NULL
          ) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
@@ -47,7 +47,7 @@ type CreateUserParams struct {
 	LastName       string      `json:"last_name"`
 	IsEnabled      bool        `json:"is_enabled"`
 	IsAdmin        bool        `json:"is_admin"`
-	ZitadelSubject string      `json:"zitadel_subject"`
+	ZitadelSubject pgtype.Text `json:"zitadel_subject"`
 	Meta           []byte      `json:"meta"`
 }
 
@@ -123,7 +123,7 @@ FROM "user"
 WHERE zitadel_subject = $1
 `
 
-func (q *Queries) GetUserByZitadelSubject(ctx context.Context, zitadelSubject string) (User, error) {
+func (q *Queries) GetUserByZitadelSubject(ctx context.Context, zitadelSubject pgtype.Text) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByZitadelSubject, zitadelSubject)
 	var i User
 	err := row.Scan(
@@ -210,7 +210,7 @@ type UpdateUserParams struct {
 	LastName       string      `json:"last_name"`
 	IsEnabled      bool        `json:"is_enabled"`
 	IsAdmin        bool        `json:"is_admin"`
-	ZitadelSubject string      `json:"zitadel_subject"`
+	ZitadelSubject pgtype.Text `json:"zitadel_subject"`
 	Meta           []byte      `json:"meta"`
 	UUID           pgtype.UUID `json:"uuid"`
 }

@@ -360,7 +360,7 @@ type User struct {
 	LastName       string             `json:"last_name"`
 	IsEnabled      bool               `json:"is_enabled"`
 	IsAdmin        bool               `json:"is_admin"`
-	ZitadelSubject string             `json:"zitadel_subject"`
+	ZitadelSubject pgtype.Text        `json:"zitadel_subject"`
 	Meta           []byte             `json:"meta"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
