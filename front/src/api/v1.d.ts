@@ -371,6 +371,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Introspect current session status */
+        get: operations["session-status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/pipeline": {
         parameters: {
             query?: never;
@@ -1039,6 +1056,7 @@ export interface components {
         SyncPolicy: components["schemas"]["sync_policy"];
         User: components["schemas"]["user"];
         WorkerJobs: components["schemas"]["worker_jobs"];
+        SessionStatus: components["schemas"]["session_status"];
         error: {
             /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
@@ -1273,6 +1291,9 @@ export interface components {
              * @description Timestamp when the token record was last updated.
              */
             updated_at?: string;
+        };
+        session_status: {
+            active: boolean;
         };
         pipeline_node: {
             id: string;
@@ -3212,6 +3233,35 @@ export interface operations {
                         /** @description Auth code URL. */
                         auth_code_url: string;
                     };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "session-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["session_status"];
                 };
             };
             /** @description Error */
