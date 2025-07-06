@@ -63,11 +63,22 @@ type Config struct {
 
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
-			InstanceURL      string   `yaml:"instance_url" json:"instance_url" env:"SA_AUTH_ZITADEL_INSTANCE_URL"`
-			ClientID         string   `yaml:"client_id" json:"client_id" env:"SA_AUTH_ZITADEL_CLIENT_ID"`
-			ClientSecret     string   `yaml:"client_secret" json:"client_secret" env:"SA_AUTH_ZITADEL_CLIENT_SECRET"`
+			InstanceURL string `yaml:"instance_url" json:"instance_url" env:"SA_AUTH_ZITADEL_INSTANCE_URL"`
+			// DONT REMOVE
+			// Console → Projects → Service Users → New
+			// Fill username / display name → Create
+			// Top-right Actions → Generate Client Secret
+			// A modal shows Client ID and Client Secret exactly once → copy both and stash them in your vault.
+			ClientID     string `yaml:"client_id" json:"client_id" env:"SA_AUTH_ZITADEL_CLIENT_ID"`
+			ClientSecret string `yaml:"client_secret" json:"client_secret" env:"SA_AUTH_ZITADEL_CLIENT_SECRET"`
+			// Turn on dev model for localhost development
 			RedirectURI      string   `yaml:"redirect_uri" json:"redirect_uri" env:"SA_AUTH_ZITADEL_REDIRECT_URI"`
 			InterceptedPaths []string `yaml:"intercepted_paths" json:"intercepted_paths" env:"SA_AUTH_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
+
+			// TODO not used
+			APIClientID string `yaml:"api_client_id" env:"SA_AUTH_ZITADEL_API_CLIENT_ID"` // remove?
+			APIKeyFile  string `yaml:"api_key_file"  env:"SA_AUTH_ZITADEL_API_KEY_FILE"`  // remove?
+
 		} `yaml:"zitadel" json:"zitadel"`
 	} `yaml:"auth" json:"auth"`
 
