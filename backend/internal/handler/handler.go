@@ -1,15 +1,15 @@
 package handler
 
 import (
-	"context"
-	"errors"
-	"log/slog"
-	"net/http"
-	"sync"
+        "context"
+        "errors"
+        "log/slog"
+        "net/http"
 
-	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
+        "github.com/gofrs/uuid"
+        "github.com/jackc/pgx/v5"
+        "github.com/jackc/pgx/v5/pgtype"
+        "github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
 	"golang.org/x/crypto/bcrypt"
 
@@ -24,9 +24,7 @@ type Handler struct {
 	cfg        *config.Config
 	log        *slog.Logger
 	dbp        *pgxpool.Pool
-	wbr        *worker.Broker
-	sessions   map[string]string
-	sessionsMu sync.Mutex
+        wbr *worker.Broker
 }
 
 func (h *Handler) DB() *pgxpool.Pool {
@@ -50,9 +48,10 @@ func (h *Handler) ensureInitAdmin(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = q.CreateUser(ctx, query.CreateUserParams{
-		UUID:           pgtype.UUID{Bytes: uuid.Must(uuid.NewV7()).Bytes(), Valid: true},
-		Email:          h.cfg.InitAdmin.Email,
+        uid := uuid.Must(uuid.NewV7())
+        _, err = q.CreateUser(ctx, query.CreateUserParams{
+                UUID:           pgtype.UUID{Bytes: uid, Valid: true},
+                Email:          h.cfg.InitAdmin.Email,
 		Password:       string(hashed),
 		FirstName:      "Admin",
 		LastName:       "User",
@@ -66,13 +65,12 @@ func (h *Handler) ensureInitAdmin(ctx context.Context) error {
 
 // Provide API handler instance for the dependency injector
 func Provide(i do.Injector) (*Handler, error) {
-	h := &Handler{
-		cfg:      do.MustInvoke[*config.Config](i),
-		log:      do.MustInvoke[*slog.Logger](i),
-		dbp:      do.MustInvoke[*pgxpool.Pool](i),
-		wbr:      do.MustInvoke[*worker.Broker](i),
-		sessions: make(map[string]string),
-	}
+        h := &Handler{
+                cfg: do.MustInvoke[*config.Config](i),
+                log: do.MustInvoke[*slog.Logger](i),
+                dbp: do.MustInvoke[*pgxpool.Pool](i),
+                wbr: do.MustInvoke[*worker.Broker](i),
+        }
 	if err := h.ensureInitAdmin(context.Background()); err != nil {
 		h.log.Error("init admin", "error", err)
 	}
