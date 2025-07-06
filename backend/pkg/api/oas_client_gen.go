@@ -707,14 +707,14 @@ func (c *Client) sendCreateContact(ctx context.Context, request *Contact) (res *
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, CreateContactOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, CreateContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -827,14 +827,14 @@ func (c *Client) sendCreateUser(ctx context.Context, request *User) (res *User, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, CreateUserOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, CreateUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -947,14 +947,14 @@ func (c *Client) sendDatasourceEmailCreate(ctx context.Context, request *Datasou
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1082,14 +1082,14 @@ func (c *Client) sendDatasourceEmailDelete(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1217,14 +1217,14 @@ func (c *Client) sendDatasourceEmailGet(ctx context.Context, params DatasourceEm
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1372,14 +1372,14 @@ func (c *Client) sendDatasourceEmailList(ctx context.Context, params DatasourceE
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1492,14 +1492,14 @@ func (c *Client) sendDatasourceEmailOAuthCreate(ctx context.Context, request *Da
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailOAuthCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1627,14 +1627,14 @@ func (c *Client) sendDatasourceEmailOAuthDelete(ctx context.Context, params Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailOAuthDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1762,14 +1762,14 @@ func (c *Client) sendDatasourceEmailOAuthGet(ctx context.Context, params Datasou
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailOAuthGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -1917,14 +1917,14 @@ func (c *Client) sendDatasourceEmailOAuthList(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailOAuthListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2055,14 +2055,14 @@ func (c *Client) sendDatasourceEmailOAuthUpdate(ctx context.Context, request *Da
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailOAuthUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2193,14 +2193,14 @@ func (c *Client) sendDatasourceEmailUpdate(ctx context.Context, request *Datasou
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceEmailUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2313,14 +2313,14 @@ func (c *Client) sendDatasourceLinkedinCreate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceLinkedinCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2448,14 +2448,14 @@ func (c *Client) sendDatasourceLinkedinDelete(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceLinkedinDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2583,14 +2583,14 @@ func (c *Client) sendDatasourceLinkedinGet(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceLinkedinGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2738,14 +2738,14 @@ func (c *Client) sendDatasourceLinkedinList(ctx context.Context, params Datasour
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceLinkedinListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -2876,14 +2876,14 @@ func (c *Client) sendDatasourceLinkedinUpdate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceLinkedinUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3031,14 +3031,14 @@ func (c *Client) sendDatasourceList(ctx context.Context, params DatasourceListPa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3170,14 +3170,14 @@ func (c *Client) sendDatasourceSetOAuth2Client(ctx context.Context, request *Dat
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceSetOAuth2ClientOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceSetOAuth2ClientOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3290,14 +3290,14 @@ func (c *Client) sendDatasourceTelegramCreate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceTelegramCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3425,14 +3425,14 @@ func (c *Client) sendDatasourceTelegramDelete(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceTelegramDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3560,14 +3560,14 @@ func (c *Client) sendDatasourceTelegramGet(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceTelegramGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3715,14 +3715,14 @@ func (c *Client) sendDatasourceTelegramList(ctx context.Context, params Datasour
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceTelegramListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3853,14 +3853,14 @@ func (c *Client) sendDatasourceTelegramUpdate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceTelegramUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -3973,14 +3973,14 @@ func (c *Client) sendDatasourceWhatsappCreate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceWhatsappCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4108,14 +4108,14 @@ func (c *Client) sendDatasourceWhatsappDelete(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceWhatsappDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4243,14 +4243,14 @@ func (c *Client) sendDatasourceWhatsappGet(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceWhatsappGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4398,14 +4398,14 @@ func (c *Client) sendDatasourceWhatsappList(ctx context.Context, params Datasour
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceWhatsappListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4536,14 +4536,14 @@ func (c *Client) sendDatasourceWhatsappUpdate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DatasourceWhatsappUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4671,14 +4671,14 @@ func (c *Client) sendDeleteContact(ctx context.Context, params DeleteContactPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DeleteContactOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DeleteContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4806,14 +4806,14 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, DeleteUserOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, DeleteUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -4926,14 +4926,14 @@ func (c *Client) sendFileCreate(ctx context.Context, request *UploadFileRequest)
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, FileCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, FileCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5061,14 +5061,14 @@ func (c *Client) sendFileDelete(ctx context.Context, params FileDeleteParams) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, FileDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, FileDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5196,14 +5196,14 @@ func (c *Client) sendFileGet(ctx context.Context, params FileGetParams) (res *Fi
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, FileGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, FileGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5351,14 +5351,14 @@ func (c *Client) sendFileList(ctx context.Context, params FileListParams) (res [
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, FileListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, FileListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5489,14 +5489,14 @@ func (c *Client) sendFileUpdate(ctx context.Context, request *FileUpdateReq, par
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, FileUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, FileUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5609,14 +5609,14 @@ func (c *Client) sendGenerateDownloadLink(ctx context.Context, request *Generate
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, GenerateDownloadLinkOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, GenerateDownloadLinkOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5729,14 +5729,14 @@ func (c *Client) sendGeneratePresignedUploadUrl(ctx context.Context, request *Up
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5864,14 +5864,14 @@ func (c *Client) sendGetContact(ctx context.Context, params GetContactParams) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, GetContactOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, GetContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -5999,14 +5999,14 @@ func (c *Client) sendGetUser(ctx context.Context, params GetUserParams) (res *Us
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, GetUserOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, GetUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6116,14 +6116,14 @@ func (c *Client) sendListContacts(ctx context.Context) (res []Contact, err error
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, ListContactsOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, ListContactsOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6233,14 +6233,14 @@ func (c *Client) sendListUsers(ctx context.Context) (res []User, err error) {
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, ListUsersOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, ListUsersOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6353,14 +6353,14 @@ func (c *Client) sendMessageEmailQuery(ctx context.Context, request *MessageQuer
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, MessageEmailQueryOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, MessageEmailQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6473,14 +6473,14 @@ func (c *Client) sendMessageLinkedinQuery(ctx context.Context, request *MessageQ
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, MessageLinkedinQueryOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, MessageLinkedinQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6593,14 +6593,14 @@ func (c *Client) sendMessageQuery(ctx context.Context, request *MessageQuery) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, MessageQueryOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, MessageQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6713,14 +6713,14 @@ func (c *Client) sendMessageTelegramQuery(ctx context.Context, request *MessageQ
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, MessageTelegramQueryOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, MessageTelegramQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6833,14 +6833,14 @@ func (c *Client) sendMessageWhatsappQuery(ctx context.Context, request *MessageQ
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, MessageWhatsappQueryOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, MessageWhatsappQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -6988,14 +6988,14 @@ func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2Clie
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientCallbackOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientCallbackOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7108,14 +7108,14 @@ func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2Clie
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7243,14 +7243,14 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7378,14 +7378,14 @@ func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGet
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7533,14 +7533,14 @@ func (c *Client) sendOAuth2ClientList(ctx context.Context, params OAuth2ClientLi
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7653,14 +7653,14 @@ func (c *Client) sendOAuth2ClientLogin(ctx context.Context, request *OAuth2Clien
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientLoginOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientLoginOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7807,14 +7807,14 @@ func (c *Client) sendOAuth2ClientTokenDelete(ctx context.Context, params OAuth2C
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientTokenDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientTokenDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -7943,14 +7943,14 @@ func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2Cli
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientTokenListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientTokenListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8081,14 +8081,14 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, OAuth2ClientUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8201,14 +8201,14 @@ func (c *Client) sendPipelineCreate(ctx context.Context, request *Pipeline) (res
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, PipelineCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8336,14 +8336,14 @@ func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeletePa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, PipelineDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8471,14 +8471,14 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, PipelineGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8660,14 +8660,14 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, PipelineListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8798,14 +8798,14 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *Pipeline, para
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, PipelineUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, PipelineUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -8918,14 +8918,14 @@ func (c *Client) sendSchedulerCreate(ctx context.Context, request *Scheduler) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SchedulerCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SchedulerCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9053,14 +9053,14 @@ func (c *Client) sendSchedulerDelete(ctx context.Context, params SchedulerDelete
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SchedulerDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SchedulerDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9188,14 +9188,14 @@ func (c *Client) sendSchedulerGet(ctx context.Context, params SchedulerGetParams
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SchedulerGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SchedulerGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9360,14 +9360,14 @@ func (c *Client) sendSchedulerList(ctx context.Context, params SchedulerListPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SchedulerListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SchedulerListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9498,14 +9498,14 @@ func (c *Client) sendSchedulerUpdate(ctx context.Context, request *Scheduler, pa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SchedulerUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SchedulerUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9618,14 +9618,14 @@ func (c *Client) sendStorageHostfilesCreate(ctx context.Context, request *Storag
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageHostfilesCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9753,14 +9753,14 @@ func (c *Client) sendStorageHostfilesDelete(ctx context.Context, params StorageH
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageHostfilesDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -9888,14 +9888,14 @@ func (c *Client) sendStorageHostfilesGet(ctx context.Context, params StorageHost
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageHostfilesGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10026,14 +10026,14 @@ func (c *Client) sendStorageHostfilesUpdate(ctx context.Context, request *Storag
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageHostfilesUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10266,14 +10266,14 @@ func (c *Client) sendStorageList(ctx context.Context, params StorageListParams) 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10386,14 +10386,14 @@ func (c *Client) sendStoragePostgresCreate(ctx context.Context, request *Storage
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StoragePostgresCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10521,14 +10521,14 @@ func (c *Client) sendStoragePostgresDelete(ctx context.Context, params StoragePo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StoragePostgresDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10656,14 +10656,14 @@ func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostg
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StoragePostgresGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10794,14 +10794,14 @@ func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *Storage
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StoragePostgresUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -10914,14 +10914,14 @@ func (c *Client) sendStorageS3Create(ctx context.Context, request *StorageS3) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageS3CreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageS3CreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11049,14 +11049,14 @@ func (c *Client) sendStorageS3Delete(ctx context.Context, params StorageS3Delete
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageS3DeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageS3DeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11184,14 +11184,14 @@ func (c *Client) sendStorageS3Get(ctx context.Context, params StorageS3GetParams
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageS3GetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageS3GetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11322,14 +11322,14 @@ func (c *Client) sendStorageS3Update(ctx context.Context, request *StorageS3, pa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, StorageS3UpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, StorageS3UpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11442,14 +11442,14 @@ func (c *Client) sendSyncpolicyCreate(ctx context.Context, request *SyncPolicy) 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SyncpolicyCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11577,14 +11577,14 @@ func (c *Client) sendSyncpolicyDelete(ctx context.Context, params SyncpolicyDele
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SyncpolicyDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11712,14 +11712,14 @@ func (c *Client) sendSyncpolicyGet(ctx context.Context, params SyncpolicyGetPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SyncpolicyGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -11867,14 +11867,14 @@ func (c *Client) sendSyncpolicyList(ctx context.Context, params SyncpolicyListPa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SyncpolicyListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12005,14 +12005,14 @@ func (c *Client) sendSyncpolicyUpdate(ctx context.Context, request *SyncPolicy, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, SyncpolicyUpdateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12125,14 +12125,14 @@ func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCrea
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, TgSessionCreateOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, TgSessionCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12242,14 +12242,14 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, TgSessionListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, TgSessionListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12380,14 +12380,14 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, TgSessionVerifyOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, TgSessionVerifyOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12518,14 +12518,14 @@ func (c *Client) sendUpdateContact(ctx context.Context, request *Contact, params
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, UpdateContactOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, UpdateContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12656,14 +12656,14 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *User, params Updat
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, UpdateUserOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, UpdateUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12776,14 +12776,14 @@ func (c *Client) sendUploadFile(ctx context.Context, request *UploadFileRequest)
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, UploadFileOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, UploadFileOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -12912,14 +12912,14 @@ func (c *Client) sendWorkerJobsCancel(ctx context.Context, params WorkerJobsCanc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WorkerJobsCancelOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsCancelOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -13047,14 +13047,14 @@ func (c *Client) sendWorkerJobsDelete(ctx context.Context, params WorkerJobsDele
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WorkerJobsDeleteOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -13182,14 +13182,14 @@ func (c *Client) sendWorkerJobsGet(ctx context.Context, params WorkerJobsGetPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WorkerJobsGetOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{
@@ -13337,14 +13337,14 @@ func (c *Client) sendWorkerJobsList(ctx context.Context, params WorkerJobsListPa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:SessionCookieAuth"
-			switch err := c.securitySessionCookieAuth(ctx, WorkerJobsListOperation, r); {
+			stage = "Security:ZitadelCookieAuth"
+			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"SessionCookieAuth\"")
+				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
 			}
 		}
 		{

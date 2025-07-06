@@ -111,6 +111,18 @@ auth:
 The intercepted paths section is used by the reverse proxy middleware when a
 frontend proxy is required.
 
+### Example ZITADEL Project Setup
+Zitadel instance runs on **reactima.com**. When creating a project and web app
+in Zitadel, add the following redirect URIs:
+
+```
+https://reactima.com/auth/callback
+https://reactima.com/logout/callback
+```
+
+Redirect URIs must begin with `https://` unless development mode is enabled.
+Make sure to also configure the post logout redirect URI.
+
 
 # Roadmap v0.1~1.0, Q1-Q4, 2025 scheduled features
 

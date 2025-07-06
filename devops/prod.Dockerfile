@@ -3,7 +3,6 @@
 # docker run --name sa-backend -p 8080:8080 \
 #  -e SA_DB_URI="postgres://shadowapi:shadowapi@postgres:5432/shadowapi" \
 #  -e SA_QUEUE_URL="nats://nats:4222" \
-#  -e SA_AUTH_ORY_KRATOS_USER_API="http://kratos/auth/user" \
 #  shadowapi-backend:latest
 
 # Stage 1: Build the Go backend

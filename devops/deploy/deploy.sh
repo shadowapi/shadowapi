@@ -6,5 +6,5 @@ docker compose \
         --env-file .env \
         --env-file devops/demo/.env \
         up \
-        db frontend kratos-migrate kratos nats backend kratos \
+        db frontend nats backend \
         --wait --build

@@ -9,8 +9,6 @@ api:
     specs_dir: ""
 jwt: {}
   auth:
-      ory:
-          frontend_api: ""
       bearer_token: ""
       zitadel:
           instance_url: ""

@@ -108,15 +108,15 @@ func (s *Server) handleCreateContactRequest(args [0]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, CreateContactOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, CreateContactOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -322,15 +322,15 @@ func (s *Server) handleCreateUserRequest(args [0]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, CreateUserOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, CreateUserOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -536,15 +536,15 @@ func (s *Server) handleDatasourceEmailCreateRequest(args [0]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -750,15 +750,15 @@ func (s *Server) handleDatasourceEmailDeleteRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -964,15 +964,15 @@ func (s *Server) handleDatasourceEmailGetRequest(args [1]string, argsEscaped boo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -1178,15 +1178,15 @@ func (s *Server) handleDatasourceEmailListRequest(args [0]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -1396,15 +1396,15 @@ func (s *Server) handleDatasourceEmailOAuthCreateRequest(args [0]string, argsEsc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailOAuthCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -1610,15 +1610,15 @@ func (s *Server) handleDatasourceEmailOAuthDeleteRequest(args [1]string, argsEsc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailOAuthDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -1824,15 +1824,15 @@ func (s *Server) handleDatasourceEmailOAuthGetRequest(args [1]string, argsEscape
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailOAuthGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -2038,15 +2038,15 @@ func (s *Server) handleDatasourceEmailOAuthListRequest(args [0]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailOAuthListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -2256,15 +2256,15 @@ func (s *Server) handleDatasourceEmailOAuthUpdateRequest(args [1]string, argsEsc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailOAuthUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -2485,15 +2485,15 @@ func (s *Server) handleDatasourceEmailUpdateRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceEmailUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceEmailUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -2714,15 +2714,15 @@ func (s *Server) handleDatasourceLinkedinCreateRequest(args [0]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceLinkedinCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceLinkedinCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -2928,15 +2928,15 @@ func (s *Server) handleDatasourceLinkedinDeleteRequest(args [1]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceLinkedinDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceLinkedinDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -3142,15 +3142,15 @@ func (s *Server) handleDatasourceLinkedinGetRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceLinkedinGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceLinkedinGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -3356,15 +3356,15 @@ func (s *Server) handleDatasourceLinkedinListRequest(args [0]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceLinkedinListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceLinkedinListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -3574,15 +3574,15 @@ func (s *Server) handleDatasourceLinkedinUpdateRequest(args [1]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceLinkedinUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceLinkedinUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -3803,15 +3803,15 @@ func (s *Server) handleDatasourceListRequest(args [0]string, argsEscaped bool, w
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -4021,15 +4021,15 @@ func (s *Server) handleDatasourceSetOAuth2ClientRequest(args [1]string, argsEsca
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceSetOAuth2ClientOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceSetOAuth2ClientOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -4250,15 +4250,15 @@ func (s *Server) handleDatasourceTelegramCreateRequest(args [0]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceTelegramCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceTelegramCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -4464,15 +4464,15 @@ func (s *Server) handleDatasourceTelegramDeleteRequest(args [1]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceTelegramDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceTelegramDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -4678,15 +4678,15 @@ func (s *Server) handleDatasourceTelegramGetRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceTelegramGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceTelegramGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -4892,15 +4892,15 @@ func (s *Server) handleDatasourceTelegramListRequest(args [0]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceTelegramListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceTelegramListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -5110,15 +5110,15 @@ func (s *Server) handleDatasourceTelegramUpdateRequest(args [1]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceTelegramUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceTelegramUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -5339,15 +5339,15 @@ func (s *Server) handleDatasourceWhatsappCreateRequest(args [0]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceWhatsappCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceWhatsappCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -5553,15 +5553,15 @@ func (s *Server) handleDatasourceWhatsappDeleteRequest(args [1]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceWhatsappDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceWhatsappDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -5767,15 +5767,15 @@ func (s *Server) handleDatasourceWhatsappGetRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceWhatsappGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceWhatsappGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -5981,15 +5981,15 @@ func (s *Server) handleDatasourceWhatsappListRequest(args [0]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceWhatsappListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceWhatsappListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -6199,15 +6199,15 @@ func (s *Server) handleDatasourceWhatsappUpdateRequest(args [1]string, argsEscap
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DatasourceWhatsappUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DatasourceWhatsappUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -6428,15 +6428,15 @@ func (s *Server) handleDeleteContactRequest(args [1]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DeleteContactOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DeleteContactOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -6642,15 +6642,15 @@ func (s *Server) handleDeleteUserRequest(args [1]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, DeleteUserOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, DeleteUserOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -6856,15 +6856,15 @@ func (s *Server) handleFileCreateRequest(args [0]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, FileCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, FileCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -7070,15 +7070,15 @@ func (s *Server) handleFileDeleteRequest(args [1]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, FileDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, FileDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -7284,15 +7284,15 @@ func (s *Server) handleFileGetRequest(args [1]string, argsEscaped bool, w http.R
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, FileGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, FileGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -7498,15 +7498,15 @@ func (s *Server) handleFileListRequest(args [0]string, argsEscaped bool, w http.
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, FileListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, FileListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -7716,15 +7716,15 @@ func (s *Server) handleFileUpdateRequest(args [1]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, FileUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, FileUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -7945,15 +7945,15 @@ func (s *Server) handleGenerateDownloadLinkRequest(args [0]string, argsEscaped b
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, GenerateDownloadLinkOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, GenerateDownloadLinkOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -8159,15 +8159,15 @@ func (s *Server) handleGeneratePresignedUploadUrlRequest(args [0]string, argsEsc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -8373,15 +8373,15 @@ func (s *Server) handleGetContactRequest(args [1]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, GetContactOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, GetContactOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -8587,15 +8587,15 @@ func (s *Server) handleGetUserRequest(args [1]string, argsEscaped bool, w http.R
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, GetUserOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, GetUserOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -8801,15 +8801,15 @@ func (s *Server) handleListContactsRequest(args [0]string, argsEscaped bool, w h
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, ListContactsOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, ListContactsOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -9000,15 +9000,15 @@ func (s *Server) handleListUsersRequest(args [0]string, argsEscaped bool, w http
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, ListUsersOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, ListUsersOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -9199,15 +9199,15 @@ func (s *Server) handleMessageEmailQueryRequest(args [0]string, argsEscaped bool
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, MessageEmailQueryOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, MessageEmailQueryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -9413,15 +9413,15 @@ func (s *Server) handleMessageLinkedinQueryRequest(args [0]string, argsEscaped b
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, MessageLinkedinQueryOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, MessageLinkedinQueryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -9627,15 +9627,15 @@ func (s *Server) handleMessageQueryRequest(args [0]string, argsEscaped bool, w h
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, MessageQueryOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, MessageQueryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -9841,15 +9841,15 @@ func (s *Server) handleMessageTelegramQueryRequest(args [0]string, argsEscaped b
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, MessageTelegramQueryOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, MessageTelegramQueryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -10055,15 +10055,15 @@ func (s *Server) handleMessageWhatsappQueryRequest(args [0]string, argsEscaped b
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, MessageWhatsappQueryOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, MessageWhatsappQueryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -10269,15 +10269,15 @@ func (s *Server) handleOAuth2ClientCallbackRequest(args [0]string, argsEscaped b
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientCallbackOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientCallbackOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -10487,15 +10487,15 @@ func (s *Server) handleOAuth2ClientCreateRequest(args [0]string, argsEscaped boo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -10701,15 +10701,15 @@ func (s *Server) handleOAuth2ClientDeleteRequest(args [1]string, argsEscaped boo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -10915,15 +10915,15 @@ func (s *Server) handleOAuth2ClientGetRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -11129,15 +11129,15 @@ func (s *Server) handleOAuth2ClientListRequest(args [0]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -11347,15 +11347,15 @@ func (s *Server) handleOAuth2ClientLoginRequest(args [0]string, argsEscaped bool
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientLoginOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientLoginOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -11561,15 +11561,15 @@ func (s *Server) handleOAuth2ClientTokenDeleteRequest(args [2]string, argsEscape
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientTokenDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientTokenDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -11779,15 +11779,15 @@ func (s *Server) handleOAuth2ClientTokenListRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientTokenListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientTokenListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -11993,15 +11993,15 @@ func (s *Server) handleOAuth2ClientUpdateRequest(args [1]string, argsEscaped boo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, OAuth2ClientUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, OAuth2ClientUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -12222,15 +12222,15 @@ func (s *Server) handlePipelineCreateRequest(args [0]string, argsEscaped bool, w
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, PipelineCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, PipelineCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -12436,15 +12436,15 @@ func (s *Server) handlePipelineDeleteRequest(args [1]string, argsEscaped bool, w
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, PipelineDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, PipelineDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -12650,15 +12650,15 @@ func (s *Server) handlePipelineGetRequest(args [1]string, argsEscaped bool, w ht
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, PipelineGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, PipelineGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -12864,15 +12864,15 @@ func (s *Server) handlePipelineListRequest(args [0]string, argsEscaped bool, w h
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, PipelineListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, PipelineListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -13090,15 +13090,15 @@ func (s *Server) handlePipelineUpdateRequest(args [1]string, argsEscaped bool, w
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, PipelineUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, PipelineUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -13319,15 +13319,15 @@ func (s *Server) handleSchedulerCreateRequest(args [0]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SchedulerCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SchedulerCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -13533,15 +13533,15 @@ func (s *Server) handleSchedulerDeleteRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SchedulerDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SchedulerDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -13747,15 +13747,15 @@ func (s *Server) handleSchedulerGetRequest(args [1]string, argsEscaped bool, w h
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SchedulerGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SchedulerGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -13961,15 +13961,15 @@ func (s *Server) handleSchedulerListRequest(args [0]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SchedulerListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SchedulerListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -14183,15 +14183,15 @@ func (s *Server) handleSchedulerUpdateRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SchedulerUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SchedulerUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -14412,15 +14412,15 @@ func (s *Server) handleStorageHostfilesCreateRequest(args [0]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageHostfilesCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageHostfilesCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -14626,15 +14626,15 @@ func (s *Server) handleStorageHostfilesDeleteRequest(args [1]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageHostfilesDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageHostfilesDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -14840,15 +14840,15 @@ func (s *Server) handleStorageHostfilesGetRequest(args [1]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageHostfilesGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageHostfilesGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -15054,15 +15054,15 @@ func (s *Server) handleStorageHostfilesUpdateRequest(args [1]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageHostfilesUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageHostfilesUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -15283,15 +15283,15 @@ func (s *Server) handleStorageListRequest(args [0]string, argsEscaped bool, w ht
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -15521,15 +15521,15 @@ func (s *Server) handleStoragePostgresCreateRequest(args [0]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StoragePostgresCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StoragePostgresCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -15735,15 +15735,15 @@ func (s *Server) handleStoragePostgresDeleteRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StoragePostgresDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StoragePostgresDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -15949,15 +15949,15 @@ func (s *Server) handleStoragePostgresGetRequest(args [1]string, argsEscaped boo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StoragePostgresGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StoragePostgresGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -16163,15 +16163,15 @@ func (s *Server) handleStoragePostgresUpdateRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StoragePostgresUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StoragePostgresUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -16392,15 +16392,15 @@ func (s *Server) handleStorageS3CreateRequest(args [0]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageS3CreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageS3CreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -16606,15 +16606,15 @@ func (s *Server) handleStorageS3DeleteRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageS3DeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageS3DeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -16820,15 +16820,15 @@ func (s *Server) handleStorageS3GetRequest(args [1]string, argsEscaped bool, w h
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageS3GetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageS3GetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -17034,15 +17034,15 @@ func (s *Server) handleStorageS3UpdateRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, StorageS3UpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, StorageS3UpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -17263,15 +17263,15 @@ func (s *Server) handleSyncpolicyCreateRequest(args [0]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SyncpolicyCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SyncpolicyCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -17477,15 +17477,15 @@ func (s *Server) handleSyncpolicyDeleteRequest(args [1]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SyncpolicyDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SyncpolicyDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -17691,15 +17691,15 @@ func (s *Server) handleSyncpolicyGetRequest(args [1]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SyncpolicyGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SyncpolicyGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -17905,15 +17905,15 @@ func (s *Server) handleSyncpolicyListRequest(args [0]string, argsEscaped bool, w
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SyncpolicyListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SyncpolicyListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -18123,15 +18123,15 @@ func (s *Server) handleSyncpolicyUpdateRequest(args [1]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, SyncpolicyUpdateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, SyncpolicyUpdateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -18352,15 +18352,15 @@ func (s *Server) handleTgSessionCreateRequest(args [0]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, TgSessionCreateOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, TgSessionCreateOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -18566,15 +18566,15 @@ func (s *Server) handleTgSessionListRequest(args [0]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, TgSessionListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, TgSessionListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -18765,15 +18765,15 @@ func (s *Server) handleTgSessionVerifyRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, TgSessionVerifyOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, TgSessionVerifyOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -18994,15 +18994,15 @@ func (s *Server) handleUpdateContactRequest(args [1]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, UpdateContactOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, UpdateContactOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -19223,15 +19223,15 @@ func (s *Server) handleUpdateUserRequest(args [1]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, UpdateUserOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, UpdateUserOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -19452,15 +19452,15 @@ func (s *Server) handleUploadFileRequest(args [0]string, argsEscaped bool, w htt
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, UploadFileOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, UploadFileOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -19666,15 +19666,15 @@ func (s *Server) handleWorkerJobsCancelRequest(args [1]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WorkerJobsCancelOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, WorkerJobsCancelOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -19880,15 +19880,15 @@ func (s *Server) handleWorkerJobsDeleteRequest(args [1]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WorkerJobsDeleteOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, WorkerJobsDeleteOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -20094,15 +20094,15 @@ func (s *Server) handleWorkerJobsGetRequest(args [1]string, argsEscaped bool, w 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WorkerJobsGetOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, WorkerJobsGetOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}
@@ -20308,15 +20308,15 @@ func (s *Server) handleWorkerJobsListRequest(args [0]string, argsEscaped bool, w
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securitySessionCookieAuth(ctx, WorkerJobsListOperation, r)
+			sctx, ok, err := s.securityZitadelCookieAuth(ctx, WorkerJobsListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "SessionCookieAuth",
+					Security:         "ZitadelCookieAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:SessionCookieAuth", err)
+					defer recordError("Security:ZitadelCookieAuth", err)
 				}
 				return
 			}

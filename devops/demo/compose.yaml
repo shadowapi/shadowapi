@@ -4,26 +4,6 @@ services:
       - traefik.http.routers.shadowapi-front.tls.certResolver=letsencrypt
       - traefik.http.routers.shadowapi-front.tls.domains.0.main=${DOMAIN}
   backend:
-    environment:
-      - SA_AUTH_ORY_KRATOS_USER_API=https://${DOMAIN}/auth/user
     labels:
       - traefik.http.routers.shadowapi-api.tls.certResolver=letsencrypt
       - traefik.http.routers.shadowapi-api.tls.domains.0.main=${DOMAIN}
-  kratos:
-    command: serve --dev --watch-courier --config /home/ory/kratos.yaml --config /home/ory/kratos-override.yaml
-    volumes:
-      - ./devops/ory/kratos/kratos.yaml:/home/ory/kratos.yaml
-      - ./devops/demo/kratos-override.yaml:/home/ory/kratos-override.yaml
-      - ./devops/ory/kratos/identity.schema.json:/home/ory/identity.schema.json
-    labels:
-      - traefik.http.routers.shadowapi-kratos-user.rule=Host(`${DOMAIN}`)&&PathPrefix(`/auth/user`)
-      - traefik.http.routers.shadowapi-kratos-user.tls.certResolver=letsencrypt
-      - traefik.http.routers.shadowapi-kratos-user.tls.domains.0.main=${DOMAIN}
-      - traefik.http.routers.shadowapi-kratos-admin.rule=Host(`${DOMAIN}`)&&PathPrefix(`/auth/admin`)
-      - traefik.http.routers.shadowapi-kratos-admin.tls.certResolver=letsencrypt
-      - traefik.http.routers.shadowapi-kratos-admin.tls.domains.0.main=${DOMAIN}
-  kratos-migrate:
-    command: migrate -c /home/ory/kratos.yaml -c /home/ory/kratos-override.yaml sql -e --yes
-    volumes:
-      - ./devops/ory/kratos/kratos.yaml:/home/ory/kratos.yaml
-      - ./devops/demo/kratos-override.yaml:/home/ory/kratos-override.yaml

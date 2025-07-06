@@ -51,11 +51,6 @@ type Config struct {
 
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
-		// Ory identity provider settings
-		Ory struct {
-			// KratosUserAPI is the URL of the Ory Kratos public API
-			KratosUserAPI string `yaml:"frontend_api" json:"frontend_api" env:"SA_AUTH_ORY_KRATOS_USER_API" envDefault:"http://sa-traefik/auth/user"`
-		} `yaml:"ory" json:"ory"`
 
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
 		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN" envDefault:"mysecretapikey"`

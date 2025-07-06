@@ -32,11 +32,11 @@ func (a *Auth) HandleBearerAuth(
 	return ctx, nil
 }
 
-// HandleSessionCookieAuth handles session cookie authentication
+// HandleZitadelCookieAuth handles session cookie authentication
 // this is just a passthrough as we use session middleware instead
-// keep it so default HandleSessionCookieAuth wont be triggered
-func (a *Auth) HandleSessionCookieAuth(
-	ctx context.Context, operationName api.OperationName, t api.SessionCookieAuth,
+// keep it so default HandleZitadelCookieAuth wont be triggered
+func (a *Auth) HandleZitadelCookieAuth(
+	ctx context.Context, operationName api.OperationName, t api.ZitadelCookieAuth,
 ) (context.Context, error) {
 	return ctx, nil
 }

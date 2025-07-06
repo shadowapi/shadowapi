@@ -83,11 +83,11 @@ components:
       $ref: "components/worker_jobs.yaml"
 
   securitySchemes:
-    # Session cookie-based auth (for Ory Kratos sessions)
-    SessionCookieAuth:
+    # Session cookie-based auth (for Zitadel sessions)
+    ZitadelCookieAuth:
       type: apiKey
       in: cookie
-      name: ory_kratos_session
+      name: zitadel_access_token
 
     # Bearer token-based auth
     BearerAuth:
@@ -202,6 +202,6 @@ servers:
     url: "http://localtest.me/api/v1"
 
 security:
-  # Logical OR of SessionCookieAuth and BearerAuth
-  - SessionCookieAuth: []
+  # Logical OR of ZitadelCookieAuth and BearerAuth
+  - ZitadelCookieAuth: []
   - BearerAuth: []

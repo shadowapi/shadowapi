@@ -19,9 +19,9 @@ func (s MySecuritySource) BearerAuth(ctx context.Context, operationName api.Oper
 	return api.BearerAuth{Token: s.token}, nil
 }
 
-// SessionCookieAuth returns a zero value; update if needed.
-func (s MySecuritySource) SessionCookieAuth(ctx context.Context, operationName api.OperationName) (api.SessionCookieAuth, error) {
-	return api.SessionCookieAuth{}, nil
+// ZitadelCookieAuth returns a zero value; update if needed.
+func (s MySecuritySource) ZitadelCookieAuth(ctx context.Context, operationName api.OperationName) (api.ZitadelCookieAuth, error) {
+	return api.ZitadelCookieAuth{}, nil
 }
 
 func main() {
