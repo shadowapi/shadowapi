@@ -4,4 +4,4 @@ export { shortenUuid } from './utils'
 
 export { ProtectedRoute } from './ProtectedRoute'
 
-export { FrontendAPI, useLogout } from './api'
+export { useLogout } from './api'

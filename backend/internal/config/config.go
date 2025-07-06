@@ -49,6 +49,12 @@ type Config struct {
 		PrivateKey string `yaml:"private_key,omitempty" json:"private_key,omitempty"`
 	} `yaml:"jwt" json:"jwt"`
 
+	// InitAdmin configures the first administrator account
+	InitAdmin struct {
+		Email    string `yaml:"email" json:"email"`
+		Password string `yaml:"password" json:"password"`
+	} `yaml:"init_admin" json:"init_admin"`
+
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
 

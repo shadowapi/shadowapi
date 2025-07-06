@@ -47,7 +47,7 @@ task sync-db
 ### 4. Access the App
 
 - Open your browser at [http://localtest.me](http://localtest.me).
-- You can sign up via [http://localtest.me/signup](http://localtest.me/signup).
+- Login and signup pages redirect to your configured ZITADEL instance.
 
 ### 5. Stopping the Development Environment
 
@@ -106,7 +106,12 @@ auth:
     client_secret: "<service-user-client-secret>"
     redirect_uri: "http://localtest.me/auth/callback"
     intercepted_paths: ["/.well-known/", "/oauth/", "/oidc/"]
+init_admin:
+  email: "admin@example.com"
+  password: "change-me"
 ```
+
+Use `https://` URLs for `redirect_uri` in production. `http://` is allowed only when ZITADEL development mode is enabled.
 
 The intercepted paths section is used by the reverse proxy middleware when a
 frontend proxy is required.
