@@ -7,6 +7,7 @@ INSERT INTO "user" (
     last_name,
     is_enabled,
     is_admin,
+    zitadel_subject,
     meta,
     created_at,
     updated_at
@@ -17,8 +18,9 @@ INSERT INTO "user" (
              sqlc.arg('first_name'),
              sqlc.arg('last_name'),
              sqlc.arg('is_enabled')::boolean,
-             sqlc.arg('is_admin')::boolean,
-             sqlc.arg('meta'),
+            sqlc.arg('is_admin')::boolean,
+            sqlc.arg('zitadel_subject'),
+            sqlc.arg('meta'),
              NOW(),
              NULL
          ) RETURNING *;
@@ -28,6 +30,12 @@ SELECT
     *
 FROM "user"
 WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: GetUserByZitadelSubject :one
+SELECT
+    *
+FROM "user"
+WHERE zitadel_subject = sqlc.arg('zitadel_subject');
 
 -- name: ListUsers :many
 SELECT
@@ -46,6 +54,7 @@ SET
     last_name = sqlc.arg('last_name'),
     is_enabled =  sqlc.arg('is_enabled')::boolean,
     is_admin = sqlc.arg('is_admin')::boolean,
+    zitadel_subject = sqlc.arg('zitadel_subject'),
     meta = sqlc.arg('meta'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;

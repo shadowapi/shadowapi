@@ -20,6 +20,7 @@ INSERT INTO "user" (
     last_name,
     is_enabled,
     is_admin,
+    zitadel_subject,
     meta,
     created_at,
     updated_at
@@ -32,20 +33,22 @@ INSERT INTO "user" (
              $6::boolean,
              $7::boolean,
              $8,
+             $9,
              NOW(),
              NULL
-         ) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+         ) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	UUID      pgtype.UUID `json:"uuid"`
-	Email     string      `json:"email"`
-	Password  string      `json:"password"`
-	FirstName string      `json:"first_name"`
-	LastName  string      `json:"last_name"`
-	IsEnabled bool        `json:"is_enabled"`
-	IsAdmin   bool        `json:"is_admin"`
-	Meta      []byte      `json:"meta"`
+	UUID           pgtype.UUID `json:"uuid"`
+	Email          string      `json:"email"`
+	Password       string      `json:"password"`
+	FirstName      string      `json:"first_name"`
+	LastName       string      `json:"last_name"`
+	IsEnabled      bool        `json:"is_enabled"`
+	IsAdmin        bool        `json:"is_admin"`
+	ZitadelSubject string      `json:"zitadel_subject"`
+	Meta           []byte      `json:"meta"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -57,6 +60,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.LastName,
 		arg.IsEnabled,
 		arg.IsAdmin,
+		arg.ZitadelSubject,
 		arg.Meta,
 	)
 	var i User
@@ -68,6 +72,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LastName,
 		&i.IsEnabled,
 		&i.IsAdmin,
+		&i.ZitadelSubject,
 		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -87,7 +92,7 @@ func (q *Queries) DeleteUser(ctx context.Context, uuid pgtype.UUID) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-    uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+    uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 FROM "user"
 WHERE uuid = $1::uuid
 `
@@ -103,6 +108,33 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 		&i.LastName,
 		&i.IsEnabled,
 		&i.IsAdmin,
+		&i.ZitadelSubject,
+		&i.Meta,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByZitadelSubject = `-- name: GetUserByZitadelSubject :one
+SELECT
+    uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+FROM "user"
+WHERE zitadel_subject = $1
+`
+
+func (q *Queries) GetUserByZitadelSubject(ctx context.Context, zitadelSubject string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByZitadelSubject, zitadelSubject)
+	var i User
+	err := row.Scan(
+		&i.UUID,
+		&i.Email,
+		&i.Password,
+		&i.FirstName,
+		&i.LastName,
+		&i.IsEnabled,
+		&i.IsAdmin,
+		&i.ZitadelSubject,
 		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -112,7 +144,7 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-   uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+   uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 FROM "user"
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -141,6 +173,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.LastName,
 			&i.IsEnabled,
 			&i.IsAdmin,
+			&i.ZitadelSubject,
 			&i.Meta,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -164,20 +197,22 @@ SET
     last_name = $4,
     is_enabled =  $5::boolean,
     is_admin = $6::boolean,
-    meta = $7,
+    zitadel_subject = $7,
+    meta = $8,
     updated_at = NOW()
-WHERE uuid = $8::uuid
+WHERE uuid = $9::uuid
 `
 
 type UpdateUserParams struct {
-	Email     string      `json:"email"`
-	Password  string      `json:"password"`
-	FirstName string      `json:"first_name"`
-	LastName  string      `json:"last_name"`
-	IsEnabled bool        `json:"is_enabled"`
-	IsAdmin   bool        `json:"is_admin"`
-	Meta      []byte      `json:"meta"`
-	UUID      pgtype.UUID `json:"uuid"`
+	Email          string      `json:"email"`
+	Password       string      `json:"password"`
+	FirstName      string      `json:"first_name"`
+	LastName       string      `json:"last_name"`
+	IsEnabled      bool        `json:"is_enabled"`
+	IsAdmin        bool        `json:"is_admin"`
+	ZitadelSubject string      `json:"zitadel_subject"`
+	Meta           []byte      `json:"meta"`
+	UUID           pgtype.UUID `json:"uuid"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
@@ -188,6 +223,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.LastName,
 		arg.IsEnabled,
 		arg.IsAdmin,
+		arg.ZitadelSubject,
 		arg.Meta,
 		arg.UUID,
 	)

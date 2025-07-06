@@ -353,16 +353,17 @@ type TgSessionsState struct {
 }
 
 type User struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Email     string             `json:"email"`
-	Password  string             `json:"password"`
-	FirstName string             `json:"first_name"`
-	LastName  string             `json:"last_name"`
-	IsEnabled bool               `json:"is_enabled"`
-	IsAdmin   bool               `json:"is_admin"`
-	Meta      []byte             `json:"meta"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID           uuid.UUID          `json:"uuid"`
+	Email          string             `json:"email"`
+	Password       string             `json:"password"`
+	FirstName      string             `json:"first_name"`
+	LastName       string             `json:"last_name"`
+	IsEnabled      bool               `json:"is_enabled"`
+	IsAdmin        bool               `json:"is_admin"`
+	ZitadelSubject string             `json:"zitadel_subject"`
+	Meta           []byte             `json:"meta"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type WorkerJob struct {

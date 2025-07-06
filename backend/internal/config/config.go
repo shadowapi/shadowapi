@@ -59,6 +59,15 @@ type Config struct {
 
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
 		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN" envDefault:"mysecretapikey"`
+
+		// Zitadel configuration for OAuth2 authentication
+		Zitadel struct {
+			InstanceURL      string   `yaml:"instance_url" json:"instance_url" env:"SA_AUTH_ZITADEL_INSTANCE_URL"`
+			ClientID         string   `yaml:"client_id" json:"client_id" env:"SA_AUTH_ZITADEL_CLIENT_ID"`
+			ClientSecret     string   `yaml:"client_secret" json:"client_secret" env:"SA_AUTH_ZITADEL_CLIENT_SECRET"`
+			RedirectURI      string   `yaml:"redirect_uri" json:"redirect_uri" env:"SA_AUTH_ZITADEL_REDIRECT_URI"`
+			InterceptedPaths []string `yaml:"intercepted_paths" json:"intercepted_paths" env:"SA_AUTH_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
+		} `yaml:"zitadel" json:"zitadel"`
 	} `yaml:"auth" json:"auth"`
 
 	// Worker settings
