@@ -1,13 +1,16 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions } from "@tanstack/react-query";
 
 export const sessionOptions = () => {
   return queryOptions({
-    queryKey: ['session'],
+    queryKey: ["session"],
     queryFn: async () => {
-      const hasCookie = document.cookie
-        .split(';')
-        .some((c) => c.trim().startsWith('zitadel_access_token='))
-      return { active: hasCookie }
+      const resp = await fetch("/api/v1/session", {
+        credentials: "include",
+      });
+      if (!resp.ok) {
+        throw new Error("session check failed");
+      }
+      return (await resp.json()) as { active: boolean };
     },
-  })
-}
+  });
+};

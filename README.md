@@ -128,6 +128,10 @@ https://reactima.com/logout/callback
 Redirect URIs must begin with `https://` unless development mode is enabled.
 Make sure to also configure the post logout redirect URI.
 
+The backend exposes `/login` for plain email/password authentication and
+`/logout/callback` to clear the session. Frontend checks session status via
+`/api/v1/session`.
+
 
 # Roadmap v0.1~1.0, Q1-Q4, 2025 scheduled features
 

@@ -81,6 +81,8 @@ components:
       $ref: "components/user.yaml"
     WorkerJobs:
       $ref: "components/worker_jobs.yaml"
+    SessionStatus:
+      $ref: "components/session_status.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Zitadel sessions)
@@ -136,6 +138,8 @@ paths:
     $ref: "paths/oauth2_client_datasource_uuid_token_uuid.yaml"
   /oauth2/login:
     $ref: "paths/oauth2_login.yaml"
+  /session:
+    $ref: "paths/session.yaml"
   /pipeline:
     $ref: "paths/pipeline.yaml"
   /pipeline/{uuid}:

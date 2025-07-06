@@ -5999,6 +5999,21 @@ func (s *Scheduler) SetUpdatedAt(val OptDateTime) {
 // SchedulerDeleteOK is response for SchedulerDelete operation.
 type SchedulerDeleteOK struct{}
 
+// Ref: #
+type SessionStatus struct {
+	Active bool `json:"active"`
+}
+
+// GetActive returns the value of Active.
+func (s *SessionStatus) GetActive() bool {
+	return s.Active
+}
+
+// SetActive sets the value of Active.
+func (s *SessionStatus) SetActive(val bool) {
+	s.Active = val
+}
+
 // Data storage settings object.
 // Ref: #
 type Storage struct {

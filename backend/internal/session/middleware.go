@@ -9,8 +9,11 @@ import (
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/samber/do/v2"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // Middleware implements a pure Ogen middleware that checks for
@@ -19,6 +22,7 @@ type Middleware struct {
 	log          *slog.Logger
 	bearerSecret string
 	zitadel      *zitadel.Client
+	handler      *handler.Handler
 }
 
 // Provide session middleware instance for the dependency injector
@@ -28,6 +32,7 @@ func Provide(i do.Injector) (*Middleware, error) {
 		log:          do.MustInvoke[*slog.Logger](i),
 		bearerSecret: cfg.Auth.BearerToken,
 		zitadel:      zitadel.Provide(cfg),
+		handler:      do.MustInvoke[*handler.Handler](i),
 	}, nil
 }
 
@@ -52,7 +57,22 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 	if token := m.zitadelToken(r); token != "" {
 		info, err := m.zitadel.Introspect(req.Context, token)
 		if err == nil && info.Active {
-			newCtx := WithIdentity(req.Context, Identity{ID: info.Subject})
+			q := query.New(m.handler.DB())
+			user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true})
+			if err == nil {
+				newCtx := WithIdentity(req.Context, Identity{ID: user.UUID.String()})
+				req.SetContext(newCtx)
+				return next(req)
+			}
+		}
+	}
+
+	if cookie, err := r.Cookie("sa_session"); err == nil {
+		m.handler.SessionsMu.Lock()
+		uid, ok := m.handler.Sessions[cookie.Value]
+		m.handler.SessionsMu.Unlock()
+		if ok {
+			newCtx := WithIdentity(req.Context, Identity{ID: uid})
 			req.SetContext(newCtx)
 			return next(req)
 		}

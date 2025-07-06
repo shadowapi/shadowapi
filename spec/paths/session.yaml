@@ -1,0 +1,18 @@
+# spec/paths/session.yaml
+get:
+  description: Introspect current session status
+  operationId: session-status
+  security: []
+  responses:
+    "200":
+      description: Session status
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/SessionStatus"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

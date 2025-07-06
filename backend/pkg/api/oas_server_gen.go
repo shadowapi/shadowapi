@@ -404,6 +404,12 @@ type Handler interface {
 	//
 	// PUT /scheduler/{uuid}
 	SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (*Scheduler, error)
+	// SessionStatus implements session-status operation.
+	//
+	// Introspect current session status.
+	//
+	// GET /session
+	SessionStatus(ctx context.Context) (*SessionStatus, error)
 	// StorageHostfilesCreate implements storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.

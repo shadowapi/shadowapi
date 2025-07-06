@@ -1,0 +1,9 @@
+# spec/components/session_status.yaml
+---
+type: object
+additionalProperties: false
+properties:
+  active:
+    type: boolean
+required:
+  - active

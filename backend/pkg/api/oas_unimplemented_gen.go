@@ -607,6 +607,15 @@ func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler,
 	return r, ht.ErrNotImplemented
 }
 
+// SessionStatus implements session-status operation.
+//
+// Introspect current session status.
+//
+// GET /session
+func (UnimplementedHandler) SessionStatus(ctx context.Context) (r *SessionStatus, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StorageHostfilesCreate implements storage-hostfiles-create operation.
 //
 // Create a new Host Files storage instance.
