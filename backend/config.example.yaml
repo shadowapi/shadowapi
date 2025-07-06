@@ -8,6 +8,9 @@ db: {}
 api:
     specs_dir: ""
 jwt: {}
+init_admin:
+    email: ""
+    password: ""
 auth:
     bearer_token: ""
     zitadel:

@@ -15,6 +15,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/session"
+	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
@@ -25,6 +26,7 @@ type Server struct {
 	api          *api.Server
 	listener     net.Listener
 	specsHandler http.Handler
+	zitadel      *zitadel.Client
 }
 
 // Provide server instance for the dependency injector
@@ -34,6 +36,7 @@ func Provide(i do.Injector) (*Server, error) {
 	authService := do.MustInvoke[*auth.Auth](i)
 	handlerService := do.MustInvoke[*handler.Handler](i)
 	authMiddleware := do.MustInvoke[*session.Middleware](i)
+	zitadelClient := zitadel.Provide(cfg)
 
 	srv, err := api.NewServer(
 		handlerService,
@@ -61,6 +64,7 @@ func Provide(i do.Injector) (*Server, error) {
 		log:          do.MustInvoke[*slog.Logger](i),
 		api:          srv,
 		specsHandler: specsHandler,
+		zitadel:      zitadelClient,
 	}, nil
 }
 
@@ -89,6 +93,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/auth/callback" {
+		s.handleAuthCallback(w, r)
+		return
+	}
+
 	// catch the API static specs requests, handle them separately
 	if s.specsHandler != nil && strings.HasPrefix(r.URL.Path, "/assets/docs/api") {
 		s.specsHandler.ServeHTTP(w, r)
@@ -102,4 +111,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // Shutdown stops the server
 func (s *Server) Shutdown() error {
 	return s.listener.Close()
+}
+
+// handleAuthCallback exchanges the code for a token and sets session cookie.
+func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		http.Error(w, "missing code", http.StatusBadRequest)
+		return
+	}
+	tok, err := s.zitadel.ExchangeCode(r.Context(), code)
+	if err != nil {
+		s.log.Error("exchange code", "error", err)
+		http.Error(w, "exchange failed", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "zitadel_access_token",
+		Value:    tok.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, "/", http.StatusFound)
 }
