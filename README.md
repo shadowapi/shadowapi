@@ -124,6 +124,18 @@ Use `https://` URLs for `redirect_uri` in production. `http://` is allowed only 
 The intercepted paths section is used by the reverse proxy middleware when a
 frontend proxy is required.
 
+### Frontend Environment Variables
+
+The React frontend uses Vite environment variables to access ZITADEL. Before
+running `task dev-up` export these variables or define them in an `.env` file so
+that they match your backend configuration:
+
+```env
+VITE_ZITADEL_INSTANCE_URL=https://<your-zitadel-domain>
+VITE_ZITADEL_CLIENT_ID=<web-app-client-id>
+VITE_ZITADEL_REDIRECT_URI=http://localtest.me/auth/callback
+```
+
 ### Example ZITADEL Project Setup
 Zitadel instance runs on **reactima.com**. When creating a project and web app
 in Zitadel, add the following redirect URIs:
