@@ -111,6 +111,14 @@ init_admin:
   password: "change-me"
 ```
 
+For a remote deployment change `redirect_uri` to your public HTTPS domain, for example:
+
+```yaml
+auth:
+  zitadel:
+    redirect_uri: "https://example.com/auth/callback"
+```
+
 Use `https://` URLs for `redirect_uri` in production. `http://` is allowed only when ZITADEL development mode is enabled.
 
 The intercepted paths section is used by the reverse proxy middleware when a
