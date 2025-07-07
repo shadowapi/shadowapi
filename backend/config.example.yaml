@@ -12,6 +12,7 @@ init_admin:
     email: ""
     password: ""
 auth:
+    ignore_https_error: false
     bearer_token: ""
     zitadel:
         instance_url: ""

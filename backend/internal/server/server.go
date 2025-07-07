@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -35,6 +36,7 @@ type Server struct {
 	zitadel      *zitadel.Client
 	handler      *handler.Handler
 	sessions     *session.Middleware
+	auth         *auth.Auth
 }
 
 // Provide server instance for the dependency injector
@@ -75,6 +77,7 @@ func Provide(i do.Injector) (*Server, error) {
 		zitadel:      zitadelClient,
 		handler:      handlerService,
 		sessions:     authMiddleware,
+		auth:         authService,
 	}, nil
 }
 
@@ -142,6 +145,14 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	tok, err := s.zitadel.ExchangeCode(r.Context(), code)
 	if err != nil {
+		if s.auth.IgnoreHttpsError {
+			var urlErr *url.Error
+			if errors.As(err, &urlErr) {
+				s.log.Info("exchange code", "code", code, "error", err)
+				http.Error(w, "exchange failed", http.StatusInternalServerError)
+				return
+			}
+		}
 		s.log.Error("exchange code", "code", code, "error", err)
 		http.Error(w, "exchange failed", http.StatusInternalServerError)
 		return

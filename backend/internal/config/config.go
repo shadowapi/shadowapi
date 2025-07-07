@@ -58,6 +58,10 @@ type Config struct {
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
 
+		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
+		// environments where the Zitadel instance may be unreachable. Defaults to false.
+		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR" envDefault:"false"`
+
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
 		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN" envDefault:"mysecretapikey"`
 
