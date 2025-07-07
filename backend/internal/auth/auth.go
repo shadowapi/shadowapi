@@ -6,18 +6,22 @@ import (
 
 	"github.com/samber/do/v2"
 
+	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
 type Auth struct {
-	log *slog.Logger
+	log              *slog.Logger
+	IgnoreHttpsError bool
 }
 
 // Provide returns the authenticator instance
 func Provide(i do.Injector) (*Auth, error) {
+	cfg := do.MustInvoke[*config.Config](i)
 	// keep log case of debugging ogen
 	return &Auth{
-		log: do.MustInvoke[*slog.Logger](i),
+		log:              do.MustInvoke[*slog.Logger](i),
+		IgnoreHttpsError: cfg.Auth.IgnoreHttpsError,
 	}, nil
 }
 
