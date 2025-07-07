@@ -22,6 +22,7 @@ import {
   UserEdit,
   Users,
   WorkerJobs,
+  Profile,
 } from '@/pages'
 import { LoginPage, ProtectedRoute, SignupPage } from '@/shauth'
 
@@ -65,6 +66,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UserEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

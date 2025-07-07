@@ -75,7 +75,10 @@ export function FullLayout({ children }: { children: ReactNode }) {
               <ActionButton>
                 <User />
               </ActionButton>
-              <Menu onAction={(key) => key === 'logout' && logout()}>
+              <Menu onAction={(key) => {
+                if (key === 'logout') logout()
+                if (key === 'edit-profile') navigate('/profile')
+              }}>
                 <Item key="edit-profile">Edit Profile</Item>
                 <Item key="logout">Logout</Item>
               </Menu>

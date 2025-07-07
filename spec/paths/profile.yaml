@@ -1,0 +1,38 @@
+get:
+  summary: Get current user profile
+  operationId: getProfile
+  responses:
+    "200":
+      description: Current user profile
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/User"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  summary: Update current user profile
+  operationId: updateProfile
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UserProfile"
+  responses:
+    "200":
+      description: Updated profile
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/User"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

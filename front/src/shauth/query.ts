@@ -10,7 +10,7 @@ export const sessionOptions = () => {
       if (!resp.ok) {
         throw new Error("session check failed");
       }
-      return (await resp.json()) as { active: boolean };
+      return (await resp.json()) as { active: boolean; uuid?: string };
     },
   });
 };
