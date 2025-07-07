@@ -82,6 +82,16 @@ task prod-down
 
 - Stops and removes the production environment containers.
 
+### Reset Admin Password
+
+Use the CLI to reset the password of a local (non‑ZITADEL) admin account. Run the command inside the backend service:
+
+```bash
+docker compose run --rm backend ./shadowapi reset-password <admin-email> <new-password>
+```
+
+Replace `<admin-email>` with the user's email and `<new-password>` with the new password.
+
 ---
 
 ## Common Tasks
