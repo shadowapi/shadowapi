@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/gofrs/uuid"
+	gouuid "github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
@@ -37,6 +38,9 @@ func (h *Handler) SessionStatus(ctx context.Context) (*api.SessionStatus, error)
 		return &api.SessionStatus{Active: false}, nil
 	}
 	out := api.SessionStatus{Active: true}
-	out.SetUuid(id.ID)
+	uid, err := gouuid.Parse(id.ID)
+	if err == nil {
+		out.SetUUID(api.NewOptUUID(uid))
+	}
 	return &out, nil
 }
