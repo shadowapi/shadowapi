@@ -242,6 +242,12 @@ type Handler interface {
 	//
 	// GET /contact/{uuid}
 	GetContact(ctx context.Context, params GetContactParams) (*Contact, error)
+	// GetProfile implements getProfile operation.
+	//
+	// Get current user profile.
+	//
+	// GET /profile
+	GetProfile(ctx context.Context) (*User, error)
 	// GetUser implements getUser operation.
 	//
 	// Get user details.
@@ -542,6 +548,12 @@ type Handler interface {
 	//
 	// PUT /contact/{uuid}
 	UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (*Contact, error)
+	// UpdateProfile implements updateProfile operation.
+	//
+	// Update current user profile.
+	//
+	// PUT /profile
+	UpdateProfile(ctx context.Context, req *UserProfile) (*User, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Update user details.

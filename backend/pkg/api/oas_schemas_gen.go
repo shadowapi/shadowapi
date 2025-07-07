@@ -6002,6 +6002,8 @@ type SchedulerDeleteOK struct{}
 // Ref: #
 type SessionStatus struct {
 	Active bool `json:"active"`
+	// UUID of the authenticated user.
+	UUID OptUUID `json:"uuid"`
 }
 
 // GetActive returns the value of Active.
@@ -6009,9 +6011,19 @@ func (s *SessionStatus) GetActive() bool {
 	return s.Active
 }
 
+// GetUUID returns the value of UUID.
+func (s *SessionStatus) GetUUID() OptUUID {
+	return s.UUID
+}
+
 // SetActive sets the value of Active.
 func (s *SessionStatus) SetActive(val bool) {
 	s.Active = val
+}
+
+// SetUUID sets the value of UUID.
+func (s *SessionStatus) SetUUID(val OptUUID) {
+	s.UUID = val
 }
 
 // Data storage settings object.
@@ -7249,6 +7261,34 @@ func (s *UserMeta) init() UserMeta {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #
+type UserProfile struct {
+	// User's first name.
+	FirstName string `json:"first_name"`
+	// User's last name.
+	LastName string `json:"last_name"`
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *UserProfile) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *UserProfile) GetLastName() string {
+	return s.LastName
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *UserProfile) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *UserProfile) SetLastName(val string) {
+	s.LastName = val
 }
 
 // Ref: #
