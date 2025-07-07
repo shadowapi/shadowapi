@@ -148,12 +148,12 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		if s.auth.IgnoreHttpsError {
 			var urlErr *url.Error
 			if errors.As(err, &urlErr) {
-				s.log.Info("exchange code", "code", code, "error", err)
+				s.log.Info("exchange code", "code", code, "url", urlErr.URL, "err", urlErr.Err)
 				http.Error(w, "exchange failed", http.StatusInternalServerError)
 				return
 			}
 		}
-		s.log.Error("exchange code", "code", code, "error", err)
+		s.log.Error("exchange code", "code", code, "query", r.URL.RawQuery, "error", err)
 		http.Error(w, "exchange failed", http.StatusInternalServerError)
 		return
 	}

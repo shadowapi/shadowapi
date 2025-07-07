@@ -5,5 +5,9 @@ additionalProperties: false
 properties:
   active:
     type: boolean
+  uuid:
+    type: string
+    format: uuid
+    description: UUID of the authenticated user
 required:
   - active
