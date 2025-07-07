@@ -58,8 +58,8 @@ type Config struct {
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
 
+		// TODO @reactima remove this
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
-		// environments where the Zitadel instance may be unreachable. Defaults to false.
 		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR" envDefault:"false"`
 
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
@@ -79,6 +79,10 @@ type Config struct {
 
 			// ---- resource-server settings ----
 			// Audience API expects in incoming access-tokens
+			// Client Id of API application, can be found under Project > Client ID top, right conner
+			// Dont forget to add Web App(not API only) Project Redirect Settings
+			// http://localhost/auth/callback
+			// http://localhost/logout/callback
 			Audience string `json:"audience" yaml:"audience" env:"SA_ZITADEL_AUDIENCE"`
 
 			// ---- browser flow ----
