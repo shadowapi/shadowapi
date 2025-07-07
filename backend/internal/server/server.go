@@ -18,6 +18,7 @@ import (
 	"github.com/samber/do/v2"
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
+	zitadellog "github.com/shadowapi/shadowapi/backend/internal/auth/zitadel"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/session"
@@ -116,6 +117,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/logout" {
+		s.handleLogout(w, r)
+		return
+	}
+
 	if r.URL.Path == "/logout/callback" {
 		s.handleLogoutCallback(w, r)
 		return
@@ -153,7 +159,11 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		s.log.Error("exchange code", "code", code, "query", r.URL.RawQuery, "error", err)
+		zitadellog.LogExchangeError(s.log, err)
+		s.log.Error("exchange code",
+			"code", code,
+			"query", r.URL.RawQuery,
+			"token_url", fmt.Sprintf("%s/oauth/v2/token", s.cfg.Auth.Zitadel.InstanceURL))
 		http.Error(w, "exchange failed", http.StatusInternalServerError)
 		return
 	}
@@ -219,6 +229,34 @@ func (s *Server) handlePlainLogin(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 	_ = json.NewEncoder(w).Encode(map[string]bool{"active": true})
+}
+
+// handleLogout invalidates local session and redirects to the appropriate logout flow.
+func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("sa_session")
+	if err == nil {
+		s.sessions.DeleteSession(cookie.Value)
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   "sa_session",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	if err == nil {
+		http.Redirect(w, r, "/logout/callback", http.StatusFound)
+		return
+	}
+
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	redirect := fmt.Sprintf("%s://%s/logout/callback", scheme, r.Host)
+	target := fmt.Sprintf("%s/oidc/v1/end_session?post_logout_redirect_uri=%s",
+		s.cfg.Auth.Zitadel.InstanceURL, url.QueryEscape(redirect))
+	http.Redirect(w, r, target, http.StatusFound)
 }
 
 // handleLogoutCallback clears session cookie.
