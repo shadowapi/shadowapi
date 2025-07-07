@@ -865,57 +865,95 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'p': // Prefix: "pipeline"
+			case 'p': // Prefix: "p"
 				origElem := elem
-				if l := len("pipeline"); len(elem) >= l && elem[0:l] == "pipeline" {
+				if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handlePipelineListRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handlePipelineCreateRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'i': // Prefix: "ipeline"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("ipeline"); len(elem) >= l && elem[0:l] == "ipeline" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handlePipelineListRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handlePipelineCreateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "DELETE":
+								s.handlePipelineDeleteRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handlePipelineGetRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handlePipelineUpdateRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE,GET,PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "rofile"
+					origElem := elem
+					if l := len("rofile"); len(elem) >= l && elem[0:l] == "rofile" {
+						elem = elem[l:]
+					} else {
+						break
+					}
 
 					if len(elem) == 0 {
 						// Leaf node.
 						switch r.Method {
-						case "DELETE":
-							s.handlePipelineDeleteRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
 						case "GET":
-							s.handlePipelineGetRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
+							s.handleGetProfileRequest([0]string{}, elemIsEscaped, w, r)
 						case "PUT":
-							s.handlePipelineUpdateRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
+							s.handleUpdateProfileRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "DELETE,GET,PUT")
+							s.notAllowed(w, r, "GET,PUT")
 						}
 
 						return
@@ -2646,76 +2684,124 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'p': // Prefix: "pipeline"
+			case 'p': // Prefix: "p"
 				origElem := elem
-				if l := len("pipeline"); len(elem) >= l && elem[0:l] == "pipeline" {
+				if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = PipelineListOperation
-						r.summary = "List pipelines"
-						r.operationID = "pipeline-list"
-						r.pathPattern = "/pipeline"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = PipelineCreateOperation
-						r.summary = "Create a new pipeline"
-						r.operationID = "pipeline-create"
-						r.pathPattern = "/pipeline"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'i': // Prefix: "ipeline"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("ipeline"); len(elem) >= l && elem[0:l] == "ipeline" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = PipelineListOperation
+							r.summary = "List pipelines"
+							r.operationID = "pipeline-list"
+							r.pathPattern = "/pipeline"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = PipelineCreateOperation
+							r.summary = "Create a new pipeline"
+							r.operationID = "pipeline-create"
+							r.pathPattern = "/pipeline"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "DELETE":
+								r.name = PipelineDeleteOperation
+								r.summary = "Delete pipeline"
+								r.operationID = "pipeline-delete"
+								r.pathPattern = "/pipeline/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = PipelineGetOperation
+								r.summary = "Get pipeline by UUID"
+								r.operationID = "pipeline-get"
+								r.pathPattern = "/pipeline/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "PUT":
+								r.name = PipelineUpdateOperation
+								r.summary = "Update pipeline"
+								r.operationID = "pipeline-update"
+								r.pathPattern = "/pipeline/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "rofile"
+					origElem := elem
+					if l := len("rofile"); len(elem) >= l && elem[0:l] == "rofile" {
+						elem = elem[l:]
+					} else {
+						break
+					}
 
 					if len(elem) == 0 {
 						// Leaf node.
 						switch method {
-						case "DELETE":
-							r.name = PipelineDeleteOperation
-							r.summary = "Delete pipeline"
-							r.operationID = "pipeline-delete"
-							r.pathPattern = "/pipeline/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
 						case "GET":
-							r.name = PipelineGetOperation
-							r.summary = "Get pipeline by UUID"
-							r.operationID = "pipeline-get"
-							r.pathPattern = "/pipeline/{uuid}"
+							r.name = GetProfileOperation
+							r.summary = "Get current user profile"
+							r.operationID = "getProfile"
+							r.pathPattern = "/profile"
 							r.args = args
-							r.count = 1
+							r.count = 0
 							return r, true
 						case "PUT":
-							r.name = PipelineUpdateOperation
-							r.summary = "Update pipeline"
-							r.operationID = "pipeline-update"
-							r.pathPattern = "/pipeline/{uuid}"
+							r.name = UpdateProfileOperation
+							r.summary = "Update current user profile"
+							r.operationID = "updateProfile"
+							r.pathPattern = "/profile"
 							r.args = args
-							r.count = 1
+							r.count = 0
 							return r, true
 						default:
 							return

@@ -1,5 +1,11 @@
-import { type NavigateOptions, Route, Routes, useHref, useNavigate } from 'react-router-dom'
-import { defaultTheme, Provider } from '@adobe/react-spectrum'
+import {
+  type NavigateOptions,
+  Route,
+  Routes,
+  useHref,
+  useNavigate,
+} from "react-router-dom";
+import { defaultTheme, Provider } from "@adobe/react-spectrum";
 
 import {
   Dashboard,
@@ -22,19 +28,24 @@ import {
   UserEdit,
   Users,
   WorkerJobs,
-} from '@/pages'
-import { LoginPage, ProtectedRoute, SignupPage } from '@/shauth'
+  Profile,
+} from "@/pages";
+import { LoginPage, ProtectedRoute, SignupPage } from "@/shauth";
 
-declare module '@adobe/react-spectrum' {
+declare module "@adobe/react-spectrum" {
   interface RouterConfig {
-    routerOptions: NavigateOptions
+    routerOptions: NavigateOptions;
   }
 }
 
 function App() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
-    <Provider theme={defaultTheme} colorScheme="light" router={{ navigate, useHref }}>
+    <Provider
+      theme={defaultTheme}
+      colorScheme="light"
+      router={{ navigate, useHref }}
+    >
       <Routes>
         <Route
           path="/"
@@ -93,6 +104,14 @@ function App() {
           }
         />
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/logs"
           element={
@@ -210,7 +229,7 @@ function App() {
         />
       </Routes>
     </Provider>
-  )
+  );
 }
 
-export default App
+export default App;

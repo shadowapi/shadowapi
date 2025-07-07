@@ -5860,6 +5860,32 @@ func (s *PipelineNodePosition) SetY(val OptFloat64) {
 }
 
 // Ref: #
+type ProfileUpdate struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *ProfileUpdate) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *ProfileUpdate) GetLastName() string {
+	return s.LastName
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *ProfileUpdate) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *ProfileUpdate) SetLastName(val string) {
+	s.LastName = val
+}
+
+// Ref: #
 type Scheduler struct {
 	// Unique identifier.
 	UUID           OptString      `json:"uuid"`
