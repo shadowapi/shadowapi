@@ -364,6 +364,15 @@ func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetProfile implements getProfile operation.
+//
+// Get current user profile.
+//
+// GET /profile
+func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetUser implements getUser operation.
 //
 // Get user details.
@@ -811,6 +820,15 @@ func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionV
 //
 // PUT /contact/{uuid}
 func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (r *Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateProfile implements updateProfile operation.
+//
+// Update current user profile.
+//
+// PUT /profile
+func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *ProfileUpdate) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -62,3 +62,11 @@ WHERE uuid = sqlc.arg('uuid')::uuid;
 -- name: DeleteUser :exec
 DELETE FROM "user"
 WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: UpdateUserName :exec
+UPDATE "user"
+SET
+    first_name = sqlc.arg('first_name'),
+    last_name = sqlc.arg('last_name'),
+    updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;

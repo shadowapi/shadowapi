@@ -83,6 +83,8 @@ components:
       $ref: "components/worker_jobs.yaml"
     SessionStatus:
       $ref: "components/session_status.yaml"
+    ProfileUpdate:
+      $ref: "components/profile_update.yaml"
 
   securitySchemes:
     # Session cookie-based auth (for Zitadel sessions)
@@ -190,6 +192,8 @@ paths:
     $ref: "paths/contact.yaml"
   /contact/{uuid}:
     $ref: "paths/contact_uuid.yaml"
+  /profile:
+    $ref: "paths/profile.yaml"
   /user:
     $ref: "paths/user.yaml"
   /user/{uuid}:

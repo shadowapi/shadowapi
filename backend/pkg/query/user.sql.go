@@ -229,3 +229,23 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	)
 	return err
 }
+
+const updateUserName = `-- name: UpdateUserName :exec
+UPDATE "user"
+SET
+    first_name = $1,
+    last_name = $2,
+    updated_at = NOW()
+WHERE uuid = $3::uuid
+`
+
+type UpdateUserNameParams struct {
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	UUID      pgtype.UUID `json:"uuid"`
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.Exec(ctx, updateUserName, arg.FirstName, arg.LastName, arg.UUID)
+	return err
+}
