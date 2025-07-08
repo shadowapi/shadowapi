@@ -9,5 +9,8 @@ properties:
     type: string
     format: uuid
     description: UUID of the authenticated user
+  reason:
+    type: string
+    description: why the session is inactive
 required:
   - active

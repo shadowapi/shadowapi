@@ -10863,11 +10863,18 @@ func (s *SessionStatus) encodeFields(e *jx.Encoder) {
 			s.UUID.Encode(e)
 		}
 	}
+	{
+		if s.Reason.Set {
+			e.FieldStart("reason")
+			s.Reason.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfSessionStatus = [2]string{
+var jsonFieldsNameOfSessionStatus = [3]string{
 	0: "active",
 	1: "uuid",
+	2: "reason",
 }
 
 // Decode decodes SessionStatus from json.
@@ -10900,6 +10907,16 @@ func (s *SessionStatus) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "reason":
+			if err := func() error {
+				s.Reason.Reset()
+				if err := s.Reason.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reason\"")
 			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
