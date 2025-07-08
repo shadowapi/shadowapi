@@ -28,8 +28,8 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/session"
 	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
-        "github.com/shadowapi/shadowapi/backend/pkg/api"
-        "github.com/shadowapi/shadowapi/backend/pkg/query"
+	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 const getUserByEmailQuery = `SELECT
@@ -210,6 +210,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	ver, _ := r.Cookie("sa_pkce")
 
+	// 1) code → token (may include refresh, id_token, access_token)
 	tok, err := s.zitadel.ExchangeCode(r.Context(), code, func() string {
 		if ver != nil {
 			return ver.Value
@@ -223,6 +224,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	s.log.Debug("code exchanged", "access_exp", tok.Expiry)
 
+	// 2) we do **not** call /introspect here – decode the id_token we already got
 	rawID, ok := tok.Extra("id_token").(string)
 	if !ok || rawID == "" {
 		s.log.Warn("exchange: no id_token")
@@ -239,9 +241,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	s.log.Info("idToken", idToken)
 
-	// ---------------------------------------------------------------------
 	// pull standard OIDC claims
-	// ---------------------------------------------------------------------
 	subject := idToken.Subject()
 	if subject == "" {
 		http.Error(w, "token missing sub", http.StatusUnauthorized)
@@ -254,64 +254,63 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		email = fmt.Sprintf("%s@zitadel.local", subject)
 	}
 
-	// ---------------------------------------------------------------------
+	// 3) lookup / create user
 	// Upsert Zitadel user (disabled by default)
-	// ---------------------------------------------------------------------
-        q := query.New(s.handler.DB())
-        user, errUser := q.GetUserByZitadelSubject(
-                r.Context(),
-                pgtype.Text{String: subject, Valid: true},
-        )
-        if errors.Is(errUser, pgx.ErrNoRows) {
-                row := s.handler.DB().QueryRow(r.Context(), getUserByEmailQuery, email)
-                errEmail := row.Scan(
-                        &user.UUID,
-                        &user.Email,
-                        &user.Password,
-                        &user.FirstName,
-                        &user.LastName,
-                        &user.IsEnabled,
-                        &user.IsAdmin,
-                        &user.ZitadelSubject,
-                        &user.Meta,
-                        &user.CreatedAt,
-                        &user.UpdatedAt,
-                )
-                switch {
-                case errors.Is(errEmail, pgx.ErrNoRows):
-                        uuidv7 := uuid.Must(uuid.NewV7())
-                        user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
-                                UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
-                                Email:          email,
-                                Password:       "",
-                                FirstName:      "",
-                                LastName:       "",
-                                IsEnabled:      false,
-                                IsAdmin:        false,
-                                ZitadelSubject: pgtype.Text{String: subject, Valid: true},
-                                Meta:           []byte(`{}`),
-                        })
-                case errEmail != nil:
-                        errUser = errEmail
-                default:
-                        if !user.ZitadelSubject.Valid {
-                                user.ZitadelSubject = pgtype.Text{String: subject, Valid: true}
-                                errUser = q.UpdateUser(r.Context(), query.UpdateUserParams{
-                                        Email:          user.Email,
-                                        Password:       user.Password,
-                                        FirstName:      user.FirstName,
-                                        LastName:       user.LastName,
-                                        IsEnabled:      user.IsEnabled,
-                                        IsAdmin:        user.IsAdmin,
-                                        ZitadelSubject: user.ZitadelSubject,
-                                        Meta:           user.Meta,
-                                        UUID:           pgtype.UUID{Bytes: user.UUID, Valid: true},
-                                })
-                        } else {
-                                errUser = nil
-                        }
-                }
-        }
+	q := query.New(s.handler.DB())
+	user, errUser := q.GetUserByZitadelSubject(
+		r.Context(),
+		pgtype.Text{String: subject, Valid: true},
+	)
+	if errors.Is(errUser, pgx.ErrNoRows) {
+		row := s.handler.DB().QueryRow(r.Context(), getUserByEmailQuery, email)
+		errEmail := row.Scan(
+			&user.UUID,
+			&user.Email,
+			&user.Password,
+			&user.FirstName,
+			&user.LastName,
+			&user.IsEnabled,
+			&user.IsAdmin,
+			&user.ZitadelSubject,
+			&user.Meta,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+		switch {
+		case errors.Is(errEmail, pgx.ErrNoRows):
+			uuidv7 := uuid.Must(uuid.NewV7())
+			user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
+				UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
+				Email:          email,
+				Password:       "",
+				FirstName:      "",
+				LastName:       "",
+				IsEnabled:      false,
+				IsAdmin:        false,
+				ZitadelSubject: pgtype.Text{String: subject, Valid: true},
+				Meta:           []byte(`{}`),
+			})
+		case errEmail != nil:
+			errUser = errEmail
+		default:
+			if !user.ZitadelSubject.Valid {
+				user.ZitadelSubject = pgtype.Text{String: subject, Valid: true}
+				errUser = q.UpdateUser(r.Context(), query.UpdateUserParams{
+					Email:          user.Email,
+					Password:       user.Password,
+					FirstName:      user.FirstName,
+					LastName:       user.LastName,
+					IsEnabled:      user.IsEnabled,
+					IsAdmin:        user.IsAdmin,
+					ZitadelSubject: user.ZitadelSubject,
+					Meta:           user.Meta,
+					UUID:           pgtype.UUID{Bytes: user.UUID, Valid: true},
+				})
+			} else {
+				errUser = nil
+			}
+		}
+	}
 	if errUser != nil {
 		s.log.Error("user upsert", "err", errUser)
 		http.Error(w, "user store failed", http.StatusInternalServerError)
@@ -319,9 +318,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	s.log.Info("user upserted", "uid", user.UUID, "email", user.Email, "enabled", user.IsEnabled)
 
-	// ---------------------------------------------------------------------
-	// Session handling
-	// ---------------------------------------------------------------------
+	// 4) create local session – **always**, no external calls needed
 	// Always forward ZITADEL access token so the front-end can detect a
 	// successful external login even when the local account is still disabled.
 	http.SetCookie(w, &http.Cookie{
