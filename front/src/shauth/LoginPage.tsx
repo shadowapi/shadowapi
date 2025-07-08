@@ -9,6 +9,8 @@ export function LoginPage() {
   const session = useQuery(sessionOptions())
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
     if (session.data?.active) {
@@ -43,21 +45,32 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {errorMsg && (
+            <Text color="negative">{errorMsg}</Text>
+          )}
           <Button
             variant="primary"
             alignSelf="end"
             width="size-1250"
+            isDisabled={submitting}
             onPress={async () => {
+              setSubmitting(true)
+              setErrorMsg(null)
               const resp = await fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ email, password }),
               })
-              if (resp.ok) navigate('/')
+              setSubmitting(false)
+              if (resp.ok) {
+                navigate('/')
+              } else {
+                setErrorMsg('Invalid email or password')
+              }
             }}
           >
-            Login
+            {submitting ? 'Logging in...' : 'Login'}
           </Button>
           <Button variant="cta" alignSelf="end" marginTop="size-150" width="size-1250" onPress={zitadelLogin}>
             <span style={{ whiteSpace: 'nowrap' }}>Login with ZITADEL</span>
