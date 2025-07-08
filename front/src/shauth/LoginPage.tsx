@@ -27,7 +27,9 @@ export function LoginPage() {
     );
   }
 
-  const loginUrl = `${import.meta.env.VITE_ZITADEL_INSTANCE_URL}/oauth/v2/authorize?client_id=${import.meta.env.VITE_ZITADEL_CLIENT_ID}&response_type=code&scope=openid&redirect_uri=${encodeURIComponent(import.meta.env.VITE_ZITADEL_REDIRECT_URI)}`;
+  const zitadelLogin = () => {
+    window.location.href = "/login/zitadel";
+  };
 
   return (
     <Flex
@@ -78,9 +80,7 @@ export function LoginPage() {
             alignSelf="end"
             marginTop="size-150"
             width="size-1250"
-            onPress={() => {
-              window.location.href = loginUrl;
-            }}
+            onPress={zitadelLogin}
           >
             Login with ZITADEL
           </Button>
