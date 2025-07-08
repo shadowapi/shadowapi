@@ -33,10 +33,13 @@ func (h *Handler) PlainLogin(ctx context.Context, email, password string) (strin
 
 // SessionStatus implements session-status operation.
 func (h *Handler) SessionStatus(ctx context.Context) (*api.SessionStatus, error) {
+	log := h.log.With("handler", "SessionStatus")
 	id, ok := session.GetIdentity(ctx)
 	if !ok {
+		log.Debug("no identity in context")
 		return &api.SessionStatus{Active: false}, nil
 	}
+	log.Debug("session active", "uuid", id.ID)
 	out := api.SessionStatus{Active: true}
 	uid, err := gouuid.Parse(id.ID)
 	if err == nil {
