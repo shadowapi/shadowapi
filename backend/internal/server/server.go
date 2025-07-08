@@ -225,6 +225,8 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "id_token missing", http.StatusUnauthorized)
 		return
 	}
+	s.log.Info("rawID", rawID)
+
 	idToken, err := jwt.ParseString(rawID, jwt.WithVerify(false))
 	if err != nil {
 		s.log.Error("id_token parse", "err", err)
@@ -233,23 +235,34 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	s.log.Info("idToken", idToken)
 
-	sub, _ := idToken.Get("sub")
-	subject, _ := sub.(string)
+	// ---------------------------------------------------------------------
+	// pull standard OIDC claims
+	// ---------------------------------------------------------------------
+	subject := idToken.Subject()
 	if subject == "" {
 		http.Error(w, "token missing sub", http.StatusUnauthorized)
 		return
 	}
+	emailAny, _ := idToken.Get("email")
+	email, _ := emailAny.(string)
+	if email == "" {
+		// fallback to synthetic address (keeps previous behaviour)
+		email = fmt.Sprintf("%s@zitadel.local", subject)
+	}
 
-	// Upsert Zitadel users, should be disabled by default
-	// TODO extract email if presenting it in the id_token
-	// email info can be set in the Zitadel console
+	// ---------------------------------------------------------------------
+	// Upsert Zitadel user (disabled by default)
+	// ---------------------------------------------------------------------
 	q := query.New(s.handler.DB())
-	user, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: subject, Valid: true})
+	user, errUser := q.GetUserByZitadelSubject(
+		r.Context(),
+		pgtype.Text{String: subject, Valid: true},
+	)
 	if errors.Is(errUser, pgx.ErrNoRows) {
 		uuidv7 := uuid.Must(uuid.NewV7())
 		user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
 			UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
-			Email:          fmt.Sprintf("%s@zitadel.local", subject),
+			Email:          email,
 			IsEnabled:      false,
 			ZitadelSubject: pgtype.Text{String: subject, Valid: true},
 			Meta:           []byte(`{}`),
@@ -260,8 +273,27 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user store failed", http.StatusInternalServerError)
 		return
 	}
+	s.log.Info("user upserted", "uid", user.UUID, "email", user.Email, "enabled", user.IsEnabled)
 
-	s.log.Info("user upserted", "uid", user.UUID, "email", user.Email)
+	// ---------------------------------------------------------------------
+	// Session handling
+	// ---------------------------------------------------------------------
+	// Always forward ZITADEL access token so the front-end can detect a
+	// successful external login even when the local account is still disabled.
+	http.SetCookie(w, &http.Cookie{
+		Name:     "zitadel_access_token",
+		Value:    tok.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	if !user.IsEnabled {
+		// Do **not** establish a local session. Redirect back to the login
+		// page – the front-end will show the “User is disabled” banner.
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 
 	token := uuid.Must(uuid.NewV7()).String()
 	s.sessions.AddSession(token, user.UUID.String())
@@ -274,13 +306,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
-	http.SetCookie(w, &http.Cookie{ // pass the access token for APIs that still need it
-		Name:     "zitadel_access_token",
-		Value:    tok.AccessToken,
-		Path:     "/",
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
+
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 

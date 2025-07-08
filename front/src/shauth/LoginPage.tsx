@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Flex, Header, Link, Text, View } from '@adobe/react-spectrum'
 import { useQuery } from '@tanstack/react-query'
@@ -11,6 +11,11 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Detect “Zitadel cookie present but no active session” → disabled account.
+  const disabledByAdmin = useMemo(() => {
+    return !session.data?.active && document.cookie.split(';').some((c) => c.trim().startsWith('zitadel_access_token='))
+  }, [session.data])
 
   useEffect(() => {
     if (session.data?.active) {
@@ -45,9 +50,9 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {errorMsg && (
-            <Text color="negative">{errorMsg}</Text>
-          )}
+          {disabledByAdmin && <Text color="negative">User is disabled, contact Admin</Text>}
+
+          {errorMsg && <Text color="negative">{errorMsg}</Text>}
           <Button
             variant="primary"
             alignSelf="end"
