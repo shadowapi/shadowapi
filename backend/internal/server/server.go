@@ -18,6 +18,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 
 	"github.com/samber/do/v2"
 
@@ -169,29 +170,28 @@ func (s *Server) Shutdown() error {
 // ---------------- ZITADEL PKCE login flow ------------------------------------
 
 func (s *Server) handleZitadelLogin(w http.ResponseWriter, r *http.Request) {
-	verifier, challenge, err := newCodeVerifier()
+	ver, chal, err := newCodeVerifier()
 	if err != nil {
-		s.log.Error("pkce generation failed", "err", err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		s.log.Error("pkce", "err", err)
+		http.Error(w, "internal", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "sa_pkce",
-		Value:    verifier,
+		Value:    ver,
 		Path:     "/auth",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   r.TLS != nil,
 		MaxAge:   300,
 	})
-	state := fmt.Sprintf("%d", time.Now().UnixNano())
 	u := s.cfg.Auth.Zitadel.InstanceURL + "/oauth/v2/authorize?" + url.Values{
 		"client_id":             {s.cfg.Auth.Zitadel.Audience},
 		"response_type":         {"code"},
 		"scope":                 {"openid profile email"},
 		"redirect_uri":          {s.cfg.Auth.Zitadel.RedirectURI},
-		"state":                 {state},
-		"code_challenge":        {challenge},
+		"state":                 {fmt.Sprintf("%d", time.Now().UnixNano())},
+		"code_challenge":        {chal},
 		"code_challenge_method": {"S256"},
 	}.Encode()
 	http.Redirect(w, r, u, http.StatusFound)
@@ -204,93 +204,70 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing code", http.StatusBadRequest)
 		return
 	}
+	ver, _ := r.Cookie("sa_pkce")
 
-	verCookie, _ := r.Cookie("sa_pkce")
-	verifier := ""
-	if verCookie != nil {
-		verifier = verCookie.Value
-	}
-
-	tok, err := s.zitadel.ExchangeCode(r.Context(), code, verifier)
-	if err != nil {
-		if s.auth.IgnoreHttpsError {
-			var urlErr *url.Error
-			if errors.As(err, &urlErr) {
-				s.log.Info("exchange code", "code", code, "url", urlErr.URL, "err", urlErr.Err)
-				http.Error(w, "exchange failed", http.StatusInternalServerError)
-				return
-			}
+	tok, err := s.zitadel.ExchangeCode(r.Context(), code, func() string {
+		if ver != nil {
+			return ver.Value
 		}
+		return ""
+	}())
+	if err != nil {
 		zitadellog.LogExchangeError(s.log, err)
-		s.log.Error("exchange code",
-			"code", code,
-			"query", r.URL.RawQuery,
-			"token_url", fmt.Sprintf("%s/oauth/v2/token", s.cfg.Auth.Zitadel.InstanceURL))
 		http.Error(w, "exchange failed", http.StatusInternalServerError)
 		return
 	}
+	s.log.Debug("code exchanged", "access_exp", tok.Expiry)
 
-	s.log.Debug("code exchanged", "expiry", tok.Expiry)
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   "sa_pkce",
-		Value:  "",
-		Path:   "/auth",
-		MaxAge: -1,
-	})
-
-	// Associate Zitadel subject with a user record and create local session
-	var userID string
-	info, err := s.zitadel.Introspect(r.Context(), tok.AccessToken)
-	if err == nil {
-		s.log.Debug("introspect", "active", info.Active, "subject", info.Subject)
-	} else {
-		s.log.Error("introspect", "error", err)
+	rawID, ok := tok.Extra("id_token").(string)
+	if !ok || rawID == "" {
+		s.log.Warn("exchange: no id_token")
+		http.Error(w, "id_token missing", http.StatusUnauthorized)
+		return
 	}
-	if err == nil && info.Active {
-		q := query.New(s.handler.DB())
-		user, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: info.Subject, Valid: true})
-		if errors.Is(errUser, pgx.ErrNoRows) {
-			uid := uuid.Must(uuid.NewV7())
-			user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
-				UUID:           pgtype.UUID{Bytes: uid, Valid: true},
-				Email:          fmt.Sprintf("zitadel_%s@example.com", uid.String()),
-				Password:       "",
-				FirstName:      "",
-				LastName:       "",
-				IsEnabled:      true,
-				IsAdmin:        false,
-				ZitadelSubject: pgtype.Text{String: info.Subject, Valid: true},
-				Meta:           []byte(`{}`),
-			})
-			if errUser != nil {
-				s.log.Error("create user", "error", errUser)
-			} else {
-				s.log.Debug("created user", "uuid", uid)
-			}
-		} else if errUser != nil {
-			s.log.Error("lookup user", "error", errUser)
-		} else {
-			s.log.Debug("found user", "uuid", user.UUID)
-		}
-		if errUser == nil {
-			userID = user.UUID.String()
-		}
+	idToken, err := jwt.ParseString(rawID, jwt.WithVerify(false))
+	if err != nil {
+		s.log.Error("id_token parse", "err", err)
+		http.Error(w, "token parse failed", http.StatusUnauthorized)
+		return
 	}
-	if userID != "" {
-		token := uuid.Must(uuid.NewV7()).String()
-		s.sessions.AddSession(token, userID)
-		s.log.Debug("session created", "user", userID, "token", token)
-		http.SetCookie(w, &http.Cookie{
-			Name:     "sa_session",
-			Value:    token,
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
+	sub, _ := idToken.Get("sub")
+	subject, _ := sub.(string)
+	if subject == "" {
+		http.Error(w, "token missing sub", http.StatusUnauthorized)
+		return
+	}
+
+	q := query.New(s.handler.DB())
+	user, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: subject, Valid: true})
+	if errors.Is(errUser, pgx.ErrNoRows) {
+		uuidv7 := uuid.Must(uuid.NewV7())
+		user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
+			UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
+			Email:          fmt.Sprintf("%s@zitadel.local", subject),
+			IsEnabled:      true,
+			ZitadelSubject: pgtype.Text{String: subject, Valid: true},
+			Meta:           []byte(`{}`),
 		})
 	}
+	if errUser != nil {
+		s.log.Error("user upsert", "err", errUser)
+		http.Error(w, "user store failed", http.StatusInternalServerError)
+		return
+	}
+
+	token := uuid.Must(uuid.NewV7()).String()
+	s.sessions.AddSession(token, user.UUID.String())
+	s.log.Debug("session created", "uid", user.UUID, "token", token)
 
 	http.SetCookie(w, &http.Cookie{
+		Name:     "sa_session",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.SetCookie(w, &http.Cookie{ // pass the access token for APIs that still need it
 		Name:     "zitadel_access_token",
 		Value:    tok.AccessToken,
 		Path:     "/",

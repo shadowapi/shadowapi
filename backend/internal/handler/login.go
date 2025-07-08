@@ -35,15 +35,21 @@ func (h *Handler) PlainLogin(ctx context.Context, email, password string) (strin
 func (h *Handler) SessionStatus(ctx context.Context) (*api.SessionStatus, error) {
 	log := h.log.With("handler", "SessionStatus")
 	id, ok := session.GetIdentity(ctx)
-	if !ok {
-		log.Debug("no identity in context")
-		return &api.SessionStatus{Active: false}, nil
+	if ok {
+		log.Debug("session active", "uuid", id.ID)
+		out := api.SessionStatus{Active: true}
+		if uid, err := gouuid.Parse(id.ID); err == nil {
+			out.SetUUID(api.NewOptUUID(uid))
+		}
+		return &out, nil
 	}
-	log.Debug("session active", "uuid", id.ID)
-	out := api.SessionStatus{Active: true}
-	uid, err := gouuid.Parse(id.ID)
-	if err == nil {
-		out.SetUUID(api.NewOptUUID(uid))
+
+	reason := "unauthorized"
+	if s, ok := ctx.Value("auth_reason").(string); ok {
+		reason = s
 	}
+	log.Debug("session inactive", "reason", reason)
+	out := api.SessionStatus{Active: false}
+	out.SetReason(api.NewOptString(reason))
 	return &out, nil
 }

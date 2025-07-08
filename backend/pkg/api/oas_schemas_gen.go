@@ -6004,6 +6004,8 @@ type SessionStatus struct {
 	Active bool `json:"active"`
 	// UUID of the authenticated user.
 	UUID OptUUID `json:"uuid"`
+	// Why the session is inactive.
+	Reason OptString `json:"reason"`
 }
 
 // GetActive returns the value of Active.
@@ -6016,6 +6018,11 @@ func (s *SessionStatus) GetUUID() OptUUID {
 	return s.UUID
 }
 
+// GetReason returns the value of Reason.
+func (s *SessionStatus) GetReason() OptString {
+	return s.Reason
+}
+
 // SetActive sets the value of Active.
 func (s *SessionStatus) SetActive(val bool) {
 	s.Active = val
@@ -6024,6 +6031,11 @@ func (s *SessionStatus) SetActive(val bool) {
 // SetUUID sets the value of UUID.
 func (s *SessionStatus) SetUUID(val OptUUID) {
 	s.UUID = val
+}
+
+// SetReason sets the value of Reason.
+func (s *SessionStatus) SetReason(val OptString) {
+	s.Reason = val
 }
 
 // Data storage settings object.
