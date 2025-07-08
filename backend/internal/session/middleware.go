@@ -10,6 +10,7 @@ import (
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/samber/do/v2"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
@@ -62,20 +63,33 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		m.sessionsMu.RLock()
 		if uid, ok := m.sessions[cookie.Value]; ok {
 			m.sessionsMu.RUnlock()
+			m.log.Debug("session cookie hit", "token", cookie.Value, "uid", uid)
 			req.SetContext(WithIdentity(req.Context, Identity{ID: uid}))
 			return next(req)
 		}
 		m.sessionsMu.RUnlock()
+		m.log.Debug("session cookie miss", "token", cookie.Value)
 	}
 
 	// 3) Validate Zitadel token if present
 	if token := m.zitadelToken(r); token != "" {
-		if info, err := m.zitadel.Introspect(req.Context, token); err == nil && info.Active {
-			q := query.New(m.db)
-			if user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true}); err == nil {
-				req.SetContext(WithIdentity(req.Context, Identity{ID: user.UUID.String()}))
-				return next(req)
+		m.log.Debug("zitadel token present")
+		if info, err := m.zitadel.Introspect(req.Context, token); err == nil {
+			m.log.Debug("zitadel introspect", "active", info.Active, "subject", info.Subject)
+			if info.Active {
+				q := query.New(m.db)
+				if user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true}); err == nil {
+					m.log.Debug("found user by subject", "uuid", user.UUID)
+					req.SetContext(WithIdentity(req.Context, Identity{ID: user.UUID.String()}))
+					return next(req)
+				} else if errors.Is(err, pgx.ErrNoRows) {
+					m.log.Debug("no user for subject", "subject", info.Subject)
+				} else {
+					m.log.Error("lookup user", "error", err)
+				}
 			}
+		} else {
+			m.log.Error("introspect token", "error", err)
 		}
 	}
 

@@ -230,6 +230,8 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.log.Debug("code exchanged", "expiry", tok.Expiry)
+
 	http.SetCookie(w, &http.Cookie{
 		Name:   "sa_pkce",
 		Value:  "",
@@ -240,6 +242,11 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	// Associate Zitadel subject with a user record and create local session
 	var userID string
 	info, err := s.zitadel.Introspect(r.Context(), tok.AccessToken)
+	if err == nil {
+		s.log.Debug("introspect", "active", info.Active, "subject", info.Subject)
+	} else {
+		s.log.Error("introspect", "error", err)
+	}
 	if err == nil && info.Active {
 		q := query.New(s.handler.DB())
 		user, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: info.Subject, Valid: true})
@@ -258,9 +265,13 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 			})
 			if errUser != nil {
 				s.log.Error("create user", "error", errUser)
+			} else {
+				s.log.Debug("created user", "uuid", uid)
 			}
 		} else if errUser != nil {
 			s.log.Error("lookup user", "error", errUser)
+		} else {
+			s.log.Debug("found user", "uuid", user.UUID)
 		}
 		if errUser == nil {
 			userID = user.UUID.String()
@@ -269,6 +280,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	if userID != "" {
 		token := uuid.Must(uuid.NewV7()).String()
 		s.sessions.AddSession(token, userID)
+		s.log.Debug("session created", "user", userID, "token", token)
 		http.SetCookie(w, &http.Cookie{
 			Name:     "sa_session",
 			Value:    token,
