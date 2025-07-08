@@ -1318,6 +1318,8 @@ export interface components {
              * @description UUID of the authenticated user
              */
             uuid?: string;
+            /** @description why the session is inactive */
+            reason?: string;
         };
         pipeline_node: {
             id: string;

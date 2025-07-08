@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 
 const init = async () => {
-  const basename = import.meta.env.VITE_APP_BASENAME || '/ui'
+  const basename = import.meta.env.VITE_APP_BASENAME || '/'
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <BrowserRouter basename={basename}>

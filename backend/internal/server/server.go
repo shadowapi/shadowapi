@@ -231,6 +231,8 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "token parse failed", http.StatusUnauthorized)
 		return
 	}
+	s.log.Info("idToken", idToken)
+
 	sub, _ := idToken.Get("sub")
 	subject, _ := sub.(string)
 	if subject == "" {
@@ -238,6 +240,9 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Upsert Zitadel users, should be disabled by default
+	// TODO extract email if presenting it in the id_token
+	// email info can be set in the Zitadel console
 	q := query.New(s.handler.DB())
 	user, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: subject, Valid: true})
 	if errors.Is(errUser, pgx.ErrNoRows) {
@@ -245,7 +250,7 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
 			UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
 			Email:          fmt.Sprintf("%s@zitadel.local", subject),
-			IsEnabled:      true,
+			IsEnabled:      false,
 			ZitadelSubject: pgtype.Text{String: subject, Valid: true},
 			Meta:           []byte(`{}`),
 		})
@@ -255,6 +260,8 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user store failed", http.StatusInternalServerError)
 		return
 	}
+
+	s.log.Info("user upserted", "uid", user.UUID, "email", user.Email)
 
 	token := uuid.Must(uuid.NewV7()).String()
 	s.sessions.AddSession(token, user.UUID.String())
