@@ -2,6 +2,9 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -39,6 +43,21 @@ type Server struct {
 	sessions     *session.Middleware
 	auth         *auth.Auth
 }
+
+// ----- helper for PKCE -------------------------------------------------------
+
+func newCodeVerifier() (string, string, error) {
+	b := make([]byte, 43) // 256-bit entropy
+	if _, err := rand.Read(b); err != nil {
+		return "", "", err
+	}
+	verifier := base64.RawURLEncoding.EncodeToString(b)
+	sum := sha256.Sum256([]byte(verifier))
+	challenge := base64.RawURLEncoding.EncodeToString(sum[:])
+	return verifier, challenge, nil
+}
+
+// -----------------------------------------------------------------------------
 
 // Provide server instance for the dependency injector
 func Provide(i do.Injector) (*Server, error) {
@@ -107,6 +126,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/login/zitadel" {
+		s.handleZitadelLogin(w, r)
+		return
+	}
+
 	if r.URL.Path == "/auth/callback" {
 		s.handleAuthCallback(w, r)
 		return
@@ -142,6 +166,37 @@ func (s *Server) Shutdown() error {
 	return s.listener.Close()
 }
 
+// ---------------- ZITADEL PKCE login flow ------------------------------------
+
+func (s *Server) handleZitadelLogin(w http.ResponseWriter, r *http.Request) {
+	verifier, challenge, err := newCodeVerifier()
+	if err != nil {
+		s.log.Error("pkce generation failed", "err", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "sa_pkce",
+		Value:    verifier,
+		Path:     "/auth",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   r.TLS != nil,
+		MaxAge:   300,
+	})
+	state := fmt.Sprintf("%d", time.Now().UnixNano())
+	u := s.cfg.Auth.Zitadel.InstanceURL + "/oauth/v2/authorize?" + url.Values{
+		"client_id":             {s.cfg.Auth.Zitadel.Audience},
+		"response_type":         {"code"},
+		"scope":                 {"openid profile email"},
+		"redirect_uri":          {s.cfg.Auth.Zitadel.RedirectURI},
+		"state":                 {state},
+		"code_challenge":        {challenge},
+		"code_challenge_method": {"S256"},
+	}.Encode()
+	http.Redirect(w, r, u, http.StatusFound)
+}
+
 // handleAuthCallback exchanges the code for a token and sets session cookie.
 func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
@@ -149,7 +204,14 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing code", http.StatusBadRequest)
 		return
 	}
-	tok, err := s.zitadel.ExchangeCode(r.Context(), code)
+
+	verCookie, _ := r.Cookie("sa_pkce")
+	verifier := ""
+	if verCookie != nil {
+		verifier = verCookie.Value
+	}
+
+	tok, err := s.zitadel.ExchangeCode(r.Context(), code, verifier)
 	if err != nil {
 		if s.auth.IgnoreHttpsError {
 			var urlErr *url.Error
@@ -167,6 +229,13 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "exchange failed", http.StatusInternalServerError)
 		return
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   "sa_pkce",
+		Value:  "",
+		Path:   "/auth",
+		MaxAge: -1,
+	})
 
 	// Associate Zitadel subject with a user record
 	info, err := s.zitadel.Introspect(r.Context(), tok.AccessToken)

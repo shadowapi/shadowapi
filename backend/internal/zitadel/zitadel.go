@@ -24,21 +24,26 @@ type Client struct {
 // Provide creates a new Client for dependency injection
 func Provide(c *config.Config) *Client {
 	oc := &oauth2.Config{
-		ClientID:     c.Auth.Zitadel.Audience,
-		ClientSecret: "",
+		ClientID: c.Auth.Zitadel.Audience, // PKCE → no secret here
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/oauth/v2/authorize", c.Auth.Zitadel.InstanceURL),
 			TokenURL: fmt.Sprintf("%s/oauth/v2/token", c.Auth.Zitadel.InstanceURL),
 		},
 		RedirectURL: c.Auth.Zitadel.RedirectURI,
-		Scopes:      []string{"urn:zitadel:iam:org:project:id:zitadel:aud"},
+		Scopes:      []string{"openid", "profile", "email"},
 	}
 	return &Client{cfg: c, oauth2: oc, client: oc.Client(context.Background(), nil)}
 }
 
-// ExchangeCode exchanges authorization code for tokens
-func (c *Client) ExchangeCode(ctx context.Context, code string) (*oauth2.Token, error) {
-	tok, err := c.oauth2.Exchange(ctx, code)
+// ExchangeCode optionally forwards a PKCE code_verifier.
+func (c *Client) ExchangeCode(ctx context.Context, code, verifier string) (*oauth2.Token, error) {
+	var tok *oauth2.Token
+	var err error
+	if verifier != "" {
+		tok, err = c.oauth2.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", verifier))
+	} else {
+		tok, err = c.oauth2.Exchange(ctx, code)
+	}
 	if err != nil {
 		if rErr, ok := err.(*oauth2.RetrieveError); ok {
 			return nil, fmt.Errorf("exchange status %d: %s", rErr.Response.StatusCode, strings.TrimSpace(string(rErr.Body)))
