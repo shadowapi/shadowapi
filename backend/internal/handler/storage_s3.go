@@ -129,7 +129,7 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 func QToStorageS3(row query.GetStorageRow) (*api.StorageS3, error) {
 	var stored api.StorageS3
 	if err := json.Unmarshal(row.Storage.Settings, &stored); err != nil {
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings", err.Error()))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal s3 settings: %w", err))
 	}
 	stored.UUID = api.NewOptString(row.Storage.UUID.String())
 	stored.Name = row.Storage.Name

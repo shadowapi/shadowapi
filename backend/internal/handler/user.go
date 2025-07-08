@@ -30,7 +30,7 @@ func (h *Handler) CreateUser(ctx context.Context, req *api.User) (*api.User, err
 			var err error
 			metaBytes, err = json.Marshal(req.Meta.Value)
 			if err != nil {
-				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal user meta", err.Error()))
+				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal user meta: %w", err))
 			}
 		}
 
@@ -45,7 +45,7 @@ func (h *Handler) CreateUser(ctx context.Context, req *api.User) (*api.User, err
 			Meta:      metaBytes,
 		})
 		if err != nil {
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create user", err.Error()))
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create user: %w", err))
 		}
 
 		// Convert the stored meta bytes into an api.UserMeta.
@@ -201,7 +201,7 @@ func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.Upda
 		if req.Meta.IsSet() && req.Meta.Value != nil {
 			b, err := json.Marshal(req.Meta.Value)
 			if err != nil {
-				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal user meta", err.Error()))
+				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal user meta: %w", err))
 			}
 			updateParams.Meta = b
 		} else {
