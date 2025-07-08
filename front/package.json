@@ -16,6 +16,7 @@
     "@adobe/react-spectrum": "^3.41.0",
     "@react-spectrum/tree": "^3.0.0-beta.3",
     "@spectrum-icons/illustrations": "^3.6.21",
+    "@spectrum-icons/workflow": "^4.2.22",
     "@tanstack/react-query": "^5.66.9",
     "@xyflow/react": "^12.4.3",
     "openapi-fetch": "^0.13.4",
