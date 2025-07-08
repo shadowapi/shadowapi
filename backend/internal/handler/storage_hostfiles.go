@@ -135,7 +135,7 @@ func (h *Handler) StorageHostfilesUpdate(ctx context.Context, req *api.StorageHo
 func QToStorageHostfile(row query.GetStorageRow) (*api.StorageHostfiles, error) {
 	var stored api.StorageHostfiles
 	if err := json.Unmarshal(row.Storage.Settings, &stored); err != nil {
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings", err.Error()))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal hostfiles settings: %w", err))
 	}
 	stored.UUID = api.NewOptString(row.Storage.UUID.String())
 	stored.Name = row.Storage.Name

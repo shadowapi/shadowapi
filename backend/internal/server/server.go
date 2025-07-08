@@ -237,14 +237,15 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	})
 
-	// Associate Zitadel subject with a user record
+	// Associate Zitadel subject with a user record and create local session
+	var userID string
 	info, err := s.zitadel.Introspect(r.Context(), tok.AccessToken)
 	if err == nil && info.Active {
 		q := query.New(s.handler.DB())
-		_, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: info.Subject, Valid: true})
+		user, errUser := q.GetUserByZitadelSubject(r.Context(), pgtype.Text{String: info.Subject, Valid: true})
 		if errors.Is(errUser, pgx.ErrNoRows) {
 			uid := uuid.Must(uuid.NewV7())
-			_, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
+			user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
 				UUID:           pgtype.UUID{Bytes: uid, Valid: true},
 				Email:          fmt.Sprintf("zitadel_%s@example.com", uid.String()),
 				Password:       "",
@@ -261,6 +262,20 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		} else if errUser != nil {
 			s.log.Error("lookup user", "error", errUser)
 		}
+		if errUser == nil {
+			userID = user.UUID.String()
+		}
+	}
+	if userID != "" {
+		token := uuid.Must(uuid.NewV7()).String()
+		s.sessions.AddSession(token, userID)
+		http.SetCookie(w, &http.Cookie{
+			Name:     "sa_session",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		})
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -302,9 +317,9 @@ func (s *Server) handlePlainLogin(w http.ResponseWriter, r *http.Request) {
 
 // handleLogout invalidates local session and redirects to the appropriate logout flow.
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("sa_session")
-	if err == nil {
-		s.sessions.DeleteSession(cookie.Value)
+	sessCookie, errSess := r.Cookie("sa_session")
+	if errSess == nil {
+		s.sessions.DeleteSession(sessCookie.Value)
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:   "sa_session",
@@ -313,19 +328,27 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	})
 
-	if err == nil {
-		http.Redirect(w, r, "/logout/callback", http.StatusFound)
+	_, zitadelCookieErr := r.Cookie("zitadel_access_token")
+	http.SetCookie(w, &http.Cookie{
+		Name:   "zitadel_access_token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	if zitadelCookieErr == nil {
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+		redirect := fmt.Sprintf("%s://%s/logout/callback", scheme, r.Host)
+		target := fmt.Sprintf("%s/oidc/v1/end_session?post_logout_redirect_uri=%s",
+			s.cfg.Auth.Zitadel.InstanceURL, url.QueryEscape(redirect))
+		http.Redirect(w, r, target, http.StatusFound)
 		return
 	}
 
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-	redirect := fmt.Sprintf("%s://%s/logout/callback", scheme, r.Host)
-	target := fmt.Sprintf("%s/oidc/v1/end_session?post_logout_redirect_uri=%s",
-		s.cfg.Auth.Zitadel.InstanceURL, url.QueryEscape(redirect))
-	http.Redirect(w, r, target, http.StatusFound)
+	http.Redirect(w, r, "/logout/callback", http.StatusFound)
 }
 
 // handleLogoutCallback clears session cookie.
@@ -336,6 +359,12 @@ func (s *Server) handleLogoutCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:   "sa_session",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:   "zitadel_access_token",
 		Value:  "",
 		Path:   "/",
 		MaxAge: -1,

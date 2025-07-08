@@ -57,28 +57,25 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		return next(req)
 	}
 
-	// Check for Zitadel token either in header or cookie
-	if token := m.zitadelToken(r); token != "" {
-		info, err := m.zitadel.Introspect(req.Context, token)
-		if err == nil && info.Active {
-			q := query.New(m.db)
-			user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true})
-			if err == nil {
-				newCtx := WithIdentity(req.Context, Identity{ID: user.UUID.String()})
-				req.SetContext(newCtx)
-				return next(req)
-			}
-		}
-	}
-
+	// 2) Local session cookie
 	if cookie, err := r.Cookie("sa_session"); err == nil {
 		m.sessionsMu.RLock()
-		uid, ok := m.sessions[cookie.Value]
-		m.sessionsMu.RUnlock()
-		if ok {
-			newCtx := WithIdentity(req.Context, Identity{ID: uid})
-			req.SetContext(newCtx)
+		if uid, ok := m.sessions[cookie.Value]; ok {
+			m.sessionsMu.RUnlock()
+			req.SetContext(WithIdentity(req.Context, Identity{ID: uid}))
 			return next(req)
+		}
+		m.sessionsMu.RUnlock()
+	}
+
+	// 3) Validate Zitadel token if present
+	if token := m.zitadelToken(r); token != "" {
+		if info, err := m.zitadel.Introspect(req.Context, token); err == nil && info.Active {
+			q := query.New(m.db)
+			if user, err := q.GetUserByZitadelSubject(req.Context, pgtype.Text{String: info.Subject, Valid: true}); err == nil {
+				req.SetContext(WithIdentity(req.Context, Identity{ID: user.UUID.String()}))
+				return next(req)
+			}
 		}
 	}
 

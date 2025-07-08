@@ -136,7 +136,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 func QToStoragePostgres(row query.GetStorageRow) (*api.StoragePostgres, error) {
 	var s api.StoragePostgres
 	if err := json.Unmarshal(row.Storage.Settings, &s); err != nil {
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings", err.Error()))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings: %w", err))
 	}
 	s.UUID = api.NewOptString(row.Storage.UUID.String())
 	s.Name = row.Storage.Name
