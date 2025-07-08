@@ -28,9 +28,13 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/session"
 	"github.com/shadowapi/shadowapi/backend/internal/zitadel"
-	"github.com/shadowapi/shadowapi/backend/pkg/api"
-	"github.com/shadowapi/shadowapi/backend/pkg/query"
+        "github.com/shadowapi/shadowapi/backend/pkg/api"
+        "github.com/shadowapi/shadowapi/backend/pkg/query"
 )
+
+const getUserByEmailQuery = `SELECT
+    uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+FROM "user" WHERE email=$1`
 
 type Server struct {
 	cfg *config.Config
@@ -253,21 +257,61 @@ func (s *Server) handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	// ---------------------------------------------------------------------
 	// Upsert Zitadel user (disabled by default)
 	// ---------------------------------------------------------------------
-	q := query.New(s.handler.DB())
-	user, errUser := q.GetUserByZitadelSubject(
-		r.Context(),
-		pgtype.Text{String: subject, Valid: true},
-	)
-	if errors.Is(errUser, pgx.ErrNoRows) {
-		uuidv7 := uuid.Must(uuid.NewV7())
-		user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
-			UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
-			Email:          email,
-			IsEnabled:      false,
-			ZitadelSubject: pgtype.Text{String: subject, Valid: true},
-			Meta:           []byte(`{}`),
-		})
-	}
+        q := query.New(s.handler.DB())
+        user, errUser := q.GetUserByZitadelSubject(
+                r.Context(),
+                pgtype.Text{String: subject, Valid: true},
+        )
+        if errors.Is(errUser, pgx.ErrNoRows) {
+                row := s.handler.DB().QueryRow(r.Context(), getUserByEmailQuery, email)
+                errEmail := row.Scan(
+                        &user.UUID,
+                        &user.Email,
+                        &user.Password,
+                        &user.FirstName,
+                        &user.LastName,
+                        &user.IsEnabled,
+                        &user.IsAdmin,
+                        &user.ZitadelSubject,
+                        &user.Meta,
+                        &user.CreatedAt,
+                        &user.UpdatedAt,
+                )
+                switch {
+                case errors.Is(errEmail, pgx.ErrNoRows):
+                        uuidv7 := uuid.Must(uuid.NewV7())
+                        user, errUser = q.CreateUser(r.Context(), query.CreateUserParams{
+                                UUID:           pgtype.UUID{Bytes: uuidv7, Valid: true},
+                                Email:          email,
+                                Password:       "",
+                                FirstName:      "",
+                                LastName:       "",
+                                IsEnabled:      false,
+                                IsAdmin:        false,
+                                ZitadelSubject: pgtype.Text{String: subject, Valid: true},
+                                Meta:           []byte(`{}`),
+                        })
+                case errEmail != nil:
+                        errUser = errEmail
+                default:
+                        if !user.ZitadelSubject.Valid {
+                                user.ZitadelSubject = pgtype.Text{String: subject, Valid: true}
+                                errUser = q.UpdateUser(r.Context(), query.UpdateUserParams{
+                                        Email:          user.Email,
+                                        Password:       user.Password,
+                                        FirstName:      user.FirstName,
+                                        LastName:       user.LastName,
+                                        IsEnabled:      user.IsEnabled,
+                                        IsAdmin:        user.IsAdmin,
+                                        ZitadelSubject: user.ZitadelSubject,
+                                        Meta:           user.Meta,
+                                        UUID:           pgtype.UUID{Bytes: user.UUID, Valid: true},
+                                })
+                        } else {
+                                errUser = nil
+                        }
+                }
+        }
 	if errUser != nil {
 		s.log.Error("user upsert", "err", errUser)
 		http.Error(w, "user store failed", http.StatusInternalServerError)
