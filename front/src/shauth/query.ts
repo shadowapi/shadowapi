@@ -7,6 +7,9 @@ export const sessionOptions = () => {
       const resp = await fetch("/api/v1/session", {
         credentials: "include",
       });
+      if (resp.status === 401) {
+        return { active: false };
+      }
       if (!resp.ok) {
         throw new Error("session check failed");
       }
