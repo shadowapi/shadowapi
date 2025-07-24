@@ -17,6 +17,7 @@ RUN go build -o /shadowapi ./cmd/shadowapi
 FROM golang:1.24-alpine
 WORKDIR /app
 COPY --from=builder /shadowapi ./shadowapi
+COPY front/dist ./dist
 
 EXPOSE 8080
 CMD ["/app/shadowapi", "serve"]

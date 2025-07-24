@@ -12,6 +12,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -122,12 +124,31 @@ func (s *Server) Run(ctx context.Context) error {
 // ServeHTTP implements the http.Handler interface to wrap the API server
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(map[string]string{"message": "ok"}); err != nil {
-			s.log.Error("failed to encode JSON response", "error", err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		dir := s.cfg.FrontendAssetsDir
+		if dir == "" {
+			// assets dir not configured
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(map[string]string{"message": "dist folder is missing"}); err != nil {
+				s.log.Error("failed to encode JSON response", "error", err.Error())
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+			return
 		}
+		indexPath := filepath.Join(dir, "index.html")
+		info, err := os.Stat(indexPath)
+		if err != nil || info.IsDir() {
+			// index.html not found or is not a file
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(map[string]string{"message": "index.html not found or is not a file"}); err != nil {
+				s.log.Error("index.html not found or is not a file", "error", err.Error())
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+			return
+		}
+		// serve existing index.html
+		http.ServeFile(w, r, indexPath)
 		return
 	}
 
