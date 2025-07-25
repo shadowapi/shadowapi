@@ -4,7 +4,8 @@ log:
 server:
     host: ""
     port: 0
-db: {}
+db:
+    uri: "postgres://shadowapi:shadowapi@localhost:5432/shadowapi?sslmode=disable"
 api:
     specs_dir: ""
 jwt: {}
@@ -15,15 +16,18 @@ auth:
     ignore_https_error: false
     bearer_token: ""
     zitadel:
-        instance_url: ""
-        service_client_id: ""
-        service_client_secret: ""
-        api_key_file: ""
-        audience: ""
-        redirect_uri: ""
-        intercepted_paths: []
+        instance_url: "https://example.zitadel.cloud"
+        service_client_id: "client-id"
+        service_client_secret: "client-secret"
+        api_key_file: "./api-key.json"
+        audience: "api-client-id"
+        redirect_uri: "http://localtest.me/auth/callback"
+        intercepted_paths:
+            - "/.well-known/"
+            - "/oauth/"
+            - "/oidc/"
 worker:
     max_count: 0
 queue:
-    url: ""
-    prefix: ""
+    url: "nats://localhost:4222"
+    prefix: "shadowapi"
