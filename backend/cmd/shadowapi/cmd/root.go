@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 
@@ -113,9 +114,12 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 }
 
 func init() {
-	if envPath := os.Getenv("SA_CONFIG_PATH"); envPath != "" {
+	envPath := os.Getenv("SA_CONFIG_PATH")
+	slog.Info("env SA_CONFIG_PATH", "value", envPath)
+	if envPath != "" {
 		defaultConfigPath = envPath
 	}
+	slog.Info("config path in use", "path", defaultConfigPath)
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
