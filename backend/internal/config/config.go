@@ -99,8 +99,10 @@ type Config struct {
 
 	// Queue settings for the NATS queue
 	Queue struct {
-		URL    string `yaml:"url" json:"url" env:"SA_QUEUE_URL" envDefault:"nats://sa-nats:4222"`
-		Prefix string `yaml:"prefix" json:"prefix" env:"SA_QUEUE_PREFIX" envDefault:"shadowapi"`
+		URL      string `yaml:"url" json:"url" env:"SA_QUEUE_URL" envDefault:"nats://sa-nats:4222"`
+		Prefix   string `yaml:"prefix" json:"prefix" env:"SA_QUEUE_PREFIX" envDefault:"shadowapi"`
+		Username string `yaml:"username" json:"username" env:"SA_QUEUE_USERNAME"`
+		Password string `yaml:"password" json:"password" env:"SA_QUEUE_PASSWORD"`
 	} `yaml:"queue" json:"queue"`
 
 	// Add cfg.Telegram.AppID, cfg.Telegram.AppHash

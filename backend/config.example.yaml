@@ -31,3 +31,5 @@ worker:
 queue:
     url: "nats://localhost:4222"
     prefix: "shadowapi"
+    username: ""
+    password: ""

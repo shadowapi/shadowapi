@@ -29,7 +29,13 @@ func Provide(injector do.Injector) (*Queue, error) {
 	log := do.MustInvoke[*slog.Logger](injector).With("service", "queue")
 
 	log.Debug("connecting to NATS server", "url", cfg.Queue.URL)
-	nc, err := nats.Connect(cfg.Queue.URL)
+	
+	var opts []nats.Option
+	if cfg.Queue.Username != "" {
+		opts = append(opts, nats.UserInfo(cfg.Queue.Username, cfg.Queue.Password))
+	}
+	nc, err := nats.Connect(cfg.Queue.URL, opts...)
+
 	if err != nil {
 		log.Error("failed to connect to NATS server", "error", err)
 		return nil, err
