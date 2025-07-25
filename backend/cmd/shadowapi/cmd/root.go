@@ -23,7 +23,9 @@ import (
 )
 
 var (
-	// defaultConfigPath is the default path to the config file
+	// defaultConfigPath is the default path to the config file. It can be
+	// overridden by the SA_CONFIG_PATH environment variable or the --config
+	// flag.
 	defaultConfigPath string
 
 	// injector is the dependency injector
@@ -124,7 +126,7 @@ func init() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	pFlags := rootCmd.PersistentFlags()
-	pFlags.StringVar(&defaultConfigPath, "config", "config.yaml", "config file")
+	pFlags.StringVar(&defaultConfigPath, "config", defaultConfigPath, "config file")
 
 	pFlags.String("log-level", "info", "log level, one of: debug, info, warn, error")
 	if err := viper.BindPFlag("log.level", pFlags.Lookup("log-level")); err != nil {
