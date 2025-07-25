@@ -44,3 +44,10 @@ func (a *Auth) HandleZitadelCookieAuth(
 ) (context.Context, error) {
 	return ctx, nil
 }
+
+// HandlePlainCookieAuth handles session cookie authentication for plain login
+func (a *Auth) HandlePlainCookieAuth(
+	ctx context.Context, operationName api.OperationName, t api.PlainCookieAuth,
+) (context.Context, error) {
+	return ctx, nil
+}

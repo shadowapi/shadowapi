@@ -93,6 +93,12 @@ components:
       in: cookie
       name: zitadel_access_token
 
+    # Session cookie-based for plain login
+    PlainCookieAuth:
+      type: apiKey
+      in: cookie
+      name: sa_session
+
     # Bearer token-based auth
     BearerAuth:
       type: http
@@ -210,6 +216,7 @@ servers:
     url: "http://localtest.me/api/v1"
 
 security:
-  # Logical OR of ZitadelCookieAuth and BearerAuth
+  # Logical OR of ZitadelCookieAuth and BearerAuth and PlainCookieAuth
   - ZitadelCookieAuth: []
   - BearerAuth: []
+  - PlainCookieAuth: []

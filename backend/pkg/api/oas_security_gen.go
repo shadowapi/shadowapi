@@ -16,6 +16,8 @@ import (
 type SecurityHandler interface {
 	// HandleBearerAuth handles BearerAuth security.
 	HandleBearerAuth(ctx context.Context, operationName OperationName, t BearerAuth) (context.Context, error)
+	// HandlePlainCookieAuth handles PlainCookieAuth security.
+	HandlePlainCookieAuth(ctx context.Context, operationName OperationName, t PlainCookieAuth) (context.Context, error)
 	// HandleZitadelCookieAuth handles ZitadelCookieAuth security.
 	HandleZitadelCookieAuth(ctx context.Context, operationName OperationName, t ZitadelCookieAuth) (context.Context, error)
 }
@@ -50,6 +52,27 @@ func (s *Server) securityBearerAuth(ctx context.Context, operationName Operation
 	}
 	return rctx, true, err
 }
+func (s *Server) securityPlainCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
+	var t PlainCookieAuth
+	const parameterName = "sa_session"
+	var value string
+	switch cookie, err := req.Cookie(parameterName); {
+	case err == nil: // if NO error
+		value = cookie.Value
+	case errors.Is(err, http.ErrNoCookie):
+		return ctx, false, nil
+	default:
+		return nil, false, errors.Wrap(err, "get cookie value")
+	}
+	t.APIKey = value
+	rctx, err := s.sec.HandlePlainCookieAuth(ctx, operationName, t)
+	if errors.Is(err, ogenerrors.ErrSkipServerSecurity) {
+		return nil, false, nil
+	} else if err != nil {
+		return nil, false, err
+	}
+	return rctx, true, err
+}
 func (s *Server) securityZitadelCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
 	var t ZitadelCookieAuth
 	const parameterName = "zitadel_access_token"
@@ -76,6 +99,8 @@ func (s *Server) securityZitadelCookieAuth(ctx context.Context, operationName Op
 type SecuritySource interface {
 	// BearerAuth provides BearerAuth security value.
 	BearerAuth(ctx context.Context, operationName OperationName) (BearerAuth, error)
+	// PlainCookieAuth provides PlainCookieAuth security value.
+	PlainCookieAuth(ctx context.Context, operationName OperationName) (PlainCookieAuth, error)
 	// ZitadelCookieAuth provides ZitadelCookieAuth security value.
 	ZitadelCookieAuth(ctx context.Context, operationName OperationName) (ZitadelCookieAuth, error)
 }
@@ -86,6 +111,17 @@ func (s *Client) securityBearerAuth(ctx context.Context, operationName Operation
 		return errors.Wrap(err, "security source \"BearerAuth\"")
 	}
 	req.Header.Set("Authorization", "Bearer "+t.Token)
+	return nil
+}
+func (s *Client) securityPlainCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
+	t, err := s.sec.PlainCookieAuth(ctx, operationName)
+	if err != nil {
+		return errors.Wrap(err, "security source \"PlainCookieAuth\"")
+	}
+	req.AddCookie(&http.Cookie{
+		Name:  "sa_session",
+		Value: t.APIKey,
+	})
 	return nil
 }
 func (s *Client) securityZitadelCookieAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
