@@ -118,7 +118,17 @@ type Config struct {
 // Provide config object instance for the dependency injector
 func Provide(i do.Injector) (*Config, error) {
 	cPath := do.MustInvokeNamed[string](i, "defaultConfigPath")
-	return Load(cPath)
+	slog.Info("loading configuration", "path", cPath)
+	cfg, err := Load(cPath)
+	if err != nil {
+		return nil, err
+	}
+	if data, err := yaml.Marshal(cfg); err == nil {
+		slog.Info("config loaded", "config", string(data))
+	} else {
+		slog.Error("marshal config", "err", err)
+	}
+	return cfg, nil
 }
 
 // Load creates a new Config instance
@@ -131,6 +141,7 @@ func Load(configPath string) (*Config, error) {
 		if err := env.Parse(config); err != nil {
 			slog.Error("failed to parse environment variables", "error", err)
 		}
+		slog.Info("SA_CONFIG_PATH after env parse", "value", os.Getenv("SA_CONFIG_PATH"))
 	}()
 
 	stat, err := os.Stat(configPath)
