@@ -161,6 +161,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// default to ogen (will 404 via WithNotFound)
+	s.log.Debug("request", "method", r.Method, "url", r.URL.Path)
 	s.api.ServeHTTP(w, r)
 }
 
