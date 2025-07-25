@@ -121,58 +121,23 @@ func (s *Server) Run(ctx context.Context) error {
 	return http.Serve(listener, s)
 }
 
-// ServeHTTP implements the http.Handler interface to wrap the API server
+// ServeHTTP wraps the API server and also serves the frontend dist (SPA) with index.html fallback
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		dir := s.cfg.FrontendAssetsDir
-		if dir == "" {
-			// assets dir not configured
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			if err := json.NewEncoder(w).Encode(map[string]string{"message": "dist folder is missing"}); err != nil {
-				s.log.Error("failed to encode JSON response", "error", err.Error())
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			}
-			return
-		}
-		indexPath := filepath.Join(dir, "index.html")
-		info, err := os.Stat(indexPath)
-		if err != nil || info.IsDir() {
-			// index.html not found or is not a file
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			if err := json.NewEncoder(w).Encode(map[string]string{"message": "index.html not found or is not a file"}); err != nil {
-				s.log.Error("index.html not found or is not a file", "error", err.Error())
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			}
-			return
-		}
-		// serve existing index.html
-		http.ServeFile(w, r, indexPath)
-		return
-	}
-
-	if r.URL.Path == "/login/zitadel" {
+	// auth endpoints first
+	switch {
+	case r.URL.Path == "/login/zitadel":
 		s.handleZitadelLogin(w, r)
 		return
-	}
-
-	if r.URL.Path == "/auth/callback" {
+	case r.URL.Path == "/auth/callback":
 		s.handleAuthCallback(w, r)
 		return
-	}
-
-	if r.URL.Path == "/login" && r.Method == http.MethodPost {
+	case r.URL.Path == "/login" && r.Method == http.MethodPost:
 		s.handlePlainLogin(w, r)
 		return
-	}
-
-	if r.URL.Path == "/logout" {
+	case r.URL.Path == "/logout":
 		s.handleLogout(w, r)
 		return
-	}
-
-	if r.URL.Path == "/logout/callback" {
+	case r.URL.Path == "/logout/callback":
 		s.handleLogoutCallback(w, r)
 		return
 	}
@@ -183,7 +148,19 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.log.Debug("request", "method", r.Method, "url", r.URL.Path)
+	// ogen api
+	if strings.HasPrefix(r.URL.Path, "/api/") || strings.HasPrefix(r.URL.Path, "/api") {
+		s.log.Debug("api request", "method", r.Method, "url", r.URL.Path)
+		s.api.ServeHTTP(w, r)
+		return
+	}
+
+	// try to serve frontend assets (and SPA index.html fallback)
+	if s.tryServeFrontend(w, r) {
+		return
+	}
+
+	// default to ogen (will 404 via WithNotFound)
 	s.api.ServeHTTP(w, r)
 }
 
@@ -192,7 +169,59 @@ func (s *Server) Shutdown() error {
 	return s.listener.Close()
 }
 
-// ---------------- ZITADEL PKCE login flow ------------------------------------
+// ------------------------ frontend (SPA) helpers -----------------------------
+
+func (s *Server) tryServeFrontend(w http.ResponseWriter, r *http.Request) bool {
+	dir := s.cfg.FrontendAssetsDir
+	if dir == "" {
+		// not configured, tell the caller to continue
+		return false
+	}
+
+	// root → strict index.html check
+	if r.URL.Path == "/" {
+		indexPath := filepath.Join(dir, "index.html")
+		if !isReadableFile(indexPath) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]string{"message": "dist folder is missing or index.html not found"})
+			return true
+		}
+		http.ServeFile(w, r, indexPath)
+		return true
+	}
+
+	// prevent path traversal
+	cleanPath := filepath.Clean(r.URL.Path)
+	full := filepath.Join(dir, cleanPath)
+	if !strings.HasPrefix(full, filepath.Clean(dir)+string(os.PathSeparator)) {
+		http.NotFound(w, r)
+		return true
+	}
+
+	// if the requested asset exists, serve it
+	if isReadableFile(full) {
+		http.ServeFile(w, r, full)
+		return true
+	}
+
+	// SPA fallback: serve index.html for non-file routes (e.g. /app/settings)
+	indexPath := filepath.Join(dir, "index.html")
+	if isReadableFile(indexPath) {
+		http.ServeFile(w, r, indexPath)
+		return true
+	}
+
+	// index missing → let caller continue
+	return false
+}
+
+func isReadableFile(p string) bool {
+	info, err := os.Stat(p)
+	return err == nil && !info.IsDir()
+}
+
+// ------------------------ ZITADEL PKCE login flow ----------------------------
 
 func (s *Server) handleZitadelLogin(w http.ResponseWriter, r *http.Request) {
 	ver, chal, err := newCodeVerifier()
