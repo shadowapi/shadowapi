@@ -1,6 +1,4 @@
-/*
-Copyright © 2023 Shadowapi <support@shadowapi.com>
-*/
+// backend/internal/config/config.go
 package config
 
 import (
@@ -133,37 +131,37 @@ func Provide(i do.Injector) (*Config, error) {
 
 // Load creates a new Config instance
 func Load(configPath string) (*Config, error) {
-	config := &Config{
+	cfg := &Config{
 		configPath: configPath,
 		ext:        strings.ToLower(filepath.Ext(configPath)),
 	}
-	defer func() {
-		if err := env.Parse(config); err != nil {
-			slog.Error("failed to parse environment variables", "error", err)
-		}
-		slog.Info("SA_CONFIG_PATH after env parse", "value", os.Getenv("SA_CONFIG_PATH"))
-	}()
+
+	if cfg.ext == "" {
+		return nil, fmt.Errorf("config file extension is empty")
+	}
 
 	stat, err := os.Stat(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-				return nil, fmt.Errorf("failed to create config directory: %w", err)
-			}
-			if err := config.Save(); err != nil {
-				return nil, err
-			}
+			return nil, fmt.Errorf("config file not found: %s", configPath)
 		}
-	} else if stat.IsDir() {
+		return nil, fmt.Errorf("stat config file: %w", err)
+	}
+	if stat.IsDir() {
 		return nil, fmt.Errorf("config file path is a directory")
-	} else {
-		if err := config.Load(); err != nil {
-			return nil, err
-		}
-		slog.Info("loaded config file", "path", configPath)
 	}
 
-	return config, nil
+	if err := cfg.Load(); err != nil {
+		return nil, err
+	}
+
+	// env overrides values from file
+	if err := env.Parse(cfg); err != nil {
+		slog.Error("failed to parse environment variables", "error", err)
+	}
+	slog.Info("loaded config file", "path", configPath)
+	slog.Info("SA_CONFIG_PATH after env parse", "value", os.Getenv("SA_CONFIG_PATH"))
+	return cfg, nil
 }
 
 // Load loads the configuration from the config file
@@ -181,11 +179,11 @@ func (c *Config) Load() error {
 
 	switch c.ext {
 	case ".yaml", ".yml":
-		if err := yaml.Unmarshal(data, &c); err != nil {
+		if err := yaml.Unmarshal(data, c); err != nil {
 			return fmt.Errorf("failed to parse config file: %w", err)
 		}
 	case ".json":
-		if err := json.Unmarshal(data, &c); err != nil {
+		if err := json.Unmarshal(data, c); err != nil {
 			return fmt.Errorf("failed to parse config file: %w", err)
 		}
 	default:
@@ -194,25 +192,25 @@ func (c *Config) Load() error {
 	return nil
 }
 
-// Save saves the configuration to the config file
-func (c *Config) Save() (err error) {
+// kept for potential future use; not called during normal load
+func (c *Config) Save() error {
 	if c.ext == "" {
 		return fmt.Errorf("config file extension is empty")
 	}
-
-	var data []byte
+	var (
+		data []byte
+		err  error
+	)
 	switch c.ext {
 	case ".yaml", ".yml":
-		if data, err = yaml.Marshal(c); err != nil {
-			return fmt.Errorf("failed to marshal config file: %w", err)
-		}
+		data, err = yaml.Marshal(c)
 	case ".json":
-		if data, err = json.MarshalIndent(c, "", "  "); err != nil {
-			return fmt.Errorf("failed to marshal config file: %w", err)
-		}
+		data, err = json.MarshalIndent(c, "", "  ")
 	default:
-		return fmt.Errorf("unknown config file format: %s", c.ext)
+		err = fmt.Errorf("unknown config file format: %s", c.ext)
 	}
-
+	if err != nil {
+		return err
+	}
 	return os.WriteFile(c.configPath, data, 0o644)
 }
