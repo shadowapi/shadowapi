@@ -16,10 +16,9 @@ RUN go build -o /shadowapi ./cmd/shadowapi
 # Final Stage
 FROM golang:1.24-alpine
 WORKDIR /app
+
 COPY --from=builder /shadowapi ./shadowapi
 COPY front/dist ./dist
 
 EXPOSE 8080
-CMD ["sh", "-c", "echo SA_CONFIG_PATH=$SA_CONFIG_PATH && cat $SA_CONFIG_PATH && /app/shadowapi serve"]
-
-
+CMD ["/app/shadowapi", "serve"]
