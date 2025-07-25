@@ -102,6 +102,28 @@ Replace `<admin-email>` with the user's email and `<new-password>` with the new 
 - **Generate API Specs (Backend + Frontend):** `task api-gen`
 - **Run Playwright Tests (Frontend):** `task playwright-run`
 
+## Configuration
+
+Copy `backend/config.example.yaml` to `backend/config.yaml` and adjust the values
+to match your environment. Important settings include the Postgres connection,
+NATS.io broker and ZITADEL OAuth2 credentials:
+
+```yaml
+db:
+  uri: postgres://shadowapi:shadowapi@localhost:5432/shadowapi?sslmode=disable
+queue:
+  url: nats://localhost:4222
+  prefix: shadowapi
+auth:
+  zitadel:
+    instance_url: https://example.zitadel.cloud
+    service_client_id: client-id
+    service_client_secret: client-secret
+    api_key_file: ./api-key.json
+    audience: api-client-id
+    redirect_uri: http://localtest.me/auth/callback
+```
+
 ## ZITADEL Authentication
 
 To enable login via [ZITADEL](https://zitadel.com) create a service user and grant it the

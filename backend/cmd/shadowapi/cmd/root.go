@@ -113,6 +113,9 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 }
 
 func init() {
+	if envPath := os.Getenv("SA_CONFIG_PATH"); envPath != "" {
+		defaultConfigPath = envPath
+	}
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
