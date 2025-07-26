@@ -60,9 +60,7 @@ services:
       db-migrate:
         condition: service_completed_successfully
     environment:
-      - SA_HOST=0.0.0.0
-      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
-      - SA_LOG_LEVEL=DEBUG
+      - SA_CONFIG_PATH=/app/config.yaml
     networks:
       - shadowapi
     volumes:

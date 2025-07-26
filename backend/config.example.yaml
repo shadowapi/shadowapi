@@ -1,11 +1,11 @@
 frontend_assets_dir: "./dist"
 log:
-    level: ""
+    level: "DEBUG"
 server:
-    host: ""
-    port: 0
+    host: "0.0.0.0"
+    port: 80
 db:
-    uri: "postgres://shadowapi:shadowapi@localhost:5432/shadowapi?sslmode=disable"
+    uri: "postgres://shadowapi:shadowapi@db/shadowapi?sslmode=disable"
 api:
     specs_dir: "../spec/"
 jwt: {}
