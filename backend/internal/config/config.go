@@ -16,29 +16,29 @@ import (
 
 // Config is the main configuration structure
 type Config struct {
-	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
+	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR"`
 
 	// Log settings
 	Log struct {
 		// Level is the log level. Valid values are "debug", "info", "warn", "error".
-		Level string `json:"level" yaml:"level" env:"SA_LOG_LEVEL" envDefault:"debug"`
+		Level string `json:"level" yaml:"level" env:"SA_LOG_LEVEL"`
 	} `json:"log" yaml:"log"`
 
 	// Server configuration for local UI and API requests
 	Server struct {
-		Host string `yaml:"host" json:"host" env:"SA_HOST" envDefault:"localhost"`
-		Port int    `yaml:"port" json:"port" env:"SA_PORT" envDefault:"8080"`
+		Host string `yaml:"host" json:"host" env:"SA_HOST"`
+		Port int    `yaml:"port" json:"port" env:"SA_PORT"`
 	} `yaml:"server" json:"server"`
 
 	// DB is a database configuration
 	DB struct {
-		URI string `yaml:"uri,omitempty" json:"uri,omitempty" env:"SA_DB_URI" envDefault:""`
+		URI string `yaml:"uri,omitempty" json:"uri,omitempty" env:"SA_DB_URI"`
 	} `yaml:"db" json:"db"`
 
 	// API settings
 	API struct {
 		// SpecsDir is the directory where the API specs are stored to serve them
-		SpecsDir string `json:"specs_dir" yaml:"specs_dir" env:"SA_API_SPECS_DIR" envDefault:"../spec/"`
+		SpecsDir string `json:"specs_dir" yaml:"specs_dir" env:"SA_API_SPECS_DIR"`
 	} `yaml:"api" json:"api"`
 
 	// JWT is a struct that holds all the JWT related methods
@@ -58,10 +58,10 @@ type Config struct {
 
 		// TODO @reactima remove this
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
-		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR" envDefault:"false"`
+		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR"`
 
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
-		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN" envDefault:"mysecretapikey"`
+		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN"`
 
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
@@ -92,21 +92,21 @@ type Config struct {
 	// Worker settings
 	Worker struct {
 		// MaxCount is the maximum number of workers that can be started
-		MaxCount int `yaml:"max_count" json:"max_count" env:"SA_WORKER_MAX_COUNT" envDefault:"100"`
+		MaxCount int `yaml:"max_count" json:"max_count" env:"SA_WORKER_MAX_COUNT"`
 	} `yaml:"worker" json:"worker"`
 
 	// Queue settings for the NATS queue
 	Queue struct {
-		URL      string `yaml:"url" json:"url" env:"SA_QUEUE_URL" envDefault:"nats://sa-nats:4222"`
-		Prefix   string `yaml:"prefix" json:"prefix" env:"SA_QUEUE_PREFIX" envDefault:"shadowapi"`
+		URL      string `yaml:"url" json:"url" env:"SA_QUEUE_URL"`
+		Prefix   string `yaml:"prefix" json:"prefix" env:"SA_QUEUE_PREFIX"`
 		Username string `yaml:"username" json:"username" env:"SA_QUEUE_USERNAME"`
 		Password string `yaml:"password" json:"password" env:"SA_QUEUE_PASSWORD"`
 	} `yaml:"queue" json:"queue"`
 
 	// Add cfg.Telegram.AppID, cfg.Telegram.AppHash
 	Telegram struct {
-		AppHash string `yaml:"app_hash" json:"app_hash" env:"TG_APP_HASH" envDefault:""`
-		AppID   int    `yaml:"app_id" json:"app_id" env:"TG_APP_ID" envDefault:""`
+		AppHash string `yaml:"app_hash" json:"app_hash" env:"TG_APP_HASH"`
+		AppID   int    `yaml:"app_id" json:"app_id" env:"TG_APP_ID"`
 	}
 
 	configPath string

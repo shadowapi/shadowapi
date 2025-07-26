@@ -7,7 +7,7 @@ server:
 db:
     uri: "postgres://shadowapi:shadowapi@localhost:5432/shadowapi?sslmode=disable"
 api:
-    specs_dir: ""
+    specs_dir: "../spec/"
 jwt: {}
 init_admin:
     email: ""
@@ -27,9 +27,9 @@ auth:
             - "/oauth/"
             - "/oidc/"
 worker:
-    max_count: 0
+    max_count: 100
 queue:
-    url: "nats://localhost:4222"
+    url: "nats://sa-nats:4222"
     prefix: "shadowapi"
     username: ""
     password: ""
