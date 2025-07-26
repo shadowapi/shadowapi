@@ -15,6 +15,7 @@ import (
 )
 
 // Config is the main configuration structure
+// No envDefault is specified so values from the config file remain if the environment variable is unset.
 type Config struct {
 	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR"`
 
