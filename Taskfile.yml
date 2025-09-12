@@ -1,12 +1,17 @@
 version: "3"
 
 tasks:
+  default:
+    cmds:
+      - task --list
   init:
     desc: Check if precondition is functioning correctly
     deps:
       - front-init
     cmds:
       - docker build -t sa-sqlc -f ./devops/sqlc.Dockerfile .
+      - docker pull arigaio/atlas
+      - docker tag arigaio/atlas sa-atlas
   clean:
     desc: Clean docker compose and volumes
     cmds:
