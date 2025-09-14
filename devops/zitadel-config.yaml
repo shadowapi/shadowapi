@@ -1,0 +1,85 @@
+Log:
+  Level: info
+  Formatter:
+    Format: text
+
+ExternalDomain: localtest.me
+ExternalPort: 8081
+ExternalSecure: false
+
+TLS:
+  Enabled: false
+
+Database:
+  Postgres:
+    MaxOpenConns: 25
+    MaxIdleConns: 10
+    MaxConnLifetime: 1h
+    MaxConnIdleTime: 5m
+
+SystemDefaults:
+  SecretGenerators:
+    PasswordSaltCost: 14
+    ClientSecretGenerator:
+      Length: 64
+      IncludeLowerLetters: true
+      IncludeUpperLetters: true
+      IncludeDigits: true
+      IncludeSymbols: false
+    InitializeUserCode:
+      Length: 6
+      Expiry: 72h
+      IncludeLowerLetters: false
+      IncludeUpperLetters: true
+      IncludeDigits: true
+      IncludeSymbols: false
+    EmailVerificationCode:
+      Length: 6
+      Expiry: 1h
+      IncludeLowerLetters: false
+      IncludeUpperLetters: true
+      IncludeDigits: true
+      IncludeSymbols: false
+    PhoneVerificationCode:
+      Length: 6
+      Expiry: 1h
+      IncludeLowerLetters: false
+      IncludeUpperLetters: false
+      IncludeDigits: true
+      IncludeSymbols: false
+    DomainVerification:
+      Length: 32
+      IncludeLowerLetters: true
+      IncludeUpperLetters: true
+      IncludeDigits: true
+      IncludeSymbols: false
+    OTPSMS:
+      Length: 8
+      Expiry: 5m
+      IncludeLowerLetters: false
+      IncludeUpperLetters: false
+      IncludeDigits: true
+      IncludeSymbols: false
+    OTPEmail:
+      Length: 8
+      Expiry: 5m
+      IncludeLowerLetters: false
+      IncludeUpperLetters: true
+      IncludeDigits: true
+      IncludeSymbols: false
+
+DefaultInstance:
+  OrgName: ShadowAPI
+  DefaultLanguage: en
+
+
+WebAuthN:
+  ID: localtest.me
+  Origins:
+    - http://localtest.me:8081
+
+OIDC:
+  DefaultAccessTokenLifetime: 12h
+  DefaultIdTokenLifetime: 12h
+  DefaultRefreshTokenIdleExpiration: 720h
+  DefaultRefreshTokenExpiration: 720h

@@ -59,8 +59,16 @@ services:
         condition: service_healthy
       db-migrate:
         condition: service_completed_successfully
+      zitadel:
+        condition: service_started
     environment:
-      - SA_CONFIG_PATH=/app/config.yaml
+      - SA_HOST=0.0.0.0
+      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
+      - SA_LOG_LEVEL=DEBUG
+      - SA_QUEUE_URL=nats://nats:4222
+      - SA_QUEUE_PREFIX=shadowapi
+      - SA_AUTH_ZITADEL_INSTANCE_URL=http://zitadel:8080
+      - SA_AUTH_ZITADEL_REDIRECT_URI=http://localtest.me/auth/callback
     networks:
       - shadowapi
     volumes:
@@ -132,6 +140,36 @@ services:
       - "8222:8222"
     networks:
       - shadowapi
+
+  zitadel:
+    image: ghcr.io/zitadel/zitadel:stable
+    container_name: sa-zitadel
+    command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml
+    environment:
+      - ZITADEL_DATABASE_POSTGRES_HOST=db
+      - ZITADEL_DATABASE_POSTGRES_PORT=5432
+      - ZITADEL_DATABASE_POSTGRES_DATABASE=zitadel
+      - ZITADEL_DATABASE_POSTGRES_USER_USERNAME=zitadel
+      - ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=zitadel
+      - ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE=disable
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME=shadowapi
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD=shadowapi
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE=disable
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    networks:
+      - shadowapi
+    volumes:
+      - ./devops/zitadel-config.yaml:/zitadel-config.yaml:ro
+      - ./devops/zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.zitadel.rule=Host(`auth.${DOMAIN}`)
+      - traefik.http.routers.zitadel.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.zitadel.loadbalancer.server.port=8080
 
 volumes:
   postgres_data:

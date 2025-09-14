@@ -17,7 +17,7 @@ import (
 // Config is the main configuration structure
 // No envDefault is specified so values from the config file remain if the environment variable is unset.
 type Config struct {
-	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR"`
+	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
 
 	// BaseURL root path for the system
 	BaseURL string `json:"base_url" yaml:"base_url" env:"SA_BASE_URL" envDefault:"http://localtest.me"`
@@ -59,7 +59,6 @@ type Config struct {
 
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
-
 		// TODO @reactima remove this
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
 		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR"`
@@ -96,7 +95,7 @@ type Config struct {
 	// Worker settings
 	Worker struct {
 		// MaxCount is the maximum number of workers that can be started
-		MaxCount int `yaml:"max_count" json:"max_count" env:"SA_WORKER_MAX_COUNT"`
+		MaxCount int `yaml:"max_count" json:"max_count" env:"SA_WORKER_MAX_COUNT" envDefault:"100"`
 	} `yaml:"worker" json:"worker"`
 
 	// Queue settings for the NATS queue
@@ -125,6 +124,7 @@ func Provide(i do.Injector) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if data, err := yaml.Marshal(cfg); err == nil {
 		slog.Info("config loaded", "config", string(data))
 	} else {
@@ -135,36 +135,39 @@ func Provide(i do.Injector) (*Config, error) {
 
 // Load creates a new Config instance
 func Load(configPath string) (*Config, error) {
-	cfg := &Config{
-		configPath: configPath,
-		ext:        strings.ToLower(filepath.Ext(configPath)),
-	}
+	cfg := &Config{}
 
-	if cfg.ext == "" {
-		return nil, fmt.Errorf("config file extension is empty")
-	}
-
-	stat, err := os.Stat(configPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("config file not found: %s", configPath)
+	if configPath != "" {
+		cfg.configPath = configPath
+		cfg.ext = strings.ToLower(filepath.Ext(configPath))
+		if cfg.ext == "" {
+			return nil, fmt.Errorf("config file extension is empty")
 		}
-		return nil, fmt.Errorf("stat config file: %w", err)
-	}
-	if stat.IsDir() {
-		return nil, fmt.Errorf("config file path is a directory")
-	}
 
-	if err := cfg.Load(); err != nil {
-		return nil, err
+		stat, err := os.Stat(configPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil, fmt.Errorf("config file not found: %s", configPath)
+			}
+			return nil, fmt.Errorf("stat config file: %w", err)
+		}
+		if stat.IsDir() {
+			return nil, fmt.Errorf("config file path is a directory")
+		}
+
+		if err := cfg.Load(); err != nil {
+			return nil, err
+		}
+
+		slog.Info("loaded config file", "path", configPath)
 	}
 
 	// env overrides values from file
 	if err := env.Parse(cfg); err != nil {
 		slog.Error("failed to parse environment variables", "error", err)
 	}
-	slog.Info("loaded config file", "path", configPath)
 	slog.Info("SA_CONFIG_PATH after env parse", "value", os.Getenv("SA_CONFIG_PATH"))
+
 	return cfg, nil
 }
 

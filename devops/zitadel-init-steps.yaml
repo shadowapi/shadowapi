@@ -1,0 +1,13 @@
+FirstInstance:
+  InstanceName: ShadowAPI
+  DefaultLanguage: en
+  Org:
+    Name: ShadowAPI
+    Human:
+      # This creates the initial admin user
+      UserName: admin
+      FirstName: Admin
+      LastName: User  
+      Email: admin@example.com
+      Password: Admin123!
+      PasswordChangeRequired: false

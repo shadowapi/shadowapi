@@ -33,8 +33,14 @@ cp .env.example .env
 task init
 ```
 
-- Builds necessary images (including an image for SQLC).
+- Builds necessary images (including an image for sqlc).
 - Installs frontend dependencies.
+
+**NOTE**: if you need to override the default Docker Compose file:
+
+```bash
+cp compose.override.example.yaml compose.override.yaml
+```
 
 ### 2. Start Development Environment
 
@@ -132,6 +138,14 @@ auth:
     audience: api-client-id
     redirect_uri: http://localtest.me/auth/callback
 ```
+
+## ZITADEL Local Development Mode
+
+Local Zitadel is URL: <http://localtest.me:8081>
+The correct login credentials are:
+
+- Username: `admin@shadowapi.localtest.me`
+- Password: `Admin123!`
 
 ## ZITADEL Authentication
 
