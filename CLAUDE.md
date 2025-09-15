@@ -9,6 +9,7 @@ ShadowAPI is a unified messaging API that enables seamless integration with Gmai
 ## Technology Stack
 
 **Backend:**
+
 - Go 1.24 with standard project layout
 - PostgreSQL database with SQLC for type-safe queries
 - NATS.io for message queuing and event-driven architecture
@@ -18,6 +19,7 @@ ShadowAPI is a unified messaging API that enables seamless integration with Gmai
 - Ory Kratos for identity management
 
 **Frontend:**
+
 - React 19 with TypeScript
 - Vite for development and building
 - Adobe React Spectrum for UI components
@@ -26,6 +28,7 @@ ShadowAPI is a unified messaging API that enables seamless integration with Gmai
 - Playwright for end-to-end testing
 
 **Infrastructure:**
+
 - Docker Compose for development environment
 - Traefik for reverse proxy and routing
 - Atlas for database migrations
@@ -34,6 +37,7 @@ ShadowAPI is a unified messaging API that enables seamless integration with Gmai
 ## Essential Development Commands
 
 ### Environment Setup
+
 ```bash
 # Copy environment template and configure
 cp .env.example .env
@@ -42,6 +46,7 @@ task init
 ```
 
 ### Development Workflow
+
 ```bash
 # Start development environment with hot reload
 task dev-up
@@ -53,6 +58,7 @@ task dev-down
 ```
 
 ### Code Generation
+
 ```bash
 # Regenerate SQL queries from schema
 task sqlc
@@ -65,6 +71,7 @@ task api-gen-frontend
 ```
 
 ### Testing and Quality
+
 ```bash
 # Run frontend tests
 task playwright-run
@@ -77,6 +84,7 @@ cd front && npm run build:tscheck
 ```
 
 ### Development Tools
+
 ```bash
 # Open shell in backend container
 task shell
@@ -89,6 +97,7 @@ task clean
 ```
 
 ### Production
+
 ```bash
 # Build and run production environment
 task prod-up
@@ -98,6 +107,7 @@ task prod-down
 ## Architecture Overview
 
 ### Core Components
+
 - **Handlers**: HTTP request handlers in `backend/internal/handler/` for each data source (email, telegram, whatsapp, linkedin)
 - **Workers**: Background job processing in `backend/internal/worker/` with broker pattern and job scheduling
 - **Storage**: Abstraction layer supporting PostgreSQL, S3, and host files in `backend/internal/storages/`
@@ -105,25 +115,30 @@ task prod-down
 - **Auth**: OAuth2 integration and Ory Kratos identity management
 
 ### Data Sources
+
 Each messaging platform is implemented as a separate data source:
+
 - **Email**: IMAP/SMTP with OAuth2 (Gmail integration)
 - **Telegram**: Official Telegram client library with session management
 - **WhatsApp**: WhatsApp Business API integration
 - **LinkedIn**: LinkedIn messaging API integration
 
 ### Database Architecture
+
 - SQL schema in `db/schema.sql` and `db/tg.sql`
 - SQLC generates type-safe Go code in `backend/pkg/query/`
 - Migrations handled by Atlas
 - Supports multiple storage backends (PostgreSQL, S3, local files)
 
 ### API Design
+
 - OpenAPI specification in `spec/openapi.yaml`
 - Component definitions in `spec/components/`
 - Path definitions in `spec/paths/`
 - Ogen generates server and client code automatically
 
 ### Frontend Architecture
+
 - Component-based React application with TypeScript
 - Forms in `front/src/forms/` for each entity type
 - Pages in `front/src/pages/` for different views
@@ -132,7 +147,8 @@ Each messaging platform is implemented as a separate data source:
 
 ## Configuration
 
-Environment variables are defined in `backend/internal/config/config.go` with SA_ prefix:
+Environment variables are defined in `backend/internal/config/config.go` with SA\_ prefix:
+
 - `SA_BASE_URL`: Base URL for the application
 - `SA_DB_URI`: PostgreSQL connection string
 - `SA_LOG_LEVEL`: Logging level (debug, info, warn, error)
@@ -150,3 +166,10 @@ Environment variables are defined in `backend/internal/config/config.go` with SA
 - OAuth2 tokens are managed per data source
 - Telegram integration includes session state management
 - File uploads support multiple storage backends
+
+## Contribution Guidelines
+
+- Follow Go and React best practices
+- Write clear and concise commit messages (use feat:, fix:, docs:, etc.), don't mention CLAUDE
+- NEVER write comments unless absolutely necessary
+
