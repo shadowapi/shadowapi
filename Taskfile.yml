@@ -1,6 +1,10 @@
 version: "3"
 
 tasks:
+  default:
+    desc: "Default task: show help"
+    cmds:
+      - task --list
   init:
     deps:
       - front-init

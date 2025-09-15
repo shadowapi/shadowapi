@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: shadowapi
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+        - name: wait-for-migrations
+          image: busybox:1.35
+          command: ["sh", "-c", 'echo "Waiting for migrations to complete..."']
+      containers:
+        - name: backend
+          image: git.devinlab.com/shadowapi/shadowapi/backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_HOST
+            - name: SA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_PORT
+            - name: SA_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_LOG_LEVEL
+            - name: SA_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_ENV
+            - name: SA_QUEUE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_QUEUE_URL
+            - name: SA_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: shadowapi-postgres
+                  key: SA_DB_URI
+            - name: SA_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shadowapi-app
+                  key: SA_BASE_URL
+            - name: TG_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: shadowapi-app
+                  key: TG_APP_ID
+            - name: TG_APP_HASH
+              valueFrom:
+                secretKeyRef:
+                  name: shadowapi-app
+                  key: TG_APP_HASH
+            - name: KRATOS_ADMIN_URL
+              value: "http://kratos-admin:4434"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: spec-volume
+              mountPath: /spec
+              readOnly: true
+      volumes:
+        - name: spec-volume
+          configMap:
+            name: api-spec
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: shadowapi
+  labels:
+    app: backend
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  selector:
+    app: backend
+

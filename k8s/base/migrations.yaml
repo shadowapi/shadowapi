@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kratos-migrate
+  namespace: shadowapi
+  labels:
+    app: kratos-migrate
+spec:
+  template:
+    metadata:
+      labels:
+        app: kratos-migrate
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: kratos-migrate
+        image: oryd/kratos:v1.3.1
+        command: ["kratos"]
+        args: ["migrate", "-c", "/etc/config/kratos.yaml", "sql", "-e", "--yes"]
+        env:
+        - name: DSN
+          valueFrom:
+            secretKeyRef:
+              name: shadowapi-postgres
+              key: KRATOS_DSN
+        volumeMounts:
+        - name: kratos-config
+          mountPath: /etc/config
+          readOnly: true
+      volumes:
+      - name: kratos-config
+        configMap:
+          name: kratos-config
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: shadowapi
+  labels:
+    app: db-migrate
+spec:
+  template:
+    metadata:
+      labels:
+        app: db-migrate
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: db-migrate
+        image: arigaio/atlas:0.30.0
+        command: ["atlas"]
+        args: [
+          "schema", "apply",
+          "--url", "$(SA_DB_URI)",
+          "--dev-url", "$(SA_DB_URI)_schema",
+          "--to", "file://schema.sql",
+          "--auto-approve"
+        ]
+        env:
+        - name: SA_DB_URI
+          valueFrom:
+            secretKeyRef:
+              name: shadowapi-postgres
+              key: SA_DB_URI
+        volumeMounts:
+        - name: schema-volume
+          mountPath: /schema.sql
+          subPath: schema.sql
+          readOnly: true
+      volumes:
+      - name: schema-volume
+        configMap:
+          name: db-schema

@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kratos
+  namespace: shadowapi
+  labels:
+    app: kratos
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kratos
+  template:
+    metadata:
+      labels:
+        app: kratos
+    spec:
+      containers:
+      - name: kratos
+        image: oryd/kratos:v1.3.1
+        command: ["kratos"]
+        args: ["serve", "--dev", "--watch-courier", "--config", "/etc/config/kratos.yaml"]
+        ports:
+        - containerPort: 4433
+          name: public
+        - containerPort: 4434
+          name: admin
+        env:
+        - name: DSN
+          valueFrom:
+            secretKeyRef:
+              name: shadowapi-postgres
+              key: KRATOS_DSN
+        - name: SECRETS_DEFAULT
+          valueFrom:
+            secretKeyRef:
+              name: shadowapi-kratos
+              key: SECRETS_DEFAULT
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/ready
+            port: 4434
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 4434
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        volumeMounts:
+        - name: kratos-config
+          mountPath: /etc/config
+          readOnly: true
+      volumes:
+      - name: kratos-config
+        configMap:
+          name: kratos-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kratos-public
+  namespace: shadowapi
+  labels:
+    app: kratos
+spec:
+  ports:
+  - port: 4433
+    targetPort: 4433
+    name: public
+  selector:
+    app: kratos
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kratos-admin
+  namespace: shadowapi
+  labels:
+    app: kratos
+    internal: "true"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 4434
+    targetPort: 4434
+    name: admin
+  selector:
+    app: kratos

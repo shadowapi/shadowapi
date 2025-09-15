@@ -1,0 +1,10 @@
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: REACT_APP_API_URL
+    value: "https://shadowapi.devinlab.com/api"
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: REACT_APP_AUTH_URL
+    value: "https://shadowapi.devinlab.com/auth"

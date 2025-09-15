@@ -1,0 +1,6 @@
+- op: replace
+  path: /spec/template/spec/containers/0/env/2/valueFrom/configMapKeyRef/key
+  value: SA_LOG_LEVEL
+- op: replace
+  path: /spec/template/spec/containers/0/env/2/valueFrom/configMapKeyRef/name
+  value: shadowapi-config

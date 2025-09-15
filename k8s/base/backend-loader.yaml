@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-loader
+  namespace: shadowapi
+  labels:
+    app: backend-loader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-loader
+  template:
+    metadata:
+      labels:
+        app: backend-loader
+    spec:
+      containers:
+        - name: backend-loader
+          image: git.devinlab.com/shadowapi/shadowapi/backend-loader:latest
+          env:
+            - name: SA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_HOST
+            - name: SA_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: shadowapi-config
+                  key: SA_LOG_LEVEL
+            - name: SA_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: shadowapi-postgres
+                  key: SA_DB_URI
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-loader
+  namespace: shadowapi
+  labels:
+    app: backend-loader
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  selector:
+    app: backend-loader
+
