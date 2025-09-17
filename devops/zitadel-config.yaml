@@ -3,8 +3,8 @@ Log:
   Formatter:
     Format: text
 
-ExternalDomain: localtest.me
-ExternalPort: 8081
+ExternalDomain: auth.localtest.me
+ExternalPort: 80
 ExternalSecure: false
 
 TLS:
@@ -74,9 +74,9 @@ DefaultInstance:
 
 
 WebAuthN:
-  ID: localtest.me
+  ID: auth.localtest.me
   Origins:
-    - http://localtest.me:8081
+    - http://auth.localtest.me
 
 OIDC:
   DefaultAccessTokenLifetime: 12h

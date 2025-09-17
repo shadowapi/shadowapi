@@ -33,7 +33,6 @@ export function LoginPage() {
     try {
       const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
 
-      // Step 1: Create session with username check
       const sessionResponse = await fetch(`${zitadelUrl}/v2/sessions`, {
         method: 'POST',
         headers: {
@@ -138,7 +137,6 @@ export function LoginPage() {
                     ref={ref}
                     validationState={invalid ? 'invalid' : undefined}
                     errorMessage={error?.message}
-                  // description="Enter your Zitadel username"
                   />
                 )}
               />
