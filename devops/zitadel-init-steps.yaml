@@ -7,7 +7,22 @@ FirstInstance:
       # This creates the initial admin user
       UserName: admin
       FirstName: Admin
-      LastName: User  
+      LastName: User
       Email: admin@example.com
       Password: Admin123!
       PasswordChangeRequired: false
+
+    # Create a project for ShadowAPI
+    Projects:
+      - Name: ShadowAPI
+        # Create service user for Management API access
+        Machine:
+          UserName: shadowapi-service
+          Name: ShadowAPI Service User
+          Description: Service user for ShadowAPI to access Zitadel Management API
+          AccessTokenType: BEARER
+        # Grant necessary roles to the service user
+        ProjectGrants:
+          - RoleKeys:
+              - PROJECT_OWNER
+              - ORG_OWNER

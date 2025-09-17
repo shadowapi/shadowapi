@@ -83,3 +83,14 @@ OIDC:
   DefaultIdTokenLifetime: 12h
   DefaultRefreshTokenIdleExpiration: 720h
   DefaultRefreshTokenExpiration: 720h
+
+# Enable Management API
+Management:
+  Enabled: true
+
+# API Configuration
+API:
+  GRPC:
+    Port: 8080
+  HTTP:
+    Port: 8080

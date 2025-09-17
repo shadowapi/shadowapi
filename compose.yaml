@@ -71,11 +71,17 @@ services:
       - SA_QUEUE_PREFIX=shadowapi
       - SA_AUTH_ZITADEL_INSTANCE_URL=http://zitadel:8080
       - SA_AUTH_ZITADEL_REDIRECT_URI=http://localtest.me/auth/callback
+      # Zitadel Management API settings
+      - SA_AUTH_ZITADEL_MANAGEMENT_URL=http://zitadel:8080
+      - SA_AUTH_ZITADEL_SERVICE_USER_ID=
+      - SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH=/secrets/zitadel-service-key.json
+      - SA_AUTH_USER_MANAGER=db
     networks:
       - shadowapi
     volumes:
       - ./backend:/app/
       - ./spec:/spec/
+      - ./secrets:/secrets:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
@@ -172,6 +178,32 @@ services:
       - traefik.http.routers.zitadel.rule=Host(`auth.${DOMAIN}`)
       - traefik.http.routers.zitadel.entrypoints=${TRAEFIK_ENTRYPOINT}
       - traefik.http.services.zitadel.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:8080/debug/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  zitadel-setup:
+    image: curlimages/curl:latest
+    container_name: sa-zitadel-setup
+    depends_on:
+      zitadel:
+        condition: service_healthy
+    environment:
+      - ZITADEL_URL=http://auth.${DOMAIN}
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=Admin123!
+      - OUTPUT_DIR=/secrets
+    networks:
+      - shadowapi
+    volumes:
+      - ./devops/setup-zitadel-service-user.sh:/setup.sh:ro
+      - ./secrets:/secrets
+    command: sh -c "chmod +x /setup.sh && /setup.sh"
+    profiles:
+      - setup
 
 volumes:
   postgres_data:

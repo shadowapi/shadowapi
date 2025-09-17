@@ -66,9 +66,17 @@ type Config struct {
 		// BearerToken is used to validate incoming requests that carry an Authorization header.
 		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN"`
 
+		// UserManager specifies which user manager implementation to use ("db" or "zitadel")
+		UserManager string `yaml:"user_manager" json:"user_manager" env:"SA_AUTH_USER_MANAGER" envDefault:"db"`
+
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
 			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"SA_ZITADEL_INSTANCE_URL"`
+
+			// ---- Management API settings ----
+			ManagementURL     string `json:"management_url" yaml:"management_url" env:"SA_AUTH_ZITADEL_MANAGEMENT_URL"`
+			ServiceUserID     string `json:"service_user_id" yaml:"service_user_id" env:"SA_AUTH_ZITADEL_SERVICE_USER_ID"`
+			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH"`
 
 			// ---- machine-to-machine credentials ----
 			// Service user → Basic-Auth (client-credentials / introspect)

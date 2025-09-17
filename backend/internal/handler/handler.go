@@ -13,6 +13,7 @@ import (
 	"github.com/samber/do/v2"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -21,10 +22,11 @@ import (
 
 // Handler is the server handler
 type Handler struct {
-	cfg *config.Config
-	log *slog.Logger
-	dbp *pgxpool.Pool
-	wbr *worker.Broker
+	cfg         *config.Config
+	log         *slog.Logger
+	dbp         *pgxpool.Pool
+	wbr         *worker.Broker
+	userManager auth.UserManager
 }
 
 func (h *Handler) DB() *pgxpool.Pool {
@@ -66,10 +68,11 @@ func (h *Handler) ensureInitAdmin(ctx context.Context) error {
 // Provide API handler instance for the dependency injector
 func Provide(i do.Injector) (*Handler, error) {
 	h := &Handler{
-		cfg: do.MustInvoke[*config.Config](i),
-		log: do.MustInvoke[*slog.Logger](i),
-		dbp: do.MustInvoke[*pgxpool.Pool](i),
-		wbr: do.MustInvoke[*worker.Broker](i),
+		cfg:         do.MustInvoke[*config.Config](i),
+		log:         do.MustInvoke[*slog.Logger](i),
+		dbp:         do.MustInvoke[*pgxpool.Pool](i),
+		wbr:         do.MustInvoke[*worker.Broker](i),
+		userManager: do.MustInvoke[auth.UserManager](i),
 	}
 	if err := h.ensureInitAdmin(context.Background()); err != nil {
 		h.log.Error("init admin", "error", err)
