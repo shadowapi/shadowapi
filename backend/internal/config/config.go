@@ -74,8 +74,7 @@ type Config struct {
 			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"SA_ZITADEL_INSTANCE_URL"`
 
 			// ---- Management API settings ----
-			ManagementURL     string `json:"management_url" yaml:"management_url" env:"SA_AUTH_ZITADEL_MANAGEMENT_URL"`
-			ServiceUserID     string `json:"service_user_id" yaml:"service_user_id" env:"SA_AUTH_ZITADEL_SERVICE_USER_ID"`
+			ManagementURL      string `json:"management_url" yaml:"management_url" env:"SA_AUTH_ZITADEL_MANAGEMENT_URL"`
 			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH"`
 
 			// ---- machine-to-machine credentials ----

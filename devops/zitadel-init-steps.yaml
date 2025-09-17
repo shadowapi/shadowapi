@@ -1,35 +1,22 @@
 FirstInstance:
   InstanceName: ShadowAPI
   DefaultLanguage: en
-
-  # Куда сохранить JSON-ключ machine-пользователя (создаётся ОДИН раз и пишется сюда)
   MachineKeyPath: "/secrets/shadowapi-admin-service.json"
-  # (опционально) Куда сохранить PAT, если захотите его тоже создать
-  # PatPath: "/secrets/shadowapi-admin-service.pat"
-
   Org:
     Name: ShadowAPI
-
     Human:
-      # Начальный админ (получит IAM_OWNER)
       UserName: admin
       FirstName: Admin
       LastName: User
       Email: admin@example.com
       Password: Admin123!
       PasswordChangeRequired: false
-
-    # Начальный machine-пользователь (также получит IAM_OWNER)
     Machine:
       Machine:
-        Username: shadowapi-admin-service # <== Важно: Username, не UserName
+        Username: shadowapi-admin-service
         Name: "ShadowAPI Admin Service User"
       MachineKey:
-        # тип ключа: 1 = JSON
         Type: 1
-        # срок действия, укажите свой (UTC RFC3339)
         ExpirationDate: "2099-01-01T00:00:00Z"
-
-      # (необязательно) если хотите ещё и PAT
       # Pat:
       #   ExpirationDate: "2099-01-01T00:00:00Z"

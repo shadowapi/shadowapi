@@ -28,18 +28,20 @@ import (
 
 // ZitadelUserManager implements UserManager interface using Zitadel Management API
 type ZitadelUserManager struct {
-	cfg        *config.Config
-	log        *slog.Logger
-	httpClient *http.Client
+	cfg *config.Config
+	log *slog.Logger
 
 	// JWT authentication fields
-	privateKey *rsa.PrivateKey
-	keyID      string
+	keyID  string
+	userID string
 
 	// Token caching
 	tokenMutex  sync.RWMutex
 	accessToken string
 	tokenExpiry time.Time
+
+	httpClient *http.Client
+	privateKey *rsa.PrivateKey
 }
 
 // Provide creates a new ZitadelUserManager instance
@@ -72,11 +74,11 @@ type ZitadelUser struct {
 		FirstName   string `json:"firstName,omitempty"`
 		LastName    string `json:"lastName,omitempty"`
 		DisplayName string `json:"displayName,omitempty"`
-	} `json:"profile,omitempty"`
+	} `json:"profile"`
 	Email struct {
 		Email      string `json:"email,omitempty"`
 		IsVerified bool   `json:"isVerified,omitempty"`
-	} `json:"email,omitempty"`
+	} `json:"email"`
 	State string `json:"state,omitempty"`
 }
 
@@ -136,6 +138,7 @@ func (m *ZitadelUserManager) loadPrivateKey() error {
 		m.log.Error("failed to parse key file", "error", err)
 		return handler.E("failed to parse key file: %w", err)
 	}
+	m.userID = keyFile.UserID
 
 	m.log.Debug("parsed key file", "keyId", keyFile.KeyID, "userId", keyFile.UserID, "type", keyFile.Type)
 
@@ -181,8 +184,8 @@ func (m *ZitadelUserManager) createJWT() (string, error) {
 	audience = strings.TrimSuffix(audience, "/")
 
 	claims := jwt.MapClaims{
-		"iss": m.cfg.Auth.Zitadel.ServiceUserID,
-		"sub": m.cfg.Auth.Zitadel.ServiceUserID,
+		"iss": m.userID,
+		"sub": m.userID,
 		"aud": audience,
 		"iat": now.Unix(),
 		"exp": now.Add(5 * time.Minute).Unix(), // 5 minutes expiry
@@ -505,4 +508,3 @@ type NotImplementedError struct {
 func (e *NotImplementedError) Error() string {
 	return "zitadel." + e.Operation + " is not yet implemented"
 }
-
