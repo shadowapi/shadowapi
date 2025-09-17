@@ -1,114 +1,106 @@
-import { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  ActionButton,
-  Flex,
-  Heading,
-  Item,
-  Menu,
-  MenuTrigger,
-  View,
-} from "@adobe/react-spectrum";
-import AssetsExpired from "@spectrum-icons/workflow/AssetsExpired";
-import Data from "@spectrum-icons/workflow/Data";
-import EmailGear from "@spectrum-icons/workflow/EmailGear";
-import Gears from "@spectrum-icons/workflow/Gears";
-import GearsAdd from "@spectrum-icons/workflow/GearsAdd";
-import Homepage from "@spectrum-icons/workflow/Homepage";
-import Login from "@spectrum-icons/workflow/Login";
-import Organize from "@spectrum-icons/workflow/Organize";
-import User from "@spectrum-icons/workflow/User";
-import Workflow from "@spectrum-icons/workflow/Workflow";
+import { ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ActionButton, Flex, Heading, Item, Menu, MenuTrigger, View } from '@adobe/react-spectrum'
+import AssetsExpired from '@spectrum-icons/workflow/AssetsExpired'
+import Data from '@spectrum-icons/workflow/Data'
+import EmailGear from '@spectrum-icons/workflow/EmailGear'
+import Gears from '@spectrum-icons/workflow/Gears'
+import GearsAdd from '@spectrum-icons/workflow/GearsAdd'
+import Homepage from '@spectrum-icons/workflow/Homepage'
+import Login from '@spectrum-icons/workflow/Login'
+import Organize from '@spectrum-icons/workflow/Organize'
+import User from '@spectrum-icons/workflow/User'
+import Workflow from '@spectrum-icons/workflow/Workflow'
 
-import type { NavbarProps } from "@/components/Navbar";
-import { Navbar } from "@/components/Navbar";
-import { useLogout } from "@/shauth";
+import type { NavbarProps } from '@/components/Navbar'
+import { Navbar } from '@/components/Navbar'
+import { useLogout } from '@/shauth'
 
 export function FullLayout({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
-  const logout = useLogout();
+  const navigate = useNavigate()
+  const logout = useLogout()
   // Main navigation items
   const navItems: NavbarProps = [
     {
-      Label: "Dashboard",
-      AriaLabel: "Go to dashboard page",
+      Label: 'Dashboard',
+      AriaLabel: 'Go to dashboard page',
       Icon: <Homepage />,
-      URL: "/",
+      URL: '/',
     },
     {
-      Label: "Messages",
-      AriaLabel: "Go to data messages page",
+      Label: 'Messages',
+      AriaLabel: 'Go to data messages page',
       Icon: <Data />,
-      URL: "/messages",
+      URL: '/messages',
       Childrens: [
         {
-          Label: "Files",
-          AriaLabel: "Go to data files page",
+          Label: 'Files',
+          AriaLabel: 'Go to data files page',
           Icon: <Data />,
-          URL: "/files",
+          URL: '/files',
         },
       ],
     },
 
     {
-      Label: "Users",
-      AriaLabel: "Go to data users page",
+      Label: 'Users',
+      AriaLabel: 'Go to data users page',
       Icon: <User />,
-      URL: "/users",
+      URL: '/users',
     },
     {
-      Label: "Data Sources",
-      AriaLabel: "Go to data sources page",
+      Label: 'Data Sources',
+      AriaLabel: 'Go to data sources page',
       Icon: <EmailGear />,
-      URL: "/datasources",
+      URL: '/datasources',
       Childrens: [
         {
-          Label: "OAuth2 Credentials",
-          AriaLabel: "Go to OAuth2 credentials page",
+          Label: 'OAuth2 Credentials',
+          AriaLabel: 'Go to OAuth2 credentials page',
           Icon: <Login />,
-          URL: "/oauth2/credentials",
+          URL: '/oauth2/credentials',
         },
       ],
     },
     {
-      Label: "Data Storages",
-      AriaLabel: "Go to data storages page",
+      Label: 'Data Storages',
+      AriaLabel: 'Go to data storages page',
       Icon: <Data />,
-      URL: "/storages",
+      URL: '/storages',
     },
     {
-      Label: "SyncPolicies",
-      AriaLabel: "Go to sync policies page",
+      Label: 'SyncPolicies',
+      AriaLabel: 'Go to sync policies page',
       Icon: <AssetsExpired />,
-      URL: "/syncpolicies",
+      URL: '/syncpolicies',
     },
     {
-      Label: "Data Pipelines",
-      AriaLabel: "Go to data pipelines page",
+      Label: 'Data Pipelines',
+      AriaLabel: 'Go to data pipelines page',
       Icon: <Workflow />,
-      URL: "/pipelines",
+      URL: '/pipelines',
     },
     {
-      Label: "Workers",
-      AriaLabel: "Go to workers page",
+      Label: 'Workers',
+      AriaLabel: 'Go to workers page',
       Icon: <Gears />,
-      URL: "/workers",
+      URL: '/workers',
       Childrens: [
         {
-          Label: "Schedulers",
-          AriaLabel: "Go to Schedulers",
+          Label: 'Schedulers',
+          AriaLabel: 'Go to Schedulers',
           Icon: <GearsAdd />,
-          URL: "/schedulers",
+          URL: '/schedulers',
         },
       ],
     },
     {
-      Label: "Logs",
-      AriaLabel: "Go to logs page",
+      Label: 'Logs',
+      AriaLabel: 'Go to logs page',
       Icon: <Organize />,
-      URL: "/logs",
+      URL: '/logs',
     },
-  ];
+  ]
 
   return (
     <Flex direction="column" height="100vh">
@@ -124,8 +116,8 @@ export function FullLayout({ children }: { children: ReactNode }) {
               </ActionButton>
               <Menu
                 onAction={(key) => {
-                  if (key === "logout") logout();
-                  if (key === "edit-profile") navigate("/profile");
+                  if (key === 'logout') logout()
+                  if (key === 'edit-profile') navigate('/profile')
                 }}
               >
                 <Item key="edit-profile">Edit Profile</Item>
@@ -135,12 +127,12 @@ export function FullLayout({ children }: { children: ReactNode }) {
           </View>
         </Flex>
       </View>
-      <Flex direction={{ base: "column", M: "row" }} flex>
+      <Flex direction={{ base: 'column', M: 'row' }} flex>
         <Navbar elements={navItems} />
         <Flex direction="column" flexGrow={1} minWidth={0} minHeight={0}>
           {children}
         </Flex>
       </Flex>
     </Flex>
-  );
+  )
 }

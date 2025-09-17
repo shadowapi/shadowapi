@@ -464,7 +464,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => 
+                  {datasourceQuery?.data?.map((datasource: components['schemas']['datasource']) => (
                     <Item key={datasource.uuid} textValue={`${datasource.name} ${datasource.type}`}>
                       <span
                         style={{
@@ -476,7 +476,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                         {datasource.name} {datasource.type}
                       </span>
                     </Item>
-                  )}
+                  ))}
                 </Picker>
               )}
             />
@@ -516,13 +516,13 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                   errorMessage={fieldState.error?.message}
                   width="100%"
                 >
-                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => (
+                  {storageQuery?.data?.map((storage: components['schemas']['storage']) => 
                     <Item key={storage.uuid}>
                       <span style={{ whiteSpace: 'nowrap', margin: '0 10px', lineHeight: '24px' }}>
                         {storage.name} {storage.type}
                       </span>
                     </Item>
-                  ))}
+                  )}
                 </Picker>
               )}
             />
@@ -573,7 +573,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                     </Column>
                   </TableHeader>
                   <TableBody items={schedulersQuery.data ?? []}>
-                    {(item: components['schemas']['scheduler']) => (
+                    {(item: components['schemas']['scheduler']) => 
                       <Row key={item.uuid!}>
                         <Cell>{item.schedule_type}</Cell>
                         <Cell>
@@ -602,7 +602,7 @@ export const PipelineForm = ({ pipelineUUID, userUUID }: PipelineProps) => {
                           </Flex>
                         </Cell>
                       </Row>
-                    )}
+                    }
                   </TableBody>
                 </TableView>
               </View>

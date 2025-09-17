@@ -216,7 +216,4 @@ servers:
     url: "http://localtest.me/api/v1"
 
 security:
-  # Logical OR of ZitadelCookieAuth and BearerAuth and PlainCookieAuth
-  - ZitadelCookieAuth: []
   - BearerAuth: []
-  - PlainCookieAuth: []

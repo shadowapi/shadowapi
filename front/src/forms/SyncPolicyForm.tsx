@@ -144,7 +144,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
                 width="100%"
               >
                 {pipelinesQuery &&
-                  pipelinesQuery.data?.pipelines?.map((pipeline: components['schemas']['pipeline']) => 
+                  pipelinesQuery.data?.pipelines?.map((pipeline: components['schemas']['pipeline']) => (
                     <Item key={pipeline.uuid}>
                       <span
                         style={{
@@ -158,7 +158,7 @@ export function SyncPolicyForm({ policyUUID }: { policyUUID: string }): ReactEle
                         {pipeline.name} {pipeline.type}
                       </span>
                     </Item>
-                  )}
+                  ))}
               </Picker>
             )}
           />

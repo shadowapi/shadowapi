@@ -2,7 +2,6 @@ version: "3"
 
 tasks:
   init:
-    desc: "Check if precondition is functioning correctly, install frontend deps, build sqlc image"
     deps:
       - front-init
     cmds:
@@ -33,44 +32,6 @@ tasks:
     desc: "Take down development services"
     cmds:
       - docker compose down
-
-  setup-zitadel:
-    desc: "Setup Zitadel service user for Management API access"
-    cmds:
-      - echo "🚀 Setting up Zitadel service user..."
-      - docker compose --profile setup up zitadel-setup
-      - echo "✅ Service user setup completed!"
-      - echo "📋 Check ./secrets/zitadel-service-key.json for the generated key"
-      - echo "🔄 To enable Zitadel user management, set SA_AUTH_USER_MANAGER=zitadel"
-
-  enable-zitadel-auth:
-    desc: "Enable Zitadel authentication for user management"
-    deps:
-      - setup-zitadel
-    cmds:
-      - echo "🔄 Enabling Zitadel authentication..."
-      - |
-        if [ -f ./secrets/zitadel-service-key.json ]; then
-          USER_ID=$(cat ./secrets/zitadel-service-key.json | grep -o '"userId":"[^"]*"' | cut -d'"' -f4)
-          echo "Setting environment variables..."
-          echo "SA_AUTH_USER_MANAGER=zitadel" >> .env
-          echo "SA_AUTH_ZITADEL_SERVICE_USER_ID=$USER_ID" >> .env
-          echo "✅ Zitadel authentication enabled!"
-          echo "🔄 Restart the backend to apply changes: task dev-down && task dev-up"
-        else
-          echo "❌ Service user key not found. Run 'task setup-zitadel' first."
-          exit 1
-        fi
-
-  disable-zitadel-auth:
-    desc: "Disable Zitadel authentication (use database instead)"
-    cmds:
-      - echo "🔄 Disabling Zitadel authentication..."
-      - sed -i.bak '/SA_AUTH_USER_MANAGER=zitadel/d' .env || true
-      - sed -i.bak '/SA_AUTH_ZITADEL_SERVICE_USER_ID=/d' .env || true
-      - echo "SA_AUTH_USER_MANAGER=db" >> .env
-      - echo "✅ Database authentication enabled!"
-      - echo "🔄 Restart the backend to apply changes: task dev-down && task dev-up"
 
   clean-zitadel-keys:
     desc: "Clean up generated Zitadel service keys"

@@ -32,11 +32,11 @@ export function Navbar(props: { elements: NavbarProps[] }) {
         <Text>{item.Label}</Text>
       </ActionButton>
 
-      {item.Childrens?.length > 0 && 
+      {item.Childrens?.length > 0 && (
         <Flex direction="column" gap="size-100" alignItems="start">
           {item.Childrens.map((child) => renderNavItem(child, level + 1))}
         </Flex>
-      }
+      )}
     </View>
   )
 

@@ -1,5 +1,5 @@
-import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 import { useNavigate } from 'react-router-dom'
+import { Breadcrumbs, Item } from '@adobe/react-spectrum'
 
 import { ProfileForm } from '@/forms/ProfileForm'
 import { useTitle } from '@/hooks'

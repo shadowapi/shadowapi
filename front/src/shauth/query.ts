@@ -1,59 +1,59 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions } from '@tanstack/react-query'
 
 interface SessionResponse {
-  active: boolean;
-  uuid?: string;
-  reason?: string;
+  active: boolean
+  uuid?: string
+  reason?: string
   session?: {
-    id?: string;
-    userId?: string;
-    loginName?: string;
-    displayName?: string;
+    id?: string
+    userId?: string
+    loginName?: string
+    displayName?: string
     factors?: {
       user?: {
-        id?: string;
-        loginName?: string;
-        displayName?: string;
-        organizationId?: string;
-        verifiedAt?: string;
-      };
+        id?: string
+        loginName?: string
+        displayName?: string
+        organizationId?: string
+        verifiedAt?: string
+      }
       password?: {
-        verifiedAt?: string;
-      };
+        verifiedAt?: string
+      }
       webAuthN?: {
-        verifiedAt?: string;
-        userVerified?: boolean;
-      };
+        verifiedAt?: string
+        userVerified?: boolean
+      }
       intent?: {
-        verifiedAt?: string;
-      };
+        verifiedAt?: string
+      }
       totp?: {
-        verifiedAt?: string;
-      };
+        verifiedAt?: string
+      }
       otpSMS?: {
-        verifiedAt?: string;
-      };
+        verifiedAt?: string
+      }
       otpEmail?: {
-        verifiedAt?: string;
-      };
-    };
-    expirationDate?: string;
-    creationDate?: string;
-    changeDate?: string;
-    lifetime?: string;
-  };
+        verifiedAt?: string
+      }
+    }
+    expirationDate?: string
+    creationDate?: string
+    changeDate?: string
+    lifetime?: string
+  }
 }
 
 export const sessionOptions = () => {
   return queryOptions({
-    queryKey: ["session"],
+    queryKey: ['session'],
     queryFn: async () => {
       // Temporarily disabled for testing - always return inactive session
-      console.log("Session check disabled for testing");
-      return { active: false, reason: "disabled_for_testing" };
+      console.log('Session check disabled for testing')
+      return { active: false, reason: 'disabled_for_testing' }
     },
     retry: false,
     staleTime: 30000,
     gcTime: 60000,
-  });
-};
+  })
+}

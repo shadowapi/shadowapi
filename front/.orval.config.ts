@@ -1,4 +1,4 @@
-import { defineConfig } from 'orval';
+import { defineConfig } from 'orval'
 
 export default defineConfig({
   api: {
@@ -11,11 +11,11 @@ export default defineConfig({
         mutator: {
           path: './src/api/axios.ts',
           name: 'customInstance',
-        }
-      }
+        },
+      },
     },
     input: {
       target: '../spec/openapi.yaml',
     },
   },
-});
+})

@@ -13,6 +13,7 @@ import {
   PipelineEdit,
   PipelineFlow,
   Pipelines,
+  Profile,
   SchedulerEdit,
   Schedulers,
   StorageEdit,
@@ -22,7 +23,6 @@ import {
   UserEdit,
   Users,
   WorkerJobs,
-  Profile,
 } from '@/pages'
 import { LoginPage, ProtectedRoute, SignupPage } from '@/shauth'
 

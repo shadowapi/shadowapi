@@ -1,22 +1,12 @@
-import {
-  Form,
-  Flex,
-  View,
-  Header,
-  Button,
-  TextField,
-  Link,
-  Text,
-} from '@adobe/react-spectrum';
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Button, Flex, Form, Header, Link, Text, TextField, View } from '@adobe/react-spectrum'
 import Alert from '@spectrum-icons/workflow/Alert'
 
-import { useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
-
 interface FormFields {
-  username: string;
-  password: string;
+  username: string
+  password: string
 }
 
 export function LoginPage() {
@@ -25,7 +15,7 @@ export function LoginPage() {
   const [loginError, setLoginError] = useState<string | null>(null)
 
   const form = useForm({
-    defaultValues: { username: "", password: "" },
+    defaultValues: { username: '', password: '' },
   })
 
   const onSubmit = async (fields: FormFields) => {
@@ -37,15 +27,15 @@ export function LoginPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
           checks: {
             user: {
-              loginName: fields.username
-            }
-          }
+              loginName: fields.username,
+            },
+          },
         }),
       })
 
@@ -67,15 +57,15 @@ export function LoginPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
           checks: {
             password: {
-              password: fields.password
-            }
-          }
+              password: fields.password,
+            },
+          },
         }),
       })
 
@@ -96,12 +86,7 @@ export function LoginPage() {
 
   return (
     <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
-      <View
-        padding="size-200"
-        backgroundColor="gray-200"
-        borderRadius="medium"
-        width="size-4600"
-      >
+      <View padding="size-200" backgroundColor="gray-200" borderRadius="medium" width="size-4600">
         <Flex direction="column" gap="size-200">
           <Header>Login to ShadowAPI</Header>
 
@@ -121,10 +106,7 @@ export function LoginPage() {
                 name="username"
                 control={form.control}
                 rules={{ required: 'Username is required' }}
-                render={({
-                  field: { name, value, onChange, onBlur, ref },
-                  fieldState: { invalid, error },
-                }) => (
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                   <TextField
                     label="Username"
                     type="text"
@@ -144,10 +126,7 @@ export function LoginPage() {
                 name="password"
                 control={form.control}
                 rules={{ required: 'Password is required' }}
-                render={({
-                  field: { name, value, onChange, onBlur, ref },
-                  fieldState: { invalid, error },
-                }) => (
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                   <TextField
                     label="Password"
                     type="password"
@@ -165,13 +144,9 @@ export function LoginPage() {
               />
               <Flex justifyContent="space-between" alignItems="center" marginTop="size-150">
                 <Text>
-                  Don't have an account?{" "}
-                  <Link href="/signup">Sign up</Link>
+                  Don't have an account? <Link href="/signup">Sign up</Link>
                 </Text>
-                <Button
-                  variant="cta"
-                  type="submit"
-                >
+                <Button variant="cta" type="submit">
                   Login
                 </Button>
               </Flex>

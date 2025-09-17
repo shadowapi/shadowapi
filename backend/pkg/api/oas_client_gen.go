@@ -725,36 +725,14 @@ func (c *Client) sendCreateContact(ctx context.Context, request *Contact) (res *
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, CreateContactOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, CreateContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, CreateContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -762,8 +740,6 @@ func (c *Client) sendCreateContact(ctx context.Context, request *Contact) (res *
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -853,63 +829,6 @@ func (c *Client) sendCreateUser(ctx context.Context, request *User) (res *User, 
 		return res, errors.Wrap(err, "encode request")
 	}
 
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, CreateUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, CreateUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, CreateUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-				{0b00000100},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
 	stage = "SendRequest"
 	resp, err := c.cfg.Client.Do(r)
 	if err != nil {
@@ -989,36 +908,14 @@ func (c *Client) sendDatasourceEmailCreate(ctx context.Context, request *Datasou
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1026,8 +923,6 @@ func (c *Client) sendDatasourceEmailCreate(ctx context.Context, request *Datasou
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -1136,36 +1031,14 @@ func (c *Client) sendDatasourceEmailDelete(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1173,8 +1046,6 @@ func (c *Client) sendDatasourceEmailDelete(ctx context.Context, params Datasourc
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -1283,36 +1154,14 @@ func (c *Client) sendDatasourceEmailGet(ctx context.Context, params DatasourceEm
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1320,8 +1169,6 @@ func (c *Client) sendDatasourceEmailGet(ctx context.Context, params DatasourceEm
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -1450,36 +1297,14 @@ func (c *Client) sendDatasourceEmailList(ctx context.Context, params DatasourceE
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1487,8 +1312,6 @@ func (c *Client) sendDatasourceEmailList(ctx context.Context, params DatasourceE
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -1582,36 +1405,14 @@ func (c *Client) sendDatasourceEmailOAuthCreate(ctx context.Context, request *Da
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailOAuthCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1619,8 +1420,6 @@ func (c *Client) sendDatasourceEmailOAuthCreate(ctx context.Context, request *Da
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -1729,36 +1528,14 @@ func (c *Client) sendDatasourceEmailOAuthDelete(ctx context.Context, params Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailOAuthDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1766,8 +1543,6 @@ func (c *Client) sendDatasourceEmailOAuthDelete(ctx context.Context, params Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -1876,36 +1651,14 @@ func (c *Client) sendDatasourceEmailOAuthGet(ctx context.Context, params Datasou
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailOAuthGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -1913,8 +1666,6 @@ func (c *Client) sendDatasourceEmailOAuthGet(ctx context.Context, params Datasou
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2043,36 +1794,14 @@ func (c *Client) sendDatasourceEmailOAuthList(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailOAuthListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2080,8 +1809,6 @@ func (c *Client) sendDatasourceEmailOAuthList(ctx context.Context, params Dataso
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2193,36 +1920,14 @@ func (c *Client) sendDatasourceEmailOAuthUpdate(ctx context.Context, request *Da
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailOAuthUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailOAuthUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2230,8 +1935,6 @@ func (c *Client) sendDatasourceEmailOAuthUpdate(ctx context.Context, request *Da
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2343,36 +2046,14 @@ func (c *Client) sendDatasourceEmailUpdate(ctx context.Context, request *Datasou
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceEmailUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceEmailUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceEmailUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2380,8 +2061,6 @@ func (c *Client) sendDatasourceEmailUpdate(ctx context.Context, request *Datasou
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2475,36 +2154,14 @@ func (c *Client) sendDatasourceLinkedinCreate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceLinkedinCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2512,8 +2169,6 @@ func (c *Client) sendDatasourceLinkedinCreate(ctx context.Context, request *Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2622,36 +2277,14 @@ func (c *Client) sendDatasourceLinkedinDelete(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceLinkedinDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2659,8 +2292,6 @@ func (c *Client) sendDatasourceLinkedinDelete(ctx context.Context, params Dataso
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2769,36 +2400,14 @@ func (c *Client) sendDatasourceLinkedinGet(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceLinkedinGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2806,8 +2415,6 @@ func (c *Client) sendDatasourceLinkedinGet(ctx context.Context, params Datasourc
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -2936,36 +2543,14 @@ func (c *Client) sendDatasourceLinkedinList(ctx context.Context, params Datasour
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceLinkedinListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -2973,8 +2558,6 @@ func (c *Client) sendDatasourceLinkedinList(ctx context.Context, params Datasour
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3086,36 +2669,14 @@ func (c *Client) sendDatasourceLinkedinUpdate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceLinkedinUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceLinkedinUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceLinkedinUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -3123,8 +2684,6 @@ func (c *Client) sendDatasourceLinkedinUpdate(ctx context.Context, request *Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3253,36 +2812,14 @@ func (c *Client) sendDatasourceList(ctx context.Context, params DatasourceListPa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -3290,8 +2827,6 @@ func (c *Client) sendDatasourceList(ctx context.Context, params DatasourceListPa
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3404,36 +2939,14 @@ func (c *Client) sendDatasourceSetOAuth2Client(ctx context.Context, request *Dat
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceSetOAuth2ClientOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceSetOAuth2ClientOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceSetOAuth2ClientOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceSetOAuth2ClientOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -3441,8 +2954,6 @@ func (c *Client) sendDatasourceSetOAuth2Client(ctx context.Context, request *Dat
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3536,36 +3047,14 @@ func (c *Client) sendDatasourceTelegramCreate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceTelegramCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceTelegramCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceTelegramCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -3573,8 +3062,6 @@ func (c *Client) sendDatasourceTelegramCreate(ctx context.Context, request *Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3683,36 +3170,14 @@ func (c *Client) sendDatasourceTelegramDelete(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceTelegramDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceTelegramDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceTelegramDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -3720,8 +3185,6 @@ func (c *Client) sendDatasourceTelegramDelete(ctx context.Context, params Dataso
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3830,36 +3293,14 @@ func (c *Client) sendDatasourceTelegramGet(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceTelegramGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceTelegramGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceTelegramGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -3867,8 +3308,6 @@ func (c *Client) sendDatasourceTelegramGet(ctx context.Context, params Datasourc
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -3997,36 +3436,14 @@ func (c *Client) sendDatasourceTelegramList(ctx context.Context, params Datasour
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceTelegramListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceTelegramListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceTelegramListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4034,8 +3451,6 @@ func (c *Client) sendDatasourceTelegramList(ctx context.Context, params Datasour
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -4147,36 +3562,14 @@ func (c *Client) sendDatasourceTelegramUpdate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceTelegramUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceTelegramUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceTelegramUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceTelegramUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4184,8 +3577,6 @@ func (c *Client) sendDatasourceTelegramUpdate(ctx context.Context, request *Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -4279,36 +3670,14 @@ func (c *Client) sendDatasourceWhatsappCreate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceWhatsappCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4316,8 +3685,6 @@ func (c *Client) sendDatasourceWhatsappCreate(ctx context.Context, request *Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -4426,36 +3793,14 @@ func (c *Client) sendDatasourceWhatsappDelete(ctx context.Context, params Dataso
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceWhatsappDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4463,8 +3808,6 @@ func (c *Client) sendDatasourceWhatsappDelete(ctx context.Context, params Dataso
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -4573,36 +3916,14 @@ func (c *Client) sendDatasourceWhatsappGet(ctx context.Context, params Datasourc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceWhatsappGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4610,8 +3931,6 @@ func (c *Client) sendDatasourceWhatsappGet(ctx context.Context, params Datasourc
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -4740,36 +4059,14 @@ func (c *Client) sendDatasourceWhatsappList(ctx context.Context, params Datasour
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceWhatsappListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4777,8 +4074,6 @@ func (c *Client) sendDatasourceWhatsappList(ctx context.Context, params Datasour
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -4890,36 +4185,14 @@ func (c *Client) sendDatasourceWhatsappUpdate(ctx context.Context, request *Data
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DatasourceWhatsappUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DatasourceWhatsappUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DatasourceWhatsappUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -4927,8 +4200,6 @@ func (c *Client) sendDatasourceWhatsappUpdate(ctx context.Context, request *Data
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5037,36 +4308,14 @@ func (c *Client) sendDeleteContact(ctx context.Context, params DeleteContactPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DeleteContactOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DeleteContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DeleteContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5074,8 +4323,6 @@ func (c *Client) sendDeleteContact(ctx context.Context, params DeleteContactPara
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5184,36 +4431,14 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, DeleteUserOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DeleteUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, DeleteUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5221,8 +4446,6 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5316,36 +4539,14 @@ func (c *Client) sendFileCreate(ctx context.Context, request *UploadFileRequest)
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, FileCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FileCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, FileCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, FileCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5353,8 +4554,6 @@ func (c *Client) sendFileCreate(ctx context.Context, request *UploadFileRequest)
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5463,36 +4662,14 @@ func (c *Client) sendFileDelete(ctx context.Context, params FileDeleteParams) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, FileDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FileDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, FileDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, FileDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5500,8 +4677,6 @@ func (c *Client) sendFileDelete(ctx context.Context, params FileDeleteParams) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5610,36 +4785,14 @@ func (c *Client) sendFileGet(ctx context.Context, params FileGetParams) (res *Fi
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, FileGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FileGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, FileGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, FileGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5647,8 +4800,6 @@ func (c *Client) sendFileGet(ctx context.Context, params FileGetParams) (res *Fi
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5777,36 +4928,14 @@ func (c *Client) sendFileList(ctx context.Context, params FileListParams) (res [
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, FileListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FileListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, FileListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, FileListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5814,8 +4943,6 @@ func (c *Client) sendFileList(ctx context.Context, params FileListParams) (res [
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -5927,36 +5054,14 @@ func (c *Client) sendFileUpdate(ctx context.Context, request *FileUpdateReq, par
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, FileUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, FileUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, FileUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, FileUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -5964,8 +5069,6 @@ func (c *Client) sendFileUpdate(ctx context.Context, request *FileUpdateReq, par
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6059,36 +5162,14 @@ func (c *Client) sendGenerateDownloadLink(ctx context.Context, request *Generate
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, GenerateDownloadLinkOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GenerateDownloadLinkOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, GenerateDownloadLinkOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, GenerateDownloadLinkOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6096,8 +5177,6 @@ func (c *Client) sendGenerateDownloadLink(ctx context.Context, request *Generate
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6191,36 +5270,14 @@ func (c *Client) sendGeneratePresignedUploadUrl(ctx context.Context, request *Up
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, GeneratePresignedUploadUrlOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6228,8 +5285,6 @@ func (c *Client) sendGeneratePresignedUploadUrl(ctx context.Context, request *Up
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6338,36 +5393,14 @@ func (c *Client) sendGetContact(ctx context.Context, params GetContactParams) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, GetContactOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, GetContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, GetContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6375,8 +5408,6 @@ func (c *Client) sendGetContact(ctx context.Context, params GetContactParams) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6467,36 +5498,14 @@ func (c *Client) sendGetProfile(ctx context.Context) (res *User, err error) {
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, GetProfileOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetProfileOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, GetProfileOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, GetProfileOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6504,8 +5513,6 @@ func (c *Client) sendGetProfile(ctx context.Context) (res *User, err error) {
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6614,36 +5621,14 @@ func (c *Client) sendGetUser(ctx context.Context, params GetUserParams) (res *Us
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, GetUserOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, GetUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, GetUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6651,8 +5636,6 @@ func (c *Client) sendGetUser(ctx context.Context, params GetUserParams) (res *Us
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6743,36 +5726,14 @@ func (c *Client) sendListContacts(ctx context.Context) (res []Contact, err error
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, ListContactsOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListContactsOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, ListContactsOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, ListContactsOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6780,8 +5741,6 @@ func (c *Client) sendListContacts(ctx context.Context) (res []Contact, err error
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -6872,36 +5831,14 @@ func (c *Client) sendListUsers(ctx context.Context) (res []User, err error) {
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, ListUsersOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListUsersOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, ListUsersOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, ListUsersOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -6909,8 +5846,6 @@ func (c *Client) sendListUsers(ctx context.Context) (res []User, err error) {
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7004,36 +5939,14 @@ func (c *Client) sendMessageEmailQuery(ctx context.Context, request *MessageQuer
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, MessageEmailQueryOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, MessageEmailQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, MessageEmailQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, MessageEmailQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7041,8 +5954,6 @@ func (c *Client) sendMessageEmailQuery(ctx context.Context, request *MessageQuer
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7136,36 +6047,14 @@ func (c *Client) sendMessageLinkedinQuery(ctx context.Context, request *MessageQ
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, MessageLinkedinQueryOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, MessageLinkedinQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, MessageLinkedinQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, MessageLinkedinQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7173,8 +6062,6 @@ func (c *Client) sendMessageLinkedinQuery(ctx context.Context, request *MessageQ
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7268,36 +6155,14 @@ func (c *Client) sendMessageQuery(ctx context.Context, request *MessageQuery) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, MessageQueryOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, MessageQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, MessageQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, MessageQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7305,8 +6170,6 @@ func (c *Client) sendMessageQuery(ctx context.Context, request *MessageQuery) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7400,36 +6263,14 @@ func (c *Client) sendMessageTelegramQuery(ctx context.Context, request *MessageQ
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, MessageTelegramQueryOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, MessageTelegramQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, MessageTelegramQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, MessageTelegramQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7437,8 +6278,6 @@ func (c *Client) sendMessageTelegramQuery(ctx context.Context, request *MessageQ
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7532,36 +6371,14 @@ func (c *Client) sendMessageWhatsappQuery(ctx context.Context, request *MessageQ
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, MessageWhatsappQueryOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, MessageWhatsappQueryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, MessageWhatsappQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, MessageWhatsappQueryOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7569,8 +6386,6 @@ func (c *Client) sendMessageWhatsappQuery(ctx context.Context, request *MessageQ
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7699,36 +6514,14 @@ func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2Clie
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientCallbackOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientCallbackOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientCallbackOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientCallbackOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7736,8 +6529,6 @@ func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2Clie
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7831,36 +6622,14 @@ func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2Clie
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -7868,8 +6637,6 @@ func (c *Client) sendOAuth2ClientCreate(ctx context.Context, request *OAuth2Clie
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -7978,36 +6745,14 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8015,8 +6760,6 @@ func (c *Client) sendOAuth2ClientDelete(ctx context.Context, params OAuth2Client
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -8125,36 +6868,14 @@ func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGet
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8162,8 +6883,6 @@ func (c *Client) sendOAuth2ClientGet(ctx context.Context, params OAuth2ClientGet
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -8292,36 +7011,14 @@ func (c *Client) sendOAuth2ClientList(ctx context.Context, params OAuth2ClientLi
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8329,8 +7026,6 @@ func (c *Client) sendOAuth2ClientList(ctx context.Context, params OAuth2ClientLi
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -8424,36 +7119,14 @@ func (c *Client) sendOAuth2ClientLogin(ctx context.Context, request *OAuth2Clien
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientLoginOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientLoginOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientLoginOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientLoginOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8461,8 +7134,6 @@ func (c *Client) sendOAuth2ClientLogin(ctx context.Context, request *OAuth2Clien
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -8590,36 +7261,14 @@ func (c *Client) sendOAuth2ClientTokenDelete(ctx context.Context, params OAuth2C
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientTokenDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientTokenDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientTokenDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientTokenDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8627,8 +7276,6 @@ func (c *Client) sendOAuth2ClientTokenDelete(ctx context.Context, params OAuth2C
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -8738,36 +7385,14 @@ func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2Cli
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientTokenListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientTokenListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientTokenListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientTokenListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8775,8 +7400,6 @@ func (c *Client) sendOAuth2ClientTokenList(ctx context.Context, params OAuth2Cli
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -8888,36 +7511,14 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, OAuth2ClientUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -8925,8 +7526,6 @@ func (c *Client) sendOAuth2ClientUpdate(ctx context.Context, request *OAuth2Clie
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9020,36 +7619,14 @@ func (c *Client) sendPipelineCreate(ctx context.Context, request *Pipeline) (res
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, PipelineCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, PipelineCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, PipelineCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9057,8 +7634,6 @@ func (c *Client) sendPipelineCreate(ctx context.Context, request *Pipeline) (res
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9167,36 +7742,14 @@ func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeletePa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, PipelineDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, PipelineDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, PipelineDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9204,8 +7757,6 @@ func (c *Client) sendPipelineDelete(ctx context.Context, params PipelineDeletePa
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9314,36 +7865,14 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, PipelineGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, PipelineGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, PipelineGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9351,8 +7880,6 @@ func (c *Client) sendPipelineGet(ctx context.Context, params PipelineGetParams) 
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9515,36 +8042,14 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, PipelineListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, PipelineListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, PipelineListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9552,8 +8057,6 @@ func (c *Client) sendPipelineList(ctx context.Context, params PipelineListParams
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9665,36 +8168,14 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *Pipeline, para
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, PipelineUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, PipelineUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, PipelineUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, PipelineUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9702,8 +8183,6 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *Pipeline, para
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9797,36 +8276,14 @@ func (c *Client) sendSchedulerCreate(ctx context.Context, request *Scheduler) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SchedulerCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SchedulerCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SchedulerCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SchedulerCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9834,8 +8291,6 @@ func (c *Client) sendSchedulerCreate(ctx context.Context, request *Scheduler) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -9944,36 +8399,14 @@ func (c *Client) sendSchedulerDelete(ctx context.Context, params SchedulerDelete
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SchedulerDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SchedulerDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SchedulerDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SchedulerDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -9981,8 +8414,6 @@ func (c *Client) sendSchedulerDelete(ctx context.Context, params SchedulerDelete
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -10091,36 +8522,14 @@ func (c *Client) sendSchedulerGet(ctx context.Context, params SchedulerGetParams
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SchedulerGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SchedulerGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SchedulerGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SchedulerGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -10128,8 +8537,6 @@ func (c *Client) sendSchedulerGet(ctx context.Context, params SchedulerGetParams
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -10275,36 +8682,14 @@ func (c *Client) sendSchedulerList(ctx context.Context, params SchedulerListPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SchedulerListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SchedulerListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SchedulerListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SchedulerListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -10312,8 +8697,6 @@ func (c *Client) sendSchedulerList(ctx context.Context, params SchedulerListPara
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -10425,36 +8808,14 @@ func (c *Client) sendSchedulerUpdate(ctx context.Context, request *Scheduler, pa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SchedulerUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SchedulerUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SchedulerUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SchedulerUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -10462,8 +8823,6 @@ func (c *Client) sendSchedulerUpdate(ctx context.Context, request *Scheduler, pa
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -10629,36 +8988,14 @@ func (c *Client) sendStorageHostfilesCreate(ctx context.Context, request *Storag
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageHostfilesCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageHostfilesCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageHostfilesCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -10666,8 +9003,6 @@ func (c *Client) sendStorageHostfilesCreate(ctx context.Context, request *Storag
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -10776,36 +9111,14 @@ func (c *Client) sendStorageHostfilesDelete(ctx context.Context, params StorageH
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageHostfilesDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageHostfilesDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageHostfilesDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -10813,8 +9126,6 @@ func (c *Client) sendStorageHostfilesDelete(ctx context.Context, params StorageH
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -10923,36 +9234,14 @@ func (c *Client) sendStorageHostfilesGet(ctx context.Context, params StorageHost
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageHostfilesGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageHostfilesGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageHostfilesGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -10960,8 +9249,6 @@ func (c *Client) sendStorageHostfilesGet(ctx context.Context, params StorageHost
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -11073,36 +9360,14 @@ func (c *Client) sendStorageHostfilesUpdate(ctx context.Context, request *Storag
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageHostfilesUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageHostfilesUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageHostfilesUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageHostfilesUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -11110,8 +9375,6 @@ func (c *Client) sendStorageHostfilesUpdate(ctx context.Context, request *Storag
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -11325,36 +9588,14 @@ func (c *Client) sendStorageList(ctx context.Context, params StorageListParams) 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -11362,8 +9603,6 @@ func (c *Client) sendStorageList(ctx context.Context, params StorageListParams) 
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -11457,36 +9696,14 @@ func (c *Client) sendStoragePostgresCreate(ctx context.Context, request *Storage
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StoragePostgresCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StoragePostgresCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -11494,8 +9711,6 @@ func (c *Client) sendStoragePostgresCreate(ctx context.Context, request *Storage
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -11604,36 +9819,14 @@ func (c *Client) sendStoragePostgresDelete(ctx context.Context, params StoragePo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StoragePostgresDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StoragePostgresDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -11641,8 +9834,6 @@ func (c *Client) sendStoragePostgresDelete(ctx context.Context, params StoragePo
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -11751,36 +9942,14 @@ func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostg
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StoragePostgresGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StoragePostgresGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -11788,8 +9957,6 @@ func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostg
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -11901,36 +10068,14 @@ func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *Storage
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StoragePostgresUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StoragePostgresUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StoragePostgresUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -11938,8 +10083,6 @@ func (c *Client) sendStoragePostgresUpdate(ctx context.Context, request *Storage
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12033,36 +10176,14 @@ func (c *Client) sendStorageS3Create(ctx context.Context, request *StorageS3) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageS3CreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageS3CreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageS3CreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageS3CreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12070,8 +10191,6 @@ func (c *Client) sendStorageS3Create(ctx context.Context, request *StorageS3) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12180,36 +10299,14 @@ func (c *Client) sendStorageS3Delete(ctx context.Context, params StorageS3Delete
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageS3DeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageS3DeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageS3DeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageS3DeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12217,8 +10314,6 @@ func (c *Client) sendStorageS3Delete(ctx context.Context, params StorageS3Delete
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12327,36 +10422,14 @@ func (c *Client) sendStorageS3Get(ctx context.Context, params StorageS3GetParams
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageS3GetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageS3GetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageS3GetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageS3GetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12364,8 +10437,6 @@ func (c *Client) sendStorageS3Get(ctx context.Context, params StorageS3GetParams
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12477,36 +10548,14 @@ func (c *Client) sendStorageS3Update(ctx context.Context, request *StorageS3, pa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, StorageS3UpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StorageS3UpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, StorageS3UpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, StorageS3UpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12514,8 +10563,6 @@ func (c *Client) sendStorageS3Update(ctx context.Context, request *StorageS3, pa
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12609,36 +10656,14 @@ func (c *Client) sendSyncpolicyCreate(ctx context.Context, request *SyncPolicy) 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SyncpolicyCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SyncpolicyCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SyncpolicyCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12646,8 +10671,6 @@ func (c *Client) sendSyncpolicyCreate(ctx context.Context, request *SyncPolicy) 
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12756,36 +10779,14 @@ func (c *Client) sendSyncpolicyDelete(ctx context.Context, params SyncpolicyDele
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SyncpolicyDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SyncpolicyDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SyncpolicyDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12793,8 +10794,6 @@ func (c *Client) sendSyncpolicyDelete(ctx context.Context, params SyncpolicyDele
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -12903,36 +10902,14 @@ func (c *Client) sendSyncpolicyGet(ctx context.Context, params SyncpolicyGetPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SyncpolicyGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SyncpolicyGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SyncpolicyGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -12940,8 +10917,6 @@ func (c *Client) sendSyncpolicyGet(ctx context.Context, params SyncpolicyGetPara
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13070,36 +11045,14 @@ func (c *Client) sendSyncpolicyList(ctx context.Context, params SyncpolicyListPa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SyncpolicyListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SyncpolicyListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SyncpolicyListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13107,8 +11060,6 @@ func (c *Client) sendSyncpolicyList(ctx context.Context, params SyncpolicyListPa
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13220,36 +11171,14 @@ func (c *Client) sendSyncpolicyUpdate(ctx context.Context, request *SyncPolicy, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, SyncpolicyUpdateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SyncpolicyUpdateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, SyncpolicyUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, SyncpolicyUpdateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13257,8 +11186,6 @@ func (c *Client) sendSyncpolicyUpdate(ctx context.Context, request *SyncPolicy, 
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13352,36 +11279,14 @@ func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCrea
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, TgSessionCreateOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, TgSessionCreateOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, TgSessionCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, TgSessionCreateOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13389,8 +11294,6 @@ func (c *Client) sendTgSessionCreate(ctx context.Context, request *TgSessionCrea
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13481,36 +11384,14 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, TgSessionListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, TgSessionListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, TgSessionListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, TgSessionListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13518,8 +11399,6 @@ func (c *Client) sendTgSessionList(ctx context.Context) (res *TgSessionListOK, e
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13631,36 +11510,14 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, TgSessionVerifyOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, TgSessionVerifyOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, TgSessionVerifyOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, TgSessionVerifyOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13668,8 +11525,6 @@ func (c *Client) sendTgSessionVerify(ctx context.Context, request *TgSessionVeri
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13781,36 +11636,14 @@ func (c *Client) sendUpdateContact(ctx context.Context, request *Contact, params
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, UpdateContactOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateContactOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, UpdateContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, UpdateContactOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13818,8 +11651,6 @@ func (c *Client) sendUpdateContact(ctx context.Context, request *Contact, params
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -13913,36 +11744,14 @@ func (c *Client) sendUpdateProfile(ctx context.Context, request *UserProfile) (r
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, UpdateProfileOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateProfileOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, UpdateProfileOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, UpdateProfileOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -13950,8 +11759,6 @@ func (c *Client) sendUpdateProfile(ctx context.Context, request *UserProfile) (r
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14063,36 +11870,14 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *User, params Updat
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, UpdateUserOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateUserOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, UpdateUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, UpdateUserOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -14100,8 +11885,6 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *User, params Updat
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14195,36 +11978,14 @@ func (c *Client) sendUploadFile(ctx context.Context, request *UploadFileRequest)
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, UploadFileOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UploadFileOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, UploadFileOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, UploadFileOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -14232,8 +11993,6 @@ func (c *Client) sendUploadFile(ctx context.Context, request *UploadFileRequest)
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14343,36 +12102,14 @@ func (c *Client) sendWorkerJobsCancel(ctx context.Context, params WorkerJobsCanc
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsCancelOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, WorkerJobsCancelOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WorkerJobsCancelOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, WorkerJobsCancelOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -14380,8 +12117,6 @@ func (c *Client) sendWorkerJobsCancel(ctx context.Context, params WorkerJobsCanc
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14490,36 +12225,14 @@ func (c *Client) sendWorkerJobsDelete(ctx context.Context, params WorkerJobsDele
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsDeleteOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, WorkerJobsDeleteOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WorkerJobsDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, WorkerJobsDeleteOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -14527,8 +12240,6 @@ func (c *Client) sendWorkerJobsDelete(ctx context.Context, params WorkerJobsDele
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14637,36 +12348,14 @@ func (c *Client) sendWorkerJobsGet(ctx context.Context, params WorkerJobsGetPara
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsGetOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, WorkerJobsGetOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WorkerJobsGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, WorkerJobsGetOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -14674,8 +12363,6 @@ func (c *Client) sendWorkerJobsGet(ctx context.Context, params WorkerJobsGetPara
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {
@@ -14804,36 +12491,14 @@ func (c *Client) sendWorkerJobsList(ctx context.Context, params WorkerJobsListPa
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, WorkerJobsListOperation, r); {
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, WorkerJobsListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, WorkerJobsListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
 				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, WorkerJobsListOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
 			}
 		}
 
@@ -14841,8 +12506,6 @@ func (c *Client) sendWorkerJobsList(ctx context.Context, params WorkerJobsListPa
 		nextRequirement:
 			for _, requirement := range []bitset{
 				{0b00000001},
-				{0b00000010},
-				{0b00000100},
 			} {
 				for i, mask := range requirement {
 					if satisfied[i]&mask != mask {

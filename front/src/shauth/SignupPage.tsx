@@ -1,26 +1,17 @@
-import {
-  Form,
-  Flex,
-  View,
-  Header,
-  Button,
-  TextField,
-  Link,
-  Text,
-} from '@adobe/react-spectrum';
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { Button, Flex, Form, Header, Link, Text, TextField, View } from '@adobe/react-spectrum'
 import Alert from '@spectrum-icons/workflow/Alert'
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useForm, Controller } from "react-hook-form"
+import client from '@/api/client'
 
 interface FormFields {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  confirmPassword: string;
+  email: string
+  firstName: string
+  lastName: string
+  password: string
+  confirmPassword: string
 }
 
 export function SignupPage() {
@@ -30,12 +21,11 @@ export function SignupPage() {
 
   const form = useForm({
     defaultValues: {
-      username: "",
-      email: "",
-      firstName: "",
-      lastName: "",
-      password: "",
-      confirmPassword: ""
+      email: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      confirmPassword: '',
     },
   })
 
@@ -50,45 +40,24 @@ export function SignupPage() {
     }
 
     try {
-      const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
-
-      const userResponse = await fetch(`${zitadelUrl}/v2/users/new`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+      const { data, error } = await client.POST('/user', {
+        body: {
+          email: fields.email,
+          password: fields.password,
+          first_name: fields.firstName,
+          last_name: fields.lastName,
         },
-        credentials: 'include',
-        body: JSON.stringify({
-          human: {
-            username: fields.username,
-            profile: {
-              givenName: fields.firstName,
-              familyName: fields.lastName,
-              displayName: `${fields.firstName} ${fields.lastName}`
-            },
-            email: {
-              email: fields.email,
-              isVerified: false
-            },
-            password: {
-              password: fields.password,
-              changeRequired: false
-            }
-          }
-        }),
       })
 
-      if (!userResponse.ok) {
-        const errorText = await userResponse.text()
+      if (error) {
         let errorMessage = 'Registration failed'
 
-        if (userResponse.status === 409) {
-          errorMessage = 'Username or email already exists'
-        } else if (userResponse.status === 400) {
+        if (error.status === 409) {
+          errorMessage = 'Email already exists'
+        } else if (error.status === 400) {
           errorMessage = 'Invalid registration data'
         } else {
-          errorMessage = `Registration failed: ${errorText || userResponse.statusText}`
+          errorMessage = `Registration failed: ${error.detail || 'Unknown error'}`
         }
 
         setSignupError(errorMessage)
@@ -96,52 +65,7 @@ export function SignupPage() {
         return
       }
 
-      const sessionResponse = await fetch(`${zitadelUrl}/v2/sessions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          checks: {
-            user: {
-              loginName: fields.username
-            }
-          }
-        }),
-      })
-
-      if (!sessionResponse.ok) {
-        setSignupError('Registration successful, but login failed. Please try logging in.')
-        setIsLoading(false)
-        return
-      }
-
-      const sessionData = await sessionResponse.json()
-      const sessionId = sessionData.sessionId
-
-      const passwordResponse = await fetch(`${zitadelUrl}/v2/sessions/${sessionId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          checks: {
-            password: {
-              password: fields.password
-            }
-          }
-        }),
-      })
-
-      if (passwordResponse.ok) {
-        navigate('/')
-      } else {
-        setSignupError('Registration successful, but login failed. Please try logging in.')
-      }
+      navigate('/')
     } catch (error) {
       setSignupError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
@@ -151,12 +75,7 @@ export function SignupPage() {
 
   return (
     <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
-      <View
-        padding="size-200"
-        backgroundColor="gray-200"
-        borderRadius="medium"
-        width="size-4600"
-      >
+      <View padding="size-200" backgroundColor="gray-200" borderRadius="medium" width="size-4600">
         <Flex direction="column" gap="size-200">
           <Header>Sign Up for ShadowAPI</Header>
 
@@ -176,10 +95,7 @@ export function SignupPage() {
                   name="firstName"
                   control={form.control}
                   rules={{ required: 'First name is required' }}
-                  render={({
-                    field: { name, value, onChange, onBlur, ref },
-                    fieldState: { invalid, error },
-                  }) => (
+                  render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                     <TextField
                       label="First Name"
                       type="text"
@@ -199,10 +115,7 @@ export function SignupPage() {
                   name="lastName"
                   control={form.control}
                   rules={{ required: 'Last name is required' }}
-                  render={({
-                    field: { name, value, onChange, onBlur, ref },
-                    fieldState: { invalid, error },
-                  }) => (
+                  render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                     <TextField
                       label="Last Name"
                       type="text"
@@ -221,43 +134,16 @@ export function SignupPage() {
               </Flex>
 
               <Controller
-                name="username"
-                control={form.control}
-                rules={{ required: 'Username is required' }}
-                render={({
-                  field: { name, value, onChange, onBlur, ref },
-                  fieldState: { invalid, error },
-                }) => (
-                  <TextField
-                    label="Username"
-                    type="text"
-                    width="100%"
-                    isRequired
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    ref={ref}
-                    validationState={invalid ? 'invalid' : undefined}
-                    errorMessage={error?.message}
-                  />
-                )}
-              />
-
-              <Controller
                 name="email"
                 control={form.control}
                 rules={{
                   required: 'Email is required',
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Please enter a valid email address'
-                  }
+                    message: 'Please enter a valid email address',
+                  },
                 }}
-                render={({
-                  field: { name, value, onChange, onBlur, ref },
-                  fieldState: { invalid, error },
-                }) => (
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                   <TextField
                     label="Email"
                     type="email"
@@ -281,13 +167,10 @@ export function SignupPage() {
                   required: 'Password is required',
                   minLength: {
                     value: 8,
-                    message: 'Password must be at least 8 characters long'
-                  }
+                    message: 'Password must be at least 8 characters long',
+                  },
                 }}
-                render={({
-                  field: { name, value, onChange, onBlur, ref },
-                  fieldState: { invalid, error },
-                }) => (
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                   <TextField
                     label="Password"
                     type="password"
@@ -309,13 +192,9 @@ export function SignupPage() {
                 control={form.control}
                 rules={{
                   required: 'Please confirm your password',
-                  validate: (value) =>
-                    value === form.watch('password') || 'Passwords do not match'
+                  validate: (value) => value === form.watch('password') || 'Passwords do not match',
                 }}
-                render={({
-                  field: { name, value, onChange, onBlur, ref },
-                  fieldState: { invalid, error },
-                }) => (
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                   <TextField
                     label="Confirm Password"
                     type="password"
@@ -334,14 +213,9 @@ export function SignupPage() {
 
               <Flex justifyContent="space-between" alignItems="center" marginTop="size-150">
                 <Text>
-                  Already have an account?{" "}
-                  <Link href="/login">Login</Link>
+                  Already have an account? <Link href="/login">Login</Link>
                 </Text>
-                <Button
-                  variant="cta"
-                  type="submit"
-                  isDisabled={isLoading}
-                >
+                <Button variant="cta" type="submit" isDisabled={isLoading}>
                   {isLoading ? 'Creating Account...' : 'Sign Up'}
                 </Button>
               </Flex>

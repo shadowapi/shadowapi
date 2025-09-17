@@ -1,6 +1,6 @@
-import { useCallback } from "react";
+import { useCallback } from 'react'
 
 export const useLogout = () =>
   useCallback(() => {
-    window.location.href = "/logout";
-  }, []);
+    window.location.href = '/logout'
+  }, [])

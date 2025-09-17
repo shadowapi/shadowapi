@@ -5859,20 +5859,6 @@ func (s *PipelineNodePosition) SetY(val OptFloat64) {
 	s.Y = val
 }
 
-type PlainCookieAuth struct {
-	APIKey string
-}
-
-// GetAPIKey returns the value of APIKey.
-func (s *PlainCookieAuth) GetAPIKey() string {
-	return s.APIKey
-}
-
-// SetAPIKey sets the value of APIKey.
-func (s *PlainCookieAuth) SetAPIKey(val string) {
-	s.APIKey = val
-}
-
 // Ref: #
 type Scheduler struct {
 	// Unique identifier.
@@ -7447,18 +7433,4 @@ func (s *WorkerJobsListOK) GetJobs() []WorkerJobs {
 // SetJobs sets the value of Jobs.
 func (s *WorkerJobsListOK) SetJobs(val []WorkerJobs) {
 	s.Jobs = val
-}
-
-type ZitadelCookieAuth struct {
-	APIKey string
-}
-
-// GetAPIKey returns the value of APIKey.
-func (s *ZitadelCookieAuth) GetAPIKey() string {
-	return s.APIKey
-}
-
-// SetAPIKey sets the value of APIKey.
-func (s *ZitadelCookieAuth) SetAPIKey(val string) {
-	s.APIKey = val
 }

@@ -169,22 +169,22 @@ export function DataSources() {
                   <Badge variant={item.state === 'Enabled' ? 'positive' : 'negative'}>{item.state}</Badge>
                 </Cell>
                 <Cell>
-                  {item.type == 'email_oauth' ? (
+                  {item.type == 'email_oauth' ? 
                     <ActionButton onPress={() => handleOauthLogin(item)}>
                       <Login />
                     </ActionButton>
-                  ) : (
+                   : 
                     <span>-</span>
-                  )}
+                  }
                 </Cell>
                 <Cell>
-                  {item.type == 'email_oauth' ? (
+                  {item.type == 'email_oauth' ? 
                     <ActionButton onPress={() => mutationRevokeTokens.mutate(item.key)}>
                       <Remove />
                     </ActionButton>
-                  ) : (
+                   : 
                     <span>-</span>
-                  )}
+                  }
                 </Cell>
                 <Cell>
                   <ActionButton onPress={() => navigate('/datasources/' + item.key)}>

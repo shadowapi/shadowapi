@@ -65,17 +65,18 @@ services:
         condition: service_started
     environment:
       - SA_HOST=0.0.0.0
+      - SA_PORT=8080
       - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
       - SA_LOG_LEVEL=DEBUG
       - SA_QUEUE_URL=nats://nats:4222
       - SA_QUEUE_PREFIX=shadowapi
-      - SA_AUTH_ZITADEL_INSTANCE_URL=http://zitadel:8080
+      - SA_ZITADEL_INSTANCE_URL=http://auth.localtest.me
       - SA_AUTH_ZITADEL_REDIRECT_URI=http://localtest.me/auth/callback
       # Zitadel Management API settings
       - SA_AUTH_ZITADEL_MANAGEMENT_URL=http://zitadel:8080
-      - SA_AUTH_ZITADEL_SERVICE_USER_ID=
-      - SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH=/secrets/zitadel-service-key.json
-      - SA_AUTH_USER_MANAGER=db
+      - SA_AUTH_ZITADEL_SERVICE_USER_ID=338238093709110022
+      - SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH=/secrets/shadowapi-admin-service.json
+      - SA_AUTH_USER_MANAGER=zitadel
     networks:
       - shadowapi
     volumes:
@@ -173,37 +174,27 @@ services:
     volumes:
       - ./devops/zitadel-config.yaml:/zitadel-config.yaml:ro
       - ./devops/zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
+      - ./secrets:/secrets
     labels:
       - traefik.enable=true
       - traefik.http.routers.zitadel.rule=Host(`auth.${DOMAIN}`)
       - traefik.http.routers.zitadel.entrypoints=${TRAEFIK_ENTRYPOINT}
       - traefik.http.services.zitadel.loadbalancer.server.port=8080
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:8080/debug/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  zitadel-setup:
-    image: curlimages/curl:latest
-    container_name: sa-zitadel-setup
-    depends_on:
-      zitadel:
-        condition: service_healthy
-    environment:
-      - ZITADEL_URL=http://auth.${DOMAIN}
-      - ADMIN_EMAIL=admin@example.com
-      - ADMIN_PASSWORD=Admin123!
-      - OUTPUT_DIR=/secrets
-    networks:
-      - shadowapi
-    volumes:
-      - ./devops/setup-zitadel-service-user.sh:/setup.sh:ro
-      - ./secrets:/secrets
-    command: sh -c "chmod +x /setup.sh && /setup.sh"
-    profiles:
-      - setup
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--spider",
+          "--tries=1",
+          "--timeout=3",
+          "http://localhost:8080/debug/ready",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
 volumes:
   postgres_data:

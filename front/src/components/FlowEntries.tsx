@@ -61,12 +61,12 @@ export const FlowEntries = React.memo(function FlowEntries(props: FlowEntriesPro
             aria-label={`Flow entry ${node.title}`}
             dragAndDropHooks={dragAndDropOptions}
           >
-            {(child: FlowItem) => 
+            {(child: FlowItem) => (
               <SpectrumItem textValue={child.title}>
                 <DragHandle />
                 {child.title}
               </SpectrumItem>
-            }
+            )}
           </ListView>
         </div>
       ))}

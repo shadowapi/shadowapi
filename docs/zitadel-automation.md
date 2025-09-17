@@ -4,19 +4,19 @@ This document describes the automated setup for Zitadel service users in ShadowA
 
 ## 🚀 Quick Start
 
-### 1. Automatic Setup (Recommended)
-
 Set up Zitadel service user with a single command:
 
 ```bash
-# Setup and enable Zitadel authentication
-task enable-zitadel-auth
-
-# Or just setup without enabling
+# Setup Zitadel authentication (default)
 task setup-zitadel
 ```
 
-### 2. Manual Steps
+This will:
+1. Create service user and generate keys
+2. Configure environment variables
+3. Enable Zitadel authentication
+
+### Manual Steps
 
 If you prefer manual setup:
 
@@ -39,9 +39,7 @@ task dev-down && task dev-up
 
 | Command | Description |
 |---------|-------------|
-| `task setup-zitadel` | Create service user and generate keys |
-| `task enable-zitadel-auth` | Setup and enable Zitadel authentication |
-| `task disable-zitadel-auth` | Switch back to database authentication |
+| `task setup-zitadel` | Setup service user and enable Zitadel authentication |
 | `task clean-zitadel-keys` | Remove generated keys |
 
 ## 🔧 How It Works
@@ -78,28 +76,9 @@ The backend automatically:
 └── zitadel-service-key.json    # Service user private key (DO NOT COMMIT!)
 ```
 
-## 🔄 Switching Authentication Methods
+## 🔄 Authentication Method
 
-### Enable Zitadel
-
-```bash
-task enable-zitadel-auth
-```
-
-This will:
-1. Run service user setup if needed
-2. Add `SA_AUTH_USER_MANAGER=zitadel` to `.env`
-3. Extract and set `SA_AUTH_ZITADEL_SERVICE_USER_ID`
-
-### Disable Zitadel (use database)
-
-```bash
-task disable-zitadel-auth
-```
-
-This will:
-1. Remove Zitadel settings from `.env`
-2. Set `SA_AUTH_USER_MANAGER=db`
+ShadowAPI uses Zitadel authentication by default. The system is configured to use the Zitadel Management API for all user operations including registration, login, and user management.
 
 ## 🔐 Security Notes
 
@@ -161,24 +140,11 @@ The service user needs these permissions in Zitadel Console:
 ### Daily Development
 
 ```bash
-# Start with database auth (default)
+# Setup Zitadel authentication (first time only)
+task setup-zitadel
+
+# Start development environment
 task dev-up
-
-# Switch to Zitadel when needed
-task enable-zitadel-auth
-task dev-down && task dev-up
-```
-
-### Testing Both Methods
-
-```bash
-# Test database auth
-task disable-zitadel-auth
-# ... test user operations ...
-
-# Test Zitadel auth
-task enable-zitadel-auth
-# ... test user operations ...
 ```
 
 ### Clean Environment
@@ -209,7 +175,7 @@ task dev-up
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SA_AUTH_USER_MANAGER` | User manager type (`db` or `zitadel`) | `db` |
+| `SA_AUTH_USER_MANAGER` | User manager type (always `zitadel`) | `zitadel` |
 | `SA_AUTH_ZITADEL_MANAGEMENT_URL` | Zitadel Management API URL | `http://zitadel:8080` |
 | `SA_AUTH_ZITADEL_SERVICE_USER_ID` | Service user ID from key file | - |
 | `SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH` | Path to private key file | `/secrets/zitadel-service-key.json` |

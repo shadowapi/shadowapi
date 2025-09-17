@@ -19,6 +19,7 @@ get:
 post:
   summary: Create a new user
   operationId: createUser
+  security: []
   requestBody:
     required: true
     content:

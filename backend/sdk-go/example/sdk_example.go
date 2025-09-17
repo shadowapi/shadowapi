@@ -19,16 +19,6 @@ func (s MySecuritySource) BearerAuth(ctx context.Context, operationName api.Oper
 	return api.BearerAuth{Token: s.token}, nil
 }
 
-// ZitadelCookieAuth returns a zero value; update if needed.
-func (s MySecuritySource) ZitadelCookieAuth(ctx context.Context, operationName api.OperationName) (api.ZitadelCookieAuth, error) {
-	return api.ZitadelCookieAuth{}, nil
-}
-
-// PlainCookieAuth returns a zero value; update if needed.
-func (s MySecuritySource) PlainCookieAuth(ctx context.Context, operationName api.OperationName) (api.PlainCookieAuth, error) {
-	return api.PlainCookieAuth{}, nil
-}
-
 func main() {
 	// Parse the server URL.
 	// use the same prefix "/api/v1" as in backend/internal/server/server.go

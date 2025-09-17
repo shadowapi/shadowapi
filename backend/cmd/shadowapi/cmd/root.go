@@ -20,7 +20,6 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/log"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
-	"github.com/shadowapi/shadowapi/backend/internal/session"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 )
 
@@ -79,7 +78,6 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 			do.Provide(injector, dbauth.Provide)
 		}
 
-		do.Provide(injector, session.Provide)
 		do.Provide(injector, handler.Provide)
 		do.Provide(injector, server.Provide)
 
