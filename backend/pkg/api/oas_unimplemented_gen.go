@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AuthLogin implements auth-login operation.
+//
+// Authenticate user with email and password.
+//
+// POST /auth/login
+func (UnimplementedHandler) AuthLogin(ctx context.Context, req *AuthLoginReq) (r AuthLoginRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateContact implements createContact operation.
 //
 // Create a new contact record.

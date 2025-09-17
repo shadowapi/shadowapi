@@ -500,6 +500,143 @@ func (m *ZitadelUserManager) ListUsers(ctx context.Context) ([]api.User, error) 
 	return nil, &NotImplementedError{Operation: "ListUsers"}
 }
 
+// ZitadelSessionRequest represents the session creation request
+type ZitadelSessionRequest struct {
+	Checks ZitadelChecks `json:"checks"`
+}
+
+// ZitadelChecks represents the checks for session creation
+type ZitadelChecks struct {
+	User     *ZitadelUserCheck     `json:"user,omitempty"`
+	Password *ZitadelPasswordCheck `json:"password,omitempty"`
+}
+
+// ZitadelUserCheck represents user check for session creation
+type ZitadelUserCheck struct {
+	LoginName string `json:"loginName"`
+}
+
+// ZitadelPasswordCheck represents password check for session update
+type ZitadelPasswordCheck struct {
+	Password string `json:"password"`
+}
+
+// ZitadelSessionResponse represents the session response from Zitadel
+type ZitadelSessionResponse struct {
+	SessionID string `json:"sessionId"`
+}
+
+// Login authenticates a user with email and password using Zitadel session API
+func (m *ZitadelUserManager) Login(ctx context.Context, email, password string) (*auth.LoginResult, error) {
+	if email == "" || password == "" {
+		return &auth.LoginResult{Success: false}, nil
+	}
+
+	zitadelURL := m.cfg.Auth.Zitadel.InstanceURL
+	if zitadelURL == "" {
+		return nil, fmt.Errorf("Zitadel instance URL not configured")
+	}
+
+	m.log.Debug("attempting login", "email", email, "zitadel_url", zitadelURL)
+
+	// Step 1: Create session with user check
+	sessionReq := ZitadelSessionRequest{
+		Checks: ZitadelChecks{
+			User: &ZitadelUserCheck{
+				LoginName: email,
+			},
+		},
+	}
+
+	sessionData, err := json.Marshal(sessionReq)
+	if err != nil {
+		m.log.Error("failed to marshal session request", "error", err)
+		return nil, fmt.Errorf("failed to marshal session request: %w", err)
+	}
+
+	sessionResp, err := http.Post(
+		fmt.Sprintf("%s/v2/sessions", zitadelURL),
+		"application/json",
+		bytes.NewBuffer(sessionData),
+	)
+	if err != nil {
+		m.log.Error("failed to create session", "error", err)
+		return nil, fmt.Errorf("failed to create session: %w", err)
+	}
+	defer sessionResp.Body.Close()
+
+	if sessionResp.StatusCode == http.StatusNotFound {
+		m.log.Debug("user not found during session creation", "email", email)
+		return &auth.LoginResult{Success: false}, nil
+	}
+
+	if sessionResp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(sessionResp.Body)
+		m.log.Error("session creation failed", "status", sessionResp.StatusCode, "response", string(body))
+		return nil, fmt.Errorf("session creation failed: %s", string(body))
+	}
+
+	var session ZitadelSessionResponse
+	if err := json.NewDecoder(sessionResp.Body).Decode(&session); err != nil {
+		m.log.Error("failed to decode session response", "error", err)
+		return nil, fmt.Errorf("failed to decode session response: %w", err)
+	}
+
+	m.log.Debug("session created successfully", "session_id", session.SessionID)
+
+	// Step 2: Update session with password check
+	passwordReq := ZitadelSessionRequest{
+		Checks: ZitadelChecks{
+			Password: &ZitadelPasswordCheck{
+				Password: password,
+			},
+		},
+	}
+
+	passwordData, err := json.Marshal(passwordReq)
+	if err != nil {
+		m.log.Error("failed to marshal password request", "error", err)
+		return nil, fmt.Errorf("failed to marshal password request: %w", err)
+	}
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	patchReq, err := http.NewRequest(
+		http.MethodPatch,
+		fmt.Sprintf("%s/v2/sessions/%s", zitadelURL, session.SessionID),
+		bytes.NewBuffer(passwordData),
+	)
+	if err != nil {
+		m.log.Error("failed to create password request", "error", err)
+		return nil, fmt.Errorf("failed to create password request: %w", err)
+	}
+	patchReq.Header.Set("Content-Type", "application/json")
+
+	passwordResp, err := client.Do(patchReq)
+	if err != nil {
+		m.log.Error("failed to verify password", "error", err)
+		return nil, fmt.Errorf("failed to verify password: %w", err)
+	}
+	defer passwordResp.Body.Close()
+
+	if passwordResp.StatusCode == http.StatusUnauthorized {
+		m.log.Debug("invalid password", "email", email)
+		return &auth.LoginResult{Success: false}, nil
+	}
+
+	if passwordResp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(passwordResp.Body)
+		m.log.Error("password verification failed", "status", passwordResp.StatusCode, "response", string(body))
+		return nil, fmt.Errorf("password verification failed: %s", string(body))
+	}
+
+	m.log.Info("user login successful", "email", email, "session_id", session.SessionID)
+
+	return &auth.LoginResult{
+		Success:      true,
+		SessionToken: session.SessionID,
+	}, nil
+}
+
 // NotImplementedError represents an operation that is not yet implemented
 type NotImplementedError struct {
 	Operation string

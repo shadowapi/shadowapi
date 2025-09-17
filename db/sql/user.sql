@@ -32,6 +32,12 @@ SELECT
 FROM "user"
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: GetUserByEmail :one
+SELECT
+  *
+FROM "user"
+WHERE email = sqlc.arg('email');
+
 -- name: UpdateUserNames :exec
 UPDATE "user"
 SET

@@ -87,18 +87,6 @@ components:
       $ref: "components/user_profile.yaml"
 
   securitySchemes:
-    # Session cookie-based auth (for Zitadel sessions)
-    ZitadelCookieAuth:
-      type: apiKey
-      in: cookie
-      name: zitadel_access_token
-
-    # Session cookie-based for plain login
-    PlainCookieAuth:
-      type: apiKey
-      in: cookie
-      name: sa_session
-
     # Bearer token-based auth
     BearerAuth:
       type: http
@@ -106,6 +94,8 @@ components:
       # optional field: bearerFormat: JWT
 
 paths:
+  /auth/login:
+    $ref: "paths/auth_login.yaml"
   /scheduler:
     $ref: "paths/scheduler.yaml"
   /scheduler/{uuid}:

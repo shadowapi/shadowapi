@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AuthLogin implements auth-login operation.
+	//
+	// Authenticate user with email and password.
+	//
+	// POST /auth/login
+	AuthLogin(ctx context.Context, req *AuthLoginReq) (AuthLoginRes, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.

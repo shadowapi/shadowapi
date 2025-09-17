@@ -6,6 +6,7 @@ package api
 type OperationName = string
 
 const (
+	AuthLoginOperation                  OperationName = "AuthLogin"
 	CreateContactOperation              OperationName = "CreateContact"
 	CreateUserOperation                 OperationName = "CreateUser"
 	DatasourceEmailCreateOperation      OperationName = "DatasourceEmailCreate"

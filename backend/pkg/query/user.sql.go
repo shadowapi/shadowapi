@@ -25,18 +25,18 @@ INSERT INTO "user" (
     created_at,
     updated_at
 ) VALUES (
-             $1::uuid,
-             $2,
-             $3,
-             $4,
-             $5,
-             $6::boolean,
-            $7::boolean,
-            $8,
-            $9,
-             NOW(),
-             NULL
-         ) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+    $1::uuid,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6::boolean,
+    $7::boolean,
+    $8,
+    $9,
+    NOW(),
+    NULL
+) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -92,7 +92,7 @@ func (q *Queries) DeleteUser(ctx context.Context, uuid pgtype.UUID) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-    uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+  uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 FROM "user"
 WHERE uuid = $1::uuid
 `
@@ -116,9 +116,35 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 	return i, err
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT
+  uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+FROM "user"
+WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.UUID,
+		&i.Email,
+		&i.Password,
+		&i.FirstName,
+		&i.LastName,
+		&i.IsEnabled,
+		&i.IsAdmin,
+		&i.ZitadelSubject,
+		&i.Meta,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByZitadelSubject = `-- name: GetUserByZitadelSubject :one
 SELECT
-    uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+  uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 FROM "user"
 WHERE zitadel_subject = $1
 `
@@ -144,11 +170,11 @@ func (q *Queries) GetUserByZitadelSubject(ctx context.Context, zitadelSubject pg
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-   uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
+  uuid, email, password, first_name, last_name, is_enabled, is_admin, zitadel_subject, meta, created_at, updated_at
 FROM "user"
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
-    OFFSET $1
+OFFSET $1
 `
 
 type ListUsersParams struct {
@@ -191,15 +217,15 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 const updateUser = `-- name: UpdateUser :exec
 UPDATE "user"
 SET
-    email = $1,
-    password = $2,
-    first_name = $3,
-    last_name = $4,
-    is_enabled =  $5::boolean,
-    is_admin = $6::boolean,
-    zitadel_subject = $7,
-    meta = $8,
-    updated_at = NOW()
+email = $1,
+password = $2,
+first_name = $3,
+last_name = $4,
+is_enabled =  $5::boolean,
+is_admin = $6::boolean,
+zitadel_subject = $7,
+meta = $8,
+updated_at = NOW()
 WHERE uuid = $9::uuid
 `
 
@@ -233,9 +259,9 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 const updateUserNames = `-- name: UpdateUserNames :exec
 UPDATE "user"
 SET
-    first_name = $1,
-    last_name = $2,
-    updated_at = NOW()
+first_name = $1,
+last_name = $2,
+updated_at = NOW()
 WHERE uuid = $3::uuid
 `
 

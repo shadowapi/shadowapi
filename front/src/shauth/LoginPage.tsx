@@ -5,7 +5,7 @@ import { Button, Flex, Form, Header, Link, Text, TextField, View } from '@adobe/
 import Alert from '@spectrum-icons/workflow/Alert'
 
 interface FormFields {
-  username: string
+  email: string
   password: string
 }
 
@@ -15,15 +15,13 @@ export function LoginPage() {
   const [loginError, setLoginError] = useState<string | null>(null)
 
   const form = useForm({
-    defaultValues: { username: '', password: '' },
+    defaultValues: { email: '', password: '' },
   })
 
   const onSubmit = async (fields: FormFields) => {
     setLoginError(null)
     try {
-      const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
-
-      const sessionResponse = await fetch(`${zitadelUrl}/v2/sessions`, {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,53 +29,24 @@ export function LoginPage() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          checks: {
-            user: {
-              loginName: fields.username,
-            },
-          },
+          email: fields.email,
+          password: fields.password,
         }),
       })
 
-      if (!sessionResponse.ok) {
-        if (sessionResponse.status === 404) {
-          setLoginError('Username not found')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          const returnTo = searchParams.get('returnTo') || '/'
+          navigate(returnTo)
         } else {
-          const errorText = await sessionResponse.text()
-          setLoginError(`Session creation failed: ${errorText || sessionResponse.statusText}`)
+          setLoginError('Login failed')
         }
-        return
-      }
-
-      const sessionData = await sessionResponse.json()
-      const sessionId = sessionData.sessionId
-
-      // Step 2: Update session with password
-      const passwordResponse = await fetch(`${zitadelUrl}/v2/sessions/${sessionId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          checks: {
-            password: {
-              password: fields.password,
-            },
-          },
-        }),
-      })
-
-      if (passwordResponse.ok) {
-        // Step 3: Redirect to application with session established
-        const returnTo = searchParams.get('returnTo') || '/'
-        navigate(returnTo)
-      } else if (passwordResponse.status === 401) {
-        setLoginError('Invalid password')
+      } else if (response.status === 401) {
+        setLoginError('Invalid email or password')
       } else {
-        const errorText = await passwordResponse.text()
-        setLoginError(`Authentication failed: ${errorText || passwordResponse.statusText}`)
+        const errorData = await response.json().catch(() => ({ message: response.statusText }))
+        setLoginError(`Authentication failed: ${errorData.message || 'Unknown error'}`)
       }
     } catch (error) {
       setLoginError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -99,17 +68,23 @@ export function LoginPage() {
             </View>
           )}
 
-          {/* Username/Password Login Form */}
+          {/* Email/Password Login Form */}
           <Form onSubmit={form.handleSubmit(onSubmit)}>
             <Flex direction="column" gap="size-100">
               <Controller
-                name="username"
+                name="email"
                 control={form.control}
-                rules={{ required: 'Username is required' }}
+                rules={{
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                }}
                 render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
                   <TextField
-                    label="Username"
-                    type="text"
+                    label="Email"
+                    type="email"
                     width="100%"
                     isRequired
                     name={name}
