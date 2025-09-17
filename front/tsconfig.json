@@ -44,7 +44,6 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "suppressImplicitAnyIndexErrors": true,
 
     /* Experimental and Decorators */
     "experimentalDecorators": true,

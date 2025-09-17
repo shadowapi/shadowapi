@@ -29,6 +29,8 @@ services:
       context: front
       dockerfile: ../devops/frontend.dev.Dockerfile
     container_name: sa-frontend
+    environment:
+      - VITE_ZITADEL_URL=http://auth.${DOMAIN}
     networks:
       - shadowapi
     #    volumes:
@@ -76,7 +78,7 @@ services:
       - ./spec:/spec/
     labels:
       - traefik.enable=true
-      - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`) || PathPrefix(`/login`) || PathPrefix(`/logout`))
+      - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
       - traefik.http.routers.shadowapi-api.entrypoints=${TRAEFIK_ENTRYPOINT}
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
 

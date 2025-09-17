@@ -1,85 +1,184 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button, Flex, Header, Link, Text, View } from '@adobe/react-spectrum'
-import { useQuery } from '@tanstack/react-query'
-import { sessionOptions } from './query'
+import {
+  Form,
+  Flex,
+  View,
+  Header,
+  Button,
+  TextField,
+  Link,
+  Text,
+} from '@adobe/react-spectrum';
+import Alert from '@spectrum-icons/workflow/Alert'
+
+import { useState } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { useForm, Controller } from "react-hook-form"
+
+interface FormFields {
+  username: string;
+  password: string;
+}
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const session = useQuery(sessionOptions())
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
+  const [loginError, setLoginError] = useState<string | null>(null)
 
-  // Detect “Zitadel cookie present but no active session” → disabled account.
-  const disabledByAdmin = useMemo(() => {
-    return !session.data?.active && document.cookie.split(';').some((c) => c.trim().startsWith('zitadel_access_token='))
-  }, [session.data])
+  const form = useForm({
+    defaultValues: { username: "", password: "" },
+  })
 
-  useEffect(() => {
-    if (session.data?.active) {
-      navigate('/')
+  const onSubmit = async (fields: FormFields) => {
+    setLoginError(null)
+    try {
+      const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
+
+      // Step 1: Create session with username check
+      const sessionResponse = await fetch(`${zitadelUrl}/v2/sessions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          checks: {
+            user: {
+              loginName: fields.username
+            }
+          }
+        }),
+      })
+
+      if (!sessionResponse.ok) {
+        if (sessionResponse.status === 404) {
+          setLoginError('Username not found')
+        } else {
+          const errorText = await sessionResponse.text()
+          setLoginError(`Session creation failed: ${errorText || sessionResponse.statusText}`)
+        }
+        return
+      }
+
+      const sessionData = await sessionResponse.json()
+      const sessionId = sessionData.sessionId
+
+      // Step 2: Update session with password
+      const passwordResponse = await fetch(`${zitadelUrl}/v2/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          checks: {
+            password: {
+              password: fields.password
+            }
+          }
+        }),
+      })
+
+      if (passwordResponse.ok) {
+        // Step 3: Redirect to application with session established
+        const returnTo = searchParams.get('returnTo') || '/'
+        navigate(returnTo)
+      } else if (passwordResponse.status === 401) {
+        setLoginError('Invalid password')
+      } else {
+        const errorText = await passwordResponse.text()
+        setLoginError(`Authentication failed: ${errorText || passwordResponse.statusText}`)
+      }
+    } catch (error) {
+      setLoginError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-  }, [session.data, navigate])
-
-  if (session.isPending) {
-    return <span>Loading...</span>
-  }
-  if (session.isError) {
-    return (
-      <span>
-        Error '{session.error.name}': {session.error.message}
-      </span>
-    )
-  }
-
-  const zitadelLogin = () => {
-    window.location.href = '/login/zitadel'
   }
 
   return (
     <Flex direction="row" alignItems="center" justifyContent="center" flexBasis="100%" height="100vh">
-      <View padding="size-200" backgroundColor="gray-200" borderRadius="medium" width="size-3600">
-        <Flex direction="column" gap="size-100">
-          <Header>Login</Header>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {disabledByAdmin && <Text color="negative">User is disabled, contact Admin</Text>}
+      <View
+        padding="size-200"
+        backgroundColor="gray-200"
+        borderRadius="medium"
+        width="size-4600"
+      >
+        <Flex direction="column" gap="size-200">
+          <Header>Login to ShadowAPI</Header>
 
-          {errorMsg && <Text color="negative">{errorMsg}</Text>}
-          <Button
-            variant="primary"
-            alignSelf="end"
-            width="size-1250"
-            isDisabled={submitting}
-            onPress={async () => {
-              setSubmitting(true)
-              setErrorMsg(null)
-              const resp = await fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ email, password }),
-              })
-              setSubmitting(false)
-              if (resp.ok) {
-                navigate('/')
-              } else {
-                setErrorMsg('Invalid email or password')
-              }
-            }}
-          >
-            {submitting ? 'Logging in...' : 'Login'}
-          </Button>
-          <Button variant="cta" alignSelf="end" marginTop="size-150" width="size-1250" onPress={zitadelLogin}>
-            <span style={{ whiteSpace: 'nowrap' }}>Login with ZITADEL</span>
-          </Button>
+          {loginError && (
+            <View backgroundColor="negative" padding="size-100" borderRadius="regular">
+              <Flex gap="size-100" alignItems="center">
+                <Alert color="negative" />
+                <Text>{loginError}</Text>
+              </Flex>
+            </View>
+          )}
+
+          {/* Username/Password Login Form */}
+          <Form onSubmit={form.handleSubmit(onSubmit)}>
+            <Flex direction="column" gap="size-100">
+              <Controller
+                name="username"
+                control={form.control}
+                rules={{ required: 'Username is required' }}
+                render={({
+                  field: { name, value, onChange, onBlur, ref },
+                  fieldState: { invalid, error },
+                }) => (
+                  <TextField
+                    label="Username"
+                    type="text"
+                    width="100%"
+                    isRequired
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    ref={ref}
+                    validationState={invalid ? 'invalid' : undefined}
+                    errorMessage={error?.message}
+                  // description="Enter your Zitadel username"
+                  />
+                )}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                rules={{ required: 'Password is required' }}
+                render={({
+                  field: { name, value, onChange, onBlur, ref },
+                  fieldState: { invalid, error },
+                }) => (
+                  <TextField
+                    label="Password"
+                    type="password"
+                    width="100%"
+                    isRequired
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    ref={ref}
+                    validationState={invalid ? 'invalid' : undefined}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
+              <Flex justifyContent="space-between" alignItems="center" marginTop="size-150">
+                <Text>
+                  Don't have an account?{" "}
+                  <Link href="/signup">Sign up</Link>
+                </Text>
+                <Button
+                  variant="cta"
+                  type="submit"
+                >
+                  Login
+                </Button>
+              </Flex>
+            </Flex>
+          </Form>
         </Flex>
       </View>
     </Flex>
