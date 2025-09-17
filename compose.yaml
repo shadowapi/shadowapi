@@ -184,12 +184,10 @@ services:
       test:
         [
           "CMD",
-          "wget",
-          "--quiet",
-          "--spider",
-          "--tries=1",
-          "--timeout=3",
-          "http://localhost:8080/debug/ready",
+          "/app/zitadel",
+          "ready",
+          "--config",
+          "/zitadel-config.yaml"
         ]
       interval: 15s
       timeout: 10s
