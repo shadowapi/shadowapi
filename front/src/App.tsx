@@ -24,7 +24,7 @@ import {
   Users,
   WorkerJobs,
 } from '@/pages'
-import { LoginPage, ProtectedRoute, SignupPage } from '@/shauth'
+import { LoginPage, ProtectedRoute, SignupPage, AuthProvider } from '@/shauth'
 
 declare module '@adobe/react-spectrum' {
   interface RouterConfig {
@@ -36,7 +36,8 @@ function App() {
   const navigate = useNavigate()
   return (
     <Provider theme={defaultTheme} colorScheme="light" router={{ navigate, useHref }}>
-      <Routes>
+      <AuthProvider>
+        <Routes>
         <Route
           path="/"
           element={
@@ -217,7 +218,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </Provider>
   )
 }

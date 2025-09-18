@@ -1,29 +1,30 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Flex, ProgressCircle, Text } from '@adobe/react-spectrum'
+import { useAuth } from './AuthContext'
 
 interface ProtectedRouteProps {
   children?: ReactNode
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { isAuthenticated, isLoading: authLoading, checkAuth } = useAuth()
+  const [isValidating, setIsValidating] = useState(false)
   const location = useLocation()
 
-  const validateSession = async () => {
-    // Fake session validation - simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    // For now, always consider user as authenticated
-    // TODO: Implement real session validation when auth system is ready
-    setIsAuthenticated(true)
-    setIsLoading(false)
-  }
-
   useEffect(() => {
-    validateSession()
-  }, [])
+    const validateAuth = async () => {
+      if (!authLoading && isAuthenticated) {
+        setIsValidating(true)
+        await checkAuth()
+        setIsValidating(false)
+      }
+    }
+
+    validateAuth()
+  }, [isAuthenticated, authLoading, checkAuth])
+
+  const isLoading = authLoading || isValidating
 
   if (isLoading) {
     return (

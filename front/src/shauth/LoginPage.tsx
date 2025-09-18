@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, Flex, Form, Header, Link, Text, TextField, View, ProgressCircle } from '@adobe/react-spectrum'
 import Alert from '@spectrum-icons/workflow/Alert'
 import { useZitadelAuth } from './useZitadelAuth'
+import { useAuth } from './AuthContext'
 
 interface FormFields {
   email: string
@@ -14,6 +15,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { loading, error, authenticateWithZitadel } = useZitadelAuth()
+  const { login } = useAuth()
 
   const form = useForm({
     defaultValues: { email: '', password: '' },
@@ -22,7 +24,10 @@ export function LoginPage() {
   const onSubmit = async (fields: FormFields) => {
     try {
       // Authenticate with Zitadel using the new flow
-      await authenticateWithZitadel(fields.email, fields.password)
+      const session = await authenticateWithZitadel(fields.email, fields.password)
+
+      // Save authentication state in context
+      login(fields.email, session.sessionToken, session.sessionId)
 
       // If successful, redirect to the desired page
       const returnTo = searchParams.get('returnTo') || '/'

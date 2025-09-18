@@ -1,0 +1,29 @@
+post:
+  operationId: authLogin
+  summary: User login
+  description: Authenticate user with email and password
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/auth_login_request.yaml"
+  responses:
+    "200":
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            $ref: "../components/auth_login_response.yaml"
+    "401":
+      description: Authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: "../components/auth_login_response.yaml"
+    default:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "../components/error.yaml"
