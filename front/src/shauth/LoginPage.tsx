@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Button, Flex, Form, Header, Link, Text, TextField, View } from '@adobe/react-spectrum'
+import { Button, Flex, Form, Header, Link, Text, TextField, View, ProgressCircle } from '@adobe/react-spectrum'
 import Alert from '@spectrum-icons/workflow/Alert'
+import { useZitadelAuth } from './useZitadelAuth'
 
 interface FormFields {
   email: string
@@ -12,44 +13,23 @@ interface FormFields {
 export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [loginError, setLoginError] = useState<string | null>(null)
+  const { loading, error, authenticateWithZitadel } = useZitadelAuth()
 
   const form = useForm({
     defaultValues: { email: '', password: '' },
   })
 
   const onSubmit = async (fields: FormFields) => {
-    setLoginError(null)
     try {
-      const response = await fetch('/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: fields.email,
-          password: fields.password,
-        }),
-      })
+      // Authenticate with Zitadel using the new flow
+      await authenticateWithZitadel(fields.email, fields.password)
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          const returnTo = searchParams.get('returnTo') || '/'
-          navigate(returnTo)
-        } else {
-          setLoginError('Login failed')
-        }
-      } else if (response.status === 401) {
-        setLoginError('Invalid email or password')
-      } else {
-        const errorData = await response.json().catch(() => ({ message: response.statusText }))
-        setLoginError(`Authentication failed: ${errorData.message || 'Unknown error'}`)
-      }
-    } catch (error) {
-      setLoginError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // If successful, redirect to the desired page
+      const returnTo = searchParams.get('returnTo') || '/'
+      navigate(returnTo)
+    } catch (err) {
+      // Error is already handled by useZitadelAuth hook
+      console.error('Login failed:', err)
     }
   }
 
@@ -59,17 +39,25 @@ export function LoginPage() {
         <Flex direction="column" gap="size-200">
           <Header>Login to ShadowAPI</Header>
 
-          {loginError && (
+          {error && (
             <View backgroundColor="negative" padding="size-100" borderRadius="regular">
               <Flex gap="size-100" alignItems="center">
                 <Alert color="negative" />
-                <Text>{loginError}</Text>
+                <Text>{error}</Text>
               </Flex>
             </View>
           )}
 
           {/* Email/Password Login Form */}
           <Form onSubmit={form.handleSubmit(onSubmit)}>
+            {loading && (
+              <View backgroundColor="informative" padding="size-100" borderRadius="regular">
+                <Flex gap="size-100" alignItems="center">
+                  <ProgressCircle size="S" isIndeterminate />
+                  <Text>Connecting to Zitadel authentication...</Text>
+                </Flex>
+              </View>
+            )}
             <Flex direction="column" gap="size-100">
               <Controller
                 name="email"
@@ -121,8 +109,15 @@ export function LoginPage() {
                 <Text>
                   Don't have an account? <Link href="/signup">Sign up</Link>
                 </Text>
-                <Button variant="cta" type="submit">
-                  Login
+                <Button variant="cta" type="submit" isDisabled={loading}>
+                  {loading ? (
+                    <Flex alignItems="center" gap="size-100">
+                      <ProgressCircle size="S" isIndeterminate />
+                      <Text>Authenticating...</Text>
+                    </Flex>
+                  ) : (
+                    'Login'
+                  )}
                 </Button>
               </Flex>
             </Flex>

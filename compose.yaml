@@ -151,7 +151,7 @@ services:
       - shadowapi
 
   zitadel:
-    image: ghcr.io/zitadel/zitadel:stable
+    image: ghcr.io/zitadel/zitadel:latest
     container_name: sa-zitadel
     user: "1000:1000"
     command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml

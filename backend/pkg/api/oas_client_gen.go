@@ -29,12 +29,6 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
-	// AuthLogin invokes auth-login operation.
-	//
-	// Authenticate user with email and password.
-	//
-	// POST /auth/login
-	AuthLogin(ctx context.Context, request *AuthLoginReq) (AuthLoginRes, error)
 	// CreateContact invokes createContact operation.
 	//
 	// Create a new contact record.
@@ -47,6 +41,12 @@ type Invoker interface {
 	//
 	// POST /user
 	CreateUser(ctx context.Context, request *User) (*User, error)
+	// CreateUserSession invokes createUserSession operation.
+	//
+	// Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
+	//
+	// POST /users/session
+	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
 	// DatasourceEmailCreate invokes datasource-email-create operation.
 	//
 	// Create a new email datasource.
@@ -668,81 +668,6 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// AuthLogin invokes auth-login operation.
-//
-// Authenticate user with email and password.
-//
-// POST /auth/login
-func (c *Client) AuthLogin(ctx context.Context, request *AuthLoginReq) (AuthLoginRes, error) {
-	res, err := c.sendAuthLogin(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendAuthLogin(ctx context.Context, request *AuthLoginReq) (res AuthLoginRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("auth-login"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/auth/login"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, AuthLoginOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/auth/login"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeAuthLoginRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeAuthLoginResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // CreateContact invokes createContact operation.
 //
 // Create a new contact record.
@@ -919,6 +844,78 @@ func (c *Client) sendCreateUser(ctx context.Context, request *User) (res *User, 
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateUserSession invokes createUserSession operation.
+//
+// Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
+//
+// POST /users/session
+func (c *Client) CreateUserSession(ctx context.Context) (*UserSessionToken, error) {
+	res, err := c.sendCreateUserSession(ctx)
+	return res, err
+}
+
+func (c *Client) sendCreateUserSession(ctx context.Context) (res *UserSessionToken, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createUserSession"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/users/session"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateUserSessionOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/users/session"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateUserSessionResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

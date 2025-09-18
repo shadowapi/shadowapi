@@ -11,8 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
@@ -249,43 +247,4 @@ func (m *DBUserManager) ListUsers(ctx context.Context) ([]api.User, error) {
 	return result, nil
 }
 
-// Login authenticates a user with email and password using database
-func (m *DBUserManager) Login(ctx context.Context, email, password string) (*auth.LoginResult, error) {
-	if email == "" || password == "" {
-		return &auth.LoginResult{Success: false}, nil
-	}
-
-	// Find user by email
-	user, err := query.New(m.dbp).GetUserByEmail(ctx, email)
-	if err == pgx.ErrNoRows {
-		m.log.Debug("user not found during login", "email", email)
-		return &auth.LoginResult{Success: false}, nil
-	} else if err != nil {
-		m.log.Error("failed to get user by email", "error", err, "email", email)
-		return nil, handler.E("failed to get user: %w", err)
-	}
-
-	// Check if user is enabled
-	if !user.IsEnabled {
-		m.log.Debug("user is disabled", "email", email)
-		return &auth.LoginResult{Success: false}, nil
-	}
-
-	// Verify password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		m.log.Debug("invalid password", "email", email)
-		return &auth.LoginResult{Success: false}, nil
-	}
-
-	m.log.Info("user login successful", "email", email, "user_id", user.UUID.String())
-
-	// For database authentication, we can generate a simple session token
-	// In a real implementation, this should be a proper JWT or session token
-	sessionToken := user.UUID.String()
-
-	return &auth.LoginResult{
-		Success:      true,
-		SessionToken: sessionToken,
-	}, nil
-}
 

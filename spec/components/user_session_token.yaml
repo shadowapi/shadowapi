@@ -1,0 +1,18 @@
+# spec/components/user_session_token.yaml
+---
+type: object
+additionalProperties: false
+properties:
+  session_token:
+    type: string
+    description: Token for creating empty session in Zitadel
+  zitadel_url:
+    type: string
+    description: Zitadel instance URL for frontend authentication
+  expires_in:
+    type: integer
+    description: Token expiration time in seconds
+required:
+  - session_token
+  - zitadel_url
+  - expires_in

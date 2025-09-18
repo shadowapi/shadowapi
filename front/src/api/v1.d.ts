@@ -4,23 +4,6 @@
  */
 
 export interface paths {
-    "/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Authenticate user with email and password */
-        post: operations["auth-login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/scheduler": {
         parameters: {
             query?: never;
@@ -904,6 +887,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a session token for Zitadel authentication
+         * @description Returns a token that can be used to create an empty session in Zitadel for frontend authentication
+         */
+        post: operations["createUserSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/profile": {
         parameters: {
             query?: never;
@@ -1090,21 +1093,18 @@ export interface components {
         };
         SyncPolicy: components["schemas"]["sync_policy"];
         User: components["schemas"]["user"];
+        UserSessionToken: components["schemas"]["user_session_token"];
         WorkerJobs: components["schemas"]["worker_jobs"];
         SessionStatus: components["schemas"]["session_status"];
         UserProfile: components["schemas"]["user_profile"];
         error: {
-            /**
-             * @description A human-readable explanation specific to this occurrence of the problem.
-             * @example Property foo is required but is missing.
-             */
+            /** @description A human-readable explanation specific to this occurrence of the problem. */
             detail?: string;
             /** @description Optional list of individual error details */
             errors?: unknown;
             /**
              * Format: int64
              * @description HTTP status code
-             * @example 400
              */
             status?: number;
         };
@@ -1806,6 +1806,14 @@ export interface components {
              */
             readonly updated_at?: string;
         };
+        user_session_token: {
+            /** @description Token for creating empty session in Zitadel */
+            session_token: string;
+            /** @description Zitadel instance URL for frontend authentication */
+            zitadel_url: string;
+            /** @description Token expiration time in seconds */
+            expires_in: number;
+        };
         user_profile: {
             /** @description User's first name */
             first_name: string;
@@ -1914,61 +1922,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    "auth-login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * Format: email
-                     * @description User email address
-                     */
-                    email: string;
-                    /** @description User password */
-                    password: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Login successful */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Login status */
-                        success?: boolean;
-                        /** @description Session token for authentication */
-                        session_token?: string;
-                    };
-                };
-            };
-            /** @description Invalid credentials */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
     "scheduler-list": {
         parameters: {
             query?: {
@@ -5026,6 +4979,35 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createUserSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session token created successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_session_token"];
+                };
             };
             /** @description Error */
             default: {

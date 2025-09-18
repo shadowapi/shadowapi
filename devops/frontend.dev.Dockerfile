@@ -1,5 +1,5 @@
 # Base stage for shared environment setup
-FROM node:20.10.0-alpine AS base
+FROM node:20.18.0-alpine AS base
 
 # Set working directory
 WORKDIR /app

@@ -79,6 +79,8 @@ components:
       $ref: "components/sync_policy.yaml"
     User:
       $ref: "components/user.yaml"
+    UserSessionToken:
+      $ref: "components/user_session_token.yaml"
     WorkerJobs:
       $ref: "components/worker_jobs.yaml"
     SessionStatus:
@@ -94,8 +96,6 @@ components:
       # optional field: bearerFormat: JWT
 
 paths:
-  /auth/login:
-    $ref: "paths/auth_login.yaml"
   /scheduler:
     $ref: "paths/scheduler.yaml"
   /scheduler/{uuid}:
@@ -192,6 +192,8 @@ paths:
     $ref: "paths/user.yaml"
   /user/{uuid}:
     $ref: "paths/user_uuid.yaml"
+  /users/session:
+    $ref: "paths/users_session.yaml"
   /profile:
     $ref: "paths/profile.yaml"
   /workerjobs:

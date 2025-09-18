@@ -8,12 +8,6 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// AuthLogin implements auth-login operation.
-	//
-	// Authenticate user with email and password.
-	//
-	// POST /auth/login
-	AuthLogin(ctx context.Context, req *AuthLoginReq) (AuthLoginRes, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.
@@ -26,6 +20,12 @@ type Handler interface {
 	//
 	// POST /user
 	CreateUser(ctx context.Context, req *User) (*User, error)
+	// CreateUserSession implements createUserSession operation.
+	//
+	// Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
+	//
+	// POST /users/session
+	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
 	// DatasourceEmailCreate implements datasource-email-create operation.
 	//
 	// Create a new email datasource.

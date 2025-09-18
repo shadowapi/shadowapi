@@ -61,27 +61,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/login"
-				origElem := elem
-				if l := len("auth/login"); len(elem) >= l && elem[0:l] == "auth/login" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "POST":
-						s.handleAuthLoginRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "POST")
-					}
-
-					return
-				}
-
-				elem = origElem
 			case 'c': // Prefix: "contact"
 				origElem := elem
 				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
@@ -1524,6 +1503,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
+				case 's': // Prefix: "s/session"
+					origElem := elem
+					if l := len("s/session"); len(elem) >= l && elem[0:l] == "s/session" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleCreateUserSessionRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem
@@ -1704,31 +1704,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/login"
-				origElem := elem
-				if l := len("auth/login"); len(elem) >= l && elem[0:l] == "auth/login" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "POST":
-						r.name = AuthLoginOperation
-						r.summary = ""
-						r.operationID = "auth-login"
-						r.pathPattern = "/auth/login"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-
-				elem = origElem
 			case 'c': // Prefix: "contact"
 				origElem := elem
 				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
@@ -3525,6 +3500,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.pathPattern = "/user/{uuid}"
 							r.args = args
 							r.count = 1
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 's': // Prefix: "s/session"
+					origElem := elem
+					if l := len("s/session"); len(elem) >= l && elem[0:l] == "s/session" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = CreateUserSessionOperation
+							r.summary = "Create a session token for Zitadel authentication"
+							r.operationID = "createUserSession"
+							r.pathPattern = "/users/session"
+							r.args = args
+							r.count = 0
 							return r, true
 						default:
 							return

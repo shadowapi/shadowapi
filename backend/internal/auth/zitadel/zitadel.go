@@ -22,9 +22,26 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
-	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
+
+// Simple error wrapper with HTTP status code
+type statusError struct {
+	code int
+	err  error
+}
+
+func (e *statusError) Error() string {
+	return e.err.Error()
+}
+
+func (e *statusError) StatusCode() int {
+	return e.code
+}
+
+func errWithCode(code int, err error) error {
+	return &statusError{code: code, err: err}
+}
 
 // ZitadelUserManager implements UserManager interface using Zitadel Management API
 type ZitadelUserManager struct {
@@ -60,7 +77,7 @@ func Provide(i do.Injector) (auth.UserManager, error) {
 
 	// Load private key for JWT authentication
 	if err := zm.loadPrivateKey(); err != nil {
-		return nil, handler.E("failed to load private key: %w", err)
+		return nil, fmt.Errorf("failed to load private key: %w", err)
 	}
 
 	return zm, nil
@@ -84,10 +101,11 @@ type ZitadelUser struct {
 
 // ZitadelCreateUserRequest represents request to create user in Zitadel
 type ZitadelCreateUserRequest struct {
+	UserID   string `json:"userId,omitempty"`
 	Username string `json:"userName"`
 	Profile  struct {
-		FirstName   string `json:"firstName"`
-		LastName    string `json:"lastName"`
+		GivenName   string `json:"givenName"`
+		FamilyName  string `json:"familyName"`
 		DisplayName string `json:"displayName"`
 	} `json:"profile"`
 	Email struct {
@@ -122,21 +140,21 @@ func (m *ZitadelUserManager) loadPrivateKey() error {
 
 	if keyPath == "" {
 		m.log.Error("service user key path not configured")
-		return handler.E("service user key path not configured")
+		return fmt.Errorf("service user key path not configured")
 	}
 
 	// Read the key file
 	keyData, err := os.ReadFile(keyPath)
 	if err != nil {
 		m.log.Error("failed to read key file", "error", err, "path", keyPath)
-		return handler.E("failed to read key file: %w", err)
+		return fmt.Errorf("failed to read key file: %w", err)
 	}
 
 	// Parse the JSON key file
 	var keyFile ZitadelKeyFile
 	if err := json.Unmarshal(keyData, &keyFile); err != nil {
 		m.log.Error("failed to parse key file", "error", err)
-		return handler.E("failed to parse key file: %w", err)
+		return fmt.Errorf("failed to parse key file: %w", err)
 	}
 	m.userID = keyFile.UserID
 
@@ -146,7 +164,7 @@ func (m *ZitadelUserManager) loadPrivateKey() error {
 	block, _ := pem.Decode([]byte(keyFile.Key))
 	if block == nil {
 		m.log.Error("failed to decode PEM block")
-		return handler.E("failed to decode PEM block")
+		return fmt.Errorf("failed to decode PEM block")
 	}
 
 	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
@@ -155,14 +173,14 @@ func (m *ZitadelUserManager) loadPrivateKey() error {
 		privateKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
 		if err != nil {
 			m.log.Error("failed to parse private key", "error", err)
-			return handler.E("failed to parse private key: %w", err)
+			return fmt.Errorf("failed to parse private key: %w", err)
 		}
 	}
 
 	rsaKey, ok := privateKey.(*rsa.PrivateKey)
 	if !ok {
 		m.log.Error("private key is not RSA key")
-		return handler.E("private key is not RSA key")
+		return fmt.Errorf("private key is not RSA key")
 	}
 
 	m.privateKey = rsaKey
@@ -214,7 +232,7 @@ func (m *ZitadelUserManager) getAccessToken(ctx context.Context) (string, int, e
 	assertion, err := m.createJWT()
 	if err != nil {
 		m.log.Error("failed to create JWT", "error", err)
-		return "", 0, handler.E("failed to create JWT: %w", err)
+		return "", 0, fmt.Errorf("failed to create JWT: %w", err)
 	}
 
 	// Prepare token request
@@ -232,7 +250,7 @@ func (m *ZitadelUserManager) getAccessToken(ctx context.Context) (string, int, e
 	req, err := http.NewRequestWithContext(ctx, "POST", tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		m.log.Error("failed to create token request", "error", err)
-		return "", 0, handler.E("failed to create token request: %w", err)
+		return "", 0, fmt.Errorf("failed to create token request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -248,7 +266,7 @@ func (m *ZitadelUserManager) getAccessToken(ctx context.Context) (string, int, e
 	resp, err := m.httpClient.Do(req)
 	if err != nil {
 		m.log.Error("failed to make token request", "error", err, "url", tokenURL)
-		return "", 0, handler.E("failed to make token request: %w", err)
+		return "", 0, fmt.Errorf("failed to make token request: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -260,21 +278,21 @@ func (m *ZitadelUserManager) getAccessToken(ctx context.Context) (string, int, e
 			"status", resp.StatusCode,
 			"response", string(bodyBytes),
 			"url", tokenURL)
-		return "", 0, handler.E("token request failed with status %d: %s", resp.StatusCode, string(bodyBytes))
+		return "", 0, fmt.Errorf("token request failed with status %d: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var tokenResp TokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
 		m.log.Error("failed to decode token response", "error", err)
-		return "", 0, handler.E("failed to decode token response: %w", err)
+		return "", 0, fmt.Errorf("failed to decode token response: %w", err)
 	}
 
 	m.log.Debug("successfully obtained access token", "expires_in", tokenResp.ExpiresIn)
 	return tokenResp.AccessToken, tokenResp.ExpiresIn, nil
 }
 
-// getAuthToken returns a cached or fresh access token for Zitadel Management API
-func (m *ZitadelUserManager) getAuthToken(ctx context.Context) (string, error) {
+// GetAuthToken returns a cached or fresh access token for Zitadel Management API
+func (m *ZitadelUserManager) GetAuthToken(ctx context.Context) (string, error) {
 	m.tokenMutex.RLock()
 	// Check if we have a valid cached token (with 1 minute buffer)
 	if m.accessToken != "" && time.Now().Add(time.Minute).Before(m.tokenExpiry) {
@@ -314,7 +332,7 @@ func (m *ZitadelUserManager) makeRequest(ctx context.Context, method, path strin
 		jsonBody, err := json.Marshal(body)
 		if err != nil {
 			m.log.Error("failed to marshal request body", "error", err)
-			return nil, handler.E("failed to marshal request body: %w", err)
+			return nil, fmt.Errorf("failed to marshal request body: %w", err)
 		}
 		bodyStr = string(jsonBody)
 		reqBody = bytes.NewBuffer(jsonBody)
@@ -331,7 +349,7 @@ func (m *ZitadelUserManager) makeRequest(ctx context.Context, method, path strin
 	req, err := http.NewRequestWithContext(ctx, method, apiURL, reqBody)
 	if err != nil {
 		m.log.Error("failed to create request", "error", err, "url", apiURL)
-		return nil, handler.E("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	// Set headers
@@ -346,10 +364,10 @@ func (m *ZitadelUserManager) makeRequest(ctx context.Context, method, path strin
 	}
 
 	// Add authentication
-	token, err := m.getAuthToken(ctx)
+	token, err := m.GetAuthToken(ctx)
 	if err != nil {
 		m.log.Error("failed to get auth token", "error", err)
-		return nil, handler.E("failed to get auth token: %w", err)
+		return nil, fmt.Errorf("failed to get auth token: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
@@ -361,6 +379,57 @@ func (m *ZitadelUserManager) makeRequest(ctx context.Context, method, path strin
 		return nil, err
 	}
 
+	m.log.Debug("received response", "status", resp.StatusCode, "url", apiURL)
+	return resp, nil
+}
+
+// makeRequestV2 makes an authenticated request to Zitadel V2 API
+func (m *ZitadelUserManager) makeRequestV2(ctx context.Context, method, path string, body interface{}) (*http.Response, error) {
+	var reqBody *bytes.Buffer
+	var bodyStr string
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			m.log.Error("failed to marshal request body", "error", err)
+			return nil, fmt.Errorf("failed to marshal request body: %w", err)
+		}
+		bodyStr = string(jsonBody)
+		reqBody = bytes.NewBuffer(jsonBody)
+	} else {
+		reqBody = bytes.NewBuffer(nil)
+	}
+	apiURL := m.cfg.Auth.Zitadel.ManagementURL + "/v2" + path
+	m.log.Debug("making Zitadel V2 API request",
+		"method", method,
+		"url", apiURL,
+		"body", bodyStr)
+	req, err := http.NewRequestWithContext(ctx, method, apiURL, reqBody)
+	if err != nil {
+		m.log.Error("failed to create request", "error", err, "url", apiURL)
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	// Set Host header to external domain if InstanceURL is configured
+	if m.cfg.Auth.Zitadel.InstanceURL != "" {
+		if u, err := url.Parse(m.cfg.Auth.Zitadel.InstanceURL); err == nil {
+			req.Host = u.Host
+		}
+	}
+	// Add authentication
+	token, err := m.GetAuthToken(ctx)
+	if err != nil {
+		m.log.Error("failed to get auth token", "error", err)
+		return nil, fmt.Errorf("failed to get auth token: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	m.log.Debug("request headers", "headers", req.Header)
+	resp, err := m.httpClient.Do(req)
+	if err != nil {
+		m.log.Error("HTTP request failed", "error", err, "url", apiURL)
+		return nil, err
+	}
 	m.log.Debug("received response", "status", resp.StatusCode, "url", apiURL)
 	return resp, nil
 }
@@ -388,15 +457,16 @@ func (m *ZitadelUserManager) convertZitadelToAPI(zu *ZitadelUser) *api.User {
 // convertAPIToZitadel converts api.User to Zitadel create request format
 func (m *ZitadelUserManager) convertAPIToZitadel(user *api.User) *ZitadelCreateUserRequest {
 	req := &ZitadelCreateUserRequest{
+		UserID:   fmt.Sprintf("user_%d", time.Now().UnixNano()), // Generate unique ID
 		Username: fmt.Sprintf("user_%s", user.Email), // Use email-based username
 	}
 
-	req.Profile.FirstName = user.FirstName
-	req.Profile.LastName = user.LastName
+	req.Profile.GivenName = user.FirstName
+	req.Profile.FamilyName = user.LastName
 	req.Profile.DisplayName = fmt.Sprintf("%s %s", user.FirstName, user.LastName)
 
 	req.Email.Email = user.Email
-	req.Email.IsVerified = false
+	req.Email.IsVerified = true
 
 	req.Password.Password = user.Password
 	req.Password.ChangeRequired = false
@@ -414,10 +484,10 @@ func (m *ZitadelUserManager) CreateUser(ctx context.Context, user *api.User) (*a
 	req := m.convertAPIToZitadel(user)
 	m.log.Debug("converted user to Zitadel format", "request", req)
 
-	resp, err := m.makeRequest(ctx, "POST", "/users/human", req)
+	resp, err := m.makeRequestV2(ctx, "POST", "/users/human", req)
 	if err != nil {
 		m.log.Error("failed to create user in Zitadel", "error", err)
-		return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to create user in Zitadel: %w", err))
+		return nil, errWithCode(http.StatusInternalServerError, fmt.Errorf("failed to create user in Zitadel: %w", err))
 	}
 	defer resp.Body.Close()
 
@@ -425,7 +495,7 @@ func (m *ZitadelUserManager) CreateUser(ctx context.Context, user *api.User) (*a
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		m.log.Error("failed to read response body", "error", err)
-		return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to read response: %w", err))
+		return nil, errWithCode(http.StatusInternalServerError, fmt.Errorf("failed to read response: %w", err))
 	}
 
 	m.log.Debug("Zitadel API response",
@@ -436,13 +506,13 @@ func (m *ZitadelUserManager) CreateUser(ctx context.Context, user *api.User) (*a
 		m.log.Error("Zitadel API error",
 			"status", resp.StatusCode,
 			"response", string(bodyBytes))
-		return nil, handler.ErrWithCode(resp.StatusCode, handler.E("Zitadel API returned status %d: %s", resp.StatusCode, string(bodyBytes)))
+		return nil, errWithCode(resp.StatusCode, fmt.Errorf("Zitadel API returned status %d: %s", resp.StatusCode, string(bodyBytes)))
 	}
 
 	var zitadelUser ZitadelUser
 	if err := json.Unmarshal(bodyBytes, &zitadelUser); err != nil {
 		m.log.Error("failed to decode Zitadel response", "error", err, "body", string(bodyBytes))
-		return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to decode Zitadel response: %w", err))
+		return nil, errWithCode(http.StatusInternalServerError, fmt.Errorf("failed to decode Zitadel response: %w", err))
 	}
 
 	m.log.Info("user created successfully", "userId", zitadelUser.ID, "email", user.Email)
@@ -453,21 +523,21 @@ func (m *ZitadelUserManager) CreateUser(ctx context.Context, user *api.User) (*a
 func (m *ZitadelUserManager) GetUser(ctx context.Context, uuid string) (*api.User, error) {
 	resp, err := m.makeRequest(ctx, "GET", "/users/"+uuid, nil)
 	if err != nil {
-		return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to get user from Zitadel: %w", err))
+		return nil, errWithCode(http.StatusInternalServerError, fmt.Errorf("failed to get user from Zitadel: %w", err))
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, handler.ErrWithCode(http.StatusNotFound, handler.E("user not found"))
+		return nil, errWithCode(http.StatusNotFound, fmt.Errorf("user not found"))
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, handler.ErrWithCode(resp.StatusCode, handler.E("Zitadel API returned status %d", resp.StatusCode))
+		return nil, errWithCode(resp.StatusCode, fmt.Errorf("Zitadel API returned status %d", resp.StatusCode))
 	}
 
 	var zitadelUser ZitadelUser
 	if err := json.NewDecoder(resp.Body).Decode(&zitadelUser); err != nil {
-		return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to decode Zitadel response: %w", err))
+		return nil, errWithCode(http.StatusInternalServerError, fmt.Errorf("failed to decode Zitadel response: %w", err))
 	}
 
 	return m.convertZitadelToAPI(&zitadelUser), nil
@@ -498,143 +568,6 @@ func (m *ZitadelUserManager) ListUsers(ctx context.Context) ([]api.User, error) 
 	// 3. Convert response to []api.User format
 	// 4. Handle pagination
 	return nil, &NotImplementedError{Operation: "ListUsers"}
-}
-
-// ZitadelSessionRequest represents the session creation request
-type ZitadelSessionRequest struct {
-	Checks ZitadelChecks `json:"checks"`
-}
-
-// ZitadelChecks represents the checks for session creation
-type ZitadelChecks struct {
-	User     *ZitadelUserCheck     `json:"user,omitempty"`
-	Password *ZitadelPasswordCheck `json:"password,omitempty"`
-}
-
-// ZitadelUserCheck represents user check for session creation
-type ZitadelUserCheck struct {
-	LoginName string `json:"loginName"`
-}
-
-// ZitadelPasswordCheck represents password check for session update
-type ZitadelPasswordCheck struct {
-	Password string `json:"password"`
-}
-
-// ZitadelSessionResponse represents the session response from Zitadel
-type ZitadelSessionResponse struct {
-	SessionID string `json:"sessionId"`
-}
-
-// Login authenticates a user with email and password using Zitadel session API
-func (m *ZitadelUserManager) Login(ctx context.Context, email, password string) (*auth.LoginResult, error) {
-	if email == "" || password == "" {
-		return &auth.LoginResult{Success: false}, nil
-	}
-
-	zitadelURL := m.cfg.Auth.Zitadel.InstanceURL
-	if zitadelURL == "" {
-		return nil, fmt.Errorf("Zitadel instance URL not configured")
-	}
-
-	m.log.Debug("attempting login", "email", email, "zitadel_url", zitadelURL)
-
-	// Step 1: Create session with user check
-	sessionReq := ZitadelSessionRequest{
-		Checks: ZitadelChecks{
-			User: &ZitadelUserCheck{
-				LoginName: email,
-			},
-		},
-	}
-
-	sessionData, err := json.Marshal(sessionReq)
-	if err != nil {
-		m.log.Error("failed to marshal session request", "error", err)
-		return nil, fmt.Errorf("failed to marshal session request: %w", err)
-	}
-
-	sessionResp, err := http.Post(
-		fmt.Sprintf("%s/v2/sessions", zitadelURL),
-		"application/json",
-		bytes.NewBuffer(sessionData),
-	)
-	if err != nil {
-		m.log.Error("failed to create session", "error", err)
-		return nil, fmt.Errorf("failed to create session: %w", err)
-	}
-	defer sessionResp.Body.Close()
-
-	if sessionResp.StatusCode == http.StatusNotFound {
-		m.log.Debug("user not found during session creation", "email", email)
-		return &auth.LoginResult{Success: false}, nil
-	}
-
-	if sessionResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(sessionResp.Body)
-		m.log.Error("session creation failed", "status", sessionResp.StatusCode, "response", string(body))
-		return nil, fmt.Errorf("session creation failed: %s", string(body))
-	}
-
-	var session ZitadelSessionResponse
-	if err := json.NewDecoder(sessionResp.Body).Decode(&session); err != nil {
-		m.log.Error("failed to decode session response", "error", err)
-		return nil, fmt.Errorf("failed to decode session response: %w", err)
-	}
-
-	m.log.Debug("session created successfully", "session_id", session.SessionID)
-
-	// Step 2: Update session with password check
-	passwordReq := ZitadelSessionRequest{
-		Checks: ZitadelChecks{
-			Password: &ZitadelPasswordCheck{
-				Password: password,
-			},
-		},
-	}
-
-	passwordData, err := json.Marshal(passwordReq)
-	if err != nil {
-		m.log.Error("failed to marshal password request", "error", err)
-		return nil, fmt.Errorf("failed to marshal password request: %w", err)
-	}
-
-	client := &http.Client{Timeout: 30 * time.Second}
-	patchReq, err := http.NewRequest(
-		http.MethodPatch,
-		fmt.Sprintf("%s/v2/sessions/%s", zitadelURL, session.SessionID),
-		bytes.NewBuffer(passwordData),
-	)
-	if err != nil {
-		m.log.Error("failed to create password request", "error", err)
-		return nil, fmt.Errorf("failed to create password request: %w", err)
-	}
-	patchReq.Header.Set("Content-Type", "application/json")
-
-	passwordResp, err := client.Do(patchReq)
-	if err != nil {
-		m.log.Error("failed to verify password", "error", err)
-		return nil, fmt.Errorf("failed to verify password: %w", err)
-	}
-	defer passwordResp.Body.Close()
-
-	if passwordResp.StatusCode == http.StatusUnauthorized {
-		m.log.Debug("invalid password", "email", email)
-		return &auth.LoginResult{Success: false}, nil
-	}
-
-	if passwordResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(passwordResp.Body)
-		m.log.Error("password verification failed", "status", passwordResp.StatusCode, "response", string(body))
-		return nil, fmt.Errorf("password verification failed: %s", string(body))
-	}
-
-	m.log.Info("user login successful", "email", email, "session_id", session.SessionID)
-
-	return &auth.LoginResult{
-		Success:      true,
-		SessionToken: session.SessionID,
-	}, nil
 }
 
 // NotImplementedError represents an operation that is not yet implemented

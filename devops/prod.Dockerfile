@@ -14,7 +14,7 @@ COPY backend/ ./
 RUN go build -o /shadowapi ./cmd/shadowapi
 
 # Stage 2: Build the Node frontend
-FROM node:20.10.0-alpine AS frontend-builder
+FROM node:20.18.0-alpine AS frontend-builder
 WORKDIR /app
 COPY front/package*.json ./
 RUN npm ci --force

@@ -13,15 +13,6 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// AuthLogin implements auth-login operation.
-//
-// Authenticate user with email and password.
-//
-// POST /auth/login
-func (UnimplementedHandler) AuthLogin(ctx context.Context, req *AuthLoginReq) (r AuthLoginRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // CreateContact implements createContact operation.
 //
 // Create a new contact record.
@@ -37,6 +28,15 @@ func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r 
 //
 // POST /user
 func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateUserSession implements createUserSession operation.
+//
+// Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
+//
+// POST /users/session
+func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r *UserSessionToken, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

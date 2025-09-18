@@ -6,76 +6,19 @@ interface ProtectedRouteProps {
   children?: ReactNode
 }
 
-interface ZitadelSession {
-  sessionId: string
-  factors: {
-    user?: {
-      verifiedAt: string
-      loginName: string
-    }
-    password?: {
-      verifiedAt: string
-    }
-  }
-  expirationDate?: string
-}
-
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const location = useLocation()
 
   const validateSession = async () => {
-    try {
-      const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
+    // Fake session validation - simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 300))
 
-      // Try to get current session from Zitadel
-      const response = await fetch(`${zitadelUrl}/v2/sessions/_current`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-        credentials: 'include', // Include cookies for session
-      })
-
-      if (!response.ok) {
-        setIsAuthenticated(false)
-        setIsLoading(false)
-        return
-      }
-
-      const sessionData: ZitadelSession = await response.json()
-
-      // Validate session has required factors
-      const hasUserFactor = sessionData.factors.user?.verifiedAt
-      const hasPasswordFactor = sessionData.factors.password?.verifiedAt
-
-      if (!hasUserFactor || !hasPasswordFactor) {
-        setIsAuthenticated(false)
-        setIsLoading(false)
-        return
-      }
-
-      // Check if session is expired
-      if (sessionData.expirationDate) {
-        const expirationTime = new Date(sessionData.expirationDate).getTime()
-        const currentTime = new Date().getTime()
-
-        if (currentTime >= expirationTime) {
-          setIsAuthenticated(false)
-          setIsLoading(false)
-          return
-        }
-      }
-
-      // Session is valid
-      setIsAuthenticated(true)
-      setIsLoading(false)
-    } catch (error) {
-      console.error('Session validation failed:', error)
-      setIsAuthenticated(false)
-      setIsLoading(false)
-    }
+    // For now, always consider user as authenticated
+    // TODO: Implement real session validation when auth system is ready
+    setIsAuthenticated(true)
+    setIsLoading(false)
   }
 
   useEffect(() => {

@@ -16,62 +16,6 @@ func (s *ErrorStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
-type AuthLoginOK struct {
-	// Login status.
-	Success OptBool `json:"success"`
-	// Session token for authentication.
-	SessionToken OptString `json:"session_token"`
-}
-
-// GetSuccess returns the value of Success.
-func (s *AuthLoginOK) GetSuccess() OptBool {
-	return s.Success
-}
-
-// GetSessionToken returns the value of SessionToken.
-func (s *AuthLoginOK) GetSessionToken() OptString {
-	return s.SessionToken
-}
-
-// SetSuccess sets the value of Success.
-func (s *AuthLoginOK) SetSuccess(val OptBool) {
-	s.Success = val
-}
-
-// SetSessionToken sets the value of SessionToken.
-func (s *AuthLoginOK) SetSessionToken(val OptString) {
-	s.SessionToken = val
-}
-
-func (*AuthLoginOK) authLoginRes() {}
-
-type AuthLoginReq struct {
-	// User email address.
-	Email string `json:"email"`
-	// User password.
-	Password string `json:"password"`
-}
-
-// GetEmail returns the value of Email.
-func (s *AuthLoginReq) GetEmail() string {
-	return s.Email
-}
-
-// GetPassword returns the value of Password.
-func (s *AuthLoginReq) GetPassword() string {
-	return s.Password
-}
-
-// SetEmail sets the value of Email.
-func (s *AuthLoginReq) SetEmail(val string) {
-	s.Email = val
-}
-
-// SetPassword sets the value of Password.
-func (s *AuthLoginReq) SetPassword(val string) {
-	s.Password = val
-}
-
 type BearerAuth struct {
 	Token string
 }
@@ -2383,8 +2327,6 @@ func (s *Error) SetErrors(val []ErrorErrorsItem) {
 func (s *Error) SetStatus(val OptInt64) {
 	s.Status = val
 }
-
-func (*Error) authLoginRes() {}
 
 type ErrorErrorsItem struct {
 	// Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'.
@@ -7359,6 +7301,46 @@ func (s *UserProfile) SetFirstName(val string) {
 // SetLastName sets the value of LastName.
 func (s *UserProfile) SetLastName(val string) {
 	s.LastName = val
+}
+
+// Ref: #
+type UserSessionToken struct {
+	// Token for creating empty session in Zitadel.
+	SessionToken string `json:"session_token"`
+	// Zitadel instance URL for frontend authentication.
+	ZitadelURL string `json:"zitadel_url"`
+	// Token expiration time in seconds.
+	ExpiresIn int `json:"expires_in"`
+}
+
+// GetSessionToken returns the value of SessionToken.
+func (s *UserSessionToken) GetSessionToken() string {
+	return s.SessionToken
+}
+
+// GetZitadelURL returns the value of ZitadelURL.
+func (s *UserSessionToken) GetZitadelURL() string {
+	return s.ZitadelURL
+}
+
+// GetExpiresIn returns the value of ExpiresIn.
+func (s *UserSessionToken) GetExpiresIn() int {
+	return s.ExpiresIn
+}
+
+// SetSessionToken sets the value of SessionToken.
+func (s *UserSessionToken) SetSessionToken(val string) {
+	s.SessionToken = val
+}
+
+// SetZitadelURL sets the value of ZitadelURL.
+func (s *UserSessionToken) SetZitadelURL(val string) {
+	s.ZitadelURL = val
+}
+
+// SetExpiresIn sets the value of ExpiresIn.
+func (s *UserSessionToken) SetExpiresIn(val int) {
+	s.ExpiresIn = val
 }
 
 // Ref: #

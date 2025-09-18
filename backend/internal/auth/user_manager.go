@@ -6,12 +6,6 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
-// LoginResult represents the result of a login attempt
-type LoginResult struct {
-	Success      bool
-	SessionToken string
-}
-
 // UserManager defines the interface for user management operations
 type UserManager interface {
 	// CreateUser creates a new user
@@ -28,7 +22,4 @@ type UserManager interface {
 
 	// ListUsers returns a list of all users
 	ListUsers(ctx context.Context) ([]api.User, error)
-
-	// Login authenticates a user with email and password
-	Login(ctx context.Context, email, password string) (*LoginResult, error)
 }
