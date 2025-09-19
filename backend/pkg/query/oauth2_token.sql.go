@@ -271,7 +271,7 @@ SELECT
     oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.user_uuid, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
 FROM oauth2_token
 WHERE
-   (NULLIF($1, '') IS NULL OR os.client_uuid = $1::uuid) AND
+   (NULLIF($1, '') IS NULL OR oauth2_token.client_uuid = $1::uuid) AND
     expires_at < NOW() AND
     (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 hour')
 `

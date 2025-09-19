@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/samber/do/v2"
 	"golang.org/x/crypto/bcrypt"
 
@@ -119,7 +121,11 @@ func (h *Handler) CreateUserSession(ctx context.Context) (*api.UserSessionToken,
 
 func (h *Handler) NewError(ctx context.Context, err error) *api.ErrorStatusCode {
 	statusCode := http.StatusInternalServerError
-	if errors.Is(err, &errWraper{}) {
+
+	// Handle SecurityError specifically - return 401 Unauthorized for authentication failures
+	if _, ok := err.(*ogenerrors.SecurityError); ok {
+		statusCode = http.StatusUnauthorized
+	} else if errors.Is(err, &errWraper{}) {
 		err := err.(*errWraper)
 		statusCode = err.status
 	} else if sc, ok := err.(interface{ StatusCode() int }); ok {
@@ -129,7 +135,7 @@ func (h *Handler) NewError(ctx context.Context, err error) *api.ErrorStatusCode 
 		StatusCode: statusCode,
 		Response: api.Error{
 			Status: api.OptInt64{
-				Value: http.StatusInternalServerError,
+				Value: int64(statusCode),
 				Set:   true,
 			},
 			Detail: api.OptString{

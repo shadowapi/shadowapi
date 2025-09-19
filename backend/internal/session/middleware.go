@@ -31,6 +31,14 @@ type OIDCConfiguration struct {
 	JWKSURI string `json:"jwks_uri"`
 }
 
+// SessionInfo represents validated session information
+type SessionInfo struct {
+	SessionID string
+	UserID    string
+	Email     string
+	Factors   map[string]interface{}
+}
+
 // Middleware implements a pure Ogen middleware that checks for JWT tokens from Zitadel
 type Middleware struct {
 	log          *slog.Logger
@@ -161,6 +169,55 @@ func (m *Middleware) getJWKS(ctx context.Context) (jwk.Set, error) {
 	return m.jwksCache.Set, nil
 }
 
+// ValidateSessionToken validates a session token using Zitadel Session API v2
+func (m *Middleware) validateSessionToken(ctx context.Context, sessionToken string) (*SessionInfo, error) {
+	if m.cfg.Auth.Zitadel.InstanceURL == "" {
+		return nil, fmt.Errorf("Zitadel instance URL not configured")
+	}
+
+	// For now, we'll use Management API to validate the session token
+	// This approach uses the userinfo endpoint which should work with session tokens
+	userinfoURL := strings.TrimSuffix(m.cfg.Auth.Zitadel.InstanceURL, "/") + "/oidc/v1/userinfo"
+	req, err := http.NewRequestWithContext(ctx, "GET", userinfoURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create userinfo request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+sessionToken)
+
+	resp, err := m.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate session via userinfo: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("session validation failed with status %d", resp.StatusCode)
+	}
+
+	var userinfo struct {
+		Sub   string `json:"sub"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&userinfo); err != nil {
+		return nil, fmt.Errorf("failed to decode userinfo response: %w", err)
+	}
+
+	m.log.Debug("session validation successful via userinfo",
+		"user_id", userinfo.Sub,
+		"email", userinfo.Email,
+		"name", userinfo.Name)
+
+	return &SessionInfo{
+		SessionID: "", // We don't have session ID from userinfo endpoint
+		UserID:    userinfo.Sub,
+		Email:     userinfo.Email,
+		Factors:   map[string]interface{}{"validated": true},
+	}, nil
+}
+
 // ValidateJWT validates a JWT token from Zitadel (public method for auth handlers)
 func (m *Middleware) ValidateJWT(ctx context.Context, tokenString string) (jwt.Token, error) {
 	return m.validateJWT(ctx, tokenString)
@@ -254,12 +311,19 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		return next(req)
 	}
 
-	// Validate JWT token from Zitadel
+	// Validate tokens from Zitadel
 	if m.cfg.Auth.UserManager == "zitadel" && m.cfg.Auth.Zitadel.InstanceURL != "" {
+		// Try Session Token validation first (v2 Sessions API)
+		if sessionInfo, err := m.validateSessionToken(req.Raw.Context(), token); err == nil {
+			m.log.Debug("Session token authenticated", "session_id", sessionInfo.SessionID, "user_id", sessionInfo.UserID)
+			return next(req)
+		}
+
+		// Fallback to JWT token validation
 		jwtToken, err := m.validateJWT(req.Raw.Context(), token)
 		if err != nil {
-			m.log.Debug("JWT validation failed", "error", err)
-			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid JWT token: %w", err))
+			m.log.Debug("Both session and JWT validation failed", "error", err)
+			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid token: %w", err))
 		}
 
 		scopeClaim, _ := jwtToken.PrivateClaims()["scope"].(string)

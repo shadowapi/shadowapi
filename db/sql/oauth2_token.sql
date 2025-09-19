@@ -26,7 +26,7 @@ SELECT
     sqlc.embed(oauth2_token)
 FROM oauth2_token
 WHERE
-   (NULLIF(sqlc.arg('client_uuid'), '') IS NULL OR os.client_uuid = sqlc.arg('client_uuid')::uuid) AND
+   (NULLIF(sqlc.arg('client_uuid'), '') IS NULL OR oauth2_token.client_uuid = sqlc.arg('client_uuid')::uuid) AND
     expires_at < NOW() AND
     (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 hour');
 

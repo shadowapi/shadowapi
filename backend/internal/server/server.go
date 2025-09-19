@@ -44,7 +44,7 @@ func Provide(i do.Injector) (*Server, error) {
 		handlerService,
 		authService,
 		api.WithPathPrefix("/api/v1"),
-		// api.WithMiddleware(authService.OgenMiddleware),
+		api.WithMiddleware(authService.OgenMiddleware),
 		api.WithNotFound(func(w http.ResponseWriter, r *http.Request) {
 			log.Info("no ogen route matched, returning 404")
 			http.NotFound(w, r)

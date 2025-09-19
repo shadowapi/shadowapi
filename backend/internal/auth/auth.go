@@ -14,6 +14,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/ogen-go/ogen/middleware"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/samber/do/v2"
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
@@ -30,6 +31,14 @@ type JWKSCache struct {
 type OIDCConfiguration struct {
 	Issuer  string `json:"issuer"`
 	JWKSURI string `json:"jwks_uri"`
+}
+
+// SessionInfo represents validated session information
+type SessionInfo struct {
+	SessionID string
+	UserID    string
+	Email     string
+	Factors   map[string]interface{}
 }
 
 type Auth struct {
@@ -81,7 +90,14 @@ func (a *Auth) HandleBearerAuth(
 		jwtToken, err := a.validateJWT(ctx, token)
 		if err != nil {
 			a.log.Debug("JWT validation failed", "error", err)
-			return ctx, fmt.Errorf("invalid JWT token: %w", err)
+			return ctx, &ogenerrors.SecurityError{
+				OperationContext: ogenerrors.OperationContext{
+					Name: string(op),
+					ID:   string(op),
+				},
+				Security: "BearerAuth",
+				Err:      fmt.Errorf("invalid JWT token: %w", err),
+			}
 		}
 
 		scopeClaim, _ := jwtToken.PrivateClaims()["scope"].(string)
@@ -92,7 +108,14 @@ func (a *Auth) HandleBearerAuth(
 		return ctx, nil
 	}
 
-	return ctx, fmt.Errorf("authentication failed")
+	return ctx, &ogenerrors.SecurityError{
+		OperationContext: ogenerrors.OperationContext{
+			Name: string(op),
+			ID:   string(op),
+		},
+		Security: "BearerAuth",
+		Err:      fmt.Errorf("authentication failed"),
+	}
 }
 
 // getOIDCConfiguration fetches OpenID Connect configuration from Zitadel
@@ -117,7 +140,9 @@ func (a *Auth) getOIDCConfiguration(ctx context.Context) (*OIDCConfiguration, er
 		return nil, fmt.Errorf("not configured URL for Zitadel instance")
 	}
 
-	oidcURL := strings.TrimSuffix(a.cfg.Auth.Zitadel.InstanceURL, "/") + "/.well-known/openid-configuration"
+	// Use external Zitadel URL through Traefik
+	zitadelBaseURL := strings.TrimSuffix(a.cfg.Auth.Zitadel.InstanceURL, "/")
+	oidcURL := zitadelBaseURL + "/.well-known/openid-configuration"
 	a.log.Debug("fetching OIDC configuration", "url", oidcURL)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", oidcURL, nil)
@@ -195,6 +220,57 @@ func (a *Auth) getJWKS(ctx context.Context) (jwk.Set, error) {
 	}
 
 	return a.jwksCache.Set, nil
+}
+
+// ValidateSessionToken validates a session token using Zitadel Session API v2
+func (a *Auth) validateSessionToken(ctx context.Context, sessionToken string) (*SessionInfo, error) {
+	if a.cfg.Auth.Zitadel.InstanceURL == "" {
+		return nil, fmt.Errorf("Zitadel instance URL not configured")
+	}
+
+	// For now, we'll use OIDC userinfo endpoint to validate the session token
+	// This approach uses the userinfo endpoint which should work with session tokens
+	// Use external Zitadel URL through Traefik
+	zitadelURL := strings.TrimSuffix(a.cfg.Auth.Zitadel.InstanceURL, "/")
+	userinfoURL := zitadelURL + "/oidc/v1/userinfo"
+	req, err := http.NewRequestWithContext(ctx, "GET", userinfoURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create userinfo request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+sessionToken)
+
+	resp, err := a.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate session via userinfo: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("session validation failed with status %d", resp.StatusCode)
+	}
+
+	var userinfo struct {
+		Sub   string `json:"sub"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&userinfo); err != nil {
+		return nil, fmt.Errorf("failed to decode userinfo response: %w", err)
+	}
+
+	a.log.Debug("session validation successful via userinfo",
+		"user_id", userinfo.Sub,
+		"email", userinfo.Email,
+		"name", userinfo.Name)
+
+	return &SessionInfo{
+		SessionID: "", // We don't have session ID from userinfo endpoint
+		UserID:    userinfo.Sub,
+		Email:     userinfo.Email,
+		Factors:   map[string]interface{}{"validated": true},
+	}, nil
 }
 
 // ValidateJWT validates a JWT token from Zitadel (public method for auth handlers)
@@ -290,12 +366,26 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 		return next(req)
 	}
 
-	// Validate JWT token from Zitadel
+	// Validate tokens from Zitadel
 	if a.cfg.Auth.UserManager == "zitadel" && a.cfg.Auth.Zitadel.InstanceURL != "" {
+		tokenPrefix := token
+		if len(token) > 10 {
+			tokenPrefix = token[:10]
+		}
+		a.log.Debug("Starting Zitadel authentication", "token_prefix", tokenPrefix)
+		// Try Session Token validation first (v2 Sessions API)
+		if sessionInfo, err := a.validateSessionToken(req.Raw.Context(), token); err == nil {
+			a.log.Debug("Session token authenticated", "session_id", sessionInfo.SessionID, "user_id", sessionInfo.UserID, "email", sessionInfo.Email)
+			return next(req)
+		} else {
+			a.log.Debug("Session token validation failed", "error", err)
+		}
+
+		// Fallback to JWT token validation
 		jwtToken, err := a.validateJWT(req.Raw.Context(), token)
 		if err != nil {
-			a.log.Debug("JWT validation failed", "error", err)
-			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid JWT token: %w", err))
+			a.log.Debug("Both session and JWT validation failed", "error", err)
+			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid token: %w", err))
 		}
 
 		scopeClaim, _ := jwtToken.PrivateClaims()["scope"].(string)
@@ -309,8 +399,21 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 	return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("authentication failed"))
 }
 
-// ErrWithCode creates an error with HTTP status code
+// errWithCode wraps an error with an associated HTTP status code.
+type errWithCode struct {
+	err    error
+	status int
+}
+
+func (e *errWithCode) Error() string { return e.err.Error() }
+
+// StatusCode returns the associated HTTP status code.
+func (e *errWithCode) StatusCode() int { return e.status }
+
+// ErrWithCode creates a new error annotated with an HTTP status code.
 func ErrWithCode(code int, err error) error {
-	// This should match the error handling in session middleware
-	return fmt.Errorf("HTTP %d: %w", code, err)
+	if err == nil {
+		return nil
+	}
+	return &errWithCode{err: err, status: code}
 }
