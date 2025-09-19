@@ -30,23 +30,17 @@ export function useZitadelAuth() {
   const [error, setError] = useState<string | null>(null)
   const [authConfig, setAuthConfig] = useState<ZitadelAuthConfig | null>(null)
 
-  // Step 1: Get session token from our backend
   const getSessionToken = async () => {
     setLoading(true)
     setError(null)
 
     try {
-      console.log('Getting session token from backend...')
       const response = await client.POST('/user/session', {})
 
       if (response.error) {
-        console.error('Backend error:', response.error)
         throw new Error(response.error.detail || 'Failed to get session token')
       }
 
-      console.log('Session token received:', response.data)
-
-      // Проверяем что данные пришли
       if (!response.data) {
         throw new Error('No data received from backend')
       }
@@ -54,12 +48,10 @@ export function useZitadelAuth() {
       const { session_token, zitadel_url, expires_in } = response.data
 
       if (!session_token) {
-        console.error('No session token in response:', response.data)
         throw new Error('No session token received from backend')
       }
 
       if (!zitadel_url) {
-        console.error('No Zitadel URL in response:', response.data)
         throw new Error('No Zitadel URL received from backend')
       }
 
@@ -82,7 +74,6 @@ export function useZitadelAuth() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to get session token'
-      console.error('Failed to get session token:', message)
       setError(message)
       throw new Error(message)
     } finally {
@@ -90,7 +81,6 @@ export function useZitadelAuth() {
     }
   }
 
-  // Step 2: Create Zitadel session with username
   const createZitadelSession = async (loginName: string, zitadelUrl: string, bearerToken: string): Promise<ZitadelSession> => {
     setLoading(true)
     setError(null)
@@ -107,9 +97,6 @@ export function useZitadelAuth() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${bearerToken}`,
       }
-
-      console.log('Request headers being sent:', headers)
-      console.log('Full request URL:', `${zitadelUrl}/v2/sessions`)
 
       const response = await fetch(`${zitadelUrl}/v2/sessions`, {
         method: 'POST',
@@ -144,7 +131,6 @@ export function useZitadelAuth() {
     }
   }
 
-  // Step 3: Add password to session
   const addPasswordToSession = async (
     sessionId: string,
     password: string,
@@ -166,9 +152,6 @@ export function useZitadelAuth() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${bearerToken}`,
       }
-
-      console.log('Password request headers being sent:', headers)
-      console.log('Password request URL:', `${zitadelUrl}/v2/sessions/${sessionId}`)
 
       const response = await fetch(`${zitadelUrl}/v2/sessions/${sessionId}`, {
         method: 'PATCH',
@@ -203,31 +186,16 @@ export function useZitadelAuth() {
     }
   }
 
-  // Complete authentication flow
   const authenticateWithZitadel = async (email: string, password: string) => {
-    console.log('Starting authentication flow for:', email)
     setLoading(true)
     setError(null)
 
     try {
-      // Step 1: Get session token from our backend
-      console.log('Step 1: Getting session token from backend...')
       const tokenData = await getSessionToken()
-      console.log('Token data received:', {
-        hasToken: !!tokenData.sessionToken,
-        zitadelUrl: tokenData.zitadelUrl,
-        expiresIn: tokenData.expiresIn
-      })
 
-      // Step 2: Create session with username in Zitadel
-      // Use the email directly as the login name (Zitadel v4.2.2+ behavior)
       const zitadelLoginName = email
-      console.log('Step 2: Creating Zitadel session...')
-      console.log(`Converting email "${email}" to Zitadel login name: "${zitadelLoginName}"`)
       const session = await createZitadelSession(zitadelLoginName, tokenData.zitadelUrl, tokenData.sessionToken)
-      console.log('Session created:', session)
 
-      // Step 3: Add password to session
       console.log('Step 3: Adding password to session...')
       const authenticatedSession = await addPasswordToSession(
         session.sessionId,
@@ -236,13 +204,9 @@ export function useZitadelAuth() {
         tokenData.sessionToken
       )
 
-      // TODO: Store authenticated session token for API calls
-      console.log('Authentication successful', authenticatedSession)
-
       return authenticatedSession
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Authentication failed'
-      console.error('Authentication failed:', err)
       setError(message)
       throw new Error(message)
     } finally {
