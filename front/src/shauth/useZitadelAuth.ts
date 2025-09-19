@@ -37,7 +37,7 @@ export function useZitadelAuth() {
 
     try {
       console.log('Getting session token from backend...')
-      const response = await client.POST('/users/session', {})
+      const response = await client.POST('/user/session', {})
 
       if (response.error) {
         console.error('Backend error:', response.error)

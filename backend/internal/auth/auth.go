@@ -21,39 +21,20 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
-// JWKSCache represents cached JWKS
-type JWKSCache struct {
-	Set    jwk.Set
-	Expiry time.Time
-}
-
-// OIDCConfiguration represents OpenID Connect configuration
-type OIDCConfiguration struct {
-	Issuer  string `json:"issuer"`
-	JWKSURI string `json:"jwks_uri"`
-}
-
-// SessionInfo represents validated session information
-type SessionInfo struct {
-	SessionID string
-	UserID    string
-	Email     string
-	Factors   map[string]interface{}
-}
-
 type Auth struct {
-	log              *slog.Logger
-	IgnoreHttpsError bool
-	cfg              *config.Config
-	bearerSecret     string
-	sessions         map[string]string
-	mu               sync.RWMutex
+	log   *slog.Logger
+	cfg   *config.Config
+	mutex sync.RWMutex
+	allow map[string]string
 
-	// JWT validation
-	httpClient *http.Client
+	httpClient       *http.Client
+	bearerSecret     string
+	IgnoreHttpsError bool
+
 	jwksCache  *JWKSCache
-	jwksMutex  sync.RWMutex
 	oidcConfig *OIDCConfiguration
+
+	jwksMutex  sync.RWMutex
 	oidcExpiry time.Time
 }
 
@@ -62,12 +43,18 @@ func Provide(i do.Injector) (*Auth, error) {
 	cfg := do.MustInvoke[*config.Config](i)
 	// keep log case of debugging ogen
 	return &Auth{
-		log:              do.MustInvoke[*slog.Logger](i),
+		log: do.MustInvoke[*slog.Logger](i),
+		cfg: cfg,
+		httpClient: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 		IgnoreHttpsError: cfg.Auth.IgnoreHttpsError,
-		cfg:              cfg,
-		bearerSecret:     cfg.Auth.BearerToken,
-		sessions:         make(map[string]string),
-		httpClient:       &http.Client{Timeout: 10 * time.Second},
+		allow: map[string]string{
+			"/health":              http.MethodGet,
+			"/ready":               http.MethodGet,
+			"/api/v1/user":         http.MethodPost,
+			"/api/v1/user/session": http.MethodPost,
+		},
 	}, nil
 }
 
@@ -77,19 +64,20 @@ func (a *Auth) HandleBearerAuth(
 	op api.OperationName,
 	t api.BearerAuth,
 ) (context.Context, error) {
-	token := t.GetToken()
-
-	// Check legacy bearer secret first
-	if a.bearerSecret != "" && token == a.bearerSecret {
-		a.log.Debug("legacy bearer token authenticated")
-		return ctx, nil
+	errResult := &ogenerrors.SecurityError{
+		OperationContext: ogenerrors.OperationContext{
+			Name: string(op),
+			ID:   string(op),
+		},
+		Security: "BearerAuth",
+		Err:      fmt.Errorf("authentication failed"),
 	}
 
-	// Validate JWT token from Zitadel
+	token := t.GetToken()
+
 	if a.cfg.Auth.UserManager == "zitadel" && a.cfg.Auth.Zitadel.InstanceURL != "" {
 		jwtToken, err := a.validateJWT(ctx, token)
 		if err != nil {
-			a.log.Debug("JWT validation failed", "error", err)
 			return ctx, &ogenerrors.SecurityError{
 				OperationContext: ogenerrors.OperationContext{
 					Name: string(op),
@@ -100,25 +88,54 @@ func (a *Auth) HandleBearerAuth(
 			}
 		}
 
-		scopeClaim, _ := jwtToken.PrivateClaims()["scope"].(string)
-		a.log.Debug("JWT authenticated", "sub", jwtToken.Subject(), "scope", scopeClaim)
-
-		// TODO: Add user context to request
-		// You can store user info in request context here
-		return ctx, nil
+		if _, ok := jwtToken.PrivateClaims()["scope"].(string); ok {
+			return ctx, nil
+		}
 	}
-
-	return ctx, &ogenerrors.SecurityError{
-		OperationContext: ogenerrors.OperationContext{
-			Name: string(op),
-			ID:   string(op),
-		},
-		Security: "BearerAuth",
-		Err:      fmt.Errorf("authentication failed"),
-	}
+	return nil, errResult
 }
 
-// getOIDCConfiguration fetches OpenID Connect configuration from Zitadel
+func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
+	println(">>>>>")
+	println("allowed path:", req.Raw.URL.Path, req.Raw.Method)
+	if m, ok := a.allow[req.Raw.URL.Path]; ok && m == req.Raw.Method {
+		return next(req)
+	}
+
+	authHeader := req.Raw.Header.Get("Authorization")
+	if authHeader == "" {
+		return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("authorization required"))
+	}
+
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid authorization header format"))
+	}
+
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	if a.bearerSecret != "" && token == a.bearerSecret {
+		return next(req)
+	}
+
+	if a.cfg.Auth.UserManager == "zitadel" && a.cfg.Auth.Zitadel.InstanceURL != "" {
+		if _, err := a.validateSessionToken(req.Raw.Context(), token); err == nil {
+			return next(req)
+		}
+
+		jwtToken, err := a.validateJWT(req.Raw.Context(), token)
+		if err != nil {
+			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid token: %w", err))
+		}
+
+		if _, ok := jwtToken.PrivateClaims()["scope"].(string); !ok {
+			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("missing scope claim in JWT"))
+		}
+		return next(req)
+	}
+
+	return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("authentication failed"))
+}
+
 func (a *Auth) getOIDCConfiguration(ctx context.Context) (*OIDCConfiguration, error) {
 	a.jwksMutex.RLock()
 	if a.oidcConfig != nil && time.Now().Before(a.oidcExpiry) {
@@ -269,7 +286,7 @@ func (a *Auth) validateSessionToken(ctx context.Context, sessionToken string) (*
 		SessionID: "", // We don't have session ID from userinfo endpoint
 		UserID:    userinfo.Sub,
 		Email:     userinfo.Email,
-		Factors:   map[string]interface{}{"validated": true},
+		Factors:   map[string]any{"validated": true},
 	}, nil
 }
 
@@ -329,88 +346,30 @@ func (a *Auth) validateJWT(ctx context.Context, tokenString string) (jwt.Token, 
 	return token, nil
 }
 
-// OgenMiddleware satisfies Ogen's middleware.Middleware signature.
-func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
-	// Skip auth for health check and public endpoints
-	path := req.Raw.URL.Path
-	if path == "/health" || path == "/" || strings.HasPrefix(path, "/assets/") {
-		return next(req)
-	}
-
-	// Extract Authorization header
-	authHeader := req.Raw.Header.Get("Authorization")
-	if authHeader == "" {
-		// Check for session cookie as fallback
-		if cookie, err := req.Raw.Cookie("sa_session"); err == nil {
-			a.mu.RLock()
-			if userID, exists := a.sessions[cookie.Value]; exists {
-				a.mu.RUnlock()
-				a.log.Debug("session authenticated", "user_id", userID)
-				return next(req)
-			}
-			a.mu.RUnlock()
-		}
-		return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("authorization required"))
-	}
-
-	// Check for Bearer token
-	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid authorization header format"))
-	}
-
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-
-	// Check legacy bearer secret first
-	if a.bearerSecret != "" && token == a.bearerSecret {
-		a.log.Debug("legacy bearer token authenticated")
-		return next(req)
-	}
-
-	// Validate tokens from Zitadel
-	if a.cfg.Auth.UserManager == "zitadel" && a.cfg.Auth.Zitadel.InstanceURL != "" {
-		tokenPrefix := token
-		if len(token) > 10 {
-			tokenPrefix = token[:10]
-		}
-		a.log.Debug("Starting Zitadel authentication", "token_prefix", tokenPrefix)
-		// Try Session Token validation first (v2 Sessions API)
-		if sessionInfo, err := a.validateSessionToken(req.Raw.Context(), token); err == nil {
-			a.log.Debug("Session token authenticated", "session_id", sessionInfo.SessionID, "user_id", sessionInfo.UserID, "email", sessionInfo.Email)
-			return next(req)
-		} else {
-			a.log.Debug("Session token validation failed", "error", err)
-		}
-
-		// Fallback to JWT token validation
-		jwtToken, err := a.validateJWT(req.Raw.Context(), token)
-		if err != nil {
-			a.log.Debug("Both session and JWT validation failed", "error", err)
-			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid token: %w", err))
-		}
-
-		scopeClaim, _ := jwtToken.PrivateClaims()["scope"].(string)
-		a.log.Debug("JWT authenticated", "sub", jwtToken.Subject(), "scope", scopeClaim)
-
-		// TODO: Add user context to request
-		// You can store user info in request context here
-		return next(req)
-	}
-
-	return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("authentication failed"))
+type JWKSCache struct {
+	Set    jwk.Set
+	Expiry time.Time
 }
 
-// errWithCode wraps an error with an associated HTTP status code.
+type OIDCConfiguration struct {
+	Issuer  string `json:"issuer"`
+	JWKSURI string `json:"jwks_uri"`
+}
+
+type SessionInfo struct {
+	SessionID string
+	UserID    string
+	Email     string
+	Factors   map[string]any
+}
+
 type errWithCode struct {
 	err    error
 	status int
 }
 
-func (e *errWithCode) Error() string { return e.err.Error() }
-
-// StatusCode returns the associated HTTP status code.
+func (e *errWithCode) Error() string   { return e.err.Error() }
 func (e *errWithCode) StatusCode() int { return e.status }
-
-// ErrWithCode creates a new error annotated with an HTTP status code.
 func ErrWithCode(code int, err error) error {
 	if err == nil {
 		return nil

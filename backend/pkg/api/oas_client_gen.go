@@ -45,7 +45,7 @@ type Invoker interface {
 	//
 	// Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
 	//
-	// POST /users/session
+	// POST /user/session
 	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
 	// DatasourceEmailCreate invokes datasource-email-create operation.
 	//
@@ -437,12 +437,6 @@ type Invoker interface {
 	//
 	// PUT /scheduler/{uuid}
 	SchedulerUpdate(ctx context.Context, request *Scheduler, params SchedulerUpdateParams) (*Scheduler, error)
-	// SessionStatus invokes session-status operation.
-	//
-	// Introspect current session status.
-	//
-	// GET /session
-	SessionStatus(ctx context.Context) (*SessionStatus, error)
 	// StorageHostfilesCreate invokes storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.
@@ -855,7 +849,7 @@ func (c *Client) sendCreateUser(ctx context.Context, request *User) (res *User, 
 //
 // Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
 //
-// POST /users/session
+// POST /user/session
 func (c *Client) CreateUserSession(ctx context.Context) (*UserSessionToken, error) {
 	res, err := c.sendCreateUserSession(ctx)
 	return res, err
@@ -865,7 +859,7 @@ func (c *Client) sendCreateUserSession(ctx context.Context) (res *UserSessionTok
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createUserSession"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/users/session"),
+		semconv.HTTPRouteKey.String("/user/session"),
 	}
 
 	// Run stopwatch.
@@ -898,7 +892,7 @@ func (c *Client) sendCreateUserSession(ctx context.Context) (res *UserSessionTok
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/users/session"
+	pathParts[0] = "/user/session"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -8924,78 +8918,6 @@ func (c *Client) sendSchedulerUpdate(ctx context.Context, request *Scheduler, pa
 
 	stage = "DecodeResponse"
 	result, err := decodeSchedulerUpdateResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// SessionStatus invokes session-status operation.
-//
-// Introspect current session status.
-//
-// GET /session
-func (c *Client) SessionStatus(ctx context.Context) (*SessionStatus, error) {
-	res, err := c.sendSessionStatus(ctx)
-	return res, err
-}
-
-func (c *Client) sendSessionStatus(ctx context.Context) (res *SessionStatus, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("session-status"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/session"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, SessionStatusOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/session"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeSessionStatusResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

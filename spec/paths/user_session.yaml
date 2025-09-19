@@ -1,0 +1,19 @@
+# spec/paths/user_session.yaml
+post:
+  summary: Create a session token for Zitadel authentication
+  description: Returns a token that can be used to create an empty session in Zitadel for frontend authentication
+  operationId: createUserSession
+  security: []
+  responses:
+    "200":
+      description: Session token created successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UserSessionToken"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

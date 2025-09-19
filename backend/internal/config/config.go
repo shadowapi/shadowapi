@@ -63,9 +63,6 @@ type Config struct {
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
 		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR"`
 
-		// BearerToken is used to validate incoming requests that carry an Authorization header.
-		BearerToken string `yaml:"bearer_token" json:"bearer_token" env:"SA_AUTH_BEARER_TOKEN"`
-
 		// UserManager specifies which user manager implementation to use ("db" or "zitadel")
 		UserManager string `yaml:"user_manager" json:"user_manager" env:"SA_AUTH_USER_MANAGER" envDefault:"db"`
 

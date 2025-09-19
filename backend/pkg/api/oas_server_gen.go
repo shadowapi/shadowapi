@@ -24,7 +24,7 @@ type Handler interface {
 	//
 	// Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
 	//
-	// POST /users/session
+	// POST /user/session
 	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
 	// DatasourceEmailCreate implements datasource-email-create operation.
 	//
@@ -416,12 +416,6 @@ type Handler interface {
 	//
 	// PUT /scheduler/{uuid}
 	SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (*Scheduler, error)
-	// SessionStatus implements session-status operation.
-	//
-	// Introspect current session status.
-	//
-	// GET /session
-	SessionStatus(ctx context.Context) (*SessionStatus, error)
 	// StorageHostfilesCreate implements storage-hostfiles-create operation.
 	//
 	// Create a new Host Files storage instance.

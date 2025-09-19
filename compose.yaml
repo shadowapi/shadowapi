@@ -81,7 +81,6 @@ services:
       - SA_AUTH_ZITADEL_SERVICE_USER_ID=338238093709110022
       - SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH=/secrets/shadowapi-admin-service.json
       - SA_AUTH_USER_MANAGER=zitadel
-      - SA_AUTH_BEARER_TOKEN=test-token-123
     networks:
       - shadowapi
     volumes:

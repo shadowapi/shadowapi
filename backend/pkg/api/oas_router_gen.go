@@ -1035,27 +1035,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
-				case 'e': // Prefix: "ession"
-					origElem := elem
-					if l := len("ession"); len(elem) >= l && elem[0:l] == "ession" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleSessionStatusRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-					elem = origElem
 				case 't': // Prefix: "torage"
 					origElem := elem
 					if l := len("torage"); len(elem) >= l && elem[0:l] == "torage" {
@@ -1475,6 +1454,32 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 's': // Prefix: "session"
+						origElem := elem
+						if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleCreateUserSessionRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
 					// Param: "uuid"
 					// Leaf parameter
 					args[0] = elem
@@ -1497,27 +1502,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "DELETE,GET,PUT")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 's': // Prefix: "s/session"
-					origElem := elem
-					if l := len("s/session"); len(elem) >= l && elem[0:l] == "s/session" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleCreateUserSessionRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
 						}
 
 						return
@@ -2925,31 +2909,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
-				case 'e': // Prefix: "ession"
-					origElem := elem
-					if l := len("ession"); len(elem) >= l && elem[0:l] == "ession" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = SessionStatusOperation
-							r.summary = ""
-							r.operationID = "session-status"
-							r.pathPattern = "/session"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
 				case 't': // Prefix: "torage"
 					origElem := elem
 					if l := len("torage"); len(elem) >= l && elem[0:l] == "torage" {
@@ -3469,6 +3428,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 's': // Prefix: "session"
+						origElem := elem
+						if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = CreateUserSessionOperation
+								r.summary = "Create a session token for Zitadel authentication"
+								r.operationID = "createUserSession"
+								r.pathPattern = "/user/session"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
 					// Param: "uuid"
 					// Leaf parameter
 					args[0] = elem
@@ -3500,31 +3489,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.pathPattern = "/user/{uuid}"
 							r.args = args
 							r.count = 1
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 's': // Prefix: "s/session"
-					origElem := elem
-					if l := len("s/session"); len(elem) >= l && elem[0:l] == "s/session" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = CreateUserSessionOperation
-							r.summary = "Create a session token for Zitadel authentication"
-							r.operationID = "createUserSession"
-							r.pathPattern = "/users/session"
-							r.args = args
-							r.count = 0
 							return r, true
 						default:
 							return

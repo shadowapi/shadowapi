@@ -83,8 +83,6 @@ components:
       $ref: "components/user_session_token.yaml"
     WorkerJobs:
       $ref: "components/worker_jobs.yaml"
-    SessionStatus:
-      $ref: "components/session_status.yaml"
     UserProfile:
       $ref: "components/user_profile.yaml"
 
@@ -136,10 +134,6 @@ paths:
     $ref: "paths/oauth2_client_datasource_uuid_token_uuid.yaml"
   /oauth2/login:
     $ref: "paths/oauth2_login.yaml"
-  /auth/login:
-    $ref: "paths/auth_login.yaml"
-  /session:
-    $ref: "paths/session.yaml"
   /pipeline:
     $ref: "paths/pipeline.yaml"
   /pipeline/{uuid}:
@@ -194,8 +188,8 @@ paths:
     $ref: "paths/user.yaml"
   /user/{uuid}:
     $ref: "paths/user_uuid.yaml"
-  /users/session:
-    $ref: "paths/users_session.yaml"
+  /user/session:
+    $ref: "paths/user_session.yaml"
   /profile:
     $ref: "paths/profile.yaml"
   /workerjobs:

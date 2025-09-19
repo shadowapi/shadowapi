@@ -5999,45 +5999,6 @@ func (s *Scheduler) SetUpdatedAt(val OptDateTime) {
 // SchedulerDeleteOK is response for SchedulerDelete operation.
 type SchedulerDeleteOK struct{}
 
-// Ref: #
-type SessionStatus struct {
-	Active bool `json:"active"`
-	// UUID of the authenticated user.
-	UUID OptUUID `json:"uuid"`
-	// Why the session is inactive.
-	Reason OptString `json:"reason"`
-}
-
-// GetActive returns the value of Active.
-func (s *SessionStatus) GetActive() bool {
-	return s.Active
-}
-
-// GetUUID returns the value of UUID.
-func (s *SessionStatus) GetUUID() OptUUID {
-	return s.UUID
-}
-
-// GetReason returns the value of Reason.
-func (s *SessionStatus) GetReason() OptString {
-	return s.Reason
-}
-
-// SetActive sets the value of Active.
-func (s *SessionStatus) SetActive(val bool) {
-	s.Active = val
-}
-
-// SetUUID sets the value of UUID.
-func (s *SessionStatus) SetUUID(val OptUUID) {
-	s.UUID = val
-}
-
-// SetReason sets the value of Reason.
-func (s *SessionStatus) SetReason(val OptString) {
-	s.Reason = val
-}
-
 // Data storage settings object.
 // Ref: #
 type Storage struct {

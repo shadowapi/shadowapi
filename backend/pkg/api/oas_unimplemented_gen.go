@@ -35,7 +35,7 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r *User,
 //
 // Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
 //
-// POST /users/session
+// POST /user/session
 func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r *UserSessionToken, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -622,15 +622,6 @@ func (UnimplementedHandler) SchedulerList(ctx context.Context, params SchedulerL
 //
 // PUT /scheduler/{uuid}
 func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (r *Scheduler, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// SessionStatus implements session-status operation.
-//
-// Introspect current session status.
-//
-// GET /session
-func (UnimplementedHandler) SessionStatus(ctx context.Context) (r *SessionStatus, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
