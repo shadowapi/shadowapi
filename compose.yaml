@@ -192,6 +192,9 @@ services:
       retries: 10
       start_period: 60s
 
+# Removed automated ZITADEL setup - using manual username/password authentication
+  # See ZITADEL-PASSWORD-AUTH.md for implementation details
+
 volumes:
   postgres_data:
     driver: local

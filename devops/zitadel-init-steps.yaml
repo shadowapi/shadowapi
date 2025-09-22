@@ -2,6 +2,7 @@ FirstInstance:
   InstanceName: ShadowAPI
   DefaultLanguage: en
   MachineKeyPath: "/secrets/shadowapi-admin-service.json"
+  PatPath: "/secrets/shadowapi-admin-service.pat"
   Org:
     Name: ShadowAPI
     Human:
@@ -18,5 +19,5 @@ FirstInstance:
       MachineKey:
         Type: 1
         ExpirationDate: "2099-01-01T00:00:00Z"
-      # Pat:
-      #   ExpirationDate: "2099-01-01T00:00:00Z"
+      Pat:
+        ExpirationDate: "2099-01-01T00:00:00Z"

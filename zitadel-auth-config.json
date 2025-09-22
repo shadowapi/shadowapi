@@ -1,0 +1,10 @@
+{
+    "auth_type": "password",
+    "login_url": "http://auth.localtest.me/v2beta/sessions",
+    "userinfo_url": "http://auth.localtest.me/oidc/v1/userinfo",
+    "admin_credentials": {
+        "username": "admin@example.com",
+        "password": "Admin123!"
+    },
+    "notes": "For username/password authentication, use ZITADEL's session API directly"
+}
