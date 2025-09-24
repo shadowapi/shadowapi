@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-test('Signup page redirects to Zitadel', async ({ page }) => {
+test('Signup page is accessible to guests and shows form', async ({ page }) => {
   await page.goto('http://localtest.me/signup')
-
-  const button = page.getByRole('button', { name: /sign up with zitadel/i })
-  await expect(button).toBeVisible()
+  await expect(page.getByLabel('First Name')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Sign Up$/i })).toBeVisible()
 })

@@ -20,13 +20,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         setIsValidating(false)
       }
     }
-
     validateAuth()
   }, [isAuthenticated, authLoading, checkAuth])
 
-  const isLoading = authLoading || isValidating
-
-  if (isLoading) {
+  if (authLoading || isValidating) {
     return (
       <Flex direction="column" alignItems="center" justifyContent="center" height="100vh" gap="size-200">
         <ProgressCircle aria-label="Validating session..." isIndeterminate />

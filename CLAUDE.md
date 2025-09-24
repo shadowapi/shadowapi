@@ -57,8 +57,6 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 - `task build-api` builds `./bin/shadowapi` locally.
 - `shadowapi serve` is the main API server when running outside Docker.
-- `shadowapi loader` seeds demo data/jobs.
-- `shadowapi reset-password` resets non-Zitadel admin passwords.
 
 ## Frontend
 
@@ -96,17 +94,12 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ### Task runner essentials
 
 - `task init` – Build sqlc helper image and install frontend dependencies.
-- `task dev-up` / `task dev-down` – Start/stop the full Docker Compose stack with live reload (Traefik, backend, frontend, Postgres, NATS, Zitadel).
-- `task shell` – Open a shell inside the backend container (useful for running `go test`, `shadowapi serve`, etc.).
-- `task db-shell` – Drop into Postgres with the project user.
 - `task sync-db` – Apply schema to the running Postgres (uses Atlas).
 - `task sqlc` / `task sqlc-vet` – Regenerate and validate SQLC output.
 - `task api-gen`, `task api-gen-backend`, `task api-gen-frontend` – Sync code with the OpenAPI spec.
-- `task playwright-run` / `task playwright-report` – Run frontend E2E tests and view reports.
 - `task build-api` – Compile the backend binary.
-- `task clean` – Tear down the dev stack and remove volumes/images (irreversible for local data).
-- `task prod-up` / `task prod-down` – Build and run the production docker-compose profile.
-- `task clean-zitadel-keys` – Purge generated Zitadel service keys from `secrets/`.
+- `docker compose watch` - start dev env, add `--no-up` if you don't need to rebuild the images
+- backend runs in the container via `air` auto rebuild, frontend changes handled by docker watch mechanizm
 
 ### Compose topology
 

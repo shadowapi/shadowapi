@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     if (user?.sessionId) {
       try {
-        // Logout from Zitadel session
         await fetch(`http://auth.localtest.me/v2/sessions/${user.sessionId}`, {
           method: 'DELETE',
           headers: {
@@ -56,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
       } catch (error) {
         console.error('Failed to logout from Zitadel:', error)
-        // Continue with local logout even if Zitadel logout fails
       }
     }
 

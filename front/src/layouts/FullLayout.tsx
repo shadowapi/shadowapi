@@ -14,11 +14,11 @@ import Workflow from '@spectrum-icons/workflow/Workflow'
 
 import type { NavbarProps } from '@/components/Navbar'
 import { Navbar } from '@/components/Navbar'
-import { useLogout } from '@/shauth'
+import { useAuth } from '@/shauth/AuthContext'
 
 export function FullLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
-  const logout = useLogout()
+  const { logout } = useAuth()
   // Main navigation items
   const navItems: NavbarProps = [
     {

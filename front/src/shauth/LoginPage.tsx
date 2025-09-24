@@ -26,9 +26,6 @@ export function LoginPage() {
       // Authenticate with Zitadel using the new flow
       const session = await authenticateWithZitadel(fields.email, fields.password)
 
-      // Save authentication state in context
-      login(fields.email, session.sessionToken, session.sessionId)
-
       // If successful, redirect to the desired page
       const returnTo = searchParams.get('returnTo') || '/'
       navigate(returnTo)
