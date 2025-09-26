@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query'
 import client from '@/api/client'
 import type { components } from '@/api/v1'
 import { FullLayout } from '@/layouts/FullLayout'
-import { shortenUuid } from '@/shauth'
+import { shortenUuid } from '@/tools'
 
 export function WorkerJobs() {
   const navigate = useNavigate()
