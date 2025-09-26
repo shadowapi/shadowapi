@@ -25,10 +25,79 @@ export interface ZitadelAuthConfig {
   zitadelUrl: string
 }
 
+export interface ZitadelError {
+  code?: string
+  message?: string
+  details?: Array<{
+    '@type': string
+    violations?: Array<{
+      field: string
+      description: string
+    }>
+  }>
+}
+
 export function useZitadelAuth() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [authConfig, setAuthConfig] = useState<ZitadelAuthConfig | null>(null)
+
+  const parseZitadelError = async (response: Response): Promise<{ message: string; fieldErrors: Record<string, string> }> => {
+    try {
+      const errorData: ZitadelError = await response.json()
+      
+      let message = errorData.message || `Request failed with status ${response.status}`
+      const fieldErrors: Record<string, string> = {}
+
+      // Extract field-specific errors from violations
+      if (errorData.details) {
+        for (const detail of errorData.details) {
+          if (detail.violations) {
+            for (const violation of detail.violations) {
+              if (violation.field && violation.description) {
+                // Map common Zitadel field names to our form fields
+                const fieldName = violation.field.toLowerCase().includes('loginname') || 
+                                violation.field.toLowerCase().includes('email') ? 'email' : 
+                                violation.field.toLowerCase().includes('password') ? 'password' : violation.field
+                fieldErrors[fieldName] = violation.description
+              }
+            }
+          }
+        }
+      }
+
+      // Common Zitadel error codes to user-friendly messages
+      if (errorData.code) {
+        switch (errorData.code) {
+          case 'PRECONDITION_FAILED':
+            message = 'Invalid email or password'
+            fieldErrors.email = 'Invalid email or password'
+            break
+          case 'NOT_FOUND':
+            message = 'User not found'
+            fieldErrors.email = 'User not found'
+            break
+          case 'INVALID_ARGUMENT':
+            message = 'Invalid credentials'
+            fieldErrors.email = 'Invalid credentials'
+            break
+          default:
+            // Keep the original message or use a fallback
+            break
+        }
+      }
+
+      return { message, fieldErrors }
+    } catch (parseError) {
+      // Fallback if JSON parsing fails
+      const text = await response.text()
+      return { 
+        message: text || `Request failed with status ${response.status}`, 
+        fieldErrors: {} 
+      }
+    }
+  }
 
   const getSessionToken = async () => {
     setLoading(true)
@@ -111,8 +180,9 @@ export function useZitadelAuth() {
       })
 
       if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(`Failed to create session: ${response.status} - ${errorData}`)
+        const { message, fieldErrors } = await parseZitadelError(response)
+        setFieldErrors(fieldErrors)
+        throw new Error(message)
       }
 
       const sessionData: ZitadelSessionResponse = await response.json()
@@ -166,8 +236,9 @@ export function useZitadelAuth() {
       })
 
       if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(`Authentication failed: ${response.status} - ${errorData}`)
+        const { message, fieldErrors } = await parseZitadelError(response)
+        setFieldErrors(fieldErrors)
+        throw new Error(message)
       }
 
       const sessionData: ZitadelSessionResponse = await response.json()
@@ -189,6 +260,7 @@ export function useZitadelAuth() {
   const authenticateWithZitadel = async (email: string, password: string) => {
     setLoading(true)
     setError(null)
+    setFieldErrors({})
 
     try {
       const tokenData = await getSessionToken()
@@ -217,6 +289,7 @@ export function useZitadelAuth() {
   return {
     loading,
     error,
+    fieldErrors,
     authConfig,
     getSessionToken,
     createZitadelSession,

@@ -14,7 +14,7 @@ interface FormFields {
 export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { loading, error, authenticateWithZitadel } = useZitadelAuth()
+  const { loading, error, fieldErrors, authenticateWithZitadel } = useZitadelAuth()
   const { login } = useAuth()
 
   const form = useForm({
@@ -41,7 +41,7 @@ export function LoginPage() {
         <Flex direction="column" gap="size-200">
           <Header>Login to ShadowAPI</Header>
 
-          {error && (
+          {error && !fieldErrors.email && !fieldErrors.password && (
             <View backgroundColor="negative" padding="size-100" borderRadius="regular">
               <Flex gap="size-100" alignItems="center">
                 <Alert color="negative" />
@@ -71,41 +71,49 @@ export function LoginPage() {
                     message: 'Invalid email address'
                   }
                 }}
-                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
-                  <TextField
-                    label="Email"
-                    type="email"
-                    width="100%"
-                    isRequired
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    ref={ref}
-                    validationState={invalid ? 'invalid' : undefined}
-                    errorMessage={error?.message}
-                  />
-                )}
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => {
+                  const fieldError = fieldErrors.email || error?.message
+                  const hasError = invalid || !!fieldErrors.email
+                  return (
+                    <TextField
+                      label="Email"
+                      type="email"
+                      width="100%"
+                      isRequired
+                      name={name}
+                      value={value}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      ref={ref}
+                      validationState={hasError ? 'invalid' : undefined}
+                      errorMessage={fieldError}
+                    />
+                  )
+                }}
               />
               <Controller
                 name="password"
                 control={form.control}
                 rules={{ required: 'Password is required' }}
-                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => (
-                  <TextField
-                    label="Password"
-                    type="password"
-                    width="100%"
-                    isRequired
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    ref={ref}
-                    validationState={invalid ? 'invalid' : undefined}
-                    errorMessage={error?.message}
-                  />
-                )}
+                render={({ field: { name, value, onChange, onBlur, ref }, fieldState: { invalid, error } }) => {
+                  const fieldError = fieldErrors.password || error?.message
+                  const hasError = invalid || !!fieldErrors.password
+                  return (
+                    <TextField
+                      label="Password"
+                      type="password"
+                      width="100%"
+                      isRequired
+                      name={name}
+                      value={value}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      ref={ref}
+                      validationState={hasError ? 'invalid' : undefined}
+                      errorMessage={fieldError}
+                    />
+                  )
+                }}
               />
               <Flex justifyContent="space-between" alignItems="center" marginTop="size-150">
                 <Text>
@@ -129,3 +137,4 @@ export function LoginPage() {
     </Flex>
   )
 }
+
