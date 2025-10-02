@@ -207,8 +207,8 @@ create_password_application() {
     local app_response=$(api_call "POST" "/management/v1/projects/$project_id/apps/oidc" '{
         "name": "'$APP_NAME'",
         "redirectUris": [
-            "http://localtest.me/auth/callback",
-            "http://localhost:5173/auth/callback"
+            "http://localtest.me/login",
+            "http://localhost:5173/login"
         ],
         "postLogoutRedirectUris": [
             "http://localtest.me/",
