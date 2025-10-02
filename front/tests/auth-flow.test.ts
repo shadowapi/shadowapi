@@ -137,19 +137,80 @@ test('guest can sign up, log in, and access protected pages', async ({ page }) =
     await route.fallback()
   })
 
+  // Mock the authorize endpoint to redirect back with authRequest parameter
+  await page.route('**/oauth/v2/authorize*', async (route) => {
+    const url = new URL(route.request().url())
+    const redirectUri = url.searchParams.get('redirect_uri')
+
+    // Simulate Zitadel redirecting back to login with authRequest parameter
+    await route.fulfill({
+      status: 302,
+      headers: {
+        'Location': `${redirectUri}?authRequest=test-auth-request-123`,
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  })
+
+  // Mock the auth request finalize endpoint
+  await page.route('**/v2/oidc/auth_requests/*', async (route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          callbackUrl: 'http://localtest.me/login?code=test-authorization-code-123&state=test-state',
+        }),
+      })
+      return
+    }
+    await route.fallback()
+  })
+
+  // Mock the token exchange endpoint
+  await page.route('**/oauth/v2/token', async (route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          access_token: 'test-access-token-jwt',
+          id_token: 'test-id-token-jwt',
+          refresh_token: 'test-refresh-token',
+          token_type: 'Bearer',
+          expires_in: 3600,
+        }),
+      })
+      return
+    }
+    await route.fallback()
+  })
+
   await test.step('Log in with the newly created user', async () => {
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Password').fill(password)
 
+    // Click login - this will trigger navigation to authorize endpoint
+    await page.getByRole('button', { name: /^Login$/i }).click()
+
+    // Wait for redirect back to login with authRequest parameter
+    await page.waitForURL(/\/login\?authRequest=/)
+
+    // Now wait for the actual authentication flow
     const sessionReq = page.waitForRequest((req) => req.method() === 'POST' && req.url().endsWith('/api/v1/user/session'))
     const zitadelCreateReq = page.waitForRequest((req) => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()))
     const zitadelPatchReq = page.waitForRequest((req) => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()))
-    const authorizeReq = page.waitForRequest((req) => req.method() === 'GET' && /\/oauth\/v2\/authorize/.test(req.url()))
     const finalizeReq = page.waitForRequest((req) => req.method() === 'POST' && /\/v2\/oidc\/auth_requests\//.test(req.url()))
     const tokenReq = page.waitForRequest((req) => req.method() === 'POST' && /\/oauth\/v2\/token/.test(req.url()))
 
-    await page.getByRole('button', { name: /^Login$/i }).click()
-    await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq, authorizeReq, finalizeReq, tokenReq])
+    // The form should auto-submit with pending credentials
+    await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq, finalizeReq, tokenReq])
 
     await expect.poll(async () => {
       const authData = await page.evaluate(() => sessionStorage.getItem('shadowapi_auth'))
