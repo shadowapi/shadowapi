@@ -412,17 +412,120 @@ export function useZitadelAuth() {
     }
   }
 
-  const authenticateWithZitadel = async (email: string, password: string) => {
+  const getOIDCTokensFromSession = async (
+    sessionId: string,
+    sessionToken: string,
+    zitadelUrl: string,
+    bearerToken: string
+  ): Promise<OIDCTokens> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      console.log('Step 4: Initiating OIDC authorization flow...')
+
+      // Build authorize URL
+      const authorizeParams = new URLSearchParams({
+        client_id: config.zitadel.clientId,
+        redirect_uri: config.zitadel.redirectUri,
+        response_type: 'code',
+        scope: 'openid profile email',
+        prompt: 'none', // Don't show login UI since we have a session
+      })
+
+      // Step 1: Call authorize endpoint to create auth request
+      // This will redirect, but we'll capture the authRequest ID from the redirect
+      const authorizeUrl = `${zitadelUrl}/oauth/v2/authorize?${authorizeParams.toString()}`
+
+      console.log('Calling authorize endpoint:', authorizeUrl)
+
+      const authorizeResponse = await fetch(authorizeUrl, {
+        method: 'GET',
+        redirect: 'manual', // Don't follow redirects automatically
+        credentials: 'include', // Include cookies
+      })
+
+      // Extract authRequestId from Location header
+      const location = authorizeResponse.headers.get('location')
+      if (!location) {
+        throw new Error('No redirect location from authorize endpoint')
+      }
+
+      console.log('Got redirect location:', location)
+
+      // Parse authRequest ID from redirect URL
+      const redirectUrl = new URL(location, zitadelUrl)
+      const authRequestId = redirectUrl.searchParams.get('authRequest')
+
+      if (!authRequestId) {
+        // If no authRequest param, check if we got a code directly (session was recognized)
+        const code = redirectUrl.searchParams.get('code')
+        if (code) {
+          console.log('Got authorization code directly (session recognized)')
+          return await exchangeCodeForTokens(code, zitadelUrl)
+        }
+        throw new Error('No authRequest ID or code in authorize redirect')
+      }
+
+      console.log('Got authRequest ID:', authRequestId)
+
+      // Step 2: Finalize auth request with our session
+      const finalizeResponse = await fetch(`${zitadelUrl}/v2/oidc/auth_requests/${authRequestId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${bearerToken}`,
+        },
+        body: JSON.stringify({
+          session: {
+            sessionId,
+            sessionToken,
+          }
+        })
+      })
+
+      if (!finalizeResponse.ok) {
+        const { message, fieldErrors } = await parseZitadelError(finalizeResponse)
+        setFieldErrors(fieldErrors)
+        throw new Error(message)
+      }
+
+      const finalizeData: AuthRequestFinalizeResponse = await finalizeResponse.json()
+      console.log('Auth request finalized, got callback URL')
+
+      // Step 3: Extract authorization code from callback URL
+      const callbackUrl = new URL(finalizeData.callbackUrl)
+      const code = callbackUrl.searchParams.get('code')
+
+      if (!code) {
+        throw new Error('No authorization code in callback URL')
+      }
+
+      // Step 4: Exchange code for tokens
+      return await exchangeCodeForTokens(code, zitadelUrl)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to get OIDC tokens'
+      setError(message)
+      throw new Error(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const authenticateWithZitadel = async (email: string, password: string): Promise<OIDCTokens> => {
     setLoading(true)
     setError(null)
     setFieldErrors({})
 
     try {
+      // Step 1: Get session token from backend
       const tokenData = await getSessionToken()
 
+      // Step 2: Create Zitadel session with username
       const zitadelLoginName = email
       const session = await createZitadelSession(zitadelLoginName, tokenData.zitadelUrl, tokenData.sessionToken)
 
+      // Step 3: Add password to session
       console.log('Step 3: Adding password to session...')
       const authenticatedSession = await addPasswordToSession(
         session.sessionId,
@@ -431,13 +534,15 @@ export function useZitadelAuth() {
         tokenData.sessionToken
       )
 
-      // Return session data including the authenticated session token
-      // This token can be used as a bearer token for API calls
-      return {
-        sessionId: authenticatedSession.sessionId,
-        sessionToken: authenticatedSession.sessionToken,
-        email,
-      }
+      // Step 4-7: Get OIDC tokens from the authenticated session
+      const tokens = await getOIDCTokensFromSession(
+        authenticatedSession.sessionId,
+        authenticatedSession.sessionToken,
+        tokenData.zitadelUrl,
+        tokenData.sessionToken
+      )
+
+      return tokens
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Authentication failed'
       setError(message)

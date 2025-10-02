@@ -2,17 +2,20 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export interface AuthUser {
   email: string
-  sessionToken: string
-  sessionId: string
+  accessToken: string
+  idToken: string
+  refreshToken?: string
+  expiresAt: number
 }
 
 interface AuthContextType {
   user: AuthUser | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, sessionToken: string, sessionId: string) => void
+  login: (email: string, accessToken: string, idToken: string, refreshToken?: string, expiresIn?: number) => void
   logout: () => Promise<void>
   checkAuth: () => Promise<boolean>
+  getAccessToken: () => string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -29,7 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedAuth) {
       try {
         const authData: AuthUser = JSON.parse(storedAuth)
-        setUser(authData)
+        // Check if token is expired
+        if (authData.expiresAt && authData.expiresAt > Date.now()) {
+          setUser(authData)
+        } else {
+          console.log('Stored auth token has expired')
+          sessionStorage.removeItem(AUTH_STORAGE_KEY)
+        }
       } catch (error) {
         console.error('Failed to parse stored auth data:', error)
         sessionStorage.removeItem(AUTH_STORAGE_KEY)
@@ -38,25 +47,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = (email: string, sessionToken: string, sessionId: string) => {
-    const userData: AuthUser = { email, sessionToken, sessionId }
+  const login = (email: string, accessToken: string, idToken: string, refreshToken?: string, expiresIn: number = 3600) => {
+    const expiresAt = Date.now() + (expiresIn * 1000)
+    const userData: AuthUser = { email, accessToken, idToken, refreshToken, expiresAt }
     setUser(userData)
     // Store in sessionStorage instead of localStorage for better security
     sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData))
   }
 
   const logout = async () => {
-    if (user?.sessionId && user?.sessionToken) {
+    if (user?.accessToken) {
       try {
         const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
-        await fetch(`${zitadelUrl}/v2/sessions/${user.sessionId}`, {
-          method: 'DELETE',
+        // Revoke the access token
+        await fetch(`${zitadelUrl}/oauth/v2/revoke`, {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${user.sessionToken}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
+          body: new URLSearchParams({
+            token: user.accessToken,
+            token_type_hint: 'access_token',
+          }).toString(),
         })
       } catch (error) {
-        console.error('Failed to delete Zitadel session:', error)
+        console.error('Failed to revoke access token:', error)
       }
     }
 
@@ -65,19 +80,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const checkAuth = async (): Promise<boolean> => {
-    if (!user?.sessionToken) {
+    if (!user?.accessToken) {
       return false
     }
 
     try {
-      // Session token exists - consider the user authenticated
-      // TODO: Optionally validate the session with Zitadel
-      return user.sessionToken.length > 0
+      // Check if token is expired
+      if (user.expiresAt && user.expiresAt <= Date.now()) {
+        console.log('Access token has expired')
+        // TODO: Try to refresh using refresh token if available
+        logout()
+        return false
+      }
+
+      // Token is valid and not expired
+      return true
     } catch (error) {
       console.error('Auth validation failed:', error)
       logout()
       return false
     }
+  }
+
+  const getAccessToken = (): string | null => {
+    if (!user?.accessToken) {
+      return null
+    }
+
+    // Check if token is expired
+    if (user.expiresAt && user.expiresAt <= Date.now()) {
+      return null
+    }
+
+    return user.accessToken
   }
 
   const value: AuthContextType = {
@@ -86,7 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     login,
     logout,
-    checkAuth
+    checkAuth,
+    getAccessToken
   }
 
   return (

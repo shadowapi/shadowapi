@@ -23,11 +23,17 @@ export function LoginPage() {
 
   const onSubmit = async (fields: FormFields) => {
     try {
-      // Authenticate with Zitadel using the session flow
-      const session = await authenticateWithZitadel(fields.email, fields.password)
+      // Authenticate with Zitadel and get OIDC tokens
+      const tokens = await authenticateWithZitadel(fields.email, fields.password)
 
-      // Store session in auth context
-      login(fields.email, session.sessionToken, session.sessionId)
+      // Store JWT tokens in auth context
+      login(
+        fields.email,
+        tokens.access_token,
+        tokens.id_token,
+        tokens.refresh_token,
+        tokens.expires_in
+      )
 
       // If successful, redirect to the desired page
       const returnTo = searchParams.get('returnTo') || '/'

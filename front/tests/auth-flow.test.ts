@@ -144,13 +144,20 @@ test('guest can sign up, log in, and access protected pages', async ({ page }) =
     const sessionReq = page.waitForRequest((req) => req.method() === 'POST' && req.url().endsWith('/api/v1/user/session'))
     const zitadelCreateReq = page.waitForRequest((req) => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()))
     const zitadelPatchReq = page.waitForRequest((req) => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()))
+    const authorizeReq = page.waitForRequest((req) => req.method() === 'GET' && /\/oauth\/v2\/authorize/.test(req.url()))
+    const finalizeReq = page.waitForRequest((req) => req.method() === 'POST' && /\/v2\/oidc\/auth_requests\//.test(req.url()))
+    const tokenReq = page.waitForRequest((req) => req.method() === 'POST' && /\/oauth\/v2\/token/.test(req.url()))
 
     await page.getByRole('button', { name: /^Login$/i }).click()
-    await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq])
+    await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq, authorizeReq, finalizeReq, tokenReq])
 
     await expect.poll(async () => {
-      return await page.evaluate(() => sessionStorage.getItem('shadowapi_auth'))
-    }, { message: 'Auth not stored in sessionStorage' }).not.toBeNull()
+      const authData = await page.evaluate(() => sessionStorage.getItem('shadowapi_auth'))
+      if (!authData) return null
+      const parsed = JSON.parse(authData)
+      // Verify we have JWT tokens, not session tokens
+      return parsed.accessToken && parsed.idToken ? authData : null
+    }, { message: 'Auth with JWT tokens not stored in sessionStorage' }).not.toBeNull()
 
     await expect(page).toHaveURL('http://localtest.me/')
   })
