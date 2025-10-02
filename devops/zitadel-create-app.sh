@@ -1,11 +1,20 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
-PAT=$(cat ./secrets/shadowapi-admin-service.pat | tr -d '\n')
-URL=http://auth.localtest.me
+if [ -f /secrets/zitadel-app-created ]; then
+  echo "Zitadel app already created, skipping..."
+  exit 0
+fi
+
+apk add --no-cache curl bash
+
+PAT=$(cat /secrets/shadowapi-admin-service.pat | tr -d '\n')
+URL=http://zitadel:8080
+HOST=auth.localtest.me
 
 # Create project
 PROJECT=$(curl -s -X POST "$URL/management/v1/projects" \
+  -H "Host: $HOST" \
   -H "Authorization: Bearer $PAT" \
   -H "Content-Type: application/json" \
   -d '{"name":"ShadowAPI"}')
@@ -13,6 +22,7 @@ PROJECT_ID=$(echo "$PROJECT" | python3 -c "import sys,json;print(json.load(sys.s
 
 # Create OIDC app
 APP=$(curl -s -X POST "$URL/management/v1/projects/$PROJECT_ID/apps/oidc" \
+  -H "Host: $HOST" \
   -H "Authorization: Bearer $PAT" \
   -H "Content-Type: application/json" \
   -d '{
@@ -32,4 +42,8 @@ APP=$(curl -s -X POST "$URL/management/v1/projects/$PROJECT_ID/apps/oidc" \
 CLIENT_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)['clientId'])")
 
 echo "Client ID: $CLIENT_ID"
-echo "Update VITE_ZITADEL_CLIENT_ID in front/.env and .env.example"
+echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >/app/.env.gen
+echo "VITE_ZITADEL_URL=$SA_ZITADEL_URL" >>/app/.env.gen
+echo "VITE_ZITADEL_REDIRECT_URL=$SA_ZITADEL_REDIRECT_URL" >>/app/.env.gen
+touch /secrets/zitadel-app-created
+echo "Zitadel app setup completed"

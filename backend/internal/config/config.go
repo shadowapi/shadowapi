@@ -68,11 +68,11 @@ type Config struct {
 
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
-			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"SA_ZITADEL_INSTANCE_URL"`
+			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"SA_ZITADEL_URL"`
 
 			// ---- Management API settings ----
-			ManagementURL      string `json:"management_url" yaml:"management_url" env:"SA_AUTH_ZITADEL_MANAGEMENT_URL"`
-			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH"`
+			ManagementURL      string `json:"management_url" yaml:"management_url" env:"SA_ZITADEL_MANAGEMENT_URL"`
+			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"SA_ZITADEL_SERVICE_USER_KEY_PATH"`
 
 			// ---- machine-to-machine credentials ----
 			// Service user → Basic-Auth (client-credentials / introspect)

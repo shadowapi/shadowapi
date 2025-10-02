@@ -20,24 +20,49 @@ services:
       - 8800:8080
     depends_on:
       - frontend
-    networks:
-      - shadowapi
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  db:
+    image: postgres:16-alpine
+    container_name: sa-db
+    command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - ./devops/db-init.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=shadowapi
+      - POSTGRES_USER=shadowapi
+      - POSTGRES_DB=shadowapi
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "shadowapi"]
+      interval: "10s"
+      timeout: "30s"
+      retries: 5
+      start_period: "20s"
+    restart: always
+
+  nats:
+    image: nats:2.11.1
+    container_name: sa-nats
+    command: ["-js", "--http_port=8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    restart: always
+
   frontend:
     build:
       context: front
       dockerfile: ../devops/frontend.dev.Dockerfile
     container_name: sa-frontend
+    env_file:
+      - .env
+      - .env.gen
     environment:
-      - VITE_ZITADEL_URL=http://auth.${DOMAIN}
-      - VITE_ZITADEL_CLIENT_ID=339013429979316232@shadowapi
-      - VITE_ZITADEL_REDIRECT_URI=http://${DOMAIN}/login
-    networks:
-      - shadowapi
-    #    volumes:
-    #      - ./front:/app
-    #      - /app/node_modules
+      - SA_HOST=0.0.0.0
+      - SA_DOMAIN=${SA_DOMAIN}
+      - SA_BASE_URL=${SA_BASE_URL}
     develop:
       watch:
         - action: sync
@@ -49,9 +74,11 @@ services:
           path: ./front/package.json
     labels:
       - traefik.enable=true
-      - traefik.http.routers.shadowapi-front.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.shadowapi-front.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-front.rule=Host(`${SA_DOMAIN}`)
+      - traefik.http.routers.shadowapi-front.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
       - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
+    restart: always
+
   backend:
     build:
       context: .
@@ -69,6 +96,8 @@ services:
         condition: service_started
     extra_hosts:
       - "auth.localtest.me:host-gateway"
+    env_file:
+      - .env
     environment:
       - SA_HOST=0.0.0.0
       - SA_PORT=8080
@@ -76,94 +105,17 @@ services:
       - SA_LOG_LEVEL=DEBUG
       - SA_QUEUE_URL=nats://nats:4222
       - SA_QUEUE_PREFIX=shadowapi
-      - SA_ZITADEL_INSTANCE_URL=http://auth.localtest.me
-      - SA_AUTH_ZITADEL_REDIRECT_URI=http://localtest.me/auth/callback
-      # Zitadel Management API settings
-      - SA_AUTH_ZITADEL_MANAGEMENT_URL=http://zitadel:8080
-      - SA_AUTH_ZITADEL_SERVICE_USER_ID=338238093709110022
-      - SA_AUTH_ZITADEL_SERVICE_USER_KEY_PATH=/secrets/shadowapi-admin-service.json
       - SA_AUTH_USER_MANAGER=zitadel
-    networks:
-      - shadowapi
     volumes:
       - ./backend:/app/
       - ./spec:/spec/
       - secrets:/secrets:ro
     labels:
       - traefik.enable=true
-      - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
-      - traefik.http.routers.shadowapi-api.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-api.rule=Host(`${SA_DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
+      - traefik.http.routers.shadowapi-api.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
-
-  backend-loader:
-    build:
-      context: .
-      dockerfile: devops/backend-loader.Dockerfile
-    container_name: sa-backend-loader
-    environment:
-      - SA_HOST=0.0.0.0
-      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
-      - SA_LOG_LEVEL=DEBUG
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - shadowapi
-
-  db:
-    image: postgres:16-alpine
-    container_name: sa-db
     restart: always
-    command: ["postgres", "-c", "log_statement=all"]
-    networks:
-      - shadowapi
-    volumes:
-      - ./devops/db-init.sh:/docker-entrypoint-initdb.d/init-user-db.sh
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=shadowapi
-      - POSTGRES_USER=shadowapi
-      - POSTGRES_DB=shadowapi
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "shadowapi"]
-      interval: "10s"
-      timeout: "30s"
-      retries: 5
-      start_period: "20s"
-  db-migrate:
-    container_name: sa-db-migrate
-    image: arigaio/atlas:0.30.0
-    networks:
-      - shadowapi
-    command: >
-      schema apply
-      --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable
-      --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable
-      --to file://schema.sql
-      --auto-approve
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./db/schema.sql:/schema.sql
-  nats:
-    image: nats:2.11.1
-    container_name: sa-nats
-    command: ["-js", "--http_port=8222"]
-    ports:
-      - "4222:4222"
-      - "8222:8222"
-    networks:
-      - shadowapi
-
-  secrets-init:
-    image: alpine:latest
-    container_name: sa-secrets-init
-    command: chmod -R 777 /secrets
-    volumes:
-      - secrets:/secrets
-    networks:
-      - shadowapi
 
   zitadel:
     image: ghcr.io/zitadel/zitadel:latest
@@ -172,7 +124,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      secrets-init:
+      zitadel-init-secrets:
         condition: service_completed_successfully
     environment:
       - ZITADEL_DATABASE_POSTGRES_HOST=db
@@ -186,16 +138,14 @@ services:
       - ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE=disable
     ports:
       - "8081:8080"
-    networks:
-      - shadowapi
     volumes:
       - ./devops/zitadel-config.yaml:/zitadel-config.yaml:ro
       - ./devops/zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
       - secrets:/secrets:rw
     labels:
       - traefik.enable=true
-      - traefik.http.routers.zitadel.rule=Host(`auth.${DOMAIN}`)
-      - traefik.http.routers.zitadel.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.zitadel.rule=Host(`auth.${SA_DOMAIN}`)
+      - traefik.http.routers.zitadel.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
       - traefik.http.services.zitadel.loadbalancer.server.port=8080
     healthcheck:
       test: ["CMD", "/app/zitadel", "ready", "--config", "/zitadel-config.yaml"]
@@ -203,37 +153,63 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+    restart: always
 
-  zitadel-app-setup:
+  backend-loader:
+    build:
+      context: .
+      dockerfile: devops/backend-loader.Dockerfile
+    container_name: sa-backend-loader
+    environment:
+      - SA_HOST=0.0.0.0
+      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
+      - SA_LOG_LEVEL=DEBUG
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db-migrate:
+    container_name: sa-db-migrate
+    image: arigaio/atlas:0.30.0
+    command: >
+      schema apply
+      --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable
+      --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable
+      --to file://schema.sql
+      --auto-approve
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./db/schema.sql:/schema.sql
+    restart: no
+
+  zitadel-init-secrets:
+    image: alpine:latest
+    container_name: sa-secrets-init
+    command: chmod -R 777 /secrets
+    volumes:
+      - secrets:/secrets
+    restart: no
+
+  zitadel-init-app:
     image: python:3-alpine
     container_name: sa-zitadel-app-setup
-    networks:
-      - shadowapi
     depends_on:
       zitadel:
         condition: service_healthy
+    command: sh -c /app/devops/zitadel-create-app.sh
+    environment:
+      - SA_ZITADEL_URL=${SA_ZITADEL_URL}
+      - SA_ZITADEL_REDIRECT_URL=${SA_ZITADEL_REDIRECT_URL}
     volumes:
       - secrets:/secrets:rw
-      - ./devops/zitadel-create-app.sh:/zitadel-create-app.sh:ro
-    command: >
-      sh -c '
-        if [ -f /secrets/.zitadel-app-created ]; then
-          echo "Zitadel app already created, skipping...";
-          exit 0;
-        fi;
-        apk add --no-cache curl bash;
-        cd /;
-        bash /zitadel-create-app.sh;
-        touch /secrets/.zitadel-app-created;
-        echo "Zitadel app setup completed";
-      '
+      - .:/app:rw
+    restart: no
 
 volumes:
   postgres_data:
     driver: local
   secrets:
     driver: local
-  node_modules:
-    driver: local
-networks:
-  shadowapi:

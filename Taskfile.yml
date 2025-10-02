@@ -6,21 +6,18 @@ tasks:
     cmds:
       - task --list
   init:
-    deps:
-      - front-init
     cmds:
-      - docker build -t sa-sqlc -f ./devops/sqlc.Dockerfile .
-
-  front-init:
-    desc: "Install frontend dependencies"
-    dir: ./front
-    cmds:
-      - npm install
+      - >
+        if ! docker image inspect sa-sqlc > /dev/null 2>&1; then
+          docker build --check -t sa-sqlc -f ./devops/sqlc.Dockerfile .
+        fi
+      - docker compose up zitadel-init-app
 
   clean:
     desc: "Clean docker compose and volumes"
     cmds:
-      - docker compose down -v --rmi all --remove-orphans
+      - docker compose down -v
+      - rm -f .env.gen
 
   dev:
     desc: "Spin up all services in development mode"
