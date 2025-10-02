@@ -194,8 +194,29 @@ services:
       retries: 10
       start_period: 60s
 
-# Removed automated ZITADEL setup - using manual username/password authentication
-  # See ZITADEL-PASSWORD-AUTH.md for implementation details
+  zitadel-app-setup:
+    image: python:3-alpine
+    container_name: sa-zitadel-app-setup
+    networks:
+      - shadowapi
+    depends_on:
+      zitadel:
+        condition: service_healthy
+    volumes:
+      - ./secrets:/secrets:rw
+      - ./devops/zitadel-create-app.sh:/zitadel-create-app.sh:ro
+    command: >
+      sh -c '
+        if [ -f /secrets/.zitadel-app-created ]; then
+          echo "Zitadel app already created, skipping...";
+          exit 0;
+        fi;
+        apk add --no-cache curl bash;
+        cd /;
+        bash /zitadel-create-app.sh;
+        touch /secrets/.zitadel-app-created;
+        echo "Zitadel app setup completed";
+      '
 
 volumes:
   postgres_data:
