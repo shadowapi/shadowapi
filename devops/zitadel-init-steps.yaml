@@ -21,3 +21,6 @@ FirstInstance:
         ExpirationDate: "2099-01-01T00:00:00Z"
       Pat:
         ExpirationDate: "2099-01-01T00:00:00Z"
+    # Note: Projects and Apps cannot be created via init steps YAML.
+    # They must be created via API, Terraform, or Console UI after initialization.
+    # See the setup documentation for creating the ShadowAPI project and OIDC application.
