@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import client from '../api/client'
+import { config } from '../config/env'
 
 export interface ZitadelSession {
   sessionId: string
@@ -35,6 +36,22 @@ export interface ZitadelError {
       description: string
     }>
   }>
+}
+
+export interface OIDCTokens {
+  access_token: string
+  id_token: string
+  refresh_token?: string
+  token_type: string
+  expires_in: number
+}
+
+export interface AuthRequestResponse {
+  authRequestId: string
+}
+
+export interface AuthRequestFinalizeResponse {
+  callbackUrl: string
 }
 
 export function useZitadelAuth() {
@@ -257,6 +274,144 @@ export function useZitadelAuth() {
     }
   }
 
+  const createAuthRequest = async (zitadelUrl: string, bearerToken: string): Promise<string> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      console.log('Creating OIDC auth request...')
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${bearerToken}`,
+      }
+
+      const response = await fetch(`${zitadelUrl}/v2/oidc/auth_requests`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          client_id: config.zitadel.clientId,
+          redirect_uri: config.zitadel.redirectUri,
+          scope: ['openid', 'profile', 'email'],
+          response_type: 'code',
+        })
+      })
+
+      if (!response.ok) {
+        const { message, fieldErrors } = await parseZitadelError(response)
+        setFieldErrors(fieldErrors)
+        throw new Error(message)
+      }
+
+      const authRequestData: AuthRequestResponse = await response.json()
+      console.log('Auth request created:', authRequestData.authRequestId)
+
+      return authRequestData.authRequestId
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create auth request'
+      setError(message)
+      throw new Error(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const finalizeAuthRequest = async (
+    authRequestId: string,
+    sessionId: string,
+    sessionToken: string,
+    zitadelUrl: string,
+    bearerToken: string
+  ): Promise<string> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      console.log('Finalizing auth request with session...')
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${bearerToken}`,
+      }
+
+      const response = await fetch(`${zitadelUrl}/v2/oidc/auth_requests/${authRequestId}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          session: {
+            sessionId,
+            sessionToken,
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const { message, fieldErrors } = await parseZitadelError(response)
+        setFieldErrors(fieldErrors)
+        throw new Error(message)
+      }
+
+      const finalizeData: AuthRequestFinalizeResponse = await response.json()
+      console.log('Auth request finalized, got callback URL')
+
+      // Extract authorization code from callback URL
+      const callbackUrl = new URL(finalizeData.callbackUrl)
+      const code = callbackUrl.searchParams.get('code')
+
+      if (!code) {
+        throw new Error('No authorization code in callback URL')
+      }
+
+      return code
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to finalize auth request'
+      setError(message)
+      throw new Error(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const exchangeCodeForTokens = async (code: string, zitadelUrl: string): Promise<OIDCTokens> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      console.log('Exchanging authorization code for tokens...')
+
+      const params = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        client_id: config.zitadel.clientId,
+        redirect_uri: config.zitadel.redirectUri,
+      })
+
+      const response = await fetch(`${zitadelUrl}/oauth/v2/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Token exchange failed: ${errorText}`)
+      }
+
+      const tokens: OIDCTokens = await response.json()
+      console.log('Successfully obtained OIDC tokens')
+
+      return tokens
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to exchange code for tokens'
+      setError(message)
+      throw new Error(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const authenticateWithZitadel = async (email: string, password: string) => {
     setLoading(true)
     setError(null)
@@ -276,7 +431,13 @@ export function useZitadelAuth() {
         tokenData.sessionToken
       )
 
-      return authenticatedSession
+      // Return session data including the authenticated session token
+      // This token can be used as a bearer token for API calls
+      return {
+        sessionId: authenticatedSession.sessionId,
+        sessionToken: authenticatedSession.sessionToken,
+        email,
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Authentication failed'
       setError(message)

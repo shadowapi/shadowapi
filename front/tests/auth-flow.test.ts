@@ -149,8 +149,8 @@ test('guest can sign up, log in, and access protected pages', async ({ page }) =
     await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq])
 
     await expect.poll(async () => {
-      return await page.evaluate(() => localStorage.getItem('shadowapi_auth'))
-    }, { message: 'Auth not stored in localStorage' }).not.toBeNull()
+      return await page.evaluate(() => sessionStorage.getItem('shadowapi_auth'))
+    }, { message: 'Auth not stored in sessionStorage' }).not.toBeNull()
 
     await expect(page).toHaveURL('http://localtest.me/')
   })

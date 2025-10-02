@@ -3,14 +3,14 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export interface AuthUser {
   email: string
   sessionToken: string
-  sessionId?: string
+  sessionId: string
 }
 
 interface AuthContextType {
   user: AuthUser | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, sessionToken: string, sessionId?: string) => void
+  login: (email: string, sessionToken: string, sessionId: string) => void
   logout: () => Promise<void>
   checkAuth: () => Promise<boolean>
 }
@@ -23,43 +23,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load auth from localStorage on mount
+  // Load auth from sessionStorage on mount
   useEffect(() => {
-    const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY)
+    const storedAuth = sessionStorage.getItem(AUTH_STORAGE_KEY)
     if (storedAuth) {
       try {
-        const authData = JSON.parse(storedAuth)
+        const authData: AuthUser = JSON.parse(storedAuth)
         setUser(authData)
       } catch (error) {
         console.error('Failed to parse stored auth data:', error)
-        localStorage.removeItem(AUTH_STORAGE_KEY)
+        sessionStorage.removeItem(AUTH_STORAGE_KEY)
       }
     }
     setIsLoading(false)
   }, [])
 
-  const login = (email: string, sessionToken: string, sessionId?: string) => {
+  const login = (email: string, sessionToken: string, sessionId: string) => {
     const userData: AuthUser = { email, sessionToken, sessionId }
     setUser(userData)
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData))
+    // Store in sessionStorage instead of localStorage for better security
+    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData))
   }
 
   const logout = async () => {
-    if (user?.sessionId) {
+    if (user?.sessionId && user?.sessionToken) {
       try {
-        await fetch(`http://auth.localtest.me/v2/sessions/${user.sessionId}`, {
+        const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
+        await fetch(`${zitadelUrl}/v2/sessions/${user.sessionId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${user.sessionToken}`,
           },
         })
       } catch (error) {
-        console.error('Failed to logout from Zitadel:', error)
+        console.error('Failed to delete Zitadel session:', error)
       }
     }
 
     setUser(null)
-    localStorage.removeItem(AUTH_STORAGE_KEY)
+    sessionStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
   const checkAuth = async (): Promise<boolean> => {
@@ -68,11 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // TODO: Implement session validation with Zitadel
-      // For now, just check if we have a session token
-      // In the future, we can make a request to validate the token
-
-      // Simple validation - check if token exists and is not empty
+      // Session token exists - consider the user authenticated
+      // TODO: Optionally validate the session with Zitadel
       return user.sessionToken.length > 0
     } catch (error) {
       console.error('Auth validation failed:', error)
