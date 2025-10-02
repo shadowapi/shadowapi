@@ -26,3 +26,6 @@ dist-ssr
 # Playwright
 playwright-report
 test-results
+
+# Compiled source files (should only be in dist/)
+!src/vite-env.d.ts
