@@ -88,7 +88,7 @@ services:
     volumes:
       - ./backend:/app/
       - ./spec:/spec/
-      - ./secrets:/secrets:ro
+      - secrets:/secrets:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
@@ -156,11 +156,24 @@ services:
     networks:
       - shadowapi
 
+  secrets-init:
+    image: alpine:latest
+    container_name: sa-secrets-init
+    command: chmod -R 777 /secrets
+    volumes:
+      - secrets:/secrets
+    networks:
+      - shadowapi
+
   zitadel:
     image: ghcr.io/zitadel/zitadel:latest
     container_name: sa-zitadel
-    user: "1000:1000"
     command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml
+    depends_on:
+      db:
+        condition: service_healthy
+      secrets-init:
+        condition: service_completed_successfully
     environment:
       - ZITADEL_DATABASE_POSTGRES_HOST=db
       - ZITADEL_DATABASE_POSTGRES_PORT=5432
@@ -171,9 +184,6 @@ services:
       - ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME=shadowapi
       - ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD=shadowapi
       - ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE=disable
-    depends_on:
-      db:
-        condition: service_healthy
     ports:
       - "8081:8080"
     networks:
@@ -181,7 +191,7 @@ services:
     volumes:
       - ./devops/zitadel-config.yaml:/zitadel-config.yaml:ro
       - ./devops/zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
-      - ./secrets:/secrets:rw
+      - secrets:/secrets:rw
     labels:
       - traefik.enable=true
       - traefik.http.routers.zitadel.rule=Host(`auth.${DOMAIN}`)
@@ -203,7 +213,7 @@ services:
       zitadel:
         condition: service_healthy
     volumes:
-      - ./secrets:/secrets:rw
+      - secrets:/secrets:rw
       - ./devops/zitadel-create-app.sh:/zitadel-create-app.sh:ro
     command: >
       sh -c '
@@ -220,6 +230,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  secrets:
     driver: local
   node_modules:
     driver: local

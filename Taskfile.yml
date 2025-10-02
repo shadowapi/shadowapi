@@ -21,40 +21,16 @@ tasks:
     desc: "Clean docker compose and volumes"
     cmds:
       - docker compose down -v --rmi all --remove-orphans
-      - rm -rf ./secrets/.zitadel-app-created
 
   dev:
     desc: "Spin up all services in development mode"
     cmds:
       - docker compose watch
 
-  no-cache:
-    desc: "Rebuild container with no cache"
-    cmds:
-      - docker-compose build --no-cache
-
-  dev-down:
+  down:
     desc: "Take down development services"
     cmds:
       - docker compose down
-
-  clean-zitadel-keys:
-    desc: "Clean up generated Zitadel service keys"
-    cmds:
-      - echo "🗑️  Cleaning up Zitadel service keys..."
-      - rm -rf ./secrets/
-      - echo "✅ Keys cleaned up!"
-
-  prod-up:
-    desc: "Spin up all services in production mode"
-    cmds:
-      - docker compose -f ./docker-compose.prod.yaml build
-      - docker compose -f ./docker-compose.prod.yaml up -d
-
-  prod-down:
-    desc: "Take down production services"
-    cmds:
-      - docker compose -f ./docker-compose.prod.yaml down
 
   build-api:
     desc: "Build API backend binary locally"
@@ -141,9 +117,3 @@ tasks:
     desc: "Generate local ssl certs"
     cmds:
       - openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout localtest.me.key -out localtest.me.crt -subj "/CN=localtest.me"
-
-  backend-loader:
-    desc: "Run the prebuilt loader command inside backend container"
-    cmds:
-      - >-
-        docker compose run --rm backend-loader
