@@ -30,7 +30,7 @@ APP=$(curl -s -X POST "$URL/management/v1/projects/$PROJECT_ID/apps/oidc" \
     "redirectUris":["http://localtest.me/login","http://localhost:5173/login"],
     "postLogoutRedirectUris":["http://localtest.me/","http://localhost:5173/"],
     "responseTypes":["OIDC_RESPONSE_TYPE_CODE"],
-    "grantTypes":["OIDC_GRANT_TYPE_AUTHORIZATION_CODE","OIDC_GRANT_TYPE_REFRESH_TOKEN"],
+    "grantTypes":["OIDC_GRANT_TYPE_AUTHORIZATION_CODE","OIDC_GRANT_TYPE_REFRESH_TOKEN","OIDC_GRANT_TYPE_TOKEN_EXCHANGE"],
     "appType":"OIDC_APP_TYPE_USER_AGENT",
     "authMethodType":"OIDC_AUTH_METHOD_TYPE_NONE",
     "version":"OIDC_VERSION_1_0",
