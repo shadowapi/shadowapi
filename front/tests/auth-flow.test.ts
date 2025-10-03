@@ -152,25 +152,7 @@ test('guest can sign up, log in, and access protected pages', async ({ page }) =
     })
   })
 
-  // Mock the auth request finalize endpoint
-  await page.route('**/v2/oidc/auth_requests/*', async (route) => {
-    if (route.request().method() === 'POST') {
-      await route.fulfill({
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          callbackUrl: 'http://localtest.me/login?code=test-authorization-code-123&state=test-state',
-        }),
-      })
-      return
-    }
-    await route.fallback()
-  })
-
-  // Mock the token exchange endpoint
+  // Mock the token exchange endpoint (Session Token -> JWT)
   await page.route('**/oauth/v2/token', async (route) => {
     if (route.request().method() === 'POST') {
       await route.fulfill({
@@ -196,21 +178,17 @@ test('guest can sign up, log in, and access protected pages', async ({ page }) =
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Password').fill(password)
 
-    // Click login - this will trigger navigation to authorize endpoint
+    // Click login - this will trigger the API-only authentication flow
     await page.getByRole('button', { name: /^Login$/i }).click()
 
-    // Wait for redirect back to login with authRequest parameter
-    await page.waitForURL(/\/login\?authRequest=/)
-
-    // Now wait for the actual authentication flow
+    // Wait for the authentication flow API calls
     const sessionReq = page.waitForRequest((req) => req.method() === 'POST' && req.url().endsWith('/api/v1/user/session'))
     const zitadelCreateReq = page.waitForRequest((req) => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()))
     const zitadelPatchReq = page.waitForRequest((req) => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()))
-    const finalizeReq = page.waitForRequest((req) => req.method() === 'POST' && /\/v2\/oidc\/auth_requests\//.test(req.url()))
-    const tokenReq = page.waitForRequest((req) => req.method() === 'POST' && /\/oauth\/v2\/token/.test(req.url()))
+    const tokenExchangeReq = page.waitForRequest((req) => req.method() === 'POST' && /\/oauth\/v2\/token$/.test(req.url()))
 
-    // The form should auto-submit with pending credentials
-    await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq, finalizeReq, tokenReq])
+    // Wait for all authentication steps to complete
+    await Promise.all([sessionReq, zitadelCreateReq, zitadelPatchReq, tokenExchangeReq])
 
     await expect.poll(async () => {
       const authData = await page.evaluate(() => sessionStorage.getItem('shadowapi_auth'))
