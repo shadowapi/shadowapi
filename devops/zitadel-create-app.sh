@@ -42,6 +42,24 @@ APP=$(curl -s -X POST "$URL/management/v1/projects/$PROJECT_ID/apps/oidc" \
 CLIENT_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)['clientId'])")
 
 echo "Client ID: $CLIENT_ID"
+
+# Configure organization login policy to allow external login
+echo "Configuring login policy for custom login UI..."
+curl -s -X POST "$URL/management/v1/policies/login" \
+  -H "Host: $HOST" \
+  -H "Authorization: Bearer $PAT" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "allowExternalIdp": true,
+    "allowRegister": true,
+    "allowUsernamePassword": true,
+    "externalLoginCheckAllowed": true,
+    "forceMfa": false,
+    "hidePasswordReset": false,
+    "ignoreUnknownUsernames": false,
+    "passwordlessType": "PASSWORDLESS_TYPE_NOT_ALLOWED"
+  }' || echo "Login policy may already exist or error occurred"
+
 echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >/app/.env.gen
 echo "VITE_ZITADEL_URL=$SA_ZITADEL_URL" >>/app/.env.gen
 echo "VITE_ZITADEL_REDIRECT_URL=$SA_ZITADEL_REDIRECT_URL" >>/app/.env.gen

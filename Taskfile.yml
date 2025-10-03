@@ -8,14 +8,15 @@ tasks:
   init:
     cmds:
       - >
-        if ! docker image inspect sa-sqlc > /dev/null 2>&1; then
-          docker build --check -t sa-sqlc -f ./devops/sqlc.Dockerfile .
-        fi
+        bash -c 'if ! docker image inspect sa-sqlc:1.28 > /dev/null 2>&1; then
+            docker build --check -t sa-sqlc:1.28 -f ./devops/sqlc.Dockerfile .
+        fi'
       - docker compose up zitadel-init-app
 
   clean:
     desc: "Clean docker compose and volumes"
     cmds:
+      - touch .env.gen # ensure file exists to avoid error
       - docker compose down -v
       - rm -f .env.gen
 
