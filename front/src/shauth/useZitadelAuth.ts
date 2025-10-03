@@ -275,6 +275,11 @@ export function useZitadelAuth() {
 
     try {
       console.log('Exchanging session token for JWT tokens...')
+      console.log('Config:', {
+        clientId: config.zitadel.clientId,
+        url: config.zitadel.url,
+        redirectUri: config.zitadel.redirectUri,
+      })
 
       const params = new URLSearchParams({
         grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
@@ -284,6 +289,8 @@ export function useZitadelAuth() {
         requested_token_type: 'urn:ietf:params:oauth:token-type:jwt',
         scope: 'openid profile email',
       })
+
+      console.log('Token exchange params:', Object.fromEntries(params.entries()))
 
       const response = await fetch(`${zitadelUrl}/oauth/v2/token`, {
         method: 'POST',
