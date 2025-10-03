@@ -43,6 +43,17 @@ CLIENT_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)
 
 echo "Client ID: $CLIENT_ID"
 
+# Enable token exchange feature (beta feature)
+echo "Enabling token exchange feature..."
+curl -s -X PUT "$URL/v2/features/instance" \
+  -H "Host: $HOST" \
+  -H "Authorization: Bearer $PAT" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  --data-raw '{
+    "oidcTokenExchange": true
+  }' || echo "Token exchange feature may already be enabled or error occurred"
+
 # Configure organization login policy to allow external login
 echo "Configuring login policy for custom login UI..."
 curl -s -X POST "$URL/management/v1/policies/login" \
