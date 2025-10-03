@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import client from '../api/client'
+import { config } from '../config/env'
 
 export interface ZitadelSession {
   sessionId: string
@@ -277,6 +278,7 @@ export function useZitadelAuth() {
 
       const params = new URLSearchParams({
         grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+        client_id: config.zitadel.clientId,
         subject_token: sessionToken,
         subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
         requested_token_type: 'urn:ietf:params:oauth:token-type:jwt',
