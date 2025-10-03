@@ -43,16 +43,29 @@ CLIENT_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)
 
 echo "Client ID: $CLIENT_ID"
 
-# Enable token exchange feature (beta feature)
-echo "Enabling token exchange feature..."
+# Configure instance features
+echo "Configuring instance features..."
 curl -s -X PUT "$URL/v2/features/instance" \
   -H "Host: $HOST" \
   -H "Authorization: Bearer $PAT" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   --data-raw '{
-    "oidcTokenExchange": true
-  }' || echo "Token exchange feature may already be enabled or error occurred"
+    "loginDefaultOrg": false,
+    "userSchema": true,
+    "oidcTokenExchange": true,
+    "improvedPerformance": [1],
+    "debugOidcParentError": true,
+    "oidcSingleV1SessionTermination": true,
+    "enableBackChannelLogout": true,
+    "loginV2": {
+      "required": true,
+      "baseUri": "http://auth.localtest.me/ui/v2/login"
+    },
+    "permissionCheckV2": true,
+    "consoleUseV2UserApi": false,
+    "enableRelationalTables": true
+  }' || echo "Instance features configuration may have failed"
 
 # # Configure organization login policy to allow external login
 # echo "Configuring login policy for custom login UI..."
