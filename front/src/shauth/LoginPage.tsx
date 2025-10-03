@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button, Flex, Form, Header, Link, Text, TextField, View, ProgressCircle } from '@adobe/react-spectrum'
 import Alert from '@spectrum-icons/workflow/Alert'
 import { useZitadelAuth } from './useZitadelAuth'
@@ -14,7 +14,6 @@ interface FormFields {
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { loading, error, fieldErrors, authenticateAndFinalizeAuthRequest } = useZitadelAuth()
   const { login } = useAuth()
 
@@ -22,58 +21,13 @@ export function LoginPage() {
     defaultValues: { email: '', password: '' },
   })
 
-  const authRequestId = searchParams.get('authRequest')
-
-  // If we have authRequest and pending credentials, auto-fill and submit
-  useEffect(() => {
-    if (authRequestId) {
-      const pendingLogin = sessionStorage.getItem('pending_login')
-      if (pendingLogin) {
-        try {
-          const credentials = JSON.parse(pendingLogin)
-          form.setValue('email', credentials.email)
-          form.setValue('password', credentials.password)
-          // Auto-submit the form
-          form.handleSubmit(onSubmit)()
-        } catch (err) {
-          console.error('Failed to parse pending login:', err)
-          sessionStorage.removeItem('pending_login')
-        }
-      }
-    }
-  }, [authRequestId])
-
   const onSubmit = async (fields: FormFields) => {
     try {
-      if (!authRequestId) {
-        // Step 1: No authRequest yet - initiate OIDC flow by redirecting to authorize endpoint
-        // Store credentials temporarily so we can use them after redirect
-        sessionStorage.setItem('pending_login', JSON.stringify({ email: fields.email, password: fields.password }))
-
-        const authorizeParams = new URLSearchParams({
-          client_id: config.zitadel.clientId,
-          redirect_uri: config.zitadel.redirectUri,
-          response_type: 'code',
-          scope: 'openid profile email',
-        })
-
-        const authorizeUrl = `${config.zitadel.url}/oauth/v2/authorize?${authorizeParams.toString()}`
-
-        // Redirect browser to Zitadel authorize endpoint
-        // This will redirect back to our redirect_uri with an authRequest parameter
-        window.location.href = authorizeUrl
-        return
-      }
-
-      // Step 2: We have authRequest - authenticate and finalize
+      // Call the complete authentication flow via API only
       const tokens = await authenticateAndFinalizeAuthRequest(
         fields.email,
-        fields.password,
-        authRequestId
+        fields.password
       )
-
-      // Clear pending login
-      sessionStorage.removeItem('pending_login')
 
       // Store JWT tokens in auth context
       login(

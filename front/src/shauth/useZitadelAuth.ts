@@ -291,7 +291,7 @@ export function useZitadelAuth() {
         headers,
         body: JSON.stringify({
           client_id: config.zitadel.clientId,
-          redirect_uri: config.zitadel.redirectUri,
+          redirect_uri: config.zitadel.redirectUrl,
           scope: ['openid', 'profile', 'email'],
           response_type: 'code',
         })
@@ -383,7 +383,7 @@ export function useZitadelAuth() {
         grant_type: 'authorization_code',
         code,
         client_id: config.zitadel.clientId,
-        redirect_uri: config.zitadel.redirectUri,
+        redirect_uri: config.zitadel.redirectUrl,
       })
 
       const response = await fetch(`${zitadelUrl}/oauth/v2/token`, {
@@ -414,8 +414,7 @@ export function useZitadelAuth() {
 
   const authenticateAndFinalizeAuthRequest = async (
     email: string,
-    password: string,
-    authRequestId: string
+    password: string
   ): Promise<OIDCTokens> => {
     setLoading(true)
     setError(null)
@@ -426,13 +425,16 @@ export function useZitadelAuth() {
       // Step 1: Get session token from backend
       const tokenData = await getSessionToken()
 
-      console.log('Step 2: Creating Zitadel session...')
-      // Step 2: Create Zitadel session with username
-      const zitadelLoginName = email
-      const session = await createZitadelSession(zitadelLoginName, tokenData.zitadelUrl, tokenData.sessionToken)
+      console.log('Step 2: Creating OIDC auth request...')
+      // Step 2: Create auth request
+      const authRequestId = await createAuthRequest(tokenData.zitadelUrl, tokenData.sessionToken)
 
-      console.log('Step 3: Adding password to session...')
-      // Step 3: Add password to session
+      console.log('Step 3: Creating Zitadel session...')
+      // Step 3: Create Zitadel session with username
+      const session = await createZitadelSession(email, tokenData.zitadelUrl, tokenData.sessionToken)
+
+      console.log('Step 4: Adding password to session...')
+      // Step 4: Add password to session
       const authenticatedSession = await addPasswordToSession(
         session.sessionId,
         password,
@@ -440,38 +442,15 @@ export function useZitadelAuth() {
         tokenData.sessionToken
       )
 
-      console.log('Step 4: Finalizing auth request with session...')
-      // Step 4: Finalize auth request with authenticated session
-      const finalizeResponse = await fetch(`${tokenData.zitadelUrl}/v2/oidc/auth_requests/${authRequestId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tokenData.sessionToken}`,
-        },
-        body: JSON.stringify({
-          session: {
-            sessionId: authenticatedSession.sessionId,
-            sessionToken: authenticatedSession.sessionToken,
-          }
-        })
-      })
-
-      if (!finalizeResponse.ok) {
-        const { message, fieldErrors } = await parseZitadelError(finalizeResponse)
-        setFieldErrors(fieldErrors)
-        throw new Error(message)
-      }
-
-      const finalizeData: AuthRequestFinalizeResponse = await finalizeResponse.json()
-      console.log('Auth request finalized, got callback URL')
-
-      // Step 5: Extract authorization code from callback URL
-      const callbackUrl = new URL(finalizeData.callbackUrl)
-      const code = callbackUrl.searchParams.get('code')
-
-      if (!code) {
-        throw new Error('No authorization code in callback URL')
-      }
+      console.log('Step 5: Finalizing auth request with session...')
+      // Step 5: Finalize auth request and get authorization code
+      const code = await finalizeAuthRequest(
+        authRequestId,
+        authenticatedSession.sessionId,
+        authenticatedSession.sessionToken,
+        tokenData.zitadelUrl,
+        tokenData.sessionToken
+      )
 
       console.log('Step 6: Exchanging authorization code for tokens...')
       // Step 6: Exchange code for tokens
