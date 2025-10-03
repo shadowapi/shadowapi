@@ -54,22 +54,22 @@ curl -s -X PUT "$URL/v2/features/instance" \
     "oidcTokenExchange": true
   }' || echo "Token exchange feature may already be enabled or error occurred"
 
-# Configure organization login policy to allow external login
-echo "Configuring login policy for custom login UI..."
-curl -s -X POST "$URL/management/v1/policies/login" \
-  -H "Host: $HOST" \
-  -H "Authorization: Bearer $PAT" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "allowExternalIdp": true,
-    "allowRegister": true,
-    "allowUsernamePassword": true,
-    "externalLoginCheckAllowed": true,
-    "forceMfa": false,
-    "hidePasswordReset": false,
-    "ignoreUnknownUsernames": false,
-    "passwordlessType": "PASSWORDLESS_TYPE_NOT_ALLOWED"
-  }' || echo "Login policy may already exist or error occurred"
+# # Configure organization login policy to allow external login
+# echo "Configuring login policy for custom login UI..."
+# curl -s -X POST "$URL/management/v1/policies/login" \
+#   -H "Host: $HOST" \
+#   -H "Authorization: Bearer $PAT" \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "allowExternalIdp": true,
+#     "allowRegister": true,
+#     "allowUsernamePassword": true,
+#     "externalLoginCheckAllowed": true,
+#     "forceMfa": false,
+#     "hidePasswordReset": false,
+#     "ignoreUnknownUsernames": false,
+#     "passwordlessType": "PASSWORDLESS_TYPE_NOT_ALLOWED"
+#   }' || echo "Login policy may already exist or error occurred"
 
 echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >/app/.env.gen
 echo "VITE_ZITADEL_URL=$SA_ZITADEL_URL" >>/app/.env.gen

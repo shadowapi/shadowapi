@@ -24,6 +24,7 @@ tasks:
     desc: "Spin up all services in development mode"
     cmds:
       - docker compose watch
+      - defer: docker compose down
 
   down:
     desc: "Take down development services"

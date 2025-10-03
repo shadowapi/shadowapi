@@ -71,7 +71,11 @@ SystemDefaults:
 DefaultInstance:
   OrgName: ShadowAPI
   DefaultLanguage: en
-
+  Features:
+    LoginV2:
+      Required: true
+      BaseURI: http://auth.localtest.me/ui/v2/login
+      ConsoleUseV2UserApi: false
 
 WebAuthN:
   ID: auth.localtest.me
@@ -83,6 +87,11 @@ OIDC:
   DefaultIdTokenLifetime: 12h
   DefaultRefreshTokenIdleExpiration: 720h
   DefaultRefreshTokenExpiration: 720h
+  DefaultLoginURLV2: http://auth.localtest.me/ui/v2/login/login?authRequest=
+  DefaultLogoutURLV2: http://auth.localtest.me/ui/v2/login/logout?post_logout_redirect=
+
+SAML:
+  DefaultLoginURLV2: http://auth.localtest.me/ui/v2/login/login?samlRequest=
 
 # Enable Management API
 Management:
@@ -94,3 +103,4 @@ API:
     Port: 8080
   HTTP:
     Port: 8080
+
