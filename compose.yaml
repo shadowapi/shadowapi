@@ -1,68 +1,17 @@
+include:
+  - devops/infra/compose.yaml
+  - devops/zitadel/compose.yaml
+
 services:
-  traefik:
-    image: traefik:v3.1
-    container_name: sa-traefik
-    command:
-      - --log.level=DEBUG
-      - --accesslog=true
-      - --accesslog.fields.defaultmode=keep
-      - --accesslog.fields.names.StartUTC=keep
-      - --accesslog.fields.names.Duration=keep
-      - --accesslog.fields.names.ResponseStatus=keep
-      - --accesslog.fields.names.RequestMethod=keep
-      - --accesslog.fields.names.RequestPath=keep
-      - --api.insecure=true
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entryPoints.web.address=:80
-    ports:
-      - 80:80
-      - 8800:8080
-    depends_on:
-      - frontend
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-  db:
-    image: postgres:16-alpine
-    container_name: sa-db
-    command: ["postgres", "-c", "log_statement=all"]
-    volumes:
-      - ./devops/db-init.sh:/docker-entrypoint-initdb.d/init-user-db.sh
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=shadowapi
-      - POSTGRES_USER=shadowapi
-      - POSTGRES_DB=shadowapi
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "shadowapi"]
-      interval: "10s"
-      timeout: "30s"
-      retries: 5
-      start_period: "20s"
-    restart: always
-
-  nats:
-    image: nats:2.11.1
-    container_name: sa-nats
-    command: ["-js", "--http_port=8222"]
-    ports:
-      - "4222:4222"
-      - "8222:8222"
-    restart: always
-
   frontend:
     build:
-      context: front
-      dockerfile: ../devops/frontend.dev.Dockerfile
-    container_name: sa-frontend
-    env_file:
-      - .env
-      - .env.gen
-    environment:
-      - SA_HOST=0.0.0.0
-      - SA_DOMAIN=${SA_DOMAIN}
-      - SA_BASE_URL=${SA_BASE_URL}
+      context: .
+      dockerfile: devops/docker/frontend/dev.Dockerfile
+    depends_on:
+      zitadel-init:
+        condition: service_completed_successfully
+    volumes:
+      - secrets:/secrets:ro
     develop:
       watch:
         - action: sync
@@ -74,16 +23,15 @@ services:
           path: ./front/package.json
     labels:
       - traefik.enable=true
-      - traefik.http.routers.shadowapi-front.rule=Host(`${SA_DOMAIN}`)
-      - traefik.http.routers.shadowapi-front.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-front.rule=Host(`${BE_DOMAIN}`)
+      - traefik.http.routers.shadowapi-front.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
     restart: always
 
   backend:
     build:
       context: .
-      dockerfile: devops/backend.dev.Dockerfile
-    container_name: sa-backend
+      dockerfile: devops/docker/backend/dev.Dockerfile
     working_dir: /app
     depends_on:
       db:
@@ -96,105 +44,48 @@ services:
         condition: service_started
     extra_hosts:
       - "auth.localtest.me:host-gateway"
-    env_file:
-      - .env
     environment:
-      - SA_HOST=0.0.0.0
-      - SA_PORT=8080
-      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
-      - SA_LOG_LEVEL=DEBUG
-      - SA_QUEUE_URL=nats://nats:4222
-      - SA_QUEUE_PREFIX=shadowapi
-      - SA_AUTH_USER_MANAGER=zitadel
+      - BE_HOST=${BE_HOST}
+      - BE_PORT=${BE_PORT}
+      - BE_DB_URI=${BE_DB_URI}
+      - BE_LOG_LEVEL=${BE_LOG_LEVEL}
+      - BE_QUEUE_URL=${BE_QUEUE_URL}
+      - BE_QUEUE_PREFIX=${BE_QUEUE_PREFIX}
+      - BE_AUTH_USER_MANAGER=${BE_AUTH_USER_MANAGER}
+      - BE_ZITADEL_URL=${BE_ZITADEL_URL}
+      - BE_ZITADEL_MANAGEMENT_URL=${BE_ZITADEL_MANAGEMENT_URL}
+      - BE_ZITADEL_SERVICE_USER_KEY_PATH=${BE_ZITADEL_SERVICE_USER_KEY_PATH}
+      - BE_ZITADEL_REDIRECT_URL=${BE_ZITADEL_REDIRECT_URL}
     volumes:
       - ./backend:/app/
       - ./spec:/spec/
       - secrets:/secrets:ro
     labels:
       - traefik.enable=true
-      - traefik.http.routers.shadowapi-api.rule=Host(`${SA_DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
-      - traefik.http.routers.shadowapi-api.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-api.rule=Host(`${BE_DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
+      - traefik.http.routers.shadowapi-api.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
     restart: always
-
-  zitadel:
-    image: ghcr.io/zitadel/zitadel:latest
-    container_name: sa-zitadel
-    command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml
-    depends_on:
-      db:
-        condition: service_healthy
-      zitadel-init-secrets:
-        condition: service_completed_successfully
-    environment:
-      - ZITADEL_DATABASE_POSTGRES_HOST=db
-      - ZITADEL_DATABASE_POSTGRES_PORT=5432
-      - ZITADEL_DATABASE_POSTGRES_DATABASE=zitadel
-      - ZITADEL_DATABASE_POSTGRES_USER_USERNAME=zitadel
-      - ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=zitadel
-      - ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE=disable
-      - ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME=shadowapi
-      - ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD=shadowapi
-      - ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE=disable
-    ports:
-      - "8081:8080"
-      - "8082:3000"
-    volumes:
-      - ./devops/zitadel-config.yaml:/zitadel-config.yaml:ro
-      - ./devops/zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
-      - secrets:/secrets:rw
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.zitadel.rule=Host(`auth.${SA_DOMAIN}`) && !PathPrefix(`/ui/v2/login`)
-      - traefik.http.routers.zitadel.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
-      - traefik.http.services.zitadel.loadbalancer.server.port=8080
-    healthcheck:
-      test: ["CMD", "/app/zitadel", "ready", "--config", "/zitadel-config.yaml"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
-    restart: always
-
-  zitadel-login:
-    image: ghcr.io/zitadel/zitadel-login:latest
-    container_name: sa-zitadel-login
-    restart: unless-stopped
-    network_mode: service:zitadel
-    environment:
-      - ZITADEL_API_URL=http://auth.${SA_DOMAIN}:8080
-      - NEXT_PUBLIC_BASE_PATH=/ui/v2/login
-      - ZITADEL_SERVICE_USER_TOKEN_FILE=/secrets/shadowapi-client-service.pat
-    user: "0"
-    volumes:
-      - secrets:/secrets:ro
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.zitadelLogin.rule=Host(`auth.${SA_DOMAIN}`) && PathPrefix(`/ui/v2/login`)
-      - traefik.http.routers.zitadelLogin.entrypoints=${SA_TRAEFIK_ENTRYPOINT}
-      - traefik.http.services.zitadelLogin.loadbalancer.server.port=3000
 
   backend-loader:
     build:
       context: .
-      dockerfile: devops/backend-loader.Dockerfile
-    container_name: sa-backend-loader
+      dockerfile: devops/docker/loader/Dockerfile
     environment:
-      - SA_HOST=0.0.0.0
-      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
-      - SA_LOG_LEVEL=DEBUG
+      - BE_HOST=${BE_HOST}
+      - BE_DB_URI=${BE_DB_URI}
+      - BE_LOG_LEVEL=${BE_LOG_LEVEL}
     depends_on:
       db:
         condition: service_healthy
     restart: always
 
   db-migrate:
-    container_name: sa-db-migrate
     image: arigaio/atlas:0.30.0
     command: >
       schema apply
-      --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable
-      --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable
+      --url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
+      --dev-url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}_schema?sslmode=disable
       --to file://schema.sql
       --auto-approve
     depends_on:
@@ -204,31 +95,19 @@ services:
       - ./db/schema.sql:/schema.sql
     restart: no
 
-  zitadel-init-secrets:
-    image: alpine:latest
-    container_name: sa-secrets-init
-    command: chmod -R 777 /secrets
+  sqlc:
+    build:
+      context: .
+      dockerfile: devops/docker/sqlc/Dockerfile
+    image: sa-sqlc:1.28
+    pull_policy: never
+    profiles:
+      - tools
     volumes:
-      - secrets:/secrets
-    restart: no
-
-  zitadel-init-app:
-    image: python:3-alpine
-    container_name: sa-zitadel-app-setup
-    depends_on:
-      zitadel:
-        condition: service_healthy
-    command: sh -c /app/devops/zitadel-create-app.sh
-    environment:
-      - SA_ZITADEL_URL=${SA_ZITADEL_URL}
-      - SA_ZITADEL_REDIRECT_URL=${SA_ZITADEL_REDIRECT_URL}
-    volumes:
-      - secrets:/secrets:rw
-      - .:/app:rw
-    restart: no
+      - ./db:/db
+      - ./backend/pkg:/pkg
+    working_dir: /db
 
 volumes:
-  postgres_data:
-    driver: local
   secrets:
     driver: local

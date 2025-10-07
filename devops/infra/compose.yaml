@@ -1,0 +1,53 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    command:
+      - --log.level=DEBUG
+      - --accesslog=true
+      - --accesslog.fields.defaultmode=keep
+      - --accesslog.fields.names.StartUTC=keep
+      - --accesslog.fields.names.Duration=keep
+      - --accesslog.fields.names.ResponseStatus=keep
+      - --accesslog.fields.names.RequestMethod=keep
+      - --accesslog.fields.names.RequestPath=keep
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.web.address=:80
+    ports:
+      - 80:80
+      - 8800:8080
+    depends_on:
+      - frontend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  db:
+    image: postgres:16-alpine
+    command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - ./db-init.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "shadowapi"]
+      interval: "10s"
+      timeout: "30s"
+      retries: 5
+      start_period: "20s"
+    restart: always
+
+  nats:
+    image: nats:2.11.1
+    command: ["-js", "--http_port=8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    restart: always
+
+volumes:
+  postgres_data:
+    driver: local

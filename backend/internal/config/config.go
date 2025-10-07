@@ -17,32 +17,32 @@ import (
 // Config is the main configuration structure
 // No envDefault is specified so values from the config file remain if the environment variable is unset.
 type Config struct {
-	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"SA_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
+	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"BE_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
 
 	// BaseURL root path for the system
-	BaseURL string `json:"base_url" yaml:"base_url" env:"SA_BASE_URL" envDefault:"http://localtest.me"`
+	BaseURL string `json:"base_url" yaml:"base_url" env:"BE_BASE_URL" envDefault:"http://localtest.me"`
 
 	// Log settings
 	Log struct {
 		// Level is the log level. Valid values are "debug", "info", "warn", "error".
-		Level string `json:"level" yaml:"level" env:"SA_LOG_LEVEL"`
+		Level string `json:"level" yaml:"level" env:"BE_LOG_LEVEL"`
 	} `json:"log" yaml:"log"`
 
 	// Server configuration for local UI and API requests
 	Server struct {
-		Host string `yaml:"host" json:"host" env:"SA_HOST"`
-		Port int    `yaml:"port" json:"port" env:"SA_PORT"`
+		Host string `yaml:"host" json:"host" env:"BE_HOST"`
+		Port int    `yaml:"port" json:"port" env:"BE_PORT"`
 	} `yaml:"server" json:"server"`
 
 	// DB is a database configuration
 	DB struct {
-		URI string `yaml:"uri,omitempty" json:"uri,omitempty" env:"SA_DB_URI"`
+		URI string `yaml:"uri,omitempty" json:"uri,omitempty" env:"BE_DB_URI"`
 	} `yaml:"db" json:"db"`
 
 	// API settings
 	API struct {
 		// SpecsDir is the directory where the API specs are stored to serve them
-		SpecsDir string `json:"specs_dir" yaml:"specs_dir" env:"SA_API_SPECS_DIR"`
+		SpecsDir string `json:"specs_dir" yaml:"specs_dir" env:"BE_API_SPECS_DIR"`
 	} `yaml:"api" json:"api"`
 
 	// JWT is a struct that holds all the JWT related methods
@@ -61,26 +61,26 @@ type Config struct {
 	Auth struct {
 		// TODO @reactima remove this
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
-		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"SA_AUTH_IGNORE_HTTPS_ERROR"`
+		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"BE_AUTH_IGNORE_HTTPS_ERROR"`
 
 		// UserManager specifies which user manager implementation to use ("db" or "zitadel")
-		UserManager string `yaml:"user_manager" json:"user_manager" env:"SA_AUTH_USER_MANAGER" envDefault:"db"`
+		UserManager string `yaml:"user_manager" json:"user_manager" env:"BE_AUTH_USER_MANAGER" envDefault:"db"`
 
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
-			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"SA_ZITADEL_URL"`
+			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"BE_ZITADEL_URL"`
 
 			// ---- Management API settings ----
-			ManagementURL      string `json:"management_url" yaml:"management_url" env:"SA_ZITADEL_MANAGEMENT_URL"`
-			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"SA_ZITADEL_SERVICE_USER_KEY_PATH"`
+			ManagementURL      string `json:"management_url" yaml:"management_url" env:"BE_ZITADEL_MANAGEMENT_URL"`
+			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"BE_ZITADEL_SERVICE_USER_KEY_PATH"`
 
 			// ---- machine-to-machine credentials ----
 			// Service user → Basic-Auth (client-credentials / introspect)
-			ServiceClientID     string `json:"service_client_id" yaml:"service_client_id" env:"SA_ZITADEL_SERVICE_CLIENT_ID"`
-			ServiceClientSecret string `json:"service_client_secret" yaml:"service_client_secret" env:"SA_ZITADEL_SERVICE_CLIENT_SECRET"`
+			ServiceClientID     string `json:"service_client_id" yaml:"service_client_id" env:"BE_ZITADEL_SERVICE_CLIENT_ID"`
+			ServiceClientSecret string `json:"service_client_secret" yaml:"service_client_secret" env:"BE_ZITADEL_SERVICE_CLIENT_SECRET"`
 
 			// Optional JWT-Profile flow (no shared secret)
-			APIKeyFile string `json:"api_key_file" yaml:"api_key_file" env:"SA_ZITADEL_API_KEY_FILE"`
+			APIKeyFile string `json:"api_key_file" yaml:"api_key_file" env:"BE_ZITADEL_API_KEY_FILE"`
 
 			// ---- resource-server settings ----
 			// Audience API expects in incoming access-tokens
@@ -88,26 +88,26 @@ type Config struct {
 			// Dont forget to add Web App(not API only) Project Redirect Settings
 			// http://localhost/auth/callback
 			// http://localhost/logout/callback
-			Audience string `json:"audience" yaml:"audience" env:"SA_ZITADEL_AUDIENCE"`
+			Audience string `json:"audience" yaml:"audience" env:"BE_ZITADEL_AUDIENCE"`
 
 			// ---- browser flow ----
-			RedirectURI      string   `json:"redirect_uri" yaml:"redirect_uri" env:"SA_ZITADEL_REDIRECT_URI"`
-			InterceptedPaths []string `json:"intercepted_paths" yaml:"intercepted_paths" env:"SA_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
+			RedirectURI      string   `json:"redirect_uri" yaml:"redirect_uri" env:"BE_ZITADEL_REDIRECT_URI"`
+			InterceptedPaths []string `json:"intercepted_paths" yaml:"intercepted_paths" env:"BE_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
 		} `json:"zitadel" yaml:"zitadel"`
 	} `yaml:"auth" json:"auth"`
 
 	// Worker settings
 	Worker struct {
 		// MaxCount is the maximum number of workers that can be started
-		MaxCount int `yaml:"max_count" json:"max_count" env:"SA_WORKER_MAX_COUNT" envDefault:"100"`
+		MaxCount int `yaml:"max_count" json:"max_count" env:"BE_WORKER_MAX_COUNT" envDefault:"100"`
 	} `yaml:"worker" json:"worker"`
 
 	// Queue settings for the NATS queue
 	Queue struct {
-		URL      string `yaml:"url" json:"url" env:"SA_QUEUE_URL"`
-		Prefix   string `yaml:"prefix" json:"prefix" env:"SA_QUEUE_PREFIX"`
-		Username string `yaml:"username" json:"username" env:"SA_QUEUE_USERNAME"`
-		Password string `yaml:"password" json:"password" env:"SA_QUEUE_PASSWORD"`
+		URL      string `yaml:"url" json:"url" env:"BE_QUEUE_URL"`
+		Prefix   string `yaml:"prefix" json:"prefix" env:"BE_QUEUE_PREFIX"`
+		Username string `yaml:"username" json:"username" env:"BE_QUEUE_USERNAME"`
+		Password string `yaml:"password" json:"password" env:"BE_QUEUE_PASSWORD"`
 	} `yaml:"queue" json:"queue"`
 
 	// Add cfg.Telegram.AppID, cfg.Telegram.AppHash
@@ -170,7 +170,7 @@ func Load(configPath string) (*Config, error) {
 	if err := env.Parse(cfg); err != nil {
 		slog.Error("failed to parse environment variables", "error", err)
 	}
-	slog.Info("SA_CONFIG_PATH after env parse", "value", os.Getenv("SA_CONFIG_PATH"))
+	slog.Info("BE_CONFIG_PATH after env parse", "value", os.Getenv("BE_CONFIG_PATH"))
 
 	return cfg, nil
 }

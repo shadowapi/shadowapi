@@ -1,46 +1,6 @@
 version: "3"
 
 tasks:
-  default:
-    desc: "Default task: show help"
-    cmds:
-      - task --list
-  init:
-    cmds:
-      - >
-        bash -c 'if ! docker image inspect sa-sqlc:1.28 > /dev/null 2>&1; then
-            docker build --check -t sa-sqlc:1.28 -f ./devops/sqlc.Dockerfile .
-        fi'
-      - docker compose up zitadel-init-app
-
-  clean:
-    desc: "Clean docker compose and volumes"
-    cmds:
-      - touch .env.gen # ensure file exists to avoid error
-      - docker compose down -v
-      - rm -f .env.gen
-
-  dev:
-    desc: "Spin up all services in development mode"
-    cmds:
-      - docker compose watch
-      - defer: docker compose down
-
-  down:
-    desc: "Take down development services"
-    cmds:
-      - docker compose down
-
-  build-api:
-    desc: "Build API backend binary locally"
-    cmds:
-      - go build -o ./bin/shadowapi ./cmd/shadowapi
-
-  shell:
-    desc: "Open a development shell in the backend container"
-    cmds:
-      - docker compose exec backend bash -l
-
   db-shell:
     desc: "Open Postgres shell in the container"
     cmds:
@@ -61,26 +21,6 @@ tasks:
             --to file://combined.sql \
             --auto-approve
         rm ./db/combined.sql
-
-  sqlc:
-    desc: "Regenerate SQL queries package"
-    cmds:
-      - |2
-        docker run --rm \
-        -v ./db:/db -v ./backend/pkg:/pkg -w /db \
-        --name sa-sqlc sa-sqlc generate
-    preconditions:
-      - sh: docker images | grep sa-sqlc
-
-  sqlc-vet:
-    desc: "Validate SQL queries"
-    cmds:
-      - |2
-        docker run --rm \
-        -v ./db:/db -v ./backend/pkg:/pkg -w /db \
-        --name sa-sqlc sa-sqlc vet
-    preconditions:
-      - sh: docker images | grep sa-sqlc
 
   api-gen-backend:
     desc: "Generate API specification in backend"

@@ -25,7 +25,7 @@ import (
 
 var (
 	// defaultConfigPath is the default path to the config file. It can be
-	// overridden by the SA_CONFIG_PATH environment variable or the --config
+	// overridden by the BE_CONFIG_PATH environment variable or the --config
 	// flag.
 	defaultConfigPath string
 
@@ -126,8 +126,8 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 }
 
 func init() {
-	envPath := os.Getenv("SA_CONFIG_PATH")
-	slog.Info("env SA_CONFIG_PATH", "value", envPath)
+	envPath := os.Getenv("BE_CONFIG_PATH")
+	slog.Info("env BE_CONFIG_PATH", "value", envPath)
 	if envPath != "" {
 		defaultConfigPath = envPath
 	}

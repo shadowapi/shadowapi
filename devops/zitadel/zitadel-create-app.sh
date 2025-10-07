@@ -84,8 +84,8 @@ curl -s -X PUT "$URL/v2/features/instance" \
 #     "passwordlessType": "PASSWORDLESS_TYPE_NOT_ALLOWED"
 #   }' || echo "Login policy may already exist or error occurred"
 
-echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >/app/.env.gen
-echo "VITE_ZITADEL_URL=$SA_ZITADEL_URL" >>/app/.env.gen
-echo "VITE_ZITADEL_REDIRECT_URL=$SA_ZITADEL_REDIRECT_URL" >>/app/.env.gen
+echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >/secrets/.env.vite
+echo "VITE_ZITADEL_URL=$BE_ZITADEL_URL" >>/secrets/.env.vite
+echo "VITE_ZITADEL_REDIRECT_URL=$BE_ZITADEL_REDIRECT_URL" >>/secrets/.env.vite
 touch /secrets/zitadel-app-created
 echo "Zitadel app setup completed"

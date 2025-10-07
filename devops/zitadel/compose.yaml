@@ -1,0 +1,68 @@
+services:
+  zitadel:
+    image: ghcr.io/zitadel/zitadel:latest
+    command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml
+    user: "0"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ZITADEL_DATABASE_POSTGRES_HOST=${ZITADEL_DATABASE_POSTGRES_HOST}
+      - ZITADEL_DATABASE_POSTGRES_PORT=${ZITADEL_DATABASE_POSTGRES_PORT}
+      - ZITADEL_DATABASE_POSTGRES_DATABASE=${ZITADEL_DATABASE_POSTGRES_DATABASE}
+      - ZITADEL_DATABASE_POSTGRES_USER_USERNAME=${ZITADEL_DATABASE_POSTGRES_USER_USERNAME}
+      - ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=${ZITADEL_DATABASE_POSTGRES_USER_PASSWORD}
+      - ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE=${ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE}
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME=${ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME}
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD=${ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD}
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE=${ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE}
+    ports:
+      - "8081:8080"
+      - "8082:3000"
+    volumes:
+      - ./zitadel-config.yaml:/zitadel-config.yaml:ro
+      - ./zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
+      - secrets:/secrets:rw
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.zitadel.rule=Host(`auth.${BE_DOMAIN}`) && !PathPrefix(`/ui/v2/login`)
+      - traefik.http.routers.zitadel.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.zitadel.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "/app/zitadel", "ready", "--config", "/zitadel-config.yaml"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: always
+
+  zitadel-login:
+    image: ghcr.io/zitadel/zitadel-login:latest
+    restart: unless-stopped
+    network_mode: service:zitadel
+    environment:
+      - ZITADEL_API_URL=${ZITADEL_API_URL}
+      - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+      - ZITADEL_SERVICE_USER_TOKEN_FILE=${ZITADEL_SERVICE_USER_TOKEN_FILE}
+    user: "0"
+    volumes:
+      - secrets:/secrets:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.zitadelLogin.rule=Host(`auth.${BE_DOMAIN}`) && PathPrefix(`/ui/v2/login`)
+      - traefik.http.routers.zitadelLogin.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.zitadelLogin.loadbalancer.server.port=3000
+
+  zitadel-init:
+    image: python:3-alpine
+    depends_on:
+      zitadel:
+        condition: service_healthy
+    command: sh /app/zitadel-create-app.sh
+    environment:
+      - BE_ZITADEL_URL=${BE_ZITADEL_URL}
+      - BE_ZITADEL_REDIRECT_URL=${BE_ZITADEL_REDIRECT_URL}
+    volumes:
+      - secrets:/secrets:rw
+      - .:/app:rw
+    restart: no

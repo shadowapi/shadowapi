@@ -119,12 +119,12 @@ func Provide(i do.Injector) (*Broker, error) {
 	}
 
 	// Check environment variable
-	if skipWorker := os.Getenv("SA_SKIP_WORKER"); skipWorker == "true" {
+	if skipWorker := os.Getenv("BE_SKIP_WORKER"); skipWorker == "true" {
 		b, err := ProvideLazy(i)
 		if err != nil {
 			return nil, err
 		}
-		b.log.Info("Worker disabled via SA_SKIP_WORKER=true")
+		b.log.Info("Worker disabled via BE_SKIP_WORKER=true")
 		return b, nil
 	}
 
