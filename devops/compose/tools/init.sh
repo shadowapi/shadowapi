@@ -47,7 +47,7 @@ PAT=$(cat /secrets/shadowapi-admin-service.pat | tr -d '\n')
 URL=http://zitadel:8080
 HOST=auth.localtest.me
 
-# Step 6: Create Zitadel project
+# Step 6: Create Zitadel project (using v1 - v2beta requires organization_id)
 echo "→ Creating Zitadel project..."
 PROJECT=$(curl -s -X POST "$URL/management/v1/projects" \
   -H "Host: $HOST" \
@@ -57,7 +57,8 @@ PROJECT=$(curl -s -X POST "$URL/management/v1/projects" \
 PROJECT_ID=$(echo "$PROJECT" | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
 echo "✓ Project created: $PROJECT_ID"
 
-# Step 7: Create OIDC app
+# Step 7: Create OIDC app (using v1 - v2beta not available in this Zitadel version)
+# Note: Login V2 is enforced via instance features configuration
 echo "→ Creating OIDC application..."
 APP=$(curl -s -X POST "$URL/management/v1/projects/$PROJECT_ID/apps/oidc" \
   -H "Host: $HOST" \
