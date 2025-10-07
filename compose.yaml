@@ -1,15 +1,13 @@
 include:
   - devops/compose/infra/compose.yaml
   - devops/compose/zitadel/compose.yaml
+  - devops/compose/tools/compose.yaml
 
 services:
   frontend:
     build:
       context: .
       dockerfile: devops/docker/frontend/dev.Dockerfile
-    depends_on:
-      zitadel-init:
-        condition: service_completed_successfully
     volumes:
       - secrets:/secrets:ro
     develop:
@@ -36,8 +34,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      db-migrate:
-        condition: service_completed_successfully
       zitadel:
         condition: service_started
       traefik:
@@ -79,34 +75,6 @@ services:
       db:
         condition: service_healthy
     restart: always
-
-  db-migrate:
-    image: arigaio/atlas:0.30.0
-    command: >
-      schema apply
-      --url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
-      --dev-url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}_schema?sslmode=disable
-      --to file://schema.sql
-      --auto-approve
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./db/schema.sql:/schema.sql
-    restart: no
-
-  sqlc:
-    build:
-      context: .
-      dockerfile: devops/docker/sqlc/Dockerfile
-    image: sa-sqlc:1.28
-    pull_policy: never
-    profiles:
-      - tools
-    volumes:
-      - ./db:/db
-      - ./backend/pkg:/pkg
-    working_dir: /db
 
 volumes:
   secrets:

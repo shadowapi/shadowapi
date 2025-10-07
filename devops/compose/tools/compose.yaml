@@ -1,0 +1,50 @@
+services:
+  init:
+    image: alpine:latest
+    profiles:
+      - init
+    depends_on:
+      db:
+        condition: service_healthy
+      zitadel:
+        condition: service_healthy
+    environment:
+      - BE_ZITADEL_URL=${BE_ZITADEL_URL}
+      - BE_ZITADEL_REDIRECT_URL=${BE_ZITADEL_REDIRECT_URL}
+    volumes:
+      - ../../..:/workspace:rw
+      - ./init.sh:/init.sh:ro
+      - secrets:/secrets:rw
+    working_dir: /workspace
+    command: sh /init.sh
+    restart: no
+
+  db-migrate:
+    image: arigaio/atlas:0.30.0
+    command: >
+      schema apply
+      --url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
+      --dev-url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}_schema?sslmode=disable
+      --to file://schema.sql
+      --auto-approve
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../../../db/schema.sql:/schema.sql
+    profiles:
+      - tools
+    restart: no
+
+  sqlc:
+    build:
+      context: ../../..
+      dockerfile: devops/docker/sqlc/Dockerfile
+    image: sa-sqlc:1.28
+    pull_policy: never
+    profiles:
+      - tools
+    volumes:
+      - ../../../db:/db
+      - ../../../backend/pkg:/pkg
+    working_dir: /db
