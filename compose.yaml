@@ -1,6 +1,6 @@
 include:
-  - devops/infra/compose.yaml
-  - devops/zitadel/compose.yaml
+  - devops/compose/infra/compose.yaml
+  - devops/compose/zitadel/compose.yaml
 
 services:
   frontend:

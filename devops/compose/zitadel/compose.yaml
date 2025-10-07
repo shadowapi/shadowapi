@@ -1,7 +1,7 @@
 services:
   zitadel:
     image: ghcr.io/zitadel/zitadel:latest
-    command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml
+    command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /config.yaml --steps /init-steps.yaml
     user: "0"
     depends_on:
       db:
@@ -20,8 +20,8 @@ services:
       - "8081:8080"
       - "8082:3000"
     volumes:
-      - ./zitadel-config.yaml:/zitadel-config.yaml:ro
-      - ./zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
+      - ./config.yaml:/config.yaml:ro
+      - ./init-steps.yaml:/init-steps.yaml:ro
       - secrets:/secrets:rw
     labels:
       - traefik.enable=true
@@ -29,7 +29,7 @@ services:
       - traefik.http.routers.zitadel.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.services.zitadel.loadbalancer.server.port=8080
     healthcheck:
-      test: ["CMD", "/app/zitadel", "ready", "--config", "/zitadel-config.yaml"]
+      test: ["CMD", "/app/zitadel", "ready", "--config", "/config.yaml"]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -58,7 +58,7 @@ services:
     depends_on:
       zitadel:
         condition: service_healthy
-    command: sh /app/zitadel-create-app.sh
+    command: sh /app/create-app.sh
     environment:
       - BE_ZITADEL_URL=${BE_ZITADEL_URL}
       - BE_ZITADEL_REDIRECT_URL=${BE_ZITADEL_REDIRECT_URL}
