@@ -61,6 +61,17 @@ tasks:
     cmds:
       - npx playwright show-report
 
+  create-test-user:
+    desc: "Create test user in Zitadel for E2E tests"
+    cmds:
+      - docker compose run --rm -v ./devops/compose/tools/create-test-user.sh:/create-test-user.sh:ro init sh /create-test-user.sh
+
+  playwright-real:
+    desc: "Run Playwright tests against real Zitadel (no mocks)"
+    dir: ./front
+    cmds:
+      - npx playwright test real-zitadel-login.test.ts --headed
+
   local-certs:
     desc: "Generate local ssl certs"
     cmds:

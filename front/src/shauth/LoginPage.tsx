@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, Flex, Form, Header, Link, Text, TextField, View, ProgressCircle } from '@adobe/react-spectrum'
 import Alert from '@spectrum-icons/workflow/Alert'
 import { useZitadelAuth } from './useZitadelAuth'
@@ -14,6 +14,7 @@ interface FormFields {
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { loading, error, fieldErrors, authenticateAndFinalizeAuthRequest } = useZitadelAuth()
   const { login } = useAuth()
 
