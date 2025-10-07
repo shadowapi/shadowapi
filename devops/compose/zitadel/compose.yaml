@@ -1,6 +1,6 @@
 services:
   zitadel:
-    image: ghcr.io/zitadel/zitadel:latest
+    image: ghcr.io/zitadel/zitadel:v4.3.0
     command: start-from-init --masterkey "shadowapi-dev-masterkey-32bytes!" --tlsMode disabled --config /config.yaml --steps /init-steps.yaml
     user: "0"
     depends_on:
@@ -37,7 +37,7 @@ services:
     restart: always
 
   zitadel-login:
-    image: ghcr.io/zitadel/zitadel-login:latest
+    image: ghcr.io/zitadel/zitadel-login:v4.3.0
     restart: unless-stopped
     network_mode: service:zitadel
     environment:
