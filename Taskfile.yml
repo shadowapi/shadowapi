@@ -6,9 +6,8 @@ tasks:
     cmds:
       - docker compose down -v
       - cp -f .env.example .env
-      - docker compose up -d db zitadel
-      - docker compose run --rm init
-      - docker compose down
+      - docker compose  --profile init run --rm init
+      # - docker compose down
 
   db-shell:
     desc: "Open Postgres shell in the container"

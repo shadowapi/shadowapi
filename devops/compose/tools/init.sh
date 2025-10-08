@@ -47,49 +47,7 @@ PAT=$(cat /secrets/shadowapi-admin-service.pat | tr -d '\n')
 URL=http://zitadel:8080
 HOST=auth.localtest.me
 
-# Step 6: Create Zitadel project (using v1 - v2beta returns 404 in v4.3.0)
-# NOTE: v2beta project API documented but not yet available in runtime
-echo "→ Creating Zitadel project..."
-PROJECT=$(curl -s -X POST "$URL/management/v1/projects" \
-  -H "Host: $HOST" \
-  -H "Authorization: Bearer $PAT" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"ShadowAPI"}')
-PROJECT_ID=$(echo "$PROJECT" | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
-echo "✓ Project created: $PROJECT_ID"
-
-# Step 7: Create OIDC app (using v1 - v2beta not available in v4.3.0)
-# NOTE: Login V2 is enforced via instance features configuration
-echo "→ Creating OIDC application..."
-APP=$(curl -s -X POST "$URL/management/v1/projects/$PROJECT_ID/apps/oidc" \
-  -H "Host: $HOST" \
-  -H "Authorization: Bearer $PAT" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name":"ShadowAPI Frontend",
-    "redirectUris":["http://localtest.me/login","http://localhost:5173/login"],
-    "postLogoutRedirectUris":["http://localtest.me/","http://localhost:5173/"],
-    "responseTypes":["OIDC_RESPONSE_TYPE_CODE"],
-    "grantTypes":["OIDC_GRANT_TYPE_AUTHORIZATION_CODE","OIDC_GRANT_TYPE_REFRESH_TOKEN","OIDC_GRANT_TYPE_TOKEN_EXCHANGE"],
-    "appType":"OIDC_APP_TYPE_USER_AGENT",
-    "authMethodType":"OIDC_AUTH_METHOD_TYPE_NONE",
-    "version":"OIDC_VERSION_1_0",
-    "devMode":true,
-    "accessTokenType":"OIDC_TOKEN_TYPE_JWT",
-    "additionalOrigins":["http://localtest.me","http://localhost:5173"]
-  }')
-
-CLIENT_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)['clientId'])")
-echo "✓ OIDC app created: $CLIENT_ID"
-
-# Debug - verify CLIENT_ID is not empty
-if [ -z "$CLIENT_ID" ]; then
-  echo "✗ ERROR: CLIENT_ID is empty!"
-  echo "Response was: $APP"
-  exit 1
-fi
-
-# Step 8: Configure instance features
+# Step 6: Configure instance features first (before creating apps)
 echo "→ Configuring Zitadel instance features..."
 curl -s -X PUT "$URL/v2/features/instance" \
   -H "Host: $HOST" \
@@ -114,12 +72,100 @@ curl -s -X PUT "$URL/v2/features/instance" \
   }' >/dev/null
 echo "✓ Instance features configured"
 
-# Step 9: Update .env with generated CLIENT_ID
+# Step 6.5: Search for organization
+echo "→ Searching for organization..."
+ORG=$(curl -s -L "$URL/v2/organizations/_search" \
+  -H "Host: $HOST" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $PAT" \
+  -d '{
+    "query": {
+      "offset": "0",
+      "limit": 100,
+      "asc": true
+    },
+    "sortingColumn": "ORGANIZATION_FIELD_NAME_UNSPECIFIED",
+    "queries": [
+      {
+        "nameQuery": {
+          "name": "ShadowAPI",
+          "method": "TEXT_QUERY_METHOD_EQUALS"
+        }
+      }
+    ]
+  }')
+ORG_ID=$(echo "$ORG" | python3 -c "import sys,json;print(json.load(sys.stdin)['result'][0]['id'])")
+echo "✓ Organization found: $ORG_ID"
+
+# Step 7: Create Zitadel project (v2beta API)
+echo "→ Creating Zitadel project..."
+PROJECT=$(curl -s -X POST "$URL/zitadel.project.v2beta.ProjectService/CreateProject" \
+  -H "Host: $HOST" \
+  -H "Authorization: Bearer $PAT" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"name\":\"ShadowAPI\",
+    \"organizationId\": \"$ORG_ID\"
+  }")
+PROJECT_ID=$(echo "$PROJECT" | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
+echo "✓ Project created: $PROJECT_ID"
+
+# Step 8: Create OIDC app (v2beta API)
+echo "→ Creating OIDC application..."
+APP=$(curl -s -X POST "$URL/zitadel.app.v2beta.AppService/CreateApplication" \
+  -H "Host: $HOST" \
+  -H "Authorization: Bearer $PAT" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"projectId\":\"$PROJECT_ID\",
+    \"name\":\"ShadowAPI Frontend\",
+    \"oidcRequest\":{
+      \"redirectUris\":[\"http://localtest.me/login\",\"http://localhost:5173/login\"],
+      \"postLogoutRedirectUris\":[\"http://localtest.me/\",\"http://localhost:5173/\"],
+      \"responseTypes\":[\"OIDC_RESPONSE_TYPE_CODE\"],
+      \"grantTypes\":[\"OIDC_GRANT_TYPE_AUTHORIZATION_CODE\"],
+      \"appType\":\"OIDC_APP_TYPE_USER_AGENT\",
+      \"authMethodType\":\"OIDC_AUTH_METHOD_TYPE_NONE\",
+      \"version\":\"OIDC_VERSION_1_0\",
+      \"devMode\":true,
+      \"accessTokenType\":\"OIDC_TOKEN_TYPE_JWT\",
+      \"additionalOrigins\":[\"http://localtest.me\",\"http://localhost:5173\"],
+      \"loginVersion\":{
+        \"loginV2\":{
+          \"baseUri\":\"http://auth.localtest.me/ui/v2/login\"
+        }
+      }
+    }
+  }")
+APP_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)['appId'])")
+CLIENT_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)['oidcResponse']['clientId'])")
+echo "✓ OIDC app created: $CLIENT_ID"
+
+# Debug - verify CLIENT_ID is not empty
+if [ -z "$CLIENT_ID" ]; then
+  echo "✗ ERROR: CLIENT_ID is empty!"
+  echo "Response was: $APP"
+  exit 1
+fi
+
+# Step 9: Get application details (v2beta API)
+echo "→ Fetching application details..."
+APP_DETAILS=$(curl -s -X POST "$URL/zitadel.app.v2beta.AppService/GetApplication" \
+  -H "Host: $HOST" \
+  -H "Authorization: Bearer $PAT" \
+  -H "Content-Type: application/json" \
+  -d "{\"id\":\"$APP_ID\"}")
+
+echo "Application details:"
+echo "$APP_DETAILS" | python3 -m json.tool
+
+# Step 10: Update .env with generated CLIENT_ID
 echo "→ Updating .env with generated values..."
 
 # Portable approach - remove old line and add new one
-grep -v "^VITE_ZITADEL_CLIENT_ID=" .env > .env.tmp || true
-echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >> .env.tmp
+grep -v "^VITE_ZITADEL_CLIENT_ID=" .env >.env.tmp || true
+echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >>.env.tmp
 mv .env.tmp .env
 
 echo "✓ .env updated with VITE_ZITADEL_CLIENT_ID=$CLIENT_ID"
