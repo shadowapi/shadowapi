@@ -24,10 +24,14 @@ export function LoginPage() {
 
   const onSubmit = async (fields: FormFields) => {
     try {
+      // Extract authRequestId from URL (added by ZITADEL OAuth redirect)
+      const authRequestId = searchParams.get('authRequest') || searchParams.get('authRequestId') || undefined
+
       // Call the complete authentication flow via API only
       const tokens = await authenticateAndFinalizeAuthRequest(
         fields.email,
-        fields.password
+        fields.password,
+        authRequestId
       )
 
       // Store JWT tokens in auth context

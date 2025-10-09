@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 30000,
+  timeout: 15000, // 15 second timeout
   expect: { timeout: 5000 },
   use: {
     baseURL: 'http://localtest.me/', // Replace with your frontend server URL

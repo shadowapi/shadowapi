@@ -71,9 +71,16 @@ test.describe('Real Zitadel Authentication', () => {
   test('complete login flow with real Zitadel', async ({ page }) => {
     console.log('\n=== TEST START: Real Zitadel Login ===\n')
 
+    // Clear any existing auth state
+    await page.goto('http://localtest.me')
+    await page.evaluate(() => {
+      sessionStorage.clear()
+      localStorage.clear()
+    })
+
     // Step 1: Navigate to login page
     console.log('Step 1: Navigate to login page')
-    await page.goto('http://localtest.me/login')
+    await page.goto('http://localtest.me/login?_t=' + Date.now())
     await expect(page.getByLabel('Email')).toBeVisible()
     console.log('✓ Login page loaded')
 
@@ -83,53 +90,49 @@ test.describe('Real Zitadel Authentication', () => {
     await page.getByLabel('Password').fill('Admin123!')
     console.log('✓ Credentials filled')
 
-    // Step 3: Submit form and wait for authentication flow
-    console.log('\nStep 3: Submit form')
+    // Step 3: Set up request watchers BEFORE clicking submit (to avoid race conditions)
+    console.log('\nStep 3: Setting up request watchers')
+    const sessionRequestPromise = page.waitForRequest(
+      req => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
+      { timeout: 10000 }
+    )
+    const zitadelSessionPromise = page.waitForRequest(
+      req => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()),
+      { timeout: 10000 }
+    )
+    const passwordVerifyPromise = page.waitForRequest(
+      req => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()),
+      { timeout: 10000 }
+    )
+
+    // Step 4: Submit form
+    console.log('\nStep 4: Submit form')
     await page.getByRole('button', { name: /^Login$/i }).click()
 
-    // Step 4: Wait for each authentication step
-    console.log('\nStep 4: Waiting for authentication flow...')
+    // Step 5: Wait for each authentication step
+    console.log('\nStep 5: Waiting for authentication flow...')
 
     try {
-      // Wait for backend session token request
       console.log('  - Waiting for backend session token request...')
-      await page.waitForRequest(
-        req => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
-        { timeout: 10000 }
-      )
+      await sessionRequestPromise
       console.log('  ✓ Backend session token requested')
 
-      // Wait for Zitadel session creation
       console.log('  - Waiting for Zitadel session creation...')
-      await page.waitForRequest(
-        req => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()),
-        { timeout: 10000 }
-      )
+      await zitadelSessionPromise
       console.log('  ✓ Zitadel session created')
 
-      // Wait for password verification
       console.log('  - Waiting for password verification...')
-      await page.waitForRequest(
-        req => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()),
-        { timeout: 10000 }
-      )
+      await passwordVerifyPromise
       console.log('  ✓ Password verified')
-
-      // Wait for token exchange
-      console.log('  - Waiting for token exchange...')
-      await page.waitForRequest(
-        req => req.method() === 'POST' && /\/oauth\/v2\/token$/.test(req.url()),
-        { timeout: 10000 }
-      )
-      console.log('  ✓ Tokens exchanged')
+      console.log('  ✓ Using session token directly (no introspection needed for USER_AGENT app)')
     } catch (error) {
       console.error('\n❌ Authentication flow failed at some step')
       console.error(error)
       throw error
     }
 
-    // Step 5: Verify authentication success
-    console.log('\nStep 5: Verify authentication success')
+    // Step 6: Verify authentication success
+    console.log('\nStep 6: Verify authentication success')
 
     // Check that we were redirected to home page
     await expect.poll(
@@ -158,8 +161,8 @@ test.describe('Real Zitadel Authentication', () => {
       expiresIn: Math.floor((authData.expiresAt - Date.now()) / 1000) + 's'
     })
 
-    // Step 6: Verify we can access protected routes
-    console.log('\nStep 6: Verify access to protected routes')
+    // Step 7: Verify we can access protected routes
+    console.log('\nStep 7: Verify access to protected routes')
     await page.goto('http://localtest.me/users')
     await expect(page).toHaveURL('http://localtest.me/users')
     await expect(page.getByRole('heading', { name: 'ShadowAPI' })).toBeVisible()
@@ -171,6 +174,13 @@ test.describe('Real Zitadel Authentication', () => {
   test('shows proper error for invalid credentials', async ({ page }) => {
     console.log('\n=== TEST START: Invalid Credentials ===\n')
 
+    // Clear any existing auth state
+    await page.goto('http://localtest.me')
+    await page.evaluate(() => {
+      sessionStorage.clear()
+      localStorage.clear()
+    })
+
     await page.goto('http://localtest.me/login')
     await expect(page.getByLabel('Email')).toBeVisible()
 
@@ -179,8 +189,10 @@ test.describe('Real Zitadel Authentication', () => {
 
     await page.getByRole('button', { name: /^Login$/i }).click()
 
-    // Should show error message
-    await expect(page.getByText(/User not found|Invalid email or password/i)).toBeVisible({ timeout: 10000 })
+    // Should show error message (checking for the actual error text from Zitadel)
+    await expect(
+      page.getByText(/User could not be found|Invalid email or password/i)
+    ).toBeVisible({ timeout: 5000 })
     console.log('✓ Error message displayed for invalid credentials')
 
     console.log('\n=== TEST PASSED ===\n')

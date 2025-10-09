@@ -47,7 +47,7 @@ PAT=$(cat /secrets/shadowapi-admin-service.pat | tr -d '\n')
 URL=http://zitadel:8080
 HOST=auth.localtest.me
 
-# Step 6: Configure instance features first (before creating apps)
+# Step 6: Configure instance features using v2beta API
 echo "→ Configuring Zitadel instance features..."
 curl -s -X PUT "$URL/v2/features/instance" \
   -H "Host: $HOST" \
@@ -58,17 +58,16 @@ curl -s -X PUT "$URL/v2/features/instance" \
     "loginDefaultOrg": false,
     "userSchema": true,
     "oidcTokenExchange": true,
-    "improvedPerformance": [1],
+    "improvedPerformance": ["IMPROVED_PERFORMANCE_ORG_BY_ID"],
     "debugOidcParentError": true,
     "oidcSingleV1SessionTermination": true,
     "enableBackChannelLogout": true,
     "loginV2": {
       "required": true,
-      "baseUri": "http://auth.localtest.me/ui/v2/login"
+      "baseUri": "http://localtest.me/login"
     },
     "permissionCheckV2": true,
-    "consoleUseV2UserApi": false,
-    "enableRelationalTables": true
+    "consoleUseV2UserApi": false
   }' >/dev/null
 echo "✓ Instance features configured"
 
@@ -124,18 +123,13 @@ APP=$(curl -s -X POST "$URL/zitadel.app.v2beta.AppService/CreateApplication" \
       \"redirectUris\":[\"http://localtest.me/login\",\"http://localhost:5173/login\"],
       \"postLogoutRedirectUris\":[\"http://localtest.me/\",\"http://localhost:5173/\"],
       \"responseTypes\":[\"OIDC_RESPONSE_TYPE_CODE\"],
-      \"grantTypes\":[\"OIDC_GRANT_TYPE_AUTHORIZATION_CODE\"],
+      \"grantTypes\":[\"OIDC_GRANT_TYPE_AUTHORIZATION_CODE\",\"OIDC_GRANT_TYPE_REFRESH_TOKEN\",\"OIDC_GRANT_TYPE_TOKEN_EXCHANGE\"],
       \"appType\":\"OIDC_APP_TYPE_USER_AGENT\",
       \"authMethodType\":\"OIDC_AUTH_METHOD_TYPE_NONE\",
       \"version\":\"OIDC_VERSION_1_0\",
       \"devMode\":true,
       \"accessTokenType\":\"OIDC_TOKEN_TYPE_JWT\",
-      \"additionalOrigins\":[\"http://localtest.me\",\"http://localhost:5173\"],
-      \"loginVersion\":{
-        \"loginV2\":{
-          \"baseUri\":\"http://auth.localtest.me/ui/v2/login\"
-        }
-      }
+      \"additionalOrigins\":[\"http://localtest.me\",\"http://localhost:5173\"]
     }
   }")
 APP_ID=$(echo "$APP" | python3 -c "import sys,json;print(json.load(sys.stdin)['appId'])")

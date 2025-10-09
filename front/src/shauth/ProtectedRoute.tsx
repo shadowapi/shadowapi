@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Flex, ProgressCircle, Text } from '@adobe/react-spectrum'
 import { useAuth } from './AuthContext'
+import { config } from '../config/env'
 
 interface ProtectedRouteProps {
   children?: ReactNode
@@ -33,7 +34,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    // Redirect to login with return URL
+    // Redirect to login page with returnTo parameter
     const returnTo = encodeURIComponent(location.pathname + location.search)
     return <Navigate to={`/login?returnTo=${returnTo}`} replace />
   }
