@@ -49,13 +49,22 @@ services:
       - BE_QUEUE_PREFIX=${BE_QUEUE_PREFIX}
       - BE_AUTH_USER_MANAGER=${BE_AUTH_USER_MANAGER}
       - BE_ZITADEL_URL=${BE_ZITADEL_URL}
+      - BE_ZITADEL_EXTERNAL_URL=${BE_ZITADEL_EXTERNAL_URL}
       - BE_ZITADEL_MANAGEMENT_URL=${BE_ZITADEL_MANAGEMENT_URL}
       - BE_ZITADEL_SERVICE_USER_KEY_PATH=${BE_ZITADEL_SERVICE_USER_KEY_PATH}
       - BE_ZITADEL_REDIRECT_URL=${BE_ZITADEL_REDIRECT_URL}
     volumes:
-      - ./backend:/app/
-      - ./spec:/spec/
       - secrets:/secrets:ro
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend
+          ignore:
+            - backend/tmp/
+        - action: rebuild
+          path: ./backend/go.mod
+        - action: rebuild
+          path: ./backend/go.sum
     labels:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-api.rule=Host(`${BE_DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))

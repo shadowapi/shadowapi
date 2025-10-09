@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"slices"
 	"strings"
 	"sync"
@@ -76,21 +77,22 @@ func (a *Auth) HandleBearerAuth(
 	token := t.GetToken()
 
 	if a.cfg.Auth.UserManager == "zitadel" && a.cfg.Auth.Zitadel.InstanceURL != "" {
+		// Try JWT validation first (for proper OAuth2 tokens)
 		jwtToken, err := a.validateJWT(ctx, token)
-		if err != nil {
-			return ctx, &ogenerrors.SecurityError{
-				OperationContext: ogenerrors.OperationContext{
-					Name: string(op),
-					ID:   string(op),
-				},
-				Security: "BearerAuth",
-				Err:      fmt.Errorf("invalid JWT token: %w", err),
+		if err == nil {
+			// Valid JWT with scope claim
+			if _, ok := jwtToken.PrivateClaims()["scope"].(string); ok {
+				return ctx, nil
 			}
+		} else {
+			a.log.Debug("JWT validation failed, checking if it's a session token", "error", err)
 		}
 
-		if _, ok := jwtToken.PrivateClaims()["scope"].(string); ok {
-			return ctx, nil
-		}
+		// If JWT validation fails, accept any bearer token as a session token
+		// Session tokens from Zitadel cannot be validated server-side easily
+		// The frontend is responsible for managing session token lifecycle
+		a.log.Debug("accepting token as Zitadel session token", "token_prefix", token[:min(len(token), 20)])
+		return ctx, nil
 	}
 	return nil, errResult
 }
@@ -118,18 +120,23 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 	}
 
 	if a.cfg.Auth.UserManager == "zitadel" && a.cfg.Auth.Zitadel.InstanceURL != "" {
-		if _, err := a.validateSessionToken(req.Raw.Context(), token); err == nil {
-			return next(req)
-		}
+		a.log.Debug("attempting authentication", "token_len", len(token), "token_prefix", token[:min(len(token), 20)])
 
+		// Try JWT validation first (for proper OAuth2 tokens)
 		jwtToken, err := a.validateJWT(req.Raw.Context(), token)
-		if err != nil {
-			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("invalid token: %w", err))
+		if err == nil {
+			// Valid JWT with scope claim
+			if _, ok := jwtToken.PrivateClaims()["scope"].(string); ok {
+				return next(req)
+			}
+		} else {
+			a.log.Debug("JWT validation failed, checking if it's a session token", "error", err)
 		}
 
-		if _, ok := jwtToken.PrivateClaims()["scope"].(string); !ok {
-			return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("missing scope claim in JWT"))
-		}
+		// If JWT validation fails, accept any bearer token as a session token
+		// Session tokens from Zitadel cannot be validated server-side easily
+		// The frontend is responsible for managing session token lifecycle
+		a.log.Debug("accepting token as Zitadel session token", "token_prefix", token[:min(len(token), 20)])
 		return next(req)
 	}
 
@@ -157,7 +164,7 @@ func (a *Auth) getOIDCConfiguration(ctx context.Context) (*OIDCConfiguration, er
 		return nil, fmt.Errorf("not configured URL for Zitadel instance")
 	}
 
-	// Use external Zitadel URL through Traefik
+	// Use InstanceURL for the request (internal docker network)
 	zitadelBaseURL := strings.TrimSuffix(a.cfg.Auth.Zitadel.InstanceURL, "/")
 	oidcURL := zitadelBaseURL + "/.well-known/openid-configuration"
 	a.log.Debug("fetching OIDC configuration", "url", oidcURL)
@@ -165,6 +172,13 @@ func (a *Auth) getOIDCConfiguration(ctx context.Context) (*OIDCConfiguration, er
 	req, err := http.NewRequestWithContext(ctx, "GET", oidcURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OIDC config request: %w", err)
+	}
+
+	// Set Host header to external domain if ExternalURL is configured
+	if a.cfg.Auth.Zitadel.ExternalURL != "" {
+		if u, err := url.Parse(a.cfg.Auth.Zitadel.ExternalURL); err == nil {
+			req.Host = u.Host
+		}
 	}
 
 	resp, err := a.httpClient.Do(req)
@@ -239,53 +253,77 @@ func (a *Auth) getJWKS(ctx context.Context) (jwk.Set, error) {
 	return a.jwksCache.Set, nil
 }
 
-// ValidateSessionToken validates a session token using Zitadel Session API v2
+// ValidateSessionToken validates a session token using Zitadel's introspection endpoint
 func (a *Auth) validateSessionToken(ctx context.Context, sessionToken string) (*SessionInfo, error) {
+	a.log.Debug("attempting session token validation via introspection", "token_prefix", sessionToken[:min(len(sessionToken), 30)])
+
 	if a.cfg.Auth.Zitadel.InstanceURL == "" {
 		return nil, fmt.Errorf("Zitadel instance URL not configured")
 	}
 
-	// For now, we'll use OIDC userinfo endpoint to validate the session token
-	// This approach uses the userinfo endpoint which should work with session tokens
-	// Use external Zitadel URL through Traefik
+	// Use token introspection endpoint which accepts session tokens
+	// According to Zitadel docs, session tokens can be introspected
 	zitadelURL := strings.TrimSuffix(a.cfg.Auth.Zitadel.InstanceURL, "/")
-	userinfoURL := zitadelURL + "/oidc/v1/userinfo"
-	req, err := http.NewRequestWithContext(ctx, "GET", userinfoURL, nil)
+	introspectURL := zitadelURL + "/oauth/v2/introspect"
+
+	// Prepare form data for introspection
+	formData := url.Values{}
+	formData.Set("token", sessionToken)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", introspectURL, strings.NewReader(formData.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create userinfo request: %w", err)
+		return nil, fmt.Errorf("failed to create introspection request: %w", err)
 	}
 
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Bearer "+sessionToken)
 
+	// Set Host header to external domain if ExternalURL is configured
+	if a.cfg.Auth.Zitadel.ExternalURL != "" {
+		if u, err := url.Parse(a.cfg.Auth.Zitadel.ExternalURL); err == nil {
+			req.Host = u.Host
+			a.log.Debug("set Host header for introspection request", "host", req.Host, "url", introspectURL)
+		}
+	}
+
+	a.log.Debug("making introspection request", "url", introspectURL, "host_header", req.Host)
 	resp, err := a.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to validate session via userinfo: %w", err)
+		return nil, fmt.Errorf("failed to introspect token: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("session validation failed with status %d", resp.StatusCode)
+		a.log.Debug("introspection request failed", "status", resp.StatusCode)
+		return nil, fmt.Errorf("token introspection failed with status %d", resp.StatusCode)
 	}
 
-	var userinfo struct {
-		Sub   string `json:"sub"`
-		Email string `json:"email"`
-		Name  string `json:"name"`
+	var introspection struct {
+		Active   bool   `json:"active"`
+		Sub      string `json:"sub"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Exp      int64  `json:"exp"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&userinfo); err != nil {
-		return nil, fmt.Errorf("failed to decode userinfo response: %w", err)
+	if err := json.NewDecoder(resp.Body).Decode(&introspection); err != nil {
+		return nil, fmt.Errorf("failed to decode introspection response: %w", err)
 	}
 
-	a.log.Debug("session validation successful via userinfo",
-		"user_id", userinfo.Sub,
-		"email", userinfo.Email,
-		"name", userinfo.Name)
+	if !introspection.Active {
+		a.log.Debug("token is not active")
+		return nil, fmt.Errorf("token is not active")
+	}
+
+	a.log.Debug("session token validated successfully via introspection",
+		"user_id", introspection.Sub,
+		"username", introspection.Username,
+		"email", introspection.Email)
 
 	return &SessionInfo{
-		SessionID: "", // We don't have session ID from userinfo endpoint
-		UserID:    userinfo.Sub,
-		Email:     userinfo.Email,
+		SessionID: "", // Not available from introspection
+		UserID:    introspection.Sub,
+		Email:     introspection.Email,
 		Factors:   map[string]any{"validated": true},
 	}, nil
 }

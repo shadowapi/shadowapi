@@ -197,4 +197,74 @@ test.describe('Real Zitadel Authentication', () => {
 
     console.log('\n=== TEST PASSED ===\n')
   })
+
+  test('can access users page after login', async ({ page }) => {
+    console.log('\n=== TEST START: Users Page Access ===\n')
+
+    // Clear any existing auth state
+    await page.goto('http://localtest.me')
+    await page.evaluate(() => {
+      sessionStorage.clear()
+      localStorage.clear()
+    })
+
+    // Step 1: Login
+    console.log('Step 1: Login')
+    await page.goto('http://localtest.me/login?_t=' + Date.now())
+    await expect(page.getByLabel('Email')).toBeVisible()
+    await page.getByLabel('Email').fill('admin@example.com')
+    await page.getByLabel('Password').fill('Admin123!')
+
+    const sessionRequestPromise = page.waitForRequest(
+      req => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
+      { timeout: 10000 }
+    )
+
+    await page.getByRole('button', { name: /^Login$/i }).click()
+    await sessionRequestPromise
+
+    // Wait for redirect to home
+    await expect.poll(
+      async () => page.url(),
+      { message: 'Should redirect to home page', timeout: 5000 }
+    ).toBe('http://localtest.me/')
+    console.log('✓ Login successful')
+
+    // Step 2: Navigate to users page
+    console.log('\nStep 2: Navigate to users page')
+    const usersResponsePromise = page.waitForResponse(
+      res => res.url().includes('/api/v1/user') && res.request().method() === 'GET',
+      { timeout: 10000 }
+    )
+
+    await page.goto('http://localtest.me/users')
+
+    // Wait for the API response
+    console.log('  - Waiting for users API response...')
+    const usersResponse = await usersResponsePromise
+    console.log('  ✓ Users API response received:', usersResponse.status())
+
+    // Step 3: Verify response was successful
+    console.log('\nStep 3: Verify API response')
+    expect(usersResponse.status()).toBe(200)
+    const users = await usersResponse.json()
+    console.log('✓ Users API returned successfully, got', users.length || 0, 'users')
+
+    // Step 4: Verify page loaded
+    console.log('\nStep 4: Verify users page loaded')
+    await expect(page).toHaveURL('http://localtest.me/users')
+    await expect(page.getByRole('heading', { name: 'ShadowAPI' })).toBeVisible()
+    console.log('✓ Users page loaded')
+
+    // Step 5: Check auth token was sent
+    console.log('\nStep 5: Verify authentication token was sent')
+    const authData = await page.evaluate(() => {
+      const data = sessionStorage.getItem('shadowapi_auth')
+      return data ? JSON.parse(data) : null
+    })
+    expect(authData.accessToken, 'Should have access token').toBeTruthy()
+    console.log('✓ Access token present:', authData.accessToken.substring(0, 30) + '...')
+
+    console.log('\n=== TEST PASSED ===\n')
+  })
 })

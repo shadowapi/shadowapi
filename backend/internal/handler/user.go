@@ -81,12 +81,18 @@ func (h *Handler) CreateUserSession(ctx context.Context) (*api.UserSessionToken,
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get authentication token"))
 	}
 
+	// Use ExternalURL if available (for frontend access), otherwise fall back to InstanceURL
+	zitadelURL := h.cfg.Auth.Zitadel.ExternalURL
+	if zitadelURL == "" {
+		zitadelURL = h.cfg.Auth.Zitadel.InstanceURL
+	}
+
 	response := &api.UserSessionToken{
 		SessionToken: token,
-		ZitadelURL:   h.cfg.Auth.Zitadel.InstanceURL,
+		ZitadelURL:   zitadelURL,
 		ExpiresIn:    3600, // 1 hour
 	}
 
-	h.log.Info("user session token created successfully", "zitadel_url", h.cfg.Auth.Zitadel.InstanceURL)
+	h.log.Info("user session token created successfully", "zitadel_url", zitadelURL)
 	return response, nil
 }

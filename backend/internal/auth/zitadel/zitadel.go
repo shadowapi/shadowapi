@@ -194,10 +194,14 @@ func (m *ZitadelUserManager) loadPrivateKey() error {
 func (m *ZitadelUserManager) createJWT() (string, error) {
 	now := time.Now().UTC()
 
-	// Use the instance URL for audience
-	audience := m.cfg.Auth.Zitadel.ManagementURL
-	if m.cfg.Auth.Zitadel.InstanceURL != "" {
+	// Use the external URL for audience (what Zitadel identifies itself as)
+	audience := m.cfg.Auth.Zitadel.ExternalURL
+	if audience == "" {
+		// Fallback to InstanceURL if ExternalURL not set
 		audience = m.cfg.Auth.Zitadel.InstanceURL
+		if audience == "" {
+			audience = m.cfg.Auth.Zitadel.ManagementURL
+		}
 	}
 	audience = strings.TrimSuffix(audience, "/")
 
@@ -256,9 +260,9 @@ func (m *ZitadelUserManager) getAccessToken(ctx context.Context) (string, int, e
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
-	// Set Host header to external domain if InstanceURL is configured
-	if m.cfg.Auth.Zitadel.InstanceURL != "" {
-		if u, err := url.Parse(m.cfg.Auth.Zitadel.InstanceURL); err == nil {
+	// Set Host header to external domain if ExternalURL is configured
+	if m.cfg.Auth.Zitadel.ExternalURL != "" {
+		if u, err := url.Parse(m.cfg.Auth.Zitadel.ExternalURL); err == nil {
 			req.Host = u.Host
 		}
 	}
@@ -356,9 +360,9 @@ func (m *ZitadelUserManager) makeRequest(ctx context.Context, method, path strin
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	// Set Host header to external domain if InstanceURL is configured
-	if m.cfg.Auth.Zitadel.InstanceURL != "" {
-		if u, err := url.Parse(m.cfg.Auth.Zitadel.InstanceURL); err == nil {
+	// Set Host header to external domain if ExternalURL is configured
+	if m.cfg.Auth.Zitadel.ExternalURL != "" {
+		if u, err := url.Parse(m.cfg.Auth.Zitadel.ExternalURL); err == nil {
 			req.Host = u.Host
 		}
 	}
@@ -411,9 +415,9 @@ func (m *ZitadelUserManager) makeRequestV2(ctx context.Context, method, path str
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	// Set Host header to external domain if InstanceURL is configured
-	if m.cfg.Auth.Zitadel.InstanceURL != "" {
-		if u, err := url.Parse(m.cfg.Auth.Zitadel.InstanceURL); err == nil {
+	// Set Host header to external domain if ExternalURL is configured
+	if m.cfg.Auth.Zitadel.ExternalURL != "" {
+		if u, err := url.Parse(m.cfg.Auth.Zitadel.ExternalURL); err == nil {
 			req.Host = u.Host
 		}
 	}

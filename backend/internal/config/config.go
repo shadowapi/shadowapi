@@ -69,6 +69,7 @@ type Config struct {
 		// Zitadel configuration for OAuth2 authentication
 		Zitadel struct {
 			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"BE_ZITADEL_URL"`
+			ExternalURL string `json:"external_url" yaml:"external_url" env:"BE_ZITADEL_EXTERNAL_URL"`
 
 			// ---- Management API settings ----
 			ManagementURL      string `json:"management_url" yaml:"management_url" env:"BE_ZITADEL_MANAGEMENT_URL"`
