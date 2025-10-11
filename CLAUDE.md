@@ -91,15 +91,20 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ## Local development & tooling
 
+### Getting started
+
+1. Run `task init` first to build the sqlc helper image and install frontend dependencies.
+2. Start the development environment with `docker compose watch`.
+   - Backend runs in the container via `air` auto-rebuild.
+   - Frontend changes are handled by Docker watch mechanism.
+
 ### Task runner essentials
 
-- `task init` – Build sqlc helper image and install frontend dependencies.
+- `task init` – Build sqlc helper image and install frontend dependencies. **Run this first before starting development.**
 - `task sync-db` – Apply schema to the running Postgres (uses Atlas).
 - `task sqlc` / `task sqlc-vet` – Regenerate and validate SQLC output.
 - `task api-gen`, `task api-gen-backend`, `task api-gen-frontend` – Sync code with the OpenAPI spec.
 - `task build-api` – Compile the backend binary.
-- `docker compose watch` - start dev env, add `--no-up` if you don't need to rebuild the images
-- backend runs in the container via `air` auto rebuild, frontend changes handled by docker watch mechanizm
 
 ### Compose topology
 
@@ -124,6 +129,10 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - Reuse existing logging helpers (`backend/internal/log`) and metric emitters rather than introducing new logging styles.
 - Respect existing channel abstractions (`internal/tg`, `internal/whatsapp`, etc.) when adding integrations—keep protocols isolated from handler code.
 - Keep secrets and credentials out of source control. Use `.env`, `backend/config.yaml`, or `secrets/` volumes instead.
+
+## Known issues
+
+- **Token validation:** The backend currently does not properly validate authentication tokens. This is a known security issue that needs to be addressed before production deployment.
 
 ## Contribution workflow
 
