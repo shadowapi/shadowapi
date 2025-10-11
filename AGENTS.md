@@ -21,6 +21,8 @@
 ## Testing Guidelines
 - Backend unit suites run with `cd backend && go test ./...`; add table-driven tests near the code they cover and mock external APIs via helpers in `internal/test`.
 - UI end-to-end coverage lives in `front/tests`; execute `task playwright-run` or `npx playwright test` for the default mocked Zitadel workflow.
+- Real Zitadel E2E tests can be run with environment variables: `ZITADEL_E2E=1 ZITADEL_E2E_USER=admin@example.com ZITADEL_E2E_PASSWORD=Admin123! npx playwright test`.
+- PKCE flow tests verify authorization code exchange with code verifier validation.
 - Preserve failing artefacts in `front/test-results/` (gitignored) and attach screenshots to PRs when behaviour changes.
 
 ## Commit & Pull Request Guidelines

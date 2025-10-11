@@ -38,186 +38,186 @@ function App() {
     <Provider theme={defaultTheme} colorScheme="light" router={{ navigate, useHref }}>
       <AuthProvider>
         <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/datasources"
-          element={
-            <ProtectedRoute>
-              <DataSources />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute>
-              <Users />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/users/:uuid"
-          element={
-            <ProtectedRoute>
-              <UserEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/schedulers"
-          element={
-            <ProtectedRoute>
-              <Schedulers />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/schedulers/:uuid"
-          element={
-            <ProtectedRoute>
-              <SchedulerEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/datasources/:uuid"
-          element={
-            <ProtectedRoute>
-              <DataSourceEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/logs"
-          element={
-            <ProtectedRoute>
-              <Logs />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/oauth2/credentials"
-          element={
-            <ProtectedRoute>
-              <OAuth2Credentials />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/oauth2/credentials/:clientID"
-          element={
-            <ProtectedRoute>
-              <OAuth2CredentialEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/pipelines/:uuid/flow"
-          element={
-            <ProtectedRoute>
-              <PipelineFlow />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/pipelines/:uuid"
-          element={
-            <ProtectedRoute>
-              <PipelineEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/pipelines"
-          element={
-            <ProtectedRoute>
-              <Pipelines />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route
-          path="/storages"
-          element={
-            <ProtectedRoute>
-              <Storages />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/storages/:uuid/storageKind/:storageKind"
-          element={
-            <ProtectedRoute>
-              <StorageEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/storages/:uuid"
-          element={
-            <ProtectedRoute>
-              <StorageEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/syncpolicies"
-          element={
-            <ProtectedRoute>
-              <SyncPolicies />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/syncpolicy/:uuid"
-          element={
-            <ProtectedRoute>
-              <SyncPolicyEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/messages"
-          element={
-            <ProtectedRoute>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/datasources"
+            element={
+              <ProtectedRoute>
+                <DataSources />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:uuid"
+            element={
+              <ProtectedRoute>
+                <UserEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/schedulers"
+            element={
+              <ProtectedRoute>
+                <Schedulers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/schedulers/:uuid"
+            element={
+              <ProtectedRoute>
+                <SchedulerEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/datasources/:uuid"
+            element={
+              <ProtectedRoute>
+                <DataSourceEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/logs"
+            element={
+              <ProtectedRoute>
+                <Logs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/oauth2/credentials"
+            element={
+              <ProtectedRoute>
+                <OAuth2Credentials />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/oauth2/credentials/:clientID"
+            element={
+              <ProtectedRoute>
+                <OAuth2CredentialEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipelines/:uuid/flow"
+            element={
+              <ProtectedRoute>
+                <PipelineFlow />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipelines/:uuid"
+            element={
+              <ProtectedRoute>
+                <PipelineEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipelines"
+            element={
+              <ProtectedRoute>
+                <Pipelines />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route
+            path="/storages"
+            element={
+              <ProtectedRoute>
+                <Storages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/storages/:uuid/storageKind/:storageKind"
+            element={
+              <ProtectedRoute>
+                <StorageEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/storages/:uuid"
+            element={
+              <ProtectedRoute>
+                <StorageEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/syncpolicies"
+            element={
+              <ProtectedRoute>
+                <SyncPolicies />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/syncpolicy/:uuid"
+            element={
+              <ProtectedRoute>
+                <SyncPolicyEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/files"
-          element={
-            <ProtectedRoute>
-              <Files />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/files"
+            element={
+              <ProtectedRoute>
+                <Files />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/workers"
-          element={
-            <ProtectedRoute>
-              <WorkerJobs />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/workers"
+            element={
+              <ProtectedRoute>
+                <WorkerJobs />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </AuthProvider>
     </Provider>

@@ -14,7 +14,7 @@ const init = async () => {
           <App />
         </QueryClientProvider>
       </BrowserRouter>
-    </React.StrictMode>
+    </React.StrictMode>,
   )
 }
 

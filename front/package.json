@@ -34,6 +34,7 @@
     "@eslint/js": "^9.21.0",
     "@playwright/test": "^1.50.1",
     "@tanstack/eslint-plugin-query": "^5.66.1",
+    "@types/node": "^24.7.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",

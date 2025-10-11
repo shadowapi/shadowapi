@@ -71,7 +71,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 - `src/pages/` – Route-level screens (messages, pipelines, storages, schedulers, etc.).
 - `src/forms/` – Form abstractions bound to API entities.
-- `src/shauth/` – Zitadel auth context, login/signup screens, and hooks (`useZitadelAuth`).
+- `src/shauth/` – Zitadel auth context, login/signup screens, PKCE utilities (`pkce.ts`), and hooks (`useZitadelAuth`).
 - `src/api/v1.d.ts` – Generated types; do not edit manually. Regenerate via `task api-gen-frontend` or `npm run generate-api-client`.
 - `src/components/`, `src/layouts/`, `src/hooks/` – Shared UI/layout/state helpers.
 
@@ -153,5 +153,22 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ## Authentication
 
-- we use Zitadel as authentication IDP
-- to build custom login&auth form we use this flow https://zitadel.com/docs/guides/integrate/login-ui/username-password
+- We use Zitadel as authentication IDP
+- Authentication uses OAuth 2.0 Authorization Code flow with PKCE (Proof Key for Code Exchange) as defined in RFC 7636
+- Custom login/auth form follows this flow: https://zitadel.com/docs/guides/integrate/login-ui/username-password
+- PKCE implementation:
+  - Code verifier generation: cryptographically secure random 64-character string
+  - Code challenge: SHA-256 hash (S256 method) with fallback to plain method
+  - State parameter for CSRF protection
+  - Session token management through backend `/user/session` endpoint
+  - PKCE state stored in browser sessionStorage for security
+- Key files:
+  - `front/src/shauth/pkce.ts` – PKCE utilities (verifier/challenge generation, storage)
+  - `front/src/shauth/ZitadelClient.ts` – Zitadel API client
+  - `front/src/shauth/useZitadelAuth.ts` – React hook for auth flows
+  - `front/src/shauth/LoginPage.tsx` – Login UI with PKCE flow
+- Environment variables:
+  - `VITE_ZITADEL_URL` – Internal Zitadel URL (for backend communication)
+  - `VITE_ZITADEL_PUBLIC_URL` – External Zitadel URL (for browser redirects, optional)
+  - `VITE_ZITADEL_CLIENT_ID` – OAuth2 client ID
+  - `VITE_ZITADEL_REDIRECT_URL` – OAuth2 redirect URI (typically `http://localtest.me/login`)

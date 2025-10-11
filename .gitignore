@@ -46,6 +46,7 @@ backend/config.yaml
 front/.env
 .env
 .env.gen
+front/dist/
 
 # Zitadel service user secrets (NEVER COMMIT!)
 secrets/

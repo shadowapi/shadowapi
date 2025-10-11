@@ -47,8 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = (email: string, accessToken: string, idToken: string, refreshToken?: string, expiresIn: number = 3600) => {
-    const expiresAt = Date.now() + (expiresIn * 1000)
+  const login = (
+    email: string,
+    accessToken: string,
+    idToken: string,
+    refreshToken?: string,
+    expiresIn: number = 3600,
+  ) => {
+    const expiresAt = Date.now() + expiresIn * 1000
     const userData: AuthUser = { email, accessToken, idToken, refreshToken, expiresAt }
     setUser(userData)
     // Store in sessionStorage instead of localStorage for better security
@@ -122,14 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     checkAuth,
-    getAccessToken
+    getAccessToken,
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

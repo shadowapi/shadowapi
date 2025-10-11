@@ -462,11 +462,11 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
               <Controller
                 name="smtp_tls"
                 control={form.control}
-                render={({ field }) => 
+                render={({ field }) => (
                   <Switch isSelected={field.value} onChange={field.onChange}>
                     SMTP TLS
                   </Switch>
-                }
+                )}
               />
               <Controller
                 name="password"
@@ -490,7 +490,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
               <Controller
                 name="oauth2_client_uuid"
                 control={form.control}
-                render={({ field, fieldState }) => 
+                render={({ field, fieldState }) => (
                   <Picker
                     label="OAuth2 Client"
                     selectedKey={field.value}
@@ -498,13 +498,13 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
                     errorMessage={fieldState.error?.message}
                     width="100%"
                   >
-                    {oauth2ClientsQuery.data?.map((client) => 
+                    {oauth2ClientsQuery.data?.map((client) => (
                       <Item key={client.uuid}>
                         {client.name} ({client.client_id})
                       </Item>
-                    )}
+                    ))}
                   </Picker>
-                }
+                )}
               />
             </Flex>
           )}

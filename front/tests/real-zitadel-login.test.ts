@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { test, expect } from '@playwright/test'
 
 /**
@@ -12,14 +13,19 @@ import { test, expect } from '@playwright/test'
 test.describe('Real Zitadel Authentication', () => {
   test.beforeEach(async ({ page }) => {
     // Enable detailed logging
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       const type = msg.type()
       const text = msg.text()
       console.log(`[BROWSER ${type.toUpperCase()}]`, text)
     })
 
-    page.on('request', req => {
-      if (req.url().includes('/api/') || req.url().includes('zitadel') || req.url().includes('sessions') || req.url().includes('oauth')) {
+    page.on('request', (req) => {
+      if (
+        req.url().includes('/api/') ||
+        req.url().includes('zitadel') ||
+        req.url().includes('sessions') ||
+        req.url().includes('oauth')
+      ) {
         console.log(`[REQUEST] ${req.method()} ${req.url()}`)
         const headers = req.headers()
         if (headers.authorization) {
@@ -36,14 +42,19 @@ test.describe('Real Zitadel Authentication', () => {
       }
     })
 
-    page.on('response', async res => {
-      if (res.url().includes('/api/') || res.url().includes('zitadel') || res.url().includes('sessions') || res.url().includes('oauth')) {
+    page.on('response', async (res) => {
+      if (
+        res.url().includes('/api/') ||
+        res.url().includes('zitadel') ||
+        res.url().includes('sessions') ||
+        res.url().includes('oauth')
+      ) {
         console.log(`[RESPONSE] ${res.status()} ${res.url()}`)
         if (res.status() >= 400) {
           try {
             const body = await res.text()
             console.log('  Error body:', body.substring(0, 500))
-          } catch (e) {
+          } catch {
             console.log('  Could not read response body')
           }
         } else {
@@ -57,12 +68,12 @@ test.describe('Real Zitadel Authentication', () => {
       }
     })
 
-    page.on('requestfailed', req => {
+    page.on('requestfailed', (req) => {
       console.log(`[REQUEST FAILED] ${req.method()} ${req.url()}`)
       console.log(`  Failure: ${req.failure()?.errorText}`)
     })
 
-    page.on('pageerror', err => {
+    page.on('pageerror', (err) => {
       console.log('[PAGE ERROR]', err.message)
       console.log(err.stack)
     })
@@ -81,6 +92,7 @@ test.describe('Real Zitadel Authentication', () => {
     // Step 1: Navigate to login page
     console.log('Step 1: Navigate to login page')
     await page.goto('http://localtest.me/login?_t=' + Date.now())
+    await page.waitForURL(/\/login.*authRequest=/, { timeout: 20000 })
     await expect(page.getByLabel('Email')).toBeVisible()
     console.log('✓ Login page loaded')
 
@@ -93,16 +105,24 @@ test.describe('Real Zitadel Authentication', () => {
     // Step 3: Set up request watchers BEFORE clicking submit (to avoid race conditions)
     console.log('\nStep 3: Setting up request watchers')
     const sessionRequestPromise = page.waitForRequest(
-      req => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
-      { timeout: 10000 }
+      (req) => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
+      { timeout: 10000 },
     )
     const zitadelSessionPromise = page.waitForRequest(
-      req => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()),
-      { timeout: 10000 }
+      (req) => req.method() === 'POST' && /\/v2\/sessions$/.test(req.url()),
+      { timeout: 10000 },
     )
     const passwordVerifyPromise = page.waitForRequest(
-      req => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()),
-      { timeout: 10000 }
+      (req) => req.method() === 'PATCH' && /\/v2\/sessions\//.test(req.url()),
+      { timeout: 10000 },
+    )
+    const finalizePromise = page.waitForRequest(
+      (req) => req.method() === 'POST' && /\/v2\/oidc\/auth_requests\//.test(req.url()),
+      { timeout: 10000 },
+    )
+    const tokenExchangePromise = page.waitForRequest(
+      (req) => req.method() === 'POST' && /\/oauth\/v2\/token$/.test(req.url()),
+      { timeout: 10000 },
     )
 
     // Step 4: Submit form
@@ -124,7 +144,14 @@ test.describe('Real Zitadel Authentication', () => {
       console.log('  - Waiting for password verification...')
       await passwordVerifyPromise
       console.log('  ✓ Password verified')
-      console.log('  ✓ Using session token directly (no introspection needed for USER_AGENT app)')
+
+      console.log('  - Waiting for auth request finalization...')
+      await finalizePromise
+      console.log('  ✓ Auth request finalized')
+
+      console.log('  - Waiting for PKCE token exchange...')
+      await tokenExchangePromise
+      console.log('  ✓ PKCE exchange completed')
     } catch (error) {
       console.error('\n❌ Authentication flow failed at some step')
       console.error(error)
@@ -135,10 +162,9 @@ test.describe('Real Zitadel Authentication', () => {
     console.log('\nStep 6: Verify authentication success')
 
     // Check that we were redirected to home page
-    await expect.poll(
-      async () => page.url(),
-      { message: 'Should redirect to home page', timeout: 5000 }
-    ).toBe('http://localtest.me/')
+    await expect
+      .poll(async () => page.url(), { message: 'Should redirect to home page', timeout: 5000 })
+      .toBe('http://localtest.me/')
     console.log('✓ Redirected to home page')
 
     // Check that tokens are stored in sessionStorage
@@ -158,7 +184,7 @@ test.describe('Real Zitadel Authentication', () => {
       hasAccessToken: !!authData.accessToken,
       hasIdToken: !!authData.idToken,
       hasRefreshToken: !!authData.refreshToken,
-      expiresIn: Math.floor((authData.expiresAt - Date.now()) / 1000) + 's'
+      expiresIn: Math.floor((authData.expiresAt - Date.now()) / 1000) + 's',
     })
 
     // Step 7: Verify we can access protected routes
@@ -182,6 +208,7 @@ test.describe('Real Zitadel Authentication', () => {
     })
 
     await page.goto('http://localtest.me/login')
+    await page.waitForURL(/\/login.*authRequest=/, { timeout: 20000 })
     await expect(page.getByLabel('Email')).toBeVisible()
 
     await page.getByLabel('Email').fill('nonexistent@example.com')
@@ -190,9 +217,7 @@ test.describe('Real Zitadel Authentication', () => {
     await page.getByRole('button', { name: /^Login$/i }).click()
 
     // Should show error message (checking for the actual error text from Zitadel)
-    await expect(
-      page.getByText(/User could not be found|Invalid email or password/i)
-    ).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/User could not be found|Invalid email or password/i)).toBeVisible({ timeout: 5000 })
     console.log('✓ Error message displayed for invalid credentials')
 
     console.log('\n=== TEST PASSED ===\n')
@@ -216,25 +241,24 @@ test.describe('Real Zitadel Authentication', () => {
     await page.getByLabel('Password').fill('Admin123!')
 
     const sessionRequestPromise = page.waitForRequest(
-      req => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
-      { timeout: 10000 }
+      (req) => req.method() === 'POST' && req.url().includes('/api/v1/user/session'),
+      { timeout: 10000 },
     )
 
     await page.getByRole('button', { name: /^Login$/i }).click()
     await sessionRequestPromise
 
     // Wait for redirect to home
-    await expect.poll(
-      async () => page.url(),
-      { message: 'Should redirect to home page', timeout: 5000 }
-    ).toBe('http://localtest.me/')
+    await expect
+      .poll(async () => page.url(), { message: 'Should redirect to home page', timeout: 5000 })
+      .toBe('http://localtest.me/')
     console.log('✓ Login successful')
 
     // Step 2: Navigate to users page
     console.log('\nStep 2: Navigate to users page')
     const usersResponsePromise = page.waitForResponse(
-      res => res.url().includes('/api/v1/user') && res.request().method() === 'GET',
-      { timeout: 10000 }
+      (res) => res.url().includes('/api/v1/user') && res.request().method() === 'GET',
+      { timeout: 10000 },
     )
 
     await page.goto('http://localtest.me/users')

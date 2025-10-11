@@ -48,7 +48,7 @@ export class ZitadelClientError extends Error {
   constructor(
     message: string,
     public code?: string,
-    public statusCode?: number
+    public statusCode?: number,
   ) {
     super(message)
     this.name = 'ZitadelClientError'
@@ -71,7 +71,7 @@ export class ZitadelClient {
   private get headers(): HeadersInit {
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.config.bearerToken}`,
+      Authorization: `Bearer ${this.config.bearerToken}`,
     }
   }
 
@@ -104,10 +104,10 @@ export class ZitadelClient {
       body: JSON.stringify({
         checks: {
           user: {
-            loginName
-          }
-        }
-      })
+            loginName,
+          },
+        },
+      }),
     })
 
     return this.handleResponse<ZitadelSession>(response)
@@ -123,10 +123,10 @@ export class ZitadelClient {
       body: JSON.stringify({
         checks: {
           password: {
-            password
-          }
-        }
-      })
+            password,
+          },
+        },
+      }),
     })
 
     return this.handleResponse<ZitadelSession>(response)
@@ -135,23 +135,19 @@ export class ZitadelClient {
   /**
    * Step 3: Finalize the auth request with authenticated session (OIDC flow)
    */
-  async finalizeAuthRequest(
-    authRequestId: string,
-    session: ZitadelSession
-  ): Promise<ZitadelCallbackResponse> {
-    const response = await fetch(
-      `${this.config.apiUrl}/v2/oidc/auth_requests/${authRequestId}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session: {
-            sessionId: session.sessionId,
-            sessionToken: session.sessionToken
-          }
-        })
-      }
-    )
+  async finalizeAuthRequest(authRequestId: string, session: ZitadelSession): Promise<ZitadelCallbackResponse> {
+    const response = await fetch(`${this.config.apiUrl}/v2/oidc/auth_requests/${authRequestId}`, {
+      method: 'POST',
+      headers: {
+        ...this.headers,
+      },
+      body: JSON.stringify({
+        session: {
+          sessionId: session.sessionId,
+          sessionToken: session.sessionToken,
+        },
+      }),
+    })
 
     return this.handleResponse<ZitadelCallbackResponse>(response)
   }
@@ -159,18 +155,24 @@ export class ZitadelClient {
   /**
    * Step 4: Exchange authorization code for tokens
    */
-  async exchangeCodeForTokens(code: string): Promise<OIDCTokens> {
+  async exchangeCodeForTokens(code: string, codeVerifier?: string): Promise<OIDCTokens> {
     const response = await fetch(`${this.config.apiUrl}/oauth/v2/token`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: this.config.clientId,
-        code,
-        redirect_uri: this.config.redirectUri
-      })
+      body: (() => {
+        const params = new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: this.config.clientId,
+          code,
+          redirect_uri: this.config.redirectUri,
+        })
+        if (codeVerifier) {
+          params.set('code_verifier', codeVerifier)
+        }
+        return params
+      })(),
     })
 
     return this.handleResponse<OIDCTokens>(response)
@@ -193,12 +195,12 @@ export class ZitadelClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: new URLSearchParams({
         token,
-        client_id: this.config.clientId
-      })
+        client_id: this.config.clientId,
+      }),
     })
 
     return this.handleResponse(response)
@@ -210,7 +212,8 @@ export class ZitadelClient {
   async authenticateWithPassword(
     loginName: string,
     password: string,
-    authRequestId?: string
+    authRequestId?: string,
+    codeVerifier?: string,
   ): Promise<OIDCTokens> {
     // Step 1: Create session with username
     const session = await this.createSession(loginName)
@@ -219,31 +222,22 @@ export class ZitadelClient {
     const authenticatedSession = await this.verifyPassword(session.sessionId, password)
 
     // If we have an authRequestId, complete the OIDC flow
-    if (authRequestId) {
-      // Step 3: Finalize the auth request
-      const callback = await this.finalizeAuthRequest(authRequestId, authenticatedSession)
-
-      // Extract code from callback URL
-      const callbackUrl = new URL(callback.callbackUrl)
-      const code = callbackUrl.searchParams.get('code')
-
-      if (!code) {
-        throw new ZitadelClientError('No authorization code in callback URL')
-      }
-
-      // Step 4: Exchange code for tokens
-      return this.exchangeCodeForTokens(code)
-    } else {
-      // Fallback: Use session token directly as access token
-      // According to Zitadel docs: "the session token can be used as OAuth2 access token"
-      // No introspection needed for USER_AGENT apps - the token is self-contained
-      return {
-        access_token: authenticatedSession.sessionToken,
-        id_token: authenticatedSession.sessionToken,
-        token_type: 'Bearer',
-        expires_in: 3600, // Default to 1 hour
-        scope: 'openid profile email'
-      }
+    if (!authRequestId) {
+      throw new ZitadelClientError('Missing auth request for token exchange')
     }
+
+    // Step 3: Finalize the auth request
+    const callback = await this.finalizeAuthRequest(authRequestId, authenticatedSession)
+
+    // Extract code from callback URL
+    const callbackUrl = new URL(callback.callbackUrl)
+    const code = callbackUrl.searchParams.get('code')
+
+    if (!code) {
+      throw new ZitadelClientError('No authorization code in callback URL')
+    }
+
+    // Step 4: Exchange code for tokens
+    return this.exchangeCodeForTokens(code, codeVerifier)
   }
 }

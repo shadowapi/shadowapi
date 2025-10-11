@@ -28,4 +28,8 @@ playwright-report
 test-results
 
 # Compiled source files (should only be in dist/)
+src/**/*.js
+src/**/*.jsx
+src/**/*.js.map
+src/**/*.jsx.map
 !src/vite-env.d.ts
