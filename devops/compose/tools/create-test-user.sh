@@ -9,7 +9,7 @@ apk add --no-cache curl python3 >/dev/null 2>&1
 
 # Configuration
 PAT=$(cat /secrets/shadowapi-admin-service.pat | tr -d '\n')
-URL=http://zitadel:8080
+URL=http://auth.localtest.me:8080
 HOST=auth.localtest.me
 EMAIL="admin@example.com"
 PASSWORD="Admin123!"

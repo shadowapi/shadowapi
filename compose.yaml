@@ -38,8 +38,6 @@ services:
         condition: service_started
       traefik:
         condition: service_started
-    extra_hosts:
-      - "auth.localtest.me:host-gateway"
     environment:
       - BE_HOST=${BE_HOST}
       - BE_PORT=${BE_PORT}

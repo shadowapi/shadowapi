@@ -28,7 +28,7 @@ echo "→ Waiting for Zitadel to be ready..."
 max_attempts=30
 attempt=0
 while [ $attempt -lt $max_attempts ]; do
-  if curl -sf http://zitadel:8080/debug/healthz >/dev/null 2>&1; then
+  if curl -sf http://auth.localtest.me:8080/debug/healthz >/dev/null 2>&1; then
     echo "✓ Zitadel is ready"
     break
   fi
@@ -44,7 +44,7 @@ fi
 # Step 5: Read PAT from secrets
 echo "→ Reading Zitadel admin PAT..."
 PAT=$(cat /secrets/shadowapi-admin-service.pat | tr -d '\n')
-URL=http://zitadel:8080
+URL=http://auth.localtest.me:8080
 HOST=auth.localtest.me
 
 # Step 6: Configure instance features using v2beta API

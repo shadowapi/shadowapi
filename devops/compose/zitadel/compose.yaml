@@ -34,6 +34,10 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+    networks:
+      default:
+        aliases:
+          - auth.localtest.me
     restart: always
 
   zitadel-login:
