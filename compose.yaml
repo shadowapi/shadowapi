@@ -70,18 +70,18 @@ services:
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
     restart: always
 
-  backend-loader:
-    build:
-      context: .
-      dockerfile: devops/docker/loader/Dockerfile
-    environment:
-      - BE_HOST=${BE_HOST}
-      - BE_DB_URI=${BE_DB_URI}
-      - BE_LOG_LEVEL=${BE_LOG_LEVEL}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
+  # backend-loader:
+  #   build:
+  #     context: .
+  #     dockerfile: devops/docker/loader/Dockerfile
+  #   environment:
+  #     - BE_HOST=${BE_HOST}
+  #     - BE_DB_URI=${BE_DB_URI}
+  #     - BE_LOG_LEVEL=${BE_LOG_LEVEL}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   restart: always
 
 volumes:
   secrets:

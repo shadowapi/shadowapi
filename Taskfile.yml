@@ -7,7 +7,12 @@ tasks:
       - docker compose down -v
       - cp -f .env.example .env
       - docker compose  --profile init run --rm init
-      # - docker compose down
+
+  dev:
+    desc: "Start development environment (backend, frontend, db)"
+    cmds:
+      - defer: docker compose down
+      - docker compose up --watch 2>&1 | grep -vE '(db|traefik)'
 
   db-shell:
     desc: "Open Postgres shell in the container"
@@ -18,60 +23,24 @@ tasks:
     desc: "Migrate database to latest changes using Atlas in the dev environment"
     cmds:
       - |2
-        cat ./db/schema.sql ./db/tg.sql > ./db/combined.sql
         docker run --rm \
-          --network shadowapi_shadowapi \
-          -v ./db/combined.sql:/combined.sql \
+          --network shadowapi_default \
+          -v ./db/schema.sql:/schema.sql \
           --name sa-atlas arigaio/atlas \
           schema apply \
             --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable \
             --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable \
-            --to file://combined.sql \
+            --to file://schema.sql \
             --auto-approve
-        rm ./db/combined.sql
-
-  api-gen-backend:
-    desc: "Generate API specification in backend"
-    dir: ./backend
-    cmds:
-      - go generate
-
-  api-gen-frontend:
-    desc: "Generate TypeScript API client in frontend"
-    dir: ./front
-    cmds:
-      - npm run generate-api-client
 
   api-gen:
     desc: "Generate API specs (backend & frontend)"
     deps:
-      - api-gen-backend
-      - api-gen-frontend
+      - go generate
+      - npm run generate-api-client
 
   playwright-run:
     desc: "Run Playwright tests"
     dir: ./front
     cmds:
-      - npx playwright test
-
-  playwright-report:
-    desc: "Generate and open Playwright test report"
-    dir: ./front
-    cmds:
-      - npx playwright show-report
-
-  create-test-user:
-    desc: "Create test user in Zitadel for E2E tests"
-    cmds:
-      - docker compose run --rm -v ./devops/compose/tools/create-test-user.sh:/create-test-user.sh:ro init sh /create-test-user.sh
-
-  playwright-real:
-    desc: "Run Playwright tests against real Zitadel (no mocks)"
-    dir: ./front
-    cmds:
-      - npx playwright test real-zitadel-login.test.ts --headed
-
-  local-certs:
-    desc: "Generate local ssl certs"
-    cmds:
-      - openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout localtest.me.key -out localtest.me.crt -subj "/CN=localtest.me"
+      - npx playwright test --headed
