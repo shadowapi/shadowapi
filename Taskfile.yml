@@ -2,36 +2,22 @@ version: "3"
 
 tasks:
   init:
-    desc: "Initialize the project (install dependencies, generate API specs, migrate DB)"
+    desc: "Initialize development environment"
     cmds:
       - docker compose down -v
       - cp -f .env.example .env
-      - docker compose  --profile init run --rm init
+      - docker compose run --rm db-migrate
 
   dev:
-    desc: "Start development environment (backend, frontend, db)"
+    desc: "Start development environment"
     cmds:
       - defer: docker compose down
-      - docker compose up --watch 2>&1 | grep -vE '(db|traefik)'
+      - docker compose up --watch 2>&1 | grep -vE '(db|traefik|zitadel)'
 
   db-shell:
     desc: "Open Postgres shell in the container"
     cmds:
       - docker compose exec db su - postgres -c "psql -U shadowapi shadowapi"
-
-  sync-db:
-    desc: "Migrate database to latest changes using Atlas in the dev environment"
-    cmds:
-      - |2
-        docker run --rm \
-          --network shadowapi_default \
-          -v ./db/schema.sql:/schema.sql \
-          --name sa-atlas arigaio/atlas \
-          schema apply \
-            --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable \
-            --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable \
-            --to file://schema.sql \
-            --auto-approve
 
   api-gen:
     desc: "Generate API specs (backend & frontend)"
