@@ -1,8 +1,7 @@
 # ShadowAPI Makefile
 # Run `make help` to see available targets
 
-.PHONY: help init db-shell sync-db api-gen-backend api-gen-frontend api-gen \
-        playwright-run playwright-report local-certs
+.PHONY: help init db-shell sync-db api-gen-backend api-gen-frontend api-gen
 
 # Default target
 .DEFAULT_GOAL := help
@@ -46,18 +45,3 @@ api-gen-frontend: ## Generate TypeScript API client in frontend
 	cd ./front && npm run generate-api-client
 
 api-gen: api-gen-backend api-gen-frontend ## Generate API specs (backend & frontend)
-
-##@ Testing
-
-playwright-run: ## Run Playwright tests
-	cd ./front && npx playwright test
-
-playwright-report: ## Generate and open Playwright test report
-	cd ./front && npx playwright show-report
-
-##@ Certificates
-
-local-certs: ## Generate local SSL certificates
-	openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
-		-keyout localtest.me.key -out localtest.me.crt \
-		-subj "/CN=localtest.me"

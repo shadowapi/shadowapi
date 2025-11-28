@@ -114,7 +114,7 @@ Run `make help` to see all available targets. Key ones:
 
 - **Go:** Prefer running `go test ./...` in the backend directory. Add focused tests under `*_test.go` when fixing bugs or adding features.
 - **SQL:** After schema edits, run `sqlc vet` in the backend directory to ensure queries remain valid.
-- **Frontend:** Run `npm run lint` and `npm run build:tscheck`. Execute `npx playwright test` (or `make playwright-run`) when UI flows change.
+- **Frontend:** Run `npm run lint` and `npm run build:tscheck`. Execute `npx playwright test` when UI flows change.
 - **Integration:** When modifying auth or message pipelines, verify the running stack (`docker compose watch`) and exercise flows through the UI or API.
 - Never leave generated files stale—regenerate them in the same change set.
 
