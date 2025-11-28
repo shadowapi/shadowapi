@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.6.2
     command:
       - --log.level=DEBUG
       - --accesslog=true
@@ -19,6 +19,7 @@ services:
       - 8800:8080
     depends_on:
       - frontend
+      - ssr
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:

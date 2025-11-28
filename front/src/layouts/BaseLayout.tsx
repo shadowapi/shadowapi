@@ -1,21 +1,21 @@
 import { type ReactNode, useMemo } from 'react';
 import { Layout, Menu, type MenuProps, theme } from 'antd';
-import { Link, useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router';
 
 const { Header, Footer } = Layout;
 
 const menuItems: MenuProps['items'] = [
   {
     key: '/',
-    label: <Link to='/'>Dashboard</Link>
+    label: 'Dashboard'
   },
   {
     key: '/page/documentation',
-    label: <Link to='/page/documentation'>Documentation</Link>
+    label: 'Documentation'
   },
   {
     key: '/page/about',
-    label: <Link to='/page/about'>About</Link>
+    label: 'About'
   },
 ];
 
@@ -25,6 +25,7 @@ interface BaseLayoutProps {
 
 function BaseLayout({ children }: BaseLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     token: { borderRadiusLG },
   } = theme.useToken();
@@ -74,6 +75,7 @@ function BaseLayout({ children }: BaseLayoutProps) {
           mode="horizontal"
           selectedKeys={selectedKeys}
           items={menuItems}
+          onClick={({ key }) => navigate(key)}
           style={{ flex: 1, minWidth: 0 }}
         />
       </Header>

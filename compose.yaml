@@ -20,7 +20,29 @@ services:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-front.rule=Host(`${BE_DOMAIN}`)
       - traefik.http.routers.shadowapi-front.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-front.priority=1
       - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
+    restart: always
+
+  ssr:
+    build:
+      context: .
+      dockerfile: devops/docker/ssr/dev.Dockerfile
+    develop:
+      watch:
+        - action: sync
+          path: ./front
+          target: /app
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: ./front/package.json
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shadowapi-ssr.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/page`)
+      - traefik.http.routers.shadowapi-ssr.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-ssr.priority=20
+      - traefik.http.services.shadowapi-ssr.loadbalancer.server.port=3000
     restart: always
 
   backend:
@@ -54,6 +76,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.shadowapi-api.rule=Host(`${BE_DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
       - traefik.http.routers.shadowapi-api.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.shadowapi-api.priority=30
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
     restart: always
 

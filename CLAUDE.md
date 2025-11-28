@@ -59,9 +59,51 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ## Frontend
 
 ### Stack
- - Vite and React with TypeScript.
- - Ant Design component library (v6).
- - Use LLMs.txt for And Design best practices and guidelines from this URL https://ant.design/llms.txt
+
+- Vite and React 19 with TypeScript.
+- Ant Design component library (v6).
+- React Router v7 for client-side routing.
+- Use LLMs.txt for Ant Design best practices and guidelines from this URL https://ant.design/llms.txt
+
+### Hybrid SSR Architecture
+
+The frontend uses a hybrid rendering approach where public pages (`/page/*`) are server-side rendered for SEO, while the app (`/`, `/app/*`) uses client-side rendering.
+
+**Two containers, one codebase:**
+- **Frontend container** (port 5173): Vite dev server for CSR routes
+- **SSR container** (port 3000): Express + Vite middleware for SSR routes
+- Both containers use the same `front/` directory
+
+**Routing behavior:**
+- Direct URL access to `/page/*` → SSR container renders full HTML, then client hydrates
+- SPA navigation within `/page/*` → React Router (no page reload)
+- Navigation from `/page/*` to `/` → Full page reload (crosses container boundary)
+- Direct URL access to `/` → Frontend container serves index.html, client renders
+
+### Key frontend files
+
+- `front/server.ts` – Express SSR server with Vite middleware, handles `/page/*` routes
+- `front/src/entry-client.tsx` – Client entry point; uses `hydrateRoot` for SSR pages, `createRoot` for CSR
+- `front/src/entry-server.tsx` – SSR render function with Ant Design CSS-in-JS extraction
+- `front/src/routes.tsx` – Centralized route configuration with `ssr` flag per route
+- `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
+- `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
+- `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
+- `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR)
+
+### Development scripts
+
+- `npm run dev` – Start Vite dev server (CSR only, used by frontend container)
+- `npm run dev:ssr` – Start Express SSR server with Vite middleware (used by SSR container)
+- `npm run build` – Build both client and server bundles for production
+
+### Adding new pages
+
+1. Create the page component in `front/src/pages/` or `front/src/app/`
+2. Add route to `front/src/routes.tsx` with appropriate `ssr` flag:
+   - `ssr: true` for public/SEO pages under `/page/*`
+   - `ssr: false` for app pages under `/` or `/app/*`
+3. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
 
 ## Specs & data model
 
@@ -89,7 +131,11 @@ Run `make help` to see all available targets. Key ones:
 
 ### Compose topology
 
-- Traefik exposes `http://localtest.me/api` to the backend.
+- Traefik routes requests based on path prefix with priority:
+  - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
+  - `/page/*` (priority 20) → SSR container (port 3000)
+  - Everything else (priority 1) → Frontend container (port 5173)
+- Access the app at `http://localtest.me`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
 ## Testing & QA expectations
