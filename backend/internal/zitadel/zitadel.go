@@ -16,41 +16,52 @@ import (
 // Client wraps OAuth2 config for Zitadel service user
 // and provides helpers for token exchange and introspection.
 type Client struct {
-	cfg    *config.Config
-	oauth2 *oauth2.Config
-	client *http.Client
+    cfg    *config.Config
+    oauth2 *oauth2.Config
+    client *http.Client
 }
 
 // Provide creates a new Client for dependency injection
 func Provide(c *config.Config) *Client {
-	oc := &oauth2.Config{
-		ClientID: c.Auth.Zitadel.Audience, // PKCE → no secret here
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth/v2/authorize", c.Auth.Zitadel.InstanceURL),
-			TokenURL: fmt.Sprintf("%s/oauth/v2/token", c.Auth.Zitadel.InstanceURL),
-		},
-		RedirectURL: c.Auth.Zitadel.RedirectURI,
-		Scopes:      []string{"openid", "profile", "email"},
-	}
-	return &Client{cfg: c, oauth2: oc, client: oc.Client(context.Background(), nil)}
+    oc := &oauth2.Config{
+        ClientID: c.Auth.Zitadel.Audience, // PKCE → no secret here
+        Endpoint: oauth2.Endpoint{
+            AuthURL:  fmt.Sprintf("%s/oauth/v2/authorize", c.Auth.Zitadel.InstanceURL),
+            TokenURL: fmt.Sprintf("%s/oauth/v2/token", c.Auth.Zitadel.InstanceURL),
+        },
+        RedirectURL: c.Auth.Zitadel.RedirectURI,
+        Scopes:      []string{"openid", "profile", "email"},
+    }
+    return &Client{cfg: c, oauth2: oc, client: oc.Client(context.Background(), nil)}
 }
 
-// ExchangeCode optionally forwards a PKCE code_verifier.
-func (c *Client) ExchangeCode(ctx context.Context, code, verifier string) (*oauth2.Token, error) {
-	var tok *oauth2.Token
-	var err error
-	if verifier != "" {
-		tok, err = c.oauth2.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", verifier))
-	} else {
-		tok, err = c.oauth2.Exchange(ctx, code)
-	}
-	if err != nil {
-		if rErr, ok := err.(*oauth2.RetrieveError); ok {
-			return nil, fmt.Errorf("exchange status %d: %s", rErr.Response.StatusCode, strings.TrimSpace(string(rErr.Body)))
-		}
-		return nil, err
-	}
-	return tok, nil
+// AuthCodeURL returns an authorization URL for the configured provider
+func (c *Client) AuthCodeURL(state string, extra ...oauth2.AuthCodeOption) string {
+    // Allow caller to override redirect_uri if needed
+    opts := []oauth2.AuthCodeOption{}
+    opts = append(opts, extra...)
+    return c.oauth2.AuthCodeURL(state, opts...)
+}
+
+// ExchangeCode optionally forwards a PKCE code_verifier and can override redirect_uri.
+func (c *Client) ExchangeCode(ctx context.Context, code, verifier string, redirectOverride string) (*oauth2.Token, error) {
+    var tok *oauth2.Token
+    var err error
+    opts := []oauth2.AuthCodeOption{}
+    if verifier != "" {
+        opts = append(opts, oauth2.SetAuthURLParam("code_verifier", verifier))
+    }
+    if redirectOverride != "" {
+        opts = append(opts, oauth2.SetAuthURLParam("redirect_uri", redirectOverride))
+    }
+    tok, err = c.oauth2.Exchange(ctx, code, opts...)
+    if err != nil {
+        if rErr, ok := err.(*oauth2.RetrieveError); ok {
+            return nil, fmt.Errorf("exchange status %d: %s", rErr.Response.StatusCode, strings.TrimSpace(string(rErr.Body)))
+        }
+        return nil, err
+    }
+    return tok, nil
 }
 
 // IntrospectResponse describes subset of fields returned by /oauth/v2/introspect

@@ -1,15 +1,13 @@
 #!/bin/sh
 set -e
 
-# Wait for .env.vite to be created by zitadel-init
-echo "Waiting for Zitadel configuration..."
-while [ ! -f /secrets/.env.vite ]; do
-  sleep 1
-done
-
-# Copy environment file to Vite working directory
-echo "Copying Vite environment configuration..."
-cp /secrets/.env.vite /app/.env.local
+# Optional Zitadel config for legacy flows
+if [ -f /secrets/.env.vite ]; then
+  echo "Found Zitadel env, copying to Vite .env.local..."
+  cp /secrets/.env.vite /app/.env.local || true
+else
+  echo "No /secrets/.env.vite found. Proceeding without Zitadel VITE vars."
+fi
 
 echo "Starting Vite development server..."
 exec npm run dev

@@ -6,7 +6,8 @@ tasks:
     cmds:
       - docker compose down -v
       - cp -f .env.example .env
-      - docker compose  --profile init run --rm init
+      - docker compose up -d db
+      - task: sync-db
       # - docker compose down
 
   db-shell:
@@ -19,16 +20,15 @@ tasks:
     cmds:
       - |2
         cat ./db/schema.sql ./db/tg.sql > ./db/combined.sql
-        docker run --rm \
-          --network shadowapi_shadowapi \
-          -v ./db/combined.sql:/combined.sql \
-          --name sa-atlas arigaio/atlas \
+        docker compose run --rm \
+          -v ./db/combined.sql:/schema.sql \
+          db-migrate \
           schema apply \
             --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable \
             --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable \
-            --to file://combined.sql \
+            --to file://schema.sql \
             --auto-approve
-        rm ./db/combined.sql
+        rm -f ./db/combined.sql
 
   api-gen-backend:
     desc: "Generate API specification in backend"
@@ -60,10 +60,10 @@ tasks:
     cmds:
       - npx playwright show-report
 
-  create-test-user:
-    desc: "Create test user in Zitadel for E2E tests"
+  zitadel-init:
+    desc: "Provision Zitadel OIDC app (optional)"
     cmds:
-      - docker compose run --rm -v ./devops/compose/tools/create-test-user.sh:/create-test-user.sh:ro init sh /create-test-user.sh
+      - docker compose --profile init run --rm init
 
   playwright-real:
     desc: "Run Playwright tests against real Zitadel (no mocks)"

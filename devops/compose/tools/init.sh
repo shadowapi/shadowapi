@@ -12,9 +12,9 @@ else
   echo "✓ .env file created"
 fi
 
-# Step 2: Check if Zitadel app already created
-if grep -q "VITE_ZITADEL_CLIENT_ID=" .env && [ "$(grep "VITE_ZITADEL_CLIENT_ID=" .env | cut -d'=' -f2)" != "" ]; then
-  echo "✓ Zitadel app already configured (VITE_ZITADEL_CLIENT_ID exists)"
+# Step 2: Check if Zitadel app already created (backend audience present)
+if grep -q "BE_ZITADEL_AUDIENCE=" .env && [ "$(grep "BE_ZITADEL_AUDIENCE=" .env | cut -d'=' -f2)" != "" ]; then
+  echo "✓ Zitadel app already configured (BE_ZITADEL_AUDIENCE exists)"
   echo "=== Initialization complete ==="
   exit 0
 fi
@@ -120,7 +120,7 @@ APP=$(curl -s -X POST "$URL/zitadel.app.v2beta.AppService/CreateApplication" \
     \"projectId\":\"$PROJECT_ID\",
     \"name\":\"ShadowAPI Frontend\",
     \"oidcRequest\":{
-      \"redirectUris\":[\"http://localtest.me/login\",\"http://localhost:5173/login\"],
+      \"redirectUris\":[\"http://localtest.me/api/v1/auth/callback\",\"http://localhost:5173/api/v1/auth/callback\",\"http://localtest.me/auth/callback\"],
       \"postLogoutRedirectUris\":[\"http://localtest.me/\",\"http://localhost:5173/\"],
       \"responseTypes\":[\"OIDC_RESPONSE_TYPE_CODE\"],
       \"grantTypes\":[\"OIDC_GRANT_TYPE_AUTHORIZATION_CODE\",\"OIDC_GRANT_TYPE_REFRESH_TOKEN\",\"OIDC_GRANT_TYPE_TOKEN_EXCHANGE\"],
@@ -154,17 +154,22 @@ APP_DETAILS=$(curl -s -X POST "$URL/zitadel.app.v2beta.AppService/GetApplication
 echo "Application details:"
 echo "$APP_DETAILS" | python3 -m json.tool
 
-# Step 10: Update .env with generated CLIENT_ID
-echo "→ Updating .env with generated values..."
+# Step 10: Update .env with generated values for backend
+echo "→ Updating .env with backend OIDC values..."
 
-# Portable approach - remove old line and add new one
-grep -v "^VITE_ZITADEL_CLIENT_ID=" .env >.env.tmp || true
-echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >>.env.tmp
+# ensure BE_ZITADEL_AUDIENCE is set
+grep -v "^BE_ZITADEL_AUDIENCE=" .env >.env.tmp || true
+echo "BE_ZITADEL_AUDIENCE=$CLIENT_ID" >>.env.tmp
+
+# ensure BE_ZITADEL_REDIRECT_URL is set (fallback to default callback)
+if ! grep -q "^BE_ZITADEL_REDIRECT_URL=" .env; then
+  echo "BE_ZITADEL_REDIRECT_URL=http://localtest.me/api/v1/auth/callback" >>.env.tmp
+fi
 mv .env.tmp .env
 
-echo "✓ .env updated with VITE_ZITADEL_CLIENT_ID=$CLIENT_ID"
+echo "✓ .env updated with BE_ZITADEL_AUDIENCE=$CLIENT_ID"
 
-# Also write to /secrets/.env.vite for frontend compatibility
+# Optional: also write VITE_* for legacy flows (not required anymore)
 echo "VITE_ZITADEL_CLIENT_ID=$CLIENT_ID" >/secrets/.env.vite
 echo "VITE_ZITADEL_URL=$BE_ZITADEL_URL" >>/secrets/.env.vite
 echo "VITE_ZITADEL_REDIRECT_URL=$BE_ZITADEL_REDIRECT_URL" >>/secrets/.env.vite

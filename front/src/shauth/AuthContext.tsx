@@ -62,27 +62,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    if (user?.accessToken) {
-      try {
-        const zitadelUrl = import.meta.env.VITE_ZITADEL_URL || 'http://auth.localtest.me'
-        // Revoke the access token
-        await fetch(`${zitadelUrl}/oauth/v2/revoke`, {
+    try {
+      if (user?.accessToken) {
+        await fetch('/api/v1/auth/logout', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${user.accessToken}`,
           },
-          body: new URLSearchParams({
-            token: user.accessToken,
-            token_type_hint: 'access_token',
-          }).toString(),
         })
-      } catch (error) {
-        console.error('Failed to revoke access token:', error)
       }
+    } catch (error) {
+      console.error('Failed to logout:', error)
+    } finally {
+      setUser(null)
+      sessionStorage.removeItem(AUTH_STORAGE_KEY)
     }
-
-    setUser(null)
-    sessionStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
   const checkAuth = async (): Promise<boolean> => {

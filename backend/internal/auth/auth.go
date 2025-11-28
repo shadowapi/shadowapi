@@ -55,6 +55,10 @@ func Provide(i do.Injector) (*Auth, error) {
 			"/ready":               http.MethodGet,
 			"/api/v1/user":         http.MethodPost,
 			"/api/v1/user/session": http.MethodPost,
+			"/api/v1/auth/login":   http.MethodGet,
+			"/api/v1/auth/callback": http.MethodGet,
+			"/api/v1/auth/logout":  http.MethodPost,
+			"/auth/callback":       http.MethodGet,
 		},
 	}, nil
 }
