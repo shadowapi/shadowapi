@@ -11,12 +11,13 @@ large language models (LLMs), or message‑centric processing (MCP) workflows.
 
 ## Development Setup
 
-We use [Task](https://taskfile.dev/installation/) instead of traditional
-Makefiles to manage the project. Make sure Task and Docker Compose are both installed.
+We use Make to manage the project. Make sure Make and Docker Compose are both installed.
 We use Zitadel as IDP, and custom login form.
 Base domain is `localtest.me`, which resolves to `localhost`.
 To access to the zitadel, we use `admin.localtest.me`, which also resolves to `localhost`.
 Traefik routes domain based traffic to the correct service.
+
+Run `make help` to see all available targets.
 
 ### 1. Initialize
 
@@ -25,7 +26,7 @@ Copy [.env.example](.env.example) to `.env` and adjust the values as needed.
 ```bash
 cp .env.example .env
 # make sure to adjust the values
-task init
+make init
 ```
 
 **NOTE**: if you need to override the default Docker Compose file:
@@ -46,7 +47,7 @@ docker compose watch
 ### 3. Apply Database Migrations
 
 ```bash
-task sync-db
+make sync-db
 ```
 
 - Applies migrations against the development database.

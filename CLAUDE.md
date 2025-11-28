@@ -7,7 +7,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - ShadowAPI is a unified messaging platform that normalises Gmail, Telegram, WhatsApp, and LinkedIn into a single REST + MCP surface.
 - Backend: Go 1.24 service using Cobra CLI, samber/do dependency injection, ogen-generated handlers, SQLC + PostgreSQL 16, NATS JetStream, S3/host/local storage abstractions, and Zitadel-powered OAuth2.
 - Frontend: React 19 + TypeScript via Vite 6, Adobe React Spectrum, TanStack Query 5, Zustand state, openapi-fetch typed clients, and Playwright for E2E.
-- Infrastructure: Docker Compose stack with Traefik, backend, frontend, Postgres, NATS, and Zitadel; orchestrated by Task (`Taskfile.yml`).
+- Infrastructure: Docker Compose stack with Traefik, backend, frontend, Postgres, NATS, and Zitadel; orchestrated by Make (`Makefile`).
 - Authentication flows rely on Zitadel (OIDC) with an optional local admin fallback via `shadowapi reset-password`.
 
 ## Repository map
@@ -16,10 +16,10 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - `front/` – React application (`src/pages`, `src/forms`, `src/components`, `src/shauth`, `src/hooks`). `package.json` defines scripts and dependencies.
 - `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` and `paths/`.
 - `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Atlas migrations are applied from these files; no separate migration files exist.
-- `devops/` – Dockerfiles, Atlas/zitadel bootstrap configs, sqlc builder image, and helper scripts used by Compose/Task.
+- `devops/` – Dockerfiles, Atlas/zitadel bootstrap configs, sqlc builder image, and helper scripts used by Compose/Make.
 - `docs/` – Product documentation and screenshots referenced by the README.
 - `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local Zitadel keys). Leave anything under `secrets/` untouched.
-- `Taskfile.yml` – Source of all task runner commands; prefer calling `task <name>` over shelling out to `docker compose` directly.
+- `Makefile` – Source of all make targets; prefer calling `make <target>` over shelling out to `docker compose` directly.
 
 ## Backend
 
@@ -38,8 +38,8 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
 - `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic.
 - `internal/imap`, `internal/whatsapp`, `internal/tg`, `internal/oauth2` – External channel integrations (IMAP/SMTP Gmail, WhatsApp via whatsmeow, Telegram via gotd, LinkedIn helpers).
-- `pkg/api` – Generated server; never edit by hand. Regenerate with `task api-gen-backend`.
-- `pkg/query` – SQLC-generated database accessors; regenerate with `task sqlc`.
+- `pkg/api` – Generated server; never edit by hand. Regenerate with `make api-gen-backend`.
+- `pkg/query` – SQLC-generated database accessors; regenerate with `sqlc generate` in the backend directory.
 
 ### Config & secrets
 
@@ -49,13 +49,13 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Generation & migrations
 
-- Run `task api-gen` after editing `spec/`. This updates the Go server and the frontend TypeScript types.
-- Run `task sqlc` (and `task sqlc-vet`) after updating the SQL schema. SQL lives in `db/schema.sql` + `db/tg.sql`.
-- `task sync-db` concatenates schema files and applies them via Atlas to the running Postgres instance.
+- Run `make api-gen` after editing `spec/`. This updates the Go server and the frontend TypeScript types.
+- Run `sqlc generate` (and `sqlc vet`) in the backend directory after updating the SQL schema. SQL lives in `db/schema.sql` + `db/tg.sql`.
+- `make sync-db` concatenates schema files and applies them via Atlas to the running Postgres instance.
 
 ### Command-line entrypoints
 
-- `task build-api` builds `./bin/shadowapi` locally.
+- `go build -o ./bin/shadowapi ./cmd/shadowapi` builds the binary locally.
 - `shadowapi serve` is the main API server when running outside Docker.
 
 ## Frontend
@@ -72,20 +72,20 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - `src/pages/` – Route-level screens (messages, pipelines, storages, schedulers, etc.).
 - `src/forms/` – Form abstractions bound to API entities.
 - `src/shauth/` – Zitadel auth context, login/signup screens, PKCE utilities (`pkce.ts`), and hooks (`useZitadelAuth`).
-- `src/api/v1.d.ts` – Generated types; do not edit manually. Regenerate via `task api-gen-frontend` or `npm run generate-api-client`.
+- `src/api/v1.d.ts` – Generated types; do not edit manually. Regenerate via `make api-gen-frontend` or `npm run generate-api-client`.
 - `src/components/`, `src/layouts/`, `src/hooks/` – Shared UI/layout/state helpers.
 
 ### Scripts
 
-- `npm install` handled by `task init`.
-- `npm run dev` (inside `front/`) starts Vite when running outside Docker; use `task dev-up` for the full stack.
+- `npm install` handled by `make init`.
+- `npm run dev` (inside `front/`) starts Vite when running outside Docker; use `docker compose watch` for the full stack.
 - `npm run lint`, `npm run build:tscheck`, and `npx playwright test` are the main QA commands.
 
 ## Specs & data model
 
 - Primary API definition: `spec/openapi.yaml` with supporting fragments in `spec/components/` and `spec/paths/`.
 - Backend and frontend contract is enforced through ogen + openapi-typescript. Keep the spec authoritative; update it before changing handlers or UI shapes.
-- SQL schema consolidated in `db/schema.sql` plus Telegram-specific SQL in `db/tg.sql`. Run `task sync-db` after edits to apply them against containers.
+- SQL schema consolidated in `db/schema.sql` plus Telegram-specific SQL in `db/tg.sql`. Run `make sync-db` after edits to apply them against containers.
 - Atlas is used in-place; there are no separate migration files. Ensure schema changes are reflected in both SQL files and code.
 - Workers operate over a queue prefix defined by `SA_QUEUE_PREFIX` (default `shadowapi`) with NATS JetStream enabled.
 
@@ -93,18 +93,18 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Getting started
 
-1. Run `task init` first to build the sqlc helper image and install frontend dependencies.
+1. Run `make init` first to initialize the project (resets containers, copies env, starts db, runs migrations).
 2. Start the development environment with `docker compose watch`.
    - Backend runs in the container via `air` auto-rebuild.
    - Frontend changes are handled by Docker watch mechanism.
 
-### Task runner essentials
+### Make targets
 
-- `task init` – Build sqlc helper image and install frontend dependencies. **Run this first before starting development.**
-- `task sync-db` – Apply schema to the running Postgres (uses Atlas).
-- `task sqlc` / `task sqlc-vet` – Regenerate and validate SQLC output.
-- `task api-gen`, `task api-gen-backend`, `task api-gen-frontend` – Sync code with the OpenAPI spec.
-- `task build-api` – Compile the backend binary.
+Run `make help` to see all available targets. Key ones:
+
+- `make init` – Initialize the project (reset containers, copy env, start db, migrate). **Run this first before starting development.**
+- `make sync-db` – Apply schema to the running Postgres (uses Atlas).
+- `make api-gen`, `make api-gen-backend`, `make api-gen-frontend` – Sync code with the OpenAPI spec.
 
 ### Compose topology
 
@@ -114,10 +114,10 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ## Testing & QA expectations
 
-- **Go:** Prefer running `go test ./...` inside `task shell`. Add focused tests under `*_test.go` when fixing bugs or adding features.
-- **SQL:** After schema edits, run `task sqlc-vet` to ensure queries remain valid.
-- **Frontend:** Run `npm run lint` and `npm run build:tscheck`. Execute `npx playwright test` (or `task playwright-run`) when UI flows change.
-- **Integration:** When modifying auth or message pipelines, verify the running stack (`task dev-up`) and exercise flows through the UI or API.
+- **Go:** Prefer running `go test ./...` in the backend directory. Add focused tests under `*_test.go` when fixing bugs or adding features.
+- **SQL:** After schema edits, run `sqlc vet` in the backend directory to ensure queries remain valid.
+- **Frontend:** Run `npm run lint` and `npm run build:tscheck`. Execute `npx playwright test` (or `make playwright-run`) when UI flows change.
+- **Integration:** When modifying auth or message pipelines, verify the running stack (`docker compose watch`) and exercise flows through the UI or API.
 - Never leave generated files stale—regenerate them in the same change set.
 
 ## Coding standards & gotchas
@@ -137,7 +137,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ## Contribution workflow
 
 1. Plan the change: update the OpenAPI spec or SQL schema first if the contract changes.
-2. Update backend/frontend code, regenerate artifacts (`task api-gen`, `task sqlc`) as needed, and ensure DI wiring stays consistent.
+2. Update backend/frontend code, regenerate artifacts (`make api-gen`, `sqlc generate`) as needed, and ensure DI wiring stays consistent.
 3. Run the relevant test and lint commands from the sections above.
 4. Update documentation (README, docs, or inline help) when behaviour changes.
 5. Use conventional commit prefixes (`feat:`, `fix:`, `docs:`, etc.). Do not mention Claude or other assistants in commit messages.
@@ -147,7 +147,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - Always read the surrounding files (`README.md`, related packages) before editing; prefer `rg` for searching within the repo.
 - Keep diffs tight and deliberate; do not refactor broadly unless explicitly asked.
 - Ask the user when scope is unclear or when destructive changes (schema rewrites, data deletion) are required.
-- Avoid running commands that need interactive input or elevated privileges unless instructed. Use the provided `task` commands whenever possible.
+- Avoid running commands that need interactive input or elevated privileges unless instructed. Use the provided `make` targets whenever possible.
 - If a change touches unfamiliar areas (auth, worker pipelines, storage), leave breadcrumbs in the PR description or docs instead of code comments.
 - When in doubt, stop and request guidance rather than guessing.
 
