@@ -34,13 +34,13 @@ function GmailDocumentation() {
 
       <Title level={4}>2. Enable the Gmail API</Title>
       <Steps
-        direction="vertical"
+        orientation="vertical"
         size="small"
         current={-1}
         items={[
           {
             title: 'Open the API Library',
-            description: (
+            content: (
               <>
                 Navigate to the{' '}
                 <Link
@@ -55,24 +55,24 @@ function GmailDocumentation() {
           },
           {
             title: 'Find Gmail API',
-            description: 'Search for "Gmail API" in the product library.',
+            content: 'Search for "Gmail API" in the product library.',
           },
           {
             title: 'Enable the API',
-            description: 'Click on the Gmail API and then click the "Enable" button.',
+            content: 'Click on the Gmail API and then click the "Enable" button.',
           },
         ]}
       />
 
       <Title level={4}>3. Configure OAuth Consent Screen</Title>
       <Steps
-        direction="vertical"
+        orientation="vertical"
         size="small"
         current={-1}
         items={[
           {
             title: 'Open OAuth Consent Screen',
-            description: (
+            content: (
               <>
                 Go to the{' '}
                 <Link
@@ -87,7 +87,7 @@ function GmailDocumentation() {
           },
           {
             title: 'Select User Type',
-            description: (
+            content: (
               <>
                 For <Text strong>User type</Text>, select <Text strong>Internal</Text> if you are
                 using Google Workspace. For personal Gmail accounts, select{' '}
@@ -97,12 +97,12 @@ function GmailDocumentation() {
           },
           {
             title: 'Complete Registration',
-            description:
+            content:
               'Fill in the required application information (app name, user support email, developer contact).',
           },
           {
             title: 'Add Scopes',
-            description:
+            content:
               'Add the necessary Gmail API scopes for your use case (e.g., gmail.readonly, gmail.send).',
           },
         ]}
@@ -110,13 +110,13 @@ function GmailDocumentation() {
 
       <Title level={4}>4. Create OAuth Credentials</Title>
       <Steps
-        direction="vertical"
+        orientation="vertical"
         size="small"
         current={-1}
         items={[
           {
             title: 'Navigate to Credentials',
-            description: (
+            content: (
               <>
                 Go to{' '}
                 <Link href="https://console.cloud.google.com/apis/credentials" target="_blank">
@@ -128,17 +128,17 @@ function GmailDocumentation() {
           },
           {
             title: 'Create Credentials',
-            description:
+            content:
               'Click "Create Credentials" and select "OAuth client ID". Choose "Web application" as the application type.',
           },
           {
             title: 'Configure Redirect URIs',
-            description:
+            content:
               'Add the ShadowAPI callback URL as an authorized redirect URI (check your ShadowAPI configuration for the exact URL).',
           },
           {
             title: 'Download Credentials',
-            description: (
+            content: (
               <>
                 Download the <Text code>credentials.json</Text> file and store it in a secure
                 location. You will need the Client ID and Client Secret for ShadowAPI
@@ -152,7 +152,7 @@ function GmailDocumentation() {
       <Alert
         type="warning"
         showIcon
-        message="Security Notice"
+        title="Security Notice"
         description={
           <>
             Never commit your <Text code>credentials.json</Text> file or OAuth secrets to version

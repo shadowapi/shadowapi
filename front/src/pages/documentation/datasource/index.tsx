@@ -1,4 +1,4 @@
-import { Typography, List } from 'antd';
+import { Typography, Card, Flex } from 'antd';
 import { Link } from 'react-router';
 import { MailOutlined, SendOutlined } from '@ant-design/icons';
 
@@ -13,15 +13,13 @@ function DatasourceIndex() {
   return (
     <>
       <Title level={2}>Datasources</Title>
-      <List
-        bordered
-        dataSource={datasources}
-        renderItem={(item) => (
-          <List.Item>
+      <Flex vertical gap="small">
+        {datasources.map((item) => (
+          <Card key={item.path} size="small" hoverable>
             <Link to={item.path}>{item.icon} {item.name}</Link>
-          </List.Item>
-        )}
-      />
+          </Card>
+        ))}
+      </Flex>
     </>
   );
 }
