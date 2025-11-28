@@ -1,6 +1,5 @@
 include:
   - devops/compose/infra/compose.yaml
-  - devops/compose/zitadel/compose.yaml
   - devops/compose/tools/compose.yaml
 
 services:
@@ -8,8 +7,6 @@ services:
     build:
       context: .
       dockerfile: devops/docker/frontend/dev.Dockerfile
-    volumes:
-      - secrets:/secrets:ro
     develop:
       watch:
         - action: sync
@@ -34,8 +31,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      zitadel:
-        condition: service_started
       traefik:
         condition: service_started
     environment:
@@ -45,14 +40,6 @@ services:
       - BE_LOG_LEVEL=${BE_LOG_LEVEL}
       - BE_QUEUE_URL=${BE_QUEUE_URL}
       - BE_QUEUE_PREFIX=${BE_QUEUE_PREFIX}
-      - BE_AUTH_USER_MANAGER=${BE_AUTH_USER_MANAGER}
-      - BE_ZITADEL_URL=${BE_ZITADEL_URL}
-      - BE_ZITADEL_EXTERNAL_URL=${BE_ZITADEL_EXTERNAL_URL}
-      - BE_ZITADEL_MANAGEMENT_URL=${BE_ZITADEL_MANAGEMENT_URL}
-      - BE_ZITADEL_SERVICE_USER_KEY_PATH=${BE_ZITADEL_SERVICE_USER_KEY_PATH}
-      - BE_ZITADEL_REDIRECT_URL=${BE_ZITADEL_REDIRECT_URL}
-    volumes:
-      - secrets:/secrets:ro
     develop:
       watch:
         - action: rebuild
@@ -83,6 +70,3 @@ services:
         condition: service_healthy
     restart: always
 
-volumes:
-  secrets:
-    driver: local

@@ -9,7 +9,7 @@ properties:
     description: "Friendly name for the admin UI."
   provider:
     type: string
-    description: "Name of the OAuth2 provider (e.g., 'github', 'google', 'zitadel')."
+    description: "Name of the OAuth2 provider (e.g., 'github', 'google')."
   client_id:
     type: string
     description: "OAuth2 client ID provided by the external provider."

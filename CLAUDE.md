@@ -5,20 +5,19 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ## Snapshot
 
 - ShadowAPI is a unified messaging platform that normalises Gmail, Telegram, WhatsApp, and LinkedIn into a single REST + MCP surface.
-- Backend: Go 1.24 service using Cobra CLI, samber/do dependency injection, ogen-generated handlers, SQLC + PostgreSQL 16, NATS JetStream, S3/host/local storage abstractions, and Zitadel-powered OAuth2.
+- Backend: Go 1.24 service using Cobra CLI, samber/do dependency injection, ogen-generated handlers, SQLC + PostgreSQL 16, NATS JetStream, S3/host/local storage abstractions.
 - Frontend: React 19 + TypeScript via Vite 6, Adobe React Spectrum, TanStack Query 5, Zustand state, openapi-fetch typed clients, and Playwright for E2E.
-- Infrastructure: Docker Compose stack with Traefik, backend, frontend, Postgres, NATS, and Zitadel; orchestrated by Make (`Makefile`).
-- Authentication flows rely on Zitadel (OIDC) with an optional local admin fallback via `shadowapi reset-password`.
+- Infrastructure: Docker Compose stack with Traefik, backend, frontend, Postgres, and NATS; orchestrated by Make (`Makefile`).
 
 ## Repository map
 
 - `backend/` – Go service. `cmd/shadowapi` hosts the CLI (`serve`, `loader`, `reset-password`), `internal/` holds domain packages (auth, handler, worker, storages, queue, metrics, config), `pkg/api` is ogen-generated HTTP server (do not edit manually), `pkg/query` is SQLC output (do not edit), and `sdk-go/` contains a generated client example.
-- `front/` – React application (`src/pages`, `src/forms`, `src/components`, `src/shauth`, `src/hooks`). `package.json` defines scripts and dependencies.
+- `front/` – React application (`src/pages`, `src/forms`, `src/components`, `src/hooks`). `package.json` defines scripts and dependencies.
 - `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` and `paths/`.
 - `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Atlas migrations are applied from these files; no separate migration files exist.
-- `devops/` – Dockerfiles, Atlas/zitadel bootstrap configs, sqlc builder image, and helper scripts used by Compose/Make.
+- `devops/` – Dockerfiles, Atlas configs, sqlc builder image, and helper scripts used by Compose/Make.
 - `docs/` – Product documentation and screenshots referenced by the README.
-- `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local Zitadel keys). Leave anything under `secrets/` untouched.
+- `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local keys). Leave anything under `secrets/` untouched.
 - `Makefile` – Source of all make targets; prefer calling `make <target>` over shelling out to `docker compose` directly.
 
 ## Backend
@@ -34,7 +33,8 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ### Key packages
 
 - `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, etc.
-- `internal/auth` + `internal/zitadel` – Login flows, token validation, and Zitadel management API calls.
+- `internal/auth` – Authentication middleware and token validation.
+- `internal/auth/dbauth` – Database-based user manager implementation.
 - `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
 - `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic.
 - `internal/imap`, `internal/whatsapp`, `internal/tg`, `internal/oauth2` – External channel integrations (IMAP/SMTP Gmail, WhatsApp via whatsmeow, Telegram via gotd, LinkedIn helpers).
@@ -44,8 +44,8 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ### Config & secrets
 
 - Default configuration lives in `backend/config.example.yaml`; copy to `backend/config.yaml` for local overrides.
-- Environment variables are SA-prefixed (see `backend/internal/config/config.go`). Important ones include `SA_DB_URI`, `SA_QUEUE_URL`, `SA_ZITADEL_INSTANCE_URL`, `SA_AUTH_USER_MANAGER`, and `TG_APP_ID`/`TG_APP_HASH`.
-- Sensitive Zitadel keys are read from `secrets/`; the repo should never gain new secrets in git history.
+- Environment variables are BE-prefixed (see `backend/internal/config/config.go`). Important ones include `BE_DB_URI`, `BE_QUEUE_URL`, and `TG_APP_ID`/`TG_APP_HASH`.
+- Sensitive keys are read from `secrets/`; the repo should never gain new secrets in git history.
 
 ### Generation & migrations
 
@@ -71,7 +71,6 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 - `src/pages/` – Route-level screens (messages, pipelines, storages, schedulers, etc.).
 - `src/forms/` – Form abstractions bound to API entities.
-- `src/shauth/` – Zitadel auth context, login/signup screens, PKCE utilities (`pkce.ts`), and hooks (`useZitadelAuth`).
 - `src/api/v1.d.ts` – Generated types; do not edit manually. Regenerate via `make api-gen-frontend` or `npm run generate-api-client`.
 - `src/components/`, `src/layouts/`, `src/hooks/` – Shared UI/layout/state helpers.
 
@@ -87,7 +86,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - Backend and frontend contract is enforced through ogen + openapi-typescript. Keep the spec authoritative; update it before changing handlers or UI shapes.
 - SQL schema consolidated in `db/schema.sql` plus Telegram-specific SQL in `db/tg.sql`. Run `make sync-db` after edits to apply them against containers.
 - Atlas is used in-place; there are no separate migration files. Ensure schema changes are reflected in both SQL files and code.
-- Workers operate over a queue prefix defined by `SA_QUEUE_PREFIX` (default `shadowapi`) with NATS JetStream enabled.
+- Workers operate over a queue prefix defined by `BE_QUEUE_PREFIX` (default `shadowapi`) with NATS JetStream enabled.
 
 ## Local development & tooling
 
@@ -109,7 +108,6 @@ Run `make help` to see all available targets. Key ones:
 ### Compose topology
 
 - Traefik exposes `http://localtest.me` to the frontend and `http://localtest.me/api` to the backend.
-- Zitadel is reachable at `http://auth.localtest.me` during development.
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
 ## Testing & QA expectations
@@ -133,6 +131,7 @@ Run `make help` to see all available targets. Key ones:
 ## Known issues
 
 - **Token validation:** The backend currently does not properly validate authentication tokens. This is a known security issue that needs to be addressed before production deployment.
+- **Frontend authentication:** The frontend authentication is currently broken and needs to be reimplemented.
 
 ## Contribution workflow
 
@@ -150,25 +149,3 @@ Run `make help` to see all available targets. Key ones:
 - Avoid running commands that need interactive input or elevated privileges unless instructed. Use the provided `make` targets whenever possible.
 - If a change touches unfamiliar areas (auth, worker pipelines, storage), leave breadcrumbs in the PR description or docs instead of code comments.
 - When in doubt, stop and request guidance rather than guessing.
-
-## Authentication
-
-- We use Zitadel as authentication IDP
-- Authentication uses OAuth 2.0 Authorization Code flow with PKCE (Proof Key for Code Exchange) as defined in RFC 7636
-- Custom login/auth form follows this flow: https://zitadel.com/docs/guides/integrate/login-ui/username-password
-- PKCE implementation:
-  - Code verifier generation: cryptographically secure random 64-character string
-  - Code challenge: SHA-256 hash (S256 method) with fallback to plain method
-  - State parameter for CSRF protection
-  - Session token management through backend `/user/session` endpoint
-  - PKCE state stored in browser sessionStorage for security
-- Key files:
-  - `front/src/shauth/pkce.ts` – PKCE utilities (verifier/challenge generation, storage)
-  - `front/src/shauth/ZitadelClient.ts` – Zitadel API client
-  - `front/src/shauth/useZitadelAuth.ts` – React hook for auth flows
-  - `front/src/shauth/LoginPage.tsx` – Login UI with PKCE flow
-- Environment variables:
-  - `VITE_ZITADEL_URL` – Internal Zitadel URL (for backend communication)
-  - `VITE_ZITADEL_PUBLIC_URL` – External Zitadel URL (for browser redirects, optional)
-  - `VITE_ZITADEL_CLIENT_ID` – OAuth2 client ID
-  - `VITE_ZITADEL_REDIRECT_URL` – OAuth2 redirect URI (typically `http://localtest.me/login`)

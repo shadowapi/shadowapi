@@ -1,14 +1,15 @@
 # spec/components/user_session_token.yaml
+# Deprecated: This component is no longer used (Zitadel removed)
 ---
 type: object
 additionalProperties: false
 properties:
   session_token:
     type: string
-    description: Token for creating empty session in Zitadel
+    description: Session token (deprecated)
   zitadel_url:
     type: string
-    description: Zitadel instance URL for frontend authentication
+    description: Deprecated field
   expires_in:
     type: integer
     description: Token expiration time in seconds

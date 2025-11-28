@@ -6,7 +6,6 @@ CREATE TABLE "user" (
   last_name  VARCHAR NOT NULL,
   is_enabled BOOLEAN NOT NULL,
   is_admin   BOOLEAN NOT NULL DEFAULT FALSE,
-  zitadel_subject VARCHAR,
   meta JSONB,
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -18,7 +17,7 @@ CREATE TABLE "user" (
 CREATE TABLE oauth2_client (
   uuid UUID PRIMARY KEY, -- Internal unique ID for the client
   name VARCHAR NOT NULL, -- Friendly name for admin UI
-  provider VARCHAR NOT NULL, -- e.g. "github", "google", "zitadel"
+  provider VARCHAR NOT NULL, -- e.g. "github", "google"
   client_id VARCHAR NOT NULL UNIQUE, -- OAuth2 client ID
   secret VARCHAR NOT NULL, -- OAuth2 client secret (store encrypted in production)
 

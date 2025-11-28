@@ -2,7 +2,7 @@
 # Run `make help` to see available targets
 
 .PHONY: help init db-shell sync-db api-gen-backend api-gen-frontend api-gen \
-        playwright-run playwright-report zitadel-init playwright-real local-certs
+        playwright-run playwright-report local-certs
 
 # Default target
 .DEFAULT_GOAL := help
@@ -54,14 +54,6 @@ playwright-run: ## Run Playwright tests
 
 playwright-report: ## Generate and open Playwright test report
 	cd ./front && npx playwright show-report
-
-playwright-real: ## Run Playwright tests against real Zitadel (no mocks)
-	cd ./front && npx playwright test real-zitadel-login.test.ts --headed
-
-##@ Zitadel
-
-zitadel-init: ## Provision Zitadel OIDC app (optional)
-	docker compose --profile init run --rm init
 
 ##@ Certificates
 

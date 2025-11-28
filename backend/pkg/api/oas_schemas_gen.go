@@ -3403,7 +3403,7 @@ type OAuth2Client struct {
 	UUID OptString `json:"uuid"`
 	// Friendly name for the admin UI.
 	Name string `json:"name"`
-	// Name of the OAuth2 provider (e.g., 'github', 'google', 'zitadel').
+	// Name of the OAuth2 provider (e.g., 'github', 'google').
 	Provider string `json:"provider"`
 	// OAuth2 client ID provided by the external provider.
 	ClientID string `json:"client_id"`
@@ -7266,9 +7266,9 @@ func (s *UserProfile) SetLastName(val string) {
 
 // Ref: #
 type UserSessionToken struct {
-	// Token for creating empty session in Zitadel.
+	// Session token (deprecated).
 	SessionToken string `json:"session_token"`
-	// Zitadel instance URL for frontend authentication.
+	// Deprecated field.
 	ZitadelURL string `json:"zitadel_url"`
 	// Token expiration time in seconds.
 	ExpiresIn int `json:"expires_in"`

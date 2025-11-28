@@ -13,7 +13,7 @@ import (
 
 var resetPasswordCmd = &cobra.Command{
 	Use:   "reset-password [email] [new-password]",
-	Short: "Reset password for a local (non-ZITADEL) admin user",
+	Short: "Reset password for a user",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		email := args[0]
@@ -26,12 +26,12 @@ var resetPasswordCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		res, err := dbp.Exec(ctx, `UPDATE "user" SET password=$1, updated_at=NOW() WHERE email=$2 AND (zitadel_subject IS NULL OR zitadel_subject='')`, string(hash), email)
+		res, err := dbp.Exec(ctx, `UPDATE "user" SET password=$1, updated_at=NOW() WHERE email=$2`, string(hash), email)
 		if err != nil {
 			return err
 		}
 		if res.RowsAffected() == 0 {
-			return fmt.Errorf("user not found or managed by ZITADEL")
+			return fmt.Errorf("user not found")
 		}
 		log.Info("password reset", "email", email)
 		return nil

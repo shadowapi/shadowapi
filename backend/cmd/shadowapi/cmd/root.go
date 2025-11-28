@@ -12,7 +12,6 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/dbauth"
-	"github.com/shadowapi/shadowapi/backend/internal/auth/zitadel"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
@@ -69,14 +68,8 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		do.Provide(injector, queue.Provide)
 		do.Provide(injector, auth.Provide)
 
-		// Register UserManager implementation based on configuration
-		cfg := do.MustInvoke[*config.Config](injector)
-		switch cfg.Auth.UserManager {
-		case "zitadel":
-			do.Provide(injector, zitadel.Provide)
-		default: // "db" or any other value defaults to database
-			do.Provide(injector, dbauth.Provide)
-		}
+		// Register UserManager implementation (database-based)
+		do.Provide(injector, dbauth.Provide)
 
 		do.Provide(injector, handler.Provide)
 		do.Provide(injector, server.Provide)

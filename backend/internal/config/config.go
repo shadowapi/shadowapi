@@ -59,42 +59,8 @@ type Config struct {
 
 	// Auth is a struct that holds all the authentication settings
 	Auth struct {
-		// TODO @reactima remove this
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
 		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"BE_AUTH_IGNORE_HTTPS_ERROR"`
-
-		// UserManager specifies which user manager implementation to use ("db" or "zitadel")
-		UserManager string `yaml:"user_manager" json:"user_manager" env:"BE_AUTH_USER_MANAGER" envDefault:"db"`
-
-		// Zitadel configuration for OAuth2 authentication
-		Zitadel struct {
-			InstanceURL string `json:"instance_url" yaml:"instance_url" env:"BE_ZITADEL_URL"`
-			ExternalURL string `json:"external_url" yaml:"external_url" env:"BE_ZITADEL_EXTERNAL_URL"`
-
-			// ---- Management API settings ----
-			ManagementURL      string `json:"management_url" yaml:"management_url" env:"BE_ZITADEL_MANAGEMENT_URL"`
-			ServiceUserKeyPath string `json:"service_user_key_path" yaml:"service_user_key_path" env:"BE_ZITADEL_SERVICE_USER_KEY_PATH"`
-
-			// ---- machine-to-machine credentials ----
-			// Service user → Basic-Auth (client-credentials / introspect)
-			ServiceClientID     string `json:"service_client_id" yaml:"service_client_id" env:"BE_ZITADEL_SERVICE_CLIENT_ID"`
-			ServiceClientSecret string `json:"service_client_secret" yaml:"service_client_secret" env:"BE_ZITADEL_SERVICE_CLIENT_SECRET"`
-
-			// Optional JWT-Profile flow (no shared secret)
-			APIKeyFile string `json:"api_key_file" yaml:"api_key_file" env:"BE_ZITADEL_API_KEY_FILE"`
-
-			// ---- resource-server settings ----
-			// Audience API expects in incoming access-tokens
-			// Client Id of API application, can be found under Project > Client ID top, right conner
-			// Dont forget to add Web App(not API only) Project Redirect Settings
-			// http://localhost/auth/callback
-			// http://localhost/logout/callback
-			Audience string `json:"audience" yaml:"audience" env:"BE_ZITADEL_AUDIENCE"`
-
-			// ---- browser flow ----
-			RedirectURI      string   `json:"redirect_uri" yaml:"redirect_uri" env:"BE_ZITADEL_REDIRECT_URI"`
-			InterceptedPaths []string `json:"intercepted_paths" yaml:"intercepted_paths" env:"BE_ZITADEL_INTERCEPTED_PATHS" envSeparator:","`
-		} `json:"zitadel" yaml:"zitadel"`
 	} `yaml:"auth" json:"auth"`
 
 	// Worker settings

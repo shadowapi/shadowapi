@@ -12,9 +12,7 @@ large language models (LLMs), or message‑centric processing (MCP) workflows.
 ## Development Setup
 
 We use Make to manage the project. Make sure Make and Docker Compose are both installed.
-We use Zitadel as IDP, and custom login form.
 Base domain is `localtest.me`, which resolves to `localhost`.
-To access to the zitadel, we use `admin.localtest.me`, which also resolves to `localhost`.
 Traefik routes domain based traffic to the correct service.
 
 Run `make help` to see all available targets.
@@ -65,5 +63,4 @@ docker compose down
 ### Cleaning up Volumes
 ```bash
 docker compose down -v
-```
 ```

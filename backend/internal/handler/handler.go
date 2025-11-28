@@ -53,15 +53,14 @@ func (h *Handler) ensureInitAdmin(ctx context.Context) error {
 	}
 	uid := uuid.Must(uuid.NewV7())
 	_, err = q.CreateUser(ctx, query.CreateUserParams{
-		UUID:           pgtype.UUID{Bytes: uid, Valid: true},
-		Email:          h.cfg.InitAdmin.Email,
-		Password:       string(hashed),
-		FirstName:      "Admin",
-		LastName:       "User",
-		IsEnabled:      true,
-		IsAdmin:        true,
-		ZitadelSubject: pgtype.Text{},
-		Meta:           []byte(`{}`),
+		UUID:      pgtype.UUID{Bytes: uid, Valid: true},
+		Email:     h.cfg.InitAdmin.Email,
+		Password:  string(hashed),
+		FirstName: "Admin",
+		LastName:  "User",
+		IsEnabled: true,
+		IsAdmin:   true,
+		Meta:      []byte(`{}`),
 	})
 	return err
 }
