@@ -77,14 +77,14 @@ selfservice:
 
     logout:
       after:
-        default_browser_return_url: http://localtest.me/auth/login
+        default_browser_return_url: http://localtest.me/login
 
     login:
-      ui_url: http://localtest.me/auth/login
+      ui_url: http://localtest.me/login
       lifespan: 10m
 
     registration:
-      ui_url: http://localtest.me/auth/signup
+      ui_url: http://localtest.me/signup
       lifespan: 10m
       after:
         password:

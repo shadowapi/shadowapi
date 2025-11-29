@@ -10,6 +10,7 @@ import TelegramDocumentation from './pages/documentation/datasource/telegram';
 
 // CSR Pages - lazy loaded (only on client)
 const Dashboard = lazy(() => import('./app/Dashboard'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 
 // Loading fallback for lazy components
 function LoadingFallback() {
@@ -23,8 +24,9 @@ function LoadingFallback() {
 export interface RouteConfig {
   path: string;
   element: ReactNode;
-  layout: 'page' | 'app';
+  layout: 'page' | 'app' | 'auth';
   ssr: boolean;
+  protected?: boolean;
 }
 
 // Wrap lazy components with Suspense
@@ -37,7 +39,16 @@ function withSuspense(Component: React.LazyExoticComponent<React.ComponentType>)
 }
 
 export const routes: RouteConfig[] = [
-  // CSR routes (app dashboard)
+  // Auth routes
+  {
+    path: '/login',
+    element: withSuspense(LoginPage),
+    layout: 'auth',
+    ssr: false,
+    protected: false
+  },
+
+  // CSR routes (app dashboard) - protected
   {
     path: '/',
     element: withSuspense(Dashboard),

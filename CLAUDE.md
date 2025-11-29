@@ -87,11 +87,13 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/server.ts` – Express SSR server with Vite middleware, handles `/page/*` routes
 - `front/src/entry-client.tsx` – Client entry point; uses `hydrateRoot` for SSR pages, `createRoot` for CSR
 - `front/src/entry-server.tsx` – SSR render function with Ant Design CSS-in-JS extraction
-- `front/src/routes.tsx` – Centralized route configuration with `ssr` flag per route
+- `front/src/routes.tsx` – Centralized route configuration with `ssr` and `protected` flags per route
 - `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
 - `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
 - `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
-- `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR)
+- `front/src/lib/auth/` – Authentication module (Kratos client, context, hooks, protected route)
+- `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR, AuthLayout for login)
+- `front/src/pages/auth/` – Authentication pages (LoginPage)
 
 ### Development scripts
 
@@ -102,10 +104,42 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 ### Adding new pages
 
 1. Create the page component in `front/src/pages/` or `front/src/app/`
-2. Add route to `front/src/routes.tsx` with appropriate `ssr` flag:
+2. Add route to `front/src/routes.tsx` with appropriate flags:
    - `ssr: true` for public/SEO pages under `/page/*`
    - `ssr: false` for app pages under `/` or `/app/*`
+   - `protected: false` for public routes that don't require authentication (default is protected for `app` layout)
 3. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
+
+### Frontend Authentication
+
+The frontend uses Ory Kratos for authentication with a custom login form.
+
+**Key files:**
+- `front/src/lib/auth/kratos-client.ts` – Kratos API client (login flow, session, logout)
+- `front/src/lib/auth/AuthProvider.tsx` – React context provider managing auth state
+- `front/src/lib/auth/useAuth.ts` – Hook to access auth state and functions
+- `front/src/lib/auth/ProtectedRoute.tsx` – Route wrapper that redirects to `/login` if unauthenticated
+- `front/src/pages/auth/LoginPage.tsx` – Login form component
+
+**Authentication flow:**
+1. On app load, `AuthProvider` checks for existing Kratos session via `/auth/kratos/sessions/whoami`
+2. Protected routes (`/` and `/app/*`) redirect to `/login` if no valid session
+3. Login form creates a Kratos browser flow, submits credentials, receives session cookie
+4. Session is stored in `ory_kratos_session` cookie on `localtest.me` domain
+5. Logout clears the session via Kratos logout flow
+
+**Using auth in components:**
+```typescript
+import { useAuth } from '../lib/auth';
+
+function MyComponent() {
+  const { user, isAuthenticated, login, logout } = useAuth();
+  // user.traits.email, user.traits.name.first, etc.
+}
+```
+
+**Adding new protected routes:**
+Routes with `layout: 'app'` are protected by default. To make a route public, set `protected: false`.
 
 ## Specs & data model
 
@@ -175,6 +209,15 @@ curl http://localtest.me/auth/kratos/health/alive
 # Check Hydra OIDC discovery
 curl http://localtest.me/.well-known/openid-configuration
 
+# Create a test user via Kratos Admin API
+curl -X POST http://localhost:4434/admin/identities \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema_id": "default",
+    "traits": {"email": "test@example.com"},
+    "credentials": {"password": {"config": {"password": "testpassword123"}}}
+  }'
+
 # Create a test OAuth2 client
 docker compose exec hydra hydra create client \
   --endpoint http://localhost:4445 \
@@ -185,6 +228,8 @@ docker compose exec hydra hydra create client \
   --name "Test Client" \
   --format json
 ```
+
+**Frontend login page:** `http://localtest.me/login`
 
 ## Testing & QA expectations
 

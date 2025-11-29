@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { Layout, Menu, theme, Breadcrumb } from 'antd'
+import { Layout, Menu, theme, Breadcrumb, Dropdown, Button, Space, Typography } from 'antd'
 import type { MenuProps } from 'antd'
 import { Link, useLocation } from 'react-router'
 import {
@@ -15,9 +15,12 @@ import {
   SettingOutlined,
   ScheduleOutlined,
   UnorderedListOutlined,
+  LogoutOutlined,
+  DownOutlined,
 } from '@ant-design/icons'
 
 import BaseLayout from './BaseLayout'
+import { useAuth } from '../lib/auth'
 
 
 const { Sider, Content } = Layout
@@ -117,6 +120,7 @@ function getOpenKeys(pathname: string): string[] {
 
 function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
+  const { user, logout } = useAuth();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -124,17 +128,46 @@ function AppLayout({ children }: AppLayoutProps) {
   const selectedKeys = [location.pathname];
   const defaultOpenKeys = getOpenKeys(location.pathname);
 
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'email',
+      label: (
+        <Typography.Text type="secondary" style={{ cursor: 'default' }}>
+          {user?.traits.email}
+        </Typography.Text>
+      ),
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Sign out',
+      onClick: logout,
+    },
+  ];
+
   return (
     <BaseLayout>
       <div style={{ padding: '0 48px' }}>
-        <Breadcrumb
-          style={{ margin: '16px 0' }}
-          items={[
-            { title: <Link to="/">Dashboard</Link> },
-            { title: 'List' },
-            { title: 'App' }
-          ]}
-        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0' }}>
+          <Breadcrumb
+            items={[
+              { title: <Link to="/">Dashboard</Link> },
+              { title: 'List' },
+              { title: 'App' }
+            ]}
+          />
+          <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+            <Button type="text">
+              <Space>
+                <UserOutlined />
+                {user?.traits.name?.first || user?.traits.email?.split('@')[0] || 'User'}
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+        </div>
         <Layout
           style={{ padding: '24px 0', background: colorBgContainer, borderRadius: borderRadiusLG }}
         >
