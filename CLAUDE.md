@@ -13,7 +13,9 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - `backend/` – Go service. `cmd/shadowapi` hosts the CLI (`serve`, `loader`, `reset-password`), `internal/` holds domain packages (auth, handler, worker, storages, queue, metrics, config), `pkg/api` is ogen-generated HTTP server (do not edit manually), `pkg/query` is SQLC output (do not edit), and `sdk-go/` contains a generated client example.
 - `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` and `paths/`.
 - `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Atlas migrations are applied from these files; no separate migration files exist.
-- `devops/` – Dockerfiles, Atlas configs, sqlc builder image, and helper scripts used by Compose/Make.
+- `devops/` – Dockerfiles, Atlas configs, sqlc builder image, helper scripts, and Ory configuration files used by Compose/Make.
+- `devops/ory/` – Ory Kratos and Hydra configuration files (`kratos/kratos.yaml`, `kratos/identity.schema.json`, `hydra/hydra.yaml`).
+- `devops/compose/auth/` – Docker Compose for Ory authentication services (Kratos, Hydra, hydra-consent, mailhog).
 - `docs/` – Product documentation and screenshots referenced by the README.
 - `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local keys). Leave anything under `secrets/` untouched.
 - `Makefile` – Source of all make targets; prefer calling `make <target>` over shelling out to `docker compose` directly.
@@ -132,11 +134,57 @@ Run `make help` to see all available targets. Key ones:
 ### Compose topology
 
 - Traefik routes requests based on path prefix with priority:
+  - `/.well-known/*` (priority 40) → Hydra OAuth2/OIDC discovery (port 4444)
+  - `/auth/kratos/*` (priority 35) → Kratos identity API (port 4433)
+  - `/oauth2/*` (priority 35) → Hydra OAuth2 endpoints (port 4444)
   - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
   - `/page/*` (priority 20) → SSR container (port 3000)
   - Everything else (priority 1) → Frontend container (port 5173)
 - Access the app at `http://localtest.me`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
+
+### Ory Authentication Stack
+
+The project includes Ory Kratos (identity management) and Ory Hydra (OAuth2/OIDC) for authentication:
+
+**Services:**
+- **kratos** (v1.3.1) – Identity management with password, TOTP, WebAuthn, and code-based authentication
+- **hydra** (v2.2.0) – OAuth2/OIDC provider for token issuance
+- **hydra-consent** – Bridges Kratos identity to Hydra OAuth2 consent flow
+- **mailhog** – Email testing server (web UI at `http://localhost:8025`)
+
+**Configuration files:**
+- `devops/ory/kratos/kratos.yaml` – Kratos configuration with self-service flows and OAuth2 provider integration
+- `devops/ory/kratos/identity.schema.json` – Identity schema (email required, optional name)
+- `devops/ory/hydra/hydra.yaml` – Hydra OAuth2/OIDC configuration
+
+**Databases:**
+- Kratos uses `kratos` database (created by `devops/compose/infra/db-init.sh`)
+- Hydra uses `hydra` database (created by `devops/compose/infra/db-init.sh`)
+
+**Environment variables (in `.env`):**
+- `KRATOS_DSN`, `KRATOS_SECRETS_DEFAULT`, `KRATOS_SECRETS_COOKIE` – Kratos database and secrets
+- `HYDRA_DSN`, `HYDRA_SECRETS_SYSTEM`, `OIDC_PAIRWISE_SALT` – Hydra database and secrets
+- `HYDRA_URLS_*` – Hydra URL configuration for login, consent, logout flows
+
+**Testing the setup:**
+```bash
+# Check Kratos health
+curl http://localtest.me/auth/kratos/health/alive
+
+# Check Hydra OIDC discovery
+curl http://localtest.me/.well-known/openid-configuration
+
+# Create a test OAuth2 client
+docker compose exec hydra hydra create client \
+  --endpoint http://localhost:4445 \
+  --grant-type authorization_code,refresh_token \
+  --response-type code \
+  --scope openid,offline_access \
+  --redirect-uri http://localtest.me/callback \
+  --name "Test Client" \
+  --format json
+```
 
 ## Testing & QA expectations
 

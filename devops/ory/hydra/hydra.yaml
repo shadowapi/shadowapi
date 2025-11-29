@@ -1,0 +1,64 @@
+version: v2.2.0
+
+serve:
+  cookies:
+    same_site_mode: Lax
+    domain: localtest.me
+
+  public:
+    cors:
+      enabled: true
+      allowed_origins:
+        - http://localtest.me
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Content-Type
+      exposed_headers:
+        - Content-Type
+
+urls:
+  self:
+    issuer: http://localtest.me
+  consent: http://hydra-consent:8080/consent
+  login: http://localtest.me/auth/login
+  logout: http://localtest.me/auth/logout
+  error: http://localtest.me/auth/error
+  post_logout_redirect: http://localtest.me/
+
+oidc:
+  subject_identifiers:
+    supported_types:
+      - pairwise
+      - public
+    pairwise:
+      salt: ${OIDC_PAIRWISE_SALT}
+  dynamic_client_registration:
+    enabled: false
+
+ttl:
+  access_token: 1h
+  refresh_token: 720h
+  id_token: 1h
+  auth_code: 10m
+  login_consent_request: 30m
+
+oauth2:
+  expose_internal_errors: true
+  hashers:
+    bcrypt:
+      cost: 10
+
+log:
+  level: debug
+  format: text
+  leak_sensitive_values: true
+
+strategies:
+  access_token: opaque
+  scope: wildcard

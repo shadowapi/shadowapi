@@ -1,5 +1,6 @@
 include:
   - devops/compose/infra/compose.yaml
+  - devops/compose/auth/compose.yaml
   - devops/compose/tools/compose.yaml
 
 services:

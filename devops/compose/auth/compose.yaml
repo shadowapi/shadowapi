@@ -1,0 +1,142 @@
+services:
+  # Kratos database migration (runs once on startup)
+  kratos-migrate:
+    image: oryd/kratos:v1.3.1
+    command: migrate sql -e --yes
+    environment:
+      - DSN=${KRATOS_DSN}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - default
+
+  # Kratos identity service
+  kratos:
+    image: oryd/kratos:v1.3.1
+    command: serve --dev --watch-courier --config /etc/config/kratos.yaml
+    environment:
+      - DSN=${KRATOS_DSN}
+      - SECRETS_DEFAULT=${KRATOS_SECRETS_DEFAULT}
+      - SECRETS_COOKIE=${KRATOS_SECRETS_COOKIE}
+      - LOG_LEVEL=${KRATOS_LOG_LEVEL:-info}
+    volumes:
+      - ../../ory/kratos:/etc/config:ro
+    depends_on:
+      kratos-migrate:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4434/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    labels:
+      - traefik.enable=true
+      # Public API routes (for frontend)
+      - traefik.http.routers.kratos-public.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/auth/kratos/`)
+      - traefik.http.routers.kratos-public.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.kratos-public.priority=35
+      - traefik.http.routers.kratos-public.middlewares=kratos-stripprefix
+      - traefik.http.middlewares.kratos-stripprefix.stripprefix.prefixes=/auth/kratos
+      - traefik.http.routers.kratos-public.service=kratos-public
+      - traefik.http.services.kratos-public.loadbalancer.server.port=4433
+    restart: unless-stopped
+    networks:
+      - default
+
+  # Hydra database migration (runs once on startup)
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    command: migrate sql -e --yes
+    environment:
+      - DSN=${HYDRA_DSN}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - default
+
+  # Hydra OAuth2/OIDC server
+  hydra:
+    image: oryd/hydra:v2.2.0
+    command: serve all --dev --config /etc/config/hydra.yaml
+    environment:
+      - DSN=${HYDRA_DSN}
+      - SECRETS_SYSTEM=${HYDRA_SECRETS_SYSTEM}
+      - URLS_SELF_ISSUER=${HYDRA_URLS_SELF_ISSUER}
+      - URLS_LOGIN=${HYDRA_URLS_LOGIN}
+      - URLS_CONSENT=${HYDRA_URLS_CONSENT}
+      - URLS_LOGOUT=${HYDRA_URLS_LOGOUT}
+      - OIDC_PAIRWISE_SALT=${OIDC_PAIRWISE_SALT}
+      - LOG_LEVEL=${HYDRA_LOG_LEVEL:-info}
+    volumes:
+      - ../../ory/hydra:/etc/config:ro
+    depends_on:
+      hydra-migrate:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4445/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    labels:
+      - traefik.enable=true
+      # Public OAuth2 endpoints
+      - traefik.http.routers.hydra-public.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/oauth2/`)
+      - traefik.http.routers.hydra-public.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.hydra-public.priority=35
+      - traefik.http.routers.hydra-public.middlewares=hydra-public-stripprefix
+      - traefik.http.middlewares.hydra-public-stripprefix.stripprefix.prefixes=/oauth2
+      - traefik.http.routers.hydra-public.service=hydra-public
+      - traefik.http.services.hydra-public.loadbalancer.server.port=4444
+      # Well-known endpoints (no strip, passthrough)
+      - traefik.http.routers.hydra-wellknown.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/.well-known/`)
+      - traefik.http.routers.hydra-wellknown.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.hydra-wellknown.priority=40
+      - traefik.http.routers.hydra-wellknown.service=hydra-wellknown
+      - traefik.http.services.hydra-wellknown.loadbalancer.server.port=4444
+    restart: unless-stopped
+    networks:
+      - default
+
+  # Hydra consent handler (bridges Kratos and Hydra)
+  hydra-consent:
+    image: ghcr.io/lus/hydra-consent:latest
+    environment:
+      - ENVIRONMENT=dev
+      - LOG_LEVEL=debug
+      - LISTEN_ADDRESS=:8080
+      - HYDRA_ADMIN_API=http://hydra:4445
+      - KRATOS_ADMIN_API=http://kratos:4434
+    depends_on:
+      hydra:
+        condition: service_healthy
+      kratos:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - default
+
+  # Mail testing server for Kratos email flows
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    restart: unless-stopped
+    networks:
+      - default
