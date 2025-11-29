@@ -138,7 +138,7 @@ function AppLayout({ children }: AppLayoutProps) {
         <Layout
           style={{ padding: '24px 0', background: colorBgContainer, borderRadius: borderRadiusLG }}
         >
-          <Sider style={{ background: colorBgContainer }} width={200}>
+          <Sider style={{ background: colorBgContainer }} width={250}>
             <Menu
               mode="inline"
               selectedKeys={selectedKeys}
