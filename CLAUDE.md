@@ -14,8 +14,8 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` and `paths/`.
 - `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Atlas migrations are applied from these files; no separate migration files exist.
 - `devops/` – Dockerfiles, Atlas configs, sqlc builder image, helper scripts, and Ory configuration files used by Compose/Make.
-- `devops/ory/` – Ory Kratos and Hydra configuration files (`kratos/kratos.yaml`, `kratos/identity.schema.json`, `hydra/hydra.yaml`).
-- `devops/compose/auth/` – Docker Compose for Ory authentication services (Kratos, Hydra, hydra-consent, mailhog).
+- `devops/ory/` – Ory Hydra configuration files (`hydra/hydra.yaml`).
+- `devops/compose/auth/` – Docker Compose for Hydra OAuth2/OIDC service.
 - `docs/` – Product documentation and screenshots referenced by the README.
 - `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local keys). Leave anything under `secrets/` untouched.
 - `Makefile` – Source of all make targets; prefer calling `make <target>` over shelling out to `docker compose` directly.
@@ -91,7 +91,7 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
 - `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
 - `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
-- `front/src/lib/auth/` – Authentication module (Kratos client, context, hooks, protected route)
+- `front/src/lib/auth/` – Authentication module (OAuth2 client, context, hooks, protected route)
 - `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR, AuthLayout for login)
 - `front/src/pages/auth/` – Authentication pages (LoginPage)
 
@@ -112,21 +112,24 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 
 ### Frontend Authentication
 
-The frontend uses Ory Kratos for authentication with a custom login form.
+The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handled by the backend with credentials stored in the database (bcrypt hashed).
 
 **Key files:**
-- `front/src/lib/auth/kratos-client.ts` – Kratos API client (login flow, session, logout)
+- `front/src/lib/auth/oauth2-client.ts` – OAuth2 client (initiate flow, refresh token, logout)
 - `front/src/lib/auth/AuthProvider.tsx` – React context provider managing auth state
 - `front/src/lib/auth/useAuth.ts` – Hook to access auth state and functions
 - `front/src/lib/auth/ProtectedRoute.tsx` – Route wrapper that redirects to `/login` if unauthenticated
 - `front/src/pages/auth/LoginPage.tsx` – Login form component
 
 **Authentication flow:**
-1. On app load, `AuthProvider` checks for existing Kratos session via `/auth/kratos/sessions/whoami`
+1. On app load, `AuthProvider` checks for existing session by attempting token refresh
 2. Protected routes (`/` and `/app/*`) redirect to `/login` if no valid session
-3. Login form creates a Kratos browser flow, submits credentials, receives session cookie
-4. Session is stored in `ory_kratos_session` cookie on `localtest.me` domain
-5. Logout clears the session via Kratos logout flow
+3. User clicks login → Frontend initiates OAuth2 flow → Hydra redirects to `/api/v1/auth/login`
+4. Backend shows login page with `login_challenge` → User enters credentials
+5. Backend validates credentials against database, accepts Hydra login → redirects to consent
+6. Backend auto-approves consent → Hydra issues tokens → Backend sets HTTP-only cookies
+7. Tokens stored in `shadowapi_access_token` and `shadowapi_refresh_token` cookies
+8. Logout revokes tokens and clears cookies
 
 **Using auth in components:**
 ```typescript
@@ -134,7 +137,7 @@ import { useAuth } from '../lib/auth';
 
 function MyComponent() {
   const { user, isAuthenticated, login, logout } = useAuth();
-  // user.traits.email, user.traits.name.first, etc.
+  // user?.email, user?.first_name, etc.
 }
 ```
 
@@ -171,7 +174,6 @@ Run `make help` to see all available targets. Key ones:
 
 - Traefik routes requests based on path prefix with priority:
   - `/.well-known/*` (priority 40) → Hydra OAuth2/OIDC discovery (port 4444)
-  - `/auth/kratos/*` (priority 35) → Kratos identity API (port 4433)
   - `/oauth2/*` (priority 35) → Hydra OAuth2 endpoints (port 4444)
   - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
   - `/page/*` (priority 20) → SSR container (port 3000)
@@ -179,46 +181,30 @@ Run `make help` to see all available targets. Key ones:
 - Access the app at `http://localtest.me`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
-### Ory Authentication Stack
+### Authentication Stack
 
-The project includes Ory Kratos (identity management) and Ory Hydra (OAuth2/OIDC) for authentication:
+The project uses Ory Hydra for OAuth2/OIDC token issuance, with user authentication handled by the backend:
 
 **Services:**
-- **kratos** (v1.3.1) – Identity management with password, TOTP, WebAuthn, and code-based authentication
 - **hydra** (v2.2.0) – OAuth2/OIDC provider for token issuance
-- **hydra-consent** – Bridges Kratos identity to Hydra OAuth2 consent flow
-- **mailhog** – Email testing server (web UI at `http://localhost:8025`)
+- **backend** – Handles login/consent flows, user authentication against database
 
 **Configuration files:**
-- `devops/ory/kratos/kratos.yaml` – Kratos configuration with self-service flows and OAuth2 provider integration
-- `devops/ory/kratos/identity.schema.json` – Identity schema (email required, optional name)
 - `devops/ory/hydra/hydra.yaml` – Hydra OAuth2/OIDC configuration
 
 **Databases:**
-- Kratos uses `kratos` database (created by `devops/compose/infra/db-init.sh`)
 - Hydra uses `hydra` database (created by `devops/compose/infra/db-init.sh`)
+- Users are stored in the main `shadowapi` database (managed by backend)
 
 **Environment variables (in `.env`):**
-- `KRATOS_DSN`, `KRATOS_SECRETS_DEFAULT`, `KRATOS_SECRETS_COOKIE` – Kratos database and secrets
 - `HYDRA_DSN`, `HYDRA_SECRETS_SYSTEM`, `OIDC_PAIRWISE_SALT` – Hydra database and secrets
-- `HYDRA_URLS_*` – Hydra URL configuration for login, consent, logout flows
+- `HYDRA_URLS_LOGIN`, `HYDRA_URLS_CONSENT`, `HYDRA_URLS_LOGOUT` – URLs pointing to backend handlers
+- `BE_INIT_ADMIN_EMAIL`, `BE_INIT_ADMIN_PASSWORD` – Initial admin user credentials
 
 **Testing the setup:**
 ```bash
-# Check Kratos health
-curl http://localtest.me/auth/kratos/health/alive
-
 # Check Hydra OIDC discovery
 curl http://localtest.me/.well-known/openid-configuration
-
-# Create a test user via Kratos Admin API
-curl -X POST http://localhost:4434/admin/identities \
-  -H "Content-Type: application/json" \
-  -d '{
-    "schema_id": "default",
-    "traits": {"email": "test@example.com"},
-    "credentials": {"password": {"config": {"password": "testpassword123"}}}
-  }'
 
 # Create a test OAuth2 client
 docker compose exec hydra hydra create client \
@@ -226,8 +212,9 @@ docker compose exec hydra hydra create client \
   --grant-type authorization_code,refresh_token \
   --response-type code \
   --scope openid,offline_access \
-  --redirect-uri http://localtest.me/callback \
+  --redirect-uri http://localtest.me/api/v1/auth/oauth2/callback \
   --name "Test Client" \
+  --token-endpoint-auth-method none \
   --format json
 ```
 

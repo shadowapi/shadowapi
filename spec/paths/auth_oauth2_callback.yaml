@@ -24,9 +24,12 @@ get:
             type: string
           description: URL to redirect to
         Set-Cookie:
+          explode: true
           schema:
-            type: string
-          description: Token cookies
+            type: array
+            items:
+              type: string
+          description: Token cookies (access and refresh)
     default:
       content:
         application/json:

@@ -1,0 +1,29 @@
+get:
+  description: Check current session status without triggering token refresh. Always returns 200.
+  operationId: auth-oauth2-session
+  security: []
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              authenticated:
+                type: boolean
+                description: Whether the user has a valid session
+              expires_in:
+                type: integer
+                description: Access token expiration time in seconds (only present when authenticated)
+            required:
+              - authenticated
+      description: Session status
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth

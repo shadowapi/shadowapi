@@ -18,9 +18,12 @@ post:
       description: OK
       headers:
         Set-Cookie:
+          explode: true
           schema:
-            type: string
-          description: Updated token cookies
+            type: array
+            items:
+              type: string
+          description: Updated token cookies (access and refresh)
     default:
       content:
         application/json:

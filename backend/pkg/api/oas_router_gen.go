@@ -61,9 +61,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/oauth2/"
+			case 'a': // Prefix: "auth/"
 				origElem := elem
-				if l := len("auth/oauth2/"); len(elem) >= l && elem[0:l] == "auth/oauth2/" {
+				if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -73,30 +73,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "authorize"
+				case 'c': // Prefix: "consent"
 					origElem := elem
-					if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleAuthOAuth2AuthorizeRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'c': // Prefix: "callback"
-					origElem := elem
-					if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+					if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
 						elem = elem[l:]
 					} else {
 						break
@@ -106,7 +85,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleAuthOAuth2CallbackRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleAuthConsentRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET")
 						}
@@ -115,9 +94,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
-				case 'l': // Prefix: "logout"
+				case 'l': // Prefix: "login"
 					origElem := elem
-					if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
 						elem = elem[l:]
 					} else {
 						break
@@ -126,34 +105,135 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch r.Method {
+						case "GET":
+							s.handleAuthLoginRequest([0]string{}, elemIsEscaped, w, r)
 						case "POST":
-							s.handleAuthOAuth2LogoutRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleAuthLoginSubmitRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "POST")
+							s.notAllowed(w, r, "GET,POST")
 						}
 
 						return
 					}
 
 					elem = origElem
-				case 'r': // Prefix: "refresh"
+				case 'o': // Prefix: "oauth2/"
 					origElem := elem
-					if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+					if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleAuthOAuth2RefreshRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "authorize"
+						origElem := elem
+						if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleAuthOAuth2AuthorizeRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'c': // Prefix: "callback"
+						origElem := elem
+						if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleAuthOAuth2CallbackRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'l': // Prefix: "logout"
+						origElem := elem
+						if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleAuthOAuth2LogoutRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'r': // Prefix: "refresh"
+						origElem := elem
+						if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleAuthOAuth2RefreshRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 's': // Prefix: "session"
+						origElem := elem
+						if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleAuthOAuth2SessionRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -1787,9 +1867,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/oauth2/"
+			case 'a': // Prefix: "auth/"
 				origElem := elem
-				if l := len("auth/oauth2/"); len(elem) >= l && elem[0:l] == "auth/oauth2/" {
+				if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -1799,34 +1879,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "authorize"
+				case 'c': // Prefix: "consent"
 					origElem := elem
-					if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = AuthOAuth2AuthorizeOperation
-							r.summary = ""
-							r.operationID = "auth-oauth2-authorize"
-							r.pathPattern = "/auth/oauth2/authorize"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'c': // Prefix: "callback"
-					origElem := elem
-					if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+					if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1836,10 +1891,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "GET":
-							r.name = AuthOAuth2CallbackOperation
+							r.name = AuthConsentOperation
 							r.summary = ""
-							r.operationID = "auth-oauth2-callback"
-							r.pathPattern = "/auth/oauth2/callback"
+							r.operationID = "auth-consent"
+							r.pathPattern = "/auth/consent"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -1849,9 +1904,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
-				case 'l': // Prefix: "logout"
+				case 'l': // Prefix: "login"
 					origElem := elem
-					if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1860,11 +1915,19 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch method {
-						case "POST":
-							r.name = AuthOAuth2LogoutOperation
+						case "GET":
+							r.name = AuthLoginOperation
 							r.summary = ""
-							r.operationID = "auth-oauth2-logout"
-							r.pathPattern = "/auth/oauth2/logout"
+							r.operationID = "auth-login"
+							r.pathPattern = "/auth/login"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = AuthLoginSubmitOperation
+							r.summary = ""
+							r.operationID = "auth-login-submit"
+							r.pathPattern = "/auth/login"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -1874,28 +1937,143 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
-				case 'r': // Prefix: "refresh"
+				case 'o': // Prefix: "oauth2/"
 					origElem := elem
-					if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+					if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = AuthOAuth2RefreshOperation
-							r.summary = ""
-							r.operationID = "auth-oauth2-refresh"
-							r.pathPattern = "/auth/oauth2/refresh"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "authorize"
+						origElem := elem
+						if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+							elem = elem[l:]
+						} else {
+							break
 						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = AuthOAuth2AuthorizeOperation
+								r.summary = ""
+								r.operationID = "auth-oauth2-authorize"
+								r.pathPattern = "/auth/oauth2/authorize"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'c': // Prefix: "callback"
+						origElem := elem
+						if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = AuthOAuth2CallbackOperation
+								r.summary = ""
+								r.operationID = "auth-oauth2-callback"
+								r.pathPattern = "/auth/oauth2/callback"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'l': // Prefix: "logout"
+						origElem := elem
+						if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = AuthOAuth2LogoutOperation
+								r.summary = ""
+								r.operationID = "auth-oauth2-logout"
+								r.pathPattern = "/auth/oauth2/logout"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'r': // Prefix: "refresh"
+						origElem := elem
+						if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = AuthOAuth2RefreshOperation
+								r.summary = ""
+								r.operationID = "auth-oauth2-refresh"
+								r.pathPattern = "/auth/oauth2/refresh"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 's': // Prefix: "session"
+						origElem := elem
+						if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = AuthOAuth2SessionOperation
+								r.summary = ""
+								r.operationID = "auth-oauth2-session"
+								r.pathPattern = "/auth/oauth2/session"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem

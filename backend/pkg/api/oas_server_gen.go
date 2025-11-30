@@ -8,6 +8,24 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AuthConsent implements auth-consent operation.
+	//
+	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
+	//
+	// GET /auth/consent
+	AuthConsent(ctx context.Context, params AuthConsentParams) (*AuthConsentFound, error)
+	// AuthLogin implements auth-login operation.
+	//
+	// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+	//
+	// GET /auth/login
+	AuthLogin(ctx context.Context, params AuthLoginParams) (*AuthLoginFound, error)
+	// AuthLoginSubmit implements auth-login-submit operation.
+	//
+	// Submit login credentials for Hydra authentication flow.
+	//
+	// POST /auth/login
+	AuthLoginSubmit(ctx context.Context, req *AuthLoginSubmitReq) (*AuthLoginSubmitOK, error)
 	// AuthOAuth2Authorize implements auth-oauth2-authorize operation.
 	//
 	// Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
@@ -32,6 +50,12 @@ type Handler interface {
 	//
 	// POST /auth/oauth2/refresh
 	AuthOAuth2Refresh(ctx context.Context) (*AuthOAuth2RefreshOKHeaders, error)
+	// AuthOAuth2Session implements auth-oauth2-session operation.
+	//
+	// Check current session status without triggering token refresh. Always returns 200.
+	//
+	// GET /auth/oauth2/session
+	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.

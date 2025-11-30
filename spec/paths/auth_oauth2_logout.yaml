@@ -18,9 +18,12 @@ post:
       description: OK
       headers:
         Set-Cookie:
+          explode: true
           schema:
-            type: string
-          description: Expired cookie headers
+            type: array
+            items:
+              type: string
+          description: Expired cookie headers (clears access and refresh)
     default:
       content:
         application/json:

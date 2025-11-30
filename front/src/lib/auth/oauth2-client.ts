@@ -13,6 +13,11 @@ export interface OAuth2RefreshResponse {
   expires_in: number;
 }
 
+export interface OAuth2SessionResponse {
+  authenticated: boolean;
+  expires_in?: number;
+}
+
 export interface OAuth2LogoutResponse {
   success: boolean;
 }
@@ -81,6 +86,32 @@ export async function refreshToken(): Promise<OAuth2RefreshResponse> {
   }
 
   return response.json();
+}
+
+/**
+ * Check session status without triggering token refresh.
+ * Always returns successfully (never throws) to avoid console errors.
+ */
+export async function checkSession(): Promise<OAuth2SessionResponse> {
+  try {
+    const response = await fetch(`${OAUTH2_BASE_URL}/session`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      // Even on error, return unauthenticated instead of throwing
+      return { authenticated: false };
+    }
+
+    return response.json();
+  } catch {
+    // Network error - return unauthenticated
+    return { authenticated: false };
+  }
 }
 
 /**

@@ -1,0 +1,79 @@
+get:
+  description: Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+  operationId: auth-login
+  security: []
+  parameters:
+    - name: login_challenge
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The login challenge from Hydra
+  responses:
+    "302":
+      description: Redirect to login page or Hydra
+      headers:
+        Location:
+          schema:
+            type: string
+          description: Redirect URL
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth
+
+post:
+  description: Submit login credentials for Hydra authentication flow
+  operationId: auth-login-submit
+  security: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            login_challenge:
+              type: string
+              description: The login challenge from Hydra
+            email:
+              type: string
+              description: User email address
+            password:
+              type: string
+              description: User password
+            remember:
+              type: boolean
+              description: Whether to remember the login session
+              default: false
+          required:
+            - login_challenge
+            - email
+            - password
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              redirect_to:
+                type: string
+                description: The URL to redirect the user to
+            required:
+              - redirect_to
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth

@@ -187,20 +187,17 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 		"has_refresh_token", tokenResp.RefreshToken != "",
 	)
 
-	// Build cookie header string
+	// Build cookie headers (separate headers for each cookie)
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
 	refreshTTL := 720 * time.Hour // Match Hydra's refresh token TTL
 
-	cookieHeader := buildCookieHeader(
+	cookieHeaders := buildCookieHeaders(
 		h.oauth2Svc.cookieConfig,
 		tokenResp.AccessToken,
 		tokenResp.RefreshToken,
 		accessTTL,
 		refreshTTL,
 	)
-
-	// Also clear Kratos session cookie
-	cookieHeader += "; " + buildClearKratosSessionCookie(h.oauth2Svc.cookieConfig.Domain, h.oauth2Svc.cookieConfig.Secure)
 
 	// Redirect to the frontend
 	redirectURL := stateData.RedirectURI
@@ -210,7 +207,7 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 
 	return &api.AuthOAuth2CallbackFound{
 		Location:  api.NewOptString(redirectURL),
-		SetCookie: api.NewOptString(cookieHeader),
+		SetCookie: cookieHeaders,
 	}, nil
 }
 
@@ -233,11 +230,11 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 		return nil, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("token refresh failed"))
 	}
 
-	// Build cookie header
+	// Build cookie headers (separate headers for each cookie)
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
 	refreshTTL := 720 * time.Hour
 
-	cookieHeader := buildCookieHeader(
+	cookieHeaders := buildCookieHeaders(
 		h.oauth2Svc.cookieConfig,
 		tokenResp.AccessToken,
 		tokenResp.RefreshToken,
@@ -246,10 +243,32 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 	)
 
 	return &api.AuthOAuth2RefreshOKHeaders{
-		SetCookie: api.NewOptString(cookieHeader),
+		SetCookie: cookieHeaders,
 		Response: api.AuthOAuth2RefreshOK{
 			ExpiresIn: tokenResp.ExpiresIn,
 		},
+	}, nil
+}
+
+// AuthOAuth2Session checks if the user has a valid session without triggering token refresh.
+// Always returns 200 to avoid console errors for unauthenticated users.
+func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2SessionOK, error) {
+	if h.oauth2Svc == nil {
+		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
+	}
+
+	// Get refresh token from context (set by middleware)
+	refreshToken, ok := ctx.Value(auth.RefreshTokenContextKey).(string)
+	if !ok || refreshToken == "" {
+		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
+	}
+
+	// We have a refresh token, so the user has a session.
+	// Note: We don't validate the token here to avoid the overhead.
+	// The actual token refresh will validate it when needed.
+	return &api.AuthOAuth2SessionOK{
+		Authenticated: true,
+		ExpiresIn:     api.NewOptInt(3600), // Approximate TTL
 	}, nil
 }
 
@@ -268,12 +287,11 @@ func (h *Handler) AuthOAuth2Logout(ctx context.Context) (*api.AuthOAuth2LogoutOK
 		}
 	}
 
-	// Build cookie header to clear all cookies
-	cookieHeader := buildClearCookieHeader(h.oauth2Svc.cookieConfig)
-	cookieHeader += "; " + buildClearKratosSessionCookie(h.oauth2Svc.cookieConfig.Domain, h.oauth2Svc.cookieConfig.Secure)
+	// Build cookie headers to clear all cookies (separate headers for each cookie)
+	cookieHeaders := buildClearCookieHeaders(h.oauth2Svc.cookieConfig)
 
 	return &api.AuthOAuth2LogoutOKHeaders{
-		SetCookie: api.NewOptString(cookieHeader),
+		SetCookie: cookieHeaders,
 		Response: api.AuthOAuth2LogoutOK{
 			Success: true,
 		},
@@ -282,7 +300,7 @@ func (h *Handler) AuthOAuth2Logout(ctx context.Context) (*api.AuthOAuth2LogoutOK
 
 // Helper functions for building cookie headers
 
-func buildCookieHeader(cfg oauth2.CookieConfig, accessToken, refreshToken string, accessTTL, refreshTTL time.Duration) string {
+func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken string, accessTTL, refreshTTL time.Duration) []string {
 	secure := ""
 	if cfg.Secure {
 		secure = "; Secure"
@@ -304,10 +322,10 @@ func buildCookieHeader(cfg oauth2.CookieConfig, accessToken, refreshToken string
 		secure,
 	)
 
-	return accessCookie + ", " + refreshCookie
+	return []string{accessCookie, refreshCookie}
 }
 
-func buildClearCookieHeader(cfg oauth2.CookieConfig) string {
+func buildClearCookieHeaders(cfg oauth2.CookieConfig) []string {
 	secure := ""
 	if cfg.Secure {
 		secure = "; Secure"
@@ -325,16 +343,5 @@ func buildClearCookieHeader(cfg oauth2.CookieConfig) string {
 		secure,
 	)
 
-	return accessCookie + ", " + refreshCookie
-}
-
-func buildClearKratosSessionCookie(domain string, secure bool) string {
-	secureStr := ""
-	if secure {
-		secureStr = "; Secure"
-	}
-	return fmt.Sprintf("ory_kratos_session=; Path=/; Domain=%s; Max-Age=0; HttpOnly; SameSite=Lax%s",
-		domain,
-		secureStr,
-	)
+	return []string{accessCookie, refreshCookie}
 }

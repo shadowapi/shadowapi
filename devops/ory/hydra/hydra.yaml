@@ -25,9 +25,10 @@ serve:
 urls:
   self:
     issuer: http://localtest.me
-  consent: http://hydra-consent:8080/consent
-  login: http://localtest.me/auth/login
-  logout: http://localtest.me/auth/logout
+  # Login and consent are handled by the backend
+  login: http://localtest.me/api/v1/auth/login
+  consent: http://localtest.me/api/v1/auth/consent
+  logout: http://localtest.me/api/v1/auth/oauth2/logout
   error: http://localtest.me/auth/error
   post_logout_redirect: http://localtest.me/
 

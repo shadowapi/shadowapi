@@ -12,10 +12,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 	CREATE DATABASE zitadel WITH OWNER zitadel;
 	GRANT ALL PRIVILEGES ON DATABASE zitadel TO zitadel;
 
-	-- Ory Kratos database
-	CREATE DATABASE kratos WITH OWNER shadowapi;
-	GRANT ALL PRIVILEGES ON DATABASE kratos TO shadowapi;
-
 	-- Ory Hydra database
 	CREATE DATABASE hydra WITH OWNER shadowapi;
 	GRANT ALL PRIVILEGES ON DATABASE hydra TO shadowapi;

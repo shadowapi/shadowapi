@@ -21,3 +21,7 @@ type errWraper struct {
 func (e *errWraper) Error() string {
 	return e.err.Error()
 }
+
+func (e *errWraper) StatusCode() int {
+	return e.status
+}

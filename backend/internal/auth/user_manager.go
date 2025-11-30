@@ -22,4 +22,7 @@ type UserManager interface {
 
 	// ListUsers returns a list of all users
 	ListUsers(ctx context.Context) ([]api.User, error)
+
+	// AuthenticateUser verifies email/password and returns the user if valid
+	AuthenticateUser(ctx context.Context, email, password string) (*api.User, error)
 }

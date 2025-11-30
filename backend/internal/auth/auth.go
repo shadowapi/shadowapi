@@ -57,7 +57,8 @@ func Provide(i do.Injector) (*Auth, error) {
 			"/ready":                        http.MethodGet,
 			"/api/v1/user":                  http.MethodPost,
 			"/api/v1/user/session":          http.MethodPost,
-			"/api/v1/auth/login":            http.MethodGet,
+			"/api/v1/auth/login":            "*", // Allow both GET and POST for OAuth2 login flow
+			"/api/v1/auth/consent":          http.MethodGet,
 			"/api/v1/auth/callback":         http.MethodGet,
 			"/api/v1/auth/logout":           http.MethodPost,
 			"/auth/callback":                http.MethodGet,
@@ -65,6 +66,7 @@ func Provide(i do.Injector) (*Auth, error) {
 			"/api/v1/auth/oauth2/callback":  http.MethodGet,
 			"/api/v1/auth/oauth2/refresh":   http.MethodPost,
 			"/api/v1/auth/oauth2/logout":    http.MethodPost,
+			"/api/v1/auth/oauth2/session":   http.MethodGet,
 		},
 	}
 
@@ -123,7 +125,7 @@ func (a *Auth) HandleBearerAuth(
 
 func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 	// Check if path is in allow list
-	if m, ok := a.allow[req.Raw.URL.Path]; ok && m == req.Raw.Method {
+	if m, ok := a.allow[req.Raw.URL.Path]; ok && (m == req.Raw.Method || m == "*") {
 		// For OAuth2 refresh/logout, add refresh token to context
 		if strings.HasPrefix(req.Raw.URL.Path, "/api/v1/auth/oauth2/") {
 			if cookie, err := req.Raw.Cookie(oauth2.RefreshTokenCookie); err == nil {

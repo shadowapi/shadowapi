@@ -87,17 +87,3 @@ func GetRefreshTokenFromCookie(r *http.Request) (string, error) {
 	}
 	return cookie.Value, nil
 }
-
-// ClearKratosSessionCookie clears the Kratos session cookie
-func ClearKratosSessionCookie(w http.ResponseWriter, domain string, secure bool) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "ory_kratos_session",
-		Value:    "",
-		Path:     "/",
-		Domain:   domain,
-		MaxAge:   -1,
-		HttpOnly: true,
-		Secure:   secure,
-		SameSite: http.SameSiteLaxMode,
-	})
-}

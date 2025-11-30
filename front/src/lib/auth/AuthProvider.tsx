@@ -1,50 +1,56 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import {
-  type KratosSession,
-  type KratosIdentity,
-  createLoginFlow,
-  submitLogin,
-  KratosAuthError,
-} from './kratos-client';
-import {
   initiateOAuth2Flow,
   refreshToken as oauth2RefreshToken,
+  checkSession as oauth2CheckSession,
   logout as oauth2Logout,
   OAuth2Error,
 } from './oauth2-client';
-import { AuthContext, type AuthContextType } from './AuthContext';
+import { AuthContext, type AuthContextType, type User } from './AuthContext';
+
+const AUTH_LOGIN_URL = '/api/v1/auth/login';
+
+interface LoginSubmitResponse {
+  redirect_to: string;
+}
+
+export class AuthError extends Error {
+  constructor(
+    message: string,
+    public status?: number,
+    public details?: unknown
+  ) {
+    super(message);
+    this.name = 'AuthError';
+  }
+}
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [session, setSession] = useState<KratosSession | null>(null);
-  const [user, setUser] = useState<KratosIdentity | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Check OAuth2 session on mount by attempting token refresh
+  // Check OAuth2 session on mount without triggering token refresh
   const checkSession = useCallback(async () => {
-    try {
-      // Try to refresh the token - if successful, we have a valid session
-      const response = await oauth2RefreshToken();
+    const session = await oauth2CheckSession();
+    if (session.authenticated) {
       setIsAuthenticated(true);
-      setTokenExpiresIn(response.expires_in);
+      setTokenExpiresIn(session.expires_in ?? null);
       // Note: User info would typically come from the JWT claims or a /userinfo endpoint
       // For now, we mark as authenticated without user details
-    } catch {
-      // No valid session
+    } else {
       setIsAuthenticated(false);
       setUser(null);
-      setSession(null);
       setTokenExpiresIn(null);
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, []);
 
   // Auto-refresh token before it expires
@@ -64,7 +70,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Refresh failed - user needs to re-login
         setIsAuthenticated(false);
         setUser(null);
-        setSession(null);
         setTokenExpiresIn(null);
       }
     }, refreshIn);
@@ -80,40 +85,54 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkSession();
   }, [checkSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, loginChallenge?: string) => {
     setError(null);
     setIsLoading(true);
 
     try {
-      // Step 1: Authenticate with Kratos
-      const flow = await createLoginFlow();
+      if (loginChallenge) {
+        // OAuth2 flow: Submit credentials to backend's /auth/login endpoint
+        const response = await fetch(AUTH_LOGIN_URL, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            login_challenge: loginChallenge,
+            email,
+            password,
+            remember: false,
+          }),
+        });
 
-      const csrfNode = flow.ui.nodes.find(
-        (node) => node.attributes.name === 'csrf_token'
-      );
-      const csrfToken = csrfNode?.attributes.value;
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new AuthError(
+            errorData.detail || 'Authentication failed',
+            response.status,
+            errorData
+          );
+        }
 
-      const kratosSession = await submitLogin(flow.id, email, password, csrfToken);
+        const data: LoginSubmitResponse = await response.json();
 
-      // Store user info from Kratos session
-      setSession(kratosSession);
-      setUser(kratosSession.identity);
+        // Redirect to Hydra consent (which auto-approves and returns tokens)
+        window.location.href = data.redirect_to;
+        return;
+      }
 
-      // Step 2: Initiate OAuth2 flow to get tokens
-      // The redirect_uri should be the current page or the app root
-      const currentUrl = window.location.origin + window.location.pathname;
+      // Direct login (not OAuth2 flow): Initiate OAuth2 flow first
+      // This will redirect to /auth/login with a login_challenge
+      const currentUrl = window.location.origin + '/app';
       const oauth2Response = await initiateOAuth2Flow(currentUrl);
-
-      // Step 3: Redirect to Hydra for authorization
-      // After Hydra consent (auto-approved since user is authenticated),
-      // the backend will set cookies and redirect back
       window.location.href = oauth2Response.authorization_url;
 
-      // Note: The page will reload after OAuth2 callback,
-      // so we don't need to set isAuthenticated here
+      // Note: The page will reload after OAuth2 callback
     } catch (err) {
       setIsLoading(false);
-      if (err instanceof KratosAuthError) {
+      if (err instanceof AuthError) {
         setError(err.message);
       } else if (err instanceof OAuth2Error) {
         setError(err.message);
@@ -133,7 +152,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await oauth2Logout();
       setIsAuthenticated(false);
       setUser(null);
-      setSession(null);
       setTokenExpiresIn(null);
     } catch (err) {
       if (err instanceof Error) {
@@ -150,7 +168,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    session,
     isAuthenticated,
     isLoading,
     error,

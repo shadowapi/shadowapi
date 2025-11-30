@@ -16,6 +16,122 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// AuthConsentParams is parameters of auth-consent operation.
+type AuthConsentParams struct {
+	// The consent challenge from Hydra.
+	ConsentChallenge string
+}
+
+func unpackAuthConsentParams(packed middleware.Parameters) (params AuthConsentParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "consent_challenge",
+			In:   "query",
+		}
+		params.ConsentChallenge = packed[key].(string)
+	}
+	return params
+}
+
+func decodeAuthConsentParams(args [0]string, argsEscaped bool, r *http.Request) (params AuthConsentParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: consent_challenge.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "consent_challenge",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ConsentChallenge = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "consent_challenge",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// AuthLoginParams is parameters of auth-login operation.
+type AuthLoginParams struct {
+	// The login challenge from Hydra.
+	LoginChallenge string
+}
+
+func unpackAuthLoginParams(packed middleware.Parameters) (params AuthLoginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "login_challenge",
+			In:   "query",
+		}
+		params.LoginChallenge = packed[key].(string)
+	}
+	return params
+}
+
+func decodeAuthLoginParams(args [0]string, argsEscaped bool, r *http.Request) (params AuthLoginParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: login_challenge.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "login_challenge",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LoginChallenge = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "login_challenge",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // AuthOAuth2CallbackParams is parameters of auth-oauth2-callback operation.
 type AuthOAuth2CallbackParams struct {
 	// The authorization code from Hydra.

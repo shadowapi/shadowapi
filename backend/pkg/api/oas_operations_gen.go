@@ -6,10 +6,14 @@ package api
 type OperationName = string
 
 const (
+	AuthConsentOperation                OperationName = "AuthConsent"
+	AuthLoginOperation                  OperationName = "AuthLogin"
+	AuthLoginSubmitOperation            OperationName = "AuthLoginSubmit"
 	AuthOAuth2AuthorizeOperation        OperationName = "AuthOAuth2Authorize"
 	AuthOAuth2CallbackOperation         OperationName = "AuthOAuth2Callback"
 	AuthOAuth2LogoutOperation           OperationName = "AuthOAuth2Logout"
 	AuthOAuth2RefreshOperation          OperationName = "AuthOAuth2Refresh"
+	AuthOAuth2SessionOperation          OperationName = "AuthOAuth2Session"
 	CreateContactOperation              OperationName = "CreateContact"
 	CreateUserOperation                 OperationName = "CreateUser"
 	CreateUserSessionOperation          OperationName = "CreateUserSession"

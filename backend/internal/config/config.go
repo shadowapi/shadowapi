@@ -53,8 +53,8 @@ type Config struct {
 
 	// InitAdmin configures the first administrator account
 	InitAdmin struct {
-		Email    string `yaml:"email" json:"email"`
-		Password string `yaml:"password" json:"password"`
+		Email    string `yaml:"email" json:"email" env:"BE_INIT_ADMIN_EMAIL"`
+		Password string `yaml:"password" json:"password" env:"BE_INIT_ADMIN_PASSWORD"`
 	} `yaml:"init_admin" json:"init_admin"`
 
 	// Auth is a struct that holds all the authentication settings

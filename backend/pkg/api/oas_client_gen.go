@@ -29,6 +29,24 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// AuthConsent invokes auth-consent operation.
+	//
+	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
+	//
+	// GET /auth/consent
+	AuthConsent(ctx context.Context, params AuthConsentParams) (*AuthConsentFound, error)
+	// AuthLogin invokes auth-login operation.
+	//
+	// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+	//
+	// GET /auth/login
+	AuthLogin(ctx context.Context, params AuthLoginParams) (*AuthLoginFound, error)
+	// AuthLoginSubmit invokes auth-login-submit operation.
+	//
+	// Submit login credentials for Hydra authentication flow.
+	//
+	// POST /auth/login
+	AuthLoginSubmit(ctx context.Context, request *AuthLoginSubmitReq) (*AuthLoginSubmitOK, error)
 	// AuthOAuth2Authorize invokes auth-oauth2-authorize operation.
 	//
 	// Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
@@ -53,6 +71,12 @@ type Invoker interface {
 	//
 	// POST /auth/oauth2/refresh
 	AuthOAuth2Refresh(ctx context.Context) (*AuthOAuth2RefreshOKHeaders, error)
+	// AuthOAuth2Session invokes auth-oauth2-session operation.
+	//
+	// Check current session status without triggering token refresh. Always returns 200.
+	//
+	// GET /auth/oauth2/session
+	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
 	// CreateContact invokes createContact operation.
 	//
 	// Create a new contact record.
@@ -686,6 +710,261 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
+// AuthConsent invokes auth-consent operation.
+//
+// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
+//
+// GET /auth/consent
+func (c *Client) AuthConsent(ctx context.Context, params AuthConsentParams) (*AuthConsentFound, error) {
+	res, err := c.sendAuthConsent(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendAuthConsent(ctx context.Context, params AuthConsentParams) (res *AuthConsentFound, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-consent"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/auth/consent"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthConsentOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/consent"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "consent_challenge" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "consent_challenge",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.ConsentChallenge))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthConsentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AuthLogin invokes auth-login operation.
+//
+// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+//
+// GET /auth/login
+func (c *Client) AuthLogin(ctx context.Context, params AuthLoginParams) (*AuthLoginFound, error) {
+	res, err := c.sendAuthLogin(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendAuthLogin(ctx context.Context, params AuthLoginParams) (res *AuthLoginFound, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-login"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/auth/login"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthLoginOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/login"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "login_challenge" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "login_challenge",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.LoginChallenge))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthLoginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AuthLoginSubmit invokes auth-login-submit operation.
+//
+// Submit login credentials for Hydra authentication flow.
+//
+// POST /auth/login
+func (c *Client) AuthLoginSubmit(ctx context.Context, request *AuthLoginSubmitReq) (*AuthLoginSubmitOK, error) {
+	res, err := c.sendAuthLoginSubmit(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendAuthLoginSubmit(ctx context.Context, request *AuthLoginSubmitReq) (res *AuthLoginSubmitOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-login-submit"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/auth/login"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthLoginSubmitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/login"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAuthLoginSubmitRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthLoginSubmitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // AuthOAuth2Authorize invokes auth-oauth2-authorize operation.
 //
 // Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
@@ -1002,6 +1281,78 @@ func (c *Client) sendAuthOAuth2Refresh(ctx context.Context) (res *AuthOAuth2Refr
 
 	stage = "DecodeResponse"
 	result, err := decodeAuthOAuth2RefreshResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AuthOAuth2Session invokes auth-oauth2-session operation.
+//
+// Check current session status without triggering token refresh. Always returns 200.
+//
+// GET /auth/oauth2/session
+func (c *Client) AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error) {
+	res, err := c.sendAuthOAuth2Session(ctx)
+	return res, err
+}
+
+func (c *Client) sendAuthOAuth2Session(ctx context.Context) (res *AuthOAuth2SessionOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-oauth2-session"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/auth/oauth2/session"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthOAuth2SessionOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/oauth2/session"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthOAuth2SessionResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

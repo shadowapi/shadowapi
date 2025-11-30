@@ -47,8 +47,5 @@ front/.env
 .env
 .env.gen
 front/dist/
-
-# Zitadel service user secrets (NEVER COMMIT!)
-secrets/
-*.key
-*.pem
+backend/shadowapi
+front/playwright-report/

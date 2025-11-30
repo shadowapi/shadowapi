@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useLocation, useSearchParams } from 'react-router';
 import { Card, Form, Input, Button, Alert, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../../lib/auth';
@@ -15,21 +15,27 @@ function LoginPage() {
   const { login, isAuthenticated, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [form] = Form.useForm();
 
+  // Get login_challenge from URL if present (OAuth2 flow from Hydra)
+  const loginChallenge = searchParams.get('login_challenge');
+
   const from = (location.state as { from?: { pathname: string } })?.from
-    ?.pathname || '/';
+    ?.pathname || '/app';
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Only redirect if authenticated AND there's no login_challenge
+    // (when there's a login_challenge, we need to complete the OAuth2 flow)
+    if (isAuthenticated && !loginChallenge) {
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, from, loginChallenge]);
 
   const handleSubmit = async (values: LoginFormValues) => {
     clearError();
     try {
-      await login(values.email, values.password);
+      await login(values.email, values.password, loginChallenge || undefined);
     } catch {
       // Error is handled by auth context
     }

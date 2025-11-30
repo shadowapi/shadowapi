@@ -11,6 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/do/v2"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
@@ -247,4 +249,49 @@ func (m *DBUserManager) ListUsers(ctx context.Context) ([]api.User, error) {
 	return result, nil
 }
 
+// AuthenticateUser verifies email/password and returns the user if valid
+func (m *DBUserManager) AuthenticateUser(ctx context.Context, email, password string) (*api.User, error) {
+	user, err := query.New(m.dbp).GetUserByEmail(ctx, email)
+	if err == pgx.ErrNoRows {
+		m.log.Debug("authentication failed: user not found", "email", email)
+		return nil, handler.ErrWithCode(http.StatusUnauthorized, handler.E("invalid credentials"))
+	}
+	if err != nil {
+		m.log.Error("failed to get user by email", "error", err)
+		return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("authentication failed"))
+	}
 
+	if !user.IsEnabled {
+		m.log.Debug("authentication failed: account disabled", "email", email)
+		return nil, handler.ErrWithCode(http.StatusUnauthorized, handler.E("account disabled"))
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		m.log.Debug("authentication failed: invalid password", "email", email)
+		return nil, handler.ErrWithCode(http.StatusUnauthorized, handler.E("invalid credentials"))
+	}
+
+	var meta api.UserMeta
+	if len(user.Meta) > 0 {
+		if err := json.Unmarshal(user.Meta, &meta); err != nil {
+			meta = make(api.UserMeta)
+		}
+	} else {
+		meta = make(api.UserMeta)
+	}
+
+	m.log.Debug("user authenticated successfully", "email", email, "uuid", user.UUID.String())
+
+	out := api.User{
+		UUID:      api.NewOptString(user.UUID.String()),
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		IsEnabled: api.NewOptBool(user.IsEnabled),
+		IsAdmin:   api.NewOptBool(user.IsAdmin),
+		Meta:      api.NewOptUserMeta(meta),
+		CreatedAt: api.NewOptDateTime(user.CreatedAt.Time),
+		UpdatedAt: api.NewOptDateTime(user.UpdatedAt.Time),
+	}
+	return &out, nil
+}

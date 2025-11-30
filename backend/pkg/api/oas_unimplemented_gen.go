@@ -13,6 +13,33 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AuthConsent implements auth-consent operation.
+//
+// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
+//
+// GET /auth/consent
+func (UnimplementedHandler) AuthConsent(ctx context.Context, params AuthConsentParams) (r *AuthConsentFound, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AuthLogin implements auth-login operation.
+//
+// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+//
+// GET /auth/login
+func (UnimplementedHandler) AuthLogin(ctx context.Context, params AuthLoginParams) (r *AuthLoginFound, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AuthLoginSubmit implements auth-login-submit operation.
+//
+// Submit login credentials for Hydra authentication flow.
+//
+// POST /auth/login
+func (UnimplementedHandler) AuthLoginSubmit(ctx context.Context, req *AuthLoginSubmitReq) (r *AuthLoginSubmitOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // AuthOAuth2Authorize implements auth-oauth2-authorize operation.
 //
 // Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
@@ -46,6 +73,15 @@ func (UnimplementedHandler) AuthOAuth2Logout(ctx context.Context) (r *AuthOAuth2
 //
 // POST /auth/oauth2/refresh
 func (UnimplementedHandler) AuthOAuth2Refresh(ctx context.Context) (r *AuthOAuth2RefreshOKHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AuthOAuth2Session implements auth-oauth2-session operation.
+//
+// Check current session status without triggering token refresh. Always returns 200.
+//
+// GET /auth/oauth2/session
+func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r *AuthOAuth2SessionOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

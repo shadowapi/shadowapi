@@ -18,6 +18,269 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func decodeAuthConsentResponse(resp *http.Response) (res *AuthConsentFound, _ error) {
+	switch resp.StatusCode {
+	case 302:
+		// Code 302.
+		var wrapper AuthConsentFound
+		h := uri.NewHeaderDecoder(resp.Header)
+		// Parse "Location" header.
+		{
+			cfg := uri.HeaderParameterDecodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := func() error {
+				if err := h.HasParam(cfg); err == nil {
+					if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+						var wrapperDotLocationVal string
+						if err := func() error {
+							val, err := d.DecodeValue()
+							if err != nil {
+								return err
+							}
+
+							c, err := conv.ToString(val)
+							if err != nil {
+								return err
+							}
+
+							wrapperDotLocationVal = c
+							return nil
+						}(); err != nil {
+							return err
+						}
+						wrapper.Location.SetTo(wrapperDotLocationVal)
+						return nil
+					}); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "parse Location header")
+			}
+		}
+		return &wrapper, nil
+	}
+	// Convenient error response.
+	defRes, err := func() (res *ErrorStatusCode, err error) {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response Error
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &ErrorStatusCode{
+				StatusCode: resp.StatusCode,
+				Response:   response,
+			}, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}()
+	if err != nil {
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
+	}
+	return res, errors.Wrap(defRes, "error")
+}
+
+func decodeAuthLoginResponse(resp *http.Response) (res *AuthLoginFound, _ error) {
+	switch resp.StatusCode {
+	case 302:
+		// Code 302.
+		var wrapper AuthLoginFound
+		h := uri.NewHeaderDecoder(resp.Header)
+		// Parse "Location" header.
+		{
+			cfg := uri.HeaderParameterDecodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := func() error {
+				if err := h.HasParam(cfg); err == nil {
+					if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+						var wrapperDotLocationVal string
+						if err := func() error {
+							val, err := d.DecodeValue()
+							if err != nil {
+								return err
+							}
+
+							c, err := conv.ToString(val)
+							if err != nil {
+								return err
+							}
+
+							wrapperDotLocationVal = c
+							return nil
+						}(); err != nil {
+							return err
+						}
+						wrapper.Location.SetTo(wrapperDotLocationVal)
+						return nil
+					}); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return res, errors.Wrap(err, "parse Location header")
+			}
+		}
+		return &wrapper, nil
+	}
+	// Convenient error response.
+	defRes, err := func() (res *ErrorStatusCode, err error) {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response Error
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &ErrorStatusCode{
+				StatusCode: resp.StatusCode,
+				Response:   response,
+			}, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}()
+	if err != nil {
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
+	}
+	return res, errors.Wrap(defRes, "error")
+}
+
+func decodeAuthLoginSubmitResponse(resp *http.Response) (res *AuthLoginSubmitOK, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response AuthLoginSubmitOK
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	// Convenient error response.
+	defRes, err := func() (res *ErrorStatusCode, err error) {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response Error
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &ErrorStatusCode{
+				StatusCode: resp.StatusCode,
+				Response:   response,
+			}, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}()
+	if err != nil {
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
+	}
+	return res, errors.Wrap(defRes, "error")
+}
+
 func decodeAuthOAuth2AuthorizeResponse(resp *http.Response) (res *AuthOAuth2AuthorizeOK, _ error) {
 	switch resp.StatusCode {
 	case 200:
@@ -148,30 +411,32 @@ func decodeAuthOAuth2CallbackResponse(resp *http.Response) (res *AuthOAuth2Callb
 		{
 			cfg := uri.HeaderParameterDecodingConfig{
 				Name:    "Set-Cookie",
-				Explode: false,
+				Explode: true,
 			}
 			if err := func() error {
 				if err := h.HasParam(cfg); err == nil {
 					if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-						var wrapperDotSetCookieVal string
-						if err := func() error {
-							val, err := d.DecodeValue()
-							if err != nil {
+						return d.DecodeArray(func(d uri.Decoder) error {
+							var wrapperDotSetCookieVal string
+							if err := func() error {
+								val, err := d.DecodeValue()
+								if err != nil {
+									return err
+								}
+
+								c, err := conv.ToString(val)
+								if err != nil {
+									return err
+								}
+
+								wrapperDotSetCookieVal = c
+								return nil
+							}(); err != nil {
 								return err
 							}
-
-							c, err := conv.ToString(val)
-							if err != nil {
-								return err
-							}
-
-							wrapperDotSetCookieVal = c
+							wrapper.SetCookie = append(wrapper.SetCookie, wrapperDotSetCookieVal)
 							return nil
-						}(); err != nil {
-							return err
-						}
-						wrapper.SetCookie.SetTo(wrapperDotSetCookieVal)
-						return nil
+						})
 					}); err != nil {
 						return err
 					}
@@ -268,30 +533,32 @@ func decodeAuthOAuth2LogoutResponse(resp *http.Response) (res *AuthOAuth2LogoutO
 			{
 				cfg := uri.HeaderParameterDecodingConfig{
 					Name:    "Set-Cookie",
-					Explode: false,
+					Explode: true,
 				}
 				if err := func() error {
 					if err := h.HasParam(cfg); err == nil {
 						if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-							var wrapperDotSetCookieVal string
-							if err := func() error {
-								val, err := d.DecodeValue()
-								if err != nil {
+							return d.DecodeArray(func(d uri.Decoder) error {
+								var wrapperDotSetCookieVal string
+								if err := func() error {
+									val, err := d.DecodeValue()
+									if err != nil {
+										return err
+									}
+
+									c, err := conv.ToString(val)
+									if err != nil {
+										return err
+									}
+
+									wrapperDotSetCookieVal = c
+									return nil
+								}(); err != nil {
 									return err
 								}
-
-								c, err := conv.ToString(val)
-								if err != nil {
-									return err
-								}
-
-								wrapperDotSetCookieVal = c
+								wrapper.SetCookie = append(wrapper.SetCookie, wrapperDotSetCookieVal)
 								return nil
-							}(); err != nil {
-								return err
-							}
-							wrapper.SetCookie.SetTo(wrapperDotSetCookieVal)
-							return nil
+							})
 						}); err != nil {
 							return err
 						}
@@ -391,30 +658,32 @@ func decodeAuthOAuth2RefreshResponse(resp *http.Response) (res *AuthOAuth2Refres
 			{
 				cfg := uri.HeaderParameterDecodingConfig{
 					Name:    "Set-Cookie",
-					Explode: false,
+					Explode: true,
 				}
 				if err := func() error {
 					if err := h.HasParam(cfg); err == nil {
 						if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-							var wrapperDotSetCookieVal string
-							if err := func() error {
-								val, err := d.DecodeValue()
-								if err != nil {
+							return d.DecodeArray(func(d uri.Decoder) error {
+								var wrapperDotSetCookieVal string
+								if err := func() error {
+									val, err := d.DecodeValue()
+									if err != nil {
+										return err
+									}
+
+									c, err := conv.ToString(val)
+									if err != nil {
+										return err
+									}
+
+									wrapperDotSetCookieVal = c
+									return nil
+								}(); err != nil {
 									return err
 								}
-
-								c, err := conv.ToString(val)
-								if err != nil {
-									return err
-								}
-
-								wrapperDotSetCookieVal = c
+								wrapper.SetCookie = append(wrapper.SetCookie, wrapperDotSetCookieVal)
 								return nil
-							}(); err != nil {
-								return err
-							}
-							wrapper.SetCookie.SetTo(wrapperDotSetCookieVal)
-							return nil
+							})
 						}); err != nil {
 							return err
 						}
@@ -425,6 +694,89 @@ func decodeAuthOAuth2RefreshResponse(resp *http.Response) (res *AuthOAuth2Refres
 				}
 			}
 			return &wrapper, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	// Convenient error response.
+	defRes, err := func() (res *ErrorStatusCode, err error) {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response Error
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &ErrorStatusCode{
+				StatusCode: resp.StatusCode,
+				Response:   response,
+			}, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}()
+	if err != nil {
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
+	}
+	return res, errors.Wrap(defRes, "error")
+}
+
+func decodeAuthOAuth2SessionResponse(resp *http.Response) (res *AuthOAuth2SessionOK, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response AuthOAuth2SessionOK
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &response, nil
 		default:
 			return res, validate.InvalidContentType(ct)
 		}

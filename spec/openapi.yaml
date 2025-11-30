@@ -206,6 +206,12 @@ paths:
     $ref: "paths/auth_oauth2_refresh.yaml"
   /auth/oauth2/logout:
     $ref: "paths/auth_oauth2_logout.yaml"
+  /auth/oauth2/session:
+    $ref: "paths/auth_oauth2_session.yaml"
+  /auth/login:
+    $ref: "paths/auth_login.yaml"
+  /auth/consent:
+    $ref: "paths/auth_consent.yaml"
 
 servers:
   - description: Local development server

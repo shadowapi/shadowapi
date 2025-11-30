@@ -15,6 +15,72 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+func encodeAuthConsentResponse(response *AuthConsentFound, w http.ResponseWriter, span trace.Span) error {
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Location" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				if val, ok := response.Location.Get(); ok {
+					return e.EncodeValue(conv.StringToString(val))
+				}
+				return nil
+			}); err != nil {
+				return errors.Wrap(err, "encode Location header")
+			}
+		}
+	}
+	w.WriteHeader(302)
+	span.SetStatus(codes.Ok, http.StatusText(302))
+
+	return nil
+}
+
+func encodeAuthLoginResponse(response *AuthLoginFound, w http.ResponseWriter, span trace.Span) error {
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Location" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				if val, ok := response.Location.Get(); ok {
+					return e.EncodeValue(conv.StringToString(val))
+				}
+				return nil
+			}); err != nil {
+				return errors.Wrap(err, "encode Location header")
+			}
+		}
+	}
+	w.WriteHeader(302)
+	span.SetStatus(codes.Ok, http.StatusText(302))
+
+	return nil
+}
+
+func encodeAuthLoginSubmitResponse(response *AuthLoginSubmitOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeAuthOAuth2AuthorizeResponse(response *AuthOAuth2AuthorizeOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -52,11 +118,20 @@ func encodeAuthOAuth2CallbackResponse(response *AuthOAuth2CallbackFound, w http.
 		{
 			cfg := uri.HeaderParameterEncodingConfig{
 				Name:    "Set-Cookie",
-				Explode: false,
+				Explode: true,
 			}
 			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-				if val, ok := response.SetCookie.Get(); ok {
-					return e.EncodeValue(conv.StringToString(val))
+				if response.SetCookie != nil {
+					return e.EncodeArray(func(e uri.Encoder) error {
+						for i, item := range response.SetCookie {
+							if err := func() error {
+								return e.EncodeValue(conv.StringToString(item))
+							}(); err != nil {
+								return errors.Wrapf(err, "[%d]", i)
+							}
+						}
+						return nil
+					})
 				}
 				return nil
 			}); err != nil {
@@ -79,11 +154,20 @@ func encodeAuthOAuth2LogoutResponse(response *AuthOAuth2LogoutOKHeaders, w http.
 		{
 			cfg := uri.HeaderParameterEncodingConfig{
 				Name:    "Set-Cookie",
-				Explode: false,
+				Explode: true,
 			}
 			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-				if val, ok := response.SetCookie.Get(); ok {
-					return e.EncodeValue(conv.StringToString(val))
+				if response.SetCookie != nil {
+					return e.EncodeArray(func(e uri.Encoder) error {
+						for i, item := range response.SetCookie {
+							if err := func() error {
+								return e.EncodeValue(conv.StringToString(item))
+							}(); err != nil {
+								return errors.Wrapf(err, "[%d]", i)
+							}
+						}
+						return nil
+					})
 				}
 				return nil
 			}); err != nil {
@@ -112,11 +196,20 @@ func encodeAuthOAuth2RefreshResponse(response *AuthOAuth2RefreshOKHeaders, w htt
 		{
 			cfg := uri.HeaderParameterEncodingConfig{
 				Name:    "Set-Cookie",
-				Explode: false,
+				Explode: true,
 			}
 			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-				if val, ok := response.SetCookie.Get(); ok {
-					return e.EncodeValue(conv.StringToString(val))
+				if response.SetCookie != nil {
+					return e.EncodeArray(func(e uri.Encoder) error {
+						for i, item := range response.SetCookie {
+							if err := func() error {
+								return e.EncodeValue(conv.StringToString(item))
+							}(); err != nil {
+								return errors.Wrapf(err, "[%d]", i)
+							}
+						}
+						return nil
+					})
 				}
 				return nil
 			}); err != nil {
@@ -129,6 +222,20 @@ func encodeAuthOAuth2RefreshResponse(response *AuthOAuth2RefreshOKHeaders, w htt
 
 	e := new(jx.Encoder)
 	response.Response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeAuthOAuth2SessionResponse(response *AuthOAuth2SessionOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}

@@ -16,6 +16,102 @@ func (s *ErrorStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+// AuthConsentFound is response for AuthConsent operation.
+type AuthConsentFound struct {
+	Location OptString
+}
+
+// GetLocation returns the value of Location.
+func (s *AuthConsentFound) GetLocation() OptString {
+	return s.Location
+}
+
+// SetLocation sets the value of Location.
+func (s *AuthConsentFound) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// AuthLoginFound is response for AuthLogin operation.
+type AuthLoginFound struct {
+	Location OptString
+}
+
+// GetLocation returns the value of Location.
+func (s *AuthLoginFound) GetLocation() OptString {
+	return s.Location
+}
+
+// SetLocation sets the value of Location.
+func (s *AuthLoginFound) SetLocation(val OptString) {
+	s.Location = val
+}
+
+type AuthLoginSubmitOK struct {
+	// The URL to redirect the user to.
+	RedirectTo string `json:"redirect_to"`
+}
+
+// GetRedirectTo returns the value of RedirectTo.
+func (s *AuthLoginSubmitOK) GetRedirectTo() string {
+	return s.RedirectTo
+}
+
+// SetRedirectTo sets the value of RedirectTo.
+func (s *AuthLoginSubmitOK) SetRedirectTo(val string) {
+	s.RedirectTo = val
+}
+
+type AuthLoginSubmitReq struct {
+	// The login challenge from Hydra.
+	LoginChallenge string `json:"login_challenge"`
+	// User email address.
+	Email string `json:"email"`
+	// User password.
+	Password string `json:"password"`
+	// Whether to remember the login session.
+	Remember OptBool `json:"remember"`
+}
+
+// GetLoginChallenge returns the value of LoginChallenge.
+func (s *AuthLoginSubmitReq) GetLoginChallenge() string {
+	return s.LoginChallenge
+}
+
+// GetEmail returns the value of Email.
+func (s *AuthLoginSubmitReq) GetEmail() string {
+	return s.Email
+}
+
+// GetPassword returns the value of Password.
+func (s *AuthLoginSubmitReq) GetPassword() string {
+	return s.Password
+}
+
+// GetRemember returns the value of Remember.
+func (s *AuthLoginSubmitReq) GetRemember() OptBool {
+	return s.Remember
+}
+
+// SetLoginChallenge sets the value of LoginChallenge.
+func (s *AuthLoginSubmitReq) SetLoginChallenge(val string) {
+	s.LoginChallenge = val
+}
+
+// SetEmail sets the value of Email.
+func (s *AuthLoginSubmitReq) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetPassword sets the value of Password.
+func (s *AuthLoginSubmitReq) SetPassword(val string) {
+	s.Password = val
+}
+
+// SetRemember sets the value of Remember.
+func (s *AuthLoginSubmitReq) SetRemember(val OptBool) {
+	s.Remember = val
+}
+
 type AuthOAuth2AuthorizeOK struct {
 	// The URL to redirect the user to for authorization.
 	AuthorizationURL string `json:"authorization_url"`
@@ -61,7 +157,7 @@ func (s *AuthOAuth2AuthorizeReq) SetRedirectURI(val string) {
 // AuthOAuth2CallbackFound is response for AuthOAuth2Callback operation.
 type AuthOAuth2CallbackFound struct {
 	Location  OptString
-	SetCookie OptString
+	SetCookie []string
 }
 
 // GetLocation returns the value of Location.
@@ -70,7 +166,7 @@ func (s *AuthOAuth2CallbackFound) GetLocation() OptString {
 }
 
 // GetSetCookie returns the value of SetCookie.
-func (s *AuthOAuth2CallbackFound) GetSetCookie() OptString {
+func (s *AuthOAuth2CallbackFound) GetSetCookie() []string {
 	return s.SetCookie
 }
 
@@ -80,7 +176,7 @@ func (s *AuthOAuth2CallbackFound) SetLocation(val OptString) {
 }
 
 // SetSetCookie sets the value of SetCookie.
-func (s *AuthOAuth2CallbackFound) SetSetCookie(val OptString) {
+func (s *AuthOAuth2CallbackFound) SetSetCookie(val []string) {
 	s.SetCookie = val
 }
 
@@ -101,12 +197,12 @@ func (s *AuthOAuth2LogoutOK) SetSuccess(val bool) {
 
 // AuthOAuth2LogoutOKHeaders wraps AuthOAuth2LogoutOK with response headers.
 type AuthOAuth2LogoutOKHeaders struct {
-	SetCookie OptString
+	SetCookie []string
 	Response  AuthOAuth2LogoutOK
 }
 
 // GetSetCookie returns the value of SetCookie.
-func (s *AuthOAuth2LogoutOKHeaders) GetSetCookie() OptString {
+func (s *AuthOAuth2LogoutOKHeaders) GetSetCookie() []string {
 	return s.SetCookie
 }
 
@@ -116,7 +212,7 @@ func (s *AuthOAuth2LogoutOKHeaders) GetResponse() AuthOAuth2LogoutOK {
 }
 
 // SetSetCookie sets the value of SetCookie.
-func (s *AuthOAuth2LogoutOKHeaders) SetSetCookie(val OptString) {
+func (s *AuthOAuth2LogoutOKHeaders) SetSetCookie(val []string) {
 	s.SetCookie = val
 }
 
@@ -142,12 +238,12 @@ func (s *AuthOAuth2RefreshOK) SetExpiresIn(val int) {
 
 // AuthOAuth2RefreshOKHeaders wraps AuthOAuth2RefreshOK with response headers.
 type AuthOAuth2RefreshOKHeaders struct {
-	SetCookie OptString
+	SetCookie []string
 	Response  AuthOAuth2RefreshOK
 }
 
 // GetSetCookie returns the value of SetCookie.
-func (s *AuthOAuth2RefreshOKHeaders) GetSetCookie() OptString {
+func (s *AuthOAuth2RefreshOKHeaders) GetSetCookie() []string {
 	return s.SetCookie
 }
 
@@ -157,13 +253,40 @@ func (s *AuthOAuth2RefreshOKHeaders) GetResponse() AuthOAuth2RefreshOK {
 }
 
 // SetSetCookie sets the value of SetCookie.
-func (s *AuthOAuth2RefreshOKHeaders) SetSetCookie(val OptString) {
+func (s *AuthOAuth2RefreshOKHeaders) SetSetCookie(val []string) {
 	s.SetCookie = val
 }
 
 // SetResponse sets the value of Response.
 func (s *AuthOAuth2RefreshOKHeaders) SetResponse(val AuthOAuth2RefreshOK) {
 	s.Response = val
+}
+
+type AuthOAuth2SessionOK struct {
+	// Whether the user has a valid session.
+	Authenticated bool `json:"authenticated"`
+	// Access token expiration time in seconds (only present when authenticated).
+	ExpiresIn OptInt `json:"expires_in"`
+}
+
+// GetAuthenticated returns the value of Authenticated.
+func (s *AuthOAuth2SessionOK) GetAuthenticated() bool {
+	return s.Authenticated
+}
+
+// GetExpiresIn returns the value of ExpiresIn.
+func (s *AuthOAuth2SessionOK) GetExpiresIn() OptInt {
+	return s.ExpiresIn
+}
+
+// SetAuthenticated sets the value of Authenticated.
+func (s *AuthOAuth2SessionOK) SetAuthenticated(val bool) {
+	s.Authenticated = val
+}
+
+// SetExpiresIn sets the value of ExpiresIn.
+func (s *AuthOAuth2SessionOK) SetExpiresIn(val OptInt) {
+	s.ExpiresIn = val
 }
 
 type BearerAuth struct {

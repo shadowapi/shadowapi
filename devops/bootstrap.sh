@@ -18,15 +18,11 @@ if [ -f .env ]; then
     echo ".env already exists, skipping secret generation..."
 else
     echo "Generating secrets..."
-    KRATOS_SECRETS_DEFAULT=$(generate_secret 32)
-    KRATOS_SECRETS_COOKIE=$(generate_secret 32)
     HYDRA_SECRETS_SYSTEM=$(generate_secret 32)
     OIDC_PAIRWISE_SALT=$(generate_secret 16)
 
     echo "Creating .env from template..."
-    sed -e "s/__KRATOS_SECRETS_DEFAULT__/$KRATOS_SECRETS_DEFAULT/" \
-        -e "s/__KRATOS_SECRETS_COOKIE__/$KRATOS_SECRETS_COOKIE/" \
-        -e "s/__HYDRA_SECRETS_SYSTEM__/$HYDRA_SECRETS_SYSTEM/" \
+    sed -e "s/__HYDRA_SECRETS_SYSTEM__/$HYDRA_SECRETS_SYSTEM/" \
         -e "s/__OIDC_PAIRWISE_SALT__/$OIDC_PAIRWISE_SALT/" \
         -e "s/__OAUTH2_CLIENT_ID__/pending-creation/" \
         .env.template > .env
@@ -43,10 +39,10 @@ sleep 5
 echo "Running database migrations..."
 make sync-db
 
-# Step 4: Start Kratos and Hydra
-echo "Starting Kratos and Hydra..."
-docker compose up -d kratos hydra
-echo "Waiting for auth services..."
+# Step 4: Start Hydra
+echo "Starting Hydra..."
+docker compose up -d hydra
+echo "Waiting for Hydra..."
 
 # Wait for Hydra to be ready
 for i in {1..30}; do
@@ -90,43 +86,15 @@ else
     echo "Updated .env with client ID"
 fi
 
-# Step 6: Create test user in Kratos (idempotent)
-echo "Creating test user..."
-TEST_EMAIL="admin@example.com"
-TEST_PASSWORD="Admin123!"
-KRATOS_ADMIN_URL="http://kratos:4434"
-
-# Wait for Kratos admin API (using docker exec since port not exposed)
-for i in {1..30}; do
-    if docker compose exec -T kratos wget -q -O /dev/null "$KRATOS_ADMIN_URL/admin/health/ready" 2>/dev/null; then
-        break
-    fi
-    echo "Waiting for Kratos admin... ($i/30)"
-    sleep 2
-done
-
-# Check if user exists (using docker exec)
-EXISTING_USER=$(docker compose exec -T kratos wget -q -O - "$KRATOS_ADMIN_URL/admin/identities" 2>/dev/null | grep -o "$TEST_EMAIL" || echo "")
-
-if [ -n "$EXISTING_USER" ]; then
-    echo "Test user already exists, skipping..."
-else
-    # Create user via Kratos admin API
-    docker compose exec -T kratos wget -q -O /dev/null \
-        --header="Content-Type: application/json" \
-        --post-data='{
-            "schema_id": "default",
-            "traits": {"email": "'"$TEST_EMAIL"'"},
-            "credentials": {"password": {"config": {"password": "'"$TEST_PASSWORD"'"}}}
-        }' \
-        "$KRATOS_ADMIN_URL/admin/identities" 2>/dev/null && \
-    echo "Test user created: $TEST_EMAIL / $TEST_PASSWORD" || \
-    echo "Failed to create test user (may already exist)"
-fi
-
-# Step 7: Start the full stack
+# Step 6: Start the full stack
+# The backend will create the admin user on first startup via ensureInitAdmin
+# if BE_INIT_ADMIN_EMAIL and BE_INIT_ADMIN_PASSWORD are set in .env
 echo "Starting all services..."
 docker compose up -d
+
+# Read test user credentials from .env
+TEST_EMAIL=$(grep "^BE_INIT_ADMIN_EMAIL=" .env | cut -d'=' -f2)
+TEST_PASSWORD=$(grep "^BE_INIT_ADMIN_PASSWORD=" .env | cut -d'=' -f2)
 
 echo ""
 echo "=== Bootstrap Complete ==="

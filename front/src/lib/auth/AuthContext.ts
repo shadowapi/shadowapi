@@ -1,14 +1,21 @@
 import { createContext } from 'react';
-import type { KratosIdentity, KratosSession } from './kratos-client';
+
+// User type based on backend API response
+export interface User {
+  uuid: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_admin: boolean;
+}
 
 export interface AuthContextType {
-  user: KratosIdentity | null;
-  session: KratosSession | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   tokenExpiresIn: number | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, loginChallenge?: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
