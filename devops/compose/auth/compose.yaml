@@ -89,12 +89,10 @@ services:
       start_period: 10s
     labels:
       - traefik.enable=true
-      # Public OAuth2 endpoints
+      # Public OAuth2 endpoints (no strip - Hydra expects /oauth2/auth path)
       - traefik.http.routers.hydra-public.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/oauth2/`)
       - traefik.http.routers.hydra-public.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.routers.hydra-public.priority=35
-      - traefik.http.routers.hydra-public.middlewares=hydra-public-stripprefix
-      - traefik.http.middlewares.hydra-public-stripprefix.stripprefix.prefixes=/oauth2
       - traefik.http.routers.hydra-public.service=hydra-public
       - traefik.http.services.hydra-public.loadbalancer.server.port=4444
       # Well-known endpoints (no strip, passthrough)
@@ -121,12 +119,7 @@ services:
         condition: service_healthy
       kratos:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+    # No healthcheck - container has no wget/curl
     restart: unless-stopped
     networks:
       - default

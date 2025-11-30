@@ -1,7 +1,7 @@
 # ShadowAPI Makefile
 # Run `make help` to see available targets
 
-.PHONY: help init db-shell sync-db api-gen-backend api-gen-frontend api-gen
+.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen
 
 # Default target
 .DEFAULT_GOAL := help
@@ -13,9 +13,12 @@ help: ## Display this help
 
 ##@ Setup
 
+up: ## Bootstrap and start the full stack (first-time setup)
+	./devops/bootstrap.sh
+
 init: ## Initialize the project (reset containers, copy env, start db, migrate)
 	docker compose down -v
-	cp -f .env.example .env
+	cp -f .env.template .env
 	docker compose up -d db
 	$(MAKE) sync-db
 

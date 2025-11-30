@@ -153,15 +153,17 @@ Routes with `layout: 'app'` are protected by default. To make a route public, se
 
 ### Getting started
 
-1. Run `make init` first to initialize the project (resets containers, copies env, starts db, runs migrations).
+1. Run `make up` first to bootstrap the project (generates secrets, starts db, runs migrations, creates OAuth client and test user).
 2. Start the development environment with `docker compose watch`.
    - Backend runs in the container via `air` auto-rebuild.
+   - Test login: `admin@example.com` / `Admin123!`
 
 ### Make targets
 
 Run `make help` to see all available targets. Key ones:
 
-- `make init` – Initialize the project (reset containers, copy env, start db, migrate). **Run this first before starting development.**
+- `make up` – Bootstrap and start the full stack (generates secrets, creates OAuth client, test user). **Run this first before starting development.**
+- `make init` – Reset containers and reinitialize database (destructive).
 - `make sync-db` – Apply schema to the running Postgres (uses Atlas).
 - `make api-gen`, `make api-gen-backend` – Sync code with the OpenAPI spec.
 

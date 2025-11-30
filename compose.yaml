@@ -63,6 +63,10 @@ services:
       - BE_LOG_LEVEL=${BE_LOG_LEVEL}
       - BE_QUEUE_URL=${BE_QUEUE_URL}
       - BE_QUEUE_PREFIX=${BE_QUEUE_PREFIX}
+      - BE_HYDRA_PUBLIC_URL=${BE_HYDRA_PUBLIC_URL}
+      - BE_HYDRA_ADMIN_URL=${BE_HYDRA_ADMIN_URL}
+      - BE_OAUTH2_SPA_CLIENT_ID=${BE_OAUTH2_SPA_CLIENT_ID}
+      - BE_JWKS_CACHE_DURATION=${BE_JWKS_CACHE_DURATION}
     develop:
       watch:
         - action: rebuild
