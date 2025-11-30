@@ -13,6 +13,42 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AuthOAuth2Authorize implements auth-oauth2-authorize operation.
+//
+// Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
+//
+// POST /auth/oauth2/authorize
+func (UnimplementedHandler) AuthOAuth2Authorize(ctx context.Context, req *AuthOAuth2AuthorizeReq) (r *AuthOAuth2AuthorizeOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AuthOAuth2Callback implements auth-oauth2-callback operation.
+//
+// OAuth2 callback handler. Exchanges authorization code for tokens and sets cookies.
+//
+// GET /auth/oauth2/callback
+func (UnimplementedHandler) AuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (r *AuthOAuth2CallbackFound, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AuthOAuth2Logout implements auth-oauth2-logout operation.
+//
+// Logout the user by revoking tokens and clearing cookies.
+//
+// POST /auth/oauth2/logout
+func (UnimplementedHandler) AuthOAuth2Logout(ctx context.Context) (r *AuthOAuth2LogoutOKHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AuthOAuth2Refresh implements auth-oauth2-refresh operation.
+//
+// Refresh the access token using the refresh token cookie.
+//
+// POST /auth/oauth2/refresh
+func (UnimplementedHandler) AuthOAuth2Refresh(ctx context.Context) (r *AuthOAuth2RefreshOKHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateContact implements createContact operation.
 //
 // Create a new contact record.

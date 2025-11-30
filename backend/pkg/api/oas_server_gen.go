@@ -8,6 +8,30 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AuthOAuth2Authorize implements auth-oauth2-authorize operation.
+	//
+	// Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
+	//
+	// POST /auth/oauth2/authorize
+	AuthOAuth2Authorize(ctx context.Context, req *AuthOAuth2AuthorizeReq) (*AuthOAuth2AuthorizeOK, error)
+	// AuthOAuth2Callback implements auth-oauth2-callback operation.
+	//
+	// OAuth2 callback handler. Exchanges authorization code for tokens and sets cookies.
+	//
+	// GET /auth/oauth2/callback
+	AuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (*AuthOAuth2CallbackFound, error)
+	// AuthOAuth2Logout implements auth-oauth2-logout operation.
+	//
+	// Logout the user by revoking tokens and clearing cookies.
+	//
+	// POST /auth/oauth2/logout
+	AuthOAuth2Logout(ctx context.Context) (*AuthOAuth2LogoutOKHeaders, error)
+	// AuthOAuth2Refresh implements auth-oauth2-refresh operation.
+	//
+	// Refresh the access token using the refresh token cookie.
+	//
+	// POST /auth/oauth2/refresh
+	AuthOAuth2Refresh(ctx context.Context) (*AuthOAuth2RefreshOKHeaders, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.

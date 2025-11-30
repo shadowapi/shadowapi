@@ -60,5 +60,5 @@ log:
   leak_sensitive_values: true
 
 strategies:
-  access_token: opaque
+  access_token: jwt
   scope: wildcard

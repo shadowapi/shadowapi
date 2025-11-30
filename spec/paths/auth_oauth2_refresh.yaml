@@ -1,0 +1,31 @@
+post:
+  description: Refresh the access token using the refresh token cookie.
+  operationId: auth-oauth2-refresh
+  security: []
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              expires_in:
+                type: integer
+                description: Access token expiration time in seconds
+            required:
+              - expires_in
+      description: OK
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+          description: Updated token cookies
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth

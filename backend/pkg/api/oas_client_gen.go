@@ -29,6 +29,30 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// AuthOAuth2Authorize invokes auth-oauth2-authorize operation.
+	//
+	// Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
+	//
+	// POST /auth/oauth2/authorize
+	AuthOAuth2Authorize(ctx context.Context, request *AuthOAuth2AuthorizeReq) (*AuthOAuth2AuthorizeOK, error)
+	// AuthOAuth2Callback invokes auth-oauth2-callback operation.
+	//
+	// OAuth2 callback handler. Exchanges authorization code for tokens and sets cookies.
+	//
+	// GET /auth/oauth2/callback
+	AuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (*AuthOAuth2CallbackFound, error)
+	// AuthOAuth2Logout invokes auth-oauth2-logout operation.
+	//
+	// Logout the user by revoking tokens and clearing cookies.
+	//
+	// POST /auth/oauth2/logout
+	AuthOAuth2Logout(ctx context.Context) (*AuthOAuth2LogoutOKHeaders, error)
+	// AuthOAuth2Refresh invokes auth-oauth2-refresh operation.
+	//
+	// Refresh the access token using the refresh token cookie.
+	//
+	// POST /auth/oauth2/refresh
+	AuthOAuth2Refresh(ctx context.Context) (*AuthOAuth2RefreshOKHeaders, error)
 	// CreateContact invokes createContact operation.
 	//
 	// Create a new contact record.
@@ -660,6 +684,329 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// AuthOAuth2Authorize invokes auth-oauth2-authorize operation.
+//
+// Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
+//
+// POST /auth/oauth2/authorize
+func (c *Client) AuthOAuth2Authorize(ctx context.Context, request *AuthOAuth2AuthorizeReq) (*AuthOAuth2AuthorizeOK, error) {
+	res, err := c.sendAuthOAuth2Authorize(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendAuthOAuth2Authorize(ctx context.Context, request *AuthOAuth2AuthorizeReq) (res *AuthOAuth2AuthorizeOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-oauth2-authorize"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/auth/oauth2/authorize"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthOAuth2AuthorizeOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/oauth2/authorize"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAuthOAuth2AuthorizeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthOAuth2AuthorizeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AuthOAuth2Callback invokes auth-oauth2-callback operation.
+//
+// OAuth2 callback handler. Exchanges authorization code for tokens and sets cookies.
+//
+// GET /auth/oauth2/callback
+func (c *Client) AuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (*AuthOAuth2CallbackFound, error) {
+	res, err := c.sendAuthOAuth2Callback(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendAuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (res *AuthOAuth2CallbackFound, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-oauth2-callback"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/auth/oauth2/callback"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthOAuth2CallbackOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/oauth2/callback"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "code" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "code",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Code))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "state" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "state",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.State))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthOAuth2CallbackResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AuthOAuth2Logout invokes auth-oauth2-logout operation.
+//
+// Logout the user by revoking tokens and clearing cookies.
+//
+// POST /auth/oauth2/logout
+func (c *Client) AuthOAuth2Logout(ctx context.Context) (*AuthOAuth2LogoutOKHeaders, error) {
+	res, err := c.sendAuthOAuth2Logout(ctx)
+	return res, err
+}
+
+func (c *Client) sendAuthOAuth2Logout(ctx context.Context) (res *AuthOAuth2LogoutOKHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-oauth2-logout"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/auth/oauth2/logout"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthOAuth2LogoutOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/oauth2/logout"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthOAuth2LogoutResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AuthOAuth2Refresh invokes auth-oauth2-refresh operation.
+//
+// Refresh the access token using the refresh token cookie.
+//
+// POST /auth/oauth2/refresh
+func (c *Client) AuthOAuth2Refresh(ctx context.Context) (*AuthOAuth2RefreshOKHeaders, error) {
+	res, err := c.sendAuthOAuth2Refresh(ctx)
+	return res, err
+}
+
+func (c *Client) sendAuthOAuth2Refresh(ctx context.Context) (res *AuthOAuth2RefreshOKHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("auth-oauth2-refresh"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/auth/oauth2/refresh"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AuthOAuth2RefreshOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/auth/oauth2/refresh"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAuthOAuth2RefreshResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // CreateContact invokes createContact operation.

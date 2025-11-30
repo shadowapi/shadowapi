@@ -198,6 +198,14 @@ paths:
     $ref: "paths/worker_jobs_uuid.yaml"
   /workerjobs/{uuid}/cancel:
     $ref: "paths/worker_jobs_cancel.yaml"
+  /auth/oauth2/authorize:
+    $ref: "paths/auth_oauth2_authorize.yaml"
+  /auth/oauth2/callback:
+    $ref: "paths/auth_oauth2_callback.yaml"
+  /auth/oauth2/refresh:
+    $ref: "paths/auth_oauth2_refresh.yaml"
+  /auth/oauth2/logout:
+    $ref: "paths/auth_oauth2_logout.yaml"
 
 servers:
   - description: Local development server

@@ -61,6 +61,105 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
+			case 'a': // Prefix: "auth/oauth2/"
+				origElem := elem
+				if l := len("auth/oauth2/"); len(elem) >= l && elem[0:l] == "auth/oauth2/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'a': // Prefix: "authorize"
+					origElem := elem
+					if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleAuthOAuth2AuthorizeRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'c': // Prefix: "callback"
+					origElem := elem
+					if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleAuthOAuth2CallbackRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'l': // Prefix: "logout"
+					origElem := elem
+					if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleAuthOAuth2LogoutRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "refresh"
+					origElem := elem
+					if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleAuthOAuth2RefreshRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'c': // Prefix: "contact"
 				origElem := elem
 				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
@@ -1688,6 +1787,121 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
+			case 'a': // Prefix: "auth/oauth2/"
+				origElem := elem
+				if l := len("auth/oauth2/"); len(elem) >= l && elem[0:l] == "auth/oauth2/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'a': // Prefix: "authorize"
+					origElem := elem
+					if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = AuthOAuth2AuthorizeOperation
+							r.summary = ""
+							r.operationID = "auth-oauth2-authorize"
+							r.pathPattern = "/auth/oauth2/authorize"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'c': // Prefix: "callback"
+					origElem := elem
+					if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = AuthOAuth2CallbackOperation
+							r.summary = ""
+							r.operationID = "auth-oauth2-callback"
+							r.pathPattern = "/auth/oauth2/callback"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'l': // Prefix: "logout"
+					origElem := elem
+					if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = AuthOAuth2LogoutOperation
+							r.summary = ""
+							r.operationID = "auth-oauth2-logout"
+							r.pathPattern = "/auth/oauth2/logout"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "refresh"
+					origElem := elem
+					if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = AuthOAuth2RefreshOperation
+							r.summary = ""
+							r.operationID = "auth-oauth2-refresh"
+							r.pathPattern = "/auth/oauth2/refresh"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 'c': // Prefix: "contact"
 				origElem := elem
 				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {

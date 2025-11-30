@@ -1,0 +1,37 @@
+get:
+  description: OAuth2 callback handler. Exchanges authorization code for tokens and sets cookies.
+  operationId: auth-oauth2-callback
+  security: []
+  parameters:
+    - name: code
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The authorization code from Hydra
+    - name: state
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The state parameter for CSRF validation
+  responses:
+    "302":
+      description: Redirect to frontend after successful token exchange
+      headers:
+        Location:
+          schema:
+            type: string
+          description: URL to redirect to
+        Set-Cookie:
+          schema:
+            type: string
+          description: Token cookies
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth

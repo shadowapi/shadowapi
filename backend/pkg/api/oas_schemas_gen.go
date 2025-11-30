@@ -16,6 +16,156 @@ func (s *ErrorStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+type AuthOAuth2AuthorizeOK struct {
+	// The URL to redirect the user to for authorization.
+	AuthorizationURL string `json:"authorization_url"`
+	// The state parameter for CSRF protection.
+	State string `json:"state"`
+}
+
+// GetAuthorizationURL returns the value of AuthorizationURL.
+func (s *AuthOAuth2AuthorizeOK) GetAuthorizationURL() string {
+	return s.AuthorizationURL
+}
+
+// GetState returns the value of State.
+func (s *AuthOAuth2AuthorizeOK) GetState() string {
+	return s.State
+}
+
+// SetAuthorizationURL sets the value of AuthorizationURL.
+func (s *AuthOAuth2AuthorizeOK) SetAuthorizationURL(val string) {
+	s.AuthorizationURL = val
+}
+
+// SetState sets the value of State.
+func (s *AuthOAuth2AuthorizeOK) SetState(val string) {
+	s.State = val
+}
+
+type AuthOAuth2AuthorizeReq struct {
+	// Where to redirect after successful authentication.
+	RedirectURI string `json:"redirect_uri"`
+}
+
+// GetRedirectURI returns the value of RedirectURI.
+func (s *AuthOAuth2AuthorizeReq) GetRedirectURI() string {
+	return s.RedirectURI
+}
+
+// SetRedirectURI sets the value of RedirectURI.
+func (s *AuthOAuth2AuthorizeReq) SetRedirectURI(val string) {
+	s.RedirectURI = val
+}
+
+// AuthOAuth2CallbackFound is response for AuthOAuth2Callback operation.
+type AuthOAuth2CallbackFound struct {
+	Location  OptString
+	SetCookie OptString
+}
+
+// GetLocation returns the value of Location.
+func (s *AuthOAuth2CallbackFound) GetLocation() OptString {
+	return s.Location
+}
+
+// GetSetCookie returns the value of SetCookie.
+func (s *AuthOAuth2CallbackFound) GetSetCookie() OptString {
+	return s.SetCookie
+}
+
+// SetLocation sets the value of Location.
+func (s *AuthOAuth2CallbackFound) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetSetCookie sets the value of SetCookie.
+func (s *AuthOAuth2CallbackFound) SetSetCookie(val OptString) {
+	s.SetCookie = val
+}
+
+type AuthOAuth2LogoutOK struct {
+	// Whether logout was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns the value of Success.
+func (s *AuthOAuth2LogoutOK) GetSuccess() bool {
+	return s.Success
+}
+
+// SetSuccess sets the value of Success.
+func (s *AuthOAuth2LogoutOK) SetSuccess(val bool) {
+	s.Success = val
+}
+
+// AuthOAuth2LogoutOKHeaders wraps AuthOAuth2LogoutOK with response headers.
+type AuthOAuth2LogoutOKHeaders struct {
+	SetCookie OptString
+	Response  AuthOAuth2LogoutOK
+}
+
+// GetSetCookie returns the value of SetCookie.
+func (s *AuthOAuth2LogoutOKHeaders) GetSetCookie() OptString {
+	return s.SetCookie
+}
+
+// GetResponse returns the value of Response.
+func (s *AuthOAuth2LogoutOKHeaders) GetResponse() AuthOAuth2LogoutOK {
+	return s.Response
+}
+
+// SetSetCookie sets the value of SetCookie.
+func (s *AuthOAuth2LogoutOKHeaders) SetSetCookie(val OptString) {
+	s.SetCookie = val
+}
+
+// SetResponse sets the value of Response.
+func (s *AuthOAuth2LogoutOKHeaders) SetResponse(val AuthOAuth2LogoutOK) {
+	s.Response = val
+}
+
+type AuthOAuth2RefreshOK struct {
+	// Access token expiration time in seconds.
+	ExpiresIn int `json:"expires_in"`
+}
+
+// GetExpiresIn returns the value of ExpiresIn.
+func (s *AuthOAuth2RefreshOK) GetExpiresIn() int {
+	return s.ExpiresIn
+}
+
+// SetExpiresIn sets the value of ExpiresIn.
+func (s *AuthOAuth2RefreshOK) SetExpiresIn(val int) {
+	s.ExpiresIn = val
+}
+
+// AuthOAuth2RefreshOKHeaders wraps AuthOAuth2RefreshOK with response headers.
+type AuthOAuth2RefreshOKHeaders struct {
+	SetCookie OptString
+	Response  AuthOAuth2RefreshOK
+}
+
+// GetSetCookie returns the value of SetCookie.
+func (s *AuthOAuth2RefreshOKHeaders) GetSetCookie() OptString {
+	return s.SetCookie
+}
+
+// GetResponse returns the value of Response.
+func (s *AuthOAuth2RefreshOKHeaders) GetResponse() AuthOAuth2RefreshOK {
+	return s.Response
+}
+
+// SetSetCookie sets the value of SetCookie.
+func (s *AuthOAuth2RefreshOKHeaders) SetSetCookie(val OptString) {
+	s.SetCookie = val
+}
+
+// SetResponse sets the value of Response.
+func (s *AuthOAuth2RefreshOKHeaders) SetResponse(val AuthOAuth2RefreshOK) {
+	s.Response = val
+}
+
 type BearerAuth struct {
 	Token string
 }

@@ -1,0 +1,31 @@
+post:
+  description: Logout the user by revoking tokens and clearing cookies.
+  operationId: auth-oauth2-logout
+  security: []
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              success:
+                type: boolean
+                description: Whether logout was successful
+            required:
+              - success
+      description: OK
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+          description: Expired cookie headers
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth

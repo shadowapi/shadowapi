@@ -83,6 +83,22 @@ type Config struct {
 		AppID   int    `yaml:"app_id" json:"app_id" env:"TG_APP_ID"`
 	}
 
+	// OAuth2 settings for Hydra integration
+	OAuth2 struct {
+		// HydraPublicURL is the URL to Hydra's public endpoints (token, authorize)
+		HydraPublicURL string `yaml:"hydra_public_url" json:"hydra_public_url" env:"BE_HYDRA_PUBLIC_URL" envDefault:"http://hydra:4444"`
+		// HydraAdminURL is the URL to Hydra's admin endpoints (introspection, revocation)
+		HydraAdminURL string `yaml:"hydra_admin_url" json:"hydra_admin_url" env:"BE_HYDRA_ADMIN_URL" envDefault:"http://hydra:4445"`
+		// SPAClientID is the OAuth2 client ID for the SPA frontend
+		SPAClientID string `yaml:"spa_client_id" json:"spa_client_id" env:"BE_OAUTH2_SPA_CLIENT_ID" envDefault:"shadowapi-spa"`
+		// JWKSCacheDuration is how long to cache JWKS keys in seconds
+		JWKSCacheDuration int `yaml:"jwks_cache_duration" json:"jwks_cache_duration" env:"BE_JWKS_CACHE_DURATION" envDefault:"300"`
+		// CookieDomain is the domain for auth cookies
+		CookieDomain string `yaml:"cookie_domain" json:"cookie_domain" env:"BE_OAUTH2_COOKIE_DOMAIN" envDefault:"localtest.me"`
+		// CookieSecure sets the Secure flag on cookies (should be true in production)
+		CookieSecure bool `yaml:"cookie_secure" json:"cookie_secure" env:"BE_OAUTH2_COOKIE_SECURE" envDefault:"false"`
+	} `yaml:"oauth2" json:"oauth2"`
+
 	configPath string
 	ext        string
 }

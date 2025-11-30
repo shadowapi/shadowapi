@@ -1,0 +1,43 @@
+post:
+  description: Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
+  operationId: auth-oauth2-authorize
+  security: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            redirect_uri:
+              type: string
+              description: Where to redirect after successful authentication
+          required:
+            - redirect_uri
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              authorization_url:
+                type: string
+                description: The URL to redirect the user to for authorization
+              state:
+                type: string
+                description: The state parameter for CSRF protection
+            required:
+              - authorization_url
+              - state
+      description: OK
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth
