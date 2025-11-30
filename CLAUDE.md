@@ -49,7 +49,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Generation & migrations
 
-- Run `make api-gen` after editing `spec/`. This updates the Go server.
+- Run `make api-gen` after editing `spec/`. This updates both the Go server (`backend/pkg/api/`) and TypeScript API types (`front/src/api/v1.d.ts`).
 - Run `sqlc generate` (and `sqlc vet`) in the backend directory after updating the SQL schema. SQL lives in `db/schema.sql` + `db/tg.sql`.
 - `make sync-db` concatenates schema files and applies them via Atlas to the running Postgres instance.
 
@@ -88,6 +88,7 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/src/entry-client.tsx` – Client entry point; uses `hydrateRoot` for SSR pages, `createRoot` for CSR
 - `front/src/entry-server.tsx` – SSR render function with Ant Design CSS-in-JS extraction
 - `front/src/routes.tsx` – Centralized route configuration with `ssr` and `protected` flags per route
+- `front/src/api/v1.d.ts` – Generated TypeScript types from OpenAPI spec (do not edit manually, regenerate with `make api-gen`)
 - `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
 - `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
 - `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
@@ -100,6 +101,7 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `npm run dev` – Start Vite dev server (CSR only, used by frontend container)
 - `npm run dev:ssr` – Start Express SSR server with Vite middleware (used by SSR container)
 - `npm run build` – Build both client and server bundles for production
+- `npm run generate-api-client` – Generate TypeScript types from OpenAPI spec (called by `make api-gen`)
 
 ### Adding new pages
 
@@ -124,12 +126,13 @@ The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handle
 **Authentication flow:**
 1. On app load, `AuthProvider` checks for existing session by attempting token refresh
 2. Protected routes (`/` and `/app/*`) redirect to `/login` if no valid session
-3. User clicks login → Frontend initiates OAuth2 flow → Hydra redirects to `/api/v1/auth/login`
-4. Backend shows login page with `login_challenge` → User enters credentials
-5. Backend validates credentials against database, accepts Hydra login → redirects to consent
-6. Backend auto-approves consent → Hydra issues tokens → Backend sets HTTP-only cookies
-7. Tokens stored in `shadowapi_access_token` and `shadowapi_refresh_token` cookies
-8. Logout revokes tokens and clears cookies
+3. Visiting `/login` without `login_challenge` auto-initiates OAuth2 flow (shows loading spinner)
+4. Hydra redirects to `/api/v1/auth/login` → Backend redirects to `/login?login_challenge=xxx`
+5. Login form appears with challenge → User enters credentials
+6. Backend validates credentials against database, accepts Hydra login → redirects to consent
+7. Backend auto-approves consent → Hydra issues tokens → Backend sets HTTP-only cookies
+8. Tokens stored in `shadowapi_access_token` and `shadowapi_refresh_token` cookies
+9. Logout revokes tokens and clears cookies
 
 **Using auth in components:**
 ```typescript
