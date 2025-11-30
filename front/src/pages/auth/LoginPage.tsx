@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router';
-import { Card, Form, Input, Button, Alert, Typography } from 'antd';
+import { Card, Form, Input, Button, Alert, Typography, Spin } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../../lib/auth';
 
@@ -17,6 +17,7 @@ function LoginPage() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [form] = Form.useForm();
+  const redirectInitiated = useRef(false);
 
   // Get login_challenge from URL if present (OAuth2 flow from Hydra)
   const loginChallenge = searchParams.get('login_challenge');
@@ -32,6 +33,18 @@ function LoginPage() {
     }
   }, [isAuthenticated, navigate, from, loginChallenge]);
 
+  // Auto-initiate OAuth2 flow when no login_challenge is present
+  useEffect(() => {
+    if (!loginChallenge && !isAuthenticated && !isLoading && !redirectInitiated.current) {
+      redirectInitiated.current = true;
+      // Calling login with empty credentials initiates the OAuth2 flow
+      login('', '', undefined).catch(() => {
+        // Reset flag if redirect fails so user can retry
+        redirectInitiated.current = false;
+      });
+    }
+  }, [loginChallenge, isAuthenticated, isLoading, login]);
+
   const handleSubmit = async (values: LoginFormValues) => {
     clearError();
     try {
@@ -40,6 +53,28 @@ function LoginPage() {
       // Error is handled by auth context
     }
   };
+
+  // Show loading state when no login_challenge (redirecting to OAuth2 flow)
+  if (!loginChallenge) {
+    return (
+      <Card style={{ width: 400, maxWidth: '100%' }}>
+        <div style={{ textAlign: 'center', padding: 24 }}>
+          <Spin size="large" />
+          <Typography.Text style={{ display: 'block', marginTop: 16 }}>
+            Redirecting to login...
+          </Typography.Text>
+          {error && (
+            <Alert
+              message={error}
+              type="error"
+              showIcon
+              style={{ marginTop: 16 }}
+            />
+          )}
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card style={{ width: 400, maxWidth: '100%' }}>

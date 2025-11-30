@@ -11,7 +11,8 @@
     "build:server": "vite build --ssr src/entry-server.tsx --outDir dist/server",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "generate-api-client": "openapi-typescript ../spec/openapi.yaml -o ./src/api/v1.d.ts"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.23.0",
@@ -36,6 +37,7 @@
     "tsx": "^4.19.4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "openapi-typescript": "^7.6.1"
   }
 }
