@@ -28,6 +28,7 @@ export interface RouteConfig {
   layout: 'page' | 'app' | 'auth';
   ssr: boolean;
   protected?: boolean;
+  showBreadcrumb?: boolean;
 }
 
 // Wrap lazy components with Suspense
@@ -74,7 +75,8 @@ export const routes: RouteConfig[] = [
     path: '/page/tenant',
     element: <TenantSelectionPage />,
     layout: 'page',
-    ssr: true
+    ssr: true,
+    showBreadcrumb: false
   },
   {
     path: '/page/about',

@@ -149,8 +149,15 @@ function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <BaseLayout>
-      <div style={{ padding: '0 48px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0' }}>
+      <div
+        style={{
+          padding: '0 48px',
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0', flexShrink: 0 }}>
           <Breadcrumb
             items={[
               { title: <Link to="/">Dashboard</Link> },
@@ -169,7 +176,13 @@ function AppLayout({ children }: AppLayoutProps) {
           </Dropdown>
         </div>
         <Layout
-          style={{ padding: '24px 0', background: colorBgContainer, borderRadius: borderRadiusLG }}
+          style={{
+            padding: '24px 0',
+            background: colorBgContainer,
+            borderRadius: borderRadiusLG,
+            flex: 1,
+            marginBottom: 24,
+          }}
         >
           <Sider style={{ background: colorBgContainer }} width={250}>
             <Menu
@@ -180,7 +193,7 @@ function AppLayout({ children }: AppLayoutProps) {
               items={menuItems}
             />
           </Sider>
-          <Content style={{ padding: '0 24px', minHeight: 280 }}>
+          <Content style={{ padding: '0 24px' }}>
             {children}
           </Content>
         </Layout>

@@ -37,7 +37,7 @@ func (h *Handler) DB() *pgxpool.Pool {
 	return h.dbp
 }
 
-// ensureInitTenantAndAdmin creates the internal tenant and first admin user if they don't exist.
+// ensureInitTenantAndAdmin creates the default tenants and first admin user if they don't exist.
 func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 	if h.cfg.InitAdmin.Email == "" || h.cfg.InitAdmin.Password == "" {
 		return nil
@@ -45,25 +45,51 @@ func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 
 	q := query.New(h.dbp)
 
-	// Step 1: Ensure "internal" tenant exists
+	// Define tenants to create
+	tenants := []struct {
+		name        string
+		displayName string
+	}{
+		{"internal", "Internal"},
+		{"demo", "Demo"},
+	}
+
+	// Hash password once for all tenants
+	hashed, err := bcrypt.GenerateFromPassword([]byte(h.cfg.InitAdmin.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	for _, t := range tenants {
+		if err := h.ensureTenantWithAdmin(ctx, q, t.name, t.displayName, string(hashed)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ensureTenantWithAdmin creates a tenant and admin user if they don't exist.
+func (h *Handler) ensureTenantWithAdmin(ctx context.Context, q *query.Queries, name, displayName, hashedPassword string) error {
+	// Step 1: Ensure tenant exists
 	var tenantUUID pgtype.UUID
-	tenant, err := q.GetTenantByName(ctx, "internal")
+	tenant, err := q.GetTenantByName(ctx, name)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			// Create internal tenant
+			// Create tenant
 			tUUID := uuid.Must(uuid.NewV7())
 			tenantUUID = pgtype.UUID{Bytes: tUUID, Valid: true}
 			_, err = q.CreateTenant(ctx, query.CreateTenantParams{
 				UUID:        tenantUUID,
-				Name:        "internal",
-				DisplayName: "Internal",
+				Name:        name,
+				DisplayName: displayName,
 				IsEnabled:   true,
 				Settings:    []byte(`{}`),
 			})
 			if err != nil {
-				return errors.New("failed to create internal tenant: " + err.Error())
+				return errors.New("failed to create " + name + " tenant: " + err.Error())
 			}
-			h.log.Info("created internal tenant")
+			h.log.Info("created tenant", "name", name)
 		} else {
 			return err
 		}
@@ -73,7 +99,7 @@ func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 		tenantUUID = pgtype.UUID{Bytes: bytes, Valid: true}
 	}
 
-	// Step 2: Ensure admin user exists in internal tenant
+	// Step 2: Ensure admin user exists in tenant
 	users, err := q.ListUsersByTenant(ctx, query.ListUsersByTenantParams{
 		TenantUuid: tenantUUID,
 		Offset:     0,
@@ -87,16 +113,12 @@ func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 	}
 
 	// Create admin user
-	hashed, err := bcrypt.GenerateFromPassword([]byte(h.cfg.InitAdmin.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
 	uid := uuid.Must(uuid.NewV7())
 	_, err = q.CreateUser(ctx, query.CreateUserParams{
 		UUID:       pgtype.UUID{Bytes: uid, Valid: true},
 		TenantUuid: tenantUUID,
 		Email:      h.cfg.InitAdmin.Email,
-		Password:   string(hashed),
+		Password:   hashedPassword,
 		FirstName:  "Admin",
 		LastName:   "User",
 		IsEnabled:  true,
@@ -106,7 +128,7 @@ func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	h.log.Info("created admin user in internal tenant", "email", h.cfg.InitAdmin.Email)
+	h.log.Info("created admin user in tenant", "tenant", name, "email", h.cfg.InitAdmin.Email)
 	return nil
 }
 

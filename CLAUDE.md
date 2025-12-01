@@ -180,9 +180,9 @@ The application supports multi-tenancy with subdomain-based tenant isolation:
 3. Redirect to `http://{tenant}.localtest.me`
 4. Login if not authenticated for that tenant
 
-**Default tenant:**
-- `internal` tenant is created automatically on first startup
-- Admin user is created in `internal` tenant using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
+**Default tenants:**
+- `internal` and `demo` tenants are created automatically on first startup
+- Admin user is created in both tenants using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
 
 **Environment variables:**
 - `BE_TENANT_BASE_DOMAIN` – Base domain for tenant subdomains (default: `localtest.me`)
@@ -224,7 +224,7 @@ Run `make help` to see all available targets. Key ones:
 - **Traefik v3 regex note:** Wildcard subdomain matching uses `HostRegexp(`.+\.${BE_DOMAIN}`)` syntax. Avoid anchors (`^$`) which don't work reliably in v3.
 - Access the app at `http://localtest.me` or tenant-specific `http://{tenant}.localtest.me`
 - Tenant selection page: `http://localtest.me/page/tenant`
-- Internal tenant (default): `http://internal.localtest.me`
+- Default tenants: `http://internal.localtest.me` and `http://demo.localtest.me`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
 ### Authentication Stack

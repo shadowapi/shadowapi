@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router';
 const { Content } = Layout;
 
 import BaseLayout from './BaseLayout';
+import { getRouteConfig } from '../routes';
 
 const breadcrumbNameMap: Record<string, string> = {
   '/page/tenant': 'Select Tenant',
@@ -25,6 +26,9 @@ function PageLayout({ children }: PageLayoutProps) {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const routeConfig = getRouteConfig(location.pathname);
+  const showBreadcrumb = routeConfig?.showBreadcrumb !== false;
+
   const pathSnippets = location.pathname.split('/').filter((i) => i && i !== 'page');
 
   const breadcrumbItems = [
@@ -44,20 +48,30 @@ function PageLayout({ children }: PageLayoutProps) {
 
   return (
     <BaseLayout>
-      <div style={{ padding: '0 48px' }}>
-        <Breadcrumb
-          style={{ margin: '16px 0' }}
-          items={breadcrumbItems}
-        />
+      <div
+        style={{
+          padding: '0 48px',
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+        }}
+      >
+        {showBreadcrumb && (
+          <Breadcrumb
+            style={{ margin: '16px 0', flexShrink: 0 }}
+            items={breadcrumbItems}
+          />
+        )}
         <div
           style={{
             background: colorBgContainer,
-            minHeight: 280,
             padding: 24,
             borderRadius: borderRadiusLG,
+            flex: 1,
+            marginBottom: 24,
           }}
         >
-          <Content>
+          <Content style={{ height: '100%' }}>
             {children}
           </Content>
         </div>
