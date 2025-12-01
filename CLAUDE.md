@@ -127,7 +127,9 @@ The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handle
 
 **Authentication flow:**
 1. On app load, `AuthProvider` checks for existing session by attempting token refresh
-2. Protected routes (`/` and `/app/*`) redirect to `/login` if no valid session
+2. Protected routes (`/` and `/app/*`) check authentication:
+   - **Root domain** (`localtest.me`): Unauthenticated users redirect to `/page/tenant` (tenant selection)
+   - **Tenant subdomain** (`internal.localtest.me`): Unauthenticated users redirect to `/login`
 3. Visiting `/login` without `login_challenge` auto-initiates OAuth2 flow (shows loading spinner)
 4. Hydra redirects to `/api/v1/auth/login` → Backend redirects to `/login?login_challenge=xxx`
 5. Login form appears with challenge → User enters credentials
@@ -211,12 +213,13 @@ Run `make help` to see all available targets. Key ones:
 
 ### Compose topology
 
-- Traefik routes requests based on path prefix with priority (supports wildcard subdomains `*.localtest.me`):
+- Traefik v3 routes requests based on path prefix with priority (supports wildcard subdomains `*.localtest.me`):
   - `/.well-known/*` (priority 40) → Hydra OAuth2/OIDC discovery (port 4444)
   - `/oauth2/*` (priority 35) → Hydra OAuth2 endpoints (port 4444)
   - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
   - `/page/*` (priority 20) → SSR container (port 3000)
   - Everything else (priority 1) → Frontend container (port 5173)
+- **Traefik v3 regex note:** Wildcard subdomain matching uses `HostRegexp(`.+\.${BE_DOMAIN}`)` syntax. Avoid anchors (`^$`) which don't work reliably in v3.
 - Access the app at `http://localtest.me` or tenant-specific `http://{tenant}.localtest.me`
 - Tenant selection page: `http://localtest.me/page/tenant`
 - Internal tenant (default): `http://internal.localtest.me`
