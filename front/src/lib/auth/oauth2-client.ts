@@ -91,7 +91,7 @@ export async function refreshToken(): Promise<OAuth2RefreshResponse> {
 
 /**
  * Check session status without triggering token refresh.
- * Always returns successfully (never throws) to avoid console errors.
+ * Returns unauthenticated for most errors, but throws for 404 (tenant not found).
  */
 export async function checkSession(): Promise<OAuth2SessionResponse> {
   try {
@@ -103,13 +103,22 @@ export async function checkSession(): Promise<OAuth2SessionResponse> {
       },
     });
 
+    // 404 means tenant doesn't exist - throw to signal this to the caller
+    if (response.status === 404) {
+      throw new OAuth2Error('Tenant not found', 404);
+    }
+
     if (!response.ok) {
-      // Even on error, return unauthenticated instead of throwing
+      // Other errors - return unauthenticated instead of throwing
       return { authenticated: false };
     }
 
     return response.json();
-  } catch {
+  } catch (err) {
+    // Re-throw OAuth2Error (including 404 tenant not found)
+    if (err instanceof OAuth2Error) {
+      throw err;
+    }
     // Network error - return unauthenticated
     return { authenticated: false };
   }

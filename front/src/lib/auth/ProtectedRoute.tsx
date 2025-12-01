@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { Spin } from 'antd';
 import { useAuth } from './useAuth';
@@ -16,11 +16,31 @@ const isRootDomain = (): boolean => {
   return parts.length <= 2;
 };
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
-  const location = useLocation();
+// Helper to get the base domain (e.g., localtest.me from internal.localtest.me)
+const getBaseDomain = (): string => {
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  if (parts.length >= 2) {
+    return parts.slice(-2).join('.');
+  }
+  return hostname;
+};
 
-  if (isLoading) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, tenantNotFound } = useAuth();
+  const location = useLocation();
+  const redirectingRef = useRef(false);
+
+  // Handle redirect for non-existent tenant via effect
+  useEffect(() => {
+    if (tenantNotFound && !redirectingRef.current) {
+      redirectingRef.current = true;
+      const baseDomain = getBaseDomain();
+      window.location.href = `${window.location.protocol}//${baseDomain}/page/tenant`;
+    }
+  }, [tenantNotFound]);
+
+  if (isLoading || tenantNotFound) {
     return (
       <div
         style={{
@@ -35,11 +55,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // Always redirect root domain users to tenant selection
+  // (even if authenticated - root domain has no tenant context)
+  if (isRootDomain()) {
+    return <Navigate to="/page/tenant" state={{ from: location }} replace />;
+  }
+
   if (!isAuthenticated) {
-    // On root domain, redirect to tenant selection
-    if (isRootDomain()) {
-      return <Navigate to="/page/tenant" state={{ from: location }} replace />;
-    }
     // On tenant subdomain, redirect to login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

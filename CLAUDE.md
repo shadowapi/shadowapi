@@ -128,7 +128,8 @@ The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handle
 **Authentication flow:**
 1. On app load, `AuthProvider` checks for existing session by attempting token refresh
 2. Protected routes (`/` and `/app/*`) check authentication:
-   - **Root domain** (`localtest.me`): Unauthenticated users redirect to `/page/tenant` (tenant selection)
+   - **Root domain** (`localtest.me`): All users redirect to `/page/tenant` (tenant selection) - root domain has no tenant context
+   - **Non-existent tenant** (`fake.localtest.me`): Redirects to `/page/tenant` on root domain
    - **Tenant subdomain** (`internal.localtest.me`): Unauthenticated users redirect to `/login`
 3. Visiting `/login` without `login_challenge` auto-initiates OAuth2 flow (shows loading spinner)
 4. Hydra redirects to `/api/v1/auth/login` → Backend redirects to `/login?login_challenge=xxx`
@@ -143,8 +144,9 @@ The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handle
 import { useAuth } from '../lib/auth';
 
 function MyComponent() {
-  const { user, isAuthenticated, login, logout } = useAuth();
+  const { user, isAuthenticated, tenantNotFound, login, logout } = useAuth();
   // user?.email, user?.first_name, etc.
+  // tenantNotFound is true if the current subdomain tenant doesn't exist
 }
 ```
 

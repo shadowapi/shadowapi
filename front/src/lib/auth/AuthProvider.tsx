@@ -6,6 +6,8 @@ import {
   logout as oauth2Logout,
   OAuth2Error,
 } from './oauth2-client';
+
+const TENANT_NOT_FOUND_STATUS = 404;
 import { AuthContext, type AuthContextType, type User } from './AuthContext';
 
 const AUTH_LOGIN_URL = '/api/v1/auth/login';
@@ -36,17 +38,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number | null>(null);
+  const [tenantNotFound, setTenantNotFound] = useState(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check OAuth2 session on mount without triggering token refresh
   const checkSession = useCallback(async () => {
-    const session = await oauth2CheckSession();
-    if (session.authenticated) {
-      setIsAuthenticated(true);
-      setTokenExpiresIn(session.expires_in ?? null);
-      // Note: User info would typically come from the JWT claims or a /userinfo endpoint
-      // For now, we mark as authenticated without user details
-    } else {
+    try {
+      const session = await oauth2CheckSession();
+      if (session.authenticated) {
+        setIsAuthenticated(true);
+        setTokenExpiresIn(session.expires_in ?? null);
+        // Note: User info would typically come from the JWT claims or a /userinfo endpoint
+        // For now, we mark as authenticated without user details
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        setTokenExpiresIn(null);
+      }
+    } catch (err) {
+      // Check if this is a 404 from non-existent tenant
+      if (err instanceof OAuth2Error && err.status === TENANT_NOT_FOUND_STATUS) {
+        setTenantNotFound(true);
+      }
       setIsAuthenticated(false);
       setUser(null);
       setTokenExpiresIn(null);
@@ -173,6 +186,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     error,
     tokenExpiresIn,
+    tenantNotFound,
     login,
     logout,
     clearError,
