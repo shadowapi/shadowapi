@@ -283,7 +283,7 @@ docker compose exec hydra hydra create client \
 
 ## Known issues
 
-- **Token validation:** The backend currently does not properly validate authentication tokens. This is a known security issue that needs to be addressed before production deployment.
+None currently tracked.
 
 ## Contribution workflow
 

@@ -24,6 +24,8 @@ type contextKey string
 const (
 	UserClaimsContextKey   contextKey = "user_claims"
 	RefreshTokenContextKey contextKey = "refresh_token"
+	AccessTokenContextKey  contextKey = "access_token"
+	RequestHostContextKey  contextKey = "request_host"
 )
 
 type Auth struct {
@@ -128,19 +130,31 @@ func (a *Auth) HandleBearerAuth(
 func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 	// Always extract shared session cookie if present (for tenant listing)
 	ctx := req.Context
+
+	// Extract request host for subdomain-aware redirects
+	scheme := "http"
+	if req.Raw.TLS != nil || req.Raw.Header.Get("X-Forwarded-Proto") == "https" {
+		scheme = "https"
+	}
+	requestHost := fmt.Sprintf("%s://%s", scheme, req.Raw.Host)
+	ctx = context.WithValue(ctx, RequestHostContextKey, requestHost)
+
 	if cookie, err := req.Raw.Cookie(oauth2.SharedSessionCookie); err == nil {
 		ctx = context.WithValue(ctx, oauth2.SharedSessionContextKey, cookie.Value)
-		req.SetContext(ctx)
 	}
+	req.SetContext(ctx)
 
 	// Check if path is in allow list
 	if m, ok := a.allow[req.Raw.URL.Path]; ok && (m == req.Raw.Method || m == "*") {
-		// For OAuth2 refresh/logout, add refresh token to context
+		// For OAuth2 endpoints, add tokens to context
 		if strings.HasPrefix(req.Raw.URL.Path, "/api/v1/auth/oauth2/") {
 			if cookie, err := req.Raw.Cookie(oauth2.RefreshTokenCookie); err == nil {
-				ctx := context.WithValue(req.Context, RefreshTokenContextKey, cookie.Value)
-				req.SetContext(ctx)
+				ctx = context.WithValue(ctx, RefreshTokenContextKey, cookie.Value)
 			}
+			if cookie, err := req.Raw.Cookie(oauth2.AccessTokenCookie); err == nil {
+				ctx = context.WithValue(ctx, AccessTokenContextKey, cookie.Value)
+			}
+			req.SetContext(ctx)
 		}
 		return next(req)
 	}

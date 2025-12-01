@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -34,6 +35,12 @@ func Provide(i do.Injector) (*Middleware, error) {
 	}, nil
 }
 
+// pathsAllowedWithoutTenant are paths that can be accessed even if tenant doesn't exist
+// This allows the frontend to check tenant existence before other operations
+var pathsAllowedWithoutTenant = []string{
+	"/api/v1/tenant/check",
+}
+
 // OgenMiddleware is the ogen middleware for tenant extraction
 func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 	subdomain := ExtractSubdomain(req.Raw.Host, m.baseDomain)
@@ -43,14 +50,25 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		return next(req)
 	}
 
+	// Check if path is allowed without tenant validation
+	for _, allowedPath := range pathsAllowedWithoutTenant {
+		if strings.HasPrefix(req.Raw.URL.Path, allowedPath) {
+			m.log.Debug("allowing path without tenant validation", "path", req.Raw.URL.Path)
+			return next(req)
+		}
+	}
+
 	// Look up tenant by subdomain
 	t, err := query.New(m.dbp).GetTenantByName(req.Context, subdomain)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			m.log.Debug("tenant not found", "subdomain", subdomain)
-			return middleware.Response{}, &errWithCode{
-				status: http.StatusNotFound,
-				err:    fmt.Errorf("tenant not found: %s", subdomain),
+			// Return a specific error that frontend can use to redirect to tenant selection
+			// The redirect URL is provided as a hint for frontend handling
+			redirectURL := fmt.Sprintf("http://%s/page/tenant", m.baseDomain)
+			return middleware.Response{}, &tenantNotFoundError{
+				subdomain:   subdomain,
+				redirectURL: redirectURL,
 			}
 		}
 		m.log.Error("failed to get tenant", "subdomain", subdomain, "error", err)
@@ -90,3 +108,18 @@ type errWithCode struct {
 
 func (e *errWithCode) Error() string   { return e.err.Error() }
 func (e *errWithCode) StatusCode() int { return e.status }
+
+// tenantNotFoundError is returned when a tenant subdomain doesn't exist.
+// It provides a redirect URL hint for frontend handling.
+type tenantNotFoundError struct {
+	subdomain   string
+	redirectURL string
+}
+
+func (e *tenantNotFoundError) Error() string {
+	return fmt.Sprintf("tenant not found: %s. Redirect to: %s", e.subdomain, e.redirectURL)
+}
+
+func (e *tenantNotFoundError) StatusCode() int {
+	return http.StatusNotFound
+}

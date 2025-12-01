@@ -301,6 +301,7 @@ type ConsentRequest struct {
 	Client                       struct {
 		ClientID string `json:"client_id"`
 	} `json:"client"`
+	RequestURL string `json:"request_url"` // Original OAuth2 authorize URL with state parameter
 }
 
 // ConsentAcceptResponse represents the response from accepting a consent request
@@ -342,17 +343,25 @@ func (c *HydraClient) GetConsentRequest(ctx context.Context, challenge string) (
 }
 
 // AcceptConsentRequest accepts a consent request and returns the redirect URL
-func (c *HydraClient) AcceptConsentRequest(ctx context.Context, challenge string, grantScope []string, grantAudience []string, subject string, remember bool, rememberFor int) (string, error) {
+// accessTokenExtras contains additional claims to include in the access token (e.g., tenant info)
+func (c *HydraClient) AcceptConsentRequest(ctx context.Context, challenge string, grantScope []string, grantAudience []string, subject string, remember bool, rememberFor int, accessTokenExtras map[string]interface{}) (string, error) {
+	session := map[string]interface{}{
+		"id_token": map[string]interface{}{
+			"sub": subject,
+		},
+	}
+
+	// Add extra claims to access token if provided
+	if accessTokenExtras != nil && len(accessTokenExtras) > 0 {
+		session["access_token"] = accessTokenExtras
+	}
+
 	body := map[string]interface{}{
 		"grant_scope":                 grantScope,
 		"grant_access_token_audience": grantAudience,
 		"remember":                    remember,
 		"remember_for":                rememberFor,
-		"session": map[string]interface{}{
-			"id_token": map[string]interface{}{
-				"sub": subject,
-			},
-		},
+		"session":                     session,
 	}
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {

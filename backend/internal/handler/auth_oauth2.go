@@ -12,6 +12,7 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
+	"github.com/shadowapi/shadowapi/backend/internal/tenant"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
@@ -32,6 +33,8 @@ type OAuth2Service struct {
 type oauth2AuthState struct {
 	CodeVerifier string
 	RedirectURI  string
+	TenantUUID   string // Tenant from original request context
+	TenantName   string // Tenant from original request context
 	CreatedAt    time.Time
 }
 
@@ -117,11 +120,21 @@ func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2Au
 		return nil, fmt.Errorf("generate PKCE: %w", err)
 	}
 
-	// Store state and verifier
+	// Get tenant from context if present (this runs on tenant subdomain)
+	var tenantUUID, tenantName string
+	if t, ok := tenant.FromContext(ctx); ok {
+		tenantUUID = t.UUID
+		tenantName = t.Name
+		h.log.Debug("capturing tenant in OAuth2 state", "tenant_uuid", tenantUUID, "tenant_name", tenantName)
+	}
+
+	// Store state, verifier, and tenant
 	h.oauth2Svc.stateMu.Lock()
 	h.oauth2Svc.stateStore[state] = &oauth2AuthState{
 		CodeVerifier: verifier,
 		RedirectURI:  req.RedirectURI,
+		TenantUUID:   tenantUUID,
+		TenantName:   tenantName,
 		CreatedAt:    time.Now(),
 	}
 	h.oauth2Svc.stateMu.Unlock()
@@ -252,20 +265,63 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 
 // AuthOAuth2Session checks if the user has a valid session without triggering token refresh.
 // Always returns 200 to avoid console errors for unauthenticated users.
+// For tenant subdomains, validates that the token belongs to the current tenant.
 func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2SessionOK, error) {
 	if h.oauth2Svc == nil {
 		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
 	}
 
-	// Get refresh token from context (set by middleware)
+	// Get access token from context (set by middleware)
+	accessToken, _ := ctx.Value(auth.AccessTokenContextKey).(string)
+
+	// If we have a JWT validator and an access token, validate tenant
+	if h.oauth2Svc.jwtValidator != nil && accessToken != "" {
+		claims, err := h.oauth2Svc.jwtValidator.Validate(ctx, accessToken)
+		if err != nil {
+			h.log.Debug("session check: JWT validation failed", "error", err)
+			return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
+		}
+
+		// Get current tenant from context (set by tenant middleware)
+		currentTenant, hasTenant := tenant.FromContext(ctx)
+
+		// If we're on a tenant subdomain, verify the token is for this tenant
+		if hasTenant && claims.TenantUUID() != "" {
+			if claims.TenantUUID() != currentTenant.UUID {
+				h.log.Debug("session check: tenant mismatch",
+					"token_tenant", claims.TenantUUID(),
+					"current_tenant", currentTenant.UUID,
+				)
+				return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
+			}
+		}
+
+		// Token is valid and tenant matches (or no tenant context)
+		expiresIn := 3600 // Default
+		if claims.ExpiresAt != nil {
+			expiresIn = int(time.Until(claims.ExpiresAt.Time).Seconds())
+		}
+
+		return &api.AuthOAuth2SessionOK{
+			Authenticated: true,
+			ExpiresIn:     api.NewOptInt(expiresIn),
+		}, nil
+	}
+
+	// Fallback: check refresh token (for backwards compatibility or when JWT validator not configured)
 	refreshToken, ok := ctx.Value(auth.RefreshTokenContextKey).(string)
 	if !ok || refreshToken == "" {
 		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
 	}
 
-	// We have a refresh token, so the user has a session.
-	// Note: We don't validate the token here to avoid the overhead.
-	// The actual token refresh will validate it when needed.
+	// We have a refresh token but couldn't validate tenant via JWT
+	// For security, if we're on a tenant subdomain without JWT validation, require re-login
+	if _, hasTenant := tenant.FromContext(ctx); hasTenant {
+		h.log.Debug("session check: on tenant subdomain but cannot validate token tenant")
+		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
+	}
+
+	// Root domain: having a refresh token means authenticated
 	return &api.AuthOAuth2SessionOK{
 		Authenticated: true,
 		ExpiresIn:     api.NewOptInt(3600), // Approximate TTL

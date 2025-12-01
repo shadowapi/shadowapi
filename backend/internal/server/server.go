@@ -16,6 +16,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
+	"github.com/shadowapi/shadowapi/backend/internal/tenant"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
@@ -35,13 +36,15 @@ func Provide(i do.Injector) (*Server, error) {
 	cfg := do.MustInvoke[*config.Config](i)
 	log := do.MustInvoke[*slog.Logger](i)
 	authService := do.MustInvoke[*auth.Auth](i)
+	tenantMiddleware := do.MustInvoke[*tenant.Middleware](i)
 	handlerService := do.MustInvoke[*handler.Handler](i)
 
 	srv, err := api.NewServer(
 		handlerService,
 		authService,
 		api.WithPathPrefix("/api/v1"),
-		api.WithMiddleware(authService.OgenMiddleware),
+		// Chain middlewares: tenant first (extracts subdomain), then auth
+		api.WithMiddleware(tenantMiddleware.OgenMiddleware, authService.OgenMiddleware),
 		api.WithNotFound(func(w http.ResponseWriter, r *http.Request) {
 			log.Info("no ogen route matched, returning 404")
 			http.NotFound(w, r)
