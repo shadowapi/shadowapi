@@ -1,0 +1,13 @@
+# spec/components/tenant_check.yaml
+# Response schema for tenant existence check
+type: object
+additionalProperties: false
+properties:
+  exists:
+    type: boolean
+    description: Whether the tenant exists
+  display_name:
+    type: string
+    description: Display name of the tenant (only present if exists)
+required:
+  - exists

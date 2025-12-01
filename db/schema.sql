@@ -1,5 +1,22 @@
+-- Tenant table for multi-tenancy support
+CREATE TABLE tenant (
+    uuid UUID PRIMARY KEY,
+    name VARCHAR(63) NOT NULL,           -- subdomain name (lowercase alphanumeric + hyphens)
+    display_name VARCHAR(255) NOT NULL,  -- human-readable name
+    is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    settings JSONB,                       -- tenant-specific settings
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT uq_tenant_name UNIQUE(name),
+    CONSTRAINT chk_tenant_name CHECK (name ~ '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$')
+);
+
+CREATE INDEX idx_tenant_name ON tenant(name);
+
 CREATE TABLE "user" (
   "uuid"     UUID PRIMARY KEY,
+  tenant_uuid UUID NOT NULL REFERENCES tenant(uuid) ON DELETE CASCADE,
   email      VARCHAR NOT NULL,
   password   VARCHAR NOT NULL,
   first_name VARCHAR NOT NULL,
@@ -11,8 +28,27 @@ CREATE TABLE "user" (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE,
 
-  CONSTRAINT uq_users_email unique(email)
+  CONSTRAINT uq_user_tenant_email UNIQUE(tenant_uuid, email)
 );
+
+CREATE INDEX idx_user_tenant ON "user"(tenant_uuid);
+
+-- Track user sessions per tenant for the tenant selection page
+CREATE TABLE tenant_session (
+    uuid UUID PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,    -- shared cookie value
+    tenant_uuid UUID NOT NULL REFERENCES tenant(uuid) ON DELETE CASCADE,
+    user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    last_accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    CONSTRAINT uq_session_tenant UNIQUE(session_id, tenant_uuid)
+);
+
+CREATE INDEX idx_tenant_session_session_id ON tenant_session(session_id);
+CREATE INDEX idx_tenant_session_expires ON tenant_session(expires_at);
 
 CREATE TABLE oauth2_client (
   uuid UUID PRIMARY KEY, -- Internal unique ID for the client
@@ -59,6 +95,7 @@ CREATE TABLE oauth2_subject (
 
 CREATE TABLE datasource(
                            "uuid"            UUID PRIMARY KEY,
+                           tenant_uuid UUID REFERENCES tenant(uuid) ON DELETE CASCADE,
                            user_uuid   UUID NOT NULL,
                            name              VARCHAR NOT NULL,
                            "type"            VARCHAR NOT NULL,
@@ -70,9 +107,12 @@ CREATE TABLE datasource(
                            updated_at TIMESTAMP WITH TIME ZONE
 );
 
+CREATE INDEX idx_datasource_tenant ON datasource(tenant_uuid);
+
 -- Pipelines table
 CREATE TABLE pipeline (
                           uuid UUID PRIMARY KEY,
+                          tenant_uuid UUID REFERENCES tenant(uuid) ON DELETE CASCADE,
                           datasource_uuid UUID NOT NULL,
                           storage_uuid UUID NOT NULL,
                           name VARCHAR NOT NULL,
@@ -84,9 +124,12 @@ CREATE TABLE pipeline (
   CONSTRAINT fk_pipeline_datasource FOREIGN KEY("datasource_uuid") REFERENCES datasource("uuid") ON DELETE CASCADE
 );
 
+CREATE INDEX idx_pipeline_tenant ON pipeline(tenant_uuid);
+
 
 CREATE TABLE storage(
   "uuid"            UUID PRIMARY KEY,
+  tenant_uuid UUID REFERENCES tenant(uuid) ON DELETE CASCADE,
   name              VARCHAR NOT NULL,
   "type"            VARCHAR NOT NULL,
   is_enabled        BOOLEAN NOT NULL DEFAULT TRUE,
@@ -95,6 +138,8 @@ CREATE TABLE storage(
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );
+
+CREATE INDEX idx_storage_tenant ON storage(tenant_uuid);
 
 CREATE TABLE "sync_policy" (
                                "uuid" UUID PRIMARY KEY,
@@ -142,7 +187,7 @@ CREATE TABLE IF NOT EXISTS message (
                                        type                       VARCHAR NOT NULL,
                                        chat_uuid                  VARCHAR,
                                        thread_uuid                VARCHAR,
-                                       external_message_id TEXT,  -- original system’s message ID (e.g. Gmail "messageId")
+                                       external_message_id TEXT,  -- original system's message ID (e.g. Gmail "messageId")
                                        sender                     VARCHAR NOT NULL,
                                        recipients                 TEXT[] NOT NULL,
                                        subject                    TEXT,
@@ -164,6 +209,7 @@ CREATE TABLE IF NOT EXISTS message (
 CREATE TABLE IF NOT EXISTS contact (
     -- Basic ID fields
                                        uuid                        text PRIMARY KEY,
+                                       tenant_uuid                 UUID REFERENCES tenant(uuid) ON DELETE CASCADE,
                                        user_uuid                   text,
                                        instance_uuid               text,
 
@@ -315,6 +361,8 @@ CREATE TABLE IF NOT EXISTS contact (
                                        edit_date                   timestamptz,
                                        last_kpi_entry_date         timestamptz
 );
+
+CREATE INDEX idx_contact_tenant ON contact(tenant_uuid);
 
 CREATE TABLE "scheduler" (
                              "uuid"             UUID PRIMARY KEY,

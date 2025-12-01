@@ -1083,6 +1083,81 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/tenants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List tenants where the current user has an active session
+         * @description Uses the shared session cookie to find all tenants where the user is authenticated.
+         *     This endpoint is used by the tenant selection page.
+         */
+        get: operations["listAuthenticatedTenants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all tenants */
+        get: operations["listTenants"];
+        put?: never;
+        /** Create a new tenant */
+        post: operations["createTenant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenant/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a tenant by UUID */
+        get: operations["getTenant"];
+        /** Update a tenant */
+        put: operations["updateTenant"];
+        post?: never;
+        /** Delete a tenant */
+        delete: operations["deleteTenant"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenant/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Check if a tenant exists by subdomain name */
+        get: operations["checkTenantExists"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1199,6 +1274,9 @@ export interface components {
         UserSessionToken: components["schemas"]["user_session_token"];
         WorkerJobs: components["schemas"]["worker_jobs"];
         UserProfile: components["schemas"]["user_profile"];
+        Tenant: components["schemas"]["tenant"];
+        AuthenticatedTenant: components["schemas"]["authenticated_tenant"];
+        TenantCheck: components["schemas"]["tenant_check"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -1944,6 +2022,60 @@ export interface components {
              * @description Timestamp when the job finished (if it has).
              */
             finished_at?: string;
+        };
+        authenticated_tenant: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the tenant
+             */
+            tenant_uuid: string;
+            /** @description Subdomain name of the tenant */
+            tenant_name: string;
+            /** @description Human-readable tenant name */
+            tenant_display_name: string;
+            /**
+             * Format: email
+             * @description Email of the authenticated user in this tenant
+             */
+            user_email: string;
+            /**
+             * Format: date-time
+             * @description Last time the user accessed this tenant
+             */
+            last_accessed_at?: string;
+        };
+        tenant: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the tenant
+             */
+            readonly uuid?: string;
+            /** @description Subdomain name (lowercase alphanumeric + hyphens, max 63 chars) */
+            name: string;
+            /** @description Human-readable tenant name */
+            display_name: string;
+            /** @description Whether the tenant is active */
+            is_enabled?: boolean;
+            /** @description Tenant-specific configuration */
+            settings?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: date-time
+             * @description Timestamp of tenant creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        tenant_check: {
+            /** @description Whether the tenant exists */
+            exists: boolean;
+            /** @description Display name of the tenant (only present if exists) */
+            display_name?: string;
         };
         email_label: {
             /** Format: int64 */
@@ -5559,6 +5691,227 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listAuthenticatedTenants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of authenticated tenants */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["authenticated_tenant"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listTenants: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of tenants */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tenant"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["tenant"];
+            };
+        };
+        responses: {
+            /** @description Tenant created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tenant"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tenant details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tenant"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["tenant"];
+            };
+        };
+        responses: {
+            /** @description Tenant updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tenant"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tenant deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    checkTenantExists: {
+        parameters: {
+            query: {
+                /** @description Tenant subdomain name to check */
+                name: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tenant existence check result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["tenant_check"];
+                };
             };
             /** @description Error */
             default: {

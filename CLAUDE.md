@@ -32,9 +32,10 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Key packages
 
-- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, etc.
+- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, tenants, etc.
 - `internal/auth` – Authentication middleware and token validation.
-- `internal/auth/dbauth` – Database-based user manager implementation.
+- `internal/auth/dbauth` – Database-based user manager implementation with tenant-aware authentication.
+- `internal/tenant` – Multi-tenant context utilities and middleware for subdomain-based tenant extraction.
 - `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
 - `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic.
 - `internal/imap`, `internal/whatsapp`, `internal/tg`, `internal/oauth2` – External channel integrations (IMAP/SMTP Gmail, WhatsApp via whatsmeow, Telegram via gotd, LinkedIn helpers).
@@ -95,6 +96,7 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/src/lib/auth/` – Authentication module (OAuth2 client, context, hooks, protected route)
 - `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR, AuthLayout for login)
 - `front/src/pages/auth/` – Authentication pages (LoginPage)
+- `front/src/pages/tenant/` – Tenant selection page for multi-tenant navigation
 
 ### Development scripts
 
@@ -147,6 +149,40 @@ function MyComponent() {
 **Adding new protected routes:**
 Routes with `layout: 'app'` are protected by default. To make a route public, set `protected: false`.
 
+### Multi-Tenant Architecture
+
+The application supports multi-tenancy with subdomain-based tenant isolation:
+
+**How it works:**
+- Each tenant has a unique subdomain (e.g., `acme.localtest.me`, `internal.localtest.me`)
+- Users are scoped to tenants via `(tenant_uuid, email)` unique constraint
+- Same email can exist in multiple tenants with different passwords
+- Tenant context is extracted from subdomain by middleware and injected into request context
+
+**Key components:**
+- `backend/internal/tenant/` – Tenant context and middleware
+- `db/schema.sql` – `tenant` and `tenant_session` tables
+- `db/sql/tenant.sql`, `db/sql/tenant_session.sql` – SQLC queries
+- `front/src/pages/tenant/` – Tenant selection UI
+
+**Session management:**
+- Shared session cookie (`.localtest.me`) tracks authenticated tenants across subdomains
+- Tenant-specific OAuth2 cookies remain per subdomain
+- `tenant_session` table stores cross-subdomain session state
+
+**Tenant selection flow:**
+1. User visits `http://localtest.me/page/tenant`
+2. Enter tenant name or select from authenticated tenants list
+3. Redirect to `http://{tenant}.localtest.me`
+4. Login if not authenticated for that tenant
+
+**Default tenant:**
+- `internal` tenant is created automatically on first startup
+- Admin user is created in `internal` tenant using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
+
+**Environment variables:**
+- `BE_TENANT_BASE_DOMAIN` – Base domain for tenant subdomains (default: `localtest.me`)
+
 ## Specs & data model
 
 - Primary API definition: `spec/openapi.yaml` with supporting fragments in `spec/components/` and `spec/paths/`.
@@ -175,13 +211,15 @@ Run `make help` to see all available targets. Key ones:
 
 ### Compose topology
 
-- Traefik routes requests based on path prefix with priority:
+- Traefik routes requests based on path prefix with priority (supports wildcard subdomains `*.localtest.me`):
   - `/.well-known/*` (priority 40) → Hydra OAuth2/OIDC discovery (port 4444)
   - `/oauth2/*` (priority 35) → Hydra OAuth2 endpoints (port 4444)
   - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
   - `/page/*` (priority 20) → SSR container (port 3000)
   - Everything else (priority 1) → Frontend container (port 5173)
-- Access the app at `http://localtest.me`
+- Access the app at `http://localtest.me` or tenant-specific `http://{tenant}.localtest.me`
+- Tenant selection page: `http://localtest.me/page/tenant`
+- Internal tenant (default): `http://internal.localtest.me`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
 ### Authentication Stack

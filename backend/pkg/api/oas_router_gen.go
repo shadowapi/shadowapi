@@ -237,6 +237,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
+				case 't': // Prefix: "tenants"
+					origElem := elem
+					if l := len("tenants"); len(elem) >= l && elem[0:l] == "tenants" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleListAuthenticatedTenantsRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem
@@ -1552,52 +1573,153 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "telegram"
+			case 't': // Prefix: "te"
 				origElem := elem
-				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
+				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'l': // Prefix: "legram"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "id"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
-						case "PUT":
-							s.handleTgSessionVerifyRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
+						case "GET":
+							s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "PUT")
+							s.notAllowed(w, r, "GET,POST")
 						}
 
 						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "PUT":
+								s.handleTgSessionVerifyRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'n': // Prefix: "nant"
+					origElem := elem
+					if l := len("nant"); len(elem) >= l && elem[0:l] == "nant" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleListTenantsRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleCreateTenantRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "check"
+							origElem := elem
+							if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleCheckTenantExistsRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "DELETE":
+								s.handleDeleteTenantRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handleGetTenantRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handleUpdateTenantRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE,GET,PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -2074,6 +2196,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					}
+
+					elem = origElem
+				case 't': // Prefix: "tenants"
+					origElem := elem
+					if l := len("tenants"); len(elem) >= l && elem[0:l] == "tenants" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = ListAuthenticatedTenantsOperation
+							r.summary = "List tenants where the current user has an active session"
+							r.operationID = "listAuthenticatedTenants"
+							r.pathPattern = "/auth/tenants"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 
 					elem = origElem
@@ -3717,64 +3864,189 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "telegram"
+			case 't': // Prefix: "te"
 				origElem := elem
-				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
+				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = TgSessionListOperation
-						r.summary = ""
-						r.operationID = "tg-session-list"
-						r.pathPattern = "/telegram"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = TgSessionCreateOperation
-						r.summary = ""
-						r.operationID = "tg-session-create"
-						r.pathPattern = "/telegram"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'l': // Prefix: "legram"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "id"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
 					if len(elem) == 0 {
-						// Leaf node.
 						switch method {
-						case "PUT":
-							r.name = TgSessionVerifyOperation
+						case "GET":
+							r.name = TgSessionListOperation
 							r.summary = ""
-							r.operationID = "tg-session-verify"
-							r.pathPattern = "/telegram/{id}"
+							r.operationID = "tg-session-list"
+							r.pathPattern = "/telegram"
 							r.args = args
-							r.count = 1
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = TgSessionCreateOperation
+							r.summary = ""
+							r.operationID = "tg-session-create"
+							r.pathPattern = "/telegram"
+							r.args = args
+							r.count = 0
 							return r, true
 						default:
 							return
 						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "PUT":
+								r.name = TgSessionVerifyOperation
+								r.summary = ""
+								r.operationID = "tg-session-verify"
+								r.pathPattern = "/telegram/{id}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'n': // Prefix: "nant"
+					origElem := elem
+					if l := len("nant"); len(elem) >= l && elem[0:l] == "nant" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = ListTenantsOperation
+							r.summary = "List all tenants"
+							r.operationID = "listTenants"
+							r.pathPattern = "/tenant"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = CreateTenantOperation
+							r.summary = "Create a new tenant"
+							r.operationID = "createTenant"
+							r.pathPattern = "/tenant"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "check"
+							origElem := elem
+							if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = CheckTenantExistsOperation
+									r.summary = "Check if a tenant exists by subdomain name"
+									r.operationID = "checkTenantExists"
+									r.pathPattern = "/tenant/check"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "DELETE":
+								r.name = DeleteTenantOperation
+								r.summary = "Delete a tenant"
+								r.operationID = "deleteTenant"
+								r.pathPattern = "/tenant/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = GetTenantOperation
+								r.summary = "Get a tenant by UUID"
+								r.operationID = "getTenant"
+								r.pathPattern = "/tenant/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "PUT":
+								r.name = UpdateTenantOperation
+								r.summary = "Update a tenant"
+								r.operationID = "updateTenant"
+								r.pathPattern = "/tenant/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem

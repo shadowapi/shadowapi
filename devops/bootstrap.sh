@@ -98,6 +98,11 @@ TEST_PASSWORD=$(grep "^BE_INIT_ADMIN_PASSWORD=" .env | cut -d'=' -f2)
 
 echo ""
 echo "=== Bootstrap Complete ==="
-echo "Application: http://localtest.me"
-echo "Test login:  $TEST_EMAIL / $TEST_PASSWORD"
+echo "Application:      http://localtest.me"
+echo "Internal tenant:  http://internal.localtest.me"
+echo "Tenant selection: http://localtest.me/page/tenant"
+echo "Test login:       $TEST_EMAIL / $TEST_PASSWORD"
 echo "OAuth2 Client ID: $CLIENT_ID"
+echo ""
+echo "The default admin user is in the 'internal' tenant."
+echo "Access via: http://internal.localtest.me"

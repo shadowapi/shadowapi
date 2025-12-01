@@ -33,7 +33,7 @@ INSERT INTO pipeline (
               $7,
              NOW(),
   NOW()
-) RETURNING uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at
+) RETURNING uuid, tenant_uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at
 `
 
 type CreatePipelineParams struct {
@@ -59,6 +59,7 @@ func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) 
 	var i Pipeline
 	err := row.Scan(
 		&i.UUID,
+		&i.TenantUuid,
 		&i.DatasourceUUID,
 		&i.StorageUuid,
 		&i.Name,
@@ -82,7 +83,7 @@ func (q *Queries) DeletePipeline(ctx context.Context, argUuid pgtype.UUID) error
 
 const getPipeline = `-- name: GetPipeline :one
 SELECT
-    pipeline.uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.tenant_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 WHERE uuid = $1::uuid
 `
@@ -96,6 +97,7 @@ func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipe
 	var i GetPipelineRow
 	err := row.Scan(
 		&i.Pipeline.UUID,
+		&i.Pipeline.TenantUuid,
 		&i.Pipeline.DatasourceUUID,
 		&i.Pipeline.StorageUuid,
 		&i.Pipeline.Name,
@@ -110,7 +112,7 @@ func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipe
 
 const getPipelines = `-- name: GetPipelines :many
 WITH filtered_pipelines AS (
-    SELECT p.uuid, p.datasource_uuid, p.storage_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
+    SELECT p.uuid, p.tenant_uuid, p.datasource_uuid, p.storage_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
     FROM pipeline p
     WHERE
         (NULLIF($5, '') IS NULL OR p.uuid = $5::uuid) AND
@@ -121,7 +123,7 @@ WITH filtered_pipelines AS (
         (NULLIF($10, '') IS NULL OR p.name ILIKE '%' || $10 || '%')
 )
 SELECT
-    uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at,
+    uuid, tenant_uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at,
     (SELECT count(*) FROM filtered_pipelines) AS total_count
 FROM filtered_pipelines
 ORDER BY
@@ -151,6 +153,7 @@ type GetPipelinesParams struct {
 
 type GetPipelinesRow struct {
 	UUID           uuid.UUID          `json:"uuid"`
+	TenantUuid     *uuid.UUID         `json:"tenant_uuid"`
 	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
 	StorageUuid    *uuid.UUID         `json:"storage_uuid"`
 	Name           string             `json:"name"`
@@ -184,6 +187,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 		var i GetPipelinesRow
 		if err := rows.Scan(
 			&i.UUID,
+			&i.TenantUuid,
 			&i.DatasourceUUID,
 			&i.StorageUuid,
 			&i.Name,
@@ -206,7 +210,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 
 const listPipelines = `-- name: ListPipelines :many
 SELECT
-    pipeline.uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.tenant_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -233,6 +237,7 @@ func (q *Queries) ListPipelines(ctx context.Context, arg ListPipelinesParams) ([
 		var i ListPipelinesRow
 		if err := rows.Scan(
 			&i.Pipeline.UUID,
+			&i.Pipeline.TenantUuid,
 			&i.Pipeline.DatasourceUUID,
 			&i.Pipeline.StorageUuid,
 			&i.Pipeline.Name,

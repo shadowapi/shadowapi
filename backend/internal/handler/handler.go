@@ -37,35 +37,77 @@ func (h *Handler) DB() *pgxpool.Pool {
 	return h.dbp
 }
 
-// ensureInitAdmin creates the first admin user if the DB has no users yet.
-func (h *Handler) ensureInitAdmin(ctx context.Context) error {
+// ensureInitTenantAndAdmin creates the internal tenant and first admin user if they don't exist.
+func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 	if h.cfg.InitAdmin.Email == "" || h.cfg.InitAdmin.Password == "" {
 		return nil
 	}
+
 	q := query.New(h.dbp)
-	users, err := q.ListUsers(ctx, query.ListUsersParams{Offset: 0, Limit: 1})
+
+	// Step 1: Ensure "internal" tenant exists
+	var tenantUUID pgtype.UUID
+	tenant, err := q.GetTenantByName(ctx, "internal")
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Create internal tenant
+			tUUID := uuid.Must(uuid.NewV7())
+			tenantUUID = pgtype.UUID{Bytes: tUUID, Valid: true}
+			_, err = q.CreateTenant(ctx, query.CreateTenantParams{
+				UUID:        tenantUUID,
+				Name:        "internal",
+				DisplayName: "Internal",
+				IsEnabled:   true,
+				Settings:    []byte(`{}`),
+			})
+			if err != nil {
+				return errors.New("failed to create internal tenant: " + err.Error())
+			}
+			h.log.Info("created internal tenant")
+		} else {
+			return err
+		}
+	} else {
+		var bytes [16]byte
+		copy(bytes[:], tenant.UUID.Bytes())
+		tenantUUID = pgtype.UUID{Bytes: bytes, Valid: true}
+	}
+
+	// Step 2: Ensure admin user exists in internal tenant
+	users, err := q.ListUsersByTenant(ctx, query.ListUsersByTenantParams{
+		TenantUuid: tenantUUID,
+		Offset:     0,
+		Limit:      1,
+	})
 	if err != nil && err != pgx.ErrNoRows {
 		return err
 	}
 	if len(users) > 0 {
-		return nil
+		return nil // Admin already exists
 	}
+
+	// Create admin user
 	hashed, err := bcrypt.GenerateFromPassword([]byte(h.cfg.InitAdmin.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 	uid := uuid.Must(uuid.NewV7())
 	_, err = q.CreateUser(ctx, query.CreateUserParams{
-		UUID:      pgtype.UUID{Bytes: uid, Valid: true},
-		Email:     h.cfg.InitAdmin.Email,
-		Password:  string(hashed),
-		FirstName: "Admin",
-		LastName:  "User",
-		IsEnabled: true,
-		IsAdmin:   true,
-		Meta:      []byte(`{}`),
+		UUID:       pgtype.UUID{Bytes: uid, Valid: true},
+		TenantUuid: tenantUUID,
+		Email:      h.cfg.InitAdmin.Email,
+		Password:   string(hashed),
+		FirstName:  "Admin",
+		LastName:   "User",
+		IsEnabled:  true,
+		IsAdmin:    true,
+		Meta:       []byte(`{}`),
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	h.log.Info("created admin user in internal tenant", "email", h.cfg.InitAdmin.Email)
+	return nil
 }
 
 // Provide API handler instance for the dependency injector
@@ -122,8 +164,8 @@ func Provide(i do.Injector) (*Handler, error) {
 		)
 	}
 
-	if err := h.ensureInitAdmin(context.Background()); err != nil {
-		h.log.Error("init admin", "error", err)
+	if err := h.ensureInitTenantAndAdmin(context.Background()); err != nil {
+		h.log.Error("init tenant and admin", "error", err)
 	}
 	return h, nil
 }

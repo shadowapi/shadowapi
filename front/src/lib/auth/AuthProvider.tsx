@@ -15,13 +15,14 @@ interface LoginSubmitResponse {
 }
 
 export class AuthError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public details?: unknown
-  ) {
+  status?: number;
+  details?: unknown;
+
+  constructor(message: string, status?: number, details?: unknown) {
     super(message);
     this.name = 'AuthError';
+    this.status = status;
+    this.details = details;
   }
 }
 

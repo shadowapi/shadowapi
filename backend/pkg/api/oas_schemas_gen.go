@@ -289,6 +289,70 @@ func (s *AuthOAuth2SessionOK) SetExpiresIn(val OptInt) {
 	s.ExpiresIn = val
 }
 
+// Ref: #
+type AuthenticatedTenant struct {
+	// Unique identifier for the tenant.
+	TenantUUID uuid.UUID `json:"tenant_uuid"`
+	// Subdomain name of the tenant.
+	TenantName string `json:"tenant_name"`
+	// Human-readable tenant name.
+	TenantDisplayName string `json:"tenant_display_name"`
+	// Email of the authenticated user in this tenant.
+	UserEmail string `json:"user_email"`
+	// Last time the user accessed this tenant.
+	LastAccessedAt OptDateTime `json:"last_accessed_at"`
+}
+
+// GetTenantUUID returns the value of TenantUUID.
+func (s *AuthenticatedTenant) GetTenantUUID() uuid.UUID {
+	return s.TenantUUID
+}
+
+// GetTenantName returns the value of TenantName.
+func (s *AuthenticatedTenant) GetTenantName() string {
+	return s.TenantName
+}
+
+// GetTenantDisplayName returns the value of TenantDisplayName.
+func (s *AuthenticatedTenant) GetTenantDisplayName() string {
+	return s.TenantDisplayName
+}
+
+// GetUserEmail returns the value of UserEmail.
+func (s *AuthenticatedTenant) GetUserEmail() string {
+	return s.UserEmail
+}
+
+// GetLastAccessedAt returns the value of LastAccessedAt.
+func (s *AuthenticatedTenant) GetLastAccessedAt() OptDateTime {
+	return s.LastAccessedAt
+}
+
+// SetTenantUUID sets the value of TenantUUID.
+func (s *AuthenticatedTenant) SetTenantUUID(val uuid.UUID) {
+	s.TenantUUID = val
+}
+
+// SetTenantName sets the value of TenantName.
+func (s *AuthenticatedTenant) SetTenantName(val string) {
+	s.TenantName = val
+}
+
+// SetTenantDisplayName sets the value of TenantDisplayName.
+func (s *AuthenticatedTenant) SetTenantDisplayName(val string) {
+	s.TenantDisplayName = val
+}
+
+// SetUserEmail sets the value of UserEmail.
+func (s *AuthenticatedTenant) SetUserEmail(val string) {
+	s.UserEmail = val
+}
+
+// SetLastAccessedAt sets the value of LastAccessedAt.
+func (s *AuthenticatedTenant) SetLastAccessedAt(val OptDateTime) {
+	s.LastAccessedAt = val
+}
+
 type BearerAuth struct {
 	Token string
 }
@@ -2557,6 +2621,9 @@ func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
 
 // DeleteContactOK is response for DeleteContact operation.
 type DeleteContactOK struct{}
+
+// DeleteTenantNoContent is response for DeleteTenant operation.
+type DeleteTenantNoContent struct{}
 
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
@@ -5537,6 +5604,52 @@ func (o OptTelegramSessionHistoryItemMeta) Or(d TelegramSessionHistoryItemMeta) 
 	return d
 }
 
+// NewOptTenantSettings returns new OptTenantSettings with value set to v.
+func NewOptTenantSettings(v TenantSettings) OptTenantSettings {
+	return OptTenantSettings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTenantSettings is optional TenantSettings.
+type OptTenantSettings struct {
+	Value TenantSettings
+	Set   bool
+}
+
+// IsSet returns true if OptTenantSettings was set.
+func (o OptTenantSettings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTenantSettings) Reset() {
+	var v TenantSettings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTenantSettings) SetTo(v TenantSettings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTenantSettings) Get() (v TenantSettings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTenantSettings) Or(d TenantSettings) TenantSettings {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptURI returns new OptURI with value set to v.
 func NewOptURI(v url.URL) OptURI {
 	return OptURI{
@@ -7118,6 +7231,134 @@ func (s *TelegramUser) SetLastName(val OptString) {
 // SetPhone sets the value of Phone.
 func (s *TelegramUser) SetPhone(val OptString) {
 	s.Phone = val
+}
+
+// Ref: #
+type Tenant struct {
+	// Unique identifier for the tenant.
+	UUID OptUUID `json:"uuid"`
+	// Subdomain name (lowercase alphanumeric + hyphens, max 63 chars).
+	Name string `json:"name"`
+	// Human-readable tenant name.
+	DisplayName string `json:"display_name"`
+	// Whether the tenant is active.
+	IsEnabled OptBool `json:"is_enabled"`
+	// Tenant-specific configuration.
+	Settings OptTenantSettings `json:"settings"`
+	// Timestamp of tenant creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *Tenant) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetName returns the value of Name.
+func (s *Tenant) GetName() string {
+	return s.Name
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *Tenant) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *Tenant) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetSettings returns the value of Settings.
+func (s *Tenant) GetSettings() OptTenantSettings {
+	return s.Settings
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Tenant) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Tenant) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *Tenant) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetName sets the value of Name.
+func (s *Tenant) SetName(val string) {
+	s.Name = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *Tenant) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *Tenant) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetSettings sets the value of Settings.
+func (s *Tenant) SetSettings(val OptTenantSettings) {
+	s.Settings = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Tenant) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Tenant) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// Ref: #
+type TenantCheck struct {
+	// Whether the tenant exists.
+	Exists bool `json:"exists"`
+	// Display name of the tenant (only present if exists).
+	DisplayName OptString `json:"display_name"`
+}
+
+// GetExists returns the value of Exists.
+func (s *TenantCheck) GetExists() bool {
+	return s.Exists
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *TenantCheck) GetDisplayName() OptString {
+	return s.DisplayName
+}
+
+// SetExists sets the value of Exists.
+func (s *TenantCheck) SetExists(val bool) {
+	s.Exists = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *TenantCheck) SetDisplayName(val OptString) {
+	s.DisplayName = val
+}
+
+// Tenant-specific configuration.
+type TenantSettings map[string]jx.Raw
+
+func (s *TenantSettings) init() TenantSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 type TgSessionCreateReq struct {

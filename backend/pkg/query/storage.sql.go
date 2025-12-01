@@ -29,7 +29,7 @@ INSERT INTO storage (
   $5,
   NOW(),
   NOW()
-) RETURNING uuid, name, type, is_enabled, settings, created_at, updated_at
+) RETURNING uuid, tenant_uuid, name, type, is_enabled, settings, created_at, updated_at
 `
 
 type CreateStorageParams struct {
@@ -51,6 +51,7 @@ func (q *Queries) CreateStorage(ctx context.Context, arg CreateStorageParams) (S
 	var i Storage
 	err := row.Scan(
 		&i.UUID,
+		&i.TenantUuid,
 		&i.Name,
 		&i.Type,
 		&i.IsEnabled,
@@ -72,7 +73,7 @@ func (q *Queries) DeleteStorage(ctx context.Context, argUuid pgtype.UUID) error 
 
 const getStorage = `-- name: GetStorage :one
 SELECT
-    storage.uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
+    storage.uuid, storage.tenant_uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
 FROM storage
 WHERE uuid = $1::uuid
 `
@@ -86,6 +87,7 @@ func (q *Queries) GetStorage(ctx context.Context, argUuid pgtype.UUID) (GetStora
 	var i GetStorageRow
 	err := row.Scan(
 		&i.Storage.UUID,
+		&i.Storage.TenantUuid,
 		&i.Storage.Name,
 		&i.Storage.Type,
 		&i.Storage.IsEnabled,
@@ -98,7 +100,7 @@ func (q *Queries) GetStorage(ctx context.Context, argUuid pgtype.UUID) (GetStora
 
 const getStorages = `-- name: GetStorages :many
 WITH filtered_storages AS (
-    SELECT d.uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at
+    SELECT d.uuid, d.tenant_uuid, d.name, d.type, d.is_enabled, d.settings, d.created_at, d.updated_at
     FROM storage d
     WHERE
         (NULLIF($5, '') IS NULL OR d."type" = $5)
@@ -107,7 +109,7 @@ WITH filtered_storages AS (
       AND (NULLIF($8, '') IS NULL OR d.name ILIKE $8)
 )
 SELECT
-    uuid, name, type, is_enabled, settings, created_at, updated_at,
+    uuid, tenant_uuid, name, type, is_enabled, settings, created_at, updated_at,
     (SELECT count(*) FROM filtered_storages) AS total_count
 FROM filtered_storages
 ORDER BY
@@ -131,6 +133,7 @@ type GetStoragesParams struct {
 
 type GetStoragesRow struct {
 	UUID       uuid.UUID          `json:"uuid"`
+	TenantUuid *uuid.UUID         `json:"tenant_uuid"`
 	Name       string             `json:"name"`
 	Type       string             `json:"type"`
 	IsEnabled  bool               `json:"is_enabled"`
@@ -160,6 +163,7 @@ func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]Get
 		var i GetStoragesRow
 		if err := rows.Scan(
 			&i.UUID,
+			&i.TenantUuid,
 			&i.Name,
 			&i.Type,
 			&i.IsEnabled,
@@ -180,7 +184,7 @@ func (q *Queries) GetStorages(ctx context.Context, arg GetStoragesParams) ([]Get
 
 const listStorages = `-- name: ListStorages :many
 SELECT
-    storage.uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
+    storage.uuid, storage.tenant_uuid, storage.name, storage.type, storage.is_enabled, storage.settings, storage.created_at, storage.updated_at
 FROM storage
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -207,6 +211,7 @@ func (q *Queries) ListStorages(ctx context.Context, arg ListStoragesParams) ([]L
 		var i ListStoragesRow
 		if err := rows.Scan(
 			&i.Storage.UUID,
+			&i.Storage.TenantUuid,
 			&i.Storage.Name,
 			&i.Storage.Type,
 			&i.Storage.IsEnabled,

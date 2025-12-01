@@ -133,7 +133,7 @@ function AppLayout({ children }: AppLayoutProps) {
       key: 'email',
       label: (
         <Typography.Text type="secondary" style={{ cursor: 'default' }}>
-          {user?.traits.email}
+          {user?.email}
         </Typography.Text>
       ),
       disabled: true,
@@ -162,7 +162,7 @@ function AppLayout({ children }: AppLayoutProps) {
             <Button type="text">
               <Space>
                 <UserOutlined />
-                {user?.traits.name?.first || user?.traits.email?.split('@')[0] || 'User'}
+                {user?.first_name || user?.email?.split('@')[0] || 'User'}
                 <DownOutlined />
               </Space>
             </Button>

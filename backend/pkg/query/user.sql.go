@@ -14,6 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO "user" (
     uuid,
+    tenant_uuid,
     email,
     password,
     first_name,
@@ -25,32 +26,35 @@ INSERT INTO "user" (
     updated_at
 ) VALUES (
     $1::uuid,
-    $2,
+    $2::uuid,
     $3,
     $4,
     $5,
-    $6::boolean,
+    $6,
     $7::boolean,
-    $8,
+    $8::boolean,
+    $9,
     NOW(),
     NULL
-) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+) RETURNING uuid, tenant_uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	UUID      pgtype.UUID `json:"uuid"`
-	Email     string      `json:"email"`
-	Password  string      `json:"password"`
-	FirstName string      `json:"first_name"`
-	LastName  string      `json:"last_name"`
-	IsEnabled bool        `json:"is_enabled"`
-	IsAdmin   bool        `json:"is_admin"`
-	Meta      []byte      `json:"meta"`
+	UUID       pgtype.UUID `json:"uuid"`
+	TenantUuid pgtype.UUID `json:"tenant_uuid"`
+	Email      string      `json:"email"`
+	Password   string      `json:"password"`
+	FirstName  string      `json:"first_name"`
+	LastName   string      `json:"last_name"`
+	IsEnabled  bool        `json:"is_enabled"`
+	IsAdmin    bool        `json:"is_admin"`
+	Meta       []byte      `json:"meta"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.UUID,
+		arg.TenantUuid,
 		arg.Email,
 		arg.Password,
 		arg.FirstName,
@@ -62,6 +66,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.UUID,
+		&i.TenantUuid,
 		&i.Email,
 		&i.Password,
 		&i.FirstName,
@@ -87,7 +92,7 @@ func (q *Queries) DeleteUser(ctx context.Context, uuid pgtype.UUID) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-  uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+  uuid, tenant_uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 FROM "user"
 WHERE uuid = $1::uuid
 `
@@ -97,6 +102,7 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.UUID,
+		&i.TenantUuid,
 		&i.Email,
 		&i.Password,
 		&i.FirstName,
@@ -112,7 +118,7 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
-  uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+  uuid, tenant_uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 FROM "user"
 WHERE email = $1
 `
@@ -122,6 +128,39 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	var i User
 	err := row.Scan(
 		&i.UUID,
+		&i.TenantUuid,
+		&i.Email,
+		&i.Password,
+		&i.FirstName,
+		&i.LastName,
+		&i.IsEnabled,
+		&i.IsAdmin,
+		&i.Meta,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByTenantAndEmail = `-- name: GetUserByTenantAndEmail :one
+SELECT
+  uuid, tenant_uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+FROM "user"
+WHERE tenant_uuid = $1::uuid
+  AND email = $2
+`
+
+type GetUserByTenantAndEmailParams struct {
+	TenantUuid pgtype.UUID `json:"tenant_uuid"`
+	Email      string      `json:"email"`
+}
+
+func (q *Queries) GetUserByTenantAndEmail(ctx context.Context, arg GetUserByTenantAndEmailParams) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByTenantAndEmail, arg.TenantUuid, arg.Email)
+	var i User
+	err := row.Scan(
+		&i.UUID,
+		&i.TenantUuid,
 		&i.Email,
 		&i.Password,
 		&i.FirstName,
@@ -137,7 +176,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-  uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+  uuid, tenant_uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
 FROM "user"
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -160,6 +199,55 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 		var i User
 		if err := rows.Scan(
 			&i.UUID,
+			&i.TenantUuid,
+			&i.Email,
+			&i.Password,
+			&i.FirstName,
+			&i.LastName,
+			&i.IsEnabled,
+			&i.IsAdmin,
+			&i.Meta,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersByTenant = `-- name: ListUsersByTenant :many
+SELECT
+  uuid, tenant_uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+FROM "user"
+WHERE tenant_uuid = $1::uuid
+ORDER BY created_at DESC
+LIMIT NULLIF($3::int, 0)
+OFFSET $2
+`
+
+type ListUsersByTenantParams struct {
+	TenantUuid pgtype.UUID `json:"tenant_uuid"`
+	Offset     int32       `json:"offset"`
+	Limit      int32       `json:"limit"`
+}
+
+func (q *Queries) ListUsersByTenant(ctx context.Context, arg ListUsersByTenantParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsersByTenant, arg.TenantUuid, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UUID,
+			&i.TenantUuid,
 			&i.Email,
 			&i.Password,
 			&i.FirstName,

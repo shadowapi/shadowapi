@@ -3,13 +3,15 @@ version: v2.2.0
 serve:
   cookies:
     same_site_mode: Lax
-    domain: localtest.me
+    # Leading dot allows cookies across all subdomains (*.localtest.me)
+    domain: .localtest.me
 
   public:
     cors:
       enabled: true
       allowed_origins:
         - http://localtest.me
+        - http://*.localtest.me
       allowed_methods:
         - POST
         - GET

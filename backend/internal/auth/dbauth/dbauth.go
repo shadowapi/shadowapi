@@ -17,6 +17,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
+	"github.com/shadowapi/shadowapi/backend/internal/tenant"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
@@ -249,9 +250,31 @@ func (m *DBUserManager) ListUsers(ctx context.Context) ([]api.User, error) {
 	return result, nil
 }
 
-// AuthenticateUser verifies email/password and returns the user if valid
+// AuthenticateUser verifies email/password and returns the user if valid.
+// Uses tenant from context if available, otherwise falls back to email-only lookup.
 func (m *DBUserManager) AuthenticateUser(ctx context.Context, email, password string) (*api.User, error) {
-	user, err := query.New(m.dbp).GetUserByEmail(ctx, email)
+	var user query.User
+	var err error
+
+	// Try to get tenant from context
+	if t, ok := tenant.FromContext(ctx); ok {
+		// Tenant-aware lookup
+		tenantUUID, parseErr := uuid.FromString(t.UUID)
+		if parseErr != nil {
+			m.log.Error("failed to parse tenant UUID", "error", parseErr)
+			return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("authentication failed"))
+		}
+		user, err = query.New(m.dbp).GetUserByTenantAndEmail(ctx, query.GetUserByTenantAndEmailParams{
+			TenantUuid: pgtype.UUID{Bytes: converter.UToBytes(tenantUUID), Valid: true},
+			Email:      email,
+		})
+		m.log.Debug("tenant-aware auth", "tenant", t.Name, "email", email)
+	} else {
+		// Fallback: global email lookup (for backwards compatibility during migration)
+		user, err = query.New(m.dbp).GetUserByEmail(ctx, email)
+		m.log.Debug("global auth (no tenant)", "email", email)
+	}
+
 	if err == pgx.ErrNoRows {
 		m.log.Debug("authentication failed: user not found", "email", email)
 		return nil, handler.ErrWithCode(http.StatusUnauthorized, handler.E("invalid credentials"))

@@ -56,12 +56,24 @@ type Handler interface {
 	//
 	// GET /auth/oauth2/session
 	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
+	// CheckTenantExists implements checkTenantExists operation.
+	//
+	// Check if a tenant exists by subdomain name.
+	//
+	// GET /tenant/check
+	CheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (*TenantCheck, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.
 	//
 	// POST /contact
 	CreateContact(ctx context.Context, req *Contact) (*Contact, error)
+	// CreateTenant implements createTenant operation.
+	//
+	// Create a new tenant.
+	//
+	// POST /tenant
+	CreateTenant(ctx context.Context, req *Tenant) (*Tenant, error)
 	// CreateUser implements createUser operation.
 	//
 	// Create a new user.
@@ -242,6 +254,12 @@ type Handler interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
+	// DeleteTenant implements deleteTenant operation.
+	//
+	// Delete a tenant.
+	//
+	// DELETE /tenant/{uuid}
+	DeleteTenant(ctx context.Context, params DeleteTenantParams) error
 	// DeleteUser implements deleteUser operation.
 	//
 	// Delete user.
@@ -302,18 +320,37 @@ type Handler interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
+	// GetTenant implements getTenant operation.
+	//
+	// Get a tenant by UUID.
+	//
+	// GET /tenant/{uuid}
+	GetTenant(ctx context.Context, params GetTenantParams) (*Tenant, error)
 	// GetUser implements getUser operation.
 	//
 	// Get user details.
 	//
 	// GET /user/{uuid}
 	GetUser(ctx context.Context, params GetUserParams) (*User, error)
+	// ListAuthenticatedTenants implements listAuthenticatedTenants operation.
+	//
+	// Uses the shared session cookie to find all tenants where the user is authenticated.
+	// This endpoint is used by the tenant selection page.
+	//
+	// GET /auth/tenants
+	ListAuthenticatedTenants(ctx context.Context) ([]AuthenticatedTenant, error)
 	// ListContacts implements listContacts operation.
 	//
 	// List all contacts.
 	//
 	// GET /contact
 	ListContacts(ctx context.Context) ([]Contact, error)
+	// ListTenants implements listTenants operation.
+	//
+	// List all tenants.
+	//
+	// GET /tenant
+	ListTenants(ctx context.Context, params ListTenantsParams) ([]Tenant, error)
 	// ListUsers implements listUsers operation.
 	//
 	// List all users.
@@ -602,6 +639,12 @@ type Handler interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, req *UserProfile) (*User, error)
+	// UpdateTenant implements updateTenant operation.
+	//
+	// Update a tenant.
+	//
+	// PUT /tenant/{uuid}
+	UpdateTenant(ctx context.Context, req *Tenant, params UpdateTenantParams) (*Tenant, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Update user details.

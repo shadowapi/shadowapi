@@ -85,6 +85,12 @@ components:
       $ref: "components/worker_jobs.yaml"
     UserProfile:
       $ref: "components/user_profile.yaml"
+    Tenant:
+      $ref: "components/tenant.yaml"
+    AuthenticatedTenant:
+      $ref: "components/authenticated_tenant.yaml"
+    TenantCheck:
+      $ref: "components/tenant_check.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -212,6 +218,14 @@ paths:
     $ref: "paths/auth_login.yaml"
   /auth/consent:
     $ref: "paths/auth_consent.yaml"
+  /auth/tenants:
+    $ref: "paths/auth_tenants.yaml"
+  /tenant:
+    $ref: "paths/tenant.yaml"
+  /tenant/{uuid}:
+    $ref: "paths/tenant_uuid.yaml"
+  /tenant/check:
+    $ref: "paths/tenant_check.yaml"
 
 servers:
   - description: Local development server

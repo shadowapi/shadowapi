@@ -3,6 +3,7 @@ import { Spin } from 'antd';
 
 // SSR Pages - imported directly (bundled for server)
 import AboutPage from './pages/about';
+import TenantSelectionPage from './pages/tenant';
 import DocumentationIndex from './pages/documentation';
 import DatasourceIndex from './pages/documentation/datasource';
 import GmailDocumentation from './pages/documentation/datasource/gmail';
@@ -66,6 +67,12 @@ export const routes: RouteConfig[] = [
   {
     path: '/page',
     element: <AboutPage />,
+    layout: 'page',
+    ssr: true
+  },
+  {
+    path: '/page/tenant',
+    element: <TenantSelectionPage />,
     layout: 'page',
     ssr: true
   },

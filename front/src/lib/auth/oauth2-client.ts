@@ -23,13 +23,14 @@ export interface OAuth2LogoutResponse {
 }
 
 export class OAuth2Error extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public details?: unknown
-  ) {
+  status?: number;
+  details?: unknown;
+
+  constructor(message: string, status?: number, details?: unknown) {
     super(message);
     this.name = 'OAuth2Error';
+    this.status = status;
+    this.details = details;
   }
 }
 

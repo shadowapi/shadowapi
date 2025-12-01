@@ -85,12 +85,30 @@ func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r *AuthOAuth
 	return r, ht.ErrNotImplemented
 }
 
+// CheckTenantExists implements checkTenantExists operation.
+//
+// Check if a tenant exists by subdomain name.
+//
+// GET /tenant/check
+func (UnimplementedHandler) CheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (r *TenantCheck, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateContact implements createContact operation.
 //
 // Create a new contact record.
 //
 // POST /contact
 func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r *Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateTenant implements createTenant operation.
+//
+// Create a new tenant.
+//
+// POST /tenant
+func (UnimplementedHandler) CreateTenant(ctx context.Context, req *Tenant) (r *Tenant, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -364,6 +382,15 @@ func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteCont
 	return ht.ErrNotImplemented
 }
 
+// DeleteTenant implements deleteTenant operation.
+//
+// Delete a tenant.
+//
+// DELETE /tenant/{uuid}
+func (UnimplementedHandler) DeleteTenant(ctx context.Context, params DeleteTenantParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteUser implements deleteUser operation.
 //
 // Delete user.
@@ -454,6 +481,15 @@ func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// GetTenant implements getTenant operation.
+//
+// Get a tenant by UUID.
+//
+// GET /tenant/{uuid}
+func (UnimplementedHandler) GetTenant(ctx context.Context, params GetTenantParams) (r *Tenant, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetUser implements getUser operation.
 //
 // Get user details.
@@ -463,12 +499,31 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 	return r, ht.ErrNotImplemented
 }
 
+// ListAuthenticatedTenants implements listAuthenticatedTenants operation.
+//
+// Uses the shared session cookie to find all tenants where the user is authenticated.
+// This endpoint is used by the tenant selection page.
+//
+// GET /auth/tenants
+func (UnimplementedHandler) ListAuthenticatedTenants(ctx context.Context) (r []AuthenticatedTenant, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListContacts implements listContacts operation.
 //
 // List all contacts.
 //
 // GET /contact
 func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListTenants implements listTenants operation.
+//
+// List all tenants.
+//
+// GET /tenant
+func (UnimplementedHandler) ListTenants(ctx context.Context, params ListTenantsParams) (r []Tenant, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -901,6 +956,15 @@ func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, par
 //
 // PUT /profile
 func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateTenant implements updateTenant operation.
+//
+// Update a tenant.
+//
+// PUT /tenant/{uuid}
+func (UnimplementedHandler) UpdateTenant(ctx context.Context, req *Tenant, params UpdateTenantParams) (r *Tenant, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

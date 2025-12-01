@@ -67,6 +67,8 @@ func Provide(i do.Injector) (*Auth, error) {
 			"/api/v1/auth/oauth2/refresh":   http.MethodPost,
 			"/api/v1/auth/oauth2/logout":    http.MethodPost,
 			"/api/v1/auth/oauth2/session":   http.MethodGet,
+			"/api/v1/auth/tenants":          http.MethodGet, // Public: list authenticated tenants
+			"/api/v1/tenant/check":          http.MethodGet, // Public: check if tenant exists
 		},
 	}
 
@@ -124,6 +126,13 @@ func (a *Auth) HandleBearerAuth(
 }
 
 func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
+	// Always extract shared session cookie if present (for tenant listing)
+	ctx := req.Context
+	if cookie, err := req.Raw.Cookie(oauth2.SharedSessionCookie); err == nil {
+		ctx = context.WithValue(ctx, oauth2.SharedSessionContextKey, cookie.Value)
+		req.SetContext(ctx)
+	}
+
 	// Check if path is in allow list
 	if m, ok := a.allow[req.Raw.URL.Path]; ok && (m == req.Raw.Method || m == "*") {
 		// For OAuth2 refresh/logout, add refresh token to context

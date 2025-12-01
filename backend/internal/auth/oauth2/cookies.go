@@ -5,10 +5,16 @@ import (
 	"time"
 )
 
+// Context key for shared session
+type contextKey string
+
+const SharedSessionContextKey contextKey = "shared_session_id"
+
 // Cookie names
 const (
-	AccessTokenCookie  = "shadowapi_access_token"
-	RefreshTokenCookie = "shadowapi_refresh_token"
+	AccessTokenCookie   = "shadowapi_access_token"
+	RefreshTokenCookie  = "shadowapi_refresh_token"
+	SharedSessionCookie = "shadowapi_shared_session"
 )
 
 // CookieConfig holds configuration for auth cookies
@@ -86,4 +92,52 @@ func GetRefreshTokenFromCookie(r *http.Request) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+// SetSharedSessionCookie sets the shared session cookie across all subdomains
+func SetSharedSessionCookie(w http.ResponseWriter, cfg CookieConfig, sessionID string, ttl time.Duration) {
+	// Use leading dot for domain to include all subdomains
+	domain := cfg.Domain
+	if domain != "" && domain[0] != '.' {
+		domain = "." + domain
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     SharedSessionCookie,
+		Value:    sessionID,
+		Path:     "/",
+		Domain:   domain,
+		MaxAge:   int(ttl.Seconds()),
+		HttpOnly: true,
+		Secure:   cfg.Secure,
+		SameSite: cfg.SameSite,
+	})
+}
+
+// GetSharedSessionFromCookie extracts the shared session ID from the request cookie
+func GetSharedSessionFromCookie(r *http.Request) (string, error) {
+	cookie, err := r.Cookie(SharedSessionCookie)
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
+}
+
+// ClearSharedSessionCookie clears the shared session cookie
+func ClearSharedSessionCookie(w http.ResponseWriter, cfg CookieConfig) {
+	domain := cfg.Domain
+	if domain != "" && domain[0] != '.' {
+		domain = "." + domain
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     SharedSessionCookie,
+		Value:    "",
+		Path:     "/",
+		Domain:   domain,
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   cfg.Secure,
+		SameSite: cfg.SameSite,
+	})
 }

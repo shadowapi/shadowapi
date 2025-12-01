@@ -11,6 +11,7 @@ import (
 
 type Contact struct {
 	UUID                    uuid.UUID          `json:"uuid"`
+	TenantUuid              *uuid.UUID         `json:"tenant_uuid"`
 	UserUUID                *uuid.UUID         `json:"user_uuid"`
 	InstanceUuid            *uuid.UUID         `json:"instance_uuid"`
 	Status                  pgtype.Text        `json:"status"`
@@ -138,15 +139,16 @@ type Contact struct {
 }
 
 type Datasource struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	UserUUID  *uuid.UUID         `json:"user_uuid"`
-	Name      string             `json:"name"`
-	Type      string             `json:"type"`
-	IsEnabled bool               `json:"is_enabled"`
-	Provider  string             `json:"provider"`
-	Settings  []byte             `json:"settings"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID       uuid.UUID          `json:"uuid"`
+	TenantUuid *uuid.UUID         `json:"tenant_uuid"`
+	UserUUID   *uuid.UUID         `json:"user_uuid"`
+	Name       string             `json:"name"`
+	Type       string             `json:"type"`
+	IsEnabled  bool               `json:"is_enabled"`
+	Provider   string             `json:"provider"`
+	Settings   []byte             `json:"settings"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 }
 
 type File struct {
@@ -229,6 +231,7 @@ type Oauth2Token struct {
 
 type Pipeline struct {
 	UUID           uuid.UUID          `json:"uuid"`
+	TenantUuid     *uuid.UUID         `json:"tenant_uuid"`
 	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
 	StorageUuid    *uuid.UUID         `json:"storage_uuid"`
 	Name           string             `json:"name"`
@@ -255,13 +258,14 @@ type Scheduler struct {
 }
 
 type Storage struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Name      string             `json:"name"`
-	Type      string             `json:"type"`
-	IsEnabled bool               `json:"is_enabled"`
-	Settings  []byte             `json:"settings"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID       uuid.UUID          `json:"uuid"`
+	TenantUuid *uuid.UUID         `json:"tenant_uuid"`
+	Name       string             `json:"name"`
+	Type       string             `json:"type"`
+	IsEnabled  bool               `json:"is_enabled"`
+	Settings   []byte             `json:"settings"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 }
 
 type SyncPolicy struct {
@@ -276,6 +280,27 @@ type SyncPolicy struct {
 	Settings     []byte             `json:"settings"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Tenant struct {
+	UUID        uuid.UUID          `json:"uuid"`
+	Name        string             `json:"name"`
+	DisplayName string             `json:"display_name"`
+	IsEnabled   bool               `json:"is_enabled"`
+	Settings    []byte             `json:"settings"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type TenantSession struct {
+	UUID           uuid.UUID          `json:"uuid"`
+	SessionID      string             `json:"session_id"`
+	TenantUuid     *uuid.UUID         `json:"tenant_uuid"`
+	UserUUID       *uuid.UUID         `json:"user_uuid"`
+	IsActive       bool               `json:"is_active"`
+	LastAccessedAt pgtype.Timestamptz `json:"last_accessed_at"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type TgAccount struct {
@@ -353,16 +378,17 @@ type TgSessionsState struct {
 }
 
 type User struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Email     string             `json:"email"`
-	Password  string             `json:"password"`
-	FirstName string             `json:"first_name"`
-	LastName  string             `json:"last_name"`
-	IsEnabled bool               `json:"is_enabled"`
-	IsAdmin   bool               `json:"is_admin"`
-	Meta      []byte             `json:"meta"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID       uuid.UUID          `json:"uuid"`
+	TenantUuid *uuid.UUID         `json:"tenant_uuid"`
+	Email      string             `json:"email"`
+	Password   string             `json:"password"`
+	FirstName  string             `json:"first_name"`
+	LastName   string             `json:"last_name"`
+	IsEnabled  bool               `json:"is_enabled"`
+	IsAdmin    bool               `json:"is_admin"`
+	Meta       []byte             `json:"meta"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 }
 
 type WorkerJob struct {

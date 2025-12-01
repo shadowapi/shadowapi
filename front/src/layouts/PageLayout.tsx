@@ -7,6 +7,7 @@ const { Content } = Layout;
 import BaseLayout from './BaseLayout';
 
 const breadcrumbNameMap: Record<string, string> = {
+  '/page/tenant': 'Select Tenant',
   '/page/documentation': 'Documentation',
   '/page/documentation/datasource': 'Datasources',
   '/page/documentation/datasource/gmail': 'Gmail',

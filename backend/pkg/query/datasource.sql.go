@@ -33,7 +33,7 @@ INSERT INTO datasource (
              $7,
              NOW(),
              NOW()
-         ) RETURNING uuid, user_uuid, name, type, is_enabled, provider, settings, created_at, updated_at
+         ) RETURNING uuid, tenant_uuid, user_uuid, name, type, is_enabled, provider, settings, created_at, updated_at
 `
 
 type CreateDatasourceParams struct {
@@ -59,6 +59,7 @@ func (q *Queries) CreateDatasource(ctx context.Context, arg CreateDatasourcePara
 	var i Datasource
 	err := row.Scan(
 		&i.UUID,
+		&i.TenantUuid,
 		&i.UserUUID,
 		&i.Name,
 		&i.Type,
@@ -82,7 +83,7 @@ func (q *Queries) DeleteDatasource(ctx context.Context, argUuid pgtype.UUID) err
 
 const getDatasource = `-- name: GetDatasource :one
 SELECT
-    datasource.uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at
+    datasource.uuid, datasource.tenant_uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at
 FROM datasource
 WHERE uuid = $1::uuid
 `
@@ -96,6 +97,7 @@ func (q *Queries) GetDatasource(ctx context.Context, argUuid pgtype.UUID) (GetDa
 	var i GetDatasourceRow
 	err := row.Scan(
 		&i.Datasource.UUID,
+		&i.Datasource.TenantUuid,
 		&i.Datasource.UserUUID,
 		&i.Datasource.Name,
 		&i.Datasource.Type,
@@ -110,7 +112,7 @@ func (q *Queries) GetDatasource(ctx context.Context, argUuid pgtype.UUID) (GetDa
 
 const getDatasources = `-- name: GetDatasources :many
 WITH filtered_datasource AS (
-    SELECT d.uuid, d.user_uuid, d.name, d.type, d.is_enabled, d.provider, d.settings, d.created_at, d.updated_at
+    SELECT d.uuid, d.tenant_uuid, d.user_uuid, d.name, d.type, d.is_enabled, d.provider, d.settings, d.created_at, d.updated_at
     FROM datasource d
     WHERE
         (NULLIF($5, '') IS NULL OR sp.uuid = $5::uuid) AND
@@ -121,7 +123,7 @@ WITH filtered_datasource AS (
         (NULLIF($10::int, -1) IS NULL OR sp.sync_all = ($11::int)::boolean)
 )
 SELECT
-    uuid, user_uuid, name, type, is_enabled, provider, settings, created_at, updated_at,
+    uuid, tenant_uuid, user_uuid, name, type, is_enabled, provider, settings, created_at, updated_at,
     (SELECT count(*) FROM filtered_datasource) AS total_count
 FROM filtered_datasource
 ORDER BY
@@ -152,6 +154,7 @@ type GetDatasourcesParams struct {
 
 type GetDatasourcesRow struct {
 	UUID       uuid.UUID          `json:"uuid"`
+	TenantUuid *uuid.UUID         `json:"tenant_uuid"`
 	UserUUID   *uuid.UUID         `json:"user_uuid"`
 	Name       string             `json:"name"`
 	Type       string             `json:"type"`
@@ -186,6 +189,7 @@ func (q *Queries) GetDatasources(ctx context.Context, arg GetDatasourcesParams) 
 		var i GetDatasourcesRow
 		if err := rows.Scan(
 			&i.UUID,
+			&i.TenantUuid,
 			&i.UserUUID,
 			&i.Name,
 			&i.Type,
@@ -208,7 +212,7 @@ func (q *Queries) GetDatasources(ctx context.Context, arg GetDatasourcesParams) 
 
 const listDatasources = `-- name: ListDatasources :many
 SELECT
-    datasource.uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at
+    datasource.uuid, datasource.tenant_uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at
 FROM datasource
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -235,6 +239,7 @@ func (q *Queries) ListDatasources(ctx context.Context, arg ListDatasourcesParams
 		var i ListDatasourcesRow
 		if err := rows.Scan(
 			&i.Datasource.UUID,
+			&i.Datasource.TenantUuid,
 			&i.Datasource.UserUUID,
 			&i.Datasource.Name,
 			&i.Datasource.Type,
