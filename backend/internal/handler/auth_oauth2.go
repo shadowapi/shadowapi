@@ -10,10 +10,14 @@ import (
 	"sync"
 	"time"
 
+	gofrsUUID "github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/tenant"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // OAuth2Service provides OAuth2 functionality for the handlers
@@ -200,6 +204,15 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 		"has_refresh_token", tokenResp.RefreshToken != "",
 	)
 
+	// Get or generate session ID for cross-subdomain session tracking
+	sessionID, _ := ctx.Value(oauth2.SharedSessionContextKey).(string)
+	if sessionID == "" {
+		sessionID = gofrsUUID.Must(gofrsUUID.NewV7()).String()
+		h.log.Debug("generated new shared session ID", "session_id", sessionID[:8]+"...")
+	} else {
+		h.log.Debug("using existing shared session ID", "session_id", sessionID[:8]+"...")
+	}
+
 	// Build cookie headers (separate headers for each cookie)
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
 	refreshTTL := 720 * time.Hour // Match Hydra's refresh token TTL
@@ -208,9 +221,51 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 		h.oauth2Svc.cookieConfig,
 		tokenResp.AccessToken,
 		tokenResp.RefreshToken,
+		sessionID,
 		accessTTL,
 		refreshTTL,
 	)
+
+	// Create tenant session record for cross-subdomain session tracking
+	if stateData.TenantUUID != "" && h.oauth2Svc.jwtValidator != nil {
+		// Decode access token to get user UUID (subject claim)
+		claims, err := h.oauth2Svc.jwtValidator.Validate(ctx, tokenResp.AccessToken)
+		if err != nil {
+			h.log.Warn("failed to decode access token for tenant session", "error", err)
+		} else if claims.Subject != "" {
+			// Parse UUIDs
+			tenantUUID, err := gofrsUUID.FromString(stateData.TenantUUID)
+			if err != nil {
+				h.log.Warn("invalid tenant UUID in state", "tenant_uuid", stateData.TenantUUID, "error", err)
+			} else {
+				userUUID, err := gofrsUUID.FromString(claims.Subject)
+				if err != nil {
+					h.log.Warn("invalid user UUID in token subject", "subject", claims.Subject, "error", err)
+				} else {
+					// Create or update tenant session record
+					sessionRecordUUID := gofrsUUID.Must(gofrsUUID.NewV7())
+					expiresAt := time.Now().Add(refreshTTL)
+
+					_, err = query.New(h.dbp).UpsertTenantSession(ctx, query.UpsertTenantSessionParams{
+						UUID:       pgtype.UUID{Bytes: sessionRecordUUID, Valid: true},
+						SessionID:  sessionID,
+						TenantUuid: pgtype.UUID{Bytes: tenantUUID, Valid: true},
+						UserUUID:   pgtype.UUID{Bytes: userUUID, Valid: true},
+						ExpiresAt:  pgtype.Timestamptz{Time: expiresAt, Valid: true},
+					})
+					if err != nil {
+						h.log.Warn("failed to create tenant session", "error", err)
+					} else {
+						h.log.Debug("created tenant session",
+							"session_id", sessionID[:8]+"...",
+							"tenant", stateData.TenantName,
+							"user", claims.Subject[:8]+"...",
+						)
+					}
+				}
+			}
+		}
+	}
 
 	// Redirect to the frontend
 	redirectURL := stateData.RedirectURI
@@ -244,6 +299,7 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 	}
 
 	// Build cookie headers (separate headers for each cookie)
+	// Don't include session ID on refresh - the shared session cookie is already set
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
 	refreshTTL := 720 * time.Hour
 
@@ -251,6 +307,7 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 		h.oauth2Svc.cookieConfig,
 		tokenResp.AccessToken,
 		tokenResp.RefreshToken,
+		"", // No session ID on refresh
 		accessTTL,
 		refreshTTL,
 	)
@@ -356,7 +413,7 @@ func (h *Handler) AuthOAuth2Logout(ctx context.Context) (*api.AuthOAuth2LogoutOK
 
 // Helper functions for building cookie headers
 
-func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken string, accessTTL, refreshTTL time.Duration) []string {
+func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken, sessionID string, accessTTL, refreshTTL time.Duration) []string {
 	secure := ""
 	if cfg.Secure {
 		secure = "; Secure"
@@ -378,7 +435,27 @@ func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken strin
 		secure,
 	)
 
-	return []string{accessCookie, refreshCookie}
+	cookies := []string{accessCookie, refreshCookie}
+
+	// Add shared session cookie if sessionID is provided
+	if sessionID != "" {
+		// Use leading dot for domain to include all subdomains
+		sharedDomain := cfg.Domain
+		if sharedDomain != "" && sharedDomain[0] != '.' {
+			sharedDomain = "." + sharedDomain
+		}
+
+		sharedSessionCookie := fmt.Sprintf("%s=%s; Path=/; Domain=%s; Max-Age=%d; HttpOnly; SameSite=Lax%s",
+			oauth2.SharedSessionCookie,
+			sessionID,
+			sharedDomain,
+			int(refreshTTL.Seconds()),
+			secure,
+		)
+		cookies = append(cookies, sharedSessionCookie)
+	}
+
+	return cookies
 }
 
 func buildClearCookieHeaders(cfg oauth2.CookieConfig) []string {

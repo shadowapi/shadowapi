@@ -47,7 +47,7 @@ function TenantSelectionPage() {
 
         if (response.ok) {
           const data = await response.json();
-          setAuthenticatedTenants(data.tenants || []);
+          setAuthenticatedTenants(Array.isArray(data) ? data : []);
         } else if (response.status !== 401) {
           // 401 is expected if no shared session exists
           console.error('Failed to fetch authenticated tenants');
