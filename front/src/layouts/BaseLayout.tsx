@@ -8,7 +8,7 @@ const { Header, Footer } = Layout;
 const menuItems: MenuProps['items'] = [
   {
     key: '/',
-    label: 'Dashboard'
+    label: 'Service'
   },
   {
     key: '/page/documentation',

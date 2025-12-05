@@ -160,9 +160,8 @@ function AppLayout({ children }: AppLayoutProps) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0', flexShrink: 0 }}>
           <Breadcrumb
             items={[
-              { title: <Link to="/">Dashboard</Link> },
-              { title: 'List' },
-              { title: 'App' }
+              { title: <Link to="/">Service</Link> },
+              { title: 'Dashboard' },
             ]}
           />
           <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
