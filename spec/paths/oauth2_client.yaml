@@ -1,6 +1,7 @@
 get:
   description: List OAuth2 clients
   operationId: oauth2-client-list
+  security: []
   parameters:
     - description: Offset records.
       explode: false
@@ -45,6 +46,7 @@ get:
 post:
   description: Create OAuth2 client
   operationId: oauth2-client-create
+  security: []
   requestBody:
     content:
       application/json:

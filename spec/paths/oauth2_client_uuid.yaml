@@ -1,6 +1,7 @@
 get:
   description: Get OAuth2 client details
   operationId: oauth2-client-get
+  security: []
   parameters:
     - description: ClientID of the OAuth2 client.
       in: path
@@ -27,6 +28,7 @@ get:
 put:
   description: Update OAuth2 client
   operationId: oauth2-client-update
+  security: []
   parameters:
     - description: ClientID of the OAuth2 client details.
       in: path
@@ -78,6 +80,7 @@ put:
 delete:
   description: Delete OAuth2 client
   operationId: oauth2-client-delete
+  security: []
   parameters:
     - description: ID of the connection base object.
       in: path
