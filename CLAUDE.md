@@ -97,6 +97,33 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR, AuthLayout for login)
 - `front/src/pages/auth/` – Authentication pages (LoginPage)
 - `front/src/pages/tenant/` – Tenant selection page for multi-tenant navigation
+- `front/src/theme.ts` – Centralized theme configuration with color palette and Ant Design theme tokens
+
+### Theme System
+
+The frontend uses a centralized theme configuration based on the color palette from [Coolors](https://coolors.co/palette/000000-14213d-fca311-e5e5e5-ffffff).
+
+**Color palette:**
+- `#000000` - Black (header border, logo text)
+- `#14213d` - Oxford Blue (header background, footer text)
+- `#fca311` - Orange (primary accent, logo background, buttons, links)
+- `#e5e5e5` - Light Gray (footer background, layout background)
+- `#ffffff` - White (content background)
+
+**Key file:** `front/src/theme.ts`
+- `colors` – Base color palette constants
+- `uiColors` – Semantic color mappings for UI elements (header, footer, menu, etc.)
+- `theme` – Ant Design `ThemeConfig` object applied via `ConfigProvider`
+
+**Usage:**
+- Theme is applied globally in `entry-client.tsx` and `entry-server.tsx` via `ConfigProvider`
+- Import `colors` or `uiColors` from `theme.ts` for custom styling
+- Ant Design components automatically use the theme tokens (primary color, border radius, etc.)
+
+**Modifying the theme:**
+1. Update color values in `front/src/theme.ts`
+2. Adjust `uiColors` mappings if semantic usage changes
+3. Modify Ant Design component tokens in the `theme.components` section as needed
 
 ### Development scripts
 

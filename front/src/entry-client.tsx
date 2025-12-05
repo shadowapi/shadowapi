@@ -1,7 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
+import { ConfigProvider } from 'antd';
 import App from './App';
+import theme from './theme';
 import './index.css';
 
 const container = document.getElementById('root')!;
@@ -11,8 +13,10 @@ const container = document.getElementById('root')!;
 container.innerHTML = '';
 createRoot(container).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ConfigProvider theme={theme}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ConfigProvider>
   </StrictMode>
 );

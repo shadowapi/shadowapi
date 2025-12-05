@@ -1,21 +1,9 @@
 import { type ReactNode, useMemo } from 'react';
-import { Layout, Menu, type MenuProps, ConfigProvider } from 'antd';
+import { Layout, Menu, type MenuProps } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router';
+import { uiColors } from '../theme';
 
 const { Header, Footer } = Layout;
-
-// Gray color palette
-const colors = {
-  lightest: '#f8f9fa',
-  light: '#e9ecef',
-  lightMedium: '#dee2e6',
-  mediumLight: '#ced4da',
-  medium: '#adb5bd',
-  mediumDark: '#6c757d',
-  dark: '#495057',
-  veryDark: '#343a40',
-  darkest: '#212529',
-};
 
 const menuItems: MenuProps['items'] = [
   {
@@ -66,8 +54,8 @@ function BaseLayout({ children }: BaseLayoutProps) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          background: colors.veryDark,
-          borderBottom: `1px solid ${colors.dark}`,
+          background: uiColors.headerBg,
+          borderBottom: `1px solid ${uiColors.headerBorder}`,
           flexShrink: 0,
         }}
       >
@@ -77,12 +65,12 @@ function BaseLayout({ children }: BaseLayoutProps) {
             height: 36,
             margin: '0 38px 0 0',
             padding: '0 18px',
-            background: colors.dark,
+            background: uiColors.logoBg,
             borderRadius: 6,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: colors.lightest,
+            color: uiColors.logoText,
             fontWeight: 600,
             fontSize: 18,
             letterSpacing: '0.5px',
@@ -91,37 +79,19 @@ function BaseLayout({ children }: BaseLayoutProps) {
         >
           ShadowAPI
         </Link>
-        <ConfigProvider
-          theme={{
-            components: {
-              Menu: {
-                darkItemBg: 'transparent',
-                darkItemColor: colors.mediumLight,
-                darkItemHoverColor: colors.lightest,
-                darkItemHoverBg: colors.dark,
-                darkItemSelectedBg: colors.dark,
-                darkItemSelectedColor: colors.lightest,
-                horizontalItemBorderRadius: 6,
-                horizontalItemHoverBg: colors.dark,
-                horizontalItemSelectedBg: colors.dark,
-              },
-            },
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          selectedKeys={selectedKeys}
+          items={menuItems}
+          onClick={({ key }) => navigate(key)}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            background: 'transparent',
+            borderBottom: 'none',
           }}
-        >
-          <Menu
-            theme="dark"
-            mode="horizontal"
-            selectedKeys={selectedKeys}
-            items={menuItems}
-            onClick={({ key }) => navigate(key)}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              background: 'transparent',
-              borderBottom: 'none',
-            }}
-          />
-        </ConfigProvider>
+        />
       </Header>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {children}
@@ -129,9 +99,9 @@ function BaseLayout({ children }: BaseLayoutProps) {
       <Footer
         style={{
           textAlign: 'center',
-          background: colors.light,
-          color: colors.mediumDark,
-          borderTop: `1px solid ${colors.lightMedium}`,
+          background: uiColors.footerBg,
+          color: uiColors.footerText,
+          borderTop: `1px solid ${uiColors.footerBorder}`,
           flexShrink: 0,
         }}
       >

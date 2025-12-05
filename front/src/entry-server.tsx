@@ -3,6 +3,7 @@ import { StaticRouter } from 'react-router';
 import { createCache, extractStyle, StyleProvider } from '@ant-design/cssinjs';
 import { ConfigProvider } from 'antd';
 import App from './App';
+import theme from './theme';
 
 export interface RenderResult {
   html: string;
@@ -17,7 +18,7 @@ export async function render(
 
   const html = renderToString(
     <StyleProvider cache={cache}>
-      <ConfigProvider>
+      <ConfigProvider theme={theme}>
         <StaticRouter location={url}>
           <App ssrData={ssrData} />
         </StaticRouter>
