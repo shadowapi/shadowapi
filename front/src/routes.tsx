@@ -10,7 +10,7 @@ import GmailDocumentation from './pages/documentation/datasource/gmail';
 import TelegramDocumentation from './pages/documentation/datasource/telegram';
 
 // CSR Pages - lazy loaded (only on client)
-const Dashboard = lazy(() => import('./app/Dashboard'));
+const AppRouter = lazy(() => import('./app/AppRouter'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 
 // Loading fallback for lazy components
@@ -50,16 +50,16 @@ export const routes: RouteConfig[] = [
     protected: false
   },
 
-  // CSR routes (app dashboard) - protected
+  // CSR routes (app) - protected
   {
     path: '/',
-    element: withSuspense(Dashboard),
+    element: withSuspense(AppRouter),
     layout: 'app',
     ssr: false
   },
   {
-    path: '/app/*',
-    element: withSuspense(Dashboard),
+    path: '/*',
+    element: withSuspense(AppRouter),
     layout: 'app',
     ssr: false
   },

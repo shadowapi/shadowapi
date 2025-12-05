@@ -89,7 +89,10 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/src/entry-client.tsx` – Client entry point; uses `hydrateRoot` for SSR pages, `createRoot` for CSR
 - `front/src/entry-server.tsx` – SSR render function with Ant Design CSS-in-JS extraction
 - `front/src/routes.tsx` – Centralized route configuration with `ssr` and `protected` flags per route
+- `front/src/api/client.ts` – API client using `openapi-fetch` for type-safe HTTP requests
 - `front/src/api/v1.d.ts` – Generated TypeScript types from OpenAPI spec (do not edit manually, regenerate with `make api-gen`)
+- `front/src/app/AppRouter.tsx` – Internal router for CSR app pages (handles routes like `/oauth2/credentials`)
+- `front/src/app/oauth2/` – OAuth2 Credentials management pages (list, create, edit)
 - `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
 - `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
 - `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
@@ -134,12 +137,20 @@ The frontend uses a centralized theme configuration based on the color palette f
 
 ### Adding new pages
 
-1. Create the page component in `front/src/pages/` or `front/src/app/`
-2. Add route to `front/src/routes.tsx` with appropriate flags:
-   - `ssr: true` for public/SEO pages under `/page/*`
-   - `ssr: false` for app pages under `/` or `/app/*`
-   - `protected: false` for public routes that don't require authentication (default is protected for `app` layout)
+**For SSR pages (public/SEO):**
+1. Create the page component in `front/src/pages/`
+2. Add route to `front/src/routes.tsx` with `ssr: true` and `layout: 'page'`
 3. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
+
+**For CSR app pages (protected):**
+1. Create the page component in `front/src/app/` (e.g., `front/src/app/oauth2/MyPage.tsx`)
+2. Add route to `front/src/app/AppRouter.tsx`
+3. Use the API client from `front/src/api/client.ts` for data fetching:
+   ```typescript
+   import client from '../../api/client';
+   const { data, error } = await client.GET('/oauth2/client');
+   ```
+4. If adding a new menu item, update `front/src/layouts/AppLayout.tsx`
 
 ### Frontend Authentication
 
