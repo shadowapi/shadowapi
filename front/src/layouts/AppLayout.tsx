@@ -100,22 +100,85 @@ interface AppLayoutProps {
   children: ReactNode;
 }
 
+// Route configuration for breadcrumbs and menu state
+interface RouteConfig {
+  title: string;
+  parent?: string;
+}
+
+const routeConfig: Record<string, RouteConfig> = {
+  '/': { title: 'Dashboard' },
+  '/messages': { title: 'Messages' },
+  '/files': { title: 'Files', parent: '/messages' },
+  '/users': { title: 'Users' },
+  '/oauth2/credentials': { title: 'OAuth2 Credentials' },
+  '/oauth2/credentials/new': { title: 'Add', parent: '/oauth2/credentials' },
+  '/storages': { title: 'Data Storages' },
+  '/syncpolicies': { title: 'Sync Policies' },
+  '/pipelines': { title: 'Data Pipelines' },
+  '/workers': { title: 'Workers' },
+  '/schedulers': { title: 'Schedulers', parent: '/workers' },
+  '/logs': { title: 'Logs' },
+};
+
+// Map of routes to their menu parent keys (for expanding submenus)
+const menuParentMap: Record<string, string> = {
+  '/files': '/messages',
+  '/oauth2/credentials': '/datasources',
+  '/schedulers': '/workers',
+};
+
 // Helper to find parent keys for a given path
 function getOpenKeys(pathname: string): string[] {
-  const openKeys: string[] = [];
-
-  // Map of child paths to their parent keys
-  const parentMap: Record<string, string> = {
-    '/files': '/messages',
-    '/oauth2/credentials': '/datasources',
-    '/schedulers': '/workers',
-  };
-
-  if (parentMap[pathname]) {
-    openKeys.push(parentMap[pathname]);
+  // Normalize dynamic paths
+  let normalizedPath = pathname;
+  if (pathname.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || pathname === '/oauth2/credentials/new') {
+    normalizedPath = '/oauth2/credentials';
   }
 
-  return openKeys;
+  const parentKey = menuParentMap[normalizedPath];
+  return parentKey ? [parentKey] : [];
+}
+
+// Generate breadcrumb items for a given path
+function getBreadcrumbItems(pathname: string): { title: React.ReactNode; key: string }[] {
+  const items: { title: React.ReactNode; key: string }[] = [
+    { title: <Link to="/">Service</Link>, key: 'service' },
+  ];
+
+  // Check if this is an edit page (uuid pattern)
+  const uuidMatch = pathname.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
+  const effectivePath = uuidMatch ? '/oauth2/credentials/:uuid' : pathname;
+
+  // Build the breadcrumb chain by following parent links
+  const chain: string[] = [];
+  let currentPath = effectivePath === '/oauth2/credentials/:uuid' ? '/oauth2/credentials' : effectivePath;
+
+  while (currentPath) {
+    chain.unshift(currentPath);
+    const config = routeConfig[currentPath];
+    currentPath = config?.parent || '';
+  }
+
+  // Add each item in the chain
+  chain.forEach((path, index) => {
+    const config = routeConfig[path];
+    if (!config) return;
+
+    const isLast = index === chain.length - 1 && !uuidMatch;
+    if (isLast) {
+      items.push({ title: config.title, key: path });
+    } else {
+      items.push({ title: <Link to={path}>{config.title}</Link>, key: path });
+    }
+  });
+
+  // Add "Edit" for uuid pages
+  if (uuidMatch) {
+    items.push({ title: 'Edit', key: 'edit' });
+  }
+
+  return items;
 }
 
 function AppLayout({ children }: AppLayoutProps) {
@@ -125,7 +188,12 @@ function AppLayout({ children }: AppLayoutProps) {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const selectedKeys = [location.pathname];
+  // Normalize path for menu selection (edit/new pages should highlight parent)
+  let menuSelectedPath = location.pathname;
+  if (location.pathname.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || location.pathname === '/oauth2/credentials/new') {
+    menuSelectedPath = '/oauth2/credentials';
+  }
+  const selectedKeys = [menuSelectedPath];
   const defaultOpenKeys = getOpenKeys(location.pathname);
 
   const userMenuItems: MenuProps['items'] = [
@@ -158,12 +226,7 @@ function AppLayout({ children }: AppLayoutProps) {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0', flexShrink: 0 }}>
-          <Breadcrumb
-            items={[
-              { title: <Link to="/">Service</Link> },
-              { title: 'Dashboard' },
-            ]}
-          />
+          <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
           <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
             <Button type="text">
               <Space>
