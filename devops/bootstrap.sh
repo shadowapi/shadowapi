@@ -13,21 +13,31 @@ generate_secret() {
 
 echo "=== ShadowAPI Bootstrap ==="
 
-# Step 1: Generate .env if it doesn't exist
+# Step 1: Force regenerate .env from template
 if [ -f .env ]; then
-    echo ".env already exists, skipping secret generation..."
-else
-    echo "Generating secrets..."
-    HYDRA_SECRETS_SYSTEM=$(generate_secret 32)
-    OIDC_PAIRWISE_SALT=$(generate_secret 16)
-
-    echo "Creating .env from template..."
-    sed -e "s/__HYDRA_SECRETS_SYSTEM__/$HYDRA_SECRETS_SYSTEM/" \
-        -e "s/__OIDC_PAIRWISE_SALT__/$OIDC_PAIRWISE_SALT/" \
-        -e "s/__OAUTH2_CLIENT_ID__/pending-creation/" \
-        .env.template > .env
-    echo ".env created successfully"
+    echo "WARNING: Removing existing .env file and regenerating from template..."
+    echo "         Any custom changes will be lost!"
+    rm -f .env
 fi
+
+echo "Generating secrets..."
+HYDRA_SECRETS_SYSTEM=$(generate_secret 32)
+OIDC_PAIRWISE_SALT=$(generate_secret 16)
+
+echo "Creating .env from template..."
+sed -e "s/__HYDRA_SECRETS_SYSTEM__/$HYDRA_SECRETS_SYSTEM/" \
+    -e "s/__OIDC_PAIRWISE_SALT__/$OIDC_PAIRWISE_SALT/" \
+    -e "s/__OAUTH2_CLIENT_ID__/pending-creation/" \
+    .env.template > .env
+echo ".env created successfully"
+
+# Step 1.5: Generate hydra.yaml from template using envsubst
+echo "Generating hydra.yaml from template..."
+set -a
+source .env
+set +a
+envsubst < devops/ory/hydra/hydra.template.yaml > devops/ory/hydra/hydra.yaml
+echo "hydra.yaml created successfully"
 
 # Step 2: Start database
 echo "Starting database..."
@@ -55,7 +65,7 @@ done
 
 # Step 5: Create OAuth2 client in Hydra (idempotent)
 echo "Creating OAuth2 client..."
-REDIRECT_URI="http://localtest.me/api/v1/auth/oauth2/callback"
+REDIRECT_URI="${BE_BASE_URL}/api/v1/auth/oauth2/callback"
 CLIENT_NAME="ShadowAPI SPA"
 
 # Check if client already exists by name (search in list)
@@ -98,12 +108,12 @@ TEST_PASSWORD=$(grep "^BE_INIT_ADMIN_PASSWORD=" .env | cut -d'=' -f2)
 
 echo ""
 echo "=== Bootstrap Complete ==="
-echo "Application:      http://localtest.me"
-echo "Tenant selection: http://localtest.me/page/tenant"
+echo "Application:      ${BE_BASE_URL}"
+echo "Tenant selection: ${BE_BASE_URL}/page/tenant"
 echo ""
 echo "Available tenants:"
-echo "  - Internal: http://internal.localtest.me"
-echo "  - Demo:     http://demo.localtest.me"
+echo "  - Internal: ${BE_PROTOCOL:-http}://internal.${BE_DOMAIN}"
+echo "  - Demo:     ${BE_PROTOCOL:-http}://demo.${BE_DOMAIN}"
 echo ""
 echo "Test login:       $TEST_EMAIL / $TEST_PASSWORD"
 echo "OAuth2 Client ID: $CLIENT_ID"

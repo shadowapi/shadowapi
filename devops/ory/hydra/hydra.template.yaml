@@ -3,15 +3,14 @@ version: v2.2.0
 serve:
   cookies:
     same_site_mode: Lax
-    # Leading dot allows cookies across all subdomains (*.localtest.me)
-    domain: .localtest.me
+    # Leading dot allows cookies across all subdomains
+    domain: .${BE_DOMAIN}
 
   public:
     cors:
       enabled: true
       allowed_origins:
-        - http://localtest.me
-        - http://*.localtest.me
+        - "*"
       allowed_methods:
         - POST
         - GET
@@ -26,13 +25,13 @@ serve:
 
 urls:
   self:
-    issuer: http://localtest.me
+    issuer: ${BE_BASE_URL}
   # Login and consent are handled by the backend
-  login: http://localtest.me/api/v1/auth/login
-  consent: http://localtest.me/api/v1/auth/consent
-  logout: http://localtest.me/api/v1/auth/oauth2/logout
-  error: http://localtest.me/auth/error
-  post_logout_redirect: http://localtest.me/
+  login: ${BE_BASE_URL}/api/v1/auth/login
+  consent: ${BE_BASE_URL}/api/v1/auth/consent
+  logout: ${BE_BASE_URL}/api/v1/auth/oauth2/logout
+  error: ${BE_BASE_URL}/auth/error
+  post_logout_redirect: ${BE_BASE_URL}/
 
 oidc:
   subject_identifiers:

@@ -46,6 +46,7 @@ backend/config.yaml
 front/.env
 .env
 .env.gen
+devops/ory/hydra/hydra.yaml
 front/dist/
 backend/shadowapi
 front/playwright-report/

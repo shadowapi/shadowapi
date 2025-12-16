@@ -19,11 +19,6 @@ services:
     environment:
       - DSN=${HYDRA_DSN}
       - SECRETS_SYSTEM=${HYDRA_SECRETS_SYSTEM}
-      - URLS_SELF_ISSUER=${HYDRA_URLS_SELF_ISSUER}
-      - URLS_LOGIN=${HYDRA_URLS_LOGIN}
-      - URLS_CONSENT=${HYDRA_URLS_CONSENT}
-      - URLS_LOGOUT=${HYDRA_URLS_LOGOUT}
-      - OIDC_PAIRWISE_SALT=${OIDC_PAIRWISE_SALT}
       - LOG_LEVEL=${HYDRA_LOG_LEVEL:-info}
     volumes:
       - ../../ory/hydra:/etc/config:ro
