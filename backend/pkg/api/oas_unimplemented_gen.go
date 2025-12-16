@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AddWorkspaceMember implements addWorkspaceMember operation.
+//
+// Add a member to a workspace.
+//
+// POST /workspace/{uuid}/members
+func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (r *WorkspaceMember, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // AuthConsent implements auth-consent operation.
 //
 // Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
@@ -85,12 +94,12 @@ func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r *AuthOAuth
 	return r, ht.ErrNotImplemented
 }
 
-// CheckTenantExists implements checkTenantExists operation.
+// CheckWorkspaceExists implements checkWorkspaceExists operation.
 //
-// Check if a tenant exists by subdomain name.
+// Check if a workspace exists by slug.
 //
-// GET /tenant/check
-func (UnimplementedHandler) CheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (r *TenantCheck, _ error) {
+// GET /workspace/check
+func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (r *WorkspaceCheck, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -100,15 +109,6 @@ func (UnimplementedHandler) CheckTenantExists(ctx context.Context, params CheckT
 //
 // POST /contact
 func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r *Contact, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// CreateTenant implements createTenant operation.
-//
-// Create a new tenant.
-//
-// POST /tenant
-func (UnimplementedHandler) CreateTenant(ctx context.Context, req *Tenant) (r *Tenant, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -127,6 +127,15 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r *User,
 //
 // POST /user/session
 func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r *UserSessionToken, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateWorkspace implements createWorkspace operation.
+//
+// Create a new workspace.
+//
+// POST /workspace
+func (UnimplementedHandler) CreateWorkspace(ctx context.Context, req *Workspace) (r *Workspace, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -382,21 +391,21 @@ func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteCont
 	return ht.ErrNotImplemented
 }
 
-// DeleteTenant implements deleteTenant operation.
-//
-// Delete a tenant.
-//
-// DELETE /tenant/{uuid}
-func (UnimplementedHandler) DeleteTenant(ctx context.Context, params DeleteTenantParams) error {
-	return ht.ErrNotImplemented
-}
-
 // DeleteUser implements deleteUser operation.
 //
 // Delete user.
 //
 // DELETE /user/{uuid}
 func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteWorkspace implements deleteWorkspace operation.
+//
+// Delete a workspace.
+//
+// DELETE /workspace/{uuid}
+func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -481,15 +490,6 @@ func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetTenant implements getTenant operation.
-//
-// Get a tenant by UUID.
-//
-// GET /tenant/{uuid}
-func (UnimplementedHandler) GetTenant(ctx context.Context, params GetTenantParams) (r *Tenant, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetUser implements getUser operation.
 //
 // Get user details.
@@ -499,13 +499,12 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 	return r, ht.ErrNotImplemented
 }
 
-// ListAuthenticatedTenants implements listAuthenticatedTenants operation.
+// GetWorkspace implements getWorkspace operation.
 //
-// Uses the shared session cookie to find all tenants where the user is authenticated.
-// This endpoint is used by the tenant selection page.
+// Get a workspace by UUID.
 //
-// GET /auth/tenants
-func (UnimplementedHandler) ListAuthenticatedTenants(ctx context.Context) (r []AuthenticatedTenant, _ error) {
+// GET /workspace/{uuid}
+func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (r *Workspace, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -518,21 +517,30 @@ func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ er
 	return r, ht.ErrNotImplemented
 }
 
-// ListTenants implements listTenants operation.
-//
-// List all tenants.
-//
-// GET /tenant
-func (UnimplementedHandler) ListTenants(ctx context.Context, params ListTenantsParams) (r []Tenant, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // ListUsers implements listUsers operation.
 //
 // List all users.
 //
 // GET /user
 func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWorkspaceMembers implements listWorkspaceMembers operation.
+//
+// List members of a workspace.
+//
+// GET /workspace/{uuid}/members
+func (UnimplementedHandler) ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) (r []WorkspaceMember, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWorkspaces implements listWorkspaces operation.
+//
+// List workspaces for the current user.
+//
+// GET /workspace
+func (UnimplementedHandler) ListWorkspaces(ctx context.Context, params ListWorkspacesParams) (r []Workspace, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -705,6 +713,15 @@ func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineLis
 // PUT /pipeline/{uuid}
 func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (r *Pipeline, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// RemoveWorkspaceMember implements removeWorkspaceMember operation.
+//
+// Remove a member from a workspace.
+//
+// DELETE /workspace/{uuid}/members/{user_uuid}
+func (UnimplementedHandler) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error {
+	return ht.ErrNotImplemented
 }
 
 // SchedulerCreate implements scheduler-create operation.
@@ -959,21 +976,30 @@ func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile)
 	return r, ht.ErrNotImplemented
 }
 
-// UpdateTenant implements updateTenant operation.
-//
-// Update a tenant.
-//
-// PUT /tenant/{uuid}
-func (UnimplementedHandler) UpdateTenant(ctx context.Context, req *Tenant, params UpdateTenantParams) (r *Tenant, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // UpdateUser implements updateUser operation.
 //
 // Update user details.
 //
 // PUT /user/{uuid}
 func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateWorkspace implements updateWorkspace operation.
+//
+// Update a workspace.
+//
+// PUT /workspace/{uuid}
+func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace, params UpdateWorkspaceParams) (r *Workspace, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateWorkspaceMemberRole implements updateWorkspaceMemberRole operation.
+//
+// Update a member's role in a workspace.
+//
+// PUT /workspace/{uuid}/members/{user_uuid}
+func (UnimplementedHandler) UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (r *WorkspaceMember, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

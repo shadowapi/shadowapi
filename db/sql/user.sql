@@ -1,7 +1,6 @@
 -- name: CreateUser :one
 INSERT INTO "user" (
     uuid,
-    tenant_uuid,
     email,
     password,
     first_name,
@@ -13,7 +12,6 @@ INSERT INTO "user" (
     updated_at
 ) VALUES (
     sqlc.arg('uuid')::uuid,
-    sqlc.arg('tenant_uuid')::uuid,
     sqlc.arg('email'),
     sqlc.arg('password'),
     sqlc.arg('first_name'),
@@ -38,13 +36,6 @@ SELECT
 FROM "user"
 WHERE email = sqlc.arg('email');
 
--- name: GetUserByTenantAndEmail :one
-SELECT
-  *
-FROM "user"
-WHERE tenant_uuid = sqlc.arg('tenant_uuid')::uuid
-  AND email = sqlc.arg('email');
-
 -- name: UpdateUserNames :exec
 UPDATE "user"
 SET
@@ -53,19 +44,17 @@ last_name = sqlc.arg('last_name'),
 updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: UpdateUserPassword :exec
+UPDATE "user"
+SET
+password = sqlc.arg('password'),
+updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;
+
 -- name: ListUsers :many
 SELECT
   *
 FROM "user"
-ORDER BY created_at DESC
-LIMIT NULLIF(sqlc.arg('limit')::int, 0)
-OFFSET sqlc.arg('offset');
-
--- name: ListUsersByTenant :many
-SELECT
-  *
-FROM "user"
-WHERE tenant_uuid = sqlc.arg('tenant_uuid')::uuid
 ORDER BY created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 OFFSET sqlc.arg('offset');
@@ -86,3 +75,11 @@ WHERE uuid = sqlc.arg('uuid')::uuid;
 -- name: DeleteUser :exec
 DELETE FROM "user"
 WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM "user";
+
+-- name: UserExists :one
+SELECT EXISTS (
+    SELECT 1 FROM "user" WHERE email = sqlc.arg('email')
+) AS exists;

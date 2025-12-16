@@ -29,6 +29,12 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// AddWorkspaceMember invokes addWorkspaceMember operation.
+	//
+	// Add a member to a workspace.
+	//
+	// POST /workspace/{uuid}/members
+	AddWorkspaceMember(ctx context.Context, request *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (*WorkspaceMember, error)
 	// AuthConsent invokes auth-consent operation.
 	//
 	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
@@ -77,24 +83,18 @@ type Invoker interface {
 	//
 	// GET /auth/oauth2/session
 	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
-	// CheckTenantExists invokes checkTenantExists operation.
+	// CheckWorkspaceExists invokes checkWorkspaceExists operation.
 	//
-	// Check if a tenant exists by subdomain name.
+	// Check if a workspace exists by slug.
 	//
-	// GET /tenant/check
-	CheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (*TenantCheck, error)
+	// GET /workspace/check
+	CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (*WorkspaceCheck, error)
 	// CreateContact invokes createContact operation.
 	//
 	// Create a new contact record.
 	//
 	// POST /contact
 	CreateContact(ctx context.Context, request *Contact) (*Contact, error)
-	// CreateTenant invokes createTenant operation.
-	//
-	// Create a new tenant.
-	//
-	// POST /tenant
-	CreateTenant(ctx context.Context, request *Tenant) (*Tenant, error)
 	// CreateUser invokes createUser operation.
 	//
 	// Create a new user.
@@ -107,6 +107,12 @@ type Invoker interface {
 	//
 	// POST /user/session
 	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
+	// CreateWorkspace invokes createWorkspace operation.
+	//
+	// Create a new workspace.
+	//
+	// POST /workspace
+	CreateWorkspace(ctx context.Context, request *Workspace) (*Workspace, error)
 	// DatasourceEmailCreate invokes datasource-email-create operation.
 	//
 	// Create a new email datasource.
@@ -275,18 +281,18 @@ type Invoker interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
-	// DeleteTenant invokes deleteTenant operation.
-	//
-	// Delete a tenant.
-	//
-	// DELETE /tenant/{uuid}
-	DeleteTenant(ctx context.Context, params DeleteTenantParams) error
 	// DeleteUser invokes deleteUser operation.
 	//
 	// Delete user.
 	//
 	// DELETE /user/{uuid}
 	DeleteUser(ctx context.Context, params DeleteUserParams) error
+	// DeleteWorkspace invokes deleteWorkspace operation.
+	//
+	// Delete a workspace.
+	//
+	// DELETE /workspace/{uuid}
+	DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error
 	// FileCreate invokes file-create operation.
 	//
 	// Upload a new file and create its record.
@@ -341,43 +347,42 @@ type Invoker interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
-	// GetTenant invokes getTenant operation.
-	//
-	// Get a tenant by UUID.
-	//
-	// GET /tenant/{uuid}
-	GetTenant(ctx context.Context, params GetTenantParams) (*Tenant, error)
 	// GetUser invokes getUser operation.
 	//
 	// Get user details.
 	//
 	// GET /user/{uuid}
 	GetUser(ctx context.Context, params GetUserParams) (*User, error)
-	// ListAuthenticatedTenants invokes listAuthenticatedTenants operation.
+	// GetWorkspace invokes getWorkspace operation.
 	//
-	// Uses the shared session cookie to find all tenants where the user is authenticated.
-	// This endpoint is used by the tenant selection page.
+	// Get a workspace by UUID.
 	//
-	// GET /auth/tenants
-	ListAuthenticatedTenants(ctx context.Context) ([]AuthenticatedTenant, error)
+	// GET /workspace/{uuid}
+	GetWorkspace(ctx context.Context, params GetWorkspaceParams) (*Workspace, error)
 	// ListContacts invokes listContacts operation.
 	//
 	// List all contacts.
 	//
 	// GET /contact
 	ListContacts(ctx context.Context) ([]Contact, error)
-	// ListTenants invokes listTenants operation.
-	//
-	// List all tenants.
-	//
-	// GET /tenant
-	ListTenants(ctx context.Context, params ListTenantsParams) ([]Tenant, error)
 	// ListUsers invokes listUsers operation.
 	//
 	// List all users.
 	//
 	// GET /user
 	ListUsers(ctx context.Context) ([]User, error)
+	// ListWorkspaceMembers invokes listWorkspaceMembers operation.
+	//
+	// List members of a workspace.
+	//
+	// GET /workspace/{uuid}/members
+	ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) ([]WorkspaceMember, error)
+	// ListWorkspaces invokes listWorkspaces operation.
+	//
+	// List workspaces for the current user.
+	//
+	// GET /workspace
+	ListWorkspaces(ctx context.Context, params ListWorkspacesParams) ([]Workspace, error)
 	// MessageEmailQuery invokes messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
@@ -492,6 +497,12 @@ type Invoker interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, request *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
+	// RemoveWorkspaceMember invokes removeWorkspaceMember operation.
+	//
+	// Remove a member from a workspace.
+	//
+	// DELETE /workspace/{uuid}/members/{user_uuid}
+	RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error
 	// SchedulerCreate invokes scheduler-create operation.
 	//
 	// Create scheduler.
@@ -660,18 +671,24 @@ type Invoker interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, request *UserProfile) (*User, error)
-	// UpdateTenant invokes updateTenant operation.
-	//
-	// Update a tenant.
-	//
-	// PUT /tenant/{uuid}
-	UpdateTenant(ctx context.Context, request *Tenant, params UpdateTenantParams) (*Tenant, error)
 	// UpdateUser invokes updateUser operation.
 	//
 	// Update user details.
 	//
 	// PUT /user/{uuid}
 	UpdateUser(ctx context.Context, request *User, params UpdateUserParams) (*User, error)
+	// UpdateWorkspace invokes updateWorkspace operation.
+	//
+	// Update a workspace.
+	//
+	// PUT /workspace/{uuid}
+	UpdateWorkspace(ctx context.Context, request *Workspace, params UpdateWorkspaceParams) (*Workspace, error)
+	// UpdateWorkspaceMemberRole invokes updateWorkspaceMemberRole operation.
+	//
+	// Update a member's role in a workspace.
+	//
+	// PUT /workspace/{uuid}/members/{user_uuid}
+	UpdateWorkspaceMemberRole(ctx context.Context, request *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (*WorkspaceMember, error)
 	// UploadFile invokes uploadFile operation.
 	//
 	// Upload a file.
@@ -751,6 +768,133 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// AddWorkspaceMember invokes addWorkspaceMember operation.
+//
+// Add a member to a workspace.
+//
+// POST /workspace/{uuid}/members
+func (c *Client) AddWorkspaceMember(ctx context.Context, request *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (*WorkspaceMember, error) {
+	res, err := c.sendAddWorkspaceMember(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddWorkspaceMember(ctx context.Context, request *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (res *WorkspaceMember, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("addWorkspaceMember"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}/members"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AddWorkspaceMemberOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddWorkspaceMemberRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, AddWorkspaceMemberOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAddWorkspaceMemberResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // AuthConsent invokes auth-consent operation.
@@ -1403,21 +1547,21 @@ func (c *Client) sendAuthOAuth2Session(ctx context.Context) (res *AuthOAuth2Sess
 	return result, nil
 }
 
-// CheckTenantExists invokes checkTenantExists operation.
+// CheckWorkspaceExists invokes checkWorkspaceExists operation.
 //
-// Check if a tenant exists by subdomain name.
+// Check if a workspace exists by slug.
 //
-// GET /tenant/check
-func (c *Client) CheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (*TenantCheck, error) {
-	res, err := c.sendCheckTenantExists(ctx, params)
+// GET /workspace/check
+func (c *Client) CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (*WorkspaceCheck, error) {
+	res, err := c.sendCheckWorkspaceExists(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendCheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (res *TenantCheck, err error) {
+func (c *Client) sendCheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (res *WorkspaceCheck, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("checkTenantExists"),
+		otelogen.OperationID("checkWorkspaceExists"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/tenant/check"),
+		semconv.HTTPRouteKey.String("/workspace/check"),
 	}
 
 	// Run stopwatch.
@@ -1432,7 +1576,7 @@ func (c *Client) sendCheckTenantExists(ctx context.Context, params CheckTenantEx
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, CheckTenantExistsOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckWorkspaceExistsOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1450,21 +1594,21 @@ func (c *Client) sendCheckTenantExists(ctx context.Context, params CheckTenantEx
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/tenant/check"
+	pathParts[0] = "/workspace/check"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "name" parameter.
+		// Encode "slug" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "name",
+			Name:    "slug",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.Name))
+			return e.EncodeValue(conv.StringToString(params.Slug))
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}
@@ -1485,7 +1629,7 @@ func (c *Client) sendCheckTenantExists(ctx context.Context, params CheckTenantEx
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeCheckTenantExistsResponse(resp)
+	result, err := decodeCheckWorkspaceExistsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1594,114 +1738,6 @@ func (c *Client) sendCreateContact(ctx context.Context, request *Contact) (res *
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateContactResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// CreateTenant invokes createTenant operation.
-//
-// Create a new tenant.
-//
-// POST /tenant
-func (c *Client) CreateTenant(ctx context.Context, request *Tenant) (*Tenant, error) {
-	res, err := c.sendCreateTenant(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendCreateTenant(ctx context.Context, request *Tenant) (res *Tenant, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("createTenant"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/tenant"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, CreateTenantOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/tenant"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeCreateTenantRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, CreateTenantOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeCreateTenantResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1849,6 +1885,114 @@ func (c *Client) sendCreateUserSession(ctx context.Context) (res *UserSessionTok
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateUserSessionResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateWorkspace invokes createWorkspace operation.
+//
+// Create a new workspace.
+//
+// POST /workspace
+func (c *Client) CreateWorkspace(ctx context.Context, request *Workspace) (*Workspace, error) {
+	res, err := c.sendCreateWorkspace(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateWorkspace(ctx context.Context, request *Workspace) (res *Workspace, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createWorkspace"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/workspace"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateWorkspaceOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/workspace"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateWorkspaceRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateWorkspaceOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateWorkspaceResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5364,129 +5508,6 @@ func (c *Client) sendDeleteContact(ctx context.Context, params DeleteContactPara
 	return result, nil
 }
 
-// DeleteTenant invokes deleteTenant operation.
-//
-// Delete a tenant.
-//
-// DELETE /tenant/{uuid}
-func (c *Client) DeleteTenant(ctx context.Context, params DeleteTenantParams) error {
-	_, err := c.sendDeleteTenant(ctx, params)
-	return err
-}
-
-func (c *Client) sendDeleteTenant(ctx context.Context, params DeleteTenantParams) (res *DeleteTenantNoContent, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("deleteTenant"),
-		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/tenant/{uuid}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, DeleteTenantOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/tenant/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "DELETE", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, DeleteTenantOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeDeleteTenantResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // DeleteUser invokes deleteUser operation.
 //
 // Delete user.
@@ -5603,6 +5624,129 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteWorkspace invokes deleteWorkspace operation.
+//
+// Delete a workspace.
+//
+// DELETE /workspace/{uuid}
+func (c *Client) DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error {
+	_, err := c.sendDeleteWorkspace(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) (res *DeleteWorkspaceNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteWorkspace"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteWorkspaceOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteWorkspaceOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteWorkspaceResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6677,129 +6821,6 @@ func (c *Client) sendGetProfile(ctx context.Context) (res *User, err error) {
 	return result, nil
 }
 
-// GetTenant invokes getTenant operation.
-//
-// Get a tenant by UUID.
-//
-// GET /tenant/{uuid}
-func (c *Client) GetTenant(ctx context.Context, params GetTenantParams) (*Tenant, error) {
-	res, err := c.sendGetTenant(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetTenant(ctx context.Context, params GetTenantParams) (res *Tenant, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTenant"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/tenant/{uuid}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, GetTenantOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/tenant/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, GetTenantOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTenantResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetUser invokes getUser operation.
 //
 // Get user details.
@@ -6923,22 +6944,21 @@ func (c *Client) sendGetUser(ctx context.Context, params GetUserParams) (res *Us
 	return result, nil
 }
 
-// ListAuthenticatedTenants invokes listAuthenticatedTenants operation.
+// GetWorkspace invokes getWorkspace operation.
 //
-// Uses the shared session cookie to find all tenants where the user is authenticated.
-// This endpoint is used by the tenant selection page.
+// Get a workspace by UUID.
 //
-// GET /auth/tenants
-func (c *Client) ListAuthenticatedTenants(ctx context.Context) ([]AuthenticatedTenant, error) {
-	res, err := c.sendListAuthenticatedTenants(ctx)
+// GET /workspace/{uuid}
+func (c *Client) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (*Workspace, error) {
+	res, err := c.sendGetWorkspace(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListAuthenticatedTenants(ctx context.Context) (res []AuthenticatedTenant, err error) {
+func (c *Client) sendGetWorkspace(ctx context.Context, params GetWorkspaceParams) (res *Workspace, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("listAuthenticatedTenants"),
+		otelogen.OperationID("getWorkspace"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/auth/tenants"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}"),
 	}
 
 	// Run stopwatch.
@@ -6953,7 +6973,7 @@ func (c *Client) sendListAuthenticatedTenants(ctx context.Context) (res []Authen
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, ListAuthenticatedTenantsOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, GetWorkspaceOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -6970,14 +6990,65 @@ func (c *Client) sendListAuthenticatedTenants(ctx context.Context) (res []Authen
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/auth/tenants"
+	var pathParts [2]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetWorkspaceOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
 	}
 
 	stage = "SendRequest"
@@ -6988,7 +7059,7 @@ func (c *Client) sendListAuthenticatedTenants(ctx context.Context) (res []Authen
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeListAuthenticatedTenantsResponse(resp)
+	result, err := decodeGetWorkspaceResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7101,149 +7172,6 @@ func (c *Client) sendListContacts(ctx context.Context) (res []Contact, err error
 	return result, nil
 }
 
-// ListTenants invokes listTenants operation.
-//
-// List all tenants.
-//
-// GET /tenant
-func (c *Client) ListTenants(ctx context.Context, params ListTenantsParams) ([]Tenant, error) {
-	res, err := c.sendListTenants(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendListTenants(ctx context.Context, params ListTenantsParams) (res []Tenant, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("listTenants"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/tenant"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, ListTenantsOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/tenant"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "offset" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Offset.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, ListTenantsOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeListTenantsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // ListUsers invokes listUsers operation.
 //
 // List all users.
@@ -7342,6 +7270,311 @@ func (c *Client) sendListUsers(ctx context.Context) (res []User, err error) {
 
 	stage = "DecodeResponse"
 	result, err := decodeListUsersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListWorkspaceMembers invokes listWorkspaceMembers operation.
+//
+// List members of a workspace.
+//
+// GET /workspace/{uuid}/members
+func (c *Client) ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) ([]WorkspaceMember, error) {
+	res, err := c.sendListWorkspaceMembers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) (res []WorkspaceMember, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listWorkspaceMembers"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}/members"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListWorkspaceMembersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListWorkspaceMembersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListWorkspaceMembersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListWorkspaces invokes listWorkspaces operation.
+//
+// List workspaces for the current user.
+//
+// GET /workspace
+func (c *Client) ListWorkspaces(ctx context.Context, params ListWorkspacesParams) ([]Workspace, error) {
+	res, err := c.sendListWorkspaces(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListWorkspaces(ctx context.Context, params ListWorkspacesParams) (res []Workspace, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listWorkspaces"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/workspace"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListWorkspacesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/workspace"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListWorkspacesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListWorkspacesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -9514,6 +9747,148 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *Pipeline, para
 
 	stage = "DecodeResponse"
 	result, err := decodePipelineUpdateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveWorkspaceMember invokes removeWorkspaceMember operation.
+//
+// Remove a member from a workspace.
+//
+// DELETE /workspace/{uuid}/members/{user_uuid}
+func (c *Client) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error {
+	_, err := c.sendRemoveWorkspaceMember(ctx, params)
+	return err
+}
+
+func (c *Client) sendRemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) (res *RemoveWorkspaceMemberNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("removeWorkspaceMember"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}/members/{user_uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RemoveWorkspaceMemberOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RemoveWorkspaceMemberOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeRemoveWorkspaceMemberResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13025,132 +13400,6 @@ func (c *Client) sendUpdateProfile(ctx context.Context, request *UserProfile) (r
 	return result, nil
 }
 
-// UpdateTenant invokes updateTenant operation.
-//
-// Update a tenant.
-//
-// PUT /tenant/{uuid}
-func (c *Client) UpdateTenant(ctx context.Context, request *Tenant, params UpdateTenantParams) (*Tenant, error) {
-	res, err := c.sendUpdateTenant(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendUpdateTenant(ctx context.Context, request *Tenant, params UpdateTenantParams) (res *Tenant, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("updateTenant"),
-		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/tenant/{uuid}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UpdateTenantOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/tenant/"
-	{
-		// Encode "uuid" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "uuid",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.UUID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeUpdateTenantRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, UpdateTenantOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeUpdateTenantResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // UpdateUser invokes updateUser operation.
 //
 // Update user details.
@@ -13270,6 +13519,277 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *User, params Updat
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateWorkspace invokes updateWorkspace operation.
+//
+// Update a workspace.
+//
+// PUT /workspace/{uuid}
+func (c *Client) UpdateWorkspace(ctx context.Context, request *Workspace, params UpdateWorkspaceParams) (*Workspace, error) {
+	res, err := c.sendUpdateWorkspace(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateWorkspace(ctx context.Context, request *Workspace, params UpdateWorkspaceParams) (res *Workspace, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateWorkspace"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateWorkspaceOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateWorkspaceRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateWorkspaceOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateWorkspaceResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateWorkspaceMemberRole invokes updateWorkspaceMemberRole operation.
+//
+// Update a member's role in a workspace.
+//
+// PUT /workspace/{uuid}/members/{user_uuid}
+func (c *Client) UpdateWorkspaceMemberRole(ctx context.Context, request *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (*WorkspaceMember, error) {
+	res, err := c.sendUpdateWorkspaceMemberRole(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateWorkspaceMemberRole(ctx context.Context, request *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (res *WorkspaceMember, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateWorkspaceMemberRole"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/workspace/{uuid}/members/{user_uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateWorkspaceMemberRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/workspace/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateWorkspaceMemberRoleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateWorkspaceMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateWorkspaceMemberRoleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

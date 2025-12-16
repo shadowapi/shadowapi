@@ -1,7 +1,9 @@
 import { type ReactNode, useMemo } from 'react';
-import { Layout, Menu, type MenuProps } from 'antd';
+import { Layout, Menu, Button, type MenuProps } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router';
+import { LoginOutlined } from '@ant-design/icons';
 import { uiColors } from '../theme';
+import { useAuth } from '../lib/auth';
 
 const { Header, Footer } = Layout;
 
@@ -27,6 +29,7 @@ interface BaseLayoutProps {
 function BaseLayout({ children }: BaseLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const selectedKeys = useMemo(() => {
     const pathname = location.pathname;
@@ -92,6 +95,15 @@ function BaseLayout({ children }: BaseLayoutProps) {
             borderBottom: 'none',
           }}
         />
+        {!isLoading && !isAuthenticated && (
+          <Button
+            type="primary"
+            icon={<LoginOutlined />}
+            onClick={() => navigate('/login')}
+          >
+            Login
+          </Button>
+        )}
       </Header>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {children}

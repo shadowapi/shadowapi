@@ -1,6 +1,7 @@
 -- name: CreateStorage :one
 INSERT INTO storage (
   uuid,
+  workspace_uuid,
   name,
   "type",
   is_enabled,
@@ -9,6 +10,7 @@ INSERT INTO storage (
   updated_at
 ) VALUES (
  sqlc.arg('uuid')::uuid,
+ sqlc.arg('workspace_uuid')::uuid,
  NULLIF(sqlc.arg('name'), ''),
  NULLIF(sqlc.arg('type'), ''),
  sqlc.arg('is_enabled')::boolean,
@@ -23,10 +25,26 @@ SELECT
 FROM storage
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: GetStorageByWorkspace :one
+SELECT
+    sqlc.embed(storage)
+FROM storage
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
 -- name: ListStorages :many
 SELECT
     sqlc.embed(storage)
 FROM storage
+ORDER BY created_at DESC
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
+
+-- name: ListStoragesByWorkspace :many
+SELECT
+    sqlc.embed(storage)
+FROM storage
+WHERE workspace_uuid = sqlc.arg('workspace_uuid')::uuid
 ORDER BY created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
     OFFSET sqlc.arg('offset');
@@ -36,6 +54,7 @@ WITH filtered_storages AS (
     SELECT d.*
     FROM storage d
     WHERE
+        (sqlc.arg('workspace_uuid')::uuid IS NULL OR d.workspace_uuid = sqlc.arg('workspace_uuid')::uuid) AND
         (NULLIF(sqlc.arg('type'), '') IS NULL OR d."type" = sqlc.arg('type'))
       AND (sqlc.arg('uuid')::uuid IS NULL OR d.uuid = sqlc.arg('uuid'))
       AND (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR d.is_enabled = sqlc.arg('is_enabled')::boolean)
@@ -62,5 +81,20 @@ UPDATE storage SET
   updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: UpdateStorageByWorkspace :exec
+UPDATE storage SET
+  name = NULLIF(sqlc.arg('name'), ''),
+  "type" = NULLIF(sqlc.arg('type'), ''),
+  is_enabled = sqlc.arg('is_enabled')::boolean,
+  settings = sqlc.arg('settings'),
+  updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
 -- name: DeleteStorage :exec
 DELETE FROM storage WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: DeleteStorageByWorkspace :exec
+DELETE FROM storage
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;

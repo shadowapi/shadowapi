@@ -16,6 +16,75 @@ func (s *ErrorStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+type AddWorkspaceMemberReq struct {
+	// UUID of the user to add.
+	UserUUID uuid.UUID `json:"user_uuid"`
+	// Role to assign (owner cannot be assigned via API).
+	Role AddWorkspaceMemberReqRole `json:"role"`
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *AddWorkspaceMemberReq) GetUserUUID() uuid.UUID {
+	return s.UserUUID
+}
+
+// GetRole returns the value of Role.
+func (s *AddWorkspaceMemberReq) GetRole() AddWorkspaceMemberReqRole {
+	return s.Role
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *AddWorkspaceMemberReq) SetUserUUID(val uuid.UUID) {
+	s.UserUUID = val
+}
+
+// SetRole sets the value of Role.
+func (s *AddWorkspaceMemberReq) SetRole(val AddWorkspaceMemberReqRole) {
+	s.Role = val
+}
+
+// Role to assign (owner cannot be assigned via API).
+type AddWorkspaceMemberReqRole string
+
+const (
+	AddWorkspaceMemberReqRoleAdmin  AddWorkspaceMemberReqRole = "admin"
+	AddWorkspaceMemberReqRoleMember AddWorkspaceMemberReqRole = "member"
+)
+
+// AllValues returns all AddWorkspaceMemberReqRole values.
+func (AddWorkspaceMemberReqRole) AllValues() []AddWorkspaceMemberReqRole {
+	return []AddWorkspaceMemberReqRole{
+		AddWorkspaceMemberReqRoleAdmin,
+		AddWorkspaceMemberReqRoleMember,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AddWorkspaceMemberReqRole) MarshalText() ([]byte, error) {
+	switch s {
+	case AddWorkspaceMemberReqRoleAdmin:
+		return []byte(s), nil
+	case AddWorkspaceMemberReqRoleMember:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AddWorkspaceMemberReqRole) UnmarshalText(data []byte) error {
+	switch AddWorkspaceMemberReqRole(data) {
+	case AddWorkspaceMemberReqRoleAdmin:
+		*s = AddWorkspaceMemberReqRoleAdmin
+		return nil
+	case AddWorkspaceMemberReqRoleMember:
+		*s = AddWorkspaceMemberReqRoleMember
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // AuthConsentFound is response for AuthConsent operation.
 type AuthConsentFound struct {
 	Location OptString
@@ -287,70 +356,6 @@ func (s *AuthOAuth2SessionOK) SetAuthenticated(val bool) {
 // SetExpiresIn sets the value of ExpiresIn.
 func (s *AuthOAuth2SessionOK) SetExpiresIn(val OptInt) {
 	s.ExpiresIn = val
-}
-
-// Ref: #
-type AuthenticatedTenant struct {
-	// Unique identifier for the tenant.
-	TenantUUID uuid.UUID `json:"tenant_uuid"`
-	// Subdomain name of the tenant.
-	TenantName string `json:"tenant_name"`
-	// Human-readable tenant name.
-	TenantDisplayName string `json:"tenant_display_name"`
-	// Email of the authenticated user in this tenant.
-	UserEmail string `json:"user_email"`
-	// Last time the user accessed this tenant.
-	LastAccessedAt OptDateTime `json:"last_accessed_at"`
-}
-
-// GetTenantUUID returns the value of TenantUUID.
-func (s *AuthenticatedTenant) GetTenantUUID() uuid.UUID {
-	return s.TenantUUID
-}
-
-// GetTenantName returns the value of TenantName.
-func (s *AuthenticatedTenant) GetTenantName() string {
-	return s.TenantName
-}
-
-// GetTenantDisplayName returns the value of TenantDisplayName.
-func (s *AuthenticatedTenant) GetTenantDisplayName() string {
-	return s.TenantDisplayName
-}
-
-// GetUserEmail returns the value of UserEmail.
-func (s *AuthenticatedTenant) GetUserEmail() string {
-	return s.UserEmail
-}
-
-// GetLastAccessedAt returns the value of LastAccessedAt.
-func (s *AuthenticatedTenant) GetLastAccessedAt() OptDateTime {
-	return s.LastAccessedAt
-}
-
-// SetTenantUUID sets the value of TenantUUID.
-func (s *AuthenticatedTenant) SetTenantUUID(val uuid.UUID) {
-	s.TenantUUID = val
-}
-
-// SetTenantName sets the value of TenantName.
-func (s *AuthenticatedTenant) SetTenantName(val string) {
-	s.TenantName = val
-}
-
-// SetTenantDisplayName sets the value of TenantDisplayName.
-func (s *AuthenticatedTenant) SetTenantDisplayName(val string) {
-	s.TenantDisplayName = val
-}
-
-// SetUserEmail sets the value of UserEmail.
-func (s *AuthenticatedTenant) SetUserEmail(val string) {
-	s.UserEmail = val
-}
-
-// SetLastAccessedAt sets the value of LastAccessedAt.
-func (s *AuthenticatedTenant) SetLastAccessedAt(val OptDateTime) {
-	s.LastAccessedAt = val
 }
 
 type BearerAuth struct {
@@ -2622,11 +2627,11 @@ func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
 // DeleteContactOK is response for DeleteContact operation.
 type DeleteContactOK struct{}
 
-// DeleteTenantNoContent is response for DeleteTenant operation.
-type DeleteTenantNoContent struct{}
-
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
+
+// DeleteWorkspaceNoContent is response for DeleteWorkspace operation.
+type DeleteWorkspaceNoContent struct{}
 
 // Ref: #
 type Error struct {
@@ -5604,52 +5609,6 @@ func (o OptTelegramSessionHistoryItemMeta) Or(d TelegramSessionHistoryItemMeta) 
 	return d
 }
 
-// NewOptTenantSettings returns new OptTenantSettings with value set to v.
-func NewOptTenantSettings(v TenantSettings) OptTenantSettings {
-	return OptTenantSettings{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptTenantSettings is optional TenantSettings.
-type OptTenantSettings struct {
-	Value TenantSettings
-	Set   bool
-}
-
-// IsSet returns true if OptTenantSettings was set.
-func (o OptTenantSettings) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptTenantSettings) Reset() {
-	var v TenantSettings
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptTenantSettings) SetTo(v TenantSettings) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptTenantSettings) Get() (v TenantSettings, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptTenantSettings) Or(d TenantSettings) TenantSettings {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptURI returns new OptURI with value set to v.
 func NewOptURI(v url.URL) OptURI {
 	return OptURI{
@@ -5874,6 +5833,52 @@ func (o OptWorkerJobsData) Get() (v WorkerJobsData, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptWorkerJobsData) Or(d WorkerJobsData) WorkerJobsData {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWorkspaceSettings returns new OptWorkspaceSettings with value set to v.
+func NewOptWorkspaceSettings(v WorkspaceSettings) OptWorkspaceSettings {
+	return OptWorkspaceSettings{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkspaceSettings is optional WorkspaceSettings.
+type OptWorkspaceSettings struct {
+	Value WorkspaceSettings
+	Set   bool
+}
+
+// IsSet returns true if OptWorkspaceSettings was set.
+func (o OptWorkspaceSettings) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkspaceSettings) Reset() {
+	var v WorkspaceSettings
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkspaceSettings) SetTo(v WorkspaceSettings) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkspaceSettings) Get() (v WorkspaceSettings, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkspaceSettings) Or(d WorkspaceSettings) WorkspaceSettings {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6244,6 +6249,9 @@ func (s *PipelineNodePosition) SetX(val OptFloat64) {
 func (s *PipelineNodePosition) SetY(val OptFloat64) {
 	s.Y = val
 }
+
+// RemoveWorkspaceMemberNoContent is response for RemoveWorkspaceMember operation.
+type RemoveWorkspaceMemberNoContent struct{}
 
 // Ref: #
 type Scheduler struct {
@@ -7233,134 +7241,6 @@ func (s *TelegramUser) SetPhone(val OptString) {
 	s.Phone = val
 }
 
-// Ref: #
-type Tenant struct {
-	// Unique identifier for the tenant.
-	UUID OptUUID `json:"uuid"`
-	// Subdomain name (lowercase alphanumeric + hyphens, max 63 chars).
-	Name string `json:"name"`
-	// Human-readable tenant name.
-	DisplayName string `json:"display_name"`
-	// Whether the tenant is active.
-	IsEnabled OptBool `json:"is_enabled"`
-	// Tenant-specific configuration.
-	Settings OptTenantSettings `json:"settings"`
-	// Timestamp of tenant creation.
-	CreatedAt OptDateTime `json:"created_at"`
-	// Timestamp of last update.
-	UpdatedAt OptDateTime `json:"updated_at"`
-}
-
-// GetUUID returns the value of UUID.
-func (s *Tenant) GetUUID() OptUUID {
-	return s.UUID
-}
-
-// GetName returns the value of Name.
-func (s *Tenant) GetName() string {
-	return s.Name
-}
-
-// GetDisplayName returns the value of DisplayName.
-func (s *Tenant) GetDisplayName() string {
-	return s.DisplayName
-}
-
-// GetIsEnabled returns the value of IsEnabled.
-func (s *Tenant) GetIsEnabled() OptBool {
-	return s.IsEnabled
-}
-
-// GetSettings returns the value of Settings.
-func (s *Tenant) GetSettings() OptTenantSettings {
-	return s.Settings
-}
-
-// GetCreatedAt returns the value of CreatedAt.
-func (s *Tenant) GetCreatedAt() OptDateTime {
-	return s.CreatedAt
-}
-
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *Tenant) GetUpdatedAt() OptDateTime {
-	return s.UpdatedAt
-}
-
-// SetUUID sets the value of UUID.
-func (s *Tenant) SetUUID(val OptUUID) {
-	s.UUID = val
-}
-
-// SetName sets the value of Name.
-func (s *Tenant) SetName(val string) {
-	s.Name = val
-}
-
-// SetDisplayName sets the value of DisplayName.
-func (s *Tenant) SetDisplayName(val string) {
-	s.DisplayName = val
-}
-
-// SetIsEnabled sets the value of IsEnabled.
-func (s *Tenant) SetIsEnabled(val OptBool) {
-	s.IsEnabled = val
-}
-
-// SetSettings sets the value of Settings.
-func (s *Tenant) SetSettings(val OptTenantSettings) {
-	s.Settings = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *Tenant) SetCreatedAt(val OptDateTime) {
-	s.CreatedAt = val
-}
-
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *Tenant) SetUpdatedAt(val OptDateTime) {
-	s.UpdatedAt = val
-}
-
-// Ref: #
-type TenantCheck struct {
-	// Whether the tenant exists.
-	Exists bool `json:"exists"`
-	// Display name of the tenant (only present if exists).
-	DisplayName OptString `json:"display_name"`
-}
-
-// GetExists returns the value of Exists.
-func (s *TenantCheck) GetExists() bool {
-	return s.Exists
-}
-
-// GetDisplayName returns the value of DisplayName.
-func (s *TenantCheck) GetDisplayName() OptString {
-	return s.DisplayName
-}
-
-// SetExists sets the value of Exists.
-func (s *TenantCheck) SetExists(val bool) {
-	s.Exists = val
-}
-
-// SetDisplayName sets the value of DisplayName.
-func (s *TenantCheck) SetDisplayName(val OptString) {
-	s.DisplayName = val
-}
-
-// Tenant-specific configuration.
-type TenantSettings map[string]jx.Raw
-
-func (s *TenantSettings) init() TenantSettings {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
 type TgSessionCreateReq struct {
 	// Phone number in international format.
 	Phone string `json:"phone"`
@@ -7439,6 +7319,63 @@ func (s *TgSessionVerifyReq) SetCode(val OptString) {
 // SetPassword sets the value of Password.
 func (s *TgSessionVerifyReq) SetPassword(val OptString) {
 	s.Password = val
+}
+
+type UpdateWorkspaceMemberRoleReq struct {
+	// New role for the member (owner cannot be changed via API).
+	Role UpdateWorkspaceMemberRoleReqRole `json:"role"`
+}
+
+// GetRole returns the value of Role.
+func (s *UpdateWorkspaceMemberRoleReq) GetRole() UpdateWorkspaceMemberRoleReqRole {
+	return s.Role
+}
+
+// SetRole sets the value of Role.
+func (s *UpdateWorkspaceMemberRoleReq) SetRole(val UpdateWorkspaceMemberRoleReqRole) {
+	s.Role = val
+}
+
+// New role for the member (owner cannot be changed via API).
+type UpdateWorkspaceMemberRoleReqRole string
+
+const (
+	UpdateWorkspaceMemberRoleReqRoleAdmin  UpdateWorkspaceMemberRoleReqRole = "admin"
+	UpdateWorkspaceMemberRoleReqRoleMember UpdateWorkspaceMemberRoleReqRole = "member"
+)
+
+// AllValues returns all UpdateWorkspaceMemberRoleReqRole values.
+func (UpdateWorkspaceMemberRoleReqRole) AllValues() []UpdateWorkspaceMemberRoleReqRole {
+	return []UpdateWorkspaceMemberRoleReqRole{
+		UpdateWorkspaceMemberRoleReqRoleAdmin,
+		UpdateWorkspaceMemberRoleReqRoleMember,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UpdateWorkspaceMemberRoleReqRole) MarshalText() ([]byte, error) {
+	switch s {
+	case UpdateWorkspaceMemberRoleReqRoleAdmin:
+		return []byte(s), nil
+	case UpdateWorkspaceMemberRoleReqRoleMember:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UpdateWorkspaceMemberRoleReqRole) UnmarshalText(data []byte) error {
+	switch UpdateWorkspaceMemberRoleReqRole(data) {
+	case UpdateWorkspaceMemberRoleReqRoleAdmin:
+		*s = UpdateWorkspaceMemberRoleReqRoleAdmin
+		return nil
+	case UpdateWorkspaceMemberRoleReqRoleMember:
+		*s = UpdateWorkspaceMemberRoleReqRoleMember
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // File upload request metadata.
@@ -7948,4 +7885,293 @@ func (s *WorkerJobsListOK) GetJobs() []WorkerJobs {
 // SetJobs sets the value of Jobs.
 func (s *WorkerJobsListOK) SetJobs(val []WorkerJobs) {
 	s.Jobs = val
+}
+
+// Ref: #
+type Workspace struct {
+	// Unique identifier for the workspace.
+	UUID OptUUID `json:"uuid"`
+	// URL-safe identifier (lowercase alphanumeric + hyphens, max 63 chars).
+	Slug string `json:"slug"`
+	// Human-readable workspace name.
+	DisplayName string `json:"display_name"`
+	// Whether the workspace is active.
+	IsEnabled OptBool `json:"is_enabled"`
+	// Workspace-specific configuration.
+	Settings OptWorkspaceSettings `json:"settings"`
+	// Timestamp of workspace creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *Workspace) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetSlug returns the value of Slug.
+func (s *Workspace) GetSlug() string {
+	return s.Slug
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *Workspace) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *Workspace) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetSettings returns the value of Settings.
+func (s *Workspace) GetSettings() OptWorkspaceSettings {
+	return s.Settings
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Workspace) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Workspace) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *Workspace) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetSlug sets the value of Slug.
+func (s *Workspace) SetSlug(val string) {
+	s.Slug = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *Workspace) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *Workspace) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetSettings sets the value of Settings.
+func (s *Workspace) SetSettings(val OptWorkspaceSettings) {
+	s.Settings = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Workspace) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Workspace) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// Ref: #
+type WorkspaceCheck struct {
+	// Whether the workspace exists.
+	Exists bool `json:"exists"`
+	// Human-readable workspace name (if exists).
+	DisplayName OptString `json:"display_name"`
+}
+
+// GetExists returns the value of Exists.
+func (s *WorkspaceCheck) GetExists() bool {
+	return s.Exists
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *WorkspaceCheck) GetDisplayName() OptString {
+	return s.DisplayName
+}
+
+// SetExists sets the value of Exists.
+func (s *WorkspaceCheck) SetExists(val bool) {
+	s.Exists = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *WorkspaceCheck) SetDisplayName(val OptString) {
+	s.DisplayName = val
+}
+
+// Ref: #
+type WorkspaceMember struct {
+	// Unique identifier for the membership.
+	UUID OptUUID `json:"uuid"`
+	// UUID of the workspace.
+	WorkspaceUUID uuid.UUID `json:"workspace_uuid"`
+	// UUID of the user.
+	UserUUID uuid.UUID `json:"user_uuid"`
+	// User's role in the workspace.
+	Role WorkspaceMemberRole `json:"role"`
+	// User's email (read-only, included for convenience).
+	UserEmail OptString `json:"user_email"`
+	// User's first name (read-only).
+	UserFirstName OptString `json:"user_first_name"`
+	// User's last name (read-only).
+	UserLastName OptString `json:"user_last_name"`
+	// Timestamp of membership creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *WorkspaceMember) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetWorkspaceUUID returns the value of WorkspaceUUID.
+func (s *WorkspaceMember) GetWorkspaceUUID() uuid.UUID {
+	return s.WorkspaceUUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *WorkspaceMember) GetUserUUID() uuid.UUID {
+	return s.UserUUID
+}
+
+// GetRole returns the value of Role.
+func (s *WorkspaceMember) GetRole() WorkspaceMemberRole {
+	return s.Role
+}
+
+// GetUserEmail returns the value of UserEmail.
+func (s *WorkspaceMember) GetUserEmail() OptString {
+	return s.UserEmail
+}
+
+// GetUserFirstName returns the value of UserFirstName.
+func (s *WorkspaceMember) GetUserFirstName() OptString {
+	return s.UserFirstName
+}
+
+// GetUserLastName returns the value of UserLastName.
+func (s *WorkspaceMember) GetUserLastName() OptString {
+	return s.UserLastName
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WorkspaceMember) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *WorkspaceMember) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *WorkspaceMember) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetWorkspaceUUID sets the value of WorkspaceUUID.
+func (s *WorkspaceMember) SetWorkspaceUUID(val uuid.UUID) {
+	s.WorkspaceUUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *WorkspaceMember) SetUserUUID(val uuid.UUID) {
+	s.UserUUID = val
+}
+
+// SetRole sets the value of Role.
+func (s *WorkspaceMember) SetRole(val WorkspaceMemberRole) {
+	s.Role = val
+}
+
+// SetUserEmail sets the value of UserEmail.
+func (s *WorkspaceMember) SetUserEmail(val OptString) {
+	s.UserEmail = val
+}
+
+// SetUserFirstName sets the value of UserFirstName.
+func (s *WorkspaceMember) SetUserFirstName(val OptString) {
+	s.UserFirstName = val
+}
+
+// SetUserLastName sets the value of UserLastName.
+func (s *WorkspaceMember) SetUserLastName(val OptString) {
+	s.UserLastName = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WorkspaceMember) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *WorkspaceMember) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// User's role in the workspace.
+type WorkspaceMemberRole string
+
+const (
+	WorkspaceMemberRoleOwner  WorkspaceMemberRole = "owner"
+	WorkspaceMemberRoleAdmin  WorkspaceMemberRole = "admin"
+	WorkspaceMemberRoleMember WorkspaceMemberRole = "member"
+)
+
+// AllValues returns all WorkspaceMemberRole values.
+func (WorkspaceMemberRole) AllValues() []WorkspaceMemberRole {
+	return []WorkspaceMemberRole{
+		WorkspaceMemberRoleOwner,
+		WorkspaceMemberRoleAdmin,
+		WorkspaceMemberRoleMember,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WorkspaceMemberRole) MarshalText() ([]byte, error) {
+	switch s {
+	case WorkspaceMemberRoleOwner:
+		return []byte(s), nil
+	case WorkspaceMemberRoleAdmin:
+		return []byte(s), nil
+	case WorkspaceMemberRoleMember:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WorkspaceMemberRole) UnmarshalText(data []byte) error {
+	switch WorkspaceMemberRole(data) {
+	case WorkspaceMemberRoleOwner:
+		*s = WorkspaceMemberRoleOwner
+		return nil
+	case WorkspaceMemberRoleAdmin:
+		*s = WorkspaceMemberRoleAdmin
+		return nil
+	case WorkspaceMemberRoleMember:
+		*s = WorkspaceMemberRoleMember
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Workspace-specific configuration.
+type WorkspaceSettings map[string]jx.Raw
+
+func (s *WorkspaceSettings) init() WorkspaceSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }

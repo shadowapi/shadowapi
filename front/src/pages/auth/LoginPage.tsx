@@ -23,7 +23,7 @@ function LoginPage() {
   const loginChallenge = searchParams.get('login_challenge');
 
   const from = (location.state as { from?: { pathname: string } })?.from
-    ?.pathname || '/app';
+    ?.pathname || '/workspaces';
 
   useEffect(() => {
     // Only redirect if authenticated AND there's no login_challenge

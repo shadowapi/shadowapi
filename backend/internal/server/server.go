@@ -16,7 +16,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
-	"github.com/shadowapi/shadowapi/backend/internal/tenant"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
@@ -36,15 +36,15 @@ func Provide(i do.Injector) (*Server, error) {
 	cfg := do.MustInvoke[*config.Config](i)
 	log := do.MustInvoke[*slog.Logger](i)
 	authService := do.MustInvoke[*auth.Auth](i)
-	tenantMiddleware := do.MustInvoke[*tenant.Middleware](i)
+	workspaceMiddleware := do.MustInvoke[*workspace.Middleware](i)
 	handlerService := do.MustInvoke[*handler.Handler](i)
 
 	srv, err := api.NewServer(
 		handlerService,
 		authService,
 		api.WithPathPrefix("/api/v1"),
-		// Chain middlewares: tenant first (extracts subdomain), then auth
-		api.WithMiddleware(tenantMiddleware.OgenMiddleware, authService.OgenMiddleware),
+		// Chain middlewares: auth first (validates JWT), then workspace (extracts from URL path)
+		api.WithMiddleware(authService.OgenMiddleware, workspaceMiddleware.OgenMiddleware),
 		api.WithNotFound(func(w http.ResponseWriter, r *http.Request) {
 			log.Info("no ogen route matched, returning 404")
 			http.NotFound(w, r)
@@ -95,6 +95,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// ogen api
 	if strings.HasPrefix(r.URL.Path, "/api/") || strings.HasPrefix(r.URL.Path, "/api") {
 		s.log.Debug("api request", "method", r.Method, "url", r.URL.Path)
+		// Convert cookie to Authorization header for ogen security
+		// (ogen security handlers only check Authorization header, not cookies)
+		if r.Header.Get("Authorization") == "" {
+			if cookie, err := r.Cookie("shadowapi_access_token"); err == nil && cookie.Value != "" {
+				r.Header.Set("Authorization", "Bearer "+cookie.Value)
+			}
+		}
 		s.api.ServeHTTP(w, r)
 		return
 	}

@@ -1083,73 +1083,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/tenants": {
+    "/workspace": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * List tenants where the current user has an active session
-         * @description Uses the shared session cookie to find all tenants where the user is authenticated.
-         *     This endpoint is used by the tenant selection page.
-         */
-        get: operations["listAuthenticatedTenants"];
+        /** List workspaces for the current user */
+        get: operations["listWorkspaces"];
         put?: never;
-        post?: never;
+        /** Create a new workspace */
+        post: operations["createWorkspace"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/tenant": {
+    "/workspace/{uuid}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List all tenants */
-        get: operations["listTenants"];
+        /** Get a workspace by UUID */
+        get: operations["getWorkspace"];
+        /** Update a workspace */
+        put: operations["updateWorkspace"];
+        post?: never;
+        /** Delete a workspace */
+        delete: operations["deleteWorkspace"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/{uuid}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List members of a workspace */
+        get: operations["listWorkspaceMembers"];
         put?: never;
-        /** Create a new tenant */
-        post: operations["createTenant"];
+        /** Add a member to a workspace */
+        post: operations["addWorkspaceMember"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/tenant/{uuid}": {
+    "/workspace/{uuid}/members/{user_uuid}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get a tenant by UUID */
-        get: operations["getTenant"];
-        /** Update a tenant */
-        put: operations["updateTenant"];
+        get?: never;
+        /** Update a member's role in a workspace */
+        put: operations["updateWorkspaceMemberRole"];
         post?: never;
-        /** Delete a tenant */
-        delete: operations["deleteTenant"];
+        /** Remove a member from a workspace */
+        delete: operations["removeWorkspaceMember"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/tenant/check": {
+    "/workspace/check": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Check if a tenant exists by subdomain name */
-        get: operations["checkTenantExists"];
+        /** Check if a workspace exists by slug */
+        get: operations["checkWorkspaceExists"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1274,9 +1289,9 @@ export interface components {
         UserSessionToken: components["schemas"]["user_session_token"];
         WorkerJobs: components["schemas"]["worker_jobs"];
         UserProfile: components["schemas"]["user_profile"];
-        Tenant: components["schemas"]["tenant"];
-        AuthenticatedTenant: components["schemas"]["authenticated_tenant"];
-        TenantCheck: components["schemas"]["tenant_check"];
+        Workspace: components["schemas"]["workspace"];
+        WorkspaceMember: components["schemas"]["workspace_member"];
+        WorkspaceCheck: components["schemas"]["workspace_check"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2023,46 +2038,25 @@ export interface components {
              */
             finished_at?: string;
         };
-        authenticated_tenant: {
+        workspace: {
             /**
              * Format: uuid
-             * @description Unique identifier for the tenant
-             */
-            tenant_uuid: string;
-            /** @description Subdomain name of the tenant */
-            tenant_name: string;
-            /** @description Human-readable tenant name */
-            tenant_display_name: string;
-            /**
-             * Format: email
-             * @description Email of the authenticated user in this tenant
-             */
-            user_email: string;
-            /**
-             * Format: date-time
-             * @description Last time the user accessed this tenant
-             */
-            last_accessed_at?: string;
-        };
-        tenant: {
-            /**
-             * Format: uuid
-             * @description Unique identifier for the tenant
+             * @description Unique identifier for the workspace
              */
             readonly uuid?: string;
-            /** @description Subdomain name (lowercase alphanumeric + hyphens, max 63 chars) */
-            name: string;
-            /** @description Human-readable tenant name */
+            /** @description URL-safe identifier (lowercase alphanumeric + hyphens, max 63 chars) */
+            slug: string;
+            /** @description Human-readable workspace name */
             display_name: string;
-            /** @description Whether the tenant is active */
+            /** @description Whether the workspace is active */
             is_enabled?: boolean;
-            /** @description Tenant-specific configuration */
+            /** @description Workspace-specific configuration */
             settings?: {
                 [key: string]: unknown;
             };
             /**
              * Format: date-time
-             * @description Timestamp of tenant creation
+             * @description Timestamp of workspace creation
              */
             readonly created_at?: string;
             /**
@@ -2071,10 +2065,48 @@ export interface components {
              */
             readonly updated_at?: string;
         };
-        tenant_check: {
-            /** @description Whether the tenant exists */
+        workspace_member: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the membership
+             */
+            readonly uuid?: string;
+            /**
+             * Format: uuid
+             * @description UUID of the workspace
+             */
+            workspace_uuid: string;
+            /**
+             * Format: uuid
+             * @description UUID of the user
+             */
+            user_uuid: string;
+            /**
+             * @description User's role in the workspace
+             * @enum {string}
+             */
+            role: "owner" | "admin" | "member";
+            /** @description User's email (read-only, included for convenience) */
+            readonly user_email?: string;
+            /** @description User's first name (read-only) */
+            readonly user_first_name?: string;
+            /** @description User's last name (read-only) */
+            readonly user_last_name?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of membership creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        workspace_check: {
+            /** @description Whether the workspace exists */
             exists: boolean;
-            /** @description Display name of the tenant (only present if exists) */
+            /** @description Human-readable workspace name (if exists) */
             display_name?: string;
         };
         email_label: {
@@ -5703,36 +5735,7 @@ export interface operations {
             };
         };
     };
-    listAuthenticatedTenants: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of authenticated tenants */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["authenticated_tenant"][];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    listTenants: {
+    listWorkspaces: {
         parameters: {
             query?: {
                 limit?: number;
@@ -5744,13 +5747,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of tenants */
+            /** @description List of workspaces */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tenant"][];
+                    "application/json": components["schemas"]["workspace"][];
                 };
             };
             /** @description Error */
@@ -5764,7 +5767,7 @@ export interface operations {
             };
         };
     };
-    createTenant: {
+    createWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -5773,17 +5776,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["tenant"];
+                "application/json": components["schemas"]["workspace"];
             };
         };
         responses: {
-            /** @description Tenant created successfully */
+            /** @description Workspace created successfully */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tenant"];
+                    "application/json": components["schemas"]["workspace"];
                 };
             };
             /** @description Error */
@@ -5797,7 +5800,7 @@ export interface operations {
             };
         };
     };
-    getTenant: {
+    getWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -5808,13 +5811,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Tenant details */
+            /** @description Workspace details */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tenant"];
+                    "application/json": components["schemas"]["workspace"];
                 };
             };
             /** @description Error */
@@ -5828,7 +5831,7 @@ export interface operations {
             };
         };
     };
-    updateTenant: {
+    updateWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -5839,17 +5842,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["tenant"];
+                "application/json": components["schemas"]["workspace"];
             };
         };
         responses: {
-            /** @description Tenant updated successfully */
+            /** @description Workspace updated successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tenant"];
+                    "application/json": components["schemas"]["workspace"];
                 };
             };
             /** @description Error */
@@ -5863,7 +5866,7 @@ export interface operations {
             };
         };
     };
-    deleteTenant: {
+    deleteWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -5874,7 +5877,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Tenant deleted successfully */
+            /** @description Workspace deleted successfully */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -5892,11 +5895,169 @@ export interface operations {
             };
         };
     };
-    checkTenantExists: {
+    listWorkspaceMembers: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of workspace members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["workspace_member"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    addWorkspaceMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description UUID of the user to add
+                     */
+                    user_uuid: string;
+                    /**
+                     * @description Role to assign (owner cannot be assigned via API)
+                     * @enum {string}
+                     */
+                    role: "admin" | "member";
+                };
+            };
+        };
+        responses: {
+            /** @description Member added successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["workspace_member"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateWorkspaceMemberRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+                /** @description User UUID */
+                user_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description New role for the member (owner cannot be changed via API)
+                     * @enum {string}
+                     */
+                    role: "admin" | "member";
+                };
+            };
+        };
+        responses: {
+            /** @description Member role updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["workspace_member"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    removeWorkspaceMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+                /** @description User UUID */
+                user_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Member removed successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    checkWorkspaceExists: {
         parameters: {
             query: {
-                /** @description Tenant subdomain name to check */
-                name: string;
+                /** @description Workspace slug to check */
+                slug: string;
             };
             header?: never;
             path?: never;
@@ -5904,13 +6065,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Tenant existence check result */
+            /** @description Workspace existence check result */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["tenant_check"];
+                    "application/json": components["schemas"]["workspace_check"];
                 };
             };
             /** @description Error */

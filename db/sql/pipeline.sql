@@ -1,6 +1,7 @@
 -- name: CreatePipeline :one
 INSERT INTO pipeline (
   uuid,
+  workspace_uuid,
   datasource_uuid,
   storage_uuid,
   name,
@@ -11,6 +12,7 @@ INSERT INTO pipeline (
   updated_at
 ) VALUES (
              sqlc.arg('uuid')::uuid,
+             sqlc.arg('workspace_uuid')::uuid,
              sqlc.arg('datasource_uuid')::uuid,
              sqlc.arg('storage_uuid')::uuid,
              NULLIF(sqlc.arg('name'), ''),
@@ -27,10 +29,26 @@ SELECT
 FROM pipeline
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: GetPipelineByWorkspace :one
+SELECT
+    sqlc.embed(pipeline)
+FROM pipeline
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
 -- name: ListPipelines :many
 SELECT
     sqlc.embed(pipeline)
 FROM pipeline
+ORDER BY created_at DESC
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
+
+-- name: ListPipelinesByWorkspace :many
+SELECT
+    sqlc.embed(pipeline)
+FROM pipeline
+WHERE workspace_uuid = sqlc.arg('workspace_uuid')::uuid
 ORDER BY created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
     OFFSET sqlc.arg('offset');
@@ -40,6 +58,7 @@ WITH filtered_pipelines AS (
     SELECT p.*
     FROM pipeline p
     WHERE
+        (sqlc.arg('workspace_uuid')::uuid IS NULL OR p.workspace_uuid = sqlc.arg('workspace_uuid')::uuid) AND
         (NULLIF(sqlc.arg('uuid'), '') IS NULL OR p.uuid = sqlc.arg('uuid')::uuid) AND
         (NULLIF(sqlc.arg('datasource_uuid'), '') IS NULL OR p.datasource_uuid = sqlc.arg('datasource_uuid')::uuid) AND
         (NULLIF(sqlc.arg('storage_uuid'), '') IS NULL OR p.storage_uuid = sqlc.arg('storage_uuid')::uuid) AND
@@ -75,5 +94,22 @@ UPDATE pipeline SET
   updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: UpdatePipelineByWorkspace :exec
+UPDATE pipeline SET
+  "name" = NULLIF(sqlc.arg('name'), ''),
+  "type" = NULLIF(sqlc.arg('type'), ''),
+  datasource_uuid = sqlc.arg('datasource_uuid')::uuid,
+  storage_uuid = sqlc.arg('storage_uuid')::uuid,
+  is_enabled = sqlc.arg('is_enabled')::boolean,
+  flow = sqlc.arg('flow'),
+  updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
 -- name: DeletePipeline :exec
 DELETE FROM pipeline WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: DeletePipelineByWorkspace :exec
+DELETE FROM pipeline
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;

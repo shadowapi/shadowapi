@@ -83,12 +83,6 @@ type Config struct {
 		AppID   int    `yaml:"app_id" json:"app_id" env:"TG_APP_ID"`
 	}
 
-	// Tenant settings for multi-tenancy
-	Tenant struct {
-		// BaseDomain is the root domain for tenant subdomains (e.g., "localtest.me")
-		BaseDomain string `yaml:"base_domain" json:"base_domain" env:"BE_TENANT_BASE_DOMAIN" envDefault:"localtest.me"`
-	} `yaml:"tenant" json:"tenant"`
-
 	// OAuth2 settings for Hydra integration
 	OAuth2 struct {
 		// HydraPublicURL is the URL to Hydra's public endpoints (token, authorize)

@@ -15,6 +15,20 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+func encodeAddWorkspaceMemberResponse(response *WorkspaceMember, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+	span.SetStatus(codes.Ok, http.StatusText(201))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeAuthConsentResponse(response *AuthConsentFound, w http.ResponseWriter, span trace.Span) error {
 	// Encoding response headers.
 	{
@@ -243,7 +257,7 @@ func encodeAuthOAuth2SessionResponse(response *AuthOAuth2SessionOK, w http.Respo
 	return nil
 }
 
-func encodeCheckTenantExistsResponse(response *TenantCheck, w http.ResponseWriter, span trace.Span) error {
+func encodeCheckWorkspaceExistsResponse(response *WorkspaceCheck, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -258,20 +272,6 @@ func encodeCheckTenantExistsResponse(response *TenantCheck, w http.ResponseWrite
 }
 
 func encodeCreateContactResponse(response *Contact, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
-
-	e := new(jx.Encoder)
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-
-	return nil
-}
-
-func encodeCreateTenantResponse(response *Tenant, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
 	span.SetStatus(codes.Ok, http.StatusText(201))
@@ -303,6 +303,20 @@ func encodeCreateUserSessionResponse(response *UserSessionToken, w http.Response
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeCreateWorkspaceResponse(response *Workspace, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -680,16 +694,16 @@ func encodeDeleteContactResponse(response *DeleteContactOK, w http.ResponseWrite
 	return nil
 }
 
-func encodeDeleteTenantResponse(response *DeleteTenantNoContent, w http.ResponseWriter, span trace.Span) error {
-	w.WriteHeader(204)
-	span.SetStatus(codes.Ok, http.StatusText(204))
+func encodeDeleteUserResponse(response *DeleteUserOK, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
-func encodeDeleteUserResponse(response *DeleteUserOK, w http.ResponseWriter, span trace.Span) error {
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
+func encodeDeleteWorkspaceResponse(response *DeleteWorkspaceNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
 
 	return nil
 }
@@ -817,20 +831,6 @@ func encodeGetProfileResponse(response *User, w http.ResponseWriter, span trace.
 	return nil
 }
 
-func encodeGetTenantResponse(response *Tenant, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := new(jx.Encoder)
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-
-	return nil
-}
-
 func encodeGetUserResponse(response *User, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -845,17 +845,13 @@ func encodeGetUserResponse(response *User, w http.ResponseWriter, span trace.Spa
 	return nil
 }
 
-func encodeListAuthenticatedTenantsResponse(response []AuthenticatedTenant, w http.ResponseWriter, span trace.Span) error {
+func encodeGetWorkspaceResponse(response *Workspace, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
-	e.ArrStart()
-	for _, elem := range response {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
+	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
@@ -881,7 +877,7 @@ func encodeListContactsResponse(response []Contact, w http.ResponseWriter, span 
 	return nil
 }
 
-func encodeListTenantsResponse(response []Tenant, w http.ResponseWriter, span trace.Span) error {
+func encodeListUsersResponse(response []User, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -899,7 +895,25 @@ func encodeListTenantsResponse(response []Tenant, w http.ResponseWriter, span tr
 	return nil
 }
 
-func encodeListUsersResponse(response []User, w http.ResponseWriter, span trace.Span) error {
+func encodeListWorkspaceMembersResponse(response []WorkspaceMember, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	e.ArrStart()
+	for _, elem := range response {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListWorkspacesResponse(response []Workspace, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -1174,6 +1188,13 @@ func encodePipelineUpdateResponse(response *Pipeline, w http.ResponseWriter, spa
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
+	return nil
+}
+
+func encodeRemoveWorkspaceMemberResponse(response *RemoveWorkspaceMemberNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
 
 	return nil
 }
@@ -1543,7 +1564,7 @@ func encodeUpdateProfileResponse(response *User, w http.ResponseWriter, span tra
 	return nil
 }
 
-func encodeUpdateTenantResponse(response *Tenant, w http.ResponseWriter, span trace.Span) error {
+func encodeUpdateUserResponse(response *User, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -1557,7 +1578,21 @@ func encodeUpdateTenantResponse(response *Tenant, w http.ResponseWriter, span tr
 	return nil
 }
 
-func encodeUpdateUserResponse(response *User, w http.ResponseWriter, span trace.Span) error {
+func encodeUpdateWorkspaceResponse(response *Workspace, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateWorkspaceMemberRoleResponse(response *WorkspaceMember, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

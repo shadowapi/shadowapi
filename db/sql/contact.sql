@@ -1,6 +1,7 @@
 -- name: CreateContact :one
 INSERT INTO contact (
     uuid,
+    workspace_uuid,
     user_uuid,
     instance_uuid,
     status,
@@ -127,6 +128,7 @@ INSERT INTO contact (
     last_kpi_entry_date
 ) VALUES (
              @uuid,
+             @workspace_uuid,
              @user_uuid,
              @instance_uuid,
              @status,
@@ -261,10 +263,28 @@ WHERE
     uuid = @uuid
 LIMIT 1;
 
+-- name: GetContactByWorkspace :one
+SELECT
+    *
+FROM contact
+WHERE
+    uuid = @uuid
+    AND workspace_uuid = @workspace_uuid
+LIMIT 1;
+
 -- name: ListContacts :many
 SELECT
     *
 FROM contact
+ORDER BY entry_date DESC
+LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
+    OFFSET @offset_records::int;
+
+-- name: ListContactsByWorkspace :many
+SELECT
+    *
+FROM contact
+WHERE workspace_uuid = @workspace_uuid
 ORDER BY entry_date DESC
 LIMIT CASE WHEN @limit_records::int = 0 THEN NULL ELSE @limit_records::int END
     OFFSET @offset_records::int;
@@ -401,3 +421,8 @@ WHERE uuid = @uuid;
 -- name: DeleteContact :exec
 DELETE FROM contact
 WHERE uuid = @uuid;
+
+-- name: DeleteContactByWorkspace :exec
+DELETE FROM contact
+WHERE uuid = @uuid
+  AND workspace_uuid = @workspace_uuid;

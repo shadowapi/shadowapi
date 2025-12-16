@@ -237,27 +237,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
-				case 't': // Prefix: "tenants"
-					origElem := elem
-					if l := len("tenants"); len(elem) >= l && elem[0:l] == "tenants" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleListAuthenticatedTenantsRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-					elem = origElem
 				}
 
 				elem = origElem
@@ -1573,153 +1552,52 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "te"
+			case 't': // Prefix: "telegram"
 				origElem := elem
-				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
+				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					break
+					switch r.Method {
+					case "GET":
+						s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
+					case "POST":
+						s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET,POST")
+					}
+
+					return
 				}
 				switch elem[0] {
-				case 'l': // Prefix: "legram"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
 					if len(elem) == 0 {
+						// Leaf node.
 						switch r.Method {
-						case "GET":
-							s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
+						case "PUT":
+							s.handleTgSessionVerifyRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET,POST")
+							s.notAllowed(w, r, "PUT")
 						}
 
 						return
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "PUT":
-								s.handleTgSessionVerifyRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "PUT")
-							}
-
-							return
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				case 'n': // Prefix: "nant"
-					origElem := elem
-					if l := len("nant"); len(elem) >= l && elem[0:l] == "nant" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch r.Method {
-						case "GET":
-							s.handleListTenantsRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleCreateTenantRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,POST")
-						}
-
-						return
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'c': // Prefix: "check"
-							origElem := elem
-							if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleCheckTenantExistsRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-						// Param: "uuid"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "DELETE":
-								s.handleDeleteTenantRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "GET":
-								s.handleGetTenantRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "PUT":
-								s.handleUpdateTenantRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "DELETE,GET,PUT")
-							}
-
-							return
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
@@ -1812,79 +1690,247 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'w': // Prefix: "workerjobs"
+			case 'w': // Prefix: "work"
 				origElem := elem
-				if l := len("workerjobs"); len(elem) >= l && elem[0:l] == "workerjobs" {
+				if l := len("work"); len(elem) >= l && elem[0:l] == "work" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleWorkerJobsListRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'e': // Prefix: "erjobs"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("erjobs"); len(elem) >= l && elem[0:l] == "erjobs" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "uuid"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
-
 					if len(elem) == 0 {
 						switch r.Method {
-						case "DELETE":
-							s.handleWorkerJobsDeleteRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
 						case "GET":
-							s.handleWorkerJobsGetRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
+							s.handleWorkerJobsListRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "DELETE,GET")
+							s.notAllowed(w, r, "GET")
 						}
 
 						return
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/cancel"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "DELETE":
+								s.handleWorkerJobsDeleteRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handleWorkerJobsGetRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE,GET")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/cancel"
+							origElem := elem
+							if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleWorkerJobsCancelRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 's': // Prefix: "space"
+					origElem := elem
+					if l := len("space"); len(elem) >= l && elem[0:l] == "space" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleListWorkspacesRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleCreateWorkspaceRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "check"
+							origElem := elem
+							if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleCheckWorkspaceExistsRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+						// Param: "uuid"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
 							switch r.Method {
-							case "POST":
-								s.handleWorkerJobsCancelRequest([1]string{
+							case "DELETE":
+								s.handleDeleteWorkspaceRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handleGetWorkspaceRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handleUpdateWorkspaceRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "POST")
+								s.notAllowed(w, r, "DELETE,GET,PUT")
 							}
 
 							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/members"
+							origElem := elem
+							if l := len("/members"); len(elem) >= l && elem[0:l] == "/members" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleListWorkspaceMembersRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleAddWorkspaceMemberRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET,POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "user_uuid"
+								// Leaf parameter
+								args[1] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleRemoveWorkspaceMemberRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleUpdateWorkspaceMemberRoleRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE,PUT")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
@@ -2196,31 +2242,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
-					}
-
-					elem = origElem
-				case 't': // Prefix: "tenants"
-					origElem := elem
-					if l := len("tenants"); len(elem) >= l && elem[0:l] == "tenants" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = ListAuthenticatedTenantsOperation
-							r.summary = "List tenants where the current user has an active session"
-							r.operationID = "listAuthenticatedTenants"
-							r.pathPattern = "/auth/tenants"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
 					}
 
 					elem = origElem
@@ -3864,189 +3885,64 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "te"
+			case 't': // Prefix: "telegram"
 				origElem := elem
-				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
+				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					break
+					switch method {
+					case "GET":
+						r.name = TgSessionListOperation
+						r.summary = ""
+						r.operationID = "tg-session-list"
+						r.pathPattern = "/telegram"
+						r.args = args
+						r.count = 0
+						return r, true
+					case "POST":
+						r.name = TgSessionCreateOperation
+						r.summary = ""
+						r.operationID = "tg-session-create"
+						r.pathPattern = "/telegram"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
 				}
 				switch elem[0] {
-				case 'l': // Prefix: "legram"
+				case '/': // Prefix: "/"
 					origElem := elem
-					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
+					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "id"
+					// Leaf parameter
+					args[0] = elem
+					elem = ""
+
 					if len(elem) == 0 {
+						// Leaf node.
 						switch method {
-						case "GET":
-							r.name = TgSessionListOperation
+						case "PUT":
+							r.name = TgSessionVerifyOperation
 							r.summary = ""
-							r.operationID = "tg-session-list"
-							r.pathPattern = "/telegram"
+							r.operationID = "tg-session-verify"
+							r.pathPattern = "/telegram/{id}"
 							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = TgSessionCreateOperation
-							r.summary = ""
-							r.operationID = "tg-session-create"
-							r.pathPattern = "/telegram"
-							r.args = args
-							r.count = 0
+							r.count = 1
 							return r, true
 						default:
 							return
 						}
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "PUT":
-								r.name = TgSessionVerifyOperation
-								r.summary = ""
-								r.operationID = "tg-session-verify"
-								r.pathPattern = "/telegram/{id}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				case 'n': // Prefix: "nant"
-					origElem := elem
-					if l := len("nant"); len(elem) >= l && elem[0:l] == "nant" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							r.name = ListTenantsOperation
-							r.summary = "List all tenants"
-							r.operationID = "listTenants"
-							r.pathPattern = "/tenant"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = CreateTenantOperation
-							r.summary = "Create a new tenant"
-							r.operationID = "createTenant"
-							r.pathPattern = "/tenant"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'c': // Prefix: "check"
-							origElem := elem
-							if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "GET":
-									r.name = CheckTenantExistsOperation
-									r.summary = "Check if a tenant exists by subdomain name"
-									r.operationID = "checkTenantExists"
-									r.pathPattern = "/tenant/check"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-						// Param: "uuid"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "DELETE":
-								r.name = DeleteTenantOperation
-								r.summary = "Delete a tenant"
-								r.operationID = "deleteTenant"
-								r.pathPattern = "/tenant/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "GET":
-								r.name = GetTenantOperation
-								r.summary = "Get a tenant by UUID"
-								r.operationID = "getTenant"
-								r.pathPattern = "/tenant/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "PUT":
-								r.name = UpdateTenantOperation
-								r.summary = "Update a tenant"
-								r.operationID = "updateTenant"
-								r.pathPattern = "/tenant/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
@@ -4163,91 +4059,293 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'w': // Prefix: "workerjobs"
+			case 'w': // Prefix: "work"
 				origElem := elem
-				if l := len("workerjobs"); len(elem) >= l && elem[0:l] == "workerjobs" {
+				if l := len("work"); len(elem) >= l && elem[0:l] == "work" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = WorkerJobsListOperation
-						r.summary = ""
-						r.operationID = "worker-jobs-list"
-						r.pathPattern = "/workerjobs"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'e': // Prefix: "erjobs"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("erjobs"); len(elem) >= l && elem[0:l] == "erjobs" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "uuid"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
-
 					if len(elem) == 0 {
 						switch method {
-						case "DELETE":
-							r.name = WorkerJobsDeleteOperation
-							r.summary = ""
-							r.operationID = "worker-jobs-delete"
-							r.pathPattern = "/workerjobs/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
 						case "GET":
-							r.name = WorkerJobsGetOperation
+							r.name = WorkerJobsListOperation
 							r.summary = ""
-							r.operationID = "worker-jobs-get"
-							r.pathPattern = "/workerjobs/{uuid}"
+							r.operationID = "worker-jobs-list"
+							r.pathPattern = "/workerjobs"
 							r.args = args
-							r.count = 1
+							r.count = 0
 							return r, true
 						default:
 							return
 						}
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/cancel"
+					case '/': // Prefix: "/"
 						origElem := elem
-						if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
+						// Param: "uuid"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
 						if len(elem) == 0 {
-							// Leaf node.
 							switch method {
-							case "POST":
-								r.name = WorkerJobsCancelOperation
-								r.summary = "Cancel a running worker job"
-								r.operationID = "worker-jobs-cancel"
-								r.pathPattern = "/workerjobs/{uuid}/cancel"
+							case "DELETE":
+								r.name = WorkerJobsDeleteOperation
+								r.summary = ""
+								r.operationID = "worker-jobs-delete"
+								r.pathPattern = "/workerjobs/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = WorkerJobsGetOperation
+								r.summary = ""
+								r.operationID = "worker-jobs-get"
+								r.pathPattern = "/workerjobs/{uuid}"
 								r.args = args
 								r.count = 1
 								return r, true
 							default:
 								return
 							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/cancel"
+							origElem := elem
+							if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = WorkerJobsCancelOperation
+									r.summary = "Cancel a running worker job"
+									r.operationID = "worker-jobs-cancel"
+									r.pathPattern = "/workerjobs/{uuid}/cancel"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 's': // Prefix: "space"
+					origElem := elem
+					if l := len("space"); len(elem) >= l && elem[0:l] == "space" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = ListWorkspacesOperation
+							r.summary = "List workspaces for the current user"
+							r.operationID = "listWorkspaces"
+							r.pathPattern = "/workspace"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = CreateWorkspaceOperation
+							r.summary = "Create a new workspace"
+							r.operationID = "createWorkspace"
+							r.pathPattern = "/workspace"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'c': // Prefix: "check"
+							origElem := elem
+							if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = CheckWorkspaceExistsOperation
+									r.summary = "Check if a workspace exists by slug"
+									r.operationID = "checkWorkspaceExists"
+									r.pathPattern = "/workspace/check"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+						// Param: "uuid"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch method {
+							case "DELETE":
+								r.name = DeleteWorkspaceOperation
+								r.summary = "Delete a workspace"
+								r.operationID = "deleteWorkspace"
+								r.pathPattern = "/workspace/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = GetWorkspaceOperation
+								r.summary = "Get a workspace by UUID"
+								r.operationID = "getWorkspace"
+								r.pathPattern = "/workspace/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "PUT":
+								r.name = UpdateWorkspaceOperation
+								r.summary = "Update a workspace"
+								r.operationID = "updateWorkspace"
+								r.pathPattern = "/workspace/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/members"
+							origElem := elem
+							if l := len("/members"); len(elem) >= l && elem[0:l] == "/members" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = ListWorkspaceMembersOperation
+									r.summary = "List members of a workspace"
+									r.operationID = "listWorkspaceMembers"
+									r.pathPattern = "/workspace/{uuid}/members"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "POST":
+									r.name = AddWorkspaceMemberOperation
+									r.summary = "Add a member to a workspace"
+									r.operationID = "addWorkspaceMember"
+									r.pathPattern = "/workspace/{uuid}/members"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "user_uuid"
+								// Leaf parameter
+								args[1] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = RemoveWorkspaceMemberOperation
+										r.summary = "Remove a member from a workspace"
+										r.operationID = "removeWorkspaceMember"
+										r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "PUT":
+										r.name = UpdateWorkspaceMemberRoleOperation
+										r.summary = "Update a member's role in a workspace"
+										r.operationID = "updateWorkspaceMemberRole"
+										r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem

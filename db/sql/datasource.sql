@@ -1,6 +1,7 @@
 -- name: CreateDatasource :one
 INSERT INTO datasource (
     uuid,
+    workspace_uuid,
     user_uuid,
     name,
     "type",
@@ -11,6 +12,7 @@ INSERT INTO datasource (
     updated_at
 ) VALUES (
              sqlc.arg('uuid')::uuid,
+             sqlc.arg('workspace_uuid')::uuid,
              sqlc.arg('user_uuid')::uuid,
              NULLIF(sqlc.arg('name'), ''),
              NULLIF(sqlc.arg('type'), ''),
@@ -27,10 +29,26 @@ SELECT
 FROM datasource
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: GetDatasourceByWorkspace :one
+SELECT
+    sqlc.embed(datasource)
+FROM datasource
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
 -- name: ListDatasources :many
 SELECT
     sqlc.embed(datasource)
 FROM datasource
+ORDER BY created_at DESC
+LIMIT NULLIF(sqlc.arg('limit')::int, 0)
+    OFFSET sqlc.arg('offset');
+
+-- name: ListDatasourcesByWorkspace :many
+SELECT
+    sqlc.embed(datasource)
+FROM datasource
+WHERE workspace_uuid = sqlc.arg('workspace_uuid')::uuid
 ORDER BY created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
     OFFSET sqlc.arg('offset');
@@ -40,12 +58,13 @@ WITH filtered_datasource AS (
     SELECT d.*
     FROM datasource d
     WHERE
-        (NULLIF(sqlc.arg('uuid'), '') IS NULL OR sp.uuid = sqlc.arg('uuid')::uuid) AND
-        (NULLIF(sqlc.arg('user_uuid'), '') IS NULL OR sp.uuid = sqlc.arg('user_uuid')::uuid) AND
-        (NULLIF(sqlc.arg('name'), '') IS NULL OR sp."type" = sqlc.arg('name')) AND
-        (NULLIF(sqlc.arg('type'), '') IS NULL OR sp."type" = sqlc.arg('type')) AND
-        (NULLIF(sqlc.arg('provider'), '') IS NULL OR sp."type" = sqlc.arg('provider')) AND
-        (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR sp.sync_all = (sqlc.arg('sync_all')::int)::boolean)
+        (sqlc.arg('workspace_uuid')::uuid IS NULL OR d.workspace_uuid = sqlc.arg('workspace_uuid')::uuid) AND
+        (NULLIF(sqlc.arg('uuid'), '') IS NULL OR d.uuid = sqlc.arg('uuid')::uuid) AND
+        (NULLIF(sqlc.arg('user_uuid'), '') IS NULL OR d.user_uuid = sqlc.arg('user_uuid')::uuid) AND
+        (NULLIF(sqlc.arg('name'), '') IS NULL OR d.name ILIKE '%' || sqlc.arg('name') || '%') AND
+        (NULLIF(sqlc.arg('type'), '') IS NULL OR d."type" = sqlc.arg('type')) AND
+        (NULLIF(sqlc.arg('provider'), '') IS NULL OR d.provider = sqlc.arg('provider')) AND
+        (NULLIF(sqlc.arg('is_enabled')::int, -1) IS NULL OR d.is_enabled = (sqlc.arg('is_enabled')::int)::boolean)
 )
 SELECT
     *,
@@ -74,5 +93,23 @@ SET
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
+-- name: UpdateDatasourceByWorkspace :exec
+UPDATE datasource
+SET
+    user_uuid  = sqlc.arg('user_uuid')::uuid,
+    "type"     = NULLIF(sqlc.arg('type'), ''),
+    name       =  NULLIF(sqlc.arg('name'), ''),
+    is_enabled = sqlc.arg('is_enabled')::boolean,
+    provider   = sqlc.arg('provider'),
+    settings   = sqlc.arg('settings'),
+    updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
 -- name: DeleteDatasource :exec
 DELETE FROM datasource WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: DeleteDatasourceByWorkspace :exec
+DELETE FROM datasource
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;

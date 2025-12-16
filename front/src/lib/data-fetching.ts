@@ -8,9 +8,9 @@ export type LoaderFunction = (ctx: LoaderContext) => Promise<Record<string, unkn
 
 // Route-to-loader mapping
 const loaders: Record<string, LoaderFunction> = {
-  '/page': async () => {
-    // Home page loader
-    return { pageTitle: 'Home' };
+  '/page/start': async () => {
+    // Start page loader
+    return { pageTitle: 'Start' };
   },
   '/page/home': async () => {
     return { pageTitle: 'Home' };

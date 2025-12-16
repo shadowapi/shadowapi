@@ -2,16 +2,18 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import { Spin } from 'antd';
 
 // SSR Pages - imported directly (bundled for server)
+import LandingPage from './pages/landing';
 import AboutPage from './pages/about';
-import TenantSelectionPage from './pages/tenant';
 import DocumentationIndex from './pages/documentation';
 import DatasourceIndex from './pages/documentation/datasource';
 import GmailDocumentation from './pages/documentation/datasource/gmail';
 import TelegramDocumentation from './pages/documentation/datasource/telegram';
 
 // CSR Pages - lazy loaded (only on client)
-const AppRouter = lazy(() => import('./app/AppRouter'));
+const WorkspaceRouter = lazy(() => import('./app/WorkspaceRouter'));
+const WorkspaceSelectionPage = lazy(() => import('./pages/workspaces'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RootRedirect = lazy(() => import('./pages/RootRedirect'));
 
 // Loading fallback for lazy components
 function LoadingFallback() {
@@ -50,33 +52,46 @@ export const routes: RouteConfig[] = [
     protected: false
   },
 
-  // CSR routes (app) - protected
+  // Workspace selection - protected, centered layout without sidebar
   {
-    path: '/',
-    element: withSuspense(AppRouter),
+    path: '/workspaces',
+    element: withSuspense(WorkspaceSelectionPage),
+    layout: 'auth',
+    ssr: false,
+    protected: true,
+  },
+
+  // Workspace routes - protected, with workspace context
+  {
+    path: '/w/:slug',
+    element: withSuspense(WorkspaceRouter),
     layout: 'app',
-    ssr: false
+    ssr: false,
+    protected: true,
   },
   {
-    path: '/*',
-    element: withSuspense(AppRouter),
+    path: '/w/:slug/*',
+    element: withSuspense(WorkspaceRouter),
     layout: 'app',
-    ssr: false
+    ssr: false,
+    protected: true,
+  },
+
+  // Root redirect - authenticated users go to /workspaces, others to /page/start
+  {
+    path: '/',
+    element: withSuspense(RootRedirect),
+    layout: 'auth',
+    ssr: false,
+    protected: false,
   },
 
   // SSR routes (public pages)
   {
-    path: '/page',
-    element: <AboutPage />,
-    layout: 'page',
+    path: '/page/start',
+    element: <LandingPage />,
+    layout: 'auth',
     ssr: true
-  },
-  {
-    path: '/page/tenant',
-    element: <TenantSelectionPage />,
-    layout: 'page',
-    ssr: true,
-    showBreadcrumb: false
   },
   {
     path: '/page/about',
@@ -121,6 +136,12 @@ export function getRouteConfig(pathname: string): RouteConfig | undefined {
     if (route.path.endsWith('/*')) {
       const basePath = route.path.slice(0, -2);
       return pathname.startsWith(basePath);
+    }
+    // Handle parameterized routes like /w/:slug
+    if (route.path.includes(':')) {
+      const pattern = route.path.replace(/:[\w]+/g, '[^/]+');
+      const regex = new RegExp(`^${pattern}$`);
+      return regex.test(pathname);
     }
     return route.path === pathname;
   });

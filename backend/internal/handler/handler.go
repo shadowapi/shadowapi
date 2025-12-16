@@ -37,31 +37,60 @@ func (h *Handler) DB() *pgxpool.Pool {
 	return h.dbp
 }
 
-// ensureInitTenantAndAdmin creates the default tenants and first admin user if they don't exist.
-func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
+// ensureInitWorkspaceAndAdmin creates the default workspaces and admin user if they don't exist.
+func (h *Handler) ensureInitWorkspaceAndAdmin(ctx context.Context) error {
 	if h.cfg.InitAdmin.Email == "" || h.cfg.InitAdmin.Password == "" {
 		return nil
 	}
 
 	q := query.New(h.dbp)
 
-	// Define tenants to create
-	tenants := []struct {
-		name        string
+	// Hash password
+	hashed, err := bcrypt.GenerateFromPassword([]byte(h.cfg.InitAdmin.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// Step 1: Ensure admin user exists (global user, not workspace-specific)
+	var userUUID pgtype.UUID
+	user, err := q.GetUserByEmail(ctx, h.cfg.InitAdmin.Email)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Create admin user
+			uid := uuid.Must(uuid.NewV7())
+			userUUID = pgtype.UUID{Bytes: uid, Valid: true}
+			_, err = q.CreateUser(ctx, query.CreateUserParams{
+				UUID:      userUUID,
+				Email:     h.cfg.InitAdmin.Email,
+				Password:  string(hashed),
+				FirstName: "Admin",
+				LastName:  "User",
+				IsEnabled: true,
+				IsAdmin:   true,
+				Meta:      []byte(`{}`),
+			})
+			if err != nil {
+				return errors.New("failed to create admin user: " + err.Error())
+			}
+			h.log.Info("created admin user", "email", h.cfg.InitAdmin.Email)
+		} else {
+			return err
+		}
+	} else {
+		userUUID = pgtype.UUID{Bytes: user.UUID, Valid: true}
+	}
+
+	// Step 2: Ensure default workspaces exist
+	workspaces := []struct {
+		slug        string
 		displayName string
 	}{
 		{"internal", "Internal"},
 		{"demo", "Demo"},
 	}
 
-	// Hash password once for all tenants
-	hashed, err := bcrypt.GenerateFromPassword([]byte(h.cfg.InitAdmin.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	for _, t := range tenants {
-		if err := h.ensureTenantWithAdmin(ctx, q, t.name, t.displayName, string(hashed)); err != nil {
+	for _, w := range workspaces {
+		if err := h.ensureWorkspaceWithOwner(ctx, q, w.slug, w.displayName, userUUID); err != nil {
 			return err
 		}
 	}
@@ -69,66 +98,66 @@ func (h *Handler) ensureInitTenantAndAdmin(ctx context.Context) error {
 	return nil
 }
 
-// ensureTenantWithAdmin creates a tenant and admin user if they don't exist.
-func (h *Handler) ensureTenantWithAdmin(ctx context.Context, q *query.Queries, name, displayName, hashedPassword string) error {
-	// Step 1: Ensure tenant exists
-	var tenantUUID pgtype.UUID
-	tenant, err := q.GetTenantByName(ctx, name)
+// ensureWorkspaceWithOwner creates a workspace and adds the user as owner if it doesn't exist.
+func (h *Handler) ensureWorkspaceWithOwner(ctx context.Context, q *query.Queries, slug, displayName string, userUUID pgtype.UUID) error {
+	// Check if workspace exists
+	workspace, err := q.GetWorkspaceBySlug(ctx, slug)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			// Create tenant
-			tUUID := uuid.Must(uuid.NewV7())
-			tenantUUID = pgtype.UUID{Bytes: tUUID, Valid: true}
-			_, err = q.CreateTenant(ctx, query.CreateTenantParams{
-				UUID:        tenantUUID,
-				Name:        name,
+			// Create workspace
+			wUUID := uuid.Must(uuid.NewV7())
+			workspaceUUID := pgtype.UUID{Bytes: wUUID, Valid: true}
+			_, err = q.CreateWorkspace(ctx, query.CreateWorkspaceParams{
+				UUID:        workspaceUUID,
+				Slug:        slug,
 				DisplayName: displayName,
 				IsEnabled:   true,
 				Settings:    []byte(`{}`),
 			})
 			if err != nil {
-				return errors.New("failed to create " + name + " tenant: " + err.Error())
+				return errors.New("failed to create " + slug + " workspace: " + err.Error())
 			}
-			h.log.Info("created tenant", "name", name)
+			h.log.Info("created workspace", "slug", slug)
+
+			// Add user as owner
+			memberUUID := uuid.Must(uuid.NewV7())
+			_, err = q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
+				UUID:          pgtype.UUID{Bytes: memberUUID, Valid: true},
+				WorkspaceUUID: workspaceUUID,
+				UserUUID:      userUUID,
+				Role:          "owner",
+			})
+			if err != nil {
+				return errors.New("failed to add workspace owner: " + err.Error())
+			}
+			h.log.Info("added user as workspace owner", "workspace", slug)
 		} else {
 			return err
 		}
 	} else {
-		var bytes [16]byte
-		copy(bytes[:], tenant.UUID.Bytes())
-		tenantUUID = pgtype.UUID{Bytes: bytes, Valid: true}
+		// Workspace exists, ensure user is a member
+		workspaceUUID := pgtype.UUID{Bytes: workspace.UUID, Valid: true}
+		_, err := q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
+			WorkspaceUUID: workspaceUUID,
+			UserUUID:      userUUID,
+		})
+		if err == pgx.ErrNoRows {
+			// Add user as owner
+			memberUUID := uuid.Must(uuid.NewV7())
+			_, err = q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
+				UUID:          pgtype.UUID{Bytes: memberUUID, Valid: true},
+				WorkspaceUUID: workspaceUUID,
+				UserUUID:      userUUID,
+				Role:          "owner",
+			})
+			if err != nil {
+				h.log.Warn("failed to add workspace member", "workspace", slug, "error", err)
+			} else {
+				h.log.Info("added user as workspace owner", "workspace", slug)
+			}
+		}
 	}
 
-	// Step 2: Ensure admin user exists in tenant
-	users, err := q.ListUsersByTenant(ctx, query.ListUsersByTenantParams{
-		TenantUuid: tenantUUID,
-		Offset:     0,
-		Limit:      1,
-	})
-	if err != nil && err != pgx.ErrNoRows {
-		return err
-	}
-	if len(users) > 0 {
-		return nil // Admin already exists
-	}
-
-	// Create admin user
-	uid := uuid.Must(uuid.NewV7())
-	_, err = q.CreateUser(ctx, query.CreateUserParams{
-		UUID:       pgtype.UUID{Bytes: uid, Valid: true},
-		TenantUuid: tenantUUID,
-		Email:      h.cfg.InitAdmin.Email,
-		Password:   hashedPassword,
-		FirstName:  "Admin",
-		LastName:   "User",
-		IsEnabled:  true,
-		IsAdmin:    true,
-		Meta:       []byte(`{}`),
-	})
-	if err != nil {
-		return err
-	}
-	h.log.Info("created admin user in tenant", "tenant", name, "email", h.cfg.InitAdmin.Email)
 	return nil
 }
 
@@ -186,8 +215,8 @@ func Provide(i do.Injector) (*Handler, error) {
 		)
 	}
 
-	if err := h.ensureInitTenantAndAdmin(context.Background()); err != nil {
-		h.log.Error("init tenant and admin", "error", err)
+	if err := h.ensureInitWorkspaceAndAdmin(context.Background()); err != nil {
+		h.log.Error("init workspace and admin", "error", err)
 	}
 	return h, nil
 }

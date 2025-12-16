@@ -7,17 +7,13 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
-	gofrsUUID "github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
-	"github.com/shadowapi/shadowapi/backend/internal/tenant"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
-	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // OAuth2Service provides OAuth2 functionality for the handlers
@@ -37,8 +33,6 @@ type OAuth2Service struct {
 type oauth2AuthState struct {
 	CodeVerifier string
 	RedirectURI  string
-	TenantUUID   string // Tenant from original request context
-	TenantName   string // Tenant from original request context
 	CreatedAt    time.Time
 }
 
@@ -124,21 +118,11 @@ func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2Au
 		return nil, fmt.Errorf("generate PKCE: %w", err)
 	}
 
-	// Get tenant from context if present (this runs on tenant subdomain)
-	var tenantUUID, tenantName string
-	if t, ok := tenant.FromContext(ctx); ok {
-		tenantUUID = t.UUID
-		tenantName = t.Name
-		h.log.Debug("capturing tenant in OAuth2 state", "tenant_uuid", tenantUUID, "tenant_name", tenantName)
-	}
-
-	// Store state, verifier, and tenant
+	// Store state and verifier
 	h.oauth2Svc.stateMu.Lock()
 	h.oauth2Svc.stateStore[state] = &oauth2AuthState{
 		CodeVerifier: verifier,
 		RedirectURI:  req.RedirectURI,
-		TenantUUID:   tenantUUID,
-		TenantName:   tenantName,
 		CreatedAt:    time.Now(),
 	}
 	h.oauth2Svc.stateMu.Unlock()
@@ -204,16 +188,7 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 		"has_refresh_token", tokenResp.RefreshToken != "",
 	)
 
-	// Get or generate session ID for cross-subdomain session tracking
-	sessionID, _ := ctx.Value(oauth2.SharedSessionContextKey).(string)
-	if sessionID == "" {
-		sessionID = gofrsUUID.Must(gofrsUUID.NewV7()).String()
-		h.log.Debug("generated new shared session ID", "session_id", sessionID[:8]+"...")
-	} else {
-		h.log.Debug("using existing shared session ID", "session_id", sessionID[:8]+"...")
-	}
-
-	// Build cookie headers (separate headers for each cookie)
+	// Build cookie headers (single domain, no cross-subdomain session needed)
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
 	refreshTTL := 720 * time.Hour // Match Hydra's refresh token TTL
 
@@ -221,56 +196,21 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 		h.oauth2Svc.cookieConfig,
 		tokenResp.AccessToken,
 		tokenResp.RefreshToken,
-		sessionID,
 		accessTTL,
 		refreshTTL,
 	)
 
-	// Create tenant session record for cross-subdomain session tracking
-	if stateData.TenantUUID != "" && h.oauth2Svc.jwtValidator != nil {
-		// Decode access token to get user UUID (subject claim)
-		claims, err := h.oauth2Svc.jwtValidator.Validate(ctx, tokenResp.AccessToken)
-		if err != nil {
-			h.log.Warn("failed to decode access token for tenant session", "error", err)
-		} else if claims.Subject != "" {
-			// Parse UUIDs
-			tenantUUID, err := gofrsUUID.FromString(stateData.TenantUUID)
-			if err != nil {
-				h.log.Warn("invalid tenant UUID in state", "tenant_uuid", stateData.TenantUUID, "error", err)
-			} else {
-				userUUID, err := gofrsUUID.FromString(claims.Subject)
-				if err != nil {
-					h.log.Warn("invalid user UUID in token subject", "subject", claims.Subject, "error", err)
-				} else {
-					// Create or update tenant session record
-					sessionRecordUUID := gofrsUUID.Must(gofrsUUID.NewV7())
-					expiresAt := time.Now().Add(refreshTTL)
-
-					_, err = query.New(h.dbp).UpsertTenantSession(ctx, query.UpsertTenantSessionParams{
-						UUID:       pgtype.UUID{Bytes: sessionRecordUUID, Valid: true},
-						SessionID:  sessionID,
-						TenantUuid: pgtype.UUID{Bytes: tenantUUID, Valid: true},
-						UserUUID:   pgtype.UUID{Bytes: userUUID, Valid: true},
-						ExpiresAt:  pgtype.Timestamptz{Time: expiresAt, Valid: true},
-					})
-					if err != nil {
-						h.log.Warn("failed to create tenant session", "error", err)
-					} else {
-						h.log.Debug("created tenant session",
-							"session_id", sessionID[:8]+"...",
-							"tenant", stateData.TenantName,
-							"user", claims.Subject[:8]+"...",
-						)
-					}
-				}
-			}
-		}
-	}
-
-	// Redirect to the frontend
+	// Redirect to the frontend with success indicator
 	redirectURL := stateData.RedirectURI
 	if redirectURL == "" {
 		redirectURL = h.oauth2Svc.baseURL + "/"
+	}
+
+	// Add oauth2_success param so frontend knows to refresh auth state
+	if !strings.Contains(redirectURL, "?") {
+		redirectURL += "?oauth2_success=true"
+	} else {
+		redirectURL += "&oauth2_success=true"
 	}
 
 	return &api.AuthOAuth2CallbackFound{
@@ -298,8 +238,7 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 		return nil, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("token refresh failed"))
 	}
 
-	// Build cookie headers (separate headers for each cookie)
-	// Don't include session ID on refresh - the shared session cookie is already set
+	// Build cookie headers
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
 	refreshTTL := 720 * time.Hour
 
@@ -307,7 +246,6 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 		h.oauth2Svc.cookieConfig,
 		tokenResp.AccessToken,
 		tokenResp.RefreshToken,
-		"", // No session ID on refresh
 		accessTTL,
 		refreshTTL,
 	)
@@ -322,7 +260,6 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 
 // AuthOAuth2Session checks if the user has a valid session without triggering token refresh.
 // Always returns 200 to avoid console errors for unauthenticated users.
-// For tenant subdomains, validates that the token belongs to the current tenant.
 func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2SessionOK, error) {
 	if h.oauth2Svc == nil {
 		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
@@ -331,7 +268,7 @@ func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2Session
 	// Get access token from context (set by middleware)
 	accessToken, _ := ctx.Value(auth.AccessTokenContextKey).(string)
 
-	// If we have a JWT validator and an access token, validate tenant
+	// Validate JWT if we have a validator and token
 	if h.oauth2Svc.jwtValidator != nil && accessToken != "" {
 		claims, err := h.oauth2Svc.jwtValidator.Validate(ctx, accessToken)
 		if err != nil {
@@ -339,21 +276,7 @@ func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2Session
 			return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
 		}
 
-		// Get current tenant from context (set by tenant middleware)
-		currentTenant, hasTenant := tenant.FromContext(ctx)
-
-		// If we're on a tenant subdomain, verify the token is for this tenant
-		if hasTenant && claims.TenantUUID() != "" {
-			if claims.TenantUUID() != currentTenant.UUID {
-				h.log.Debug("session check: tenant mismatch",
-					"token_tenant", claims.TenantUUID(),
-					"current_tenant", currentTenant.UUID,
-				)
-				return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
-			}
-		}
-
-		// Token is valid and tenant matches (or no tenant context)
+		// Token is valid
 		expiresIn := 3600 // Default
 		if claims.ExpiresAt != nil {
 			expiresIn = int(time.Until(claims.ExpiresAt.Time).Seconds())
@@ -365,20 +288,13 @@ func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2Session
 		}, nil
 	}
 
-	// Fallback: check refresh token (for backwards compatibility or when JWT validator not configured)
+	// Fallback: check refresh token (for when JWT validator not configured)
 	refreshToken, ok := ctx.Value(auth.RefreshTokenContextKey).(string)
 	if !ok || refreshToken == "" {
 		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
 	}
 
-	// We have a refresh token but couldn't validate tenant via JWT
-	// For security, if we're on a tenant subdomain without JWT validation, require re-login
-	if _, hasTenant := tenant.FromContext(ctx); hasTenant {
-		h.log.Debug("session check: on tenant subdomain but cannot validate token tenant")
-		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
-	}
-
-	// Root domain: having a refresh token means authenticated
+	// Having a refresh token means authenticated
 	return &api.AuthOAuth2SessionOK{
 		Authenticated: true,
 		ExpiresIn:     api.NewOptInt(3600), // Approximate TTL
@@ -413,7 +329,7 @@ func (h *Handler) AuthOAuth2Logout(ctx context.Context) (*api.AuthOAuth2LogoutOK
 
 // Helper functions for building cookie headers
 
-func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken, sessionID string, accessTTL, refreshTTL time.Duration) []string {
+func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken string, accessTTL, refreshTTL time.Duration) []string {
 	secure := ""
 	if cfg.Secure {
 		secure = "; Secure"
@@ -435,27 +351,7 @@ func buildCookieHeaders(cfg oauth2.CookieConfig, accessToken, refreshToken, sess
 		secure,
 	)
 
-	cookies := []string{accessCookie, refreshCookie}
-
-	// Add shared session cookie if sessionID is provided
-	if sessionID != "" {
-		// Use leading dot for domain to include all subdomains
-		sharedDomain := cfg.Domain
-		if sharedDomain != "" && sharedDomain[0] != '.' {
-			sharedDomain = "." + sharedDomain
-		}
-
-		sharedSessionCookie := fmt.Sprintf("%s=%s; Path=/; Domain=%s; Max-Age=%d; HttpOnly; SameSite=Lax%s",
-			oauth2.SharedSessionCookie,
-			sessionID,
-			sharedDomain,
-			int(refreshTTL.Seconds()),
-			secure,
-		)
-		cookies = append(cookies, sharedSessionCookie)
-	}
-
-	return cookies
+	return []string{accessCookie, refreshCookie}
 }
 
 func buildClearCookieHeaders(cfg oauth2.CookieConfig) []string {

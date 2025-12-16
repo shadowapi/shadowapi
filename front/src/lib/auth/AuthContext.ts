@@ -15,7 +15,6 @@ export interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   tokenExpiresIn: number | null;
-  tenantNotFound: boolean;
   login: (email: string, password: string, loginChallenge?: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;

@@ -100,7 +100,6 @@ func (h *Handler) DatasourceEmailOAuthList(ctx context.Context, params api.Datas
 		Type:           "email_oauth", // filter only email_oauth datasources
 		Provider:       "",
 		IsEnabled:      -1, // no filtering
-		SyncAll:        -1, // no filtering
 	}
 	rows, err := query.New(h.dbp).GetDatasources(ctx, qp)
 	if err != nil {

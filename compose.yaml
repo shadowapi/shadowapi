@@ -19,8 +19,8 @@ services:
           path: ./front/package.json
     labels:
       - traefik.enable=true
-      # Match root domain and all subdomains for frontend (Traefik v3 regex syntax)
-      - traefik.http.routers.shadowapi-front.rule=HostRegexp(`.+\.${BE_DOMAIN}`) || Host(`${BE_DOMAIN}`)
+      # Single domain - frontend catches all unmatched routes
+      - traefik.http.routers.shadowapi-front.rule=Host(`${BE_DOMAIN}`)
       - traefik.http.routers.shadowapi-front.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.routers.shadowapi-front.priority=1
       - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
@@ -41,8 +41,8 @@ services:
           path: ./front/package.json
     labels:
       - traefik.enable=true
-      # Match root domain and all subdomains for SSR /page routes (Traefik v3 regex syntax)
-      - traefik.http.routers.shadowapi-ssr.rule=(HostRegexp(`.+\.${BE_DOMAIN}`) || Host(`${BE_DOMAIN}`)) && PathPrefix(`/page`)
+      # Single domain - SSR for /page/* routes
+      - traefik.http.routers.shadowapi-ssr.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/page`)
       - traefik.http.routers.shadowapi-ssr.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.routers.shadowapi-ssr.priority=20
       - traefik.http.services.shadowapi-ssr.loadbalancer.server.port=3000
@@ -71,7 +71,7 @@ services:
       - BE_JWKS_CACHE_DURATION=${BE_JWKS_CACHE_DURATION}
       - BE_INIT_ADMIN_EMAIL=${BE_INIT_ADMIN_EMAIL}
       - BE_INIT_ADMIN_PASSWORD=${BE_INIT_ADMIN_PASSWORD}
-      - BE_TENANT_BASE_DOMAIN=${BE_DOMAIN}
+      - BE_BASE_URL=http://${BE_DOMAIN}
     develop:
       watch:
         - action: rebuild
@@ -84,8 +84,8 @@ services:
           path: ./backend/go.sum
     labels:
       - traefik.enable=true
-      # Match root domain and all subdomains for API routes (Traefik v3 regex syntax)
-      - traefik.http.routers.shadowapi-api.rule=(HostRegexp(`.+\.${BE_DOMAIN}`) || Host(`${BE_DOMAIN}`)) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
+      # Single domain - API routes
+      - traefik.http.routers.shadowapi-api.rule=Host(`${BE_DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`))
       - traefik.http.routers.shadowapi-api.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
       - traefik.http.routers.shadowapi-api.priority=30
       - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080

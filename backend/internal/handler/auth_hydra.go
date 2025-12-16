@@ -4,74 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
-
-// tenantInfo holds tenant data extracted from OAuth2 state
-type tenantInfo struct {
-	UUID        string
-	Name        string
-	RedirectURI string
-}
-
-// extractTenantFromRequestURL extracts tenant info from the OAuth2 request URL.
-// The request_url contains our state parameter which maps to stored tenant info.
-func (h *Handler) extractTenantFromRequestURL(requestURL string) *tenantInfo {
-	if requestURL == "" || h.oauth2Svc == nil {
-		return nil
-	}
-
-	// Parse the URL to extract the state parameter
-	parsedURL, err := url.Parse(requestURL)
-	if err != nil {
-		h.log.Debug("failed to parse request_url", "url", requestURL, "error", err)
-		return nil
-	}
-
-	state := parsedURL.Query().Get("state")
-	if state == "" {
-		h.log.Debug("no state parameter in request_url", "url", requestURL)
-		return nil
-	}
-
-	// Look up the state in our store (don't delete it yet, we might need it in callback)
-	h.oauth2Svc.stateMu.RLock()
-	stateData, ok := h.oauth2Svc.stateStore[state]
-	h.oauth2Svc.stateMu.RUnlock()
-
-	if !ok {
-		h.log.Debug("state not found in store", "state", state[:8]+"...")
-		return nil
-	}
-
-	h.log.Debug("extracted tenant from OAuth2 state",
-		"tenant_uuid", stateData.TenantUUID,
-		"tenant_name", stateData.TenantName,
-		"redirect_uri", stateData.RedirectURI,
-	)
-
-	return &tenantInfo{
-		UUID:        stateData.TenantUUID,
-		Name:        stateData.TenantName,
-		RedirectURI: stateData.RedirectURI,
-	}
-}
-
-// extractHostFromRedirectURI extracts the host (scheme + host) from a redirect URI
-func extractHostFromRedirectURI(redirectURI string) string {
-	if redirectURI == "" {
-		return ""
-	}
-
-	parsedURL, err := url.Parse(redirectURI)
-	if err != nil {
-		return ""
-	}
-
-	return parsedURL.Scheme + "://" + parsedURL.Host
-}
 
 // AuthLogin handles the Hydra login redirect.
 // GET /api/v1/auth/login?login_challenge=xxx
@@ -109,17 +44,9 @@ func (h *Handler) AuthLogin(ctx context.Context, params api.AuthLoginParams) (*a
 	}
 
 	// Redirect to frontend login page with the challenge
-	// Extract the original redirect host from the OAuth2 request URL (preserves tenant subdomain)
-	var redirectHost string
-	if tenantInfo := h.extractTenantFromRequestURL(loginReq.RequestURL); tenantInfo != nil {
-		redirectHost = extractHostFromRedirectURI(tenantInfo.RedirectURI)
-	}
-	if redirectHost == "" {
-		redirectHost = h.oauth2Svc.baseURL // fallback to configured baseURL
-	}
-	loginPageURL := fmt.Sprintf("%s/login?login_challenge=%s", redirectHost, params.LoginChallenge)
+	loginPageURL := fmt.Sprintf("%s/login?login_challenge=%s", h.oauth2Svc.baseURL, params.LoginChallenge)
 
-	h.log.Debug("redirecting to login page", "challenge", params.LoginChallenge[:8]+"...", "host", redirectHost)
+	h.log.Debug("redirecting to login page", "challenge", params.LoginChallenge[:8]+"...")
 	return &api.AuthLoginFound{
 		Location: api.NewOptString(loginPageURL),
 	}, nil
@@ -185,20 +112,8 @@ func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams)
 		return nil, ErrWithCode(http.StatusBadRequest, fmt.Errorf("invalid consent challenge"))
 	}
 
-	// Build access token extras with tenant information
-	// Extract tenant from the original OAuth2 request URL (stored in state when flow started)
-	var accessTokenExtras map[string]interface{}
-	if tenantInfo := h.extractTenantFromRequestURL(consentReq.RequestURL); tenantInfo != nil && tenantInfo.UUID != "" {
-		accessTokenExtras = map[string]interface{}{
-			"tenant_uuid": tenantInfo.UUID,
-			"tenant_name": tenantInfo.Name,
-		}
-		h.log.Debug("including tenant in consent from OAuth2 state", "tenant_uuid", tenantInfo.UUID, "tenant_name", tenantInfo.Name)
-	} else {
-		h.log.Debug("no tenant info found in OAuth2 state for consent")
-	}
-
 	// Auto-approve: Accept all requested scopes and audiences
+	// No tenant info needed in workspace-based architecture
 	redirectURL, err := h.oauth2Svc.hydraClient.AcceptConsentRequest(
 		ctx,
 		params.ConsentChallenge,
@@ -207,7 +122,7 @@ func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams)
 		consentReq.Subject,
 		true,  // remember consent
 		3600,  // remember for 1 hour
-		accessTokenExtras,
+		nil,   // no extra access token claims needed
 	)
 	if err != nil {
 		h.log.Error("failed to accept consent request", "error", err)

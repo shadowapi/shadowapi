@@ -19,8 +19,8 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/log"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
-	"github.com/shadowapi/shadowapi/backend/internal/tenant"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 )
 
 var (
@@ -68,7 +68,7 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		// Skip server when subcommand is loader
 		do.Provide(injector, queue.Provide)
 		do.Provide(injector, auth.Provide)
-		do.Provide(injector, tenant.Provide) // Tenant middleware
+		do.Provide(injector, workspace.Provide) // Workspace middleware
 
 		// Register UserManager implementation (database-based)
 		do.Provide(injector, dbauth.Provide)

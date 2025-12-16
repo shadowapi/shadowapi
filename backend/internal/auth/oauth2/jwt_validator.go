@@ -9,29 +9,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// ClaimsExt represents the extra claims embedded in the JWT's ext field
-type ClaimsExt struct {
-	TenantUUID string `json:"tenant_uuid,omitempty"`
-	TenantName string `json:"tenant_name,omitempty"`
-}
-
 // Claims represents the JWT claims we care about
+// With workspace-based architecture, we don't need tenant claims in JWT
+// Workspace context is derived from URL path, not JWT
 type Claims struct {
 	jwt.RegisteredClaims
-	Scope    string    `json:"scope,omitempty"`
-	ClientID string    `json:"client_id,omitempty"`
-	SessionID string   `json:"sid,omitempty"`
-	Ext      ClaimsExt `json:"ext,omitempty"` // Hydra puts custom claims here
-}
-
-// TenantUUID returns the tenant UUID from ext claims
-func (c *Claims) TenantUUID() string {
-	return c.Ext.TenantUUID
-}
-
-// TenantName returns the tenant name from ext claims
-func (c *Claims) TenantName() string {
-	return c.Ext.TenantName
+	Scope     string `json:"scope,omitempty"`
+	ClientID  string `json:"client_id,omitempty"`
+	SessionID string `json:"sid,omitempty"`
 }
 
 // JWTValidator validates JWT tokens using JWKS
@@ -92,8 +77,6 @@ func (v *JWTValidator) Validate(ctx context.Context, tokenString string) (*Claim
 		"subject", claims.Subject,
 		"client_id", claims.ClientID,
 		"expires_at", claims.ExpiresAt,
-		"tenant_uuid", claims.TenantUUID(),
-		"tenant_name", claims.TenantName(),
 	)
 
 	return claims, nil

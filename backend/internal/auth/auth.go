@@ -69,8 +69,7 @@ func Provide(i do.Injector) (*Auth, error) {
 			"/api/v1/auth/oauth2/refresh":   http.MethodPost,
 			"/api/v1/auth/oauth2/logout":    http.MethodPost,
 			"/api/v1/auth/oauth2/session":   http.MethodGet,
-			"/api/v1/auth/tenants":          http.MethodGet, // Public: list authenticated tenants
-			"/api/v1/tenant/check":          http.MethodGet, // Public: check if tenant exists
+			"/api/v1/workspace/check":       http.MethodGet, // Public: check if workspace exists
 		},
 	}
 
@@ -128,20 +127,15 @@ func (a *Auth) HandleBearerAuth(
 }
 
 func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
-	// Always extract shared session cookie if present (for tenant listing)
 	ctx := req.Context
 
-	// Extract request host for subdomain-aware redirects
+	// Extract request host for redirects
 	scheme := "http"
 	if req.Raw.TLS != nil || req.Raw.Header.Get("X-Forwarded-Proto") == "https" {
 		scheme = "https"
 	}
 	requestHost := fmt.Sprintf("%s://%s", scheme, req.Raw.Host)
 	ctx = context.WithValue(ctx, RequestHostContextKey, requestHost)
-
-	if cookie, err := req.Raw.Cookie(oauth2.SharedSessionCookie); err == nil {
-		ctx = context.WithValue(ctx, oauth2.SharedSessionContextKey, cookie.Value)
-	}
 	req.SetContext(ctx)
 
 	// Check if path is in allow list

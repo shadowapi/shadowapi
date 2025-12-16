@@ -11,6 +11,20 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeAddWorkspaceMemberRequest(
+	req *AddWorkspaceMemberReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeAuthLoginSubmitRequest(
 	req *AuthLoginSubmitReq,
 	r *http.Request,
@@ -53,8 +67,8 @@ func encodeCreateContactRequest(
 	return nil
 }
 
-func encodeCreateTenantRequest(
-	req *Tenant,
+func encodeCreateUserRequest(
+	req *User,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -67,8 +81,8 @@ func encodeCreateTenantRequest(
 	return nil
 }
 
-func encodeCreateUserRequest(
-	req *User,
+func encodeCreateWorkspaceRequest(
+	req *Workspace,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -627,8 +641,8 @@ func encodeUpdateProfileRequest(
 	return nil
 }
 
-func encodeUpdateTenantRequest(
-	req *Tenant,
+func encodeUpdateUserRequest(
+	req *User,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -641,8 +655,22 @@ func encodeUpdateTenantRequest(
 	return nil
 }
 
-func encodeUpdateUserRequest(
-	req *User,
+func encodeUpdateWorkspaceRequest(
+	req *Workspace,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateWorkspaceMemberRoleRequest(
+	req *UpdateWorkspaceMemberRoleReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

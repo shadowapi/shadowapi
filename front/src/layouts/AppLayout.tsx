@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { Layout, Menu, theme, Breadcrumb, Dropdown, Button, Space, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import {
   DashboardOutlined,
   MessageOutlined,
@@ -183,10 +183,16 @@ function getBreadcrumbItems(pathname: string): { title: React.ReactNode; key: st
 
 function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   // Normalize path for menu selection (edit/new pages should highlight parent)
   let menuSelectedPath = location.pathname;
@@ -211,7 +217,7 @@ function AppLayout({ children }: AppLayoutProps) {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Sign out',
-      onClick: logout,
+      onClick: handleLogout,
     },
   ];
 

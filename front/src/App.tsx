@@ -27,8 +27,8 @@ function App({ ssrData }: AppProps) {
               element = <AuthLayout>{element}</AuthLayout>;
             }
 
-            // Wrap protected routes (app layout routes are protected by default)
-            if (route.protected !== false && route.layout === 'app') {
+            // Wrap protected routes (explicit protection via route.protected)
+            if (route.protected === true) {
               element = <ProtectedRoute>{element}</ProtectedRoute>;
             }
 

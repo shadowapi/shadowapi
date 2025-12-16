@@ -6,8 +6,6 @@ import {
   logout as oauth2Logout,
   OAuth2Error,
 } from './oauth2-client';
-
-const TENANT_NOT_FOUND_STATUS = 404;
 import { AuthContext, type AuthContextType, type User } from './AuthContext';
 
 const AUTH_LOGIN_URL = '/api/v1/auth/login';
@@ -38,7 +36,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number | null>(null);
-  const [tenantNotFound, setTenantNotFound] = useState(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check OAuth2 session on mount without triggering token refresh
@@ -56,10 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setTokenExpiresIn(null);
       }
     } catch (err) {
-      // Check if this is a 404 from non-existent tenant
-      if (err instanceof OAuth2Error && err.status === TENANT_NOT_FOUND_STATUS) {
-        setTenantNotFound(true);
-      }
+      console.error('Session check failed:', err);
       setIsAuthenticated(false);
       setUser(null);
       setTokenExpiresIn(null);
@@ -139,7 +133,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Direct login (not OAuth2 flow): Initiate OAuth2 flow first
       // This will redirect to /auth/login with a login_challenge
-      const currentUrl = window.location.origin + '/app';
+      const currentUrl = window.location.origin + '/workspaces';
       const oauth2Response = await initiateOAuth2Flow(currentUrl);
       window.location.href = oauth2Response.authorization_url;
 
@@ -186,7 +180,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     error,
     tokenExpiresIn,
-    tenantNotFound,
     login,
     logout,
     clearError,

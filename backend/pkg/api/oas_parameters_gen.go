@@ -16,6 +16,72 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// AddWorkspaceMemberParams is parameters of addWorkspaceMember operation.
+type AddWorkspaceMemberParams struct {
+	// Workspace UUID.
+	UUID uuid.UUID
+}
+
+func unpackAddWorkspaceMemberParams(packed middleware.Parameters) (params AddWorkspaceMemberParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeAddWorkspaceMemberParams(args [1]string, argsEscaped bool, r *http.Request) (params AddWorkspaceMemberParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // AuthConsentParams is parameters of auth-consent operation.
 type AuthConsentParams struct {
 	// The consent challenge from Hydra.
@@ -235,29 +301,29 @@ func decodeAuthOAuth2CallbackParams(args [0]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
-// CheckTenantExistsParams is parameters of checkTenantExists operation.
-type CheckTenantExistsParams struct {
-	// Tenant subdomain name to check.
-	Name string
+// CheckWorkspaceExistsParams is parameters of checkWorkspaceExists operation.
+type CheckWorkspaceExistsParams struct {
+	// Workspace slug to check.
+	Slug string
 }
 
-func unpackCheckTenantExistsParams(packed middleware.Parameters) (params CheckTenantExistsParams) {
+func unpackCheckWorkspaceExistsParams(packed middleware.Parameters) (params CheckWorkspaceExistsParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "name",
+			Name: "slug",
 			In:   "query",
 		}
-		params.Name = packed[key].(string)
+		params.Slug = packed[key].(string)
 	}
 	return params
 }
 
-func decodeCheckTenantExistsParams(args [0]string, argsEscaped bool, r *http.Request) (params CheckTenantExistsParams, _ error) {
+func decodeCheckWorkspaceExistsParams(args [0]string, argsEscaped bool, r *http.Request) (params CheckWorkspaceExistsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: name.
+	// Decode query: slug.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "name",
+			Name:    "slug",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
@@ -274,7 +340,7 @@ func decodeCheckTenantExistsParams(args [0]string, argsEscaped bool, r *http.Req
 					return err
 				}
 
-				params.Name = c
+				params.Slug = c
 				return nil
 			}); err != nil {
 				return err
@@ -285,7 +351,7 @@ func decodeCheckTenantExistsParams(args [0]string, argsEscaped bool, r *http.Req
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "name",
+			Name: "slug",
 			In:   "query",
 			Err:  err,
 		}
@@ -2116,71 +2182,6 @@ func decodeDeleteContactParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
-// DeleteTenantParams is parameters of deleteTenant operation.
-type DeleteTenantParams struct {
-	UUID uuid.UUID
-}
-
-func unpackDeleteTenantParams(packed middleware.Parameters) (params DeleteTenantParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeDeleteTenantParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteTenantParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // DeleteUserParams is parameters of deleteUser operation.
 type DeleteUserParams struct {
 	UUID string
@@ -2223,6 +2224,71 @@ func decodeDeleteUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 				}
 
 				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteWorkspaceParams is parameters of deleteWorkspace operation.
+type DeleteWorkspaceParams struct {
+	UUID uuid.UUID
+}
+
+func unpackDeleteWorkspaceParams(packed middleware.Parameters) (params DeleteWorkspaceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteWorkspaceParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteWorkspaceParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -2626,71 +2692,6 @@ func decodeGetContactParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
-// GetTenantParams is parameters of getTenant operation.
-type GetTenantParams struct {
-	UUID uuid.UUID
-}
-
-func unpackGetTenantParams(packed middleware.Parameters) (params GetTenantParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeGetTenantParams(args [1]string, argsEscaped bool, r *http.Request) (params GetTenantParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // GetUserParams is parameters of getUser operation.
 type GetUserParams struct {
 	UUID string
@@ -2756,13 +2757,87 @@ func decodeGetUserParams(args [1]string, argsEscaped bool, r *http.Request) (par
 	return params, nil
 }
 
-// ListTenantsParams is parameters of listTenants operation.
-type ListTenantsParams struct {
+// GetWorkspaceParams is parameters of getWorkspace operation.
+type GetWorkspaceParams struct {
+	UUID uuid.UUID
+}
+
+func unpackGetWorkspaceParams(packed middleware.Parameters) (params GetWorkspaceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetWorkspaceParams(args [1]string, argsEscaped bool, r *http.Request) (params GetWorkspaceParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListWorkspaceMembersParams is parameters of listWorkspaceMembers operation.
+type ListWorkspaceMembersParams struct {
+	// Workspace UUID.
+	UUID   uuid.UUID
 	Limit  OptInt
 	Offset OptInt
 }
 
-func unpackListTenantsParams(packed middleware.Parameters) (params ListTenantsParams) {
+func unpackListWorkspaceMembersParams(packed middleware.Parameters) (params ListWorkspaceMembersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "limit",
@@ -2784,7 +2859,177 @@ func unpackListTenantsParams(packed middleware.Parameters) (params ListTenantsPa
 	return params
 }
 
-func decodeListTenantsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListTenantsParams, _ error) {
+func decodeListWorkspaceMembersParams(args [1]string, argsEscaped bool, r *http.Request) (params ListWorkspaceMembersParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: offset.
+	{
+		val := int(0)
+		params.Offset.SetTo(val)
+	}
+	// Decode query: offset.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListWorkspacesParams is parameters of listWorkspaces operation.
+type ListWorkspacesParams struct {
+	Limit  OptInt
+	Offset OptInt
+}
+
+func unpackListWorkspacesParams(packed middleware.Parameters) (params ListWorkspacesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeListWorkspacesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListWorkspacesParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Set default value for query: limit.
 	{
@@ -3911,6 +4156,126 @@ func decodePipelineUpdateParams(args [1]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// RemoveWorkspaceMemberParams is parameters of removeWorkspaceMember operation.
+type RemoveWorkspaceMemberParams struct {
+	// Workspace UUID.
+	UUID uuid.UUID
+	// User UUID.
+	UserUUID uuid.UUID
+}
+
+func unpackRemoveWorkspaceMemberParams(packed middleware.Parameters) (params RemoveWorkspaceMemberParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeRemoveWorkspaceMemberParams(args [2]string, argsEscaped bool, r *http.Request) (params RemoveWorkspaceMemberParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
 			In:   "path",
 			Err:  err,
 		}
@@ -5729,71 +6094,6 @@ func decodeUpdateContactParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
-// UpdateTenantParams is parameters of updateTenant operation.
-type UpdateTenantParams struct {
-	UUID uuid.UUID
-}
-
-func unpackUpdateTenantParams(packed middleware.Parameters) (params UpdateTenantParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeUpdateTenantParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateTenantParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // UpdateUserParams is parameters of updateUser operation.
 type UpdateUserParams struct {
 	UUID string
@@ -5852,6 +6152,191 @@ func decodeUpdateUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateWorkspaceParams is parameters of updateWorkspace operation.
+type UpdateWorkspaceParams struct {
+	UUID uuid.UUID
+}
+
+func unpackUpdateWorkspaceParams(packed middleware.Parameters) (params UpdateWorkspaceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateWorkspaceParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateWorkspaceParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateWorkspaceMemberRoleParams is parameters of updateWorkspaceMemberRole operation.
+type UpdateWorkspaceMemberRoleParams struct {
+	// Workspace UUID.
+	UUID uuid.UUID
+	// User UUID.
+	UserUUID uuid.UUID
+}
+
+func unpackUpdateWorkspaceMemberRoleParams(packed middleware.Parameters) (params UpdateWorkspaceMemberRoleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateWorkspaceMemberRoleParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateWorkspaceMemberRoleParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
 			In:   "path",
 			Err:  err,
 		}

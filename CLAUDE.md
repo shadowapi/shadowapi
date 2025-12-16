@@ -32,10 +32,10 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Key packages
 
-- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, tenants, etc.
+- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, workspaces, etc.
 - `internal/auth` – Authentication middleware and token validation.
-- `internal/auth/dbauth` – Database-based user manager implementation with tenant-aware authentication.
-- `internal/tenant` – Multi-tenant context utilities and middleware for subdomain-based tenant extraction.
+- `internal/auth/dbauth` – Database-based user manager implementation with global user authentication.
+- `internal/workspace` – Workspace context utilities and middleware for path-based workspace extraction.
 - `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
 - `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic.
 - `internal/imap`, `internal/whatsapp`, `internal/tg`, `internal/oauth2` – External channel integrations (IMAP/SMTP Gmail, WhatsApp via whatsmeow, Telegram via gotd, LinkedIn helpers).
@@ -70,7 +70,7 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Hybrid SSR Architecture
 
-The frontend uses a hybrid rendering approach where public pages (`/page/*`) are server-side rendered for SEO, while the app (`/`, `/app/*`) uses client-side rendering.
+The frontend uses a hybrid rendering approach where public pages (`/page/*`) are server-side rendered for SEO, while the app uses client-side rendering.
 
 **Two containers, one codebase:**
 - **Frontend container** (port 5173): Vite dev server for CSR routes
@@ -91,15 +91,16 @@ The frontend uses a hybrid rendering approach where public pages (`/page/*`) are
 - `front/src/routes.tsx` – Centralized route configuration with `ssr` and `protected` flags per route
 - `front/src/api/client.ts` – API client using `openapi-fetch` for type-safe HTTP requests
 - `front/src/api/v1.d.ts` – Generated TypeScript types from OpenAPI spec (do not edit manually, regenerate with `make api-gen`)
-- `front/src/app/AppRouter.tsx` – Internal router for CSR app pages (handles routes like `/oauth2/credentials`)
+- `front/src/app/WorkspaceRouter.tsx` – Router for workspace-scoped pages under `/w/:slug/*`
 - `front/src/app/oauth2/` – OAuth2 Credentials management pages (list, create, edit)
 - `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
 - `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
 - `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
 - `front/src/lib/auth/` – Authentication module (OAuth2 client, context, hooks, protected route)
+- `front/src/lib/workspace/` – Workspace context and provider for workspace-scoped pages
 - `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR, AuthLayout for login)
 - `front/src/pages/auth/` – Authentication pages (LoginPage)
-- `front/src/pages/tenant/` – Tenant selection page for multi-tenant navigation
+- `front/src/pages/workspaces/` – Workspace selection page
 - `front/src/theme.ts` – Centralized theme configuration with color palette and Ant Design theme tokens
 
 ### Theme System
@@ -142,15 +143,16 @@ The frontend uses a centralized theme configuration based on the color palette f
 2. Add route to `front/src/routes.tsx` with `ssr: true` and `layout: 'page'`
 3. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
 
-**For CSR app pages (protected):**
+**For CSR app pages (protected, workspace-scoped):**
 1. Create the page component in `front/src/app/` (e.g., `front/src/app/oauth2/MyPage.tsx`)
-2. Add route to `front/src/app/AppRouter.tsx`
+2. Add route to `front/src/app/WorkspaceRouter.tsx`
 3. Use the API client from `front/src/api/client.ts` for data fetching:
    ```typescript
    import client from '../../api/client';
    const { data, error } = await client.GET('/oauth2/client');
    ```
-4. If adding a new menu item, update `front/src/layouts/AppLayout.tsx`
+4. Access workspace context via `useWorkspace()` hook from `front/src/lib/workspace/WorkspaceContext.tsx`
+5. If adding a new menu item, update `front/src/layouts/AppLayout.tsx`
 
 ### Frontend Authentication
 
@@ -165,10 +167,7 @@ The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handle
 
 **Authentication flow:**
 1. On app load, `AuthProvider` checks for existing session by attempting token refresh
-2. Protected routes (`/` and `/app/*`) check authentication:
-   - **Root domain** (`localtest.me`): All users redirect to `/page/tenant` (tenant selection) - root domain has no tenant context
-   - **Non-existent tenant** (`fake.localtest.me`): Redirects to `/page/tenant` on root domain
-   - **Tenant subdomain** (`internal.localtest.me`): Unauthenticated users redirect to `/login`
+2. Protected routes redirect unauthenticated users to `/login`
 3. Visiting `/login` without `login_challenge` auto-initiates OAuth2 flow (shows loading spinner)
 4. Hydra redirects to `/api/v1/auth/login` → Backend redirects to `/login?login_challenge=xxx`
 5. Login form appears with challenge → User enters credentials
@@ -182,48 +181,50 @@ The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handle
 import { useAuth } from '../lib/auth';
 
 function MyComponent() {
-  const { user, isAuthenticated, tenantNotFound, login, logout } = useAuth();
+  const { user, isAuthenticated, login, logout } = useAuth();
   // user?.email, user?.first_name, etc.
-  // tenantNotFound is true if the current subdomain tenant doesn't exist
 }
 ```
 
 **Adding new protected routes:**
 Routes with `layout: 'app'` are protected by default. To make a route public, set `protected: false`.
 
-### Multi-Tenant Architecture
+### Workspace Architecture
 
-The application supports multi-tenancy with subdomain-based tenant isolation:
+The application uses path-based workspaces on a single domain:
 
 **How it works:**
-- Each tenant has a unique subdomain (e.g., `acme.localtest.me`, `internal.localtest.me`)
-- Users are scoped to tenants via `(tenant_uuid, email)` unique constraint
-- Same email can exist in multiple tenants with different passwords
-- Tenant context is extracted from subdomain by middleware and injected into request context
+- All requests go to a single domain (`localtest.me`)
+- Workspace context is derived from URL path (`/w/{slug}/*`)
+- Users are global (one user, one email across all workspaces)
+- Users can be members of multiple workspaces with different roles (owner, admin, member)
+- Workspace membership is checked by middleware before accessing workspace-scoped resources
+
+**URL structure:**
+- `/` → Root redirect (authenticated → `/workspaces`, unauthenticated → `/page/start`)
+- `/workspaces` → Workspace selection (CSR, protected, auth layout)
+- `/w/{slug}/` → Workspace dashboard
+- `/w/{slug}/oauth2/credentials` → OAuth2 credentials in workspace
+- `/login` → Login page
+- `/page/start` → Landing page (SSR, auth layout - centered, no menu)
+- `/page/*` → SSR public pages (documentation, about)
 
 **Key components:**
-- `backend/internal/tenant/` – Tenant context and middleware
-- `db/schema.sql` – `tenant` and `tenant_session` tables
-- `db/sql/tenant.sql`, `db/sql/tenant_session.sql` – SQLC queries
-- `front/src/pages/tenant/` – Tenant selection UI
+- `backend/internal/workspace/` – Workspace context and middleware (path-based extraction)
+- `db/schema.sql` – `workspace` and `workspace_member` tables
+- `db/sql/workspace.sql`, `db/sql/workspace_member.sql` – SQLC queries
+- `front/src/lib/workspace/WorkspaceContext.tsx` – React context for workspace state
+- `front/src/app/WorkspaceRouter.tsx` – Router wrapper for `/w/:slug/*` routes
+- `front/src/pages/workspaces/` – Workspace selection page
 
-**Session management:**
-- Shared session cookie (`.localtest.me`) tracks authenticated tenants across subdomains
-- Tenant-specific OAuth2 cookies remain per subdomain
-- `tenant_session` table stores cross-subdomain session state
+**Workspace roles:**
+- `owner` – Full control, can delete workspace
+- `admin` – Can manage members and settings
+- `member` – Can access workspace resources
 
-**Tenant selection flow:**
-1. User visits `http://localtest.me/page/tenant`
-2. Enter tenant name or select from authenticated tenants list
-3. Redirect to `http://{tenant}.localtest.me`
-4. Login if not authenticated for that tenant
-
-**Default tenants:**
-- `internal` and `demo` tenants are created automatically on first startup
-- Admin user is created in both tenants using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
-
-**Environment variables:**
-- `BE_TENANT_BASE_DOMAIN` – Base domain for tenant subdomains (default: `localtest.me`)
+**Default workspaces:**
+- `internal` and `demo` workspaces are created automatically on first startup
+- Admin user is added as owner to both workspaces using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
 
 ## Specs & data model
 
@@ -253,16 +254,14 @@ Run `make help` to see all available targets. Key ones:
 
 ### Compose topology
 
-- Traefik v3 routes requests based on path prefix with priority (supports wildcard subdomains `*.localtest.me`):
+- Traefik v3 routes requests based on path prefix with priority (single domain `localtest.me`):
   - `/.well-known/*` (priority 40) → Hydra OAuth2/OIDC discovery (port 4444)
   - `/oauth2/*` (priority 35) → Hydra OAuth2 endpoints (port 4444)
   - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
   - `/page/*` (priority 20) → SSR container (port 3000)
   - Everything else (priority 1) → Frontend container (port 5173)
-- **Traefik v3 regex note:** Wildcard subdomain matching uses `HostRegexp(`.+\.${BE_DOMAIN}`)` syntax. Avoid anchors (`^$`) which don't work reliably in v3.
-- Access the app at `http://localtest.me` or tenant-specific `http://{tenant}.localtest.me`
-- Tenant selection page: `http://localtest.me/page/tenant`
-- Default tenants: `http://internal.localtest.me` and `http://demo.localtest.me`
+- Access the app at `http://localtest.me`
+- Default workspaces: `http://localtest.me/w/internal` and `http://localtest.me/w/demo`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
 ### Authentication Stack

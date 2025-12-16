@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AddWorkspaceMember implements addWorkspaceMember operation.
+	//
+	// Add a member to a workspace.
+	//
+	// POST /workspace/{uuid}/members
+	AddWorkspaceMember(ctx context.Context, req *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (*WorkspaceMember, error)
 	// AuthConsent implements auth-consent operation.
 	//
 	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
@@ -56,24 +62,18 @@ type Handler interface {
 	//
 	// GET /auth/oauth2/session
 	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
-	// CheckTenantExists implements checkTenantExists operation.
+	// CheckWorkspaceExists implements checkWorkspaceExists operation.
 	//
-	// Check if a tenant exists by subdomain name.
+	// Check if a workspace exists by slug.
 	//
-	// GET /tenant/check
-	CheckTenantExists(ctx context.Context, params CheckTenantExistsParams) (*TenantCheck, error)
+	// GET /workspace/check
+	CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (*WorkspaceCheck, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.
 	//
 	// POST /contact
 	CreateContact(ctx context.Context, req *Contact) (*Contact, error)
-	// CreateTenant implements createTenant operation.
-	//
-	// Create a new tenant.
-	//
-	// POST /tenant
-	CreateTenant(ctx context.Context, req *Tenant) (*Tenant, error)
 	// CreateUser implements createUser operation.
 	//
 	// Create a new user.
@@ -86,6 +86,12 @@ type Handler interface {
 	//
 	// POST /user/session
 	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
+	// CreateWorkspace implements createWorkspace operation.
+	//
+	// Create a new workspace.
+	//
+	// POST /workspace
+	CreateWorkspace(ctx context.Context, req *Workspace) (*Workspace, error)
 	// DatasourceEmailCreate implements datasource-email-create operation.
 	//
 	// Create a new email datasource.
@@ -254,18 +260,18 @@ type Handler interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
-	// DeleteTenant implements deleteTenant operation.
-	//
-	// Delete a tenant.
-	//
-	// DELETE /tenant/{uuid}
-	DeleteTenant(ctx context.Context, params DeleteTenantParams) error
 	// DeleteUser implements deleteUser operation.
 	//
 	// Delete user.
 	//
 	// DELETE /user/{uuid}
 	DeleteUser(ctx context.Context, params DeleteUserParams) error
+	// DeleteWorkspace implements deleteWorkspace operation.
+	//
+	// Delete a workspace.
+	//
+	// DELETE /workspace/{uuid}
+	DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error
 	// FileCreate implements file-create operation.
 	//
 	// Upload a new file and create its record.
@@ -320,43 +326,42 @@ type Handler interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
-	// GetTenant implements getTenant operation.
-	//
-	// Get a tenant by UUID.
-	//
-	// GET /tenant/{uuid}
-	GetTenant(ctx context.Context, params GetTenantParams) (*Tenant, error)
 	// GetUser implements getUser operation.
 	//
 	// Get user details.
 	//
 	// GET /user/{uuid}
 	GetUser(ctx context.Context, params GetUserParams) (*User, error)
-	// ListAuthenticatedTenants implements listAuthenticatedTenants operation.
+	// GetWorkspace implements getWorkspace operation.
 	//
-	// Uses the shared session cookie to find all tenants where the user is authenticated.
-	// This endpoint is used by the tenant selection page.
+	// Get a workspace by UUID.
 	//
-	// GET /auth/tenants
-	ListAuthenticatedTenants(ctx context.Context) ([]AuthenticatedTenant, error)
+	// GET /workspace/{uuid}
+	GetWorkspace(ctx context.Context, params GetWorkspaceParams) (*Workspace, error)
 	// ListContacts implements listContacts operation.
 	//
 	// List all contacts.
 	//
 	// GET /contact
 	ListContacts(ctx context.Context) ([]Contact, error)
-	// ListTenants implements listTenants operation.
-	//
-	// List all tenants.
-	//
-	// GET /tenant
-	ListTenants(ctx context.Context, params ListTenantsParams) ([]Tenant, error)
 	// ListUsers implements listUsers operation.
 	//
 	// List all users.
 	//
 	// GET /user
 	ListUsers(ctx context.Context) ([]User, error)
+	// ListWorkspaceMembers implements listWorkspaceMembers operation.
+	//
+	// List members of a workspace.
+	//
+	// GET /workspace/{uuid}/members
+	ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) ([]WorkspaceMember, error)
+	// ListWorkspaces implements listWorkspaces operation.
+	//
+	// List workspaces for the current user.
+	//
+	// GET /workspace
+	ListWorkspaces(ctx context.Context, params ListWorkspacesParams) ([]Workspace, error)
 	// MessageEmailQuery implements messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
@@ -471,6 +476,12 @@ type Handler interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
+	// RemoveWorkspaceMember implements removeWorkspaceMember operation.
+	//
+	// Remove a member from a workspace.
+	//
+	// DELETE /workspace/{uuid}/members/{user_uuid}
+	RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error
 	// SchedulerCreate implements scheduler-create operation.
 	//
 	// Create scheduler.
@@ -639,18 +650,24 @@ type Handler interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, req *UserProfile) (*User, error)
-	// UpdateTenant implements updateTenant operation.
-	//
-	// Update a tenant.
-	//
-	// PUT /tenant/{uuid}
-	UpdateTenant(ctx context.Context, req *Tenant, params UpdateTenantParams) (*Tenant, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Update user details.
 	//
 	// PUT /user/{uuid}
 	UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (*User, error)
+	// UpdateWorkspace implements updateWorkspace operation.
+	//
+	// Update a workspace.
+	//
+	// PUT /workspace/{uuid}
+	UpdateWorkspace(ctx context.Context, req *Workspace, params UpdateWorkspaceParams) (*Workspace, error)
+	// UpdateWorkspaceMemberRole implements updateWorkspaceMemberRole operation.
+	//
+	// Update a member's role in a workspace.
+	//
+	// PUT /workspace/{uuid}/members/{user_uuid}
+	UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (*WorkspaceMember, error)
 	// UploadFile implements uploadFile operation.
 	//
 	// Upload a file.
