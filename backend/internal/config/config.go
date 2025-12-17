@@ -83,6 +83,12 @@ type Config struct {
 		AppID   int    `yaml:"app_id" json:"app_id" env:"TG_APP_ID"`
 	}
 
+	// CORS settings for cross-origin requests
+	CORS struct {
+		// AllowedOrigins is a comma-separated list of allowed origins
+		AllowedOrigins string `yaml:"allowed_origins" json:"allowed_origins" env:"BE_CORS_ALLOWED_ORIGINS" envDefault:""`
+	} `yaml:"cors" json:"cors"`
+
 	// OAuth2 settings for Hydra integration
 	OAuth2 struct {
 		// HydraPublicURL is the URL to Hydra's public endpoints (token, authorize)

@@ -29,6 +29,7 @@ type Server struct {
 	specsHandler http.Handler
 	handler      *handler.Handler
 	auth         *auth.Auth
+	corsConfig   *CORSConfig
 }
 
 // Provide server instance for the dependency injector
@@ -61,6 +62,12 @@ func Provide(i do.Injector) (*Server, error) {
 		specsHandler = http.StripPrefix("/assets/docs/api", http.FileServer(http.Dir(cfg.API.SpecsDir)))
 	}
 
+	// Initialize CORS configuration
+	corsConfig := NewCORSConfig(cfg.CORS.AllowedOrigins)
+	if len(corsConfig.AllowedOrigins) > 0 {
+		log.Info("CORS enabled", "allowed_origins", cfg.CORS.AllowedOrigins)
+	}
+
 	return &Server{
 		cfg:          cfg,
 		log:          do.MustInvoke[*slog.Logger](i),
@@ -68,6 +75,7 @@ func Provide(i do.Injector) (*Server, error) {
 		specsHandler: specsHandler,
 		handler:      handlerService,
 		auth:         authService,
+		corsConfig:   corsConfig,
 	}, nil
 }
 
@@ -81,7 +89,13 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 	s.listener = listener
 
-	return http.Serve(listener, s)
+	// Wrap with CORS middleware if configured
+	var handler http.Handler = s
+	if len(s.corsConfig.AllowedOrigins) > 0 {
+		handler = CORSMiddleware(s.corsConfig)(s)
+	}
+
+	return http.Serve(listener, handler)
 }
 
 // ServeHTTP wraps the API server and also serves the frontend dist (SPA) with index.html fallback

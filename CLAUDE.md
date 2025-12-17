@@ -68,24 +68,37 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - React Router v7 for client-side routing.
 - Use LLMs.txt for Ant Design best practices and guidelines from this URL https://ant.design/llms.txt
 
-### Hybrid SSR Architecture
+### Subdomain Architecture
 
-The frontend uses a hybrid rendering approach where public pages (`/page/*`) are server-side rendered for SEO, while the app uses client-side rendering.
+The application uses a subdomain-based architecture for service separation:
+
+| Subdomain | Service | Port | Description |
+|-----------|---------|------|-------------|
+| `{domain}` | Frontend | 5173 | React SPA (CSR) |
+| `api.{domain}` | Backend | 8080 | REST API |
+| `oidc.{domain}` | Hydra | 4444 | OAuth2/OIDC |
+| `www.{domain}` | SSR | 3000 | Server-rendered pages |
 
 **Two containers, one codebase:**
-- **Frontend container** (port 5173): Vite dev server for CSR routes
-- **SSR container** (port 3000): Express + Vite middleware for SSR routes
+- **Frontend container** (port 5173): Vite dev server for CSR routes on root domain
+- **SSR container** (port 3000): Express + Vite middleware for SSR routes on www subdomain
 - Both containers use the same `front/` directory
 
 **Routing behavior:**
-- Direct URL access to `/page/*` → SSR container renders full HTML, then client hydrates
-- SPA navigation within `/page/*` → React Router (no page reload)
-- Navigation from `/page/*` to `/` → Full page reload (crosses container boundary)
-- Direct URL access to `/` → Frontend container serves index.html, client renders
+- Direct URL access to `www.{domain}/start` → SSR container renders full HTML, then client hydrates
+- SPA navigation within `www.{domain}/*` → React Router (no page reload)
+- Navigation from `www.{domain}/*` to `{domain}/*` → Full page reload (crosses subdomain)
+- Direct URL access to `{domain}/` → Frontend container serves index.html, client renders
+
+**Cross-origin considerations:**
+- Frontend on `{domain}` makes API calls to `api.{domain}`
+- CORS middleware on backend allows requests from `{domain}` and `www.{domain}`
+- Cookies use `.{domain}` domain for cross-subdomain sharing
 
 ### Key frontend files
 
-- `front/server.ts` – Express SSR server with Vite middleware, handles `/page/*` routes
+- `front/server.ts` – Express SSR server with Vite middleware for www subdomain
+- `front/.env.development` – Environment variables for local development (API URLs, subdomain URLs)
 - `front/src/entry-client.tsx` – Client entry point; uses `hydrateRoot` for SSR pages, `createRoot` for CSR
 - `front/src/entry-server.tsx` – SSR render function with Ant Design CSS-in-JS extraction
 - `front/src/routes.tsx` – Centralized route configuration with `ssr` and `protected` flags per route
@@ -138,10 +151,11 @@ The frontend uses a centralized theme configuration based on the color palette f
 
 ### Adding new pages
 
-**For SSR pages (public/SEO):**
+**For SSR pages (public/SEO on www subdomain):**
 1. Create the page component in `front/src/pages/`
-2. Add route to `front/src/routes.tsx` with `ssr: true` and `layout: 'page'`
-3. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
+2. Add route to `front/src/routes.tsx` with `ssr: true` and `layout: 'page'` (use path without `/page` prefix, e.g., `/about`)
+3. Update `SSR_PATHS` array in `front/src/lib/SmartLink.tsx` if needed
+4. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
 
 **For CSR app pages (protected, workspace-scoped):**
 1. Create the page component in `front/src/app/` (e.g., `front/src/app/oauth2/MyPage.tsx`)
@@ -201,13 +215,25 @@ The application uses path-based workspaces on a single domain:
 - Workspace membership is checked by middleware before accessing workspace-scoped resources
 
 **URL structure:**
-- `/` → Root redirect (authenticated → `/workspaces`, unauthenticated → `/page/start`)
+
+*Root domain (`{domain}`):*
+- `/` → Root redirect (authenticated → `/workspaces`, unauthenticated → `www.{domain}/start`)
 - `/workspaces` → Workspace selection (CSR, protected, auth layout)
 - `/w/{slug}/` → Workspace dashboard
 - `/w/{slug}/oauth2/credentials` → OAuth2 credentials in workspace
 - `/login` → Login page
-- `/page/start` → Landing page (SSR, auth layout - centered, no menu)
-- `/page/*` → SSR public pages (documentation, about)
+
+*WWW subdomain (`www.{domain}`):*
+- `/start` → Landing page (SSR, auth layout - centered, no menu)
+- `/about` → About page (SSR)
+- `/documentation/*` → Documentation pages (SSR)
+
+*API subdomain (`api.{domain}`):*
+- `/api/v1/*` → REST API endpoints
+
+*OIDC subdomain (`oidc.{domain}`):*
+- `/.well-known/openid-configuration` → OIDC discovery
+- `/oauth2/*` → OAuth2 endpoints
 
 **Key components:**
 - `backend/internal/workspace/` – Workspace context and middleware (path-based extraction)
@@ -254,14 +280,20 @@ Run `make help` to see all available targets. Key ones:
 
 ### Compose topology
 
-- Traefik v3 routes requests based on path prefix with priority (single domain `localtest.me`):
-  - `/.well-known/*` (priority 40) → Hydra OAuth2/OIDC discovery (port 4444)
-  - `/oauth2/*` (priority 35) → Hydra OAuth2 endpoints (port 4444)
-  - `/api/`, `/assets/`, `/auth/` (priority 30) → Backend container (port 8080)
-  - `/page/*` (priority 20) → SSR container (port 3000)
-  - Everything else (priority 1) → Frontend container (port 5173)
+Traefik v3 routes requests based on subdomain:
+
+| Subdomain | Service | Port |
+|-----------|---------|------|
+| `localtest.me` | Frontend (CSR) | 5173 |
+| `api.localtest.me` | Backend | 8080 |
+| `oidc.localtest.me` | Hydra | 4444 |
+| `www.localtest.me` | SSR | 3000 |
+
 - Access the app at `http://localtest.me`
 - Default workspaces: `http://localtest.me/w/internal` and `http://localtest.me/w/demo`
+- OIDC discovery: `http://oidc.localtest.me/.well-known/openid-configuration`
+- API base: `http://api.localtest.me/api/v1`
+- Public pages: `http://www.localtest.me/start`
 - Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
 
 ### Authentication Stack
@@ -287,7 +319,7 @@ The project uses Ory Hydra for OAuth2/OIDC token issuance, with user authenticat
 **Testing the setup:**
 ```bash
 # Check Hydra OIDC discovery
-curl http://localtest.me/.well-known/openid-configuration
+curl http://oidc.localtest.me/.well-known/openid-configuration
 
 # Create a test OAuth2 client
 docker compose exec hydra hydra create client \
@@ -295,7 +327,7 @@ docker compose exec hydra hydra create client \
   --grant-type authorization_code,refresh_token \
   --response-type code \
   --scope openid,offline_access \
-  --redirect-uri http://localtest.me/api/v1/auth/oauth2/callback \
+  --redirect-uri http://api.localtest.me/api/v1/auth/oauth2/callback \
   --name "Test Client" \
   --token-endpoint-auth-method none \
   --format json

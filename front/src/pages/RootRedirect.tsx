@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router';
 import { Spin } from 'antd';
 import { useAuth } from '../lib/auth';
 
+// WWW subdomain URL for SSR pages
+const WWW_BASE_URL =
+  import.meta.env.VITE_WWW_BASE_URL || 'http://www.localtest.me'
+
 function RootRedirect() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
@@ -12,7 +16,8 @@ function RootRedirect() {
       if (isAuthenticated) {
         navigate('/workspaces', { replace: true });
       } else {
-        navigate('/page/start', { replace: true });
+        // Redirect to www subdomain for landing page
+        window.location.href = `${WWW_BASE_URL}/start`;
       }
     }
   }, [isAuthenticated, isLoading, navigate]);

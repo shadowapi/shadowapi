@@ -2,7 +2,10 @@
  * OAuth2 client for communicating with the backend OAuth2 endpoints
  */
 
-const OAUTH2_BASE_URL = '/api/v1/auth/oauth2';
+// OAuth2 base URL - use environment variable or fallback to default
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://api.localtest.me/api/v1'
+const OAUTH2_BASE_URL = `${API_BASE_URL}/auth/oauth2`
 
 export interface OAuth2AuthorizeResponse {
   authorization_url: string;

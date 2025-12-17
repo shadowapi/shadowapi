@@ -86,39 +86,39 @@ export const routes: RouteConfig[] = [
     protected: false,
   },
 
-  // SSR routes (public pages)
+  // SSR routes (public pages on www subdomain)
   {
-    path: '/page/start',
+    path: '/start',
     element: <LandingPage />,
     layout: 'auth',
     ssr: true
   },
   {
-    path: '/page/about',
+    path: '/about',
     element: <AboutPage />,
     layout: 'page',
     ssr: true
   },
   {
-    path: '/page/documentation',
+    path: '/documentation',
     element: <DocumentationIndex />,
     layout: 'page',
     ssr: true
   },
   {
-    path: '/page/documentation/datasource',
+    path: '/documentation/datasource',
     element: <DatasourceIndex />,
     layout: 'page',
     ssr: true
   },
   {
-    path: '/page/documentation/datasource/gmail',
+    path: '/documentation/datasource/gmail',
     element: <GmailDocumentation />,
     layout: 'page',
     ssr: true
   },
   {
-    path: '/page/documentation/datasource/telegram',
+    path: '/documentation/datasource/telegram',
     element: <TelegramDocumentation />,
     layout: 'page',
     ssr: true
@@ -126,8 +126,10 @@ export const routes: RouteConfig[] = [
 ];
 
 // Helper to check if a path should be SSR rendered
+// SSR routes are now on www subdomain without /page prefix
 export function isSSRRoute(pathname: string): boolean {
-  return pathname.startsWith('/page');
+  const ssrPaths = ['/start', '/about', '/documentation'];
+  return ssrPaths.some(p => pathname === p || pathname.startsWith(p + '/'));
 }
 
 // Get route config by path

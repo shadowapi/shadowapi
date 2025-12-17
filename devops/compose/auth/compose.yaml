@@ -35,18 +35,11 @@ services:
       start_period: 10s
     labels:
       - traefik.enable=true
-      # Public OAuth2 endpoints (no strip - Hydra expects /oauth2/auth path)
-      - traefik.http.routers.hydra-public.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/oauth2/`)
-      - traefik.http.routers.hydra-public.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
-      - traefik.http.routers.hydra-public.priority=35
-      - traefik.http.routers.hydra-public.service=hydra-public
-      - traefik.http.services.hydra-public.loadbalancer.server.port=4444
-      # Well-known endpoints (no strip, passthrough)
-      - traefik.http.routers.hydra-wellknown.rule=Host(`${BE_DOMAIN}`) && PathPrefix(`/.well-known/`)
-      - traefik.http.routers.hydra-wellknown.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
-      - traefik.http.routers.hydra-wellknown.priority=40
-      - traefik.http.routers.hydra-wellknown.service=hydra-wellknown
-      - traefik.http.services.hydra-wellknown.loadbalancer.server.port=4444
+      # OIDC subdomain routes all Hydra traffic (oauth2 and well-known endpoints)
+      - traefik.http.routers.hydra.rule=Host(`${BE_OIDC_SUBDOMAIN}.${BE_DOMAIN}`)
+      - traefik.http.routers.hydra.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.hydra.service=hydra
+      - traefik.http.services.hydra.loadbalancer.server.port=4444
     restart: unless-stopped
     networks:
       - default

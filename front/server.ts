@@ -19,8 +19,13 @@ async function createServer() {
   // Use Vite's connect instance as middleware
   app.use(vite.middlewares);
 
-  // Handle /page/* routes with SSR
-  app.use('/page*', async (req, res) => {
+  // Handle all routes with SSR (www subdomain serves SSR pages)
+  // Routes: /start, /about, /documentation, etc.
+  app.use('*', async (req, res, next) => {
+    // Skip non-page routes (assets, etc. handled by Vite middleware)
+    if (req.originalUrl.startsWith('/@') || req.originalUrl.startsWith('/node_modules')) {
+      return next();
+    }
     const url = req.originalUrl;
 
     try {
@@ -69,7 +74,7 @@ async function createServer() {
   const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`SSR server running at http://localhost:${port}`);
-    console.log('Handling /page/* routes with server-side rendering');
+    console.log('Serving www subdomain with server-side rendering');
   });
 }
 

@@ -65,7 +65,8 @@ done
 
 # Step 5: Create OAuth2 client in Hydra (idempotent)
 echo "Creating OAuth2 client..."
-REDIRECT_URI="${BE_BASE_URL}/api/v1/auth/oauth2/callback"
+# Redirect URI uses api subdomain
+REDIRECT_URI="${BE_PROTOCOL:-http}://${BE_API_SUBDOMAIN:-api}.${BE_DOMAIN}/api/v1/auth/oauth2/callback"
 CLIENT_NAME="ShadowAPI SPA"
 
 # Check if client already exists by name (search in list)
@@ -108,14 +109,18 @@ TEST_PASSWORD=$(grep "^BE_INIT_ADMIN_PASSWORD=" .env | cut -d'=' -f2)
 
 echo ""
 echo "=== Bootstrap Complete ==="
-echo "Application:      ${BE_BASE_URL}"
-echo "Tenant selection: ${BE_BASE_URL}/page/tenant"
 echo ""
-echo "Available tenants:"
-echo "  - Internal: ${BE_PROTOCOL:-http}://internal.${BE_DOMAIN}"
-echo "  - Demo:     ${BE_PROTOCOL:-http}://demo.${BE_DOMAIN}"
+echo "Services:"
+echo "  - Frontend (SPA):  ${BE_PROTOCOL:-http}://${BE_DOMAIN}"
+echo "  - API:             ${BE_PROTOCOL:-http}://${BE_API_SUBDOMAIN:-api}.${BE_DOMAIN}"
+echo "  - OIDC:            ${BE_PROTOCOL:-http}://${BE_OIDC_SUBDOMAIN:-oidc}.${BE_DOMAIN}"
+echo "  - SSR (www):       ${BE_PROTOCOL:-http}://${BE_SSR_SUBDOMAIN:-www}.${BE_DOMAIN}"
+echo ""
+echo "Workspaces:"
+echo "  - Internal: ${BE_PROTOCOL:-http}://${BE_DOMAIN}/w/internal"
+echo "  - Demo:     ${BE_PROTOCOL:-http}://${BE_DOMAIN}/w/demo"
 echo ""
 echo "Test login:       $TEST_EMAIL / $TEST_PASSWORD"
 echo "OAuth2 Client ID: $CLIENT_ID"
 echo ""
-echo "The admin user exists in both 'internal' and 'demo' tenants."
+echo "The admin user exists in both 'internal' and 'demo' workspaces."

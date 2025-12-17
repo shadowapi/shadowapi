@@ -26,6 +26,9 @@ services:
       default:
         aliases:
           - localtest.me
+          - oidc.localtest.me
+          - api.localtest.me
+          - www.localtest.me
 
   db:
     image: postgres:16-alpine
