@@ -8,7 +8,10 @@ import {
 } from './oauth2-client';
 import { AuthContext, type AuthContextType, type User } from './AuthContext';
 
-const AUTH_LOGIN_URL = '/api/v1/auth/login';
+// API base URL - use environment variable or fallback to default
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://api.localtest.me/api/v1';
+const AUTH_LOGIN_URL = `${API_BASE_URL}/auth/login`;
 
 interface LoginSubmitResponse {
   redirect_to: string;

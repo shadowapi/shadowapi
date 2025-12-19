@@ -5,7 +5,7 @@ import { DatabaseOutlined } from '@ant-design/icons';
 const { Title } = Typography;
 
 const sections = [
-  { name: 'Datasources', path: '/page/documentation/datasource', icon: <DatabaseOutlined /> },
+  { name: 'Datasources', path: '/documentation/datasource', icon: <DatabaseOutlined /> },
 ];
 
 function DocumentationIndex() {

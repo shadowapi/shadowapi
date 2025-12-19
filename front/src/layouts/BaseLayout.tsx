@@ -1,9 +1,39 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useCallback } from 'react';
 import { Layout, Menu, Button, type MenuProps } from 'antd';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { LoginOutlined } from '@ant-design/icons';
 import { uiColors } from '../theme';
 import { useAuth } from '../lib/auth';
+import { SmartLink } from '../lib/SmartLink';
+
+// Subdomain URLs from environment
+const WWW_BASE_URL = import.meta.env.VITE_WWW_BASE_URL || 'http://www.localtest.me';
+const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL || 'http://localtest.me';
+
+// SSR routes that live on www subdomain
+const SSR_PATHS = ['/start', '/about', '/documentation'];
+
+// Check if a path is an SSR route (www subdomain)
+function isSSRPath(path: string): boolean {
+  return SSR_PATHS.some((p) => path === p || path.startsWith(p + '/'));
+}
+
+// Check if a path is an app route (root domain)
+function isAppPath(path: string): boolean {
+  return (
+    path === '/' ||
+    path.startsWith('/workspaces') ||
+    path.startsWith('/w/') ||
+    path.startsWith('/login')
+  );
+}
+
+// Get current subdomain context
+function getCurrentContext(): 'www' | 'app' {
+  if (typeof window === 'undefined') return 'app';
+  const hostname = window.location.hostname;
+  return hostname.startsWith('www.') ? 'www' : 'app';
+}
 
 const { Header, Footer } = Layout;
 
@@ -13,11 +43,11 @@ const menuItems: MenuProps['items'] = [
     label: 'Service'
   },
   {
-    key: '/page/documentation',
+    key: '/documentation',
     label: 'Documentation'
   },
   {
-    key: '/page/about',
+    key: '/about',
     label: 'About'
   },
 ];
@@ -30,6 +60,27 @@ function BaseLayout({ children }: BaseLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Smart navigation that handles cross-subdomain routing
+  const smartNavigate = useCallback((path: string) => {
+    const currentContext = getCurrentContext();
+    const targetIsSSR = isSSRPath(path);
+    const targetIsApp = isAppPath(path);
+
+    // Cross-subdomain navigation requires full page redirect
+    if (currentContext === 'app' && targetIsSSR) {
+      window.location.href = `${WWW_BASE_URL}${path}`;
+      return;
+    }
+
+    if (currentContext === 'www' && targetIsApp) {
+      window.location.href = `${APP_BASE_URL}${path}`;
+      return;
+    }
+
+    // Same-subdomain navigation uses React Router
+    navigate(path);
+  }, [navigate]);
 
   const selectedKeys = useMemo(() => {
     const pathname = location.pathname;
@@ -62,7 +113,7 @@ function BaseLayout({ children }: BaseLayoutProps) {
           flexShrink: 0,
         }}
       >
-        <Link
+        <SmartLink
           to="/"
           style={{
             height: 36,
@@ -81,13 +132,13 @@ function BaseLayout({ children }: BaseLayoutProps) {
           }}
         >
           ShadowAPI
-        </Link>
+        </SmartLink>
         <Menu
           theme="dark"
           mode="horizontal"
           selectedKeys={selectedKeys}
           items={menuItems}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => smartNavigate(key)}
           style={{
             flex: 1,
             minWidth: 0,
@@ -99,7 +150,7 @@ function BaseLayout({ children }: BaseLayoutProps) {
           <Button
             type="primary"
             icon={<LoginOutlined />}
-            onClick={() => navigate('/login')}
+            onClick={() => smartNavigate('/login')}
           >
             Login
           </Button>

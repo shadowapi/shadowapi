@@ -37,18 +37,20 @@ type oauth2AuthState struct {
 }
 
 // NewOAuth2Service creates a new OAuth2 service
+// baseURL is the frontend URL (for login page redirects)
+// apiBaseURL is the API URL (for OAuth2 callback)
 func NewOAuth2Service(
 	hydraClient *oauth2.HydraClient,
 	jwtValidator *oauth2.JWTValidator,
 	cookieConfig oauth2.CookieConfig,
-	clientID, baseURL string,
+	clientID, baseURL, apiBaseURL string,
 ) *OAuth2Service {
 	svc := &OAuth2Service{
 		hydraClient:  hydraClient,
 		jwtValidator: jwtValidator,
 		cookieConfig: cookieConfig,
 		clientID:     clientID,
-		redirectURI:  baseURL + "/api/v1/auth/oauth2/callback",
+		redirectURI:  apiBaseURL + "/api/v1/auth/oauth2/callback",
 		baseURL:      baseURL,
 		stateStore:   make(map[string]*oauth2AuthState),
 	}

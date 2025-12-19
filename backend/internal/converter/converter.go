@@ -154,3 +154,20 @@ func PgInt8(v int) pgtype.Int8 {
 func PgBool(b bool) pgtype.Bool {
 	return pgtype.Bool{Bool: b, Valid: true}
 }
+
+// GoogleToGofrsUUID converts a google/uuid.UUID to a gofrs/uuid.UUID
+// Both types are [16]byte arrays so we can convert directly
+func GoogleToGofrsUUID(googleUUID [16]byte) uuid.UUID {
+	return uuid.UUID(googleUUID)
+}
+
+// GoogleToGofrsUUIDPtr converts a google/uuid.UUID to a pointer to gofrs/uuid.UUID
+func GoogleToGofrsUUIDPtr(googleUUID [16]byte) *uuid.UUID {
+	u := uuid.UUID(googleUUID)
+	return &u
+}
+
+// GofrsToGoogleUUID converts a gofrs/uuid.UUID to a google/uuid.UUID
+func GofrsToGoogleUUID(gofrsUUID uuid.UUID) [16]byte {
+	return [16]byte(gofrsUUID)
+}

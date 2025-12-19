@@ -19,8 +19,11 @@ import (
 type Config struct {
 	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"BE_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
 
-	// BaseURL root path for the system
+	// BaseURL root path for the system (frontend URL)
 	BaseURL string `json:"base_url" yaml:"base_url" env:"BE_BASE_URL" envDefault:"http://localtest.me"`
+
+	// APIBaseURL is the base URL for the API (used for OAuth2 callback)
+	APIBaseURL string `json:"api_base_url" yaml:"api_base_url" env:"BE_API_BASE_URL" envDefault:"http://api.localtest.me"`
 
 	// Log settings
 	Log struct {

@@ -100,13 +100,15 @@ func (h *Handler) ensureInitWorkspaceAndAdmin(ctx context.Context) error {
 
 // ensureWorkspaceWithOwner creates a workspace and adds the user as owner if it doesn't exist.
 func (h *Handler) ensureWorkspaceWithOwner(ctx context.Context, q *query.Queries, slug, displayName string, userUUID pgtype.UUID) error {
+	// Convert pgtype.UUID to gofrs/uuid
+	userUUIDVal := uuid.UUID(userUUID.Bytes)
+
 	// Check if workspace exists
 	workspace, err := q.GetWorkspaceBySlug(ctx, slug)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			// Create workspace
-			wUUID := uuid.Must(uuid.NewV7())
-			workspaceUUID := pgtype.UUID{Bytes: wUUID, Valid: true}
+			workspaceUUID := uuid.Must(uuid.NewV7())
 			_, err = q.CreateWorkspace(ctx, query.CreateWorkspaceParams{
 				UUID:        workspaceUUID,
 				Slug:        slug,
@@ -122,9 +124,9 @@ func (h *Handler) ensureWorkspaceWithOwner(ctx context.Context, q *query.Queries
 			// Add user as owner
 			memberUUID := uuid.Must(uuid.NewV7())
 			_, err = q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
-				UUID:          pgtype.UUID{Bytes: memberUUID, Valid: true},
-				WorkspaceUUID: workspaceUUID,
-				UserUUID:      userUUID,
+				UUID:          memberUUID,
+				WorkspaceUUID: &workspaceUUID,
+				UserUUID:      &userUUIDVal,
 				Role:          "owner",
 			})
 			if err != nil {
@@ -136,18 +138,18 @@ func (h *Handler) ensureWorkspaceWithOwner(ctx context.Context, q *query.Queries
 		}
 	} else {
 		// Workspace exists, ensure user is a member
-		workspaceUUID := pgtype.UUID{Bytes: workspace.UUID, Valid: true}
+		workspaceUUID := workspace.UUID
 		_, err := q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
-			WorkspaceUUID: workspaceUUID,
-			UserUUID:      userUUID,
+			WorkspaceUUID: &workspaceUUID,
+			UserUUID:      &userUUIDVal,
 		})
 		if err == pgx.ErrNoRows {
 			// Add user as owner
 			memberUUID := uuid.Must(uuid.NewV7())
 			_, err = q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
-				UUID:          pgtype.UUID{Bytes: memberUUID, Valid: true},
-				WorkspaceUUID: workspaceUUID,
-				UserUUID:      userUUID,
+				UUID:          memberUUID,
+				WorkspaceUUID: &workspaceUUID,
+				UserUUID:      &userUUIDVal,
 				Role:          "owner",
 			})
 			if err != nil {
@@ -185,7 +187,7 @@ func Provide(i do.Injector) (*Handler, error) {
 
 		jwtValidator := oauth2.NewJWTValidator(
 			jwksCache,
-			cfg.BaseURL, // Hydra issuer is the base URL
+			cfg.OAuth2.HydraPublicURL, // Issuer matches Hydra's self.issuer URL
 			log,
 		)
 
@@ -207,6 +209,7 @@ func Provide(i do.Injector) (*Handler, error) {
 			cookieConfig,
 			cfg.OAuth2.SPAClientID,
 			cfg.BaseURL,
+			cfg.APIBaseURL,
 		)
 
 		log.Info("OAuth2 service initialized",

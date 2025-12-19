@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Link } from 'react-router';
 import { Typography, Form, Input, Select, Button, Space, message, Popconfirm, Row, Col, Card } from 'antd';
 import client from '../../api/client';
 import type { components } from '../../api/v1';
+import { SmartLink } from '../../lib/SmartLink';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -25,9 +25,9 @@ function CredentialDocumentation({ provider }: { provider?: string }) {
           <li>Copy Client ID and Client Secret here</li>
         </ul>
         <Paragraph>
-          <Link to="/page/documentation/datasource/gmail">
+          <SmartLink to="/documentation/datasource/gmail">
             View detailed Gmail setup guide →
-          </Link>
+          </SmartLink>
         </Paragraph>
       </Card>
     );

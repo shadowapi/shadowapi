@@ -6,14 +6,15 @@ const { Content } = Layout;
 
 import BaseLayout from './BaseLayout';
 import { getRouteConfig } from '../routes';
+import { SmartLink } from '../lib/SmartLink';
 
 const breadcrumbNameMap: Record<string, string> = {
-  '/page/tenant': 'Select Tenant',
-  '/page/documentation': 'Documentation',
-  '/page/documentation/datasource': 'Datasources',
-  '/page/documentation/datasource/gmail': 'Gmail',
-  '/page/documentation/datasource/telegram': 'Telegram',
-  '/page/about': 'About',
+  '/tenant': 'Select Tenant',
+  '/documentation': 'Documentation',
+  '/documentation/datasource': 'Datasources',
+  '/documentation/datasource/gmail': 'Gmail',
+  '/documentation/datasource/telegram': 'Telegram',
+  '/about': 'About',
 };
 
 interface PageLayoutProps {
@@ -33,10 +34,10 @@ function PageLayout({ children }: PageLayoutProps) {
 
   const breadcrumbItems = [
     {
-      title: <Link to="/">Dashboard</Link>,
+      title: <SmartLink to="/">Dashboard</SmartLink>,
     },
     ...pathSnippets.map((_, index) => {
-      const url = `/page/${pathSnippets.slice(0, index + 1).join('/')}`;
+      const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
       const isLast = index === pathSnippets.length - 1;
       const name = breadcrumbNameMap[url] || pathSnippets[index];
 

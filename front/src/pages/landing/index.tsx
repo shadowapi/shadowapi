@@ -2,6 +2,7 @@ import { Typography, Card, Flex, Button, Space } from 'antd';
 import { Link } from 'react-router';
 import { RocketOutlined } from '@ant-design/icons';
 import { uiColors } from '../../theme';
+import { SmartLink } from '../../lib/SmartLink';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -19,12 +20,12 @@ function LandingPage() {
           Connect all your messaging channels in one place.
         </Paragraph>
         <Space direction="vertical" size="middle" style={{ width: '100%', marginTop: 32 }}>
-          <Link to="/login">
+          <SmartLink to="/login">
             <Button type="primary" size="large" block>
               Get Started
             </Button>
-          </Link>
-          <Link to="/page/documentation">
+          </SmartLink>
+          <Link to="/documentation">
             <Button type="default" size="large" block>
               Documentation
             </Button>

@@ -8,42 +8,42 @@ export type LoaderFunction = (ctx: LoaderContext) => Promise<Record<string, unkn
 
 // Route-to-loader mapping
 const loaders: Record<string, LoaderFunction> = {
-  '/page/start': async () => {
+  '/start': async () => {
     // Start page loader
     return { pageTitle: 'Start' };
   },
-  '/page/home': async () => {
+  '/home': async () => {
     return { pageTitle: 'Home' };
   },
-  '/page/about': async () => {
+  '/about': async () => {
     return {
       version: '0.0.1',
       pageTitle: 'About'
     };
   },
-  '/page/documentation': async () => {
+  '/documentation': async () => {
     // Could fetch documentation sections from API
     return {
       pageTitle: 'Documentation',
       sections: [
-        { name: 'Getting Started', path: '/page/documentation/getting-started' },
-        { name: 'Datasources', path: '/page/documentation/datasource' }
+        { name: 'Getting Started', path: '/documentation/getting-started' },
+        { name: 'Datasources', path: '/documentation/datasource' }
       ]
     };
   },
-  '/page/documentation/datasource': async () => {
+  '/documentation/datasource': async () => {
     return {
       pageTitle: 'Datasources',
       datasources: [
-        { name: 'Gmail', path: '/page/documentation/datasource/gmail' },
-        { name: 'Telegram', path: '/page/documentation/datasource/telegram' }
+        { name: 'Gmail', path: '/documentation/datasource/gmail' },
+        { name: 'Telegram', path: '/documentation/datasource/telegram' }
       ]
     };
   },
-  '/page/documentation/datasource/gmail': async () => {
+  '/documentation/datasource/gmail': async () => {
     return { pageTitle: 'Gmail Setup' };
   },
-  '/page/documentation/datasource/telegram': async () => {
+  '/documentation/datasource/telegram': async () => {
     return { pageTitle: 'Telegram Setup' };
   }
 };
