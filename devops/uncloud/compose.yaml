@@ -15,13 +15,13 @@ services:
     build:
       context: ../..
       dockerfile: devops/docker/frontend/prod.Dockerfile
+      args:
+        - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
+        - VITE_OIDC_URL=https://oidc.meshpump.com
+        - VITE_WWW_BASE_URL=https://www.meshpump.com
+        - VITE_APP_BASE_URL=https://meshpump.com
     x-ports:
       - meshpump.com:5173/https
-    environment:
-      - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
-      - VITE_OIDC_URL=https://oidc.meshpump.com
-      - VITE_WWW_BASE_URL=https://www.meshpump.com
-      - VITE_APP_BASE_URL=https://meshpump.com
     restart: always
 
   # SSR Server (Express + Vite)
@@ -30,13 +30,13 @@ services:
     build:
       context: ../..
       dockerfile: devops/docker/ssr/prod.Dockerfile
+      args:
+        - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
+        - VITE_OIDC_URL=https://oidc.meshpump.com
+        - VITE_WWW_BASE_URL=https://www.meshpump.com
+        - VITE_APP_BASE_URL=https://meshpump.com
     x-ports:
       - www.meshpump.com:3000/https
-    environment:
-      - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
-      - VITE_OIDC_URL=https://oidc.meshpump.com
-      - VITE_WWW_BASE_URL=https://www.meshpump.com
-      - VITE_APP_BASE_URL=https://meshpump.com
     restart: always
 
   # Backend API (Go)
@@ -61,6 +61,9 @@ services:
       - BE_HYDRA_ADMIN_URL=http://mp-hydra.internal:4445
       - BE_OAUTH2_SPA_CLIENT_ID=${BE_OAUTH2_SPA_CLIENT_ID}
       - BE_JWKS_CACHE_DURATION=${BE_JWKS_CACHE_DURATION:-300}
+      # OAuth2 cookie configuration (leading dot for cross-subdomain)
+      - BE_OAUTH2_COOKIE_DOMAIN=.meshpump.com
+      - BE_OAUTH2_COOKIE_SECURE=true
       # Initial admin user
       - BE_INIT_ADMIN_EMAIL=${BE_INIT_ADMIN_EMAIL}
       - BE_INIT_ADMIN_PASSWORD=${BE_INIT_ADMIN_PASSWORD}
