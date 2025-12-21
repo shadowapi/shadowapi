@@ -19,6 +19,11 @@ async function createServer() {
   // Use Vite's connect instance as middleware
   app.use(vite.middlewares);
 
+  // Redirect root to /start (SSR landing page)
+  app.get('/', (_req, res) => {
+    res.redirect(301, '/start');
+  });
+
   // Handle all routes with SSR (www subdomain serves SSR pages)
   // Routes: /start, /about, /documentation, etc.
   app.use('*', async (req, res, next) => {

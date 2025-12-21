@@ -28,6 +28,11 @@ async function createServer() {
     res.json({ status: 'ok', mode: 'ssr-production' });
   });
 
+  // Redirect root to /start (SSR landing page)
+  app.get('/', (_req, res) => {
+    res.redirect(301, '/start');
+  });
+
   // Load the production template and server render module
   const template = fs.readFileSync(
     path.resolve(__dirname, 'dist/client/index.html'),
