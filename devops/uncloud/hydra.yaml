@@ -13,7 +13,7 @@ serve:
       enabled: true
       allowed_origins:
         - https://meshpump.com
-        - https://www.meshpump.com
+        - https://app.meshpump.com
       allowed_methods:
         - POST
         - GET

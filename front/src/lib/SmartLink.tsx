@@ -2,19 +2,18 @@ import { Link } from 'react-router';
 import { type ReactNode } from 'react';
 
 // Subdomain URLs from environment
-const WWW_BASE_URL =
-  import.meta.env.VITE_WWW_BASE_URL || 'http://www.localtest.me'
-const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL || 'http://localtest.me'
+const ROOT_URL = import.meta.env.VITE_ROOT_URL || 'http://localtest.me'
+const APP_URL = import.meta.env.VITE_APP_URL || 'http://app.localtest.me'
 
-// SSR routes that live on www subdomain
+// SSR routes that live on root domain
 const SSR_PATHS = ['/start', '/about', '/documentation']
 
-// Check if a path is an SSR route (www subdomain)
+// Check if a path is an SSR route (root domain)
 function isSSRPath(path: string): boolean {
   return SSR_PATHS.some((p) => path === p || path.startsWith(p + '/'))
 }
 
-// Check if a path is an app route (root domain)
+// Check if a path is an app route (app subdomain)
 function isAppPath(path: string): boolean {
   return (
     path === '/' ||
@@ -25,10 +24,10 @@ function isAppPath(path: string): boolean {
 }
 
 // Get current subdomain context
-function getCurrentContext(): 'www' | 'app' {
+function getCurrentContext(): 'root' | 'app' {
   if (typeof window === 'undefined') return 'app'
   const hostname = window.location.hostname
-  return hostname.startsWith('www.') ? 'www' : 'app'
+  return hostname.startsWith('app.') ? 'app' : 'root'
 }
 
 interface SmartLinkProps {
@@ -46,8 +45,8 @@ interface SmartLinkProps {
  * - Same-subdomain routes = React Router <Link> for SPA navigation
  *
  * Subdomain architecture:
- * - www.{domain} - SSR pages (/start, /about, /documentation)
- * - {domain} - App routes (/workspaces, /w/*, /login)
+ * - {domain} - SSR pages (/start, /about, /documentation)
+ * - app.{domain} - App routes (/workspaces, /w/*, /login)
  */
 export function SmartLink({ to, children, className, style }: SmartLinkProps) {
   // External URLs use standard anchor tag
@@ -71,18 +70,18 @@ export function SmartLink({ to, children, className, style }: SmartLinkProps) {
 
   // Cross-subdomain navigation requires full page redirect
   if (currentContext === 'app' && targetIsSSR) {
-    // From app to www subdomain
+    // From app subdomain to root domain
     return (
-      <a href={`${WWW_BASE_URL}${to}`} className={className} style={style}>
+      <a href={`${ROOT_URL}${to}`} className={className} style={style}>
         {children}
       </a>
     )
   }
 
-  if (currentContext === 'www' && targetIsApp) {
-    // From www to app subdomain
+  if (currentContext === 'root' && targetIsApp) {
+    // From root domain to app subdomain
     return (
-      <a href={`${APP_BASE_URL}${to}`} className={className} style={style}>
+      <a href={`${APP_URL}${to}`} className={className} style={style}>
         {children}
       </a>
     )

@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router';
 import { Spin } from 'antd';
 import { useAuth } from '../lib/auth';
 
-// WWW subdomain URL for SSR pages
-const WWW_BASE_URL =
-  import.meta.env.VITE_WWW_BASE_URL || 'http://www.localtest.me'
-
+/**
+ * RootRedirect handles the root path on the app subdomain.
+ * - Authenticated users → /workspaces
+ * - Unauthenticated users → /login
+ *
+ * Note: This runs on app.{domain}, not on the root domain.
+ * The root domain serves SSR content directly.
+ */
 function RootRedirect() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
@@ -16,8 +20,7 @@ function RootRedirect() {
       if (isAuthenticated) {
         navigate('/workspaces', { replace: true });
       } else {
-        // Redirect to www subdomain for landing page
-        window.location.href = `${WWW_BASE_URL}/start`;
+        navigate('/login', { replace: true });
       }
     }
   }, [isAuthenticated, isLoading, navigate]);

@@ -28,7 +28,7 @@ services:
           - localtest.me
           - oidc.localtest.me
           - api.localtest.me
-          - www.localtest.me
+          - app.localtest.me
 
   db:
     image: postgres:16-alpine

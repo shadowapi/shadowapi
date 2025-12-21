@@ -7,18 +7,18 @@ import { useAuth } from '../lib/auth';
 import { SmartLink } from '../lib/SmartLink';
 
 // Subdomain URLs from environment
-const WWW_BASE_URL = import.meta.env.VITE_WWW_BASE_URL || 'http://www.localtest.me';
-const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL || 'http://localtest.me';
+const ROOT_URL = import.meta.env.VITE_ROOT_URL || 'http://localtest.me';
+const APP_URL = import.meta.env.VITE_APP_URL || 'http://app.localtest.me';
 
-// SSR routes that live on www subdomain
+// SSR routes that live on root domain
 const SSR_PATHS = ['/start', '/about', '/documentation'];
 
-// Check if a path is an SSR route (www subdomain)
+// Check if a path is an SSR route (root domain)
 function isSSRPath(path: string): boolean {
   return SSR_PATHS.some((p) => path === p || path.startsWith(p + '/'));
 }
 
-// Check if a path is an app route (root domain)
+// Check if a path is an app route (app subdomain)
 function isAppPath(path: string): boolean {
   return (
     path === '/' ||
@@ -29,10 +29,10 @@ function isAppPath(path: string): boolean {
 }
 
 // Get current subdomain context
-function getCurrentContext(): 'www' | 'app' {
+function getCurrentContext(): 'root' | 'app' {
   if (typeof window === 'undefined') return 'app';
   const hostname = window.location.hostname;
-  return hostname.startsWith('www.') ? 'www' : 'app';
+  return hostname.startsWith('app.') ? 'app' : 'root';
 }
 
 const { Header, Footer } = Layout;
@@ -69,12 +69,12 @@ function BaseLayout({ children }: BaseLayoutProps) {
 
     // Cross-subdomain navigation requires full page redirect
     if (currentContext === 'app' && targetIsSSR) {
-      window.location.href = `${WWW_BASE_URL}${path}`;
+      window.location.href = `${ROOT_URL}${path}`;
       return;
     }
 
-    if (currentContext === 'www' && targetIsApp) {
-      window.location.href = `${APP_BASE_URL}${path}`;
+    if (currentContext === 'root' && targetIsApp) {
+      window.location.href = `${APP_URL}${path}`;
       return;
     }
 

@@ -19,8 +19,11 @@ import (
 type Config struct {
 	FrontendAssetsDir string `json:"frontend_assets_dir" yaml:"frontend_assets_dir" env:"BE_FRONTEND_ASSETS_DIR" envDefault:"./dist"`
 
-	// BaseURL root path for the system (frontend URL)
+	// BaseURL root path for the system (SSR/public pages on root domain)
 	BaseURL string `json:"base_url" yaml:"base_url" env:"BE_BASE_URL" envDefault:"http://localtest.me"`
+
+	// CSRBaseURL is the URL for the CSR app (app subdomain) - used for login redirects
+	CSRBaseURL string `json:"csr_base_url" yaml:"csr_base_url" env:"BE_CSR_BASE_URL" envDefault:"http://app.localtest.me"`
 
 	// APIBaseURL is the base URL for the API (used for OAuth2 callback)
 	APIBaseURL string `json:"api_base_url" yaml:"api_base_url" env:"BE_API_BASE_URL" envDefault:"http://api.localtest.me"`

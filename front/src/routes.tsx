@@ -77,7 +77,7 @@ export const routes: RouteConfig[] = [
     protected: true,
   },
 
-  // Root redirect - authenticated users go to /workspaces, others to /page/start
+  // Root redirect on app subdomain - authenticated users go to /workspaces, others to /login
   {
     path: '/',
     element: withSuspense(RootRedirect),
@@ -86,7 +86,7 @@ export const routes: RouteConfig[] = [
     protected: false,
   },
 
-  // SSR routes (public pages on www subdomain)
+  // SSR routes (public pages on root domain)
   {
     path: '/start',
     element: <LandingPage />,
@@ -126,7 +126,7 @@ export const routes: RouteConfig[] = [
 ];
 
 // Helper to check if a path should be SSR rendered
-// SSR routes are now on www subdomain without /page prefix
+// SSR routes are on root domain (not app subdomain)
 export function isSSRRoute(pathname: string): boolean {
   const ssrPaths = ['/start', '/about', '/documentation'];
   return ssrPaths.some(p => pathname === p || pathname.startsWith(p + '/'));

@@ -208,7 +208,7 @@ func Provide(i do.Injector) (*Handler, error) {
 			jwtValidator,
 			cookieConfig,
 			cfg.OAuth2.SPAClientID,
-			cfg.BaseURL,
+			cfg.CSRBaseURL, // Login page is on app subdomain
 			cfg.APIBaseURL,
 		)
 

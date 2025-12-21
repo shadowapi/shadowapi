@@ -4,14 +4,14 @@ FROM --platform=linux/amd64 node:20.18.0-alpine AS builder
 # Build arguments for Vite environment variables (baked in at build time)
 ARG VITE_API_BASE_URL
 ARG VITE_OIDC_URL
-ARG VITE_WWW_BASE_URL
-ARG VITE_APP_BASE_URL
+ARG VITE_ROOT_URL
+ARG VITE_APP_URL
 
 # Set as environment variables for the build process
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ENV VITE_OIDC_URL=${VITE_OIDC_URL}
-ENV VITE_WWW_BASE_URL=${VITE_WWW_BASE_URL}
-ENV VITE_APP_BASE_URL=${VITE_APP_BASE_URL}
+ENV VITE_ROOT_URL=${VITE_ROOT_URL}
+ENV VITE_APP_URL=${VITE_APP_URL}
 
 WORKDIR /app
 
