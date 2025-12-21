@@ -81,7 +81,7 @@ func Provide(i do.Injector) (*Auth, error) {
 			time.Duration(cfg.OAuth2.JWKSCacheDuration)*time.Second,
 			log,
 		)
-		auth.jwtValidator = oauth2.NewJWTValidator(jwksCache, cfg.BaseURL, log)
+		auth.jwtValidator = oauth2.NewJWTValidator(jwksCache, cfg.OAuth2.HydraPublicURL, log)
 		log.Info("JWT validator initialized", "jwks_url", jwksURL)
 	}
 
@@ -166,6 +166,8 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 		// Try to get token from cookie (for browser requests)
 		if cookie, err := req.Raw.Cookie(oauth2.AccessTokenCookie); err == nil {
 			token = cookie.Value
+			// Inject token into Authorization header so ogen's security handler can find it
+			req.Raw.Header.Set("Authorization", "Bearer "+token)
 		}
 	}
 
