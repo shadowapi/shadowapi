@@ -33,13 +33,20 @@ FROM --platform=linux/amd64 node:20.18.0-alpine
 
 WORKDIR /app
 
-# Install a simple static server
-RUN npm install -g serve
+# Copy package files for production dependencies
+COPY front/package.json front/package-lock.json ./
+RUN npm ci --omit=dev
 
-# Copy the built files from the builder stage
-COPY --from=builder /app/dist ./dist
+# Install tsx for running TypeScript server
+RUN npm install tsx
+
+# Copy only the client build (not server build)
+COPY --from=builder /app/dist/client ./dist
+
+# Copy the production CSR server
+COPY front/server.csr.prod.ts ./server.csr.prod.ts
 
 EXPOSE 5173
 
-# Serve the built frontend
-CMD ["serve", "-s", "dist", "--listen", "5173"]
+# Run the production CSR server
+CMD ["npx", "tsx", "server.csr.prod.ts"]
