@@ -318,6 +318,17 @@ func (h *Handler) AuthOAuth2Logout(ctx context.Context) (*api.AuthOAuth2LogoutOK
 		}
 	}
 
+	// Get user claims to extract subject for session revocation
+	if claims, ok := ctx.Value(auth.UserClaimsContextKey).(*oauth2.Claims); ok && claims != nil {
+		// Revoke Hydra login session to prevent auto-re-authentication
+		if claims.Subject != "" {
+			if err := h.oauth2Svc.hydraClient.RevokeLoginSession(ctx, claims.Subject); err != nil {
+				h.log.Warn("failed to revoke login session", "error", err)
+				// Continue with logout even if session revocation fails
+			}
+		}
+	}
+
 	// Build cookie headers to clear all cookies (separate headers for each cookie)
 	cookieHeaders := buildClearCookieHeaders(h.oauth2Svc.cookieConfig)
 

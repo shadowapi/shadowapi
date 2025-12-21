@@ -399,3 +399,33 @@ func (c *HydraClient) AcceptConsentRequest(ctx context.Context, challenge string
 	c.log.Debug("consent request accepted", "challenge", challenge, "redirect_to", acceptResp.RedirectTo)
 	return acceptResp.RedirectTo, nil
 }
+
+// RevokeLoginSession revokes all login sessions for a subject
+// This should be called during logout to prevent automatic re-authentication
+func (c *HydraClient) RevokeLoginSession(ctx context.Context, subject string) error {
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodDelete,
+		c.adminURL+"/admin/oauth2/auth/sessions/login?subject="+url.QueryEscape(subject),
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("revoke login session: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// 204 No Content on success, 404 if no session exists (both are OK)
+	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
+		body, _ := io.ReadAll(resp.Body)
+		c.log.Error("revoke login session failed", "status", resp.StatusCode, "body", string(body))
+		return fmt.Errorf("revoke login session failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	c.log.Debug("login session revoked", "subject", subject)
+	return nil
+}

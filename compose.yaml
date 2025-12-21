@@ -73,6 +73,7 @@ services:
       - BE_API_BASE_URL=http://${BE_API_SUBDOMAIN}.${BE_DOMAIN}
       - BE_CSR_BASE_URL=http://${BE_APP_SUBDOMAIN}.${BE_DOMAIN}
       - BE_CORS_ALLOWED_ORIGINS=${BE_CORS_ALLOWED_ORIGINS}
+      - BE_OAUTH2_COOKIE_DOMAIN=${BE_OAUTH2_COOKIE_DOMAIN}
     develop:
       watch:
         - action: rebuild
