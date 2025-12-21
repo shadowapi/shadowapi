@@ -36,7 +36,7 @@ function CredentialDocumentation({ provider }: { provider?: string }) {
   return (
     <Card title="About OAuth2 Credentials" size="small">
       <Paragraph>
-        OAuth2 credentials are required to authenticate ShadowAPI with external services
+        OAuth2 credentials are required to authenticate MeshPump with external services
         like Gmail, allowing secure access to your data without sharing passwords.
       </Paragraph>
       <Paragraph>

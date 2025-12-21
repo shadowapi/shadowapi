@@ -131,7 +131,7 @@ function BaseLayout({ children }: BaseLayoutProps) {
             textDecoration: 'none',
           }}
         >
-          ShadowAPI
+          MeshPump
         </SmartLink>
         <Menu
           theme="dark"
@@ -168,7 +168,7 @@ function BaseLayout({ children }: BaseLayoutProps) {
           flexShrink: 0,
         }}
       >
-        ShadowAPI ©{new Date().getFullYear()}
+        MeshPump ©{new Date().getFullYear()}
       </Footer>
     </Layout>
   );

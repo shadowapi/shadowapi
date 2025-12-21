@@ -6,7 +6,7 @@ function Dashboard() {
   return (
     <>
       <Title level={2}>Dashboard</Title>
-      <Paragraph>Welcome to ShadowAPI</Paragraph>
+      <Paragraph>Welcome to MeshPump</Paragraph>
     </>
   );
 }

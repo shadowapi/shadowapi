@@ -7,7 +7,7 @@ function GmailDocumentation() {
     <>
       <Title level={2}>Gmail Datasource</Title>
       <Paragraph>
-        This guide explains how to configure Gmail as a datasource in ShadowAPI. It is based on
+        This guide explains how to configure Gmail as a datasource in MeshPump. It is based on
         the official{' '}
         <Link href="https://developers.google.com/gmail/api/guides" target="_blank">
           Google Gmail API documentation
@@ -134,14 +134,14 @@ function GmailDocumentation() {
           {
             title: 'Configure Redirect URIs',
             content:
-              'Add the ShadowAPI callback URL as an authorized redirect URI (check your ShadowAPI configuration for the exact URL).',
+              'Add the MeshPump callback URL as an authorized redirect URI (check your MeshPump configuration for the exact URL).',
           },
           {
             title: 'Download Credentials',
             content: (
               <>
                 Download the <Text code>credentials.json</Text> file and store it in a secure
-                location. You will need the Client ID and Client Secret for ShadowAPI
+                location. You will need the Client ID and Client Secret for MeshPump
                 configuration.
               </>
             ),
@@ -163,9 +163,9 @@ function GmailDocumentation() {
         style={{ marginTop: 16, marginBottom: 16 }}
       />
 
-      <Title level={3}>Configuring ShadowAPI</Title>
+      <Title level={3}>Configuring MeshPump</Title>
       <Paragraph>
-        Once you have your OAuth credentials, configure the Gmail datasource in ShadowAPI by
+        Once you have your OAuth credentials, configure the Gmail datasource in MeshPump by
         providing:
       </Paragraph>
       <ul>
@@ -187,7 +187,7 @@ function GmailDocumentation() {
       </Paragraph>
       <Paragraph>
         <Text strong>Error: "Redirect URI mismatch"</Text> - Verify that the redirect URI in
-        ShadowAPI exactly matches the one configured in your Google Cloud OAuth credentials.
+        MeshPump exactly matches the one configured in your Google Cloud OAuth credentials.
       </Paragraph>
     </>
   );

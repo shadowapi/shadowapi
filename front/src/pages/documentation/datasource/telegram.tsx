@@ -7,7 +7,7 @@ function TelegramDocumentation() {
     <>
       <Title level={2}>Telegram Datasource</Title>
       <Paragraph>
-        Documentation for configuring and using Telegram as a datasource in ShadowAPI.
+        Documentation for configuring and using Telegram as a datasource in MeshPump.
       </Paragraph>
     </>
   );

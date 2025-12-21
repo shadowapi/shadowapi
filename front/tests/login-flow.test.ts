@@ -6,7 +6,7 @@ test.describe('Login Flow', () => {
     await page.goto('/login');
 
     // Verify we're on the login page
-    await expect(page.getByRole('heading', { name: 'ShadowAPI' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'MeshPump' })).toBeVisible();
 
     // Step 1: Fill in credentials and submit to initiate OAuth2 flow
     await page.getByPlaceholder('Email').fill('admin@example.com');

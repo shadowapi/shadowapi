@@ -11,7 +11,7 @@ function LandingPage() {
     <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
       <Card style={{ width: 500, textAlign: 'center' }}>
         <RocketOutlined style={{ fontSize: 64, color: uiColors.primary, marginBottom: 24 }} />
-        <Title level={1} style={{ marginBottom: 8 }}>ShadowAPI</Title>
+        <Title level={1} style={{ marginBottom: 8 }}>MeshPump</Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
           Unified Messaging Platform
         </Text>

@@ -80,7 +80,7 @@ function LoginPage() {
     <Card style={{ width: 400, maxWidth: '100%' }}>
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <Title level={3} style={{ margin: 0 }}>
-          ShadowAPI
+          MeshPump
         </Title>
         <Typography.Text type="secondary">
           Sign in to your account
