@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM golang:1.24-alpine AS builder
+FROM --platform=linux/amd64 golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -10,15 +10,17 @@ RUN go mod download
 # Copy the rest of the backend code:
 COPY backend/ ./
 
-# Build the Go binary
-RUN go build -o /shadowapi ./cmd/shadowapi
+# Build the Go binary for linux/amd64
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /shadowapi ./cmd/shadowapi
 
-# Final Stage
-FROM golang:1.24-alpine
+# Final Stage - use minimal scratch image since CGO is disabled
+FROM --platform=linux/amd64 alpine:3.19
 WORKDIR /app
 
+# Add ca-certificates for HTTPS calls
+RUN apk --no-cache add ca-certificates
+
 COPY --from=builder /shadowapi ./shadowapi
-COPY front/dist ./dist
 
 EXPOSE 8080
 CMD ["/app/shadowapi", "serve"]
