@@ -18,8 +18,9 @@ export default defineConfig({
   },
   // SSR configuration
   ssr: {
-    // Don't externalize these packages in SSR build
-    noExternal: ['antd', '@ant-design/cssinjs', '@ant-design/icons'],
+    // Don't externalize Ant Design ecosystem packages in SSR build
+    // Include @emotion for hash function used by cssinjs
+    noExternal: [/antd/, /@ant-design\//, /rc-/, /@emotion\//],
   },
   server: {
     host: '0.0.0.0',
