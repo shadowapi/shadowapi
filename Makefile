@@ -1,7 +1,7 @@
 # ShadowAPI Makefile
 # Run `make help` to see available targets
 
-.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen deploy deploy-auto deploy-no-migrate
+.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen deploy
 
 # Default target
 .DEFAULT_GOAL := help
@@ -51,11 +51,5 @@ api-gen: api-gen-backend api-gen-frontend ## Generate API specs (backend & front
 
 ##@ Deployment
 
-deploy: ## Deploy to Uncloud (production) with migration approval
+deploy: ## Deploy to Uncloud (production)
 	./devops/uncloud/deploy.sh
-
-deploy-auto: ## Deploy to Uncloud with auto-approval (CI/CD)
-	./devops/uncloud/deploy.sh --yes
-
-deploy-no-migrate: ## Deploy to Uncloud without migrations
-	./devops/uncloud/deploy.sh --skip-migrations

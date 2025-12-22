@@ -74,17 +74,6 @@ services:
       - BE_CORS_ALLOWED_ORIGINS=https://meshpump.com,https://app.meshpump.com
     restart: always
 
-  # Database migrations service (stays running for exec)
-  mp-migrate:
-    platform: linux/amd64
-    build:
-      context: ../..
-      dockerfile: devops/uncloud/Dockerfile.migrate
-    environment:
-      - DB_URI=${BE_DB_URI}
-    # No x-ports - internal service only
-    restart: always
-
   # Hydra OAuth2/OIDC Server
   # Note: Migrations run inline at startup via entrypoint script
   mp-hydra:
