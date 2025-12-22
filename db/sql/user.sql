@@ -83,3 +83,10 @@ SELECT COUNT(*) FROM "user";
 SELECT EXISTS (
     SELECT 1 FROM "user" WHERE email = sqlc.arg('email')
 ) AS exists;
+
+-- name: SetUserAdmin :exec
+UPDATE "user"
+SET
+is_admin = sqlc.arg('is_admin')::boolean,
+updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;

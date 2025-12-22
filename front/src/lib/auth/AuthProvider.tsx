@@ -7,6 +7,7 @@ import {
   OAuth2Error,
 } from './oauth2-client';
 import { AuthContext, type AuthContextType, type User } from './AuthContext';
+import client from '../../api/client';
 
 // API base URL - use environment variable or fallback to default
 const API_BASE_URL =
@@ -41,6 +42,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Fetch user profile from the backend
+  const fetchUserProfile = useCallback(async (): Promise<User | null> => {
+    try {
+      const { data, error } = await client.GET('/profile');
+      if (error || !data) {
+        console.error('Failed to fetch user profile:', error);
+        return null;
+      }
+      return {
+        uuid: data.uuid ?? '',
+        email: data.email ?? '',
+        first_name: data.first_name ?? '',
+        last_name: data.last_name ?? '',
+        is_admin: data.is_admin ?? false,
+      };
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+      return null;
+    }
+  }, []);
+
   // Check OAuth2 session on mount without triggering token refresh
   const checkSession = useCallback(async () => {
     try {
@@ -48,8 +70,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (session.authenticated) {
         setIsAuthenticated(true);
         setTokenExpiresIn(session.expires_in ?? null);
-        // Note: User info would typically come from the JWT claims or a /userinfo endpoint
-        // For now, we mark as authenticated without user details
+        // Fetch user profile to get user details including is_admin
+        const userProfile = await fetchUserProfile();
+        if (userProfile) {
+          setUser(userProfile);
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
@@ -62,7 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setTokenExpiresIn(null);
     }
     setIsLoading(false);
-  }, []);
+  }, [fetchUserProfile]);
 
   // Auto-refresh token before it expires
   useEffect(() => {

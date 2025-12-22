@@ -191,6 +191,24 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 	return items, nil
 }
 
+const setUserAdmin = `-- name: SetUserAdmin :exec
+UPDATE "user"
+SET
+is_admin = $1::boolean,
+updated_at = NOW()
+WHERE uuid = $2::uuid
+`
+
+type SetUserAdminParams struct {
+	IsAdmin bool        `json:"is_admin"`
+	UUID    pgtype.UUID `json:"uuid"`
+}
+
+func (q *Queries) SetUserAdmin(ctx context.Context, arg SetUserAdminParams) error {
+	_, err := q.db.Exec(ctx, setUserAdmin, arg.IsAdmin, arg.UUID)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :exec
 UPDATE "user"
 SET

@@ -3,6 +3,8 @@ import { WorkspaceProvider } from '../lib/workspace/WorkspaceContext';
 import Dashboard from './Dashboard';
 import OAuth2Credentials from './oauth2/OAuth2Credentials';
 import OAuth2CredentialEdit from './oauth2/OAuth2CredentialEdit';
+import Users from './users/Users';
+import UserEdit from './users/UserEdit';
 
 /**
  * WorkspaceRouter handles all routes under /w/:slug/*
@@ -16,7 +18,9 @@ function WorkspaceRouter() {
         <Route path="oauth2/credentials" element={<OAuth2Credentials />} />
         <Route path="oauth2/credentials/new" element={<OAuth2CredentialEdit />} />
         <Route path="oauth2/credentials/:uuid" element={<OAuth2CredentialEdit />} />
-        {/* Add more workspace-scoped routes here */}
+        <Route path="users" element={<Users />} />
+        <Route path="users/new" element={<UserEdit />} />
+        <Route path="users/:uuid" element={<UserEdit />} />
       </Routes>
     </WorkspaceProvider>
   );

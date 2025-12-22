@@ -126,6 +126,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/messages': { title: 'Messages' },
   '/files': { title: 'Files', parent: '/messages' },
   '/users': { title: 'Users' },
+  '/users/new': { title: 'Add', parent: '/users' },
   '/oauth2/credentials': { title: 'OAuth2 Credentials' },
   '/oauth2/credentials/new': { title: 'Add', parent: '/oauth2/credentials' },
   '/storages': { title: 'Data Storages' },
@@ -149,6 +150,8 @@ function getOpenKeys(relativePath: string): string[] {
   let normalizedPath = relativePath;
   if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
     normalizedPath = '/oauth2/credentials';
+  } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
+    normalizedPath = '/users';
   }
 
   const parentKey = menuParentMap[normalizedPath];
@@ -162,12 +165,21 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   ];
 
   // Check if this is an edit page (uuid pattern)
-  const uuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
-  const effectivePath = uuidMatch ? '/oauth2/credentials/:uuid' : relativePath;
+  const oauth2UuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
+  const usersUuidMatch = relativePath.match(/^\/users\/([0-9a-f-]+)$/i);
+  const uuidMatch = oauth2UuidMatch || usersUuidMatch;
+
+  // Determine effective path for breadcrumb chain
+  let effectivePath = relativePath;
+  if (oauth2UuidMatch) {
+    effectivePath = '/oauth2/credentials';
+  } else if (usersUuidMatch) {
+    effectivePath = '/users';
+  }
 
   // Build the breadcrumb chain by following parent links
   const chain: string[] = [];
-  let currentPath = effectivePath === '/oauth2/credentials/:uuid' ? '/oauth2/credentials' : effectivePath;
+  let currentPath = effectivePath;
 
   while (currentPath) {
     chain.unshift(currentPath);
@@ -216,6 +228,8 @@ function AppLayout({ children }: AppLayoutProps) {
   let menuSelectedPath = relativePath;
   if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
     menuSelectedPath = '/oauth2/credentials';
+  } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
+    menuSelectedPath = '/users';
   }
   const selectedKeys = [menuSelectedPath];
   const defaultOpenKeys = getOpenKeys(relativePath);

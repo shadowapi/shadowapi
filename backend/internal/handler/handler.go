@@ -78,6 +78,17 @@ func (h *Handler) ensureInitWorkspaceAndAdmin(ctx context.Context) error {
 		}
 	} else {
 		userUUID = pgtype.UUID{Bytes: user.UUID, Valid: true}
+		// Ensure existing user has admin flag set
+		if !user.IsAdmin {
+			if err := q.SetUserAdmin(ctx, query.SetUserAdminParams{
+				UUID:    userUUID,
+				IsAdmin: true,
+			}); err != nil {
+				h.log.Warn("failed to set admin flag on existing user", "email", h.cfg.InitAdmin.Email, "error", err)
+			} else {
+				h.log.Info("updated existing user to admin", "email", h.cfg.InitAdmin.Email)
+			}
+		}
 	}
 
 	// Step 2: Ensure default workspaces exist

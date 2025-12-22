@@ -41,6 +41,13 @@ func (m *DBUserManager) CreateUser(ctx context.Context, req *api.User) (*api.Use
 		// Generate a new UUID for the user.
 		userUUID := uuid.Must(uuid.NewV7())
 
+		// Hash the password with bcrypt
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			m.log.Error("failed to hash password", "error", err)
+			return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to hash password"))
+		}
+
 		// Marshal Meta if provided.
 		var metaBytes []byte
 		if req.Meta.IsSet() && req.Meta.Value != nil {
@@ -54,7 +61,7 @@ func (m *DBUserManager) CreateUser(ctx context.Context, req *api.User) (*api.Use
 		created, err := query.New(tx).CreateUser(ctx, query.CreateUserParams{
 			UUID:      pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true},
 			Email:     req.Email,
-			Password:  req.Password,
+			Password:  string(hashedPassword),
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
 			IsEnabled: req.IsEnabled.Or(false),
@@ -141,10 +148,32 @@ func (m *DBUserManager) UpdateUser(ctx context.Context, req *api.User, uuidStr s
 	}
 
 	return db.InTx(ctx, m.dbp, func(tx pgx.Tx) (*api.User, error) {
+		pgUUID := pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true}
+
+		// Fetch current user to preserve password if not provided
+		currentUser, err := query.New(tx).GetUser(ctx, pgUUID)
+		if err == pgx.ErrNoRows {
+			return nil, handler.ErrWithCode(http.StatusNotFound, handler.E("user not found"))
+		} else if err != nil {
+			m.log.Error("failed to get current user", "error", err)
+			return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to get current user"))
+		}
+
+		// Determine password: if new password provided, hash it; otherwise keep existing
+		passwordToStore := currentUser.Password
+		if req.Password != "" {
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+			if err != nil {
+				m.log.Error("failed to hash password", "error", err)
+				return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to hash password"))
+			}
+			passwordToStore = string(hashedPassword)
+		}
+
 		updateParams := query.UpdateUserParams{
-			UUID:      pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true},
+			UUID:      pgUUID,
 			Email:     req.Email,
-			Password:  req.Password,
+			Password:  passwordToStore,
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
 			IsEnabled: req.IsEnabled.Or(false),
@@ -166,7 +195,7 @@ func (m *DBUserManager) UpdateUser(ctx context.Context, req *api.User, uuidStr s
 			return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to update user"))
 		}
 
-		user, err := query.New(tx).GetUser(ctx, pgtype.UUID{Bytes: converter.UToBytes(userUUID), Valid: true})
+		user, err := query.New(tx).GetUser(ctx, pgUUID)
 		if err != nil {
 			m.log.Error("failed to get updated user", "error", err)
 			return nil, handler.ErrWithCode(http.StatusInternalServerError, handler.E("failed to get updated user"))
