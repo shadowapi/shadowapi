@@ -5,6 +5,7 @@ import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import type { components } from '../../api/v1';
+import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 
 const { Title } = Typography;
 
@@ -12,6 +13,7 @@ type OAuth2Client = components['schemas']['oauth2_client'];
 
 function OAuth2Credentials() {
   const navigate = useNavigate();
+  const { slug } = useWorkspace();
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<OAuth2Client[]>([]);
 
@@ -49,7 +51,7 @@ function OAuth2Credentials() {
         <Button
           type="text"
           icon={<EditOutlined />}
-          onClick={() => navigate(`/oauth2/credentials/${record.uuid}`)}
+          onClick={() => navigate(`/w/${slug}/oauth2/credentials/${record.uuid}`)}
         />
       ),
     },
@@ -62,7 +64,7 @@ function OAuth2Credentials() {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => navigate('/oauth2/credentials/new')}
+          onClick={() => navigate(`/w/${slug}/oauth2/credentials/new`)}
         >
           Add OAuth2 Credential
         </Button>

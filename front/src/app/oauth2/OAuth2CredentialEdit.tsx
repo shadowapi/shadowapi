@@ -4,6 +4,7 @@ import { Typography, Form, Input, Select, Button, Space, message, Popconfirm, Ro
 import client from '../../api/client';
 import type { components } from '../../api/v1';
 import { SmartLink } from '../../lib/SmartLink';
+import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -59,6 +60,7 @@ type OAuth2Client = components['schemas']['oauth2_client'];
 function OAuth2CredentialEdit() {
   const navigate = useNavigate();
   const { uuid } = useParams<{ uuid: string }>();
+  const { slug } = useWorkspace();
   const isNew = !uuid;
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -116,7 +118,7 @@ function OAuth2CredentialEdit() {
     }
 
     message.success(isNew ? 'OAuth2 credential created' : 'OAuth2 credential updated');
-    navigate('/oauth2/credentials');
+    navigate(`/w/${slug}/oauth2/credentials`);
   };
 
   const onDelete = async () => {
@@ -131,7 +133,7 @@ function OAuth2CredentialEdit() {
       return;
     }
     message.success('OAuth2 credential deleted');
-    navigate('/oauth2/credentials');
+    navigate(`/w/${slug}/oauth2/credentials`);
   };
 
   return (
@@ -184,7 +186,7 @@ function OAuth2CredentialEdit() {
                 <Button type="primary" htmlType="submit" loading={saving}>
                   {isNew ? 'Create' : 'Update'}
                 </Button>
-                <Button onClick={() => navigate('/oauth2/credentials')}>
+                <Button onClick={() => navigate(`/w/${slug}/oauth2/credentials`)}>
                   Cancel
                 </Button>
                 {!isNew && (

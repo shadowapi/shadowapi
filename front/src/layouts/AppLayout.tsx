@@ -27,74 +27,89 @@ const { Sider, Content } = Layout
 
 type MenuItem = Required<MenuProps>['items'][number]
 
-const menuItems: MenuItem[] = [
-  {
-    key: '/',
-    icon: <DashboardOutlined />,
-    label: <Link to="/">Dashboard</Link>,
-  },
-  {
-    key: '/messages',
-    icon: <MessageOutlined />,
-    label: <Link to="/messages">Messages</Link>,
-    children: [
-      {
-        key: '/files',
-        icon: <FileOutlined />,
-        label: <Link to="/files">Files</Link>,
-      },
-    ],
-  },
-  {
-    key: '/users',
-    icon: <UserOutlined />,
-    label: <Link to="/users">Users</Link>,
-  },
-  {
-    key: '/datasources',
-    icon: <MailOutlined />,
-    label: <Link to="/datasources">Data Sources</Link>,
-    children: [
-      {
-        key: '/oauth2/credentials',
-        icon: <LoginOutlined />,
-        label: <Link to="/oauth2/credentials">OAuth2 Credentials</Link>,
-      },
-    ],
-  },
-  {
-    key: '/storages',
-    icon: <DatabaseOutlined />,
-    label: <Link to="/storages">Data Storages</Link>,
-  },
-  {
-    key: '/syncpolicies',
-    icon: <ClockCircleOutlined />,
-    label: <Link to="/syncpolicies">Sync Policies</Link>,
-  },
-  {
-    key: '/pipelines',
-    icon: <NodeIndexOutlined />,
-    label: <Link to="/pipelines">Data Pipelines</Link>,
-  },
-  {
-    key: '/workers',
-    icon: <SettingOutlined />,
-    label: <Link to="/workers">Workers</Link>,
-    children: [
-      {
-        key: '/schedulers',
-        icon: <ScheduleOutlined />,
-        label: <Link to="/schedulers">Schedulers</Link>,
-      },
-    ],
-  },
-  {
-    key: '/logs',
-    icon: <UnorderedListOutlined />,
-    label: <Link to="/logs">Logs</Link>,
-  },
-];
+// Helper to extract workspace info from pathname
+function getWorkspaceInfo(pathname: string): { basePath: string; relativePath: string } {
+  const match = pathname.match(/^\/w\/([^/]+)(.*)/);
+  if (match) {
+    return {
+      basePath: `/w/${match[1]}`,
+      relativePath: match[2] || '/',
+    };
+  }
+  return { basePath: '', relativePath: pathname };
+}
+
+// Generate menu items with workspace-aware paths
+function getMenuItems(basePath: string): MenuItem[] {
+  return [
+    {
+      key: '/',
+      icon: <DashboardOutlined />,
+      label: <Link to={`${basePath}/`}>Dashboard</Link>,
+    },
+    {
+      key: '/messages',
+      icon: <MessageOutlined />,
+      label: <Link to={`${basePath}/messages`}>Messages</Link>,
+      children: [
+        {
+          key: '/files',
+          icon: <FileOutlined />,
+          label: <Link to={`${basePath}/files`}>Files</Link>,
+        },
+      ],
+    },
+    {
+      key: '/users',
+      icon: <UserOutlined />,
+      label: <Link to={`${basePath}/users`}>Users</Link>,
+    },
+    {
+      key: '/datasources',
+      icon: <MailOutlined />,
+      label: <Link to={`${basePath}/datasources`}>Data Sources</Link>,
+      children: [
+        {
+          key: '/oauth2/credentials',
+          icon: <LoginOutlined />,
+          label: <Link to={`${basePath}/oauth2/credentials`}>OAuth2 Credentials</Link>,
+        },
+      ],
+    },
+    {
+      key: '/storages',
+      icon: <DatabaseOutlined />,
+      label: <Link to={`${basePath}/storages`}>Data Storages</Link>,
+    },
+    {
+      key: '/syncpolicies',
+      icon: <ClockCircleOutlined />,
+      label: <Link to={`${basePath}/syncpolicies`}>Sync Policies</Link>,
+    },
+    {
+      key: '/pipelines',
+      icon: <NodeIndexOutlined />,
+      label: <Link to={`${basePath}/pipelines`}>Data Pipelines</Link>,
+    },
+    {
+      key: '/workers',
+      icon: <SettingOutlined />,
+      label: <Link to={`${basePath}/workers`}>Workers</Link>,
+      children: [
+        {
+          key: '/schedulers',
+          icon: <ScheduleOutlined />,
+          label: <Link to={`${basePath}/schedulers`}>Schedulers</Link>,
+        },
+      ],
+    },
+    {
+      key: '/logs',
+      icon: <UnorderedListOutlined />,
+      label: <Link to={`${basePath}/logs`}>Logs</Link>,
+    },
+  ];
+}
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -128,11 +143,11 @@ const menuParentMap: Record<string, string> = {
   '/schedulers': '/workers',
 };
 
-// Helper to find parent keys for a given path
-function getOpenKeys(pathname: string): string[] {
+// Helper to find parent keys for a given relative path
+function getOpenKeys(relativePath: string): string[] {
   // Normalize dynamic paths
-  let normalizedPath = pathname;
-  if (pathname.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || pathname === '/oauth2/credentials/new') {
+  let normalizedPath = relativePath;
+  if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
     normalizedPath = '/oauth2/credentials';
   }
 
@@ -141,14 +156,14 @@ function getOpenKeys(pathname: string): string[] {
 }
 
 // Generate breadcrumb items for a given path
-function getBreadcrumbItems(pathname: string): { title: React.ReactNode; key: string }[] {
+function getBreadcrumbItems(relativePath: string, basePath: string): { title: React.ReactNode; key: string }[] {
   const items: { title: React.ReactNode; key: string }[] = [
-    { title: <Link to="/">Service</Link>, key: 'service' },
+    { title: <Link to={`${basePath}/`}>Service</Link>, key: 'service' },
   ];
 
   // Check if this is an edit page (uuid pattern)
-  const uuidMatch = pathname.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
-  const effectivePath = uuidMatch ? '/oauth2/credentials/:uuid' : pathname;
+  const uuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
+  const effectivePath = uuidMatch ? '/oauth2/credentials/:uuid' : relativePath;
 
   // Build the breadcrumb chain by following parent links
   const chain: string[] = [];
@@ -169,7 +184,7 @@ function getBreadcrumbItems(pathname: string): { title: React.ReactNode; key: st
     if (isLast) {
       items.push({ title: config.title, key: path });
     } else {
-      items.push({ title: <Link to={path}>{config.title}</Link>, key: path });
+      items.push({ title: <Link to={`${basePath}${path}`}>{config.title}</Link>, key: path });
     }
   });
 
@@ -189,18 +204,22 @@ function AppLayout({ children }: AppLayoutProps) {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  // Extract workspace info from path
+  const { basePath, relativePath } = getWorkspaceInfo(location.pathname);
+
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate('/workspaces');
   };
 
   // Normalize path for menu selection (edit/new pages should highlight parent)
-  let menuSelectedPath = location.pathname;
-  if (location.pathname.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || location.pathname === '/oauth2/credentials/new') {
+  let menuSelectedPath = relativePath;
+  if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
     menuSelectedPath = '/oauth2/credentials';
   }
   const selectedKeys = [menuSelectedPath];
-  const defaultOpenKeys = getOpenKeys(location.pathname);
+  const defaultOpenKeys = getOpenKeys(relativePath);
+  const menuItems = getMenuItems(basePath);
 
   const userMenuItems: MenuProps['items'] = [
     {
@@ -232,7 +251,7 @@ function AppLayout({ children }: AppLayoutProps) {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0', flexShrink: 0 }}>
-          <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
+          <Breadcrumb items={getBreadcrumbItems(relativePath, basePath)} />
           <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
             <Button type="text">
               <Space>
