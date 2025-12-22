@@ -1,0 +1,15 @@
+# Migration service with Atlas CLI and schema files
+FROM --platform=linux/amd64 alpine:3.19
+
+# Install Atlas CLI
+RUN apk add --no-cache curl \
+    && curl -sSf https://atlasgo.sh | sh
+
+# Copy and combine schema files
+COPY db/schema.sql db/tg.sql /schema/
+RUN cat /schema/schema.sql /schema/tg.sql > /schema/combined.sql
+
+WORKDIR /schema
+
+# Keep container running - tail blocks indefinitely
+CMD ["tail", "-f", "/dev/null"]

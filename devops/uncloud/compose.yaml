@@ -1,4 +1,4 @@
-# ShadowAPI Uncloud Deployment
+# MeshPump Uncloud Deployment
 # Domain: meshpump.com
 #
 # Deploy with: uncloud deploy -f compose.yaml
@@ -72,6 +72,17 @@ services:
       - BE_CSR_BASE_URL=https://app.meshpump.com
       - BE_API_BASE_URL=https://api.meshpump.com
       - BE_CORS_ALLOWED_ORIGINS=https://meshpump.com,https://app.meshpump.com
+    restart: always
+
+  # Database migrations service (stays running for exec)
+  mp-migrate:
+    platform: linux/amd64
+    build:
+      context: ../..
+      dockerfile: devops/uncloud/Dockerfile.migrate
+    environment:
+      - DB_URI=${BE_DB_URI}
+    # No x-ports - internal service only
     restart: always
 
   # Hydra OAuth2/OIDC Server

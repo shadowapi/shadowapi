@@ -1,7 +1,7 @@
 # ShadowAPI Makefile
 # Run `make help` to see available targets
 
-.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen
+.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen deploy deploy-auto deploy-no-migrate
 
 # Default target
 .DEFAULT_GOAL := help
@@ -48,3 +48,14 @@ api-gen-frontend: ## Generate TypeScript API client in frontend
 	cd ./front && npm run generate-api-client
 
 api-gen: api-gen-backend api-gen-frontend ## Generate API specs (backend & frontend)
+
+##@ Deployment
+
+deploy: ## Deploy to Uncloud (production) with migration approval
+	./devops/uncloud/deploy.sh
+
+deploy-auto: ## Deploy to Uncloud with auto-approval (CI/CD)
+	./devops/uncloud/deploy.sh --yes
+
+deploy-no-migrate: ## Deploy to Uncloud without migrations
+	./devops/uncloud/deploy.sh --skip-migrations
