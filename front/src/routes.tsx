@@ -62,13 +62,7 @@ export const routes: RouteConfig[] = [
   },
 
   // Workspace routes - protected, with workspace context
-  {
-    path: '/w/:slug',
-    element: withSuspense(WorkspaceRouter),
-    layout: 'app',
-    ssr: false,
-    protected: true,
-  },
+  // Using /* to allow nested routes in WorkspaceRouter
   {
     path: '/w/:slug/*',
     element: withSuspense(WorkspaceRouter),

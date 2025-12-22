@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Typography, Card, Button, List, Alert, Spin, Empty } from 'antd';
+import { Typography, Card, Button, Alert, Spin, Empty, Flex } from 'antd';
 import { FolderOutlined, PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { uiColors } from '../../theme';
@@ -140,30 +140,28 @@ function WorkspaceSelectionPage() {
 
       {/* User's workspaces list */}
       {workspaces.length > 0 && (
-        <List
-          dataSource={workspaces}
-          renderItem={(workspace) => (
-            <List.Item style={{ padding: '8px 0' }}>
-              <Button
-                type="default"
-                block
-                size="large"
-                onClick={() => handleWorkspaceSelect(workspace.slug)}
-                style={{ textAlign: 'left', height: 'auto', padding: '16px 20px' }}
-                disabled={!workspace.is_enabled}
-              >
-                <div>
-                  <Text strong style={{ fontSize: 16 }}>{workspace.display_name}</Text>
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    /w/{workspace.slug}
-                    {!workspace.is_enabled && ' (disabled)'}
-                  </Text>
-                </div>
-              </Button>
-            </List.Item>
-          )}
-        />
+        <Flex vertical gap={8}>
+          {workspaces.map((workspace) => (
+            <Button
+              key={workspace.uuid || workspace.slug}
+              type="default"
+              block
+              size="large"
+              onClick={() => handleWorkspaceSelect(workspace.slug)}
+              style={{ textAlign: 'left', height: 'auto', padding: '16px 20px' }}
+              disabled={!workspace.is_enabled}
+            >
+              <div>
+                <Text strong style={{ fontSize: 16 }}>{workspace.display_name}</Text>
+                <br />
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  /w/{workspace.slug}
+                  {!workspace.is_enabled && ' (disabled)'}
+                </Text>
+              </div>
+            </Button>
+          ))}
+        </Flex>
       )}
 
       {workspaces.length === 0 && (
