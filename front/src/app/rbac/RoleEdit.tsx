@@ -175,12 +175,17 @@ function RoleEdit() {
   const onFinish = async (values: RoleFormValues) => {
     setSaving(true);
 
+    // Map selected permission names to full permission objects
+    const selectedPerms = Array.from(selectedPermissions)
+      .map((name) => permissions.find((p) => p.name === name))
+      .filter((p): p is RBACPermission => p !== undefined);
+
     const roleData: RBACRole = {
       name: values.name,
       display_name: values.display_name,
       description: values.description,
       scope: values.scope,
-      permissions: Array.from(selectedPermissions).map((name) => ({ name } as RBACPermission)),
+      permissions: selectedPerms,
     };
 
     let result;
