@@ -1,7 +1,5 @@
 import { Typography, Card, Flex, Button, Space } from 'antd';
 import { Link } from 'react-router';
-import { RocketOutlined } from '@ant-design/icons';
-import { uiColors } from '../../theme';
 import { SmartLink } from '../../lib/SmartLink';
 
 const { Title, Text, Paragraph } = Typography;
@@ -10,7 +8,7 @@ function LandingPage() {
   return (
     <Flex justify="center" align="center" style={{ minHeight: '60vh' }}>
       <Card style={{ width: 500, textAlign: 'center' }}>
-        <RocketOutlined style={{ fontSize: 64, color: uiColors.primary, marginBottom: 24 }} />
+        <img src="/logo.svg" alt="MeshPump logo" style={{ height: 80, marginBottom: 24 }} />
         <Title level={1} style={{ marginBottom: 8 }}>MeshPump</Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
           Unified Messaging Platform

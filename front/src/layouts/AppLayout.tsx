@@ -328,6 +328,7 @@ function AppLayout({ children }: AppLayoutProps) {
             textDecoration: 'none',
           }}
         >
+          <img src="/logo.svg" alt="MeshPump logo" style={{ height: 28, marginRight: 8 }} />
           MeshPump
         </SmartLink>
 
