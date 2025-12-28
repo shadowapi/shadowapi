@@ -5,6 +5,8 @@ import OAuth2Credentials from './oauth2/OAuth2Credentials';
 import OAuth2CredentialEdit from './oauth2/OAuth2CredentialEdit';
 import Users from './users/Users';
 import UserEdit from './users/UserEdit';
+import Roles from './rbac/Roles';
+import RoleEdit from './rbac/RoleEdit';
 
 /**
  * WorkspaceRouter handles all routes under /w/:slug/*
@@ -21,6 +23,9 @@ function WorkspaceRouter() {
         <Route path="users" element={<Users />} />
         <Route path="users/new" element={<UserEdit />} />
         <Route path="users/:uuid" element={<UserEdit />} />
+        <Route path="rbac/roles" element={<Roles />} />
+        <Route path="rbac/roles/new" element={<RoleEdit />} />
+        <Route path="rbac/roles/:uuid" element={<RoleEdit />} />
       </Routes>
     </WorkspaceProvider>
   );

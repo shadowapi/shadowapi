@@ -19,6 +19,7 @@ import {
   DownOutlined,
   MenuOutlined,
   BookOutlined,
+  SafetyOutlined,
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
@@ -66,6 +67,17 @@ function getMenuItems(basePath: string): MenuItem[] {
       key: '/users',
       icon: <UserOutlined />,
       label: <Link to={`${basePath}/users`}>Users</Link>,
+    },
+    {
+      key: '/rbac',
+      icon: <SafetyOutlined />,
+      label: 'Access Control',
+      children: [
+        {
+          key: '/rbac/roles',
+          label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
+        },
+      ],
     },
     {
       key: '/datasources',
@@ -136,6 +148,8 @@ const routeConfig: Record<string, RouteConfig> = {
   '/files': { title: 'Files', parent: '/messages' },
   '/users': { title: 'Users' },
   '/users/new': { title: 'Add', parent: '/users' },
+  '/rbac/roles': { title: 'Roles' },
+  '/rbac/roles/new': { title: 'Create', parent: '/rbac/roles' },
   '/oauth2/credentials': { title: 'OAuth2 Credentials' },
   '/oauth2/credentials/new': { title: 'Add', parent: '/oauth2/credentials' },
   '/storages': { title: 'Data Storages' },
@@ -151,6 +165,7 @@ const menuParentMap: Record<string, string> = {
   '/files': '/messages',
   '/oauth2/credentials': '/datasources',
   '/schedulers': '/workers',
+  '/rbac/roles': '/rbac',
 };
 
 // Helper to find parent keys for a given relative path
@@ -161,6 +176,8 @@ function getOpenKeys(relativePath: string): string[] {
     normalizedPath = '/oauth2/credentials';
   } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
     normalizedPath = '/users';
+  } else if (relativePath.match(/^\/rbac\/roles\/[0-9a-f-]+$/i) || relativePath === '/rbac/roles/new') {
+    normalizedPath = '/rbac/roles';
   }
 
   const parentKey = menuParentMap[normalizedPath];
@@ -176,7 +193,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   // Check if this is an edit page (uuid pattern)
   const oauth2UuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
   const usersUuidMatch = relativePath.match(/^\/users\/([0-9a-f-]+)$/i);
-  const uuidMatch = oauth2UuidMatch || usersUuidMatch;
+  const rbacRolesUuidMatch = relativePath.match(/^\/rbac\/roles\/([0-9a-f-]+)$/i);
+  const uuidMatch = oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch;
 
   // Determine effective path for breadcrumb chain
   let effectivePath = relativePath;
@@ -184,6 +202,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
     effectivePath = '/oauth2/credentials';
   } else if (usersUuidMatch) {
     effectivePath = '/users';
+  } else if (rbacRolesUuidMatch) {
+    effectivePath = '/rbac/roles';
   }
 
   // Build the breadcrumb chain by following parent links
@@ -248,6 +268,8 @@ function AppLayout({ children }: AppLayoutProps) {
     menuSelectedPath = '/oauth2/credentials';
   } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
     menuSelectedPath = '/users';
+  } else if (relativePath.match(/^\/rbac\/roles\/[0-9a-f-]+$/i) || relativePath === '/rbac/roles/new') {
+    menuSelectedPath = '/rbac/roles';
   }
   const selectedKeys = [menuSelectedPath];
   const defaultOpenKeys = getOpenKeys(relativePath);
