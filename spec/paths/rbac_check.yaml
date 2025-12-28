@@ -1,0 +1,47 @@
+post:
+  summary: Check if a user has permission
+  operationId: checkPermission
+  tags:
+    - RBAC
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            user_uuid:
+              type: string
+              format: uuid
+              description: User UUID to check
+            domain:
+              type: string
+              description: Domain (workspace slug or "global")
+            resource:
+              type: string
+              description: Resource type to check
+            action:
+              type: string
+              description: Action to check
+          required:
+            - user_uuid
+            - domain
+            - resource
+            - action
+  responses:
+    "200":
+      description: Permission check result
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              allowed:
+                type: boolean
+                description: Whether the action is allowed
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

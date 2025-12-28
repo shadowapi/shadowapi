@@ -18,6 +18,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -31,6 +32,7 @@ type Handler struct {
 	wbr         *worker.Broker
 	userManager auth.UserManager
 	oauth2Svc   *OAuth2Service
+	enforcer    *rbac.Enforcer
 }
 
 func (h *Handler) DB() *pgxpool.Pool {
@@ -185,6 +187,7 @@ func Provide(i do.Injector) (*Handler, error) {
 		dbp:         do.MustInvoke[*pgxpool.Pool](i),
 		wbr:         do.MustInvoke[*worker.Broker](i),
 		userManager: do.MustInvoke[auth.UserManager](i),
+		enforcer:    do.MustInvoke[*rbac.Enforcer](i),
 	}
 
 	// Initialize OAuth2 service if configured

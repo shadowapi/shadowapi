@@ -1,0 +1,25 @@
+# spec/components/rbac_role_assignment.yaml
+# Defines the schema for an RBAC Role Assignment
+type: object
+additionalProperties: false
+properties:
+  user_uuid:
+    type: string
+    format: uuid
+    description: UUID of the user
+  role:
+    $ref: "rbac_role.yaml"
+  domain:
+    type: string
+    description: Domain where the role is assigned (workspace slug or "global")
+    minLength: 1
+    maxLength: 100
+  assigned_at:
+    type: string
+    format: date-time
+    description: Timestamp when the role was assigned
+    readOnly: true
+required:
+  - user_uuid
+  - role
+  - domain

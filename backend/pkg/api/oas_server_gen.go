@@ -10,10 +10,16 @@ import (
 type Handler interface {
 	// AddWorkspaceMember implements addWorkspaceMember operation.
 	//
-	// Add a member to a workspace.
+	// Add member to workspace.
 	//
 	// POST /workspace/{uuid}/members
-	AddWorkspaceMember(ctx context.Context, req *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (*WorkspaceMember, error)
+	AddWorkspaceMember(ctx context.Context, req *WorkspaceMember, params AddWorkspaceMemberParams) (*WorkspaceMember, error)
+	// AssignRoleToUser implements assignRoleToUser operation.
+	//
+	// Assign a role to a user.
+	//
+	// POST /rbac/user/{user_uuid}/roles
+	AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq, params AssignRoleToUserParams) error
 	// AuthConsent implements auth-consent operation.
 	//
 	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
@@ -62,9 +68,15 @@ type Handler interface {
 	//
 	// GET /auth/oauth2/session
 	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
+	// CheckPermission implements checkPermission operation.
+	//
+	// Check if a user has permission.
+	//
+	// POST /rbac/check
+	CheckPermission(ctx context.Context, req *CheckPermissionReq) (*CheckPermissionOK, error)
 	// CheckWorkspaceExists implements checkWorkspaceExists operation.
 	//
-	// Check if a workspace exists by slug.
+	// Check if workspace exists.
 	//
 	// GET /workspace/check
 	CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (*WorkspaceCheck, error)
@@ -74,6 +86,12 @@ type Handler interface {
 	//
 	// POST /contact
 	CreateContact(ctx context.Context, req *Contact) (*Contact, error)
+	// CreateRole implements createRole operation.
+	//
+	// Create a new role.
+	//
+	// POST /rbac/role
+	CreateRole(ctx context.Context, req *RbacRole) (*RbacRole, error)
 	// CreateUser implements createUser operation.
 	//
 	// Create a new user.
@@ -260,6 +278,12 @@ type Handler interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
+	// DeleteRole implements deleteRole operation.
+	//
+	// Delete a role.
+	//
+	// DELETE /rbac/role/{uuid}
+	DeleteRole(ctx context.Context, params DeleteRoleParams) error
 	// DeleteUser implements deleteUser operation.
 	//
 	// Delete user.
@@ -268,7 +292,7 @@ type Handler interface {
 	DeleteUser(ctx context.Context, params DeleteUserParams) error
 	// DeleteWorkspace implements deleteWorkspace operation.
 	//
-	// Delete a workspace.
+	// Delete workspace.
 	//
 	// DELETE /workspace/{uuid}
 	DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error
@@ -326,15 +350,27 @@ type Handler interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
+	// GetRole implements getRole operation.
+	//
+	// Get role details.
+	//
+	// GET /rbac/role/{uuid}
+	GetRole(ctx context.Context, params GetRoleParams) (*RbacRole, error)
 	// GetUser implements getUser operation.
 	//
 	// Get user details.
 	//
 	// GET /user/{uuid}
 	GetUser(ctx context.Context, params GetUserParams) (*User, error)
+	// GetUserRoles implements getUserRoles operation.
+	//
+	// Get roles for a user.
+	//
+	// GET /rbac/user/{user_uuid}/roles
+	GetUserRoles(ctx context.Context, params GetUserRolesParams) (*GetUserRolesOK, error)
 	// GetWorkspace implements getWorkspace operation.
 	//
-	// Get a workspace by UUID.
+	// Get workspace details.
 	//
 	// GET /workspace/{uuid}
 	GetWorkspace(ctx context.Context, params GetWorkspaceParams) (*Workspace, error)
@@ -344,6 +380,18 @@ type Handler interface {
 	//
 	// GET /contact
 	ListContacts(ctx context.Context) ([]Contact, error)
+	// ListPermissions implements listPermissions operation.
+	//
+	// List all permissions.
+	//
+	// GET /rbac/permission
+	ListPermissions(ctx context.Context, params ListPermissionsParams) ([]RbacPermission, error)
+	// ListRoles implements listRoles operation.
+	//
+	// List all roles.
+	//
+	// GET /rbac/role
+	ListRoles(ctx context.Context, params ListRolesParams) ([]RbacRole, error)
 	// ListUsers implements listUsers operation.
 	//
 	// List all users.
@@ -352,16 +400,16 @@ type Handler interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	// ListWorkspaceMembers implements listWorkspaceMembers operation.
 	//
-	// List members of a workspace.
+	// List workspace members.
 	//
 	// GET /workspace/{uuid}/members
 	ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) ([]WorkspaceMember, error)
 	// ListWorkspaces implements listWorkspaces operation.
 	//
-	// List workspaces for the current user.
+	// List all workspaces.
 	//
 	// GET /workspace
-	ListWorkspaces(ctx context.Context, params ListWorkspacesParams) ([]Workspace, error)
+	ListWorkspaces(ctx context.Context) ([]Workspace, error)
 	// MessageEmailQuery implements messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
@@ -476,9 +524,15 @@ type Handler interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
+	// RemoveRoleFromUser implements removeRoleFromUser operation.
+	//
+	// Remove a role from a user.
+	//
+	// DELETE /rbac/user/{user_uuid}/roles/{role_name}
+	RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) error
 	// RemoveWorkspaceMember implements removeWorkspaceMember operation.
 	//
-	// Remove a member from a workspace.
+	// Remove member from workspace.
 	//
 	// DELETE /workspace/{uuid}/members/{user_uuid}
 	RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error
@@ -650,6 +704,12 @@ type Handler interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, req *UserProfile) (*User, error)
+	// UpdateRole implements updateRole operation.
+	//
+	// Update a role.
+	//
+	// PUT /rbac/role/{uuid}
+	UpdateRole(ctx context.Context, req *RbacRole, params UpdateRoleParams) (*RbacRole, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Update user details.
@@ -658,13 +718,13 @@ type Handler interface {
 	UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (*User, error)
 	// UpdateWorkspace implements updateWorkspace operation.
 	//
-	// Update a workspace.
+	// Update workspace.
 	//
 	// PUT /workspace/{uuid}
 	UpdateWorkspace(ctx context.Context, req *Workspace, params UpdateWorkspaceParams) (*Workspace, error)
 	// UpdateWorkspaceMemberRole implements updateWorkspaceMemberRole operation.
 	//
-	// Update a member's role in a workspace.
+	// Update member role.
 	//
 	// PUT /workspace/{uuid}/members/{user_uuid}
 	UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (*WorkspaceMember, error)

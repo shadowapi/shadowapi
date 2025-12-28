@@ -1,0 +1,80 @@
+get:
+  summary: Get role details
+  operationId: getRole
+  tags:
+    - RBAC
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Role UUID
+  responses:
+    "200":
+      description: Role details
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/RBACRole"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  summary: Update a role
+  operationId: updateRole
+  tags:
+    - RBAC
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Role UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/RBACRole"
+  responses:
+    "200":
+      description: Role updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/RBACRole"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Delete a role
+  operationId: deleteRole
+  tags:
+    - RBAC
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Role UUID
+  responses:
+    "204":
+      description: Role deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

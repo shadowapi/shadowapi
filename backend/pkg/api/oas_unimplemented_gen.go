@@ -15,11 +15,20 @@ var _ Handler = UnimplementedHandler{}
 
 // AddWorkspaceMember implements addWorkspaceMember operation.
 //
-// Add a member to a workspace.
+// Add member to workspace.
 //
 // POST /workspace/{uuid}/members
-func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (r *WorkspaceMember, _ error) {
+func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *WorkspaceMember, params AddWorkspaceMemberParams) (r *WorkspaceMember, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// AssignRoleToUser implements assignRoleToUser operation.
+//
+// Assign a role to a user.
+//
+// POST /rbac/user/{user_uuid}/roles
+func (UnimplementedHandler) AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq, params AssignRoleToUserParams) error {
+	return ht.ErrNotImplemented
 }
 
 // AuthConsent implements auth-consent operation.
@@ -94,9 +103,18 @@ func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r *AuthOAuth
 	return r, ht.ErrNotImplemented
 }
 
+// CheckPermission implements checkPermission operation.
+//
+// Check if a user has permission.
+//
+// POST /rbac/check
+func (UnimplementedHandler) CheckPermission(ctx context.Context, req *CheckPermissionReq) (r *CheckPermissionOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CheckWorkspaceExists implements checkWorkspaceExists operation.
 //
-// Check if a workspace exists by slug.
+// Check if workspace exists.
 //
 // GET /workspace/check
 func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (r *WorkspaceCheck, _ error) {
@@ -109,6 +127,15 @@ func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params Che
 //
 // POST /contact
 func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r *Contact, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateRole implements createRole operation.
+//
+// Create a new role.
+//
+// POST /rbac/role
+func (UnimplementedHandler) CreateRole(ctx context.Context, req *RbacRole) (r *RbacRole, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -391,6 +418,15 @@ func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteCont
 	return ht.ErrNotImplemented
 }
 
+// DeleteRole implements deleteRole operation.
+//
+// Delete a role.
+//
+// DELETE /rbac/role/{uuid}
+func (UnimplementedHandler) DeleteRole(ctx context.Context, params DeleteRoleParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteUser implements deleteUser operation.
 //
 // Delete user.
@@ -402,7 +438,7 @@ func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserPar
 
 // DeleteWorkspace implements deleteWorkspace operation.
 //
-// Delete a workspace.
+// Delete workspace.
 //
 // DELETE /workspace/{uuid}
 func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error {
@@ -490,6 +526,15 @@ func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// GetRole implements getRole operation.
+//
+// Get role details.
+//
+// GET /rbac/role/{uuid}
+func (UnimplementedHandler) GetRole(ctx context.Context, params GetRoleParams) (r *RbacRole, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetUser implements getUser operation.
 //
 // Get user details.
@@ -499,9 +544,18 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 	return r, ht.ErrNotImplemented
 }
 
+// GetUserRoles implements getUserRoles operation.
+//
+// Get roles for a user.
+//
+// GET /rbac/user/{user_uuid}/roles
+func (UnimplementedHandler) GetUserRoles(ctx context.Context, params GetUserRolesParams) (r *GetUserRolesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetWorkspace implements getWorkspace operation.
 //
-// Get a workspace by UUID.
+// Get workspace details.
 //
 // GET /workspace/{uuid}
 func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (r *Workspace, _ error) {
@@ -517,6 +571,24 @@ func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ er
 	return r, ht.ErrNotImplemented
 }
 
+// ListPermissions implements listPermissions operation.
+//
+// List all permissions.
+//
+// GET /rbac/permission
+func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPermissionsParams) (r []RbacPermission, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListRoles implements listRoles operation.
+//
+// List all roles.
+//
+// GET /rbac/role
+func (UnimplementedHandler) ListRoles(ctx context.Context, params ListRolesParams) (r []RbacRole, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListUsers implements listUsers operation.
 //
 // List all users.
@@ -528,7 +600,7 @@ func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
 
 // ListWorkspaceMembers implements listWorkspaceMembers operation.
 //
-// List members of a workspace.
+// List workspace members.
 //
 // GET /workspace/{uuid}/members
 func (UnimplementedHandler) ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) (r []WorkspaceMember, _ error) {
@@ -537,10 +609,10 @@ func (UnimplementedHandler) ListWorkspaceMembers(ctx context.Context, params Lis
 
 // ListWorkspaces implements listWorkspaces operation.
 //
-// List workspaces for the current user.
+// List all workspaces.
 //
 // GET /workspace
-func (UnimplementedHandler) ListWorkspaces(ctx context.Context, params ListWorkspacesParams) (r []Workspace, _ error) {
+func (UnimplementedHandler) ListWorkspaces(ctx context.Context) (r []Workspace, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -715,9 +787,18 @@ func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, p
 	return r, ht.ErrNotImplemented
 }
 
+// RemoveRoleFromUser implements removeRoleFromUser operation.
+//
+// Remove a role from a user.
+//
+// DELETE /rbac/user/{user_uuid}/roles/{role_name}
+func (UnimplementedHandler) RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) error {
+	return ht.ErrNotImplemented
+}
+
 // RemoveWorkspaceMember implements removeWorkspaceMember operation.
 //
-// Remove a member from a workspace.
+// Remove member from workspace.
 //
 // DELETE /workspace/{uuid}/members/{user_uuid}
 func (UnimplementedHandler) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error {
@@ -976,6 +1057,15 @@ func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile)
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateRole implements updateRole operation.
+//
+// Update a role.
+//
+// PUT /rbac/role/{uuid}
+func (UnimplementedHandler) UpdateRole(ctx context.Context, req *RbacRole, params UpdateRoleParams) (r *RbacRole, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateUser implements updateUser operation.
 //
 // Update user details.
@@ -987,7 +1077,7 @@ func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params Up
 
 // UpdateWorkspace implements updateWorkspace operation.
 //
-// Update a workspace.
+// Update workspace.
 //
 // PUT /workspace/{uuid}
 func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace, params UpdateWorkspaceParams) (r *Workspace, _ error) {
@@ -996,7 +1086,7 @@ func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace,
 
 // UpdateWorkspaceMemberRole implements updateWorkspaceMemberRole operation.
 //
-// Update a member's role in a workspace.
+// Update member role.
 //
 // PUT /workspace/{uuid}/members/{user_uuid}
 func (UnimplementedHandler) UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (r *WorkspaceMember, _ error) {

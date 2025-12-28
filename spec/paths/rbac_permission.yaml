@@ -1,0 +1,32 @@
+get:
+  summary: List all permissions
+  operationId: listPermissions
+  tags:
+    - RBAC
+  parameters:
+    - in: query
+      name: scope
+      schema:
+        type: string
+        enum: [global, workspace]
+      description: Filter permissions by scope
+    - in: query
+      name: resource
+      schema:
+        type: string
+      description: Filter permissions by resource type
+  responses:
+    "200":
+      description: List of permissions
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/RBACPermission"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

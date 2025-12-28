@@ -1090,7 +1090,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List workspaces for the current user */
+        /** List all workspaces */
         get: operations["listWorkspaces"];
         put?: never;
         /** Create a new workspace */
@@ -1108,12 +1108,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a workspace by UUID */
+        /** Get workspace details */
         get: operations["getWorkspace"];
-        /** Update a workspace */
+        /** Update workspace */
         put: operations["updateWorkspace"];
         post?: never;
-        /** Delete a workspace */
+        /** Delete workspace */
         delete: operations["deleteWorkspace"];
         options?: never;
         head?: never;
@@ -1127,10 +1127,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List members of a workspace */
+        /** List workspace members */
         get: operations["listWorkspaceMembers"];
         put?: never;
-        /** Add a member to a workspace */
+        /** Add member to workspace */
         post: operations["addWorkspaceMember"];
         delete?: never;
         options?: never;
@@ -1146,10 +1146,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Update a member's role in a workspace */
+        /** Update member role */
         put: operations["updateWorkspaceMemberRole"];
         post?: never;
-        /** Remove a member from a workspace */
+        /** Remove member from workspace */
         delete: operations["removeWorkspaceMember"];
         options?: never;
         head?: never;
@@ -1163,10 +1163,116 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Check if a workspace exists by slug */
+        /** Check if workspace exists */
         get: operations["checkWorkspaceExists"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rbac/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all roles */
+        get: operations["listRoles"];
+        put?: never;
+        /** Create a new role */
+        post: operations["createRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rbac/role/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get role details */
+        get: operations["getRole"];
+        /** Update a role */
+        put: operations["updateRole"];
+        post?: never;
+        /** Delete a role */
+        delete: operations["deleteRole"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rbac/permission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all permissions */
+        get: operations["listPermissions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rbac/user/{user_uuid}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get roles for a user */
+        get: operations["getUserRoles"];
+        put?: never;
+        /** Assign a role to a user */
+        post: operations["assignRoleToUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rbac/user/{user_uuid}/roles/{role_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a role from a user */
+        delete: operations["removeRoleFromUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rbac/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check if a user has permission */
+        post: operations["checkPermission"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1292,6 +1398,9 @@ export interface components {
         Workspace: components["schemas"]["workspace"];
         WorkspaceMember: components["schemas"]["workspace_member"];
         WorkspaceCheck: components["schemas"]["workspace_check"];
+        RBACRole: components["schemas"]["rbac_role"];
+        RBACPermission: components["schemas"]["rbac_permission"];
+        RBACRoleAssignment: components["schemas"]["rbac_role_assignment"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2108,6 +2217,83 @@ export interface components {
             exists: boolean;
             /** @description Human-readable workspace name (if exists) */
             display_name?: string;
+        };
+        rbac_permission: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the permission
+             */
+            readonly uuid?: string;
+            /** @description Permission identifier (e.g., "datasource:read", "workspace:admin") */
+            name: string;
+            /** @description Human-readable permission name */
+            display_name?: string;
+            /** @description Description of what this permission allows */
+            description?: string;
+            /** @description Resource type (e.g., "datasource", "pipeline", "workspace") */
+            resource: string;
+            /**
+             * @description Action allowed on the resource
+             * @enum {string}
+             */
+            action: "read" | "write" | "create" | "delete" | "admin" | "*";
+            /**
+             * @description Scope of the permission
+             * @enum {string}
+             */
+            scope?: "global" | "workspace";
+            /**
+             * Format: date-time
+             * @description Timestamp of permission creation
+             */
+            readonly created_at?: string;
+        };
+        rbac_role: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the role
+             */
+            readonly uuid?: string;
+            /** @description Unique role identifier (e.g., "super_admin", "workspace_owner") */
+            name: string;
+            /** @description Human-readable role name */
+            display_name: string;
+            /** @description Description of the role's purpose and permissions */
+            description?: string;
+            /**
+             * @description Scope of the role (global for system-wide, workspace for workspace-scoped)
+             * @enum {string}
+             */
+            scope: "global" | "workspace";
+            /** @description Whether this is a system-defined role (cannot be deleted) */
+            readonly is_system?: boolean;
+            /** @description List of permissions granted by this role */
+            permissions?: components["schemas"]["rbac_permission"][];
+            /**
+             * Format: date-time
+             * @description Timestamp of role creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        rbac_role_assignment: {
+            /**
+             * Format: uuid
+             * @description UUID of the user
+             */
+            user_uuid: string;
+            role: components["schemas"]["rbac_role"];
+            /** @description Domain where the role is assigned (workspace slug or "global") */
+            domain: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the role was assigned
+             */
+            readonly assigned_at?: string;
         };
         email_label: {
             /** Format: int64 */
@@ -5737,10 +5923,7 @@ export interface operations {
     };
     listWorkspaces: {
         parameters: {
-            query?: {
-                limit?: number;
-                offset?: number;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -5805,6 +5988,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description Workspace UUID */
                 uuid: string;
             };
             cookie?: never;
@@ -5836,6 +6020,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description Workspace UUID */
                 uuid: string;
             };
             cookie?: never;
@@ -5871,6 +6056,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description Workspace UUID */
                 uuid: string;
             };
             cookie?: never;
@@ -5897,10 +6083,7 @@ export interface operations {
     };
     listWorkspaceMembers: {
         parameters: {
-            query?: {
-                limit?: number;
-                offset?: number;
-            };
+            query?: never;
             header?: never;
             path: {
                 /** @description Workspace UUID */
@@ -5942,18 +6125,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": {
-                    /**
-                     * Format: uuid
-                     * @description UUID of the user to add
-                     */
-                    user_uuid: string;
-                    /**
-                     * @description Role to assign (owner cannot be assigned via API)
-                     * @enum {string}
-                     */
-                    role: "admin" | "member";
-                };
+                "application/json": components["schemas"]["workspace_member"];
             };
         };
         responses: {
@@ -5993,7 +6165,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description New role for the member (owner cannot be changed via API)
+                     * @description New role for the member (owner cannot be changed)
                      * @enum {string}
                      */
                     role: "admin" | "member";
@@ -6065,13 +6237,371 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Workspace existence check result */
+            /** @description Workspace check result */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["workspace_check"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listRoles: {
+        parameters: {
+            query?: {
+                /** @description Filter roles by scope */
+                scope?: "global" | "workspace";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of roles */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["rbac_role"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["rbac_role"];
+            };
+        };
+        responses: {
+            /** @description Role created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["rbac_role"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Role UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["rbac_role"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Role UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["rbac_role"];
+            };
+        };
+        responses: {
+            /** @description Role updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["rbac_role"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Role UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listPermissions: {
+        parameters: {
+            query?: {
+                /** @description Filter permissions by scope */
+                scope?: "global" | "workspace";
+                /** @description Filter permissions by resource type */
+                resource?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of permissions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["rbac_permission"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getUserRoles: {
+        parameters: {
+            query?: {
+                /** @description Filter by domain (workspace slug or "global") */
+                domain?: string;
+            };
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User roles */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        user_uuid?: string;
+                        roles?: components["schemas"]["rbac_role_assignment"][];
+                    };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    assignRoleToUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Name of the role to assign */
+                    role_name: string;
+                    /** @description Domain for the role (workspace slug or "global") */
+                    domain: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Role assigned successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    removeRoleFromUser: {
+        parameters: {
+            query: {
+                /** @description Domain where the role was assigned (workspace slug or "global") */
+                domain: string;
+            };
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+                /** @description Role name to remove */
+                role_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role removed successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    checkPermission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description User UUID to check
+                     */
+                    user_uuid: string;
+                    /** @description Domain (workspace slug or "global") */
+                    domain: string;
+                    /** @description Resource type to check */
+                    resource: string;
+                    /** @description Action to check */
+                    action: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Permission check result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Whether the action is allowed */
+                        allowed?: boolean;
+                    };
                 };
             };
             /** @description Error */

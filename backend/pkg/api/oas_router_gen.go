@@ -1142,6 +1142,204 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'r': // Prefix: "rbac/"
+				origElem := elem
+				if l := len("rbac/"); len(elem) >= l && elem[0:l] == "rbac/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'c': // Prefix: "check"
+					origElem := elem
+					if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleCheckPermissionRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'p': // Prefix: "permission"
+					origElem := elem
+					if l := len("permission"); len(elem) >= l && elem[0:l] == "permission" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleListPermissionsRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "role"
+					origElem := elem
+					if l := len("role"); len(elem) >= l && elem[0:l] == "role" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleListRolesRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleCreateRoleRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "DELETE":
+								s.handleDeleteRoleRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "GET":
+								s.handleGetRoleRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handleUpdateRoleRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE,GET,PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'u': // Prefix: "user/"
+					origElem := elem
+					if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "user_uuid"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/roles"
+						origElem := elem
+						if l := len("/roles"); len(elem) >= l && elem[0:l] == "/roles" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleGetUserRolesRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleAssignRoleToUserRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "role_name"
+							// Leaf parameter
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleRemoveRoleFromUserRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 's': // Prefix: "s"
 				origElem := elem
 				if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
@@ -3377,6 +3575,239 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
+			case 'r': // Prefix: "rbac/"
+				origElem := elem
+				if l := len("rbac/"); len(elem) >= l && elem[0:l] == "rbac/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'c': // Prefix: "check"
+					origElem := elem
+					if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = CheckPermissionOperation
+							r.summary = "Check if a user has permission"
+							r.operationID = "checkPermission"
+							r.pathPattern = "/rbac/check"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'p': // Prefix: "permission"
+					origElem := elem
+					if l := len("permission"); len(elem) >= l && elem[0:l] == "permission" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = ListPermissionsOperation
+							r.summary = "List all permissions"
+							r.operationID = "listPermissions"
+							r.pathPattern = "/rbac/permission"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'r': // Prefix: "role"
+					origElem := elem
+					if l := len("role"); len(elem) >= l && elem[0:l] == "role" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = ListRolesOperation
+							r.summary = "List all roles"
+							r.operationID = "listRoles"
+							r.pathPattern = "/rbac/role"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = CreateRoleOperation
+							r.summary = "Create a new role"
+							r.operationID = "createRole"
+							r.pathPattern = "/rbac/role"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "uuid"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "DELETE":
+								r.name = DeleteRoleOperation
+								r.summary = "Delete a role"
+								r.operationID = "deleteRole"
+								r.pathPattern = "/rbac/role/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "GET":
+								r.name = GetRoleOperation
+								r.summary = "Get role details"
+								r.operationID = "getRole"
+								r.pathPattern = "/rbac/role/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "PUT":
+								r.name = UpdateRoleOperation
+								r.summary = "Update a role"
+								r.operationID = "updateRole"
+								r.pathPattern = "/rbac/role/{uuid}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 'u': // Prefix: "user/"
+					origElem := elem
+					if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "user_uuid"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/roles"
+						origElem := elem
+						if l := len("/roles"); len(elem) >= l && elem[0:l] == "/roles" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = GetUserRolesOperation
+								r.summary = "Get roles for a user"
+								r.operationID = "getUserRoles"
+								r.pathPattern = "/rbac/user/{user_uuid}/roles"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "POST":
+								r.name = AssignRoleToUserOperation
+								r.summary = "Assign a role to a user"
+								r.operationID = "assignRoleToUser"
+								r.pathPattern = "/rbac/user/{user_uuid}/roles"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "role_name"
+							// Leaf parameter
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = RemoveRoleFromUserOperation
+									r.summary = "Remove a role from a user"
+									r.operationID = "removeRoleFromUser"
+									r.pathPattern = "/rbac/user/{user_uuid}/roles/{role_name}"
+									r.args = args
+									r.count = 2
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				}
+
+				elem = origElem
 			case 's': // Prefix: "s"
 				origElem := elem
 				if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
@@ -4177,7 +4608,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						switch method {
 						case "GET":
 							r.name = ListWorkspacesOperation
-							r.summary = "List workspaces for the current user"
+							r.summary = "List all workspaces"
 							r.operationID = "listWorkspaces"
 							r.pathPattern = "/workspace"
 							r.args = args
@@ -4221,7 +4652,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								switch method {
 								case "GET":
 									r.name = CheckWorkspaceExistsOperation
-									r.summary = "Check if a workspace exists by slug"
+									r.summary = "Check if workspace exists"
 									r.operationID = "checkWorkspaceExists"
 									r.pathPattern = "/workspace/check"
 									r.args = args
@@ -4247,7 +4678,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							switch method {
 							case "DELETE":
 								r.name = DeleteWorkspaceOperation
-								r.summary = "Delete a workspace"
+								r.summary = "Delete workspace"
 								r.operationID = "deleteWorkspace"
 								r.pathPattern = "/workspace/{uuid}"
 								r.args = args
@@ -4255,7 +4686,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								return r, true
 							case "GET":
 								r.name = GetWorkspaceOperation
-								r.summary = "Get a workspace by UUID"
+								r.summary = "Get workspace details"
 								r.operationID = "getWorkspace"
 								r.pathPattern = "/workspace/{uuid}"
 								r.args = args
@@ -4263,7 +4694,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								return r, true
 							case "PUT":
 								r.name = UpdateWorkspaceOperation
-								r.summary = "Update a workspace"
+								r.summary = "Update workspace"
 								r.operationID = "updateWorkspace"
 								r.pathPattern = "/workspace/{uuid}"
 								r.args = args
@@ -4286,7 +4717,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								switch method {
 								case "GET":
 									r.name = ListWorkspaceMembersOperation
-									r.summary = "List members of a workspace"
+									r.summary = "List workspace members"
 									r.operationID = "listWorkspaceMembers"
 									r.pathPattern = "/workspace/{uuid}/members"
 									r.args = args
@@ -4294,7 +4725,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									return r, true
 								case "POST":
 									r.name = AddWorkspaceMemberOperation
-									r.summary = "Add a member to a workspace"
+									r.summary = "Add member to workspace"
 									r.operationID = "addWorkspaceMember"
 									r.pathPattern = "/workspace/{uuid}/members"
 									r.args = args
@@ -4323,7 +4754,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									switch method {
 									case "DELETE":
 										r.name = RemoveWorkspaceMemberOperation
-										r.summary = "Remove a member from a workspace"
+										r.summary = "Remove member from workspace"
 										r.operationID = "removeWorkspaceMember"
 										r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
 										r.args = args
@@ -4331,7 +4762,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										return r, true
 									case "PUT":
 										r.name = UpdateWorkspaceMemberRoleOperation
-										r.summary = "Update a member's role in a workspace"
+										r.summary = "Update member role"
 										r.operationID = "updateWorkspaceMemberRole"
 										r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
 										r.args = args

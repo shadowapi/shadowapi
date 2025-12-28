@@ -9,6 +9,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type CasbinRule struct {
+	ID    int32       `json:"id"`
+	Ptype string      `json:"ptype"`
+	V0    pgtype.Text `json:"v0"`
+	V1    pgtype.Text `json:"v1"`
+	V2    pgtype.Text `json:"v2"`
+	V3    pgtype.Text `json:"v3"`
+	V4    pgtype.Text `json:"v4"`
+	V5    pgtype.Text `json:"v5"`
+}
+
 type Contact struct {
 	UUID                    uuid.UUID          `json:"uuid"`
 	WorkspaceUUID           *uuid.UUID         `json:"workspace_uuid"`
@@ -240,6 +251,29 @@ type Pipeline struct {
 	Flow           []byte             `json:"flow"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type RbacPermission struct {
+	UUID        uuid.UUID          `json:"uuid"`
+	Name        string             `json:"name"`
+	DisplayName string             `json:"display_name"`
+	Description pgtype.Text        `json:"description"`
+	Resource    string             `json:"resource"`
+	Action      string             `json:"action"`
+	Scope       string             `json:"scope"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type RbacRole struct {
+	UUID        uuid.UUID          `json:"uuid"`
+	Name        string             `json:"name"`
+	DisplayName string             `json:"display_name"`
+	Description pgtype.Text        `json:"description"`
+	Scope       string             `json:"scope"`
+	IsSystem    bool               `json:"is_system"`
+	Permissions []byte             `json:"permissions"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Scheduler struct {

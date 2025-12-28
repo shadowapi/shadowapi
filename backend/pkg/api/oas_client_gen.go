@@ -31,10 +31,16 @@ func trimTrailingSlashes(u *url.URL) {
 type Invoker interface {
 	// AddWorkspaceMember invokes addWorkspaceMember operation.
 	//
-	// Add a member to a workspace.
+	// Add member to workspace.
 	//
 	// POST /workspace/{uuid}/members
-	AddWorkspaceMember(ctx context.Context, request *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (*WorkspaceMember, error)
+	AddWorkspaceMember(ctx context.Context, request *WorkspaceMember, params AddWorkspaceMemberParams) (*WorkspaceMember, error)
+	// AssignRoleToUser invokes assignRoleToUser operation.
+	//
+	// Assign a role to a user.
+	//
+	// POST /rbac/user/{user_uuid}/roles
+	AssignRoleToUser(ctx context.Context, request *AssignRoleToUserReq, params AssignRoleToUserParams) error
 	// AuthConsent invokes auth-consent operation.
 	//
 	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
@@ -83,9 +89,15 @@ type Invoker interface {
 	//
 	// GET /auth/oauth2/session
 	AuthOAuth2Session(ctx context.Context) (*AuthOAuth2SessionOK, error)
+	// CheckPermission invokes checkPermission operation.
+	//
+	// Check if a user has permission.
+	//
+	// POST /rbac/check
+	CheckPermission(ctx context.Context, request *CheckPermissionReq) (*CheckPermissionOK, error)
 	// CheckWorkspaceExists invokes checkWorkspaceExists operation.
 	//
-	// Check if a workspace exists by slug.
+	// Check if workspace exists.
 	//
 	// GET /workspace/check
 	CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (*WorkspaceCheck, error)
@@ -95,6 +107,12 @@ type Invoker interface {
 	//
 	// POST /contact
 	CreateContact(ctx context.Context, request *Contact) (*Contact, error)
+	// CreateRole invokes createRole operation.
+	//
+	// Create a new role.
+	//
+	// POST /rbac/role
+	CreateRole(ctx context.Context, request *RbacRole) (*RbacRole, error)
 	// CreateUser invokes createUser operation.
 	//
 	// Create a new user.
@@ -281,6 +299,12 @@ type Invoker interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
+	// DeleteRole invokes deleteRole operation.
+	//
+	// Delete a role.
+	//
+	// DELETE /rbac/role/{uuid}
+	DeleteRole(ctx context.Context, params DeleteRoleParams) error
 	// DeleteUser invokes deleteUser operation.
 	//
 	// Delete user.
@@ -289,7 +313,7 @@ type Invoker interface {
 	DeleteUser(ctx context.Context, params DeleteUserParams) error
 	// DeleteWorkspace invokes deleteWorkspace operation.
 	//
-	// Delete a workspace.
+	// Delete workspace.
 	//
 	// DELETE /workspace/{uuid}
 	DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error
@@ -347,15 +371,27 @@ type Invoker interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
+	// GetRole invokes getRole operation.
+	//
+	// Get role details.
+	//
+	// GET /rbac/role/{uuid}
+	GetRole(ctx context.Context, params GetRoleParams) (*RbacRole, error)
 	// GetUser invokes getUser operation.
 	//
 	// Get user details.
 	//
 	// GET /user/{uuid}
 	GetUser(ctx context.Context, params GetUserParams) (*User, error)
+	// GetUserRoles invokes getUserRoles operation.
+	//
+	// Get roles for a user.
+	//
+	// GET /rbac/user/{user_uuid}/roles
+	GetUserRoles(ctx context.Context, params GetUserRolesParams) (*GetUserRolesOK, error)
 	// GetWorkspace invokes getWorkspace operation.
 	//
-	// Get a workspace by UUID.
+	// Get workspace details.
 	//
 	// GET /workspace/{uuid}
 	GetWorkspace(ctx context.Context, params GetWorkspaceParams) (*Workspace, error)
@@ -365,6 +401,18 @@ type Invoker interface {
 	//
 	// GET /contact
 	ListContacts(ctx context.Context) ([]Contact, error)
+	// ListPermissions invokes listPermissions operation.
+	//
+	// List all permissions.
+	//
+	// GET /rbac/permission
+	ListPermissions(ctx context.Context, params ListPermissionsParams) ([]RbacPermission, error)
+	// ListRoles invokes listRoles operation.
+	//
+	// List all roles.
+	//
+	// GET /rbac/role
+	ListRoles(ctx context.Context, params ListRolesParams) ([]RbacRole, error)
 	// ListUsers invokes listUsers operation.
 	//
 	// List all users.
@@ -373,16 +421,16 @@ type Invoker interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	// ListWorkspaceMembers invokes listWorkspaceMembers operation.
 	//
-	// List members of a workspace.
+	// List workspace members.
 	//
 	// GET /workspace/{uuid}/members
 	ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) ([]WorkspaceMember, error)
 	// ListWorkspaces invokes listWorkspaces operation.
 	//
-	// List workspaces for the current user.
+	// List all workspaces.
 	//
 	// GET /workspace
-	ListWorkspaces(ctx context.Context, params ListWorkspacesParams) ([]Workspace, error)
+	ListWorkspaces(ctx context.Context) ([]Workspace, error)
 	// MessageEmailQuery invokes messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.
@@ -497,9 +545,15 @@ type Invoker interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, request *Pipeline, params PipelineUpdateParams) (*Pipeline, error)
+	// RemoveRoleFromUser invokes removeRoleFromUser operation.
+	//
+	// Remove a role from a user.
+	//
+	// DELETE /rbac/user/{user_uuid}/roles/{role_name}
+	RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) error
 	// RemoveWorkspaceMember invokes removeWorkspaceMember operation.
 	//
-	// Remove a member from a workspace.
+	// Remove member from workspace.
 	//
 	// DELETE /workspace/{uuid}/members/{user_uuid}
 	RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error
@@ -671,6 +725,12 @@ type Invoker interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, request *UserProfile) (*User, error)
+	// UpdateRole invokes updateRole operation.
+	//
+	// Update a role.
+	//
+	// PUT /rbac/role/{uuid}
+	UpdateRole(ctx context.Context, request *RbacRole, params UpdateRoleParams) (*RbacRole, error)
 	// UpdateUser invokes updateUser operation.
 	//
 	// Update user details.
@@ -679,13 +739,13 @@ type Invoker interface {
 	UpdateUser(ctx context.Context, request *User, params UpdateUserParams) (*User, error)
 	// UpdateWorkspace invokes updateWorkspace operation.
 	//
-	// Update a workspace.
+	// Update workspace.
 	//
 	// PUT /workspace/{uuid}
 	UpdateWorkspace(ctx context.Context, request *Workspace, params UpdateWorkspaceParams) (*Workspace, error)
 	// UpdateWorkspaceMemberRole invokes updateWorkspaceMemberRole operation.
 	//
-	// Update a member's role in a workspace.
+	// Update member role.
 	//
 	// PUT /workspace/{uuid}/members/{user_uuid}
 	UpdateWorkspaceMemberRole(ctx context.Context, request *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (*WorkspaceMember, error)
@@ -772,15 +832,15 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 
 // AddWorkspaceMember invokes addWorkspaceMember operation.
 //
-// Add a member to a workspace.
+// Add member to workspace.
 //
 // POST /workspace/{uuid}/members
-func (c *Client) AddWorkspaceMember(ctx context.Context, request *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (*WorkspaceMember, error) {
+func (c *Client) AddWorkspaceMember(ctx context.Context, request *WorkspaceMember, params AddWorkspaceMemberParams) (*WorkspaceMember, error) {
 	res, err := c.sendAddWorkspaceMember(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendAddWorkspaceMember(ctx context.Context, request *AddWorkspaceMemberReq, params AddWorkspaceMemberParams) (res *WorkspaceMember, err error) {
+func (c *Client) sendAddWorkspaceMember(ctx context.Context, request *WorkspaceMember, params AddWorkspaceMemberParams) (res *WorkspaceMember, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("addWorkspaceMember"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -890,6 +950,133 @@ func (c *Client) sendAddWorkspaceMember(ctx context.Context, request *AddWorkspa
 
 	stage = "DecodeResponse"
 	result, err := decodeAddWorkspaceMemberResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AssignRoleToUser invokes assignRoleToUser operation.
+//
+// Assign a role to a user.
+//
+// POST /rbac/user/{user_uuid}/roles
+func (c *Client) AssignRoleToUser(ctx context.Context, request *AssignRoleToUserReq, params AssignRoleToUserParams) error {
+	_, err := c.sendAssignRoleToUser(ctx, request, params)
+	return err
+}
+
+func (c *Client) sendAssignRoleToUser(ctx context.Context, request *AssignRoleToUserReq, params AssignRoleToUserParams) (res *AssignRoleToUserCreated, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("assignRoleToUser"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/rbac/user/{user_uuid}/roles"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AssignRoleToUserOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/rbac/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/roles"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAssignRoleToUserRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, AssignRoleToUserOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAssignRoleToUserResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1547,9 +1734,117 @@ func (c *Client) sendAuthOAuth2Session(ctx context.Context) (res *AuthOAuth2Sess
 	return result, nil
 }
 
+// CheckPermission invokes checkPermission operation.
+//
+// Check if a user has permission.
+//
+// POST /rbac/check
+func (c *Client) CheckPermission(ctx context.Context, request *CheckPermissionReq) (*CheckPermissionOK, error) {
+	res, err := c.sendCheckPermission(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCheckPermission(ctx context.Context, request *CheckPermissionReq) (res *CheckPermissionOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkPermission"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/rbac/check"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckPermissionOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/rbac/check"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCheckPermissionRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CheckPermissionOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckPermissionResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CheckWorkspaceExists invokes checkWorkspaceExists operation.
 //
-// Check if a workspace exists by slug.
+// Check if workspace exists.
 //
 // GET /workspace/check
 func (c *Client) CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (*WorkspaceCheck, error) {
@@ -1619,6 +1914,39 @@ func (c *Client) sendCheckWorkspaceExists(ctx context.Context, params CheckWorks
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CheckWorkspaceExistsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
 	}
 
 	stage = "SendRequest"
@@ -1738,6 +2066,114 @@ func (c *Client) sendCreateContact(ctx context.Context, request *Contact) (res *
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateContactResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateRole invokes createRole operation.
+//
+// Create a new role.
+//
+// POST /rbac/role
+func (c *Client) CreateRole(ctx context.Context, request *RbacRole) (*RbacRole, error) {
+	res, err := c.sendCreateRole(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateRole(ctx context.Context, request *RbacRole) (res *RbacRole, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createRole"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/rbac/role"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/rbac/role"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateRoleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateRoleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5508,6 +5944,129 @@ func (c *Client) sendDeleteContact(ctx context.Context, params DeleteContactPara
 	return result, nil
 }
 
+// DeleteRole invokes deleteRole operation.
+//
+// Delete a role.
+//
+// DELETE /rbac/role/{uuid}
+func (c *Client) DeleteRole(ctx context.Context, params DeleteRoleParams) error {
+	_, err := c.sendDeleteRole(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteRole(ctx context.Context, params DeleteRoleParams) (res *DeleteRoleNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteRole"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/rbac/role/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/rbac/role/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteRoleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteUser invokes deleteUser operation.
 //
 // Delete user.
@@ -5633,7 +6192,7 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 
 // DeleteWorkspace invokes deleteWorkspace operation.
 //
-// Delete a workspace.
+// Delete workspace.
 //
 // DELETE /workspace/{uuid}
 func (c *Client) DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error {
@@ -6821,6 +7380,129 @@ func (c *Client) sendGetProfile(ctx context.Context) (res *User, err error) {
 	return result, nil
 }
 
+// GetRole invokes getRole operation.
+//
+// Get role details.
+//
+// GET /rbac/role/{uuid}
+func (c *Client) GetRole(ctx context.Context, params GetRoleParams) (*RbacRole, error) {
+	res, err := c.sendGetRole(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetRole(ctx context.Context, params GetRoleParams) (res *RbacRole, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRole"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/rbac/role/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/rbac/role/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRoleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetUser invokes getUser operation.
 //
 // Get user details.
@@ -6944,9 +7626,154 @@ func (c *Client) sendGetUser(ctx context.Context, params GetUserParams) (res *Us
 	return result, nil
 }
 
+// GetUserRoles invokes getUserRoles operation.
+//
+// Get roles for a user.
+//
+// GET /rbac/user/{user_uuid}/roles
+func (c *Client) GetUserRoles(ctx context.Context, params GetUserRolesParams) (*GetUserRolesOK, error) {
+	res, err := c.sendGetUserRoles(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetUserRoles(ctx context.Context, params GetUserRolesParams) (res *GetUserRolesOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getUserRoles"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/rbac/user/{user_uuid}/roles"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetUserRolesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/rbac/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/roles"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "domain" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "domain",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Domain.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetUserRolesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetUserRolesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetWorkspace invokes getWorkspace operation.
 //
-// Get a workspace by UUID.
+// Get workspace details.
 //
 // GET /workspace/{uuid}
 func (c *Client) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (*Workspace, error) {
@@ -7172,6 +7999,275 @@ func (c *Client) sendListContacts(ctx context.Context) (res []Contact, err error
 	return result, nil
 }
 
+// ListPermissions invokes listPermissions operation.
+//
+// List all permissions.
+//
+// GET /rbac/permission
+func (c *Client) ListPermissions(ctx context.Context, params ListPermissionsParams) ([]RbacPermission, error) {
+	res, err := c.sendListPermissions(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListPermissions(ctx context.Context, params ListPermissionsParams) (res []RbacPermission, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listPermissions"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/rbac/permission"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListPermissionsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/rbac/permission"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "scope" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "scope",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Scope.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "resource" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "resource",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Resource.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListPermissionsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListPermissionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListRoles invokes listRoles operation.
+//
+// List all roles.
+//
+// GET /rbac/role
+func (c *Client) ListRoles(ctx context.Context, params ListRolesParams) ([]RbacRole, error) {
+	res, err := c.sendListRoles(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListRoles(ctx context.Context, params ListRolesParams) (res []RbacRole, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listRoles"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/rbac/role"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListRolesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/rbac/role"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "scope" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "scope",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Scope.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListRolesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListRolesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListUsers invokes listUsers operation.
 //
 // List all users.
@@ -7279,7 +8375,7 @@ func (c *Client) sendListUsers(ctx context.Context) (res []User, err error) {
 
 // ListWorkspaceMembers invokes listWorkspaceMembers operation.
 //
-// List members of a workspace.
+// List workspace members.
 //
 // GET /workspace/{uuid}/members
 func (c *Client) ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) ([]WorkspaceMember, error) {
@@ -7346,44 +8442,6 @@ func (c *Client) sendListWorkspaceMembers(ctx context.Context, params ListWorksp
 	pathParts[2] = "/members"
 	uri.AddPathParts(u, pathParts[:]...)
 
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "offset" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Offset.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
@@ -7441,15 +8499,15 @@ func (c *Client) sendListWorkspaceMembers(ctx context.Context, params ListWorksp
 
 // ListWorkspaces invokes listWorkspaces operation.
 //
-// List workspaces for the current user.
+// List all workspaces.
 //
 // GET /workspace
-func (c *Client) ListWorkspaces(ctx context.Context, params ListWorkspacesParams) ([]Workspace, error) {
-	res, err := c.sendListWorkspaces(ctx, params)
+func (c *Client) ListWorkspaces(ctx context.Context) ([]Workspace, error) {
+	res, err := c.sendListWorkspaces(ctx)
 	return res, err
 }
 
-func (c *Client) sendListWorkspaces(ctx context.Context, params ListWorkspacesParams) (res []Workspace, err error) {
+func (c *Client) sendListWorkspaces(ctx context.Context) (res []Workspace, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listWorkspaces"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -7488,44 +8546,6 @@ func (c *Client) sendListWorkspaces(ctx context.Context, params ListWorkspacesPa
 	var pathParts [1]string
 	pathParts[0] = "/workspace"
 	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "limit" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Limit.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	{
-		// Encode "offset" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.Offset.Get(); ok {
-				return e.EncodeValue(conv.IntToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -9754,9 +10774,169 @@ func (c *Client) sendPipelineUpdate(ctx context.Context, request *Pipeline, para
 	return result, nil
 }
 
+// RemoveRoleFromUser invokes removeRoleFromUser operation.
+//
+// Remove a role from a user.
+//
+// DELETE /rbac/user/{user_uuid}/roles/{role_name}
+func (c *Client) RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) error {
+	_, err := c.sendRemoveRoleFromUser(ctx, params)
+	return err
+}
+
+func (c *Client) sendRemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) (res *RemoveRoleFromUserNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("removeRoleFromUser"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/rbac/user/{user_uuid}/roles/{role_name}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RemoveRoleFromUserOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/rbac/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/roles/"
+	{
+		// Encode "role_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "role_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.RoleName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "domain" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "domain",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Domain))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RemoveRoleFromUserOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeRemoveRoleFromUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveWorkspaceMember invokes removeWorkspaceMember operation.
 //
-// Remove a member from a workspace.
+// Remove member from workspace.
 //
 // DELETE /workspace/{uuid}/members/{user_uuid}
 func (c *Client) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error {
@@ -13400,6 +14580,132 @@ func (c *Client) sendUpdateProfile(ctx context.Context, request *UserProfile) (r
 	return result, nil
 }
 
+// UpdateRole invokes updateRole operation.
+//
+// Update a role.
+//
+// PUT /rbac/role/{uuid}
+func (c *Client) UpdateRole(ctx context.Context, request *RbacRole, params UpdateRoleParams) (*RbacRole, error) {
+	res, err := c.sendUpdateRole(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateRole(ctx context.Context, request *RbacRole, params UpdateRoleParams) (res *RbacRole, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateRole"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/rbac/role/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/rbac/role/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateRoleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateRoleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateUser invokes updateUser operation.
 //
 // Update user details.
@@ -13528,7 +14834,7 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *User, params Updat
 
 // UpdateWorkspace invokes updateWorkspace operation.
 //
-// Update a workspace.
+// Update workspace.
 //
 // PUT /workspace/{uuid}
 func (c *Client) UpdateWorkspace(ctx context.Context, request *Workspace, params UpdateWorkspaceParams) (*Workspace, error) {
@@ -13654,7 +14960,7 @@ func (c *Client) sendUpdateWorkspace(ctx context.Context, request *Workspace, pa
 
 // UpdateWorkspaceMemberRole invokes updateWorkspaceMemberRole operation.
 //
-// Update a member's role in a workspace.
+// Update member role.
 //
 // PUT /workspace/{uuid}/members/{user_uuid}
 func (c *Client) UpdateWorkspaceMemberRole(ctx context.Context, request *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (*WorkspaceMember, error) {

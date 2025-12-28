@@ -389,3 +389,60 @@ CREATE TABLE IF NOT EXISTS worker_jobs (
                                            started_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                                            finished_at         TIMESTAMP WITH TIME ZONE
 );
+
+-- ============================================================================
+-- RBAC (Role-Based Access Control) Tables
+-- ============================================================================
+
+-- Casbin policy storage (standard adapter schema)
+-- Used by github.com/casbin/casbin-pg-adapter
+CREATE TABLE IF NOT EXISTS casbin_rule (
+    id SERIAL PRIMARY KEY,
+    ptype VARCHAR(100) NOT NULL,
+    v0 VARCHAR(100),
+    v1 VARCHAR(100),
+    v2 VARCHAR(100),
+    v3 VARCHAR(100),
+    v4 VARCHAR(100),
+    v5 VARCHAR(100)
+);
+
+CREATE INDEX IF NOT EXISTS idx_casbin_rule_ptype ON casbin_rule(ptype);
+CREATE INDEX IF NOT EXISTS idx_casbin_rule_v0 ON casbin_rule(v0);
+CREATE INDEX IF NOT EXISTS idx_casbin_rule_v1 ON casbin_rule(v1);
+
+-- Role definitions for API management
+CREATE TABLE IF NOT EXISTS rbac_role (
+    uuid UUID PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    display_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    scope VARCHAR(50) NOT NULL DEFAULT 'workspace', -- 'global' or 'workspace'
+    is_system BOOLEAN NOT NULL DEFAULT FALSE, -- System roles cannot be deleted
+    permissions JSONB DEFAULT '[]'::jsonb, -- Cached list of permissions for display
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT chk_rbac_role_scope CHECK (scope IN ('global', 'workspace'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_rbac_role_scope ON rbac_role(scope);
+CREATE INDEX IF NOT EXISTS idx_rbac_role_name ON rbac_role(name);
+
+-- Permission definitions (for documentation/UI)
+CREATE TABLE IF NOT EXISTS rbac_permission (
+    uuid UUID PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE, -- e.g., "datasource:read", "workspace:admin"
+    display_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    resource VARCHAR(100) NOT NULL, -- e.g., "datasource", "pipeline", "workspace"
+    action VARCHAR(50) NOT NULL, -- e.g., "read", "write", "delete", "admin"
+    scope VARCHAR(50) NOT NULL DEFAULT 'workspace', -- 'global' or 'workspace'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    CONSTRAINT chk_rbac_permission_scope CHECK (scope IN ('global', 'workspace'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_rbac_permission_resource ON rbac_permission(resource);
+CREATE INDEX IF NOT EXISTS idx_rbac_permission_scope ON rbac_permission(scope);
+CREATE INDEX IF NOT EXISTS idx_rbac_permission_name ON rbac_permission(name);

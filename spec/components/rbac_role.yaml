@@ -1,0 +1,51 @@
+# spec/components/rbac_role.yaml
+# Defines the schema for an RBAC Role
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the role
+    readOnly: true
+  name:
+    type: string
+    description: Unique role identifier (e.g., "super_admin", "workspace_owner")
+    pattern: "^[a-z][a-z0-9_]*$"
+    minLength: 2
+    maxLength: 100
+  display_name:
+    type: string
+    description: Human-readable role name
+    minLength: 1
+    maxLength: 255
+  description:
+    type: string
+    description: Description of the role's purpose and permissions
+  scope:
+    type: string
+    enum: [global, workspace]
+    description: Scope of the role (global for system-wide, workspace for workspace-scoped)
+  is_system:
+    type: boolean
+    description: Whether this is a system-defined role (cannot be deleted)
+    readOnly: true
+  permissions:
+    type: array
+    description: List of permissions granted by this role
+    items:
+      $ref: "rbac_permission.yaml"
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of role creation
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - name
+  - display_name
+  - scope

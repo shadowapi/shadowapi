@@ -16,6 +16,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
+	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
@@ -38,14 +39,15 @@ func Provide(i do.Injector) (*Server, error) {
 	log := do.MustInvoke[*slog.Logger](i)
 	authService := do.MustInvoke[*auth.Auth](i)
 	workspaceMiddleware := do.MustInvoke[*workspace.Middleware](i)
+	rbacMiddleware := do.MustInvoke[*rbac.Middleware](i)
 	handlerService := do.MustInvoke[*handler.Handler](i)
 
 	srv, err := api.NewServer(
 		handlerService,
 		authService,
 		api.WithPathPrefix("/api/v1"),
-		// Chain middlewares: auth first (validates JWT), then workspace (extracts from URL path)
-		api.WithMiddleware(authService.OgenMiddleware, workspaceMiddleware.OgenMiddleware),
+		// Chain middlewares: auth (validates JWT), workspace (extracts from URL path), rbac (permission check)
+		api.WithMiddleware(authService.OgenMiddleware, workspaceMiddleware.OgenMiddleware, rbacMiddleware.OgenMiddleware),
 		api.WithNotFound(func(w http.ResponseWriter, r *http.Request) {
 			log.Info("no ogen route matched, returning 404")
 			http.NotFound(w, r)

@@ -82,6 +82,72 @@ func decodeAddWorkspaceMemberParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// AssignRoleToUserParams is parameters of assignRoleToUser operation.
+type AssignRoleToUserParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+}
+
+func unpackAssignRoleToUserParams(packed middleware.Parameters) (params AssignRoleToUserParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeAssignRoleToUserParams(args [1]string, argsEscaped bool, r *http.Request) (params AssignRoleToUserParams, _ error) {
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // AuthConsentParams is parameters of auth-consent operation.
 type AuthConsentParams struct {
 	// The consent challenge from Hydra.
@@ -2182,6 +2248,72 @@ func decodeDeleteContactParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
+// DeleteRoleParams is parameters of deleteRole operation.
+type DeleteRoleParams struct {
+	// Role UUID.
+	UUID uuid.UUID
+}
+
+func unpackDeleteRoleParams(packed middleware.Parameters) (params DeleteRoleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteRoleParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteRoleParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteUserParams is parameters of deleteUser operation.
 type DeleteUserParams struct {
 	UUID string
@@ -2249,6 +2381,7 @@ func decodeDeleteUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 
 // DeleteWorkspaceParams is parameters of deleteWorkspace operation.
 type DeleteWorkspaceParams struct {
+	// Workspace UUID.
 	UUID uuid.UUID
 }
 
@@ -2692,6 +2825,72 @@ func decodeGetContactParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// GetRoleParams is parameters of getRole operation.
+type GetRoleParams struct {
+	// Role UUID.
+	UUID uuid.UUID
+}
+
+func unpackGetRoleParams(packed middleware.Parameters) (params GetRoleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetRoleParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRoleParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetUserParams is parameters of getUser operation.
 type GetUserParams struct {
 	UUID string
@@ -2757,8 +2956,128 @@ func decodeGetUserParams(args [1]string, argsEscaped bool, r *http.Request) (par
 	return params, nil
 }
 
+// GetUserRolesParams is parameters of getUserRoles operation.
+type GetUserRolesParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+	// Filter by domain (workspace slug or "global").
+	Domain OptString
+}
+
+func unpackGetUserRolesParams(packed middleware.Parameters) (params GetUserRolesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "domain",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Domain = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetUserRolesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetUserRolesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: domain.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "domain",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotDomainVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDomainVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Domain.SetTo(paramsDotDomainVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetWorkspaceParams is parameters of getWorkspace operation.
 type GetWorkspaceParams struct {
+	// Workspace UUID.
 	UUID uuid.UUID
 }
 
@@ -2822,12 +3141,222 @@ func decodeGetWorkspaceParams(args [1]string, argsEscaped bool, r *http.Request)
 	return params, nil
 }
 
+// ListPermissionsParams is parameters of listPermissions operation.
+type ListPermissionsParams struct {
+	// Filter permissions by scope.
+	Scope OptListPermissionsScope
+	// Filter permissions by resource type.
+	Resource OptString
+}
+
+func unpackListPermissionsParams(packed middleware.Parameters) (params ListPermissionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scope",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Scope = v.(OptListPermissionsScope)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "resource",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Resource = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeListPermissionsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListPermissionsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: scope.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "scope",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotScopeVal ListPermissionsScope
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotScopeVal = ListPermissionsScope(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Scope.SetTo(paramsDotScopeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Scope.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scope",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: resource.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "resource",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotResourceVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotResourceVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Resource.SetTo(paramsDotResourceVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "resource",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListRolesParams is parameters of listRoles operation.
+type ListRolesParams struct {
+	// Filter roles by scope.
+	Scope OptListRolesScope
+}
+
+func unpackListRolesParams(packed middleware.Parameters) (params ListRolesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "scope",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Scope = v.(OptListRolesScope)
+		}
+	}
+	return params
+}
+
+func decodeListRolesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListRolesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: scope.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "scope",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotScopeVal ListRolesScope
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotScopeVal = ListRolesScope(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Scope.SetTo(paramsDotScopeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Scope.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "scope",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListWorkspaceMembersParams is parameters of listWorkspaceMembers operation.
 type ListWorkspaceMembersParams struct {
 	// Workspace UUID.
-	UUID   uuid.UUID
-	Limit  OptInt
-	Offset OptInt
+	UUID uuid.UUID
 }
 
 func unpackListWorkspaceMembersParams(packed middleware.Parameters) (params ListWorkspaceMembersParams) {
@@ -2838,29 +3367,10 @@ func unpackListWorkspaceMembersParams(packed middleware.Parameters) (params List
 		}
 		params.UUID = packed[key].(uuid.UUID)
 	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "offset",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Offset = v.(OptInt)
-		}
-	}
 	return params
 }
 
 func decodeListWorkspaceMembersParams(args [1]string, argsEscaped bool, r *http.Request) (params ListWorkspaceMembersParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
@@ -2903,223 +3413,6 @@ func decodeListWorkspaceMembersParams(args [1]string, argsEscaped bool, r *http.
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
 			In:   "path",
-			Err:  err,
-		}
-	}
-	// Set default value for query: limit.
-	{
-		val := int(100)
-		params.Limit.SetTo(val)
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: offset.
-	{
-		val := int(0)
-		params.Offset.SetTo(val)
-	}
-	// Decode query: offset.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotOffsetVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOffsetVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Offset.SetTo(paramsDotOffsetVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "offset",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// ListWorkspacesParams is parameters of listWorkspaces operation.
-type ListWorkspacesParams struct {
-	Limit  OptInt
-	Offset OptInt
-}
-
-func unpackListWorkspacesParams(packed middleware.Parameters) (params ListWorkspacesParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "offset",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Offset = v.(OptInt)
-		}
-	}
-	return params
-}
-
-func decodeListWorkspacesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListWorkspacesParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Set default value for query: limit.
-	{
-		val := int(100)
-		params.Limit.SetTo(val)
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Set default value for query: offset.
-	{
-		val := int(0)
-		params.Offset.SetTo(val)
-	}
-	// Decode query: offset.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "offset",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotOffsetVal int
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOffsetVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Offset.SetTo(paramsDotOffsetVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "offset",
-			In:   "query",
 			Err:  err,
 		}
 	}
@@ -4157,6 +4450,172 @@ func decodePipelineUpdateParams(args [1]string, argsEscaped bool, r *http.Reques
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// RemoveRoleFromUserParams is parameters of removeRoleFromUser operation.
+type RemoveRoleFromUserParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+	// Role name to remove.
+	RoleName string
+	// Domain where the role was assigned (workspace slug or "global").
+	Domain string
+}
+
+func unpackRemoveRoleFromUserParams(packed middleware.Parameters) (params RemoveRoleFromUserParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "role_name",
+			In:   "path",
+		}
+		params.RoleName = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "domain",
+			In:   "query",
+		}
+		params.Domain = packed[key].(string)
+	}
+	return params
+}
+
+func decodeRemoveRoleFromUserParams(args [2]string, argsEscaped bool, r *http.Request) (params RemoveRoleFromUserParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: role_name.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "role_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.RoleName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "role_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: domain.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "domain",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Domain = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "domain",
+			In:   "query",
 			Err:  err,
 		}
 	}
@@ -6094,6 +6553,72 @@ func decodeUpdateContactParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
+// UpdateRoleParams is parameters of updateRole operation.
+type UpdateRoleParams struct {
+	// Role UUID.
+	UUID uuid.UUID
+}
+
+func unpackUpdateRoleParams(packed middleware.Parameters) (params UpdateRoleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateRoleParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateRoleParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateUserParams is parameters of updateUser operation.
 type UpdateUserParams struct {
 	UUID string
@@ -6161,6 +6686,7 @@ func decodeUpdateUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 
 // UpdateWorkspaceParams is parameters of updateWorkspace operation.
 type UpdateWorkspaceParams struct {
+	// Workspace UUID.
 	UUID uuid.UUID
 }
 

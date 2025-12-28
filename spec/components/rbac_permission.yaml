@@ -1,0 +1,46 @@
+# spec/components/rbac_permission.yaml
+# Defines the schema for an RBAC Permission
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the permission
+    readOnly: true
+  name:
+    type: string
+    description: Permission identifier (e.g., "datasource:read", "workspace:admin")
+    pattern: "^[a-z][a-z0-9_]*:[a-z*]+$"
+    minLength: 3
+    maxLength: 100
+  display_name:
+    type: string
+    description: Human-readable permission name
+    minLength: 1
+    maxLength: 255
+  description:
+    type: string
+    description: Description of what this permission allows
+  resource:
+    type: string
+    description: Resource type (e.g., "datasource", "pipeline", "workspace")
+    minLength: 1
+    maxLength: 100
+  action:
+    type: string
+    enum: [read, write, create, delete, admin, "*"]
+    description: Action allowed on the resource
+  scope:
+    type: string
+    enum: [global, workspace]
+    description: Scope of the permission
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of permission creation
+    readOnly: true
+required:
+  - name
+  - resource
+  - action

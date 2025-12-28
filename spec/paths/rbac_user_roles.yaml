@@ -1,0 +1,77 @@
+get:
+  summary: Get roles for a user
+  operationId: getUserRoles
+  tags:
+    - RBAC
+  parameters:
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+    - in: query
+      name: domain
+      schema:
+        type: string
+      description: Filter by domain (workspace slug or "global")
+  responses:
+    "200":
+      description: User roles
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              user_uuid:
+                type: string
+                format: uuid
+              roles:
+                type: array
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/RBACRoleAssignment"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+post:
+  summary: Assign a role to a user
+  operationId: assignRoleToUser
+  tags:
+    - RBAC
+  parameters:
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            role_name:
+              type: string
+              description: Name of the role to assign
+            domain:
+              type: string
+              description: Domain for the role (workspace slug or "global")
+          required:
+            - role_name
+            - domain
+  responses:
+    "201":
+      description: Role assigned successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

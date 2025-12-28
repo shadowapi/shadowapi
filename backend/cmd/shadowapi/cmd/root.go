@@ -18,6 +18,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/loader"
 	"github.com/shadowapi/shadowapi/backend/internal/log"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
+	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/internal/workspace"
@@ -69,6 +70,8 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		do.Provide(injector, queue.Provide)
 		do.Provide(injector, auth.Provide)
 		do.Provide(injector, workspace.Provide) // Workspace middleware
+		do.Provide(injector, rbac.Provide)      // RBAC enforcer
+		do.Provide(injector, rbac.ProvideMiddleware)
 
 		// Register UserManager implementation (database-based)
 		do.Provide(injector, dbauth.Provide)

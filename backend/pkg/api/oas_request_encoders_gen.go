@@ -12,7 +12,21 @@ import (
 )
 
 func encodeAddWorkspaceMemberRequest(
-	req *AddWorkspaceMemberReq,
+	req *WorkspaceMember,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeAssignRoleToUserRequest(
+	req *AssignRoleToUserReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -53,8 +67,36 @@ func encodeAuthOAuth2AuthorizeRequest(
 	return nil
 }
 
+func encodeCheckPermissionRequest(
+	req *CheckPermissionReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateContactRequest(
 	req *Contact,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateRoleRequest(
+	req *RbacRole,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -629,6 +671,20 @@ func encodeUpdateContactRequest(
 
 func encodeUpdateProfileRequest(
 	req *UserProfile,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateRoleRequest(
+	req *RbacRole,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
