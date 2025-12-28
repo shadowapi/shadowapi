@@ -43,10 +43,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch user profile from the backend
-  const fetchUserProfile = useCallback(async (): Promise<User | null> => {
+  // Returns user data on success, null on error
+  // If 401, returns 'unauthorized' to signal session expired
+  const fetchUserProfile = useCallback(async (): Promise<User | null | 'unauthorized'> => {
     try {
-      const { data, error } = await client.GET('/profile');
+      const { data, error, response } = await client.GET('/profile');
       if (error || !data) {
+        // Check if it's an auth error (401)
+        if (response?.status === 401) {
+          return 'unauthorized';
+        }
         console.error('Failed to fetch user profile:', error);
         return null;
       }
@@ -72,7 +78,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setTokenExpiresIn(session.expires_in ?? null);
         // Fetch user profile to get user details including is_admin
         const userProfile = await fetchUserProfile();
-        if (userProfile) {
+        if (userProfile === 'unauthorized') {
+          // Session cookie expired - clear state and redirect to login
+          await oauth2Logout().catch(() => {}); // Ignore logout errors
+          setIsAuthenticated(false);
+          setUser(null);
+          setTokenExpiresIn(null);
+        } else if (userProfile) {
           setUser(userProfile);
         }
       } else {

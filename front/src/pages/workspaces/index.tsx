@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Typography, Card, Button, Alert, Spin, Empty, Flex } from 'antd';
+import { Typography, Card, Button, Spin, Empty, Flex } from 'antd';
 import { FolderOutlined, PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { uiColors } from '../../theme';
@@ -21,27 +21,21 @@ function WorkspaceSelectionPage() {
   const { logout, user } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Check if we just returned from OAuth2 callback
   const isOAuth2Callback = searchParams.get('oauth2_success') === 'true';
 
-  const fetchWorkspaces = useCallback(async (retry = 0): Promise<boolean> => {
+  const fetchWorkspaces = useCallback(async (): Promise<boolean> => {
     try {
       const response = await client.GET('/workspace');
 
       if (response.error) {
-        console.error('Failed to fetch workspaces:', response.error);
-        // If auth error and haven't retried much, wait and retry (cookies might not be ready)
-        const isAuthError = response.response?.status === 401;
-        if (isAuthError && retry < 3) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          return fetchWorkspaces(retry + 1);
+        // If auth error (401), logout and let ProtectedRoute redirect to login
+        if (response.response?.status === 401) {
+          await logout();
+          return false;
         }
-        const errorDetail = typeof response.error === 'object' && 'detail' in response.error
-          ? (response.error as { detail?: string }).detail
-          : 'Unknown error';
-        setError(`Failed to load workspaces: ${errorDetail}`);
+        console.error('Failed to fetch workspaces:', response.error);
         return false;
       } else if (response.data) {
         setWorkspaces(response.data);
@@ -55,10 +49,9 @@ function WorkspaceSelectionPage() {
       return false;
     } catch (err) {
       console.error('Error fetching workspaces:', err);
-      setError('Failed to load workspaces');
       return false;
     }
-  }, [navigate]);
+  }, [navigate, logout]);
 
   // Fetch user's workspaces on mount
   useEffect(() => {
@@ -80,13 +73,6 @@ function WorkspaceSelectionPage() {
   const handleLogout = async () => {
     await logout();
     navigate('/');
-  };
-
-  const handleRetry = async () => {
-    setError(null);
-    setLoading(true);
-    await fetchWorkspaces();
-    setLoading(false);
   };
 
   // Navigate to a workspace
@@ -121,22 +107,6 @@ function WorkspaceSelectionPage() {
           {user?.email ? `Welcome, ${user.email}` : 'Choose a workspace to continue.'}
         </Paragraph>
       </div>
-
-      {error && (
-        <Alert
-          message={error}
-          type="error"
-          showIcon
-          closable
-          onClose={() => setError(null)}
-          style={{ marginBottom: 24 }}
-          action={
-            <Button size="small" onClick={handleRetry}>
-              Retry
-            </Button>
-          }
-        />
-      )}
 
       {/* User's workspaces list */}
       {workspaces.length > 0 && (
