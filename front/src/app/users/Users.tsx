@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Table, Button, Space, Typography, message, Tag, Result, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
@@ -98,31 +98,25 @@ function Users() {
         value ? new Date(value).toLocaleDateString() : '-',
     },
     {
-      title: 'Actions',
+      title: '',
       key: 'actions',
-      width: 120,
+      width: 60,
       render: (_, record) => (
-        <Space>
+        <Popconfirm
+          title="Delete user"
+          description="Are you sure you want to delete this user?"
+          onConfirm={() => handleDelete(record.uuid!)}
+          okButtonProps={{ danger: true }}
+          okText="Delete"
+        >
           <Button
             type="text"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/w/${slug}/users/${record.uuid}`)}
+            danger
+            icon={<DeleteOutlined />}
+            disabled={record.uuid === currentUser?.uuid}
+            onClick={(e) => e.stopPropagation()}
           />
-          <Popconfirm
-            title="Delete user"
-            description="Are you sure you want to delete this user?"
-            onConfirm={() => handleDelete(record.uuid!)}
-            okButtonProps={{ danger: true }}
-            okText="Delete"
-          >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              disabled={record.uuid === currentUser?.uuid}
-            />
-          </Popconfirm>
-        </Space>
+        </Popconfirm>
       ),
     },
   ];
@@ -153,6 +147,10 @@ function Users() {
         rowKey="uuid"
         loading={loading}
         pagination={false}
+        onRow={(record) => ({
+          onClick: () => navigate(`/w/${slug}/users/${record.uuid}`),
+          style: { cursor: 'pointer' },
+        })}
       />
     </>
   );

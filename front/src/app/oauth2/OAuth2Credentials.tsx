@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Typography, Button, Table, Space, message } from 'antd';
-import { PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import type { components } from '../../api/v1';
@@ -43,18 +43,6 @@ function OAuth2Credentials() {
       dataIndex: 'provider',
       key: 'provider',
     },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      render: (_, record) => (
-        <Button
-          type="text"
-          icon={<EditOutlined />}
-          onClick={() => navigate(`/w/${slug}/oauth2/credentials/${record.uuid}`)}
-        />
-      ),
-    },
   ];
 
   return (
@@ -75,6 +63,10 @@ function OAuth2Credentials() {
         rowKey="uuid"
         loading={loading}
         pagination={false}
+        onRow={(record) => ({
+          onClick: () => navigate(`/w/${slug}/oauth2/credentials/${record.uuid}`),
+          style: { cursor: 'pointer' },
+        })}
       />
     </>
   );

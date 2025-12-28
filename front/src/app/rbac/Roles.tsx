@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { Table, Button, Space, Typography, message, Tag, Result, Popconfirm, Select } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
@@ -85,39 +85,27 @@ function Roles() {
       render: (_, record) => record.permissions?.length || 0,
     },
     {
-      title: 'Actions',
+      title: '',
       key: 'actions',
-      width: 120,
-      render: (_, record) => (
-        <Space>
-          {record.is_system ? (
+      width: 60,
+      render: (_, record) =>
+        record.is_system ? null : (
+          <Popconfirm
+            title="Delete role"
+            description="Are you sure you want to delete this role?"
+            onConfirm={() => handleDelete(record.uuid!)}
+            okButtonProps={{ danger: true }}
+            okText="Delete"
+          >
             <Button
               type="text"
-              icon={<EyeOutlined />}
-              onClick={() => navigate(`/w/${slug}/rbac/roles/${record.uuid}`)}
-              title="View"
+              danger
+              icon={<DeleteOutlined />}
+              title="Delete"
+              onClick={(e) => e.stopPropagation()}
             />
-          ) : (
-            <>
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => navigate(`/w/${slug}/rbac/roles/${record.uuid}`)}
-                title="Edit"
-              />
-              <Popconfirm
-                title="Delete role"
-                description="Are you sure you want to delete this role?"
-                onConfirm={() => handleDelete(record.uuid!)}
-                okButtonProps={{ danger: true }}
-                okText="Delete"
-              >
-                <Button type="text" danger icon={<DeleteOutlined />} title="Delete" />
-              </Popconfirm>
-            </>
-          )}
-        </Space>
-      ),
+          </Popconfirm>
+        ),
     },
   ];
 
@@ -177,6 +165,10 @@ function Roles() {
         rowKey="uuid"
         loading={loading}
         pagination={false}
+        onRow={(record) => ({
+          onClick: () => navigate(`/w/${slug}/rbac/roles/${record.uuid}`),
+          style: { cursor: 'pointer' },
+        })}
       />
     </>
   );
