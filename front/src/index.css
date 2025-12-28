@@ -5,8 +5,18 @@ html,body {
 }
 
 .ant-layout-sider .ant-menu-submenu > .ant-menu-submenu-title,
-.ant-layout-sider .ant-menu-submenu > .ant-menu-submenu-title .ant-menu-title-content a {
+.ant-layout-sider .ant-menu-submenu > .ant-menu-submenu-title .ant-menu-title-content a,
+.ant-drawer-body .ant-menu-submenu > .ant-menu-submenu-title,
+.ant-drawer-body .ant-menu-submenu > .ant-menu-submenu-title .ant-menu-title-content a {
     color: rgba(0, 0, 0, 0.88) !important;
     background-color: transparent !important;
     background: transparent !important;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 991px) {
+    /* Reduce content padding on smaller screens */
+    .ant-layout-content {
+        padding: 16px !important;
+    }
 }

@@ -1,7 +1,7 @@
-import { type ReactNode } from 'react'
-import { Layout, Menu, theme, Breadcrumb, Dropdown, Button, Space, Typography } from 'antd'
-import type { MenuProps } from 'antd'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { useState, useEffect, type ReactNode } from 'react';
+import { Layout, Menu, Drawer, theme, Breadcrumb, Dropdown, Button, Space, Typography } from 'antd';
+import type { MenuProps } from 'antd';
+import { Link, useLocation, useNavigate } from 'react-router';
 import {
   DashboardOutlined,
   MessageOutlined,
@@ -17,15 +17,17 @@ import {
   UnorderedListOutlined,
   LogoutOutlined,
   DownOutlined,
-} from '@ant-design/icons'
+  MenuOutlined,
+} from '@ant-design/icons';
 
-import BaseLayout from './BaseLayout'
-import { useAuth } from '../lib/auth'
+import { uiColors } from '../theme';
+import { useAuth } from '../lib/auth';
+import { useResponsive } from '../lib/useResponsive';
+import { SmartLink } from '../lib/SmartLink';
 
+const { Header, Sider, Content, Footer } = Layout;
 
-const { Sider, Content } = Layout
-
-type MenuItem = Required<MenuProps>['items'][number]
+type MenuItem = Required<MenuProps>['items'][number];
 
 // Helper to extract workspace info from pathname
 function getWorkspaceInfo(pathname: string): { basePath: string; relativePath: string } {
@@ -212,9 +214,18 @@ function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isMobile } = useResponsive();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  // Close drawer when switching to desktop
+  useEffect(() => {
+    if (!isMobile) {
+      setDrawerOpen(false);
+    }
+  }, [isMobile]);
 
   // Extract workspace info from path
   const { basePath, relativePath } = getWorkspaceInfo(location.pathname);
@@ -254,52 +265,157 @@ function AppLayout({ children }: AppLayoutProps) {
     },
   ];
 
+  // Handle menu click - close drawer on mobile
+  const handleMenuClick = () => {
+    if (isMobile) {
+      setDrawerOpen(false);
+    }
+  };
+
+  // Sidebar menu component (reused in Sider and Drawer)
+  const sidebarMenu = (
+    <Menu
+      mode="inline"
+      selectedKeys={selectedKeys}
+      defaultOpenKeys={defaultOpenKeys}
+      style={{ height: '100%', borderRight: 0 }}
+      items={menuItems}
+      onClick={handleMenuClick}
+    />
+  );
+
   return (
-    <BaseLayout>
-      <div
+    <Layout style={{ minHeight: '100vh' }}>
+      {/* Sticky Header */}
+      <Header
         style={{
-          padding: '0 48px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1001,
           display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
+          alignItems: 'center',
+          background: uiColors.headerBg,
+          borderBottom: `1px solid ${uiColors.headerBorder}`,
+          padding: '0 16px',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0', flexShrink: 0 }}>
-          <Breadcrumb items={getBreadcrumbItems(relativePath, basePath)} />
-          <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-            <Button type="text">
-              <Space>
-                <UserOutlined />
-                {user?.first_name || user?.email?.split('@')[0] || 'User'}
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
-        </div>
-        <Layout
+        {/* Hamburger button - mobile only */}
+        {isMobile && (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setDrawerOpen(true)}
+            style={{ color: '#fff', marginRight: 16, fontSize: 18 }}
+          />
+        )}
+
+        {/* Logo */}
+        <SmartLink
+          to="/"
           style={{
-            padding: '24px 0',
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-            flex: 1,
-            marginBottom: 24,
+            height: 36,
+            margin: '0 24px 0 0',
+            padding: '0 18px',
+            background: uiColors.logoBg,
+            borderRadius: 6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: uiColors.logoText,
+            fontWeight: 600,
+            fontSize: 18,
+            letterSpacing: '0.5px',
+            textDecoration: 'none',
           }}
         >
-          <Sider style={{ background: colorBgContainer }} width={250}>
-            <Menu
-              mode="inline"
-              selectedKeys={selectedKeys}
-              defaultOpenKeys={defaultOpenKeys}
-              style={{ height: '100%' }}
-              items={menuItems}
-            />
+          MeshPump
+        </SmartLink>
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* User dropdown */}
+        <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+          <Button type="text" style={{ color: '#fff' }}>
+            <Space>
+              <UserOutlined />
+              {user?.first_name || user?.email?.split('@')[0] || 'User'}
+              <DownOutlined />
+            </Space>
+          </Button>
+        </Dropdown>
+      </Header>
+
+      {/* Main content area with sidebar */}
+      <Layout hasSider>
+        {/* Desktop Sider - hidden on mobile */}
+        {!isMobile && (
+          <Sider
+            width={250}
+            style={{
+              background: colorBgContainer,
+              overflow: 'auto',
+              height: 'calc(100vh - 64px)',
+              position: 'sticky',
+              top: 64,
+              left: 0,
+            }}
+          >
+            {sidebarMenu}
           </Sider>
-          <Content style={{ padding: '0 24px' }}>
+        )}
+
+        {/* Content area */}
+        <Layout style={{ padding: isMobile ? '16px' : '0 24px 24px' }}>
+          {/* Breadcrumb row */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              margin: '16px 0',
+            }}
+          >
+            <Breadcrumb items={getBreadcrumbItems(relativePath, basePath)} />
+          </div>
+
+          {/* Main content */}
+          <Content
+            style={{
+              padding: 24,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+              minHeight: 280,
+            }}
+          >
             {children}
           </Content>
         </Layout>
-      </div>
-    </BaseLayout>
+      </Layout>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        title="Navigation"
+        placement="left"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        styles={{ body: { padding: 0 }, wrapper: { width: 280 } }}
+      >
+        {sidebarMenu}
+      </Drawer>
+
+      {/* Footer */}
+      <Footer
+        style={{
+          textAlign: 'center',
+          background: uiColors.footerBg,
+          color: uiColors.footerText,
+          borderTop: `1px solid ${uiColors.footerBorder}`,
+        }}
+      >
+        MeshPump {new Date().getFullYear()}
+      </Footer>
+    </Layout>
   );
 }
 
