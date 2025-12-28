@@ -18,6 +18,7 @@ import {
   LogoutOutlined,
   DownOutlined,
   MenuOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
@@ -109,6 +110,12 @@ function getMenuItems(basePath: string): MenuItem[] {
       key: '/logs',
       icon: <UnorderedListOutlined />,
       label: <Link to={`${basePath}/logs`}>Logs</Link>,
+    },
+    { type: 'divider' },
+    {
+      key: '/documentation',
+      icon: <BookOutlined />,
+      label: <SmartLink to="/documentation">Documentation</SmartLink>,
     },
   ];
 }
