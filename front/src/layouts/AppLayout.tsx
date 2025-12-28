@@ -20,6 +20,7 @@ import {
   MenuOutlined,
   BookOutlined,
   SafetyOutlined,
+  CrownOutlined,
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
@@ -119,6 +120,7 @@ function getMenuItems(basePath: string): MenuItem[] {
         },
         {
           key: '/rbac/roles',
+          icon: <CrownOutlined />,
           label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
         },
       ],
