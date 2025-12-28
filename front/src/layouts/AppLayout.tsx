@@ -64,15 +64,15 @@ function getMenuItems(basePath: string): MenuItem[] {
       ],
     },
     {
-      key: '/users',
-      icon: <UserOutlined />,
-      label: <Link to={`${basePath}/users`}>Users</Link>,
-    },
-    {
       key: '/rbac',
       icon: <SafetyOutlined />,
       label: 'Access Control',
       children: [
+        {
+          key: '/users',
+          icon: <UserOutlined />,
+          label: <Link to={`${basePath}/users`}>Users</Link>,
+        },
         {
           key: '/rbac/roles',
           label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
@@ -165,6 +165,7 @@ const menuParentMap: Record<string, string> = {
   '/files': '/messages',
   '/oauth2/credentials': '/datasources',
   '/schedulers': '/workers',
+  '/users': '/rbac',
   '/rbac/roles': '/rbac',
 };
 
