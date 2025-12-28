@@ -107,6 +107,8 @@ The application uses a subdomain-based architecture for service separation:
 - `front/src/api/v1.d.ts` – Generated TypeScript types from OpenAPI spec (do not edit manually, regenerate with `make api-gen`)
 - `front/src/app/WorkspaceRouter.tsx` – Router for workspace-scoped pages under `/w/:slug/*`
 - `front/src/app/oauth2/` – OAuth2 Credentials management pages (list, create, edit)
+- `front/src/app/rbac/` – RBAC management pages (Roles list, RoleEdit with permission picker)
+- `front/src/app/users/` – User management pages with integrated role assignment
 - `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
 - `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
 - `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
@@ -228,6 +230,8 @@ The application uses path-based workspaces on a single domain:
 - `/workspaces` → Workspace selection (CSR, protected, auth layout)
 - `/w/{slug}/` → Workspace dashboard
 - `/w/{slug}/oauth2/credentials` → OAuth2 credentials in workspace
+- `/w/{slug}/users` → User management (admin only)
+- `/w/{slug}/rbac/roles` → RBAC roles management (admin only)
 
 *API subdomain (`api.{domain}`):*
 - `/api/v1/*` → REST API endpoints
@@ -305,6 +309,13 @@ The application uses Casbin for fine-grained permission enforcement with domain-
 1. Add operation to `OperationPermissionMap` in `backend/internal/rbac/middleware.go`
 2. Specify the required `Resource` and `Action`
 3. For new resources, add constants to `types.go` and update `GlobalResources` if needed
+
+**Frontend RBAC UI:**
+- `front/src/app/rbac/Roles.tsx` – List all roles with scope filter, system role badges, and CRUD actions
+- `front/src/app/rbac/RoleEdit.tsx` – Create/edit roles with permission picker (checkboxes grouped by resource)
+- Role assignment is integrated into `front/src/app/users/UserEdit.tsx` with modal for assigning roles to users
+- Access Control menu item in sidebar (requires admin privileges)
+- System roles are read-only (cannot be edited or deleted)
 
 ## Specs & data model
 
