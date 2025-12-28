@@ -11,8 +11,8 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ## Repository map
 
 - `backend/` – Go service. `cmd/shadowapi` hosts the CLI (`serve`, `loader`, `reset-password`), `internal/` holds domain packages (auth, handler, worker, storages, queue, metrics, config), `pkg/api` is ogen-generated HTTP server (do not edit manually), `pkg/query` is SQLC output (do not edit), and `sdk-go/` contains a generated client example.
-- `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` and `paths/`.
-- `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Atlas migrations are applied from these files; no separate migration files exist.
+- `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` (including RBAC schemas) and `paths/` (including RBAC endpoints).
+- `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`, and RBAC queries in `sql/rbac.sql`. Atlas migrations are applied from schema files; no separate migration files exist.
 - `devops/` – Dockerfiles, Atlas configs, sqlc builder image, helper scripts, and Ory configuration files used by Compose/Make.
 - `devops/ory/` – Ory Hydra configuration files (`hydra/hydra.yaml`).
 - `devops/compose/auth/` – Docker Compose for Hydra OAuth2/OIDC service.
@@ -32,9 +32,10 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ### Key packages
 
-- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, workspaces, etc.
+- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, workspaces, RBAC, etc.
 - `internal/auth` – Authentication middleware and token validation.
 - `internal/auth/dbauth` – Database-based user manager implementation with global user authentication.
+- `internal/rbac` – Role-Based Access Control with Casbin enforcer, middleware, and predefined policies.
 - `internal/workspace` – Workspace context utilities and middleware for path-based workspace extraction.
 - `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
 - `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic.
@@ -251,6 +252,59 @@ The application uses path-based workspaces on a single domain:
 **Default workspaces:**
 - `internal` and `demo` workspaces are created automatically on first startup
 - Admin user is added as owner to both workspaces using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
+
+### RBAC (Role-Based Access Control)
+
+The application uses Casbin for fine-grained permission enforcement with domain-based (workspace-scoped) policies.
+
+**Architecture:**
+- Casbin enforcer with PostgreSQL adapter (`casbin_rule` table)
+- Ogen middleware intercepts requests and checks permissions before handlers execute
+- Policies are automatically initialized on startup with predefined roles
+
+**Key files:**
+- `backend/internal/rbac/rbac.go` – Casbin enforcer wrapper with DI provider
+- `backend/internal/rbac/middleware.go` – Ogen middleware with operation-to-permission mapping
+- `backend/internal/rbac/policies.go` – Predefined roles and permissions initialization
+- `backend/internal/rbac/types.go` – Resource, Action, Scope type definitions
+- `backend/internal/rbac/model.conf` – Casbin RBAC model configuration
+- `backend/internal/handler/rbac.go` – API handlers for role/permission management
+- `db/sql/rbac.sql` – SQLC queries for roles, permissions, role_assignments tables
+
+**Predefined roles:**
+| Role | Scope | Description |
+|------|-------|-------------|
+| `super_admin` | global | Full system access including user management and all workspaces |
+| `workspace_owner` | workspace | Full control over workspace including member management |
+| `workspace_admin` | workspace | Can manage workspace resources but not members |
+| `workspace_member` | workspace | Read-only access to workspace resources |
+
+**Resource types:**
+- **Global:** `user`, `workspace`, `role`, `rbac`
+- **Workspace-scoped:** `datasource`, `pipeline`, `storage`, `contact`, `message`, `scheduler`, `member`
+
+**Actions:** `read`, `write`, `create`, `delete`, `admin`
+
+**How enforcement works:**
+1. `OperationPermissionMap` in middleware.go maps API operation names to required `{Resource, Action}` pairs
+2. Middleware extracts user UUID from JWT claims and workspace slug from URL path
+3. Casbin checks if user has the required permission in the domain (workspace or "global")
+4. Operations not in the map are allowed by default (e.g., auth endpoints)
+
+**API endpoints:**
+- `GET /rbac/roles` – List all roles
+- `POST /rbac/roles` – Create custom role
+- `GET/PUT/DELETE /rbac/roles/{uuid}` – Manage specific role
+- `GET /rbac/permissions` – List all permissions
+- `GET /rbac/users/{uuid}/roles` – Get user's roles across all domains
+- `POST /rbac/users/{uuid}/roles` – Assign role to user in domain
+- `DELETE /rbac/users/{uuid}/roles/{role}` – Remove role from user
+- `POST /rbac/check` – Check if user has specific permission
+
+**Adding new protected operations:**
+1. Add operation to `OperationPermissionMap` in `backend/internal/rbac/middleware.go`
+2. Specify the required `Resource` and `Action`
+3. For new resources, add constants to `types.go` and update `GlobalResources` if needed
 
 ## Specs & data model
 
