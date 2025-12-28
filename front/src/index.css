@@ -3,3 +3,10 @@ html,body {
     padding: 0;
     font-family: Arial, sans-serif;
 }
+
+.ant-layout-sider .ant-menu-submenu > .ant-menu-submenu-title,
+.ant-layout-sider .ant-menu-submenu > .ant-menu-submenu-title .ant-menu-title-content a {
+    color: rgba(0, 0, 0, 0.88) !important;
+    background-color: transparent !important;
+    background: transparent !important;
+}

@@ -45,6 +45,7 @@ export const theme: ThemeConfig = {
     colorPrimary: colors.orange,
     colorLink: colors.orange,
     colorLinkHover: uiColors.primaryHover,
+    colorPrimaryBgHover: 'transparent', // Remove beige hover background on links
     colorBgContainer: colors.white,
     colorBgLayout: colors.lightGray,
     borderRadius: 6,
@@ -64,6 +65,9 @@ export const theme: ThemeConfig = {
       horizontalItemBorderRadius: 6,
       horizontalItemHoverBg: uiColors.menuItemHoverBg,
       horizontalItemSelectedBg: uiColors.menuItemActiveBg,
+      // Light menu (sidebar) - remove active/hover background for submenu titles
+      itemActiveBg: 'transparent',
+      subMenuItemBg: 'transparent',
     },
   },
 };
