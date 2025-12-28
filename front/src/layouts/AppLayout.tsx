@@ -64,22 +64,6 @@ function getMenuItems(basePath: string): MenuItem[] {
       ],
     },
     {
-      key: '/rbac',
-      icon: <SafetyOutlined />,
-      label: 'Access Control',
-      children: [
-        {
-          key: '/users',
-          icon: <UserOutlined />,
-          label: <Link to={`${basePath}/users`}>Users</Link>,
-        },
-        {
-          key: '/rbac/roles',
-          label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
-        },
-      ],
-    },
-    {
       key: '/datasources',
       icon: <MailOutlined />,
       label: <Link to={`${basePath}/datasources`}>Data Sources</Link>,
@@ -122,6 +106,22 @@ function getMenuItems(basePath: string): MenuItem[] {
       key: '/logs',
       icon: <UnorderedListOutlined />,
       label: <Link to={`${basePath}/logs`}>Logs</Link>,
+    },
+    {
+      key: '/rbac',
+      icon: <SafetyOutlined />,
+      label: 'Access Control',
+      children: [
+        {
+          key: '/users',
+          icon: <UserOutlined />,
+          label: <Link to={`${basePath}/users`}>Users</Link>,
+        },
+        {
+          key: '/rbac/roles',
+          label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
+        },
+      ],
     },
     { type: 'divider' },
     {
