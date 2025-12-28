@@ -63,9 +63,9 @@ test.describe('RBAC Roles Management', () => {
     // Wait for roles to load
     await expect(page.getByText('super_admin')).toBeVisible();
 
-    // Click view button on super_admin row (icon button with title="View")
+    // Click on the super_admin row to view it (rows are clickable)
     const superAdminRow = page.getByRole('row').filter({ hasText: 'super_admin' });
-    await superAdminRow.locator('button[title="View"]').click();
+    await superAdminRow.click();
 
     // Verify we're on the role edit page
     await expect(page.getByRole('heading', { name: 'View Role' })).toBeVisible();
@@ -154,9 +154,9 @@ test.describe('RBAC Roles Management', () => {
     await expect(page.getByText('Role created successfully')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(roleName)).toBeVisible({ timeout: 5000 });
 
-    // Click edit on the new role (icon button with title="Edit")
+    // Click on the new role row to edit it (rows are clickable)
     const roleRow = page.getByRole('row').filter({ hasText: roleName });
-    await roleRow.locator('button[title="Edit"]').click();
+    await roleRow.click();
 
     // Verify we're on the edit page
     await expect(page.getByRole('heading', { name: 'Edit Role' })).toBeVisible({ timeout: 5000 });

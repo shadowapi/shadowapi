@@ -21,10 +21,10 @@ test.describe('Login Flow', () => {
     await page.getByPlaceholder('Password').fill('Admin123!');
     await page.getByRole('button', { name: 'Sign in' }).click();
 
-    // Wait for OAuth2 flow to complete and redirect to home
-    await page.waitForURL('/', { timeout: 15000 });
+    // Wait for OAuth2 flow to complete and redirect to workspaces
+    await page.waitForURL(/\/workspaces/, { timeout: 15000 });
 
-    // Verify we're on the home page (authenticated)
-    await expect(page).toHaveURL('/');
+    // Verify we're on the workspaces page (authenticated)
+    await expect(page).toHaveURL(/\/workspaces/);
   });
 });
