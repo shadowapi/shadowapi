@@ -30,7 +30,6 @@ INSERT INTO "user" (
     first_name,
     last_name,
     is_enabled,
-    is_admin,
     meta,
     created_at,
     updated_at
@@ -41,11 +40,10 @@ INSERT INTO "user" (
     $4,
     $5,
     $6::boolean,
-    $7::boolean,
-    $8,
+    $7,
     NOW(),
     NULL
-) RETURNING uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+) RETURNING uuid, email, password, first_name, last_name, is_enabled, meta, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -55,7 +53,6 @@ type CreateUserParams struct {
 	FirstName string      `json:"first_name"`
 	LastName  string      `json:"last_name"`
 	IsEnabled bool        `json:"is_enabled"`
-	IsAdmin   bool        `json:"is_admin"`
 	Meta      []byte      `json:"meta"`
 }
 
@@ -67,7 +64,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.FirstName,
 		arg.LastName,
 		arg.IsEnabled,
-		arg.IsAdmin,
 		arg.Meta,
 	)
 	var i User
@@ -78,7 +74,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.FirstName,
 		&i.LastName,
 		&i.IsEnabled,
-		&i.IsAdmin,
 		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -98,7 +93,7 @@ func (q *Queries) DeleteUser(ctx context.Context, uuid pgtype.UUID) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-  uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+  uuid, email, password, first_name, last_name, is_enabled, meta, created_at, updated_at
 FROM "user"
 WHERE uuid = $1::uuid
 `
@@ -113,7 +108,6 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 		&i.FirstName,
 		&i.LastName,
 		&i.IsEnabled,
-		&i.IsAdmin,
 		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -123,7 +117,7 @@ func (q *Queries) GetUser(ctx context.Context, uuid pgtype.UUID) (User, error) {
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
-  uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+  uuid, email, password, first_name, last_name, is_enabled, meta, created_at, updated_at
 FROM "user"
 WHERE email = $1
 `
@@ -138,7 +132,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.FirstName,
 		&i.LastName,
 		&i.IsEnabled,
-		&i.IsAdmin,
 		&i.Meta,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -148,7 +141,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-  uuid, email, password, first_name, last_name, is_enabled, is_admin, meta, created_at, updated_at
+  uuid, email, password, first_name, last_name, is_enabled, meta, created_at, updated_at
 FROM "user"
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -176,7 +169,6 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.FirstName,
 			&i.LastName,
 			&i.IsEnabled,
-			&i.IsAdmin,
 			&i.Meta,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -191,24 +183,6 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 	return items, nil
 }
 
-const setUserAdmin = `-- name: SetUserAdmin :exec
-UPDATE "user"
-SET
-is_admin = $1::boolean,
-updated_at = NOW()
-WHERE uuid = $2::uuid
-`
-
-type SetUserAdminParams struct {
-	IsAdmin bool        `json:"is_admin"`
-	UUID    pgtype.UUID `json:"uuid"`
-}
-
-func (q *Queries) SetUserAdmin(ctx context.Context, arg SetUserAdminParams) error {
-	_, err := q.db.Exec(ctx, setUserAdmin, arg.IsAdmin, arg.UUID)
-	return err
-}
-
 const updateUser = `-- name: UpdateUser :exec
 UPDATE "user"
 SET
@@ -217,10 +191,9 @@ password = $2,
 first_name = $3,
 last_name = $4,
 is_enabled =  $5::boolean,
-is_admin = $6::boolean,
-meta = $7,
+meta = $6,
 updated_at = NOW()
-WHERE uuid = $8::uuid
+WHERE uuid = $7::uuid
 `
 
 type UpdateUserParams struct {
@@ -229,7 +202,6 @@ type UpdateUserParams struct {
 	FirstName string      `json:"first_name"`
 	LastName  string      `json:"last_name"`
 	IsEnabled bool        `json:"is_enabled"`
-	IsAdmin   bool        `json:"is_admin"`
 	Meta      []byte      `json:"meta"`
 	UUID      pgtype.UUID `json:"uuid"`
 }
@@ -241,7 +213,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.FirstName,
 		arg.LastName,
 		arg.IsEnabled,
-		arg.IsAdmin,
 		arg.Meta,
 		arg.UUID,
 	)

@@ -23,9 +23,19 @@ properties:
   is_enabled:
     type: boolean
     description: Indicates if the user is enabled
-  is_admin:
-    type: boolean
-    description: Indicates if the user has administrative privileges
+  roles:
+    type: array
+    description: User's assigned roles with domain information
+    readOnly: true
+    items:
+      type: object
+      properties:
+        role:
+          type: string
+          description: Role name
+        domain:
+          type: string
+          description: Domain (workspace slug or 'global')
   meta:
     type: object
     additionalProperties: true

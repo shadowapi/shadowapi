@@ -397,7 +397,6 @@ type User struct {
 	FirstName string             `json:"first_name"`
 	LastName  string             `json:"last_name"`
 	IsEnabled bool               `json:"is_enabled"`
-	IsAdmin   bool               `json:"is_admin"`
 	Meta      []byte             `json:"meta"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`

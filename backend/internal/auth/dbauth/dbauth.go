@@ -65,7 +65,6 @@ func (m *DBUserManager) CreateUser(ctx context.Context, req *api.User) (*api.Use
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
 			IsEnabled: req.IsEnabled.Or(false),
-			IsAdmin:   req.IsAdmin.Or(false),
 			Meta:      metaBytes,
 		})
 		if err != nil {
@@ -90,7 +89,6 @@ func (m *DBUserManager) CreateUser(ctx context.Context, req *api.User) (*api.Use
 			FirstName: created.FirstName,
 			LastName:  created.LastName,
 			IsEnabled: api.NewOptBool(created.IsEnabled),
-			IsAdmin:   api.NewOptBool(created.IsAdmin),
 			Meta:      api.NewOptUserMeta(meta),
 			CreatedAt: api.NewOptDateTime(created.CreatedAt.Time),
 			UpdatedAt: api.NewOptDateTime(created.UpdatedAt.Time),
@@ -131,7 +129,6 @@ func (m *DBUserManager) GetUser(ctx context.Context, uuidStr string) (*api.User,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		IsEnabled: api.NewOptBool(user.IsEnabled),
-		IsAdmin:   api.NewOptBool(user.IsAdmin),
 		Meta:      api.NewOptUserMeta(meta),
 		CreatedAt: api.NewOptDateTime(user.CreatedAt.Time),
 		UpdatedAt: api.NewOptDateTime(user.UpdatedAt.Time),
@@ -177,7 +174,6 @@ func (m *DBUserManager) UpdateUser(ctx context.Context, req *api.User, uuidStr s
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
 			IsEnabled: req.IsEnabled.Or(false),
-			IsAdmin:   req.IsAdmin.Or(false),
 		}
 		// Handle Meta field (if provided)
 		if req.Meta.IsSet() && req.Meta.Value != nil {
@@ -217,7 +213,6 @@ func (m *DBUserManager) UpdateUser(ctx context.Context, req *api.User, uuidStr s
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			IsEnabled: api.NewOptBool(user.IsEnabled),
-			IsAdmin:   api.NewOptBool(user.IsAdmin),
 			Meta:      api.NewOptUserMeta(meta),
 			CreatedAt: api.NewOptDateTime(user.CreatedAt.Time),
 			UpdatedAt: api.NewOptDateTime(user.UpdatedAt.Time),
@@ -269,7 +264,6 @@ func (m *DBUserManager) ListUsers(ctx context.Context) ([]api.User, error) {
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
 			IsEnabled: api.NewOptBool(u.IsEnabled),
-			IsAdmin:   api.NewOptBool(u.IsAdmin),
 			Meta:      api.NewOptUserMeta(meta),
 			CreatedAt: api.NewOptDateTime(u.CreatedAt.Time),
 			UpdatedAt: api.NewOptDateTime(u.UpdatedAt.Time),
@@ -319,7 +313,6 @@ func (m *DBUserManager) AuthenticateUser(ctx context.Context, email, password st
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		IsEnabled: api.NewOptBool(user.IsEnabled),
-		IsAdmin:   api.NewOptBool(user.IsAdmin),
 		Meta:      api.NewOptUserMeta(meta),
 		CreatedAt: api.NewOptDateTime(user.CreatedAt.Time),
 		UpdatedAt: api.NewOptDateTime(user.UpdatedAt.Time),

@@ -2090,8 +2090,13 @@ export interface components {
             last_name: string;
             /** @description Indicates if the user is enabled */
             is_enabled?: boolean;
-            /** @description Indicates if the user has administrative privileges */
-            is_admin?: boolean;
+            /** @description User's assigned roles with domain information */
+            readonly roles?: {
+                /** @description Role name */
+                role?: string;
+                /** @description Domain (workspace slug or 'global') */
+                domain?: string;
+            }[];
             /** @description Arbitrary key-value metadata about the user */
             meta?: {
                 [key: string]: unknown;

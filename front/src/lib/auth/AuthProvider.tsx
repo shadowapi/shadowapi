@@ -61,7 +61,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         email: data.email ?? '',
         first_name: data.first_name ?? '',
         last_name: data.last_name ?? '',
-        is_admin: data.is_admin ?? false,
+        roles: (data.roles ?? []).map(r => ({
+          role: r.role ?? '',
+          domain: r.domain ?? '',
+        })),
       };
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
@@ -76,7 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (session.authenticated) {
         setIsAuthenticated(true);
         setTokenExpiresIn(session.expires_in ?? null);
-        // Fetch user profile to get user details including is_admin
+        // Fetch user profile to get user details including roles
         const userProfile = await fetchUserProfile();
         if (userProfile === 'unauthorized') {
           // Session cookie expired - clear state and redirect to login

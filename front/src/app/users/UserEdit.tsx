@@ -21,7 +21,7 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
-import { useAuth } from '../../lib/auth';
+import { useAuth, isAdmin } from '../../lib/auth';
 import type { components } from '../../api/v1';
 
 const { Title } = Typography;
@@ -36,7 +36,6 @@ interface UserFormValues {
   last_name: string;
   password?: string;
   is_enabled: boolean;
-  is_admin: boolean;
 }
 
 function UserEdit() {
@@ -61,7 +60,7 @@ function UserEdit() {
 
   // Load user data
   useEffect(() => {
-    if (!isNew && uuid && currentUser?.is_admin) {
+    if (!isNew && uuid && isAdmin(currentUser)) {
       const loadUser = async () => {
         setLoading(true);
         const { data, error } = await client.GET('/user/{uuid}', {
@@ -77,13 +76,12 @@ function UserEdit() {
           first_name: data.first_name,
           last_name: data.last_name,
           is_enabled: data.is_enabled ?? true,
-          is_admin: data.is_admin ?? false,
         });
         setLoading(false);
       };
       loadUser();
     }
-  }, [uuid, isNew, form, slug, navigate, currentUser?.is_admin]);
+  }, [uuid, isNew, form, slug, navigate, currentUser]);
 
   // Load user's role assignments
   const loadRoleAssignments = useCallback(async () => {
@@ -102,10 +100,10 @@ function UserEdit() {
   }, [uuid]);
 
   useEffect(() => {
-    if (!isNew && uuid && currentUser?.is_admin) {
+    if (!isNew && uuid && isAdmin(currentUser)) {
       loadRoleAssignments();
     }
-  }, [uuid, isNew, loadRoleAssignments, currentUser?.is_admin]);
+  }, [uuid, isNew, loadRoleAssignments, currentUser]);
 
   // Load available roles for assignment modal
   const loadAvailableRoles = async () => {
@@ -216,7 +214,6 @@ function UserEdit() {
       last_name: values.last_name,
       password: values.password || '',
       is_enabled: values.is_enabled,
-      is_admin: values.is_admin,
     };
 
     let result;
@@ -260,7 +257,7 @@ function UserEdit() {
   };
 
   // Admin access check - after hooks
-  if (!currentUser?.is_admin) {
+  if (!isAdmin(currentUser)) {
     return (
       <Result
         status="403"
@@ -292,7 +289,6 @@ function UserEdit() {
         onFinish={onFinish}
         initialValues={{
           is_enabled: true,
-          is_admin: false,
         }}
         style={{ maxWidth: 500 }}
       >
@@ -338,10 +334,6 @@ function UserEdit() {
 
         <Form.Item name="is_enabled" valuePropName="checked">
           <Checkbox>User is enabled</Checkbox>
-        </Form.Item>
-
-        <Form.Item name="is_admin" valuePropName="checked">
-          <Checkbox>User is administrator</Checkbox>
         </Form.Item>
 
         <Form.Item>

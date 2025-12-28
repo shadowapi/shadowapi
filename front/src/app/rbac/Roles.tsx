@@ -5,7 +5,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-de
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
-import { useAuth } from '../../lib/auth';
+import { useAuth, isAdmin } from '../../lib/auth';
 import type { components } from '../../api/v1';
 
 const { Title } = Typography;
@@ -35,10 +35,10 @@ function Roles() {
   }, [scopeFilter]);
 
   useEffect(() => {
-    if (currentUser?.is_admin) {
+    if (isAdmin(currentUser)) {
       loadRoles();
     }
-  }, [loadRoles, currentUser?.is_admin]);
+  }, [loadRoles, currentUser]);
 
   const handleDelete = async (uuid: string) => {
     const { error } = await client.DELETE('/rbac/role/{uuid}', {
@@ -122,7 +122,7 @@ function Roles() {
   ];
 
   // Admin access check - after hooks
-  if (!currentUser?.is_admin) {
+  if (!isAdmin(currentUser)) {
     return (
       <Result
         status="403"

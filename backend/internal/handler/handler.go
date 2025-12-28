@@ -68,7 +68,6 @@ func (h *Handler) ensureInitWorkspaceAndAdmin(ctx context.Context) error {
 				FirstName: "Admin",
 				LastName:  "User",
 				IsEnabled: true,
-				IsAdmin:   true,
 				Meta:      []byte(`{}`),
 			})
 			if err != nil {
@@ -80,20 +79,19 @@ func (h *Handler) ensureInitWorkspaceAndAdmin(ctx context.Context) error {
 		}
 	} else {
 		userUUID = pgtype.UUID{Bytes: user.UUID, Valid: true}
-		// Ensure existing user has admin flag set
-		if !user.IsAdmin {
-			if err := q.SetUserAdmin(ctx, query.SetUserAdminParams{
-				UUID:    userUUID,
-				IsAdmin: true,
-			}); err != nil {
-				h.log.Warn("failed to set admin flag on existing user", "email", h.cfg.InitAdmin.Email, "error", err)
-			} else {
-				h.log.Info("updated existing user to admin", "email", h.cfg.InitAdmin.Email)
-			}
+	}
+
+	// Step 2: Assign super_admin role (global scope)
+	userUUIDStr := uuid.UUID(userUUID.Bytes).String()
+	if !h.enforcer.HasRoleForUserInDomain(userUUIDStr, rbac.RoleSuperAdmin, "global") {
+		if err := h.enforcer.AddRoleForUserInDomain(userUUIDStr, rbac.RoleSuperAdmin, "global"); err != nil {
+			h.log.Warn("failed to assign super_admin role", "email", h.cfg.InitAdmin.Email, "error", err)
+		} else {
+			h.log.Info("assigned super_admin role to admin user", "email", h.cfg.InitAdmin.Email)
 		}
 	}
 
-	// Step 2: Ensure default workspaces exist
+	// Step 3: Ensure default workspaces exist
 	workspaces := []struct {
 		slug        string
 		displayName string

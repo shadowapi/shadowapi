@@ -6,7 +6,6 @@ INSERT INTO "user" (
     first_name,
     last_name,
     is_enabled,
-    is_admin,
     meta,
     created_at,
     updated_at
@@ -17,7 +16,6 @@ INSERT INTO "user" (
     sqlc.arg('first_name'),
     sqlc.arg('last_name'),
     sqlc.arg('is_enabled')::boolean,
-    sqlc.arg('is_admin')::boolean,
     sqlc.arg('meta'),
     NOW(),
     NULL
@@ -67,7 +65,6 @@ password = sqlc.arg('password'),
 first_name = sqlc.arg('first_name'),
 last_name = sqlc.arg('last_name'),
 is_enabled =  sqlc.arg('is_enabled')::boolean,
-is_admin = sqlc.arg('is_admin')::boolean,
 meta = sqlc.arg('meta'),
 updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
@@ -84,9 +81,3 @@ SELECT EXISTS (
     SELECT 1 FROM "user" WHERE email = sqlc.arg('email')
 ) AS exists;
 
--- name: SetUserAdmin :exec
-UPDATE "user"
-SET
-is_admin = sqlc.arg('is_admin')::boolean,
-updated_at = NOW()
-WHERE uuid = sqlc.arg('uuid')::uuid;

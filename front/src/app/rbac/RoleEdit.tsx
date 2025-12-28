@@ -22,7 +22,7 @@ import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import type { components } from '../../api/v1';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
-import { useAuth } from '../../lib/auth';
+import { useAuth, isAdmin } from '../../lib/auth';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -92,7 +92,7 @@ function RoleEdit() {
 
   // Load role for editing
   useEffect(() => {
-    if (!isNew && uuid && currentUser?.is_admin) {
+    if (!isNew && uuid && isAdmin(currentUser)) {
       const loadRole = async () => {
         setLoading(true);
         const { data, error } = await client.GET('/rbac/role/{uuid}', {
@@ -117,7 +117,7 @@ function RoleEdit() {
       };
       loadRole();
     }
-  }, [uuid, isNew, form, slug, navigate, currentUser?.is_admin]);
+  }, [uuid, isNew, form, slug, navigate, currentUser]);
 
   // Load permissions based on scope
   const loadPermissions = useCallback(async () => {
@@ -135,10 +135,10 @@ function RoleEdit() {
   }, [formScope]);
 
   useEffect(() => {
-    if (currentUser?.is_admin) {
+    if (isAdmin(currentUser)) {
       loadPermissions();
     }
-  }, [loadPermissions, currentUser?.is_admin]);
+  }, [loadPermissions, currentUser]);
 
   // Group permissions by resource
   const permissionsByResource = useMemo(() => {
@@ -319,7 +319,7 @@ function RoleEdit() {
   ];
 
   // Admin access check - after hooks
-  if (!currentUser?.is_admin) {
+  if (!isAdmin(currentUser)) {
     return (
       <Result
         status="403"

@@ -8260,8 +8260,8 @@ type User struct {
 	LastName string `json:"last_name"`
 	// Indicates if the user is enabled.
 	IsEnabled OptBool `json:"is_enabled"`
-	// Indicates if the user has administrative privileges.
-	IsAdmin OptBool `json:"is_admin"`
+	// User's assigned roles with domain information.
+	Roles []UserRolesItem `json:"roles"`
 	// Arbitrary key-value metadata about the user.
 	Meta OptUserMeta `json:"meta"`
 	// Timestamp of user creation.
@@ -8300,9 +8300,9 @@ func (s *User) GetIsEnabled() OptBool {
 	return s.IsEnabled
 }
 
-// GetIsAdmin returns the value of IsAdmin.
-func (s *User) GetIsAdmin() OptBool {
-	return s.IsAdmin
+// GetRoles returns the value of Roles.
+func (s *User) GetRoles() []UserRolesItem {
+	return s.Roles
 }
 
 // GetMeta returns the value of Meta.
@@ -8350,9 +8350,9 @@ func (s *User) SetIsEnabled(val OptBool) {
 	s.IsEnabled = val
 }
 
-// SetIsAdmin sets the value of IsAdmin.
-func (s *User) SetIsAdmin(val OptBool) {
-	s.IsAdmin = val
+// SetRoles sets the value of Roles.
+func (s *User) SetRoles(val []UserRolesItem) {
+	s.Roles = val
 }
 
 // SetMeta sets the value of Meta.
@@ -8408,6 +8408,33 @@ func (s *UserProfile) SetFirstName(val string) {
 // SetLastName sets the value of LastName.
 func (s *UserProfile) SetLastName(val string) {
 	s.LastName = val
+}
+
+type UserRolesItem struct {
+	// Role name.
+	Role OptString `json:"role"`
+	// Domain (workspace slug or 'global').
+	Domain OptString `json:"domain"`
+}
+
+// GetRole returns the value of Role.
+func (s *UserRolesItem) GetRole() OptString {
+	return s.Role
+}
+
+// GetDomain returns the value of Domain.
+func (s *UserRolesItem) GetDomain() OptString {
+	return s.Domain
+}
+
+// SetRole sets the value of Role.
+func (s *UserRolesItem) SetRole(val OptString) {
+	s.Role = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *UserRolesItem) SetDomain(val OptString) {
+	s.Domain = val
 }
 
 // Ref: #

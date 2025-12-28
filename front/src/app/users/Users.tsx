@@ -5,7 +5,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
-import { useAuth } from '../../lib/auth';
+import { useAuth, isAdmin } from '../../lib/auth';
 import type { components } from '../../api/v1';
 
 const { Title } = Typography;
@@ -20,7 +20,7 @@ function Users() {
   const [users, setUsers] = useState<User[]>([]);
 
   // Admin access check
-  if (!currentUser?.is_admin) {
+  if (!isAdmin(currentUser)) {
     return (
       <Result
         status="403"
@@ -84,7 +84,9 @@ function Users() {
           ) : (
             <Tag color="red">Disabled</Tag>
           )}
-          {record.is_admin && <Tag color="blue">Admin</Tag>}
+          {record.roles?.some(r => r.role === 'super_admin' && r.domain === 'global') && (
+            <Tag color="blue">Super Admin</Tag>
+          )}
         </Space>
       ),
     },

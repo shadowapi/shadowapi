@@ -15642,9 +15642,13 @@ func (s *User) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.IsAdmin.Set {
-			e.FieldStart("is_admin")
-			s.IsAdmin.Encode(e)
+		if s.Roles != nil {
+			e.FieldStart("roles")
+			e.ArrStart()
+			for _, elem := range s.Roles {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
 		}
 	}
 	{
@@ -15674,7 +15678,7 @@ var jsonFieldsNameOfUser = [10]string{
 	3: "first_name",
 	4: "last_name",
 	5: "is_enabled",
-	6: "is_admin",
+	6: "roles",
 	7: "meta",
 	8: "created_at",
 	9: "updated_at",
@@ -15757,15 +15761,22 @@ func (s *User) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_enabled\"")
 			}
-		case "is_admin":
+		case "roles":
 			if err := func() error {
-				s.IsAdmin.Reset()
-				if err := s.IsAdmin.Decode(d); err != nil {
+				s.Roles = make([]UserRolesItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem UserRolesItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Roles = append(s.Roles, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_admin\"")
+				return errors.Wrap(err, "decode field \"roles\"")
 			}
 		case "meta":
 			if err := func() error {
@@ -16021,6 +16032,86 @@ func (s *UserProfile) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UserProfile) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UserRolesItem) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UserRolesItem) encodeFields(e *jx.Encoder) {
+	{
+		if s.Role.Set {
+			e.FieldStart("role")
+			s.Role.Encode(e)
+		}
+	}
+	{
+		if s.Domain.Set {
+			e.FieldStart("domain")
+			s.Domain.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUserRolesItem = [2]string{
+	0: "role",
+	1: "domain",
+}
+
+// Decode decodes UserRolesItem from json.
+func (s *UserRolesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UserRolesItem to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "role":
+			if err := func() error {
+				s.Role.Reset()
+				if err := s.Role.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"role\"")
+			}
+		case "domain":
+			if err := func() error {
+				s.Domain.Reset()
+				if err := s.Domain.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"domain\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UserRolesItem")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UserRolesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UserRolesItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

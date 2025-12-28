@@ -6,7 +6,6 @@ CREATE TABLE "user" (
   first_name VARCHAR NOT NULL,
   last_name  VARCHAR NOT NULL,
   is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-  is_admin   BOOLEAN NOT NULL DEFAULT FALSE,  -- System-wide admin
   meta JSONB,
 
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
