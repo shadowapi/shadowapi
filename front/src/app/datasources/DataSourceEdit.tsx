@@ -18,7 +18,7 @@ import {
   Tag,
   Alert,
 } from 'antd';
-import { DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, LoginOutlined } from '@ant-design/icons';
+import { DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, LoginOutlined, StopOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import type { components } from '../../api/v1';
@@ -72,6 +72,7 @@ function DataSourceEdit() {
   const [loadedData, setLoadedData] = useState<FormValues | null>(null);
   const [hasOAuthTokens, setHasOAuthTokens] = useState<boolean | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [revokeLoading, setRevokeLoading] = useState(false);
   const isNew = !uuid;
 
   const selectedType = Form.useWatch('type', form) || datasourceType;
@@ -118,6 +119,32 @@ function DataSourceEdit() {
     if (data?.auth_code_url) {
       window.location.href = data.auth_code_url;
     }
+  };
+
+  // Handle revoking OAuth tokens for email_oauth datasources
+  const handleRevokeTokens = async () => {
+    if (!uuid) return;
+    setRevokeLoading(true);
+
+    const { data: tokens, error: listError } = await client.GET('/oauth2/client/{datasource_uuid}/token', {
+      params: { path: { datasource_uuid: uuid } },
+    });
+
+    if (listError) {
+      message.error('Failed to fetch tokens');
+      setRevokeLoading(false);
+      return;
+    }
+
+    for (const token of tokens || []) {
+      await client.DELETE('/oauth2/client/{datasource_uuid}/token/{uuid}', {
+        params: { path: { datasource_uuid: uuid, uuid: token.uuid! } },
+      });
+    }
+
+    setRevokeLoading(false);
+    setHasOAuthTokens(false);
+    message.success('OAuth authentication removed');
   };
 
   // Load existing datasource for edit mode
@@ -541,7 +568,24 @@ function DataSourceEdit() {
                           ? 'OAuth authenticated'
                           : 'Not authenticated - authorization required'}
                       </span>
-                      {!hasOAuthTokens && (
+                      {hasOAuthTokens ? (
+                        <Popconfirm
+                          title="Remove authentication"
+                          description="This will revoke the OAuth tokens. You'll need to re-authorize to use this datasource."
+                          onConfirm={handleRevokeTokens}
+                          okButtonProps={{ danger: true }}
+                          okText="Remove"
+                        >
+                          <Button
+                            danger
+                            size="small"
+                            icon={<StopOutlined />}
+                            loading={revokeLoading}
+                          >
+                            Remove Authentication
+                          </Button>
+                        </Popconfirm>
+                      ) : (
                         <Button
                           type="primary"
                           size="small"

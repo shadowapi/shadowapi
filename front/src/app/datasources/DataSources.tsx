@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { Table, Button, Space, Typography, message, Tag, Popconfirm, Switch, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, LoginOutlined, StopOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, LoginOutlined, StopOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
@@ -27,6 +27,7 @@ function DataSources() {
   const [loading, setLoading] = useState(true);
   const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [oauthStatus, setOauthStatus] = useState<Record<string, boolean>>({});
 
   const loadDatasources = useCallback(async () => {
     setLoading(true);
@@ -38,6 +39,19 @@ function DataSources() {
     }
     setDatasources(data || []);
     setLoading(false);
+
+    // Check OAuth status for email_oauth datasources
+    const emailOAuthDatasources = (data || []).filter((ds) => ds.type === 'email_oauth');
+    const statusMap: Record<string, boolean> = {};
+    await Promise.all(
+      emailOAuthDatasources.map(async (ds) => {
+        const { data: tokens } = await client.GET('/oauth2/client/{datasource_uuid}/token', {
+          params: { path: { datasource_uuid: ds.uuid! } },
+        });
+        statusMap[ds.uuid!] = !!(tokens && tokens.length > 0);
+      })
+    );
+    setOauthStatus(statusMap);
   }, []);
 
   useEffect(() => {
@@ -118,8 +132,8 @@ function DataSources() {
     }
 
     setActionLoading(null);
+    setOauthStatus((prev) => ({ ...prev, [record.uuid!]: false }));
     message.success('All tokens revoked');
-    loadDatasources();
   };
 
   const columns: ColumnsType<Datasource> = [
@@ -145,10 +159,20 @@ function DataSources() {
       title: 'Status',
       dataIndex: 'is_enabled',
       key: 'is_enabled',
-      render: (isEnabled: boolean) => (
-        <Tag color={isEnabled ? 'success' : 'default'}>
-          {isEnabled ? 'Enabled' : 'Disabled'}
-        </Tag>
+      render: (isEnabled: boolean, record: Datasource) => (
+        <Space size="small">
+          <Tag color={isEnabled ? 'success' : 'default'}>
+            {isEnabled ? 'Enabled' : 'Disabled'}
+          </Tag>
+          {record.type === 'email_oauth' && record.uuid && oauthStatus[record.uuid] !== undefined && (
+            <Tag
+              color={oauthStatus[record.uuid] ? 'success' : 'warning'}
+              icon={oauthStatus[record.uuid] ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+            >
+              {oauthStatus[record.uuid] ? 'Authenticated' : 'Not Authenticated'}
+            </Tag>
+          )}
+        </Space>
       ),
     },
     {
