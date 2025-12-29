@@ -80,6 +80,11 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/pipelines`}>Data Pipelines</Link>,
     },
     {
+      key: '/workers',
+      icon: <SettingOutlined />,
+      label: <Link to={`${basePath}/workers`}>Workers</Link>,
+    },
+    {
       key: '/rbac',
       icon: <SafetyOutlined />,
       label: 'Access Control',
@@ -114,16 +119,9 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/syncpolicies`}>Sync Policies</Link>,
     },
     {
-      key: '/workers',
-      icon: <SettingOutlined />,
-      label: <Link to={`${basePath}/workers`}>Workers</Link>,
-      children: [
-        {
-          key: '/schedulers',
-          icon: <ScheduleOutlined />,
-          label: <Link to={`${basePath}/schedulers`}>Schedulers</Link>,
-        },
-      ],
+      key: '/schedulers',
+      icon: <ScheduleOutlined />,
+      label: <Link to={`${basePath}/schedulers`}>Schedulers</Link>,
     },
     {
       key: '/logs',
@@ -167,7 +165,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/pipelines': { title: 'Data Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
   '/workers': { title: 'Workers' },
-  '/schedulers': { title: 'Schedulers', parent: '/workers' },
+  '/schedulers': { title: 'Schedulers' },
   '/logs': { title: 'Logs' },
 };
 
@@ -176,7 +174,6 @@ const menuParentMap: Record<string, string> = {
   '/files': '/messages',
   '/datasources': '/datasources-menu',
   '/oauth2/credentials': '/datasources-menu',
-  '/schedulers': '/workers',
   '/users': '/rbac',
   '/rbac/roles': '/rbac',
 };

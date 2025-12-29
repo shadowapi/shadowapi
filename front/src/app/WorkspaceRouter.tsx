@@ -13,6 +13,7 @@ import Roles from './rbac/Roles';
 import RoleEdit from './rbac/RoleEdit';
 import Pipelines from './pipelines/Pipelines';
 import PipelineEdit from './pipelines/PipelineEdit';
+import Workers from './workers/Workers';
 
 /**
  * WorkspaceRouter handles all routes under /w/:slug/*
@@ -32,6 +33,7 @@ function WorkspaceRouter() {
         <Route path="pipelines" element={<Pipelines />} />
         <Route path="pipelines/new" element={<PipelineEdit />} />
         <Route path="pipelines/:uuid" element={<PipelineEdit />} />
+        <Route path="workers" element={<Workers />} />
         <Route path="oauth2/credentials" element={<OAuth2Credentials />} />
         <Route path="oauth2/credentials/new" element={<OAuth2CredentialEdit />} />
         <Route path="oauth2/credentials/:uuid" element={<OAuth2CredentialEdit />} />
