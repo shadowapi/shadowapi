@@ -15,21 +15,18 @@ import {
   Row,
   Col,
   Divider,
+  Tag,
+  Alert,
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, LoginOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import type { components } from '../../api/v1';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 type DatasourceType = 'email' | 'email_oauth' | 'telegram' | 'whatsapp' | 'linkedin';
 
-type DatasourceEmail = components['schemas']['datasource_email'];
-type DatasourceEmailOauth = components['schemas']['datasource_email_oauth'];
-type DatasourceTelegram = components['schemas']['datasource_telegram'];
-type DatasourceWhatsapp = components['schemas']['datasource_whatsapp'];
-type DatasourceLinkedin = components['schemas']['datasource_linkedin'];
 type OAuth2Client = components['schemas']['oauth2_client'];
 
 interface FormValues {
@@ -72,6 +69,9 @@ function DataSourceEdit() {
   const [saving, setSaving] = useState(false);
   const [datasourceType, setDatasourceType] = useState<DatasourceType>('email');
   const [oauth2Clients, setOauth2Clients] = useState<OAuth2Client[]>([]);
+  const [loadedData, setLoadedData] = useState<FormValues | null>(null);
+  const [hasOAuthTokens, setHasOAuthTokens] = useState<boolean | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
   const isNew = !uuid;
 
   const selectedType = Form.useWatch('type', form) || datasourceType;
@@ -83,6 +83,42 @@ function DataSourceEdit() {
       setOauth2Clients(data.clients);
     }
   }, []);
+
+  // Check if the datasource has OAuth tokens (for email_oauth type)
+  const checkOAuthStatus = useCallback(async (datasourceUuid: string) => {
+    const { data: tokens, error } = await client.GET('/oauth2/client/{datasource_uuid}/token', {
+      params: { path: { datasource_uuid: datasourceUuid } },
+    });
+    if (error) {
+      console.log('[DataSourceEdit] Failed to check OAuth status:', error);
+      setHasOAuthTokens(false);
+      return;
+    }
+    setHasOAuthTokens(tokens && tokens.length > 0);
+  }, []);
+
+  // Handle OAuth login for email_oauth datasources
+  const handleOAuthLogin = async () => {
+    if (!uuid || datasourceType !== 'email_oauth') return;
+    setAuthLoading(true);
+
+    const { data, error } = await client.POST('/oauth2/login', {
+      body: {
+        query: { datasource_uuid: [uuid], workspace_slug: [slug] },
+      },
+    });
+
+    setAuthLoading(false);
+
+    if (error) {
+      message.error(error.detail || 'Failed to initiate OAuth login');
+      return;
+    }
+
+    if (data?.auth_code_url) {
+      window.location.href = data.auth_code_url;
+    }
+  };
 
   // Load existing datasource for edit mode
   const loadDatasource = useCallback(async () => {
@@ -133,6 +169,8 @@ function DataSourceEdit() {
             ...data,
             type: 'email_oauth',
           };
+          // Check OAuth authentication status
+          checkOAuthStatus(uuid!);
         }
         break;
       }
@@ -174,12 +212,31 @@ function DataSourceEdit() {
       }
     }
 
-    if (fullData) {
-      form.setFieldsValue(fullData);
-    }
-
+    // Store loaded data in state - form values will be set after re-render
+    // when the correct type-specific fields are rendered
+    setLoadedData(fullData);
     setLoading(false);
-  }, [uuid, isNew, form, navigate, slug]);
+  }, [uuid, isNew, navigate, slug, checkOAuthStatus]);
+
+  // Set form values after the component has rendered with the correct type
+  // This ensures type-specific fields exist in the DOM before setting values
+  useEffect(() => {
+    if (loadedData) {
+      // First, set just the type to trigger re-render with correct fields
+      form.setFieldValue('type', loadedData.type);
+    }
+  }, [loadedData, form]);
+
+  // Second effect: set all values after type is correctly set and fields are rendered
+  useEffect(() => {
+    if (loadedData && datasourceType === loadedData.type) {
+      // Use setTimeout to ensure DOM has updated with type-specific fields
+      const timer = setTimeout(() => {
+        form.setFieldsValue(loadedData);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [loadedData, datasourceType, form]);
 
   useEffect(() => {
     loadOAuth2Clients();
@@ -470,6 +527,36 @@ function DataSourceEdit() {
           {/* Email OAuth fields */}
           {selectedType === 'email_oauth' && (
             <>
+              {/* Authentication Status for existing datasources */}
+              {!isNew && hasOAuthTokens !== null && (
+                <Alert
+                  style={{ marginBottom: 16 }}
+                  type={hasOAuthTokens ? 'success' : 'warning'}
+                  showIcon
+                  icon={hasOAuthTokens ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                  message={
+                    <Space>
+                      <span>
+                        {hasOAuthTokens
+                          ? 'OAuth authenticated'
+                          : 'Not authenticated - authorization required'}
+                      </span>
+                      {!hasOAuthTokens && (
+                        <Button
+                          type="primary"
+                          size="small"
+                          icon={<LoginOutlined />}
+                          loading={authLoading}
+                          onClick={handleOAuthLogin}
+                        >
+                          Authorize
+                        </Button>
+                      )}
+                    </Space>
+                  }
+                />
+              )}
+
               <Form.Item name="email" label="Email Address" rules={[{ type: 'email' }]}>
                 <Input placeholder="user@gmail.com" />
               </Form.Item>

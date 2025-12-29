@@ -1480,6 +1480,8 @@ export interface components {
             provider: "gmail" | "google";
             /** @description Identifier of the OAuth2 client bound to this datasource. */
             oauth2_client_uuid: string;
+            /** @description Identifier of the OAuth2 token associated with this datasource. */
+            readonly oauth2_token_uuid?: string;
             /** Format: date-time */
             readonly created_at?: string;
             /** Format: date-time */

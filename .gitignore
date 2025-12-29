@@ -50,3 +50,5 @@ devops/ory/hydra/hydra.yaml
 front/dist/
 backend/shadowapi
 front/playwright-report/
+TODO.md
+test-results/

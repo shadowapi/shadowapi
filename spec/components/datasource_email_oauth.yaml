@@ -23,6 +23,10 @@ properties:
   oauth2_client_uuid:
     type: string
     description: Identifier of the OAuth2 client bound to this datasource.
+  oauth2_token_uuid:
+    type: string
+    description: Identifier of the OAuth2 token associated with this datasource.
+    readOnly: true
   created_at:
     type: string
     format: date-time
