@@ -75,43 +75,9 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/storages`}>Data Storages</Link>,
     },
     {
-      key: '/messages',
-      icon: <MessageOutlined />,
-      label: <Link to={`${basePath}/messages`}>Messages</Link>,
-      children: [
-        {
-          key: '/files',
-          icon: <FileOutlined />,
-          label: <Link to={`${basePath}/files`}>Files</Link>,
-        },
-      ],
-    },
-    {
-      key: '/syncpolicies',
-      icon: <ClockCircleOutlined />,
-      label: <Link to={`${basePath}/syncpolicies`}>Sync Policies</Link>,
-    },
-    {
       key: '/pipelines',
       icon: <NodeIndexOutlined />,
       label: <Link to={`${basePath}/pipelines`}>Data Pipelines</Link>,
-    },
-    {
-      key: '/workers',
-      icon: <SettingOutlined />,
-      label: <Link to={`${basePath}/workers`}>Workers</Link>,
-      children: [
-        {
-          key: '/schedulers',
-          icon: <ScheduleOutlined />,
-          label: <Link to={`${basePath}/schedulers`}>Schedulers</Link>,
-        },
-      ],
-    },
-    {
-      key: '/logs',
-      icon: <UnorderedListOutlined />,
-      label: <Link to={`${basePath}/logs`}>Logs</Link>,
     },
     {
       key: '/rbac',
@@ -129,6 +95,40 @@ function getMenuItems(basePath: string): MenuItem[] {
           label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
         },
       ],
+    },
+    {
+      key: '/messages',
+      icon: <MessageOutlined />,
+      label: <Link to={`${basePath}/messages`}>Messages</Link>,
+      children: [
+        {
+          key: '/files',
+          icon: <FileOutlined />,
+          label: <Link to={`${basePath}/files`}>Files</Link>,
+        },
+      ],
+    },
+    {
+      key: '/syncpolicies',
+      icon: <ClockCircleOutlined />,
+      label: <Link to={`${basePath}/syncpolicies`}>Sync Policies</Link>,
+    },
+    {
+      key: '/workers',
+      icon: <SettingOutlined />,
+      label: <Link to={`${basePath}/workers`}>Workers</Link>,
+      children: [
+        {
+          key: '/schedulers',
+          icon: <ScheduleOutlined />,
+          label: <Link to={`${basePath}/schedulers`}>Schedulers</Link>,
+        },
+      ],
+    },
+    {
+      key: '/logs',
+      icon: <UnorderedListOutlined />,
+      label: <Link to={`${basePath}/logs`}>Logs</Link>,
     },
     { type: 'divider' },
     {
