@@ -1,0 +1,48 @@
+# spec/components/worker_enrollment_token.yaml
+# Defines the schema for a Worker Enrollment Token
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    description: Unique identifier for the token
+    readOnly: true
+  token:
+    type: string
+    description: The actual enrollment token (only returned on creation)
+    readOnly: true
+  name:
+    type: string
+    description: Display name for the worker that will be enrolled with this token
+  is_global:
+    type: boolean
+    description: If true, the enrolled worker will have access to all workspaces
+  workspace_uuids:
+    type: array
+    items:
+      type: string
+    description: List of workspace UUIDs the enrolled worker will be allowed to access
+  expires_at:
+    type: string
+    format: date-time
+    description: When the token expires
+  used_at:
+    type: string
+    format: date-time
+    description: When the token was used (if used)
+    readOnly: true
+  used_by_worker_uuid:
+    type: string
+    description: UUID of the worker that used this token (if used)
+    readOnly: true
+  created_by_user_uuid:
+    type: string
+    description: UUID of the user who created the token
+    readOnly: true
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of token creation
+    readOnly: true
+required:
+  - name

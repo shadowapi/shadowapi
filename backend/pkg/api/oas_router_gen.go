@@ -1900,76 +1900,210 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'e': // Prefix: "erjobs"
+				case 'e': // Prefix: "er"
 					origElem := elem
-					if l := len("erjobs"); len(elem) >= l && elem[0:l] == "erjobs" {
+					if l := len("er"); len(elem) >= l && elem[0:l] == "er" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch r.Method {
-						case "GET":
-							s.handleWorkerJobsListRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'j': // Prefix: "jobs"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("jobs"); len(elem) >= l && elem[0:l] == "jobs" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "uuid"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
 							switch r.Method {
-							case "DELETE":
-								s.handleWorkerJobsDeleteRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
 							case "GET":
-								s.handleWorkerJobsGetRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
+								s.handleWorkerJobsListRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "DELETE,GET")
+								s.notAllowed(w, r, "GET")
 							}
 
 							return
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/cancel"
+						case '/': // Prefix: "/"
 							origElem := elem
-							if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "DELETE":
+									s.handleWorkerJobsDeleteRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleWorkerJobsGetRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE,GET")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/cancel"
+								origElem := elem
+								if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "POST":
+										s.handleWorkerJobsCancelRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "POST")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 's': // Prefix: "s"
+						origElem := elem
+						if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleListRegisteredWorkersRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'e': // Prefix: "enrollment-tokens"
+								origElem := elem
+								if l := len("enrollment-tokens"); len(elem) >= l && elem[0:l] == "enrollment-tokens" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleListWorkerEnrollmentTokensRequest([0]string{}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleCreateWorkerEnrollmentTokenRequest([0]string{}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET,POST")
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "uuid"
+									// Leaf parameter
+									args[0] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "DELETE":
+											s.handleDeleteWorkerEnrollmentTokenRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										case "GET":
+											s.handleGetWorkerEnrollmentTokenRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "DELETE,GET")
+										}
+
+										return
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							}
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
-								case "POST":
-									s.handleWorkerJobsCancelRequest([1]string{
+								case "DELETE":
+									s.handleDeleteRegisteredWorkerRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleGetRegisteredWorkerRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "PUT":
+									s.handleUpdateRegisteredWorkerRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "POST")
+									s.notAllowed(w, r, "DELETE,GET,PUT")
 								}
 
 								return
@@ -4502,85 +4636,249 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'e': // Prefix: "erjobs"
+				case 'e': // Prefix: "er"
 					origElem := elem
-					if l := len("erjobs"); len(elem) >= l && elem[0:l] == "erjobs" {
+					if l := len("er"); len(elem) >= l && elem[0:l] == "er" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							r.name = WorkerJobsListOperation
-							r.summary = ""
-							r.operationID = "worker-jobs-list"
-							r.pathPattern = "/workerjobs"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'j': // Prefix: "jobs"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("jobs"); len(elem) >= l && elem[0:l] == "jobs" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "uuid"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
 							switch method {
-							case "DELETE":
-								r.name = WorkerJobsDeleteOperation
-								r.summary = ""
-								r.operationID = "worker-jobs-delete"
-								r.pathPattern = "/workerjobs/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
 							case "GET":
-								r.name = WorkerJobsGetOperation
+								r.name = WorkerJobsListOperation
 								r.summary = ""
-								r.operationID = "worker-jobs-get"
-								r.pathPattern = "/workerjobs/{uuid}"
+								r.operationID = "worker-jobs-list"
+								r.pathPattern = "/workerjobs"
 								r.args = args
-								r.count = 1
+								r.count = 0
 								return r, true
 							default:
 								return
 							}
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/cancel"
+						case '/': // Prefix: "/"
 							origElem := elem
-							if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "uuid"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch method {
+								case "DELETE":
+									r.name = WorkerJobsDeleteOperation
+									r.summary = ""
+									r.operationID = "worker-jobs-delete"
+									r.pathPattern = "/workerjobs/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = WorkerJobsGetOperation
+									r.summary = ""
+									r.operationID = "worker-jobs-get"
+									r.pathPattern = "/workerjobs/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/cancel"
+								origElem := elem
+								if l := len("/cancel"); len(elem) >= l && elem[0:l] == "/cancel" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "POST":
+										r.name = WorkerJobsCancelOperation
+										r.summary = "Cancel a running worker job"
+										r.operationID = "worker-jobs-cancel"
+										r.pathPattern = "/workerjobs/{uuid}/cancel"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 's': // Prefix: "s"
+						origElem := elem
+						if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = ListRegisteredWorkersOperation
+								r.summary = "List registered workers"
+								r.operationID = "listRegisteredWorkers"
+								r.pathPattern = "/workers"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'e': // Prefix: "enrollment-tokens"
+								origElem := elem
+								if l := len("enrollment-tokens"); len(elem) >= l && elem[0:l] == "enrollment-tokens" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = ListWorkerEnrollmentTokensOperation
+										r.summary = "List worker enrollment tokens"
+										r.operationID = "listWorkerEnrollmentTokens"
+										r.pathPattern = "/workers/enrollment-tokens"
+										r.args = args
+										r.count = 0
+										return r, true
+									case "POST":
+										r.name = CreateWorkerEnrollmentTokenOperation
+										r.summary = "Create worker enrollment token"
+										r.operationID = "createWorkerEnrollmentToken"
+										r.pathPattern = "/workers/enrollment-tokens"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "uuid"
+									// Leaf parameter
+									args[0] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "DELETE":
+											r.name = DeleteWorkerEnrollmentTokenOperation
+											r.summary = "Delete worker enrollment token"
+											r.operationID = "deleteWorkerEnrollmentToken"
+											r.pathPattern = "/workers/enrollment-tokens/{uuid}"
+											r.args = args
+											r.count = 1
+											return r, true
+										case "GET":
+											r.name = GetWorkerEnrollmentTokenOperation
+											r.summary = "Get worker enrollment token details"
+											r.operationID = "getWorkerEnrollmentToken"
+											r.pathPattern = "/workers/enrollment-tokens/{uuid}"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							}
+							// Param: "uuid"
+							// Leaf parameter
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
 								// Leaf node.
 								switch method {
-								case "POST":
-									r.name = WorkerJobsCancelOperation
-									r.summary = "Cancel a running worker job"
-									r.operationID = "worker-jobs-cancel"
-									r.pathPattern = "/workerjobs/{uuid}/cancel"
+								case "DELETE":
+									r.name = DeleteRegisteredWorkerOperation
+									r.summary = "Delete registered worker"
+									r.operationID = "deleteRegisteredWorker"
+									r.pathPattern = "/workers/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "GET":
+									r.name = GetRegisteredWorkerOperation
+									r.summary = "Get registered worker details"
+									r.operationID = "getRegisteredWorker"
+									r.pathPattern = "/workers/{uuid}"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "PUT":
+									r.name = UpdateRegisteredWorkerOperation
+									r.summary = "Update registered worker"
+									r.operationID = "updateRegisteredWorker"
+									r.pathPattern = "/workers/{uuid}"
 									r.args = args
 									r.count = 1
 									return r, true

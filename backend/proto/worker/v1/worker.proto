@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package worker.v1;
+
+option go_package = "github.com/shadowapi/shadowapi/backend/pkg/proto/worker/v1;workerv1";
+
+import "google/protobuf/timestamp.proto";
+
+// WorkerService defines the gRPC interface for worker management
+service WorkerService {
+  // Enroll exchanges a one-time token for permanent worker credentials
+  rpc Enroll(EnrollRequest) returns (EnrollResponse);
+
+  // Connect establishes a bidirectional stream for heartbeats and job dispatch
+  rpc Connect(stream WorkerMessage) returns (stream ServerMessage);
+}
+
+// EnrollRequest is sent by worker with one-time token
+message EnrollRequest {
+  string enrollment_token = 1;
+  string worker_name = 2;
+  string worker_version = 3;
+  map<string, string> labels = 4;
+}
+
+// EnrollResponse contains permanent credentials
+message EnrollResponse {
+  string worker_id = 1;
+  string worker_secret = 2;
+  repeated string allowed_workspaces = 3;
+  bool is_global = 4;
+}
+
+// WorkerMessage sent from worker to server
+message WorkerMessage {
+  oneof payload {
+    Authenticate authenticate = 1;
+    Heartbeat heartbeat = 2;
+    JobResult job_result = 3;
+  }
+}
+
+// Authenticate sent as first message on Connect
+message Authenticate {
+  string worker_id = 1;
+  string worker_secret = 2;
+}
+
+// Heartbeat sent periodically to maintain connection
+message Heartbeat {
+  google.protobuf.Timestamp timestamp = 1;
+  WorkerStatus status = 2;
+  int32 active_jobs = 3;
+  int32 capacity = 4;
+}
+
+// JobResult reports completion of a job
+message JobResult {
+  string job_id = 1;
+  bool success = 2;
+  string error_message = 3;
+  bytes result_data = 4;
+}
+
+// ServerMessage sent from server to worker
+message ServerMessage {
+  oneof payload {
+    AuthenticateAck authenticate_ack = 1;
+    HeartbeatAck heartbeat_ack = 2;
+    JobAssignment job_assignment = 3;
+    Disconnect disconnect = 4;
+  }
+}
+
+// AuthenticateAck confirms authentication
+message AuthenticateAck {
+  bool success = 1;
+  string error_message = 2;
+  repeated string allowed_workspaces = 3;
+  bool is_global = 4;
+}
+
+// HeartbeatAck confirms heartbeat received
+message HeartbeatAck {
+  google.protobuf.Timestamp server_time = 1;
+}
+
+// JobAssignment dispatches a job to worker
+message JobAssignment {
+  string job_id = 1;
+  string job_type = 2;
+  string workspace_slug = 3;
+  bytes job_data = 4;
+  google.protobuf.Timestamp deadline = 5;
+}
+
+// Disconnect requests worker to disconnect
+message Disconnect {
+  string reason = 1;
+}
+
+// WorkerStatus represents the current state of a worker
+enum WorkerStatus {
+  WORKER_STATUS_UNSPECIFIED = 0;
+  WORKER_STATUS_IDLE = 1;
+  WORKER_STATUS_BUSY = 2;
+  WORKER_STATUS_DRAINING = 3;
+}

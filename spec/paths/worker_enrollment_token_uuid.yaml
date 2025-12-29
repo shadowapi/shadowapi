@@ -1,0 +1,40 @@
+get:
+  summary: Get worker enrollment token details
+  operationId: getWorkerEnrollmentToken
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Token details retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkerEnrollmentToken"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Delete worker enrollment token
+  operationId: deleteWorkerEnrollmentToken
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Token deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

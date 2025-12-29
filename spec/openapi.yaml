@@ -97,6 +97,10 @@ components:
       $ref: "components/rbac_permission.yaml"
     RBACRoleAssignment:
       $ref: "components/rbac_role_assignment.yaml"
+    RegisteredWorker:
+      $ref: "components/registered_worker.yaml"
+    WorkerEnrollmentToken:
+      $ref: "components/worker_enrollment_token.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -246,6 +250,14 @@ paths:
     $ref: "paths/rbac_user_role.yaml"
   /rbac/check:
     $ref: "paths/rbac_check.yaml"
+  /workers:
+    $ref: "paths/registered_worker.yaml"
+  /workers/{uuid}:
+    $ref: "paths/registered_worker_uuid.yaml"
+  /workers/enrollment-tokens:
+    $ref: "paths/worker_enrollment_token.yaml"
+  /workers/enrollment-tokens/{uuid}:
+    $ref: "paths/worker_enrollment_token_uuid.yaml"
 
 servers:
   - description: Local development server

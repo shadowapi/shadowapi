@@ -2721,11 +2721,17 @@ func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
 // DeleteContactOK is response for DeleteContact operation.
 type DeleteContactOK struct{}
 
+// DeleteRegisteredWorkerOK is response for DeleteRegisteredWorker operation.
+type DeleteRegisteredWorkerOK struct{}
+
 // DeleteRoleNoContent is response for DeleteRole operation.
 type DeleteRoleNoContent struct{}
 
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
+
+// DeleteWorkerEnrollmentTokenOK is response for DeleteWorkerEnrollmentToken operation.
+type DeleteWorkerEnrollmentTokenOK struct{}
 
 // DeleteWorkspaceNoContent is response for DeleteWorkspace operation.
 type DeleteWorkspaceNoContent struct{}
@@ -5640,6 +5646,98 @@ func (o OptRbacPermissionScope) Or(d RbacPermissionScope) RbacPermissionScope {
 	return d
 }
 
+// NewOptRegisteredWorkerLabels returns new OptRegisteredWorkerLabels with value set to v.
+func NewOptRegisteredWorkerLabels(v RegisteredWorkerLabels) OptRegisteredWorkerLabels {
+	return OptRegisteredWorkerLabels{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRegisteredWorkerLabels is optional RegisteredWorkerLabels.
+type OptRegisteredWorkerLabels struct {
+	Value RegisteredWorkerLabels
+	Set   bool
+}
+
+// IsSet returns true if OptRegisteredWorkerLabels was set.
+func (o OptRegisteredWorkerLabels) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRegisteredWorkerLabels) Reset() {
+	var v RegisteredWorkerLabels
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRegisteredWorkerLabels) SetTo(v RegisteredWorkerLabels) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRegisteredWorkerLabels) Get() (v RegisteredWorkerLabels, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRegisteredWorkerLabels) Or(d RegisteredWorkerLabels) RegisteredWorkerLabels {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptRegisteredWorkerStatus returns new OptRegisteredWorkerStatus with value set to v.
+func NewOptRegisteredWorkerStatus(v RegisteredWorkerStatus) OptRegisteredWorkerStatus {
+	return OptRegisteredWorkerStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRegisteredWorkerStatus is optional RegisteredWorkerStatus.
+type OptRegisteredWorkerStatus struct {
+	Value RegisteredWorkerStatus
+	Set   bool
+}
+
+// IsSet returns true if OptRegisteredWorkerStatus was set.
+func (o OptRegisteredWorkerStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRegisteredWorkerStatus) Reset() {
+	var v RegisteredWorkerStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRegisteredWorkerStatus) SetTo(v RegisteredWorkerStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRegisteredWorkerStatus) Get() (v RegisteredWorkerStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRegisteredWorkerStatus) Or(d RegisteredWorkerStatus) RegisteredWorkerStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptStorageListOrderBy returns new OptStorageListOrderBy with value set to v.
 func NewOptStorageListOrderBy(v StorageListOrderBy) OptStorageListOrderBy {
 	return OptStorageListOrderBy{
@@ -6968,6 +7066,215 @@ func (s *RbacRoleScope) UnmarshalText(data []byte) error {
 		return nil
 	case RbacRoleScopeWorkspace:
 		*s = RbacRoleScopeWorkspace
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #
+type RegisteredWorker struct {
+	// Unique identifier for the worker.
+	UUID OptString `json:"uuid"`
+	// Display name for the worker.
+	Name string `json:"name"`
+	// Current connection status of the worker.
+	Status OptRegisteredWorkerStatus `json:"status"`
+	// If true, worker can process jobs for all workspaces.
+	IsGlobal OptBool `json:"is_global"`
+	// Worker software version.
+	Version OptString `json:"version"`
+	// Arbitrary key-value metadata labels.
+	Labels OptRegisteredWorkerLabels `json:"labels"`
+	// List of workspace UUIDs the worker is allowed to access (if not global).
+	WorkspaceUuids []string `json:"workspace_uuids"`
+	// Timestamp of last heartbeat received.
+	LastHeartbeat OptDateTime `json:"last_heartbeat"`
+	// Timestamp of when the worker last connected.
+	LastConnectedAt OptDateTime `json:"last_connected_at"`
+	// IP address or hostname the worker connected from.
+	ConnectedFrom OptString `json:"connected_from"`
+	// Timestamp of worker registration.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *RegisteredWorker) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetName returns the value of Name.
+func (s *RegisteredWorker) GetName() string {
+	return s.Name
+}
+
+// GetStatus returns the value of Status.
+func (s *RegisteredWorker) GetStatus() OptRegisteredWorkerStatus {
+	return s.Status
+}
+
+// GetIsGlobal returns the value of IsGlobal.
+func (s *RegisteredWorker) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
+// GetVersion returns the value of Version.
+func (s *RegisteredWorker) GetVersion() OptString {
+	return s.Version
+}
+
+// GetLabels returns the value of Labels.
+func (s *RegisteredWorker) GetLabels() OptRegisteredWorkerLabels {
+	return s.Labels
+}
+
+// GetWorkspaceUuids returns the value of WorkspaceUuids.
+func (s *RegisteredWorker) GetWorkspaceUuids() []string {
+	return s.WorkspaceUuids
+}
+
+// GetLastHeartbeat returns the value of LastHeartbeat.
+func (s *RegisteredWorker) GetLastHeartbeat() OptDateTime {
+	return s.LastHeartbeat
+}
+
+// GetLastConnectedAt returns the value of LastConnectedAt.
+func (s *RegisteredWorker) GetLastConnectedAt() OptDateTime {
+	return s.LastConnectedAt
+}
+
+// GetConnectedFrom returns the value of ConnectedFrom.
+func (s *RegisteredWorker) GetConnectedFrom() OptString {
+	return s.ConnectedFrom
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *RegisteredWorker) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *RegisteredWorker) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *RegisteredWorker) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetName sets the value of Name.
+func (s *RegisteredWorker) SetName(val string) {
+	s.Name = val
+}
+
+// SetStatus sets the value of Status.
+func (s *RegisteredWorker) SetStatus(val OptRegisteredWorkerStatus) {
+	s.Status = val
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *RegisteredWorker) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+// SetVersion sets the value of Version.
+func (s *RegisteredWorker) SetVersion(val OptString) {
+	s.Version = val
+}
+
+// SetLabels sets the value of Labels.
+func (s *RegisteredWorker) SetLabels(val OptRegisteredWorkerLabels) {
+	s.Labels = val
+}
+
+// SetWorkspaceUuids sets the value of WorkspaceUuids.
+func (s *RegisteredWorker) SetWorkspaceUuids(val []string) {
+	s.WorkspaceUuids = val
+}
+
+// SetLastHeartbeat sets the value of LastHeartbeat.
+func (s *RegisteredWorker) SetLastHeartbeat(val OptDateTime) {
+	s.LastHeartbeat = val
+}
+
+// SetLastConnectedAt sets the value of LastConnectedAt.
+func (s *RegisteredWorker) SetLastConnectedAt(val OptDateTime) {
+	s.LastConnectedAt = val
+}
+
+// SetConnectedFrom sets the value of ConnectedFrom.
+func (s *RegisteredWorker) SetConnectedFrom(val OptString) {
+	s.ConnectedFrom = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *RegisteredWorker) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *RegisteredWorker) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// Arbitrary key-value metadata labels.
+type RegisteredWorkerLabels map[string]jx.Raw
+
+func (s *RegisteredWorkerLabels) init() RegisteredWorkerLabels {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Current connection status of the worker.
+type RegisteredWorkerStatus string
+
+const (
+	RegisteredWorkerStatusOnline   RegisteredWorkerStatus = "online"
+	RegisteredWorkerStatusOffline  RegisteredWorkerStatus = "offline"
+	RegisteredWorkerStatusDraining RegisteredWorkerStatus = "draining"
+)
+
+// AllValues returns all RegisteredWorkerStatus values.
+func (RegisteredWorkerStatus) AllValues() []RegisteredWorkerStatus {
+	return []RegisteredWorkerStatus{
+		RegisteredWorkerStatusOnline,
+		RegisteredWorkerStatusOffline,
+		RegisteredWorkerStatusDraining,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RegisteredWorkerStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case RegisteredWorkerStatusOnline:
+		return []byte(s), nil
+	case RegisteredWorkerStatusOffline:
+		return []byte(s), nil
+	case RegisteredWorkerStatusDraining:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RegisteredWorkerStatus) UnmarshalText(data []byte) error {
+	switch RegisteredWorkerStatus(data) {
+	case RegisteredWorkerStatusOnline:
+		*s = RegisteredWorkerStatusOnline
+		return nil
+	case RegisteredWorkerStatusOffline:
+		*s = RegisteredWorkerStatusOffline
+		return nil
+	case RegisteredWorkerStatusDraining:
+		*s = RegisteredWorkerStatusDraining
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -8507,6 +8814,130 @@ func (s *UserSessionToken) SetZitadelURL(val string) {
 // SetExpiresIn sets the value of ExpiresIn.
 func (s *UserSessionToken) SetExpiresIn(val int) {
 	s.ExpiresIn = val
+}
+
+// Ref: #
+type WorkerEnrollmentToken struct {
+	// Unique identifier for the token.
+	UUID OptString `json:"uuid"`
+	// The actual enrollment token (only returned on creation).
+	Token OptString `json:"token"`
+	// Display name for the worker that will be enrolled with this token.
+	Name string `json:"name"`
+	// If true, the enrolled worker will have access to all workspaces.
+	IsGlobal OptBool `json:"is_global"`
+	// List of workspace UUIDs the enrolled worker will be allowed to access.
+	WorkspaceUuids []string `json:"workspace_uuids"`
+	// When the token expires.
+	ExpiresAt OptDateTime `json:"expires_at"`
+	// When the token was used (if used).
+	UsedAt OptDateTime `json:"used_at"`
+	// UUID of the worker that used this token (if used).
+	UsedByWorkerUUID OptString `json:"used_by_worker_uuid"`
+	// UUID of the user who created the token.
+	CreatedByUserUUID OptString `json:"created_by_user_uuid"`
+	// Timestamp of token creation.
+	CreatedAt OptDateTime `json:"created_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *WorkerEnrollmentToken) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetToken returns the value of Token.
+func (s *WorkerEnrollmentToken) GetToken() OptString {
+	return s.Token
+}
+
+// GetName returns the value of Name.
+func (s *WorkerEnrollmentToken) GetName() string {
+	return s.Name
+}
+
+// GetIsGlobal returns the value of IsGlobal.
+func (s *WorkerEnrollmentToken) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
+// GetWorkspaceUuids returns the value of WorkspaceUuids.
+func (s *WorkerEnrollmentToken) GetWorkspaceUuids() []string {
+	return s.WorkspaceUuids
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *WorkerEnrollmentToken) GetExpiresAt() OptDateTime {
+	return s.ExpiresAt
+}
+
+// GetUsedAt returns the value of UsedAt.
+func (s *WorkerEnrollmentToken) GetUsedAt() OptDateTime {
+	return s.UsedAt
+}
+
+// GetUsedByWorkerUUID returns the value of UsedByWorkerUUID.
+func (s *WorkerEnrollmentToken) GetUsedByWorkerUUID() OptString {
+	return s.UsedByWorkerUUID
+}
+
+// GetCreatedByUserUUID returns the value of CreatedByUserUUID.
+func (s *WorkerEnrollmentToken) GetCreatedByUserUUID() OptString {
+	return s.CreatedByUserUUID
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WorkerEnrollmentToken) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *WorkerEnrollmentToken) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetToken sets the value of Token.
+func (s *WorkerEnrollmentToken) SetToken(val OptString) {
+	s.Token = val
+}
+
+// SetName sets the value of Name.
+func (s *WorkerEnrollmentToken) SetName(val string) {
+	s.Name = val
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *WorkerEnrollmentToken) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+// SetWorkspaceUuids sets the value of WorkspaceUuids.
+func (s *WorkerEnrollmentToken) SetWorkspaceUuids(val []string) {
+	s.WorkspaceUuids = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *WorkerEnrollmentToken) SetExpiresAt(val OptDateTime) {
+	s.ExpiresAt = val
+}
+
+// SetUsedAt sets the value of UsedAt.
+func (s *WorkerEnrollmentToken) SetUsedAt(val OptDateTime) {
+	s.UsedAt = val
+}
+
+// SetUsedByWorkerUUID sets the value of UsedByWorkerUUID.
+func (s *WorkerEnrollmentToken) SetUsedByWorkerUUID(val OptString) {
+	s.UsedByWorkerUUID = val
+}
+
+// SetCreatedByUserUUID sets the value of CreatedByUserUUID.
+func (s *WorkerEnrollmentToken) SetCreatedByUserUUID(val OptString) {
+	s.CreatedByUserUUID = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WorkerEnrollmentToken) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
 }
 
 // Ref: #

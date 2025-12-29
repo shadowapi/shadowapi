@@ -17,6 +17,7 @@ sql:
           workspace_uuid: "WorkspaceUUID"
           datasource_uuid: "DatasourceUUID"
           oauth2_token_uuid: "OAuth2TokenUUID"
+          worker_uuid: "WorkerUUID"
           imap_server: "IMAPServer"
           smtp_server: "SMTPServer"
           smtp_tls: "SMTPTLS"

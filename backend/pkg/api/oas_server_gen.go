@@ -104,6 +104,12 @@ type Handler interface {
 	//
 	// POST /user/session
 	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
+	// CreateWorkerEnrollmentToken implements createWorkerEnrollmentToken operation.
+	//
+	// Create worker enrollment token.
+	//
+	// POST /workers/enrollment-tokens
+	CreateWorkerEnrollmentToken(ctx context.Context, req *WorkerEnrollmentToken) (*WorkerEnrollmentToken, error)
 	// CreateWorkspace implements createWorkspace operation.
 	//
 	// Create a new workspace.
@@ -278,6 +284,12 @@ type Handler interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
+	// DeleteRegisteredWorker implements deleteRegisteredWorker operation.
+	//
+	// Delete registered worker.
+	//
+	// DELETE /workers/{uuid}
+	DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) error
 	// DeleteRole implements deleteRole operation.
 	//
 	// Delete a role.
@@ -290,6 +302,12 @@ type Handler interface {
 	//
 	// DELETE /user/{uuid}
 	DeleteUser(ctx context.Context, params DeleteUserParams) error
+	// DeleteWorkerEnrollmentToken implements deleteWorkerEnrollmentToken operation.
+	//
+	// Delete worker enrollment token.
+	//
+	// DELETE /workers/enrollment-tokens/{uuid}
+	DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) error
 	// DeleteWorkspace implements deleteWorkspace operation.
 	//
 	// Delete workspace.
@@ -350,6 +368,12 @@ type Handler interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
+	// GetRegisteredWorker implements getRegisteredWorker operation.
+	//
+	// Get registered worker details.
+	//
+	// GET /workers/{uuid}
+	GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (*RegisteredWorker, error)
 	// GetRole implements getRole operation.
 	//
 	// Get role details.
@@ -368,6 +392,12 @@ type Handler interface {
 	//
 	// GET /rbac/user/{user_uuid}/roles
 	GetUserRoles(ctx context.Context, params GetUserRolesParams) (*GetUserRolesOK, error)
+	// GetWorkerEnrollmentToken implements getWorkerEnrollmentToken operation.
+	//
+	// Get worker enrollment token details.
+	//
+	// GET /workers/enrollment-tokens/{uuid}
+	GetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (*WorkerEnrollmentToken, error)
 	// GetWorkspace implements getWorkspace operation.
 	//
 	// Get workspace details.
@@ -386,6 +416,12 @@ type Handler interface {
 	//
 	// GET /rbac/permission
 	ListPermissions(ctx context.Context, params ListPermissionsParams) ([]RbacPermission, error)
+	// ListRegisteredWorkers implements listRegisteredWorkers operation.
+	//
+	// List registered workers.
+	//
+	// GET /workers
+	ListRegisteredWorkers(ctx context.Context) ([]RegisteredWorker, error)
 	// ListRoles implements listRoles operation.
 	//
 	// List all roles.
@@ -398,6 +434,12 @@ type Handler interface {
 	//
 	// GET /user
 	ListUsers(ctx context.Context) ([]User, error)
+	// ListWorkerEnrollmentTokens implements listWorkerEnrollmentTokens operation.
+	//
+	// List worker enrollment tokens.
+	//
+	// GET /workers/enrollment-tokens
+	ListWorkerEnrollmentTokens(ctx context.Context) ([]WorkerEnrollmentToken, error)
 	// ListWorkspaceMembers implements listWorkspaceMembers operation.
 	//
 	// List workspace members.
@@ -704,6 +746,12 @@ type Handler interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, req *UserProfile) (*User, error)
+	// UpdateRegisteredWorker implements updateRegisteredWorker operation.
+	//
+	// Update registered worker.
+	//
+	// PUT /workers/{uuid}
+	UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (*RegisteredWorker, error)
 	// UpdateRole implements updateRole operation.
 	//
 	// Update a role.

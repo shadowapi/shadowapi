@@ -2248,6 +2248,71 @@ func decodeDeleteContactParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
+// DeleteRegisteredWorkerParams is parameters of deleteRegisteredWorker operation.
+type DeleteRegisteredWorkerParams struct {
+	UUID string
+}
+
+func unpackDeleteRegisteredWorkerParams(packed middleware.Parameters) (params DeleteRegisteredWorkerParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeleteRegisteredWorkerParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteRegisteredWorkerParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteRoleParams is parameters of deleteRole operation.
 type DeleteRoleParams struct {
 	// Role UUID.
@@ -2331,6 +2396,71 @@ func unpackDeleteUserParams(packed middleware.Parameters) (params DeleteUserPara
 }
 
 func decodeDeleteUserParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteUserParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteWorkerEnrollmentTokenParams is parameters of deleteWorkerEnrollmentToken operation.
+type DeleteWorkerEnrollmentTokenParams struct {
+	UUID string
+}
+
+func unpackDeleteWorkerEnrollmentTokenParams(packed middleware.Parameters) (params DeleteWorkerEnrollmentTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeleteWorkerEnrollmentTokenParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteWorkerEnrollmentTokenParams, _ error) {
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]
@@ -2825,6 +2955,71 @@ func decodeGetContactParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// GetRegisteredWorkerParams is parameters of getRegisteredWorker operation.
+type GetRegisteredWorkerParams struct {
+	UUID string
+}
+
+func unpackGetRegisteredWorkerParams(packed middleware.Parameters) (params GetRegisteredWorkerParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetRegisteredWorkerParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRegisteredWorkerParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetRoleParams is parameters of getRole operation.
 type GetRoleParams struct {
 	// Role UUID.
@@ -3069,6 +3264,71 @@ func decodeGetUserRolesParams(args [1]string, argsEscaped bool, r *http.Request)
 		return params, &ogenerrors.DecodeParamError{
 			Name: "domain",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetWorkerEnrollmentTokenParams is parameters of getWorkerEnrollmentToken operation.
+type GetWorkerEnrollmentTokenParams struct {
+	UUID string
+}
+
+func unpackGetWorkerEnrollmentTokenParams(packed middleware.Parameters) (params GetWorkerEnrollmentTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetWorkerEnrollmentTokenParams(args [1]string, argsEscaped bool, r *http.Request) (params GetWorkerEnrollmentTokenParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
 			Err:  err,
 		}
 	}
@@ -6505,6 +6765,71 @@ func unpackUpdateContactParams(packed middleware.Parameters) (params UpdateConta
 }
 
 func decodeUpdateContactParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateContactParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateRegisteredWorkerParams is parameters of updateRegisteredWorker operation.
+type UpdateRegisteredWorkerParams struct {
+	UUID string
+}
+
+func unpackUpdateRegisteredWorkerParams(packed middleware.Parameters) (params UpdateRegisteredWorkerParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateRegisteredWorkerParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateRegisteredWorkerParams, _ error) {
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]

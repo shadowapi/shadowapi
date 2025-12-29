@@ -445,3 +445,56 @@ CREATE TABLE IF NOT EXISTS rbac_permission (
 CREATE INDEX IF NOT EXISTS idx_rbac_permission_resource ON rbac_permission(resource);
 CREATE INDEX IF NOT EXISTS idx_rbac_permission_scope ON rbac_permission(scope);
 CREATE INDEX IF NOT EXISTS idx_rbac_permission_name ON rbac_permission(name);
+
+-- ============================================================================
+-- Distributed Worker Tables
+-- ============================================================================
+
+-- Worker registry - stores registered workers that connect via gRPC
+CREATE TABLE IF NOT EXISTS registered_worker (
+    uuid UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    secret_hash VARCHAR(255) NOT NULL,  -- bcrypt hashed secret for authentication
+    status VARCHAR(50) NOT NULL DEFAULT 'offline',  -- online, offline, draining
+    is_global BOOLEAN NOT NULL DEFAULT FALSE,  -- can process any workspace
+    version VARCHAR(100),  -- worker binary version
+    labels JSONB DEFAULT '{}'::jsonb,  -- metadata labels
+    last_heartbeat TIMESTAMP WITH TIME ZONE,
+    last_connected_at TIMESTAMP WITH TIME ZONE,
+    connected_from VARCHAR(255),  -- IP address
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT chk_registered_worker_status CHECK (status IN ('online', 'offline', 'draining'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_registered_worker_status ON registered_worker(status);
+
+-- Worker-to-workspace assignments (many-to-many)
+CREATE TABLE IF NOT EXISTS worker_workspace (
+    uuid UUID PRIMARY KEY,
+    worker_uuid UUID NOT NULL REFERENCES registered_worker(uuid) ON DELETE CASCADE,
+    workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    CONSTRAINT uq_worker_workspace UNIQUE(worker_uuid, workspace_uuid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_worker_workspace_worker ON worker_workspace(worker_uuid);
+CREATE INDEX IF NOT EXISTS idx_worker_workspace_workspace ON worker_workspace(workspace_uuid);
+
+-- One-time enrollment tokens for worker registration
+CREATE TABLE IF NOT EXISTS worker_enrollment_token (
+    uuid UUID PRIMARY KEY,
+    token_hash VARCHAR(255) NOT NULL UNIQUE,  -- bcrypt hashed token
+    name VARCHAR(255) NOT NULL,  -- pre-assigned worker name
+    is_global BOOLEAN NOT NULL DEFAULT FALSE,
+    workspace_uuids UUID[] DEFAULT '{}',  -- workspaces to assign on enrollment
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    used_at TIMESTAMP WITH TIME ZONE,
+    used_by_worker_uuid UUID REFERENCES registered_worker(uuid),
+    created_by_user_uuid UUID REFERENCES "user"(uuid),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_worker_enrollment_token_expires ON worker_enrollment_token(expires_at);

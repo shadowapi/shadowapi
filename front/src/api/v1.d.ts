@@ -1279,6 +1279,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/workers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List registered workers */
+        get: operations["listRegisteredWorkers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get registered worker details */
+        get: operations["getRegisteredWorker"];
+        /** Update registered worker */
+        put: operations["updateRegisteredWorker"];
+        post?: never;
+        /** Delete registered worker */
+        delete: operations["deleteRegisteredWorker"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers/enrollment-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List worker enrollment tokens */
+        get: operations["listWorkerEnrollmentTokens"];
+        put?: never;
+        /** Create worker enrollment token */
+        post: operations["createWorkerEnrollmentToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers/enrollment-tokens/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get worker enrollment token details */
+        get: operations["getWorkerEnrollmentToken"];
+        put?: never;
+        post?: never;
+        /** Delete worker enrollment token */
+        delete: operations["deleteWorkerEnrollmentToken"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1401,6 +1473,8 @@ export interface components {
         RBACRole: components["schemas"]["rbac_role"];
         RBACPermission: components["schemas"]["rbac_permission"];
         RBACRoleAssignment: components["schemas"]["rbac_role_assignment"];
+        RegisteredWorker: components["schemas"]["registered_worker"];
+        WorkerEnrollmentToken: components["schemas"]["worker_enrollment_token"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2308,6 +2382,80 @@ export interface components {
              * @description Timestamp when the role was assigned
              */
             readonly assigned_at?: string;
+        };
+        registered_worker: {
+            /** @description Unique identifier for the worker */
+            readonly uuid?: string;
+            /** @description Display name for the worker */
+            name: string;
+            /**
+             * @description Current connection status of the worker
+             * @enum {string}
+             */
+            readonly status?: "online" | "offline" | "draining";
+            /** @description If true, worker can process jobs for all workspaces */
+            is_global?: boolean;
+            /** @description Worker software version */
+            readonly version?: string;
+            /** @description Arbitrary key-value metadata labels */
+            labels?: {
+                [key: string]: unknown;
+            };
+            /** @description List of workspace UUIDs the worker is allowed to access (if not global) */
+            workspace_uuids?: string[];
+            /**
+             * Format: date-time
+             * @description Timestamp of last heartbeat received
+             */
+            readonly last_heartbeat?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of when the worker last connected
+             */
+            readonly last_connected_at?: string;
+            /** @description IP address or hostname the worker connected from */
+            readonly connected_from?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of worker registration
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        worker_enrollment_token: {
+            /** @description Unique identifier for the token */
+            readonly uuid?: string;
+            /** @description The actual enrollment token (only returned on creation) */
+            readonly token?: string;
+            /** @description Display name for the worker that will be enrolled with this token */
+            name: string;
+            /** @description If true, the enrolled worker will have access to all workspaces */
+            is_global?: boolean;
+            /** @description List of workspace UUIDs the enrolled worker will be allowed to access */
+            workspace_uuids?: string[];
+            /**
+             * Format: date-time
+             * @description When the token expires
+             */
+            expires_at?: string;
+            /**
+             * Format: date-time
+             * @description When the token was used (if used)
+             */
+            readonly used_at?: string;
+            /** @description UUID of the worker that used this token (if used) */
+            readonly used_by_worker_uuid?: string;
+            /** @description UUID of the user who created the token */
+            readonly created_by_user_uuid?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of token creation
+             */
+            readonly created_at?: string;
         };
         email_label: {
             /** Format: int64 */
@@ -6617,6 +6765,252 @@ export interface operations {
                         allowed?: boolean;
                     };
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listRegisteredWorkers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of registered workers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["registered_worker"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getRegisteredWorker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker details retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["registered_worker"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateRegisteredWorker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["registered_worker"];
+            };
+        };
+        responses: {
+            /** @description Worker updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["registered_worker"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteRegisteredWorker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listWorkerEnrollmentTokens: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of enrollment tokens */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_enrollment_token"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createWorkerEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["worker_enrollment_token"];
+            };
+        };
+        responses: {
+            /** @description Enrollment token created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_enrollment_token"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getWorkerEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token details retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_enrollment_token"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteWorkerEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {

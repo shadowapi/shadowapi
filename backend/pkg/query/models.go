@@ -276,6 +276,21 @@ type RbacRole struct {
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
+type RegisteredWorker struct {
+	UUID            uuid.UUID          `json:"uuid"`
+	Name            string             `json:"name"`
+	SecretHash      string             `json:"secret_hash"`
+	Status          string             `json:"status"`
+	IsGlobal        bool               `json:"is_global"`
+	Version         pgtype.Text        `json:"version"`
+	Labels          []byte             `json:"labels"`
+	LastHeartbeat   pgtype.Timestamptz `json:"last_heartbeat"`
+	LastConnectedAt pgtype.Timestamptz `json:"last_connected_at"`
+	ConnectedFrom   pgtype.Text        `json:"connected_from"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Scheduler struct {
 	UUID           uuid.UUID          `json:"uuid"`
 	PipelineUuid   *uuid.UUID         `json:"pipeline_uuid"`
@@ -402,6 +417,19 @@ type User struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type WorkerEnrollmentToken struct {
+	UUID              uuid.UUID          `json:"uuid"`
+	TokenHash         string             `json:"token_hash"`
+	Name              string             `json:"name"`
+	IsGlobal          bool               `json:"is_global"`
+	WorkspaceUuids    []pgtype.UUID      `json:"workspace_uuids"`
+	ExpiresAt         pgtype.Timestamptz `json:"expires_at"`
+	UsedAt            pgtype.Timestamptz `json:"used_at"`
+	UsedByWorkerUuid  *uuid.UUID         `json:"used_by_worker_uuid"`
+	CreatedByUserUuid *uuid.UUID         `json:"created_by_user_uuid"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+}
+
 type WorkerJob struct {
 	UUID          uuid.UUID          `json:"uuid"`
 	SchedulerUuid *uuid.UUID         `json:"scheduler_uuid"`
@@ -411,6 +439,13 @@ type WorkerJob struct {
 	Data          []byte             `json:"data"`
 	StartedAt     pgtype.Timestamptz `json:"started_at"`
 	FinishedAt    pgtype.Timestamptz `json:"finished_at"`
+}
+
+type WorkerWorkspace struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	WorkerUUID    *uuid.UUID         `json:"worker_uuid"`
+	WorkspaceUUID *uuid.UUID         `json:"workspace_uuid"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type Workspace struct {

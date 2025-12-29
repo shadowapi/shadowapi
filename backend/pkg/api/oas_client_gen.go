@@ -125,6 +125,12 @@ type Invoker interface {
 	//
 	// POST /user/session
 	CreateUserSession(ctx context.Context) (*UserSessionToken, error)
+	// CreateWorkerEnrollmentToken invokes createWorkerEnrollmentToken operation.
+	//
+	// Create worker enrollment token.
+	//
+	// POST /workers/enrollment-tokens
+	CreateWorkerEnrollmentToken(ctx context.Context, request *WorkerEnrollmentToken) (*WorkerEnrollmentToken, error)
 	// CreateWorkspace invokes createWorkspace operation.
 	//
 	// Create a new workspace.
@@ -299,6 +305,12 @@ type Invoker interface {
 	//
 	// DELETE /contact/{uuid}
 	DeleteContact(ctx context.Context, params DeleteContactParams) error
+	// DeleteRegisteredWorker invokes deleteRegisteredWorker operation.
+	//
+	// Delete registered worker.
+	//
+	// DELETE /workers/{uuid}
+	DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) error
 	// DeleteRole invokes deleteRole operation.
 	//
 	// Delete a role.
@@ -311,6 +323,12 @@ type Invoker interface {
 	//
 	// DELETE /user/{uuid}
 	DeleteUser(ctx context.Context, params DeleteUserParams) error
+	// DeleteWorkerEnrollmentToken invokes deleteWorkerEnrollmentToken operation.
+	//
+	// Delete worker enrollment token.
+	//
+	// DELETE /workers/enrollment-tokens/{uuid}
+	DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) error
 	// DeleteWorkspace invokes deleteWorkspace operation.
 	//
 	// Delete workspace.
@@ -371,6 +389,12 @@ type Invoker interface {
 	//
 	// GET /profile
 	GetProfile(ctx context.Context) (*User, error)
+	// GetRegisteredWorker invokes getRegisteredWorker operation.
+	//
+	// Get registered worker details.
+	//
+	// GET /workers/{uuid}
+	GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (*RegisteredWorker, error)
 	// GetRole invokes getRole operation.
 	//
 	// Get role details.
@@ -389,6 +413,12 @@ type Invoker interface {
 	//
 	// GET /rbac/user/{user_uuid}/roles
 	GetUserRoles(ctx context.Context, params GetUserRolesParams) (*GetUserRolesOK, error)
+	// GetWorkerEnrollmentToken invokes getWorkerEnrollmentToken operation.
+	//
+	// Get worker enrollment token details.
+	//
+	// GET /workers/enrollment-tokens/{uuid}
+	GetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (*WorkerEnrollmentToken, error)
 	// GetWorkspace invokes getWorkspace operation.
 	//
 	// Get workspace details.
@@ -407,6 +437,12 @@ type Invoker interface {
 	//
 	// GET /rbac/permission
 	ListPermissions(ctx context.Context, params ListPermissionsParams) ([]RbacPermission, error)
+	// ListRegisteredWorkers invokes listRegisteredWorkers operation.
+	//
+	// List registered workers.
+	//
+	// GET /workers
+	ListRegisteredWorkers(ctx context.Context) ([]RegisteredWorker, error)
 	// ListRoles invokes listRoles operation.
 	//
 	// List all roles.
@@ -419,6 +455,12 @@ type Invoker interface {
 	//
 	// GET /user
 	ListUsers(ctx context.Context) ([]User, error)
+	// ListWorkerEnrollmentTokens invokes listWorkerEnrollmentTokens operation.
+	//
+	// List worker enrollment tokens.
+	//
+	// GET /workers/enrollment-tokens
+	ListWorkerEnrollmentTokens(ctx context.Context) ([]WorkerEnrollmentToken, error)
 	// ListWorkspaceMembers invokes listWorkspaceMembers operation.
 	//
 	// List workspace members.
@@ -725,6 +767,12 @@ type Invoker interface {
 	//
 	// PUT /profile
 	UpdateProfile(ctx context.Context, request *UserProfile) (*User, error)
+	// UpdateRegisteredWorker invokes updateRegisteredWorker operation.
+	//
+	// Update registered worker.
+	//
+	// PUT /workers/{uuid}
+	UpdateRegisteredWorker(ctx context.Context, request *RegisteredWorker, params UpdateRegisteredWorkerParams) (*RegisteredWorker, error)
 	// UpdateRole invokes updateRole operation.
 	//
 	// Update a role.
@@ -2321,6 +2369,114 @@ func (c *Client) sendCreateUserSession(ctx context.Context) (res *UserSessionTok
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateUserSessionResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateWorkerEnrollmentToken invokes createWorkerEnrollmentToken operation.
+//
+// Create worker enrollment token.
+//
+// POST /workers/enrollment-tokens
+func (c *Client) CreateWorkerEnrollmentToken(ctx context.Context, request *WorkerEnrollmentToken) (*WorkerEnrollmentToken, error) {
+	res, err := c.sendCreateWorkerEnrollmentToken(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateWorkerEnrollmentToken(ctx context.Context, request *WorkerEnrollmentToken) (res *WorkerEnrollmentToken, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createWorkerEnrollmentToken"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/workers/enrollment-tokens"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateWorkerEnrollmentTokenOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/workers/enrollment-tokens"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateWorkerEnrollmentTokenRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateWorkerEnrollmentTokenOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateWorkerEnrollmentTokenResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5944,6 +6100,129 @@ func (c *Client) sendDeleteContact(ctx context.Context, params DeleteContactPara
 	return result, nil
 }
 
+// DeleteRegisteredWorker invokes deleteRegisteredWorker operation.
+//
+// Delete registered worker.
+//
+// DELETE /workers/{uuid}
+func (c *Client) DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) error {
+	_, err := c.sendDeleteRegisteredWorker(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) (res *DeleteRegisteredWorkerOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteRegisteredWorker"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/workers/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteRegisteredWorkerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workers/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteRegisteredWorkerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteRegisteredWorkerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteRole invokes deleteRole operation.
 //
 // Delete a role.
@@ -6183,6 +6462,129 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteWorkerEnrollmentToken invokes deleteWorkerEnrollmentToken operation.
+//
+// Delete worker enrollment token.
+//
+// DELETE /workers/enrollment-tokens/{uuid}
+func (c *Client) DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) error {
+	_, err := c.sendDeleteWorkerEnrollmentToken(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) (res *DeleteWorkerEnrollmentTokenOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteWorkerEnrollmentToken"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/workers/enrollment-tokens/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteWorkerEnrollmentTokenOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workers/enrollment-tokens/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteWorkerEnrollmentTokenOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteWorkerEnrollmentTokenResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7380,6 +7782,129 @@ func (c *Client) sendGetProfile(ctx context.Context) (res *User, err error) {
 	return result, nil
 }
 
+// GetRegisteredWorker invokes getRegisteredWorker operation.
+//
+// Get registered worker details.
+//
+// GET /workers/{uuid}
+func (c *Client) GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (*RegisteredWorker, error) {
+	res, err := c.sendGetRegisteredWorker(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (res *RegisteredWorker, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRegisteredWorker"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/workers/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetRegisteredWorkerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workers/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetRegisteredWorkerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRegisteredWorkerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetRole invokes getRole operation.
 //
 // Get role details.
@@ -7771,6 +8296,129 @@ func (c *Client) sendGetUserRoles(ctx context.Context, params GetUserRolesParams
 	return result, nil
 }
 
+// GetWorkerEnrollmentToken invokes getWorkerEnrollmentToken operation.
+//
+// Get worker enrollment token details.
+//
+// GET /workers/enrollment-tokens/{uuid}
+func (c *Client) GetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (*WorkerEnrollmentToken, error) {
+	res, err := c.sendGetWorkerEnrollmentToken(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (res *WorkerEnrollmentToken, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getWorkerEnrollmentToken"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/workers/enrollment-tokens/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetWorkerEnrollmentTokenOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workers/enrollment-tokens/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetWorkerEnrollmentTokenOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetWorkerEnrollmentTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetWorkspace invokes getWorkspace operation.
 //
 // Get workspace details.
@@ -8142,6 +8790,111 @@ func (c *Client) sendListPermissions(ctx context.Context, params ListPermissions
 	return result, nil
 }
 
+// ListRegisteredWorkers invokes listRegisteredWorkers operation.
+//
+// List registered workers.
+//
+// GET /workers
+func (c *Client) ListRegisteredWorkers(ctx context.Context) ([]RegisteredWorker, error) {
+	res, err := c.sendListRegisteredWorkers(ctx)
+	return res, err
+}
+
+func (c *Client) sendListRegisteredWorkers(ctx context.Context) (res []RegisteredWorker, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listRegisteredWorkers"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/workers"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListRegisteredWorkersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/workers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListRegisteredWorkersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListRegisteredWorkersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListRoles invokes listRoles operation.
 //
 // List all roles.
@@ -8366,6 +9119,111 @@ func (c *Client) sendListUsers(ctx context.Context) (res []User, err error) {
 
 	stage = "DecodeResponse"
 	result, err := decodeListUsersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListWorkerEnrollmentTokens invokes listWorkerEnrollmentTokens operation.
+//
+// List worker enrollment tokens.
+//
+// GET /workers/enrollment-tokens
+func (c *Client) ListWorkerEnrollmentTokens(ctx context.Context) ([]WorkerEnrollmentToken, error) {
+	res, err := c.sendListWorkerEnrollmentTokens(ctx)
+	return res, err
+}
+
+func (c *Client) sendListWorkerEnrollmentTokens(ctx context.Context) (res []WorkerEnrollmentToken, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listWorkerEnrollmentTokens"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/workers/enrollment-tokens"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListWorkerEnrollmentTokensOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/workers/enrollment-tokens"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListWorkerEnrollmentTokensOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListWorkerEnrollmentTokensResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -14573,6 +15431,132 @@ func (c *Client) sendUpdateProfile(ctx context.Context, request *UserProfile) (r
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProfileResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateRegisteredWorker invokes updateRegisteredWorker operation.
+//
+// Update registered worker.
+//
+// PUT /workers/{uuid}
+func (c *Client) UpdateRegisteredWorker(ctx context.Context, request *RegisteredWorker, params UpdateRegisteredWorkerParams) (*RegisteredWorker, error) {
+	res, err := c.sendUpdateRegisteredWorker(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateRegisteredWorker(ctx context.Context, request *RegisteredWorker, params UpdateRegisteredWorkerParams) (res *RegisteredWorker, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateRegisteredWorker"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/workers/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateRegisteredWorkerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/workers/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateRegisteredWorkerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateRegisteredWorkerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateRegisteredWorkerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

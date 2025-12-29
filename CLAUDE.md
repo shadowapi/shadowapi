@@ -10,12 +10,21 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 
 ## Repository map
 
-- `backend/` – Go service. `cmd/shadowapi` hosts the CLI (`serve`, `loader`, `reset-password`), `internal/` holds domain packages (auth, handler, worker, storages, queue, metrics, config), `pkg/api` is ogen-generated HTTP server (do not edit manually), `pkg/query` is SQLC output (do not edit), and `sdk-go/` contains a generated client example.
+- `backend/` – Go service:
+  - `cmd/shadowapi` – Main CLI binary (`serve`, `loader`, `reset-password`)
+  - `cmd/worker` – Distributed worker binary (`enroll`, `connect`)
+  - `internal/` – Domain packages (auth, handler, worker, grpc, storages, queue, metrics, config)
+  - `proto/` – Protobuf definitions for gRPC services (use `make proto-gen` to regenerate)
+  - `pkg/api` – ogen-generated HTTP server (do not edit manually)
+  - `pkg/query` – SQLC-generated database accessors (do not edit)
+  - `pkg/proto` – buf-generated gRPC/protobuf code (do not edit)
+  - `sdk-go/` – Generated client example
 - `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` (including RBAC schemas) and `paths/` (including RBAC endpoints).
-- `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`, and RBAC queries in `sql/rbac.sql`. Atlas migrations are applied from schema files; no separate migration files exist.
+- `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Worker tables (`registered_worker`, `worker_workspace`, `worker_enrollment_token`) and RBAC queries in `sql/`. Atlas migrations are applied from schema files; no separate migration files exist.
 - `devops/` – Dockerfiles, Atlas configs, sqlc builder image, helper scripts, and Ory configuration files used by Compose/Make.
 - `devops/ory/` – Ory Hydra configuration files (`hydra/hydra.yaml`).
 - `devops/compose/auth/` – Docker Compose for Hydra OAuth2/OIDC service.
+- `devops/docker/worker/` – Dockerfile for distributed worker container.
 - `docs/` – Product documentation and screenshots referenced by the README.
 - `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local keys). Leave anything under `secrets/` untouched.
 - `Makefile` – Source of all make targets; prefer calling `make <target>` over shelling out to `docker compose` directly.
@@ -38,10 +47,42 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 - `internal/rbac` – Role-Based Access Control with Casbin enforcer, middleware, and predefined policies.
 - `internal/workspace` – Workspace context utilities and middleware for path-based workspace extraction.
 - `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
-- `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic.
+- `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic (NATS-based internal worker).
+- `internal/grpc` – gRPC server for distributed workers. Handles worker enrollment and bidirectional streaming for job dispatch.
 - `internal/imap`, `internal/whatsapp`, `internal/tg`, `internal/oauth2` – External channel integrations (IMAP/SMTP Gmail, WhatsApp via whatsmeow, Telegram via gotd, LinkedIn helpers).
 - `pkg/api` – Generated server; never edit by hand. Regenerate with `make api-gen-backend`.
 - `pkg/query` – SQLC-generated database accessors; regenerate with `sqlc generate` in the backend directory.
+- `pkg/proto` – Generated gRPC/protobuf code; regenerate with `make proto-gen`.
+
+### Distributed Worker System
+
+The backend supports distributed workers that connect via gRPC for job processing. This is separate from the NATS-based internal worker.
+
+**Architecture:**
+- Backend runs gRPC server on port 9090 (configurable via `BE_GRPC_HOST` and `BE_GRPC_PORT`)
+- Workers are standalone binaries (`cmd/worker`) that connect as gRPC clients
+- Pull-based pattern: workers connect and receive jobs via bidirectional streaming
+
+**Worker Binary (`cmd/worker`):**
+- `worker enroll --token=<token> --name=<name>` - Exchange enrollment token for credentials
+- `worker connect` - Connect to backend and start receiving jobs
+
+**Enrollment Flow:**
+1. Admin creates enrollment token (stored hashed in `worker_enrollment_token` table)
+2. Worker operator runs `worker enroll` with token
+3. Backend validates token, creates worker record, returns worker_id and secret
+4. Worker uses credentials for all future connections
+
+**Database Tables:**
+- `registered_worker` - Worker metadata, status, allowed workspaces
+- `worker_workspace` - Many-to-many worker-to-workspace assignments
+- `worker_enrollment_token` - One-time enrollment tokens
+
+**Key Files:**
+- `backend/internal/grpc/server.go` - gRPC server setup
+- `backend/internal/grpc/worker_service.go` - Enroll() and Connect() implementations
+- `backend/internal/grpc/manager.go` - Connected worker tracking
+- `backend/proto/worker/v1/worker.proto` - Protocol definition
 
 ### Config & secrets
 
@@ -52,13 +93,20 @@ This document guides Claude Code (claude.ai/code) when working inside the Shadow
 ### Generation & migrations
 
 - Run `make api-gen` after editing `spec/`. This updates both the Go server (`backend/pkg/api/`) and TypeScript API types (`front/src/api/v1.d.ts`).
-- Run `sqlc generate` (and `sqlc vet`) in the backend directory after updating the SQL schema. SQL lives in `db/schema.sql` + `db/tg.sql`.
+- Run `make proto-gen` after editing `backend/proto/`. This regenerates gRPC code in `backend/pkg/proto/`.
+- Run `make sqlc-gen` (or `cd db && sqlc generate`) after updating the SQL schema. SQL lives in `db/schema.sql` + `db/tg.sql`.
 - `make sync-db` concatenates schema files and applies them via Atlas to the running Postgres instance.
 
 ### Command-line entrypoints
 
+**Main API server:**
 - `go build -o ./bin/shadowapi ./cmd/shadowapi` builds the binary locally.
-- `shadowapi serve` is the main API server when running outside Docker.
+- `shadowapi serve` starts HTTP (port 8080) and gRPC (port 9090) servers.
+
+**Distributed worker:**
+- `go build -o ./bin/worker ./cmd/worker` builds the worker binary.
+- `worker enroll --server=<host:port> --token=<token> --name=<name>` enrolls a new worker.
+- `worker connect` connects to backend and starts receiving jobs.
 
 ## Frontend
 

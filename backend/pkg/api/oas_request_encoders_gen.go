@@ -123,6 +123,20 @@ func encodeCreateUserRequest(
 	return nil
 }
 
+func encodeCreateWorkerEnrollmentTokenRequest(
+	req *WorkerEnrollmentToken,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateWorkspaceRequest(
 	req *Workspace,
 	r *http.Request,
@@ -671,6 +685,20 @@ func encodeUpdateContactRequest(
 
 func encodeUpdateProfileRequest(
 	req *UserProfile,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateRegisteredWorkerRequest(
+	req *RegisteredWorker,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

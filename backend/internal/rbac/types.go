@@ -38,6 +38,7 @@ const (
 	ResourceWorkspace Resource = "workspace"
 	ResourceRole      Resource = "role"
 	ResourceRBAC      Resource = "rbac"
+	ResourceWorker    Resource = "worker"
 
 	// Workspace-scoped resources
 	ResourceDatasource Resource = "datasource"
@@ -70,6 +71,7 @@ var GlobalResources = map[Resource]bool{
 	ResourceWorkspace: true,
 	ResourceRole:      true,
 	ResourceRBAC:      true,
+	ResourceWorker:    true,
 }
 
 // IsGlobalResource checks if a resource is global (not workspace-scoped).

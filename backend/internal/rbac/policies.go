@@ -138,6 +138,12 @@ var PredefinedPermissions = []struct {
 	{"member:create", "Add Members", "Add members to workspace", ResourceMember, ActionCreate, ScopeWorkspace},
 	{"member:write", "Edit Members", "Edit member roles", ResourceMember, ActionWrite, ScopeWorkspace},
 	{"member:delete", "Remove Members", "Remove members from workspace", ResourceMember, ActionDelete, ScopeWorkspace},
+
+	// Worker permissions (global)
+	{"worker:read", "View Workers", "View registered workers and enrollment tokens", ResourceWorker, ActionRead, ScopeGlobal},
+	{"worker:create", "Create Workers", "Create enrollment tokens for workers", ResourceWorker, ActionCreate, ScopeGlobal},
+	{"worker:write", "Edit Workers", "Edit worker settings", ResourceWorker, ActionWrite, ScopeGlobal},
+	{"worker:delete", "Delete Workers", "Delete workers and enrollment tokens", ResourceWorker, ActionDelete, ScopeGlobal},
 }
 
 // initializePredefinedPolicies creates the predefined roles and permissions in the database.

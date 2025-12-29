@@ -157,6 +157,15 @@ func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r *UserSessi
 	return r, ht.ErrNotImplemented
 }
 
+// CreateWorkerEnrollmentToken implements createWorkerEnrollmentToken operation.
+//
+// Create worker enrollment token.
+//
+// POST /workers/enrollment-tokens
+func (UnimplementedHandler) CreateWorkerEnrollmentToken(ctx context.Context, req *WorkerEnrollmentToken) (r *WorkerEnrollmentToken, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateWorkspace implements createWorkspace operation.
 //
 // Create a new workspace.
@@ -418,6 +427,15 @@ func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteCont
 	return ht.ErrNotImplemented
 }
 
+// DeleteRegisteredWorker implements deleteRegisteredWorker operation.
+//
+// Delete registered worker.
+//
+// DELETE /workers/{uuid}
+func (UnimplementedHandler) DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteRole implements deleteRole operation.
 //
 // Delete a role.
@@ -433,6 +451,15 @@ func (UnimplementedHandler) DeleteRole(ctx context.Context, params DeleteRolePar
 //
 // DELETE /user/{uuid}
 func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteWorkerEnrollmentToken implements deleteWorkerEnrollmentToken operation.
+//
+// Delete worker enrollment token.
+//
+// DELETE /workers/enrollment-tokens/{uuid}
+func (UnimplementedHandler) DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -526,6 +553,15 @@ func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// GetRegisteredWorker implements getRegisteredWorker operation.
+//
+// Get registered worker details.
+//
+// GET /workers/{uuid}
+func (UnimplementedHandler) GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (r *RegisteredWorker, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRole implements getRole operation.
 //
 // Get role details.
@@ -550,6 +586,15 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 //
 // GET /rbac/user/{user_uuid}/roles
 func (UnimplementedHandler) GetUserRoles(ctx context.Context, params GetUserRolesParams) (r *GetUserRolesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetWorkerEnrollmentToken implements getWorkerEnrollmentToken operation.
+//
+// Get worker enrollment token details.
+//
+// GET /workers/enrollment-tokens/{uuid}
+func (UnimplementedHandler) GetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (r *WorkerEnrollmentToken, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -580,6 +625,15 @@ func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPerm
 	return r, ht.ErrNotImplemented
 }
 
+// ListRegisteredWorkers implements listRegisteredWorkers operation.
+//
+// List registered workers.
+//
+// GET /workers
+func (UnimplementedHandler) ListRegisteredWorkers(ctx context.Context) (r []RegisteredWorker, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListRoles implements listRoles operation.
 //
 // List all roles.
@@ -595,6 +649,15 @@ func (UnimplementedHandler) ListRoles(ctx context.Context, params ListRolesParam
 //
 // GET /user
 func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWorkerEnrollmentTokens implements listWorkerEnrollmentTokens operation.
+//
+// List worker enrollment tokens.
+//
+// GET /workers/enrollment-tokens
+func (UnimplementedHandler) ListWorkerEnrollmentTokens(ctx context.Context) (r []WorkerEnrollmentToken, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1054,6 +1117,15 @@ func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, par
 //
 // PUT /profile
 func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile) (r *User, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateRegisteredWorker implements updateRegisteredWorker operation.
+//
+// Update registered worker.
+//
+// PUT /workers/{uuid}
+func (UnimplementedHandler) UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (r *RegisteredWorker, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

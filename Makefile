@@ -49,6 +49,23 @@ api-gen-frontend: ## Generate TypeScript API client in frontend
 
 api-gen: api-gen-backend api-gen-frontend ## Generate API specs (backend & frontend)
 
+proto-gen: ## Generate protobuf Go code using buf
+	cd ./backend/proto && buf generate
+
+proto-lint: ## Lint protobuf files
+	cd ./backend/proto && buf lint
+
+sqlc-gen: ## Generate SQLC database code
+	cd ./db && sqlc generate
+
+##@ Worker
+
+worker-build: ## Build worker binary locally
+	cd ./backend && go build -o ./bin/worker ./cmd/worker
+
+worker-enroll: ## Enroll a new worker (requires TOKEN and NAME)
+	cd ./backend && ./bin/worker enroll --token=$(TOKEN) --name=$(NAME)
+
 ##@ Deployment
 
 deploy: ## Deploy to Uncloud (production)

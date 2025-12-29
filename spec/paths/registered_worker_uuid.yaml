@@ -1,0 +1,68 @@
+get:
+  summary: Get registered worker details
+  operationId: getRegisteredWorker
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Worker details retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/RegisteredWorker"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  summary: Update registered worker
+  operationId: updateRegisteredWorker
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/RegisteredWorker"
+  responses:
+    "200":
+      description: Worker updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/RegisteredWorker"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Delete registered worker
+  operationId: deleteRegisteredWorker
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Worker deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

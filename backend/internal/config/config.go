@@ -95,6 +95,12 @@ type Config struct {
 		AllowedOrigins string `yaml:"allowed_origins" json:"allowed_origins" env:"BE_CORS_ALLOWED_ORIGINS" envDefault:""`
 	} `yaml:"cors" json:"cors"`
 
+	// GRPC server settings for distributed workers
+	GRPC struct {
+		Host string `yaml:"host" json:"host" env:"BE_GRPC_HOST" envDefault:"0.0.0.0"`
+		Port int    `yaml:"port" json:"port" env:"BE_GRPC_PORT" envDefault:"9090"`
+	} `yaml:"grpc" json:"grpc"`
+
 	// OAuth2 settings for Hydra integration
 	OAuth2 struct {
 		// HydraPublicURL is the URL to Hydra's public endpoints (token, authorize)

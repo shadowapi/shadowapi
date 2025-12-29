@@ -104,6 +104,16 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"assignRoleToUser":   {ResourceRole, ActionWrite},
 	"removeRoleFromUser": {ResourceRole, ActionWrite},
 	"checkPermission":    {ResourceRole, ActionRead},
+
+	// Worker operations (global, require admin)
+	"listRegisteredWorkers":        {ResourceWorker, ActionRead},
+	"getRegisteredWorker":          {ResourceWorker, ActionRead},
+	"updateRegisteredWorker":       {ResourceWorker, ActionWrite},
+	"deleteRegisteredWorker":       {ResourceWorker, ActionDelete},
+	"listWorkerEnrollmentTokens":   {ResourceWorker, ActionRead},
+	"createWorkerEnrollmentToken":  {ResourceWorker, ActionCreate},
+	"getWorkerEnrollmentToken":     {ResourceWorker, ActionRead},
+	"deleteWorkerEnrollmentToken":  {ResourceWorker, ActionDelete},
 }
 
 // Middleware provides RBAC enforcement for ogen handlers.

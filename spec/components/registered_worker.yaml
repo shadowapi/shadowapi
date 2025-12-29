@@ -1,0 +1,59 @@
+# spec/components/registered_worker.yaml
+# Defines the schema for a Registered Worker in the system
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    description: Unique identifier for the worker
+    readOnly: true
+  name:
+    type: string
+    description: Display name for the worker
+  status:
+    type: string
+    enum: [online, offline, draining]
+    description: Current connection status of the worker
+    readOnly: true
+  is_global:
+    type: boolean
+    description: If true, worker can process jobs for all workspaces
+  version:
+    type: string
+    description: Worker software version
+    readOnly: true
+  labels:
+    type: object
+    additionalProperties: true
+    description: Arbitrary key-value metadata labels
+  workspace_uuids:
+    type: array
+    items:
+      type: string
+    description: List of workspace UUIDs the worker is allowed to access (if not global)
+  last_heartbeat:
+    type: string
+    format: date-time
+    description: Timestamp of last heartbeat received
+    readOnly: true
+  last_connected_at:
+    type: string
+    format: date-time
+    description: Timestamp of when the worker last connected
+    readOnly: true
+  connected_from:
+    type: string
+    description: IP address or hostname the worker connected from
+    readOnly: true
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of worker registration
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - name

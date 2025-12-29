@@ -1,0 +1,18 @@
+get:
+  summary: List registered workers
+  operationId: listRegisteredWorkers
+  responses:
+    "200":
+      description: List of registered workers
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/RegisteredWorker"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
