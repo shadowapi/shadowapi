@@ -11,6 +11,8 @@ import Users from './users/Users';
 import UserEdit from './users/UserEdit';
 import Roles from './rbac/Roles';
 import RoleEdit from './rbac/RoleEdit';
+import Pipelines from './pipelines/Pipelines';
+import PipelineEdit from './pipelines/PipelineEdit';
 
 /**
  * WorkspaceRouter handles all routes under /w/:slug/*
@@ -27,6 +29,9 @@ function WorkspaceRouter() {
         <Route path="storages" element={<Storages />} />
         <Route path="storages/new" element={<StorageEdit />} />
         <Route path="storages/:uuid" element={<StorageEdit />} />
+        <Route path="pipelines" element={<Pipelines />} />
+        <Route path="pipelines/new" element={<PipelineEdit />} />
+        <Route path="pipelines/:uuid" element={<PipelineEdit />} />
         <Route path="oauth2/credentials" element={<OAuth2Credentials />} />
         <Route path="oauth2/credentials/new" element={<OAuth2CredentialEdit />} />
         <Route path="oauth2/credentials/:uuid" element={<OAuth2CredentialEdit />} />
