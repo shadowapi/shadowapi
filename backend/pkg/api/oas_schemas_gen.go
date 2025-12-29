@@ -1801,7 +1801,7 @@ type ContactSocials struct{}
 // Ref: #
 type Datasource struct {
 	UUID      OptString   `json:"uuid"`
-	UserUUID  string      `json:"user_uuid"`
+	UserUUID  OptString   `json:"user_uuid"`
 	Type      string      `json:"type"`
 	Name      string      `json:"name"`
 	IsEnabled OptBool     `json:"is_enabled"`
@@ -1816,7 +1816,7 @@ func (s *Datasource) GetUUID() OptString {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *Datasource) GetUserUUID() string {
+func (s *Datasource) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -1856,7 +1856,7 @@ func (s *Datasource) SetUUID(val OptString) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *Datasource) SetUserUUID(val string) {
+func (s *Datasource) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
@@ -1893,7 +1893,7 @@ func (s *Datasource) SetUpdatedAt(val OptDateTime) {
 // Ref: #
 type DatasourceEmail struct {
 	UUID            OptString   `json:"uuid"`
-	UserUUID        string      `json:"user_uuid"`
+	UserUUID        OptString   `json:"user_uuid"`
 	Email           string      `json:"email"`
 	Name            string      `json:"name"`
 	IsEnabled       OptBool     `json:"is_enabled"`
@@ -1914,7 +1914,7 @@ func (s *DatasourceEmail) GetUUID() OptString {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *DatasourceEmail) GetUserUUID() string {
+func (s *DatasourceEmail) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -1984,7 +1984,7 @@ func (s *DatasourceEmail) SetUUID(val OptString) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *DatasourceEmail) SetUserUUID(val string) {
+func (s *DatasourceEmail) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
@@ -2055,7 +2055,7 @@ type DatasourceEmailDeleteOK struct{}
 // Ref: #
 type DatasourceEmailOAuth struct {
 	UUID      OptString `json:"uuid"`
-	UserUUID  string    `json:"user_uuid"`
+	UserUUID  OptString `json:"user_uuid"`
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
 	IsEnabled OptBool   `json:"is_enabled"`
@@ -2073,7 +2073,7 @@ func (s *DatasourceEmailOAuth) GetUUID() OptString {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *DatasourceEmailOAuth) GetUserUUID() string {
+func (s *DatasourceEmailOAuth) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -2118,7 +2118,7 @@ func (s *DatasourceEmailOAuth) SetUUID(val OptString) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *DatasourceEmailOAuth) SetUserUUID(val string) {
+func (s *DatasourceEmailOAuth) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
@@ -2206,7 +2206,7 @@ func (s *DatasourceEmailOAuthProvider) UnmarshalText(data []byte) error {
 // Ref: #
 type DatasourceLinkedin struct {
 	UUID      OptString `json:"uuid"`
-	UserUUID  string    `json:"user_uuid"`
+	UserUUID  OptString `json:"user_uuid"`
 	Name      string    `json:"name"`
 	IsEnabled OptBool   `json:"is_enabled"`
 	Provider  string    `json:"provider"`
@@ -2227,7 +2227,7 @@ func (s *DatasourceLinkedin) GetUUID() OptString {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *DatasourceLinkedin) GetUserUUID() string {
+func (s *DatasourceLinkedin) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -2277,7 +2277,7 @@ func (s *DatasourceLinkedin) SetUUID(val OptString) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *DatasourceLinkedin) SetUserUUID(val string) {
+func (s *DatasourceLinkedin) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
@@ -2358,7 +2358,7 @@ func (s *DatasourceSetOAuth2ClientReq) SetClientID(val string) {
 // Ref: #
 type DatasourceTelegram struct {
 	UUID      OptString `json:"uuid"`
-	UserUUID  string    `json:"user_uuid"`
+	UserUUID  OptString `json:"user_uuid"`
 	Name      string    `json:"name"`
 	IsEnabled OptBool   `json:"is_enabled"`
 	Provider  string    `json:"provider"`
@@ -2387,7 +2387,7 @@ func (s *DatasourceTelegram) GetUUID() OptString {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *DatasourceTelegram) GetUserUUID() string {
+func (s *DatasourceTelegram) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -2462,7 +2462,7 @@ func (s *DatasourceTelegram) SetUUID(val OptString) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *DatasourceTelegram) SetUserUUID(val string) {
+func (s *DatasourceTelegram) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 
@@ -2563,7 +2563,7 @@ func (s *DatasourceTelegramSettings) init() DatasourceTelegramSettings {
 // Ref: #
 type DatasourceWhatsapp struct {
 	UUID      OptString `json:"uuid"`
-	UserUUID  string    `json:"user_uuid"`
+	UserUUID  OptString `json:"user_uuid"`
 	Name      string    `json:"name"`
 	IsEnabled OptBool   `json:"is_enabled"`
 	Provider  string    `json:"provider"`
@@ -2584,7 +2584,7 @@ func (s *DatasourceWhatsapp) GetUUID() OptString {
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *DatasourceWhatsapp) GetUserUUID() string {
+func (s *DatasourceWhatsapp) GetUserUUID() OptString {
 	return s.UserUUID
 }
 
@@ -2634,7 +2634,7 @@ func (s *DatasourceWhatsapp) SetUUID(val OptString) {
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *DatasourceWhatsapp) SetUserUUID(val string) {
+func (s *DatasourceWhatsapp) SetUserUUID(val OptString) {
 	s.UserUUID = val
 }
 

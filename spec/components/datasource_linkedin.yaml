@@ -37,7 +37,6 @@ properties:
     readOnly: true
 required:
   - name
-  - user_uuid
   - provider
   - username
   - password

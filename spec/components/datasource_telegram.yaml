@@ -50,7 +50,6 @@ properties:
     readOnly: true
 required:
   - name
-  - user_uuid
   - provider
   - phone_number
   - api_id

@@ -15,9 +15,7 @@ func QToDatasourceEmail(row query.GetDatasourcesRow) (*api.DatasourceEmail, erro
 	ds.UUID = api.NewOptString(row.UUID.String())
 
 	if row.UserUUID != nil {
-		ds.UserUUID = row.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.UserUUID.String())
 	}
 
 	// ds.Name is a plain string:
@@ -41,9 +39,7 @@ func QToDatasourceEmailRow(row query.GetDatasourceRow) (*api.DatasourceEmail, er
 	}
 	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
 	if row.Datasource.UserUUID != nil {
-		ds.UserUUID = row.Datasource.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.Datasource.UserUUID.String())
 	}
 	ds.Name = row.Datasource.Name
 	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
@@ -65,11 +61,8 @@ func QToDatasourceLinkedin(row query.GetDatasourcesRow) (*api.DatasourceLinkedin
 	}
 	ds.UUID = api.NewOptString(row.UUID.String())
 
-	// ds.UserUUID is a plain string
 	if row.UserUUID != nil {
-		ds.UserUUID = row.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.UserUUID.String())
 	}
 
 	ds.Name = row.Name
@@ -92,9 +85,7 @@ func QToDatasourceLinkedinRow(row query.GetDatasourceRow) (*api.DatasourceLinked
 	}
 	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
 	if row.Datasource.UserUUID != nil {
-		ds.UserUUID = row.Datasource.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.Datasource.UserUUID.String())
 	}
 	ds.Name = row.Datasource.Name
 	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
@@ -117,9 +108,7 @@ func QToDatasourceTelegram(row query.GetDatasourcesRow) (*api.DatasourceTelegram
 	ds.UUID = api.NewOptString(row.UUID.String())
 
 	if row.UserUUID != nil {
-		ds.UserUUID = row.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.UserUUID.String())
 	}
 
 	ds.Name = row.Name
@@ -141,9 +130,7 @@ func QToDatasourceTelegramRow(row query.GetDatasourceRow) (*api.DatasourceTelegr
 	}
 	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
 	if row.Datasource.UserUUID != nil {
-		ds.UserUUID = row.Datasource.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.Datasource.UserUUID.String())
 	}
 	ds.Name = row.Datasource.Name
 	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)
@@ -166,9 +153,7 @@ func QToDatasourceWhatsapp(row query.GetDatasourcesRow) (*api.DatasourceWhatsapp
 	ds.UUID = api.NewOptString(row.UUID.String())
 
 	if row.UserUUID != nil {
-		ds.UserUUID = row.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.UserUUID.String())
 	}
 
 	ds.Name = row.Name
@@ -191,9 +176,7 @@ func QToDatasourceWhatsappRow(row query.GetDatasourceRow) (*api.DatasourceWhatsa
 	}
 	ds.UUID = api.NewOptString(row.Datasource.UUID.String())
 	if row.Datasource.UserUUID != nil {
-		ds.UserUUID = row.Datasource.UserUUID.String()
-	} else {
-		ds.UserUUID = ""
+		ds.UserUUID = api.NewOptString(row.Datasource.UserUUID.String())
 	}
 	ds.Name = row.Datasource.Name
 	ds.IsEnabled = api.NewOptBool(row.Datasource.IsEnabled)

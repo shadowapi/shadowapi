@@ -25,7 +25,6 @@ properties:
     readOnly: true
     type: string
 required:
-  - user_uuid
   - name
   - type
   - provider

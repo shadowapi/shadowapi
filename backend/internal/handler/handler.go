@@ -262,3 +262,16 @@ func (h *Handler) NewError(ctx context.Context, err error) *api.ErrorStatusCode 
 		},
 	}
 }
+
+// getUserUUIDFromContext extracts the authenticated user's UUID from the JWT claims in context.
+// Returns an error if the user is not authenticated or claims are missing.
+func getUserUUIDFromContext(ctx context.Context) (string, error) {
+	claims, ok := ctx.Value(auth.UserClaimsContextKey).(*oauth2.Claims)
+	if !ok || claims == nil {
+		return "", errors.New("authentication required")
+	}
+	if claims.Subject == "" {
+		return "", errors.New("invalid user claims: missing subject")
+	}
+	return claims.Subject, nil
+}

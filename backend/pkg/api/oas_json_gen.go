@@ -3742,8 +3742,10 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user_uuid")
-		e.Str(s.UserUUID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("type")
@@ -3808,11 +3810,9 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.UserUUID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -3895,7 +3895,7 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00101110,
+		0b00101100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3957,8 +3957,10 @@ func (s *DatasourceEmail) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user_uuid")
-		e.Str(s.UserUUID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("email")
@@ -4059,11 +4061,9 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.UserUUID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -4212,7 +4212,7 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00101110,
+		0b00101100,
 		0b00001011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -4275,8 +4275,10 @@ func (s *DatasourceEmailOAuth) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user_uuid")
-		e.Str(s.UserUUID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("email")
@@ -4346,11 +4348,9 @@ func (s *DatasourceEmailOAuth) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.UserUUID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -4443,7 +4443,7 @@ func (s *DatasourceEmailOAuth) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01101110,
+		0b01101100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -4546,8 +4546,10 @@ func (s *DatasourceLinkedin) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user_uuid")
-		e.Str(s.UserUUID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("name")
@@ -4624,11 +4626,9 @@ func (s *DatasourceLinkedin) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.UserUUID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -4733,7 +4733,7 @@ func (s *DatasourceLinkedin) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01110110,
+		0b01110100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -4950,8 +4950,10 @@ func (s *DatasourceTelegram) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user_uuid")
-		e.Str(s.UserUUID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("name")
@@ -5061,11 +5063,9 @@ func (s *DatasourceTelegram) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.UserUUID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -5220,7 +5220,7 @@ func (s *DatasourceTelegram) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11110110,
+		0b11110100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -5399,8 +5399,10 @@ func (s *DatasourceWhatsapp) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("user_uuid")
-		e.Str(s.UserUUID)
+		if s.UserUUID.Set {
+			e.FieldStart("user_uuid")
+			s.UserUUID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("name")
@@ -5479,11 +5481,9 @@ func (s *DatasourceWhatsapp) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
 		case "user_uuid":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.UserUUID = string(v)
-				if err != nil {
+				s.UserUUID.Reset()
+				if err := s.UserUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -5586,7 +5586,7 @@ func (s *DatasourceWhatsapp) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00110110,
+		0b00110100,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {

@@ -1438,7 +1438,7 @@ export interface components {
         };
         datasource: {
             readonly uuid?: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             type: string;
             name: string;
             is_enabled?: boolean;
@@ -1450,7 +1450,7 @@ export interface components {
         };
         datasource_email: {
             readonly uuid?: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             email: string;
             name: string;
             is_enabled?: boolean;
@@ -1469,7 +1469,7 @@ export interface components {
         /** @description OAuth2‑enabled email datasource object representation. */
         datasource_email_oauth: {
             readonly uuid?: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             email: string;
             name: string;
             is_enabled?: boolean;
@@ -1515,7 +1515,7 @@ export interface components {
         }[];
         datasource_telegram: {
             readonly uuid?: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             name: string;
             is_enabled?: boolean;
             provider: string;
@@ -1548,7 +1548,7 @@ export interface components {
         /** @description WhatsApp datasource object representation */
         datasource_whatsapp: {
             readonly uuid?: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             name: string;
             is_enabled?: boolean;
             provider: string;
@@ -1571,7 +1571,7 @@ export interface components {
         /** @description LinkedIn datasource object representation */
         datasource_linkedin: {
             readonly uuid?: string;
-            readonly user_uuid: string;
+            readonly user_uuid?: string;
             name: string;
             is_enabled?: boolean;
             provider: string;

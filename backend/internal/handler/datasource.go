@@ -57,7 +57,7 @@ func QToDatasource(ds query.Datasource) api.Datasource {
 		IsEnabled: api.NewOptBool(ds.IsEnabled),
 	}
 	if ds.UserUUID != nil {
-		c.UserUUID = ds.UserUUID.String()
+		c.UserUUID = api.NewOptString(ds.UserUUID.String())
 	}
 	if ds.CreatedAt.Valid {
 		c.CreatedAt = api.NewOptDateTime(ds.CreatedAt.Time)

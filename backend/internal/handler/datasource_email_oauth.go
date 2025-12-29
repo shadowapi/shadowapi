@@ -19,6 +19,19 @@ import (
 // POST /datasource/email_oauth
 func (h *Handler) DatasourceEmailOAuthCreate(ctx context.Context, req *api.DatasourceEmailOAuth) (*api.DatasourceEmailOAuth, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthCreate")
+
+	// Get user UUID from authenticated session
+	userUUIDStr, err := getUserUUIDFromContext(ctx)
+	if err != nil {
+		log.Error("failed to get user from context", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("authentication required"))
+	}
+	pgUserUUID, err := converter.ConvertStringToPgUUID(userUUIDStr)
+	if err != nil {
+		log.Error("failed to convert user uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
+	}
+
 	dsUUID := uuid.Must(uuid.NewV7())
 	settings, err := json.Marshal(req)
 	if err != nil {
@@ -26,17 +39,12 @@ func (h *Handler) DatasourceEmailOAuthCreate(ctx context.Context, req *api.Datas
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 	isEnabled := req.IsEnabled.Or(false)
-	pgUserUUID, err := converter.ConvertStringToPgUUID(req.UserUUID)
-	if err != nil {
-		log.Error("failed to convert user uuid", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
-	}
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
 		UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
 		UserUUID:  pgUserUUID,
 		Name:      req.Name,
 		IsEnabled: isEnabled,
-		Provider:  req.Provider,
+		Provider:  string(req.Provider),
 		Settings:  settings,
 		Type:      "email_oauth",
 	})
@@ -46,6 +54,7 @@ func (h *Handler) DatasourceEmailOAuthCreate(ctx context.Context, req *api.Datas
 	}
 	resp := *req
 	resp.UUID = api.NewOptString(ds.UUID.String())
+	resp.UserUUID = api.NewOptString(userUUIDStr)
 	return &resp, nil
 }
 
@@ -139,17 +148,13 @@ func (h *Handler) DatasourceEmailOAuthUpdate(ctx context.Context, req *api.Datas
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
-		pgUserUUID, err := converter.ConvertStringToPgUUID(req.UserUUID)
-		if err != nil {
-			log.Error("failed to convert user uuid", "error", err)
-			return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
-		}
+		// Preserve the existing user_uuid from the database record
 		err = query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
 			UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
-			UserUUID:  pgUserUUID,
+			UserUUID:  converter.UuidPtrToPgUUID(dse.Datasource.UserUUID),
 			Name:      req.Name,
 			IsEnabled: isEnabled,
-			Provider:  req.Provider,
+			Provider:  string(req.Provider),
 			Settings:  newSettings,
 			Type:      "email_oauth",
 		})
@@ -169,10 +174,10 @@ func QToDatasourceEmailOAuthRow(dse query.GetDatasourceRow) (*api.DatasourceEmai
 	}
 	out.UUID = api.NewOptString(dse.Datasource.UUID.String())
 	if dse.Datasource.UserUUID != nil {
-		out.UserUUID = dse.Datasource.UserUUID.String()
+		out.UserUUID = api.NewOptString(dse.Datasource.UserUUID.String())
 	}
 	out.Name = dse.Datasource.Name
-	out.Provider = dse.Datasource.Provider
+	out.Provider = api.DatasourceEmailOAuthProvider(dse.Datasource.Provider)
 	out.IsEnabled = api.NewOptBool(dse.Datasource.IsEnabled)
 	return &out, nil
 }
@@ -185,10 +190,10 @@ func QToDatasourceEmailOAuthRowMany(r query.GetDatasourcesRow) (*api.DatasourceE
 	}
 	out.UUID = api.NewOptString(r.UUID.String())
 	if r.UserUUID != nil {
-		out.UserUUID = r.UserUUID.String()
+		out.UserUUID = api.NewOptString(r.UserUUID.String())
 	}
 	out.Name = r.Name
-	out.Provider = r.Provider
+	out.Provider = api.DatasourceEmailOAuthProvider(r.Provider)
 	out.IsEnabled = api.NewOptBool(r.IsEnabled)
 	return &out, nil
 }

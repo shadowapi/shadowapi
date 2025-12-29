@@ -35,5 +35,4 @@ required:
   - email
   - name
   - provider
-  - user_uuid
   - oauth2_client_uuid

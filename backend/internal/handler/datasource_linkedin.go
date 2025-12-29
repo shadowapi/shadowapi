@@ -17,6 +17,19 @@ import (
 
 func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.DatasourceLinkedin) (*api.DatasourceLinkedin, error) {
 	log := h.log.With("handler", "DatasourceLinkedinCreate")
+
+	// Get user UUID from authenticated session
+	userUUIDStr, err := getUserUUIDFromContext(ctx)
+	if err != nil {
+		log.Error("failed to get user from context", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("authentication required"))
+	}
+	pgUserUUID, err := converter.ConvertStringToPgUUID(userUUIDStr)
+	if err != nil {
+		log.Error("failed to convert user uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
+	}
+
 	dsUUID := uuid.Must(uuid.NewV7())
 	settings, err := json.Marshal(req)
 	if err != nil {
@@ -24,11 +37,6 @@ func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.Datasou
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 	}
 	isEnabled := req.IsEnabled.Or(false)
-	pgUserUUID, err := converter.ConvertStringToPgUUID(req.UserUUID)
-	if err != nil {
-		log.Error("failed to convert user uuid", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
-	}
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
 		UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
 		UserUUID:  pgUserUUID,
@@ -44,6 +52,7 @@ func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.Datasou
 	}
 	resp := *req
 	resp.UUID = api.NewOptString(ds.UUID.String())
+	resp.UserUUID = api.NewOptString(userUUIDStr)
 	return &resp, nil
 }
 
@@ -95,15 +104,10 @@ func (h *Handler) DatasourceLinkedinUpdate(ctx context.Context, req *api.Datasou
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
-		pgUserUUID, err := converter.ConvertStringToPgUUID(req.UserUUID)
-		if err != nil {
-			log.Error("failed to convert user uuid", "error", err)
-			return nil, ErrWithCode(http.StatusBadRequest, E("invalid user UUID"))
-		}
-
+		// Preserve the existing user_uuid from the database record
 		if err := query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
 			UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
-			UserUUID:  pgUserUUID,
+			UserUUID:  converter.UuidPtrToPgUUID(dse.Datasource.UserUUID),
 			Name:      req.Name,
 			IsEnabled: isEnabled,
 			Provider:  string(req.Provider),
