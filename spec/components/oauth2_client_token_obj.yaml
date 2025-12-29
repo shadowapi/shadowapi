@@ -1,5 +1,6 @@
 type: object
-additionalProperties: false
+additionalProperties: true
+description: "OAuth2 token object containing access and refresh tokens."
 properties:
   access_token:
     type: string
@@ -7,15 +8,12 @@ properties:
   refresh_token:
     type: string
     description: "Refresh token, if available."
-  expires_at:
+  expiry:
     type: string
     format: date-time
-    description: "Timestamp when the access token expires."
-  token:
-    type: object
-    additionalProperties: true
-    description: "Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata)."
+    description: "Timestamp when the access token expires (from Go oauth2.Token)."
+  token_type:
+    type: string
+    description: "Token type (e.g., Bearer)."
 required:
   - access_token
-  - refresh_token
-  - expires_at

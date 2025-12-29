@@ -2,12 +2,14 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
-	"net/http"
 )
 
 // Standard code generate CRUD
@@ -139,23 +141,37 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
 	}
 
-	// Retrieve the client based on datasource UUID.
-	client, err := q.GetOauth2Client(ctx, dsUUID)
+	// First, get the datasource to find the oauth2_client_uuid from its settings
+	dsRow, err := q.GetDatasource(ctx, dsUUID)
 	if err == pgx.ErrNoRows {
-		log.Error("no oauth2 client")
-		return nil, ErrWithCode(http.StatusNotFound, E("client not found"))
+		log.Error("datasource not found")
+		return nil, ErrWithCode(http.StatusNotFound, E("datasource not found"))
 	} else if err != nil {
-		log.Error("failed to get oauth2 client", "error", err)
+		log.Error("failed to get datasource", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 
-	clientUUID, err := converter.ConvertStringToPgUUID(client.Oauth2Client.UUID.String())
-	if err != nil {
-		log.Error("invalid UUID", "error", err)
-		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
+	// Parse settings to extract oauth2_client_uuid
+	var settings struct {
+		OAuth2ClientUUID string `json:"oauth2_client_uuid"`
+	}
+	if err := json.Unmarshal(dsRow.Datasource.Settings, &settings); err != nil {
+		log.Error("failed to parse datasource settings", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to parse datasource settings"))
+	}
+	if settings.OAuth2ClientUUID == "" {
+		log.Error("datasource has no oauth2_client_uuid")
+		return nil, ErrWithCode(http.StatusBadRequest, E("datasource not linked to oauth2 client"))
 	}
 
-	tokens, err := q.GetOauth2ClientTokens(ctx, clientUUID)
+	// Now get the OAuth2 client using the correct UUID from settings
+	clientUUID, err := converter.ConvertStringToPgUUID(settings.OAuth2ClientUUID)
+	if err != nil {
+		log.Error("invalid oauth2_client_uuid in settings", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid oauth2 client UUID"))
+	}
+
+	tokens, err := q.GetOauth2TokensByClientUUID(ctx, clientUUID)
 	if err != nil && err != pgx.ErrNoRows {
 		log.Error("failed to get client tokens", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
@@ -164,7 +180,7 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 	var out []api.OAuth2ClientToken
 	for _, t := range tokens {
 		// Convert the raw JSONB token field into a string.
-		tokenStr := string(t.Token)
+		tokenStr := string(t.Oauth2Token.Token)
 		// Unmarshal the token JSON into tokenObj.
 		var tokenObj api.OAuth2ClientTokenObj
 		if err := tokenObj.UnmarshalJSON([]byte(tokenStr)); err != nil {
@@ -172,15 +188,15 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to decode oauth token"))
 		}
 		token := api.OAuth2ClientToken{
-			UUID:       api.NewOptString(t.UUID.String()),
-			ClientUUID: t.ClientUuid.String(), // new expires_at field
-			Token:      tokenObj,              // wrap the token JSON
+			UUID:       api.NewOptString(t.Oauth2Token.UUID.String()),
+			ClientUUID: t.Oauth2Token.ClientUuid.String(),
+			Token:      tokenObj,
 		}
-		if t.CreatedAt.Valid {
-			token.CreatedAt = api.NewOptDateTime(t.CreatedAt.Time)
+		if t.Oauth2Token.CreatedAt.Valid {
+			token.CreatedAt = api.NewOptDateTime(t.Oauth2Token.CreatedAt.Time)
 		}
-		if t.UpdatedAt.Valid {
-			token.UpdatedAt = api.NewOptDateTime(t.UpdatedAt.Time)
+		if t.Oauth2Token.UpdatedAt.Valid {
+			token.UpdatedAt = api.NewOptDateTime(t.Oauth2Token.UpdatedAt.Time)
 		}
 		out = append(out, token)
 	}

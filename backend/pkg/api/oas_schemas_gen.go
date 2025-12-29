@@ -4226,16 +4226,18 @@ func (s *OAuth2ClientToken) SetUpdatedAt(val OptDateTime) {
 // OAuth2ClientTokenDeleteOK is response for OAuth2ClientTokenDelete operation.
 type OAuth2ClientTokenDeleteOK struct{}
 
+// OAuth2 token object containing access and refresh tokens.
 // Ref: #
 type OAuth2ClientTokenObj struct {
 	// Access token (JWT or opaque string).
 	AccessToken string `json:"access_token"`
 	// Refresh token, if available.
-	RefreshToken string `json:"refresh_token"`
-	// Timestamp when the access token expires.
-	ExpiresAt time.Time `json:"expires_at"`
-	// Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata).
-	Token OptOAuth2ClientTokenObjToken `json:"token"`
+	RefreshToken OptString `json:"refresh_token"`
+	// Timestamp when the access token expires (from Go oauth2.Token).
+	Expiry OptDateTime `json:"expiry"`
+	// Token type (e.g., Bearer).
+	TokenType       OptString `json:"token_type"`
+	AdditionalProps OAuth2ClientTokenObjAdditional
 }
 
 // GetAccessToken returns the value of AccessToken.
@@ -4244,18 +4246,23 @@ func (s *OAuth2ClientTokenObj) GetAccessToken() string {
 }
 
 // GetRefreshToken returns the value of RefreshToken.
-func (s *OAuth2ClientTokenObj) GetRefreshToken() string {
+func (s *OAuth2ClientTokenObj) GetRefreshToken() OptString {
 	return s.RefreshToken
 }
 
-// GetExpiresAt returns the value of ExpiresAt.
-func (s *OAuth2ClientTokenObj) GetExpiresAt() time.Time {
-	return s.ExpiresAt
+// GetExpiry returns the value of Expiry.
+func (s *OAuth2ClientTokenObj) GetExpiry() OptDateTime {
+	return s.Expiry
 }
 
-// GetToken returns the value of Token.
-func (s *OAuth2ClientTokenObj) GetToken() OptOAuth2ClientTokenObjToken {
-	return s.Token
+// GetTokenType returns the value of TokenType.
+func (s *OAuth2ClientTokenObj) GetTokenType() OptString {
+	return s.TokenType
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *OAuth2ClientTokenObj) GetAdditionalProps() OAuth2ClientTokenObjAdditional {
+	return s.AdditionalProps
 }
 
 // SetAccessToken sets the value of AccessToken.
@@ -4264,24 +4271,28 @@ func (s *OAuth2ClientTokenObj) SetAccessToken(val string) {
 }
 
 // SetRefreshToken sets the value of RefreshToken.
-func (s *OAuth2ClientTokenObj) SetRefreshToken(val string) {
+func (s *OAuth2ClientTokenObj) SetRefreshToken(val OptString) {
 	s.RefreshToken = val
 }
 
-// SetExpiresAt sets the value of ExpiresAt.
-func (s *OAuth2ClientTokenObj) SetExpiresAt(val time.Time) {
-	s.ExpiresAt = val
+// SetExpiry sets the value of Expiry.
+func (s *OAuth2ClientTokenObj) SetExpiry(val OptDateTime) {
+	s.Expiry = val
 }
 
-// SetToken sets the value of Token.
-func (s *OAuth2ClientTokenObj) SetToken(val OptOAuth2ClientTokenObjToken) {
-	s.Token = val
+// SetTokenType sets the value of TokenType.
+func (s *OAuth2ClientTokenObj) SetTokenType(val OptString) {
+	s.TokenType = val
 }
 
-// Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata).
-type OAuth2ClientTokenObjToken map[string]jx.Raw
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *OAuth2ClientTokenObj) SetAdditionalProps(val OAuth2ClientTokenObjAdditional) {
+	s.AdditionalProps = val
+}
 
-func (s *OAuth2ClientTokenObjToken) init() OAuth2ClientTokenObjToken {
+type OAuth2ClientTokenObjAdditional map[string]jx.Raw
+
+func (s *OAuth2ClientTokenObjAdditional) init() OAuth2ClientTokenObjAdditional {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -5427,52 +5438,6 @@ func (o OptNilString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilString) Or(d string) string {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptOAuth2ClientTokenObjToken returns new OptOAuth2ClientTokenObjToken with value set to v.
-func NewOptOAuth2ClientTokenObjToken(v OAuth2ClientTokenObjToken) OptOAuth2ClientTokenObjToken {
-	return OptOAuth2ClientTokenObjToken{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptOAuth2ClientTokenObjToken is optional OAuth2ClientTokenObjToken.
-type OptOAuth2ClientTokenObjToken struct {
-	Value OAuth2ClientTokenObjToken
-	Set   bool
-}
-
-// IsSet returns true if OptOAuth2ClientTokenObjToken was set.
-func (o OptOAuth2ClientTokenObjToken) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptOAuth2ClientTokenObjToken) Reset() {
-	var v OAuth2ClientTokenObjToken
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptOAuth2ClientTokenObjToken) SetTo(v OAuth2ClientTokenObjToken) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptOAuth2ClientTokenObjToken) Get() (v OAuth2ClientTokenObjToken, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptOAuth2ClientTokenObjToken) Or(d OAuth2ClientTokenObjToken) OAuth2ClientTokenObjToken {
 	if v, ok := o.Get(); ok {
 		return v
 	}
