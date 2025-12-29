@@ -36,6 +36,9 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 				log.Error("failed to marshal pipeline flow", "error", err)
 				return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal pipeline flow"))
 			}
+		} else {
+			// Default to empty JSON object for JSONB NOT NULL constraint
+			flowData = []byte("{}")
 		}
 		ds, err := query.New(tx).GetDatasource(ctx, pgDatasourceUUID)
 		if err != nil {
