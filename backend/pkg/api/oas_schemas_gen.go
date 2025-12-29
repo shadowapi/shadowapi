@@ -2059,7 +2059,8 @@ type DatasourceEmailOAuth struct {
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
 	IsEnabled OptBool   `json:"is_enabled"`
-	Provider  string    `json:"provider"`
+	// Email provider type (gmail for Gmail/Google Workspace, google for generic Google OAuth2).
+	Provider DatasourceEmailOAuthProvider `json:"provider"`
 	// Identifier of the OAuth2 client bound to this datasource.
 	OAuth2ClientUUID string      `json:"oauth2_client_uuid"`
 	CreatedAt        OptDateTime `json:"created_at"`
@@ -2092,7 +2093,7 @@ func (s *DatasourceEmailOAuth) GetIsEnabled() OptBool {
 }
 
 // GetProvider returns the value of Provider.
-func (s *DatasourceEmailOAuth) GetProvider() string {
+func (s *DatasourceEmailOAuth) GetProvider() DatasourceEmailOAuthProvider {
 	return s.Provider
 }
 
@@ -2137,7 +2138,7 @@ func (s *DatasourceEmailOAuth) SetIsEnabled(val OptBool) {
 }
 
 // SetProvider sets the value of Provider.
-func (s *DatasourceEmailOAuth) SetProvider(val string) {
+func (s *DatasourceEmailOAuth) SetProvider(val DatasourceEmailOAuthProvider) {
 	s.Provider = val
 }
 
@@ -2158,6 +2159,48 @@ func (s *DatasourceEmailOAuth) SetUpdatedAt(val OptDateTime) {
 
 // DatasourceEmailOAuthDeleteOK is response for DatasourceEmailOAuthDelete operation.
 type DatasourceEmailOAuthDeleteOK struct{}
+
+// Email provider type (gmail for Gmail/Google Workspace, google for generic Google OAuth2).
+type DatasourceEmailOAuthProvider string
+
+const (
+	DatasourceEmailOAuthProviderGmail  DatasourceEmailOAuthProvider = "gmail"
+	DatasourceEmailOAuthProviderGoogle DatasourceEmailOAuthProvider = "google"
+)
+
+// AllValues returns all DatasourceEmailOAuthProvider values.
+func (DatasourceEmailOAuthProvider) AllValues() []DatasourceEmailOAuthProvider {
+	return []DatasourceEmailOAuthProvider{
+		DatasourceEmailOAuthProviderGmail,
+		DatasourceEmailOAuthProviderGoogle,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DatasourceEmailOAuthProvider) MarshalText() ([]byte, error) {
+	switch s {
+	case DatasourceEmailOAuthProviderGmail:
+		return []byte(s), nil
+	case DatasourceEmailOAuthProviderGoogle:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DatasourceEmailOAuthProvider) UnmarshalText(data []byte) error {
+	switch DatasourceEmailOAuthProvider(data) {
+	case DatasourceEmailOAuthProviderGmail:
+		*s = DatasourceEmailOAuthProviderGmail
+		return nil
+	case DatasourceEmailOAuthProviderGoogle:
+		*s = DatasourceEmailOAuthProviderGoogle
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // LinkedIn datasource object representation.
 // Ref: #

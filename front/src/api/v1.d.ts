@@ -1473,7 +1473,11 @@ export interface components {
             email: string;
             name: string;
             is_enabled?: boolean;
-            provider: string;
+            /**
+             * @description Email provider type (gmail for Gmail/Google Workspace, google for generic Google OAuth2)
+             * @enum {string}
+             */
+            provider: "gmail" | "google";
             /** @description Identifier of the OAuth2 client bound to this datasource. */
             oauth2_client_uuid: string;
             /** Format: date-time */

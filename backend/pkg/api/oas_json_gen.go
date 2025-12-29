@@ -4294,7 +4294,7 @@ func (s *DatasourceEmailOAuth) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("provider")
-		e.Str(s.Provider)
+		s.Provider.Encode(e)
 	}
 	{
 		e.FieldStart("oauth2_client_uuid")
@@ -4394,9 +4394,7 @@ func (s *DatasourceEmailOAuth) Decode(d *jx.Decoder) error {
 		case "provider":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.Str()
-				s.Provider = string(v)
-				if err != nil {
+				if err := s.Provider.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -4488,6 +4486,46 @@ func (s *DatasourceEmailOAuth) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DatasourceEmailOAuth) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DatasourceEmailOAuthProvider as json.
+func (s DatasourceEmailOAuthProvider) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes DatasourceEmailOAuthProvider from json.
+func (s *DatasourceEmailOAuthProvider) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DatasourceEmailOAuthProvider to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch DatasourceEmailOAuthProvider(v) {
+	case DatasourceEmailOAuthProviderGmail:
+		*s = DatasourceEmailOAuthProviderGmail
+	case DatasourceEmailOAuthProviderGoogle:
+		*s = DatasourceEmailOAuthProviderGoogle
+	default:
+		*s = DatasourceEmailOAuthProvider(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DatasourceEmailOAuthProvider) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DatasourceEmailOAuthProvider) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

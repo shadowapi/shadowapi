@@ -53,22 +53,15 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/`}>Dashboard</Link>,
     },
     {
-      key: '/messages',
-      icon: <MessageOutlined />,
-      label: <Link to={`${basePath}/messages`}>Messages</Link>,
+      key: '/datasources-menu',
+      icon: <MailOutlined />,
+      label: 'Data Sources',
       children: [
         {
-          key: '/files',
-          icon: <FileOutlined />,
-          label: <Link to={`${basePath}/files`}>Files</Link>,
+          key: '/datasources',
+          icon: <MailOutlined />,
+          label: <Link to={`${basePath}/datasources`}>Sources</Link>,
         },
-      ],
-    },
-    {
-      key: '/datasources',
-      icon: <MailOutlined />,
-      label: <Link to={`${basePath}/datasources`}>Data Sources</Link>,
-      children: [
         {
           key: '/oauth2/credentials',
           icon: <LoginOutlined />,
@@ -80,6 +73,18 @@ function getMenuItems(basePath: string): MenuItem[] {
       key: '/storages',
       icon: <DatabaseOutlined />,
       label: <Link to={`${basePath}/storages`}>Data Storages</Link>,
+    },
+    {
+      key: '/messages',
+      icon: <MessageOutlined />,
+      label: <Link to={`${basePath}/messages`}>Messages</Link>,
+      children: [
+        {
+          key: '/files',
+          icon: <FileOutlined />,
+          label: <Link to={`${basePath}/files`}>Files</Link>,
+        },
+      ],
     },
     {
       key: '/syncpolicies',
@@ -152,7 +157,9 @@ const routeConfig: Record<string, RouteConfig> = {
   '/users/new': { title: 'Add', parent: '/users' },
   '/rbac/roles': { title: 'Roles' },
   '/rbac/roles/new': { title: 'Create', parent: '/rbac/roles' },
-  '/oauth2/credentials': { title: 'OAuth2 Credentials' },
+  '/datasources': { title: 'Data Sources' },
+  '/datasources/new': { title: 'Add', parent: '/datasources' },
+  '/oauth2/credentials': { title: 'OAuth2 Credentials', parent: '/datasources' },
   '/oauth2/credentials/new': { title: 'Add', parent: '/oauth2/credentials' },
   '/storages': { title: 'Data Storages' },
   '/syncpolicies': { title: 'Sync Policies' },
@@ -165,7 +172,8 @@ const routeConfig: Record<string, RouteConfig> = {
 // Map of routes to their menu parent keys (for expanding submenus)
 const menuParentMap: Record<string, string> = {
   '/files': '/messages',
-  '/oauth2/credentials': '/datasources',
+  '/datasources': '/datasources-menu',
+  '/oauth2/credentials': '/datasources-menu',
   '/schedulers': '/workers',
   '/users': '/rbac',
   '/rbac/roles': '/rbac',
@@ -175,7 +183,9 @@ const menuParentMap: Record<string, string> = {
 function getOpenKeys(relativePath: string): string[] {
   // Normalize dynamic paths
   let normalizedPath = relativePath;
-  if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
+  if (relativePath.match(/^\/datasources\/[0-9a-f-]+$/i) || relativePath === '/datasources/new') {
+    normalizedPath = '/datasources';
+  } else if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
     normalizedPath = '/oauth2/credentials';
   } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
     normalizedPath = '/users';
@@ -194,14 +204,17 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   ];
 
   // Check if this is an edit page (uuid pattern)
+  const datasourcesUuidMatch = relativePath.match(/^\/datasources\/([0-9a-f-]+)$/i);
   const oauth2UuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
   const usersUuidMatch = relativePath.match(/^\/users\/([0-9a-f-]+)$/i);
   const rbacRolesUuidMatch = relativePath.match(/^\/rbac\/roles\/([0-9a-f-]+)$/i);
-  const uuidMatch = oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch;
+  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch;
 
   // Determine effective path for breadcrumb chain
   let effectivePath = relativePath;
-  if (oauth2UuidMatch) {
+  if (datasourcesUuidMatch) {
+    effectivePath = '/datasources';
+  } else if (oauth2UuidMatch) {
     effectivePath = '/oauth2/credentials';
   } else if (usersUuidMatch) {
     effectivePath = '/users';
@@ -267,7 +280,9 @@ function AppLayout({ children }: AppLayoutProps) {
 
   // Normalize path for menu selection (edit/new pages should highlight parent)
   let menuSelectedPath = relativePath;
-  if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
+  if (relativePath.match(/^\/datasources\/[0-9a-f-]+$/i) || relativePath === '/datasources/new') {
+    menuSelectedPath = '/datasources';
+  } else if (relativePath.match(/^\/oauth2\/credentials\/[0-9a-f-]+$/i) || relativePath === '/oauth2/credentials/new') {
     menuSelectedPath = '/oauth2/credentials';
   } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
     menuSelectedPath = '/users';

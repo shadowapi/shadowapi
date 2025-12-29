@@ -10,6 +10,40 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func (s *DatasourceEmailOAuth) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Provider.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "provider",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s DatasourceEmailOAuthProvider) Validate() error {
+	switch s {
+	case "gmail":
+		return nil
+	case "google":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GetUserRolesOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer

@@ -16,6 +16,10 @@ properties:
     type: boolean
   provider:
     type: string
+    enum:
+      - gmail
+      - google
+    description: Email provider type (gmail for Gmail/Google Workspace, google for generic Google OAuth2)
   oauth2_client_uuid:
     type: string
     description: Identifier of the OAuth2 client bound to this datasource.
