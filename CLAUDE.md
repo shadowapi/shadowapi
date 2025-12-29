@@ -333,6 +333,7 @@ The application uses Casbin for fine-grained permission enforcement with domain-
 2. Start the development environment with `docker compose watch`.
    - Backend runs in the container via `air` auto-rebuild.
    - Test login: `admin@example.com` / `Admin123!`
+3. Always ask user predefined objects before creating it (datasources, OAuth2 clients, pipelines, etc.).
 
 ### Make targets
 
