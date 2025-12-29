@@ -35,7 +35,7 @@ func ResolveClientConfig(provider query.Oauth2Client) (*Config, error) {
 	var base oauth2.Config
 
 	switch strings.ToLower(provider.Provider) {
-	case "gmail":
+	case "google", "gmail": // "gmail" kept for backward compatibility
 		base = oauth2.Config{
 			ClientID:     provider.ClientID,
 			ClientSecret: provider.Secret,
@@ -45,13 +45,6 @@ func ResolveClientConfig(provider query.Oauth2Client) (*Config, error) {
 				"https://www.googleapis.com/auth/userinfo.email",
 				"https://www.googleapis.com/auth/gmail.readonly",
 			},
-		}
-	case "google":
-		base = oauth2.Config{
-			ClientID:     provider.ClientID,
-			ClientSecret: provider.Secret,
-			Endpoint:     googleOAuth2.Endpoint,
-			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		}
 	default:
 		return nil, fmt.Errorf("unknown provider %s", provider.Provider)

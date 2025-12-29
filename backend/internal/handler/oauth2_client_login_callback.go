@@ -109,7 +109,7 @@ func (h *Handler) OAuth2ClientLogin(ctx context.Context, req *api.OAuth2ClientLo
 			oauth2.AccessTypeOffline,
 			oauth2.ApprovalForce,
 			oauth2.SetAuthURLParam(
-				"redirect_uri", fmt.Sprintf("%s/api/v1/oauth2/callback", h.cfg.BaseURL),
+				"redirect_uri", fmt.Sprintf("%s/api/v1/oauth2/callback", h.cfg.APIBaseURL),
 			),
 		),
 	}, nil
@@ -147,7 +147,7 @@ func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2Cli
 		log.Error("failed to get client config", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client config"))
 	}
-	config.RedirectURL = fmt.Sprintf("%s/api/v1/oauth2/callback", h.cfg.BaseURL)
+	config.RedirectURL = fmt.Sprintf("%s/api/v1/oauth2/callback", h.cfg.APIBaseURL)
 
 	// 4. Exchange code → token
 	tok, err := config.Exchange(ctx, params.Code.Value)
@@ -159,7 +159,7 @@ func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2Cli
 	tok, _ = config.TokenSource(ctx, tok).Token()
 
 	switch strings.ToLower(config.Provider) {
-	case "gmail":
+	case "google", "gmail": // "gmail" kept for backward compatibility
 		return h.handleGmailToken(ctx, log, tok, stateQuery, stateRow.Oauth2State.ClientUuid.String())
 	default:
 		return nil, ErrWithCode(http.StatusInternalServerError, E("unknown provider"))
@@ -199,7 +199,7 @@ func (h *Handler) OAuth2ClientTokenDelete(ctx context.Context, params api.OAuth2
 
 	// Provider‑specific revoke
 	switch strings.ToLower(clientCfg.Provider) {
-	case "gmail":
+	case "google", "gmail": // "gmail" kept for backward compatibility
 		_ = revokeGoogleToken(ctx, stored.AccessToken)
 	}
 

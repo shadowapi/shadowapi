@@ -144,8 +144,13 @@ func (h *Handler) handleGmailToken(
 
 		// TODO: schedule token refresh via worker/pipeline – skipped per current scope
 
-		// 4.5) Build redirect location back to datasource page
-		location, err := url.Parse("/datasources/" + dsID)
+		// 4.5) Build redirect location back to datasource page on CSR app
+		workspaceSlug := stateQuery.Get("workspace_slug")
+		if workspaceSlug == "" {
+			workspaceSlug = "internal" // fallback to default workspace
+		}
+		redirectPath := "/w/" + workspaceSlug + "/datasources/" + dsID
+		location, err := url.Parse(h.cfg.CSRBaseURL + redirectPath)
 		if err != nil {
 			log.Error("4.5 can't parse location", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("can't parse location"))

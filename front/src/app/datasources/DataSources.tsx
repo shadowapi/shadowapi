@@ -80,7 +80,7 @@ function DataSources() {
 
     const { data, error } = await client.POST('/oauth2/login', {
       body: {
-        query: { datasource_uuid: [record.uuid!] },
+        query: { datasource_uuid: [record.uuid!], workspace_slug: [slug] },
       },
     });
 

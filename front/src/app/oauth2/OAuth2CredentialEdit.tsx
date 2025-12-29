@@ -9,18 +9,18 @@ import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 const { Title, Paragraph, Text } = Typography;
 
 function CredentialDocumentation({ provider }: { provider?: string }) {
-  if (provider === 'GMAIL') {
+  if (provider === 'google') {
     return (
-      <Card title="Gmail OAuth2 Setup" size="small">
+      <Card title="Google OAuth2 Setup" size="small">
         <Paragraph>
-          To connect Gmail as a data source, you need OAuth2 credentials from Google Cloud Console.
+          To connect Google services as a data source, you need OAuth2 credentials from Google Cloud Console.
         </Paragraph>
         <Paragraph>
           <Text strong>Quick steps:</Text>
         </Paragraph>
         <ul>
           <li>Create a Google Cloud project</li>
-          <li>Enable the Gmail API</li>
+          <li>Enable required APIs (e.g., Gmail API)</li>
           <li>Configure OAuth consent screen</li>
           <li>Create OAuth2 credentials (Web application)</li>
           <li>Copy Client ID and Client Secret here</li>
@@ -152,7 +152,7 @@ function OAuth2CredentialEdit() {
               name="name"
               rules={[{ required: true, message: 'Please enter a name' }]}
             >
-              <Input placeholder="My Gmail OAuth2" />
+              <Input placeholder="My Google OAuth2" />
             </Form.Item>
 
             <Form.Item
@@ -161,7 +161,7 @@ function OAuth2CredentialEdit() {
               rules={[{ required: true, message: 'Please select a provider' }]}
             >
               <Select placeholder="Select provider">
-                <Select.Option value="GMAIL">Gmail</Select.Option>
+                <Select.Option value="google">Google</Select.Option>
               </Select>
             </Form.Item>
 
