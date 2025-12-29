@@ -26,12 +26,12 @@ func (h *Handler) DatasourceList(
 			limit = params.Limit.Value
 		}
 
-		// Call our one "ListDatasources" query with offset & limit
-		listArgs := query.ListDatasourcesParams{
+		// Call the query that includes OAuth authentication status
+		listArgs := query.ListDatasourcesWithOAuthStatusParams{
 			Offset: offset,
 			Limit:  limit,
 		}
-		rows, err := query.New(h.dbp).ListDatasources(ctx, listArgs)
+		rows, err := query.New(h.dbp).ListDatasourcesWithOAuthStatus(ctx, listArgs)
 		if err != nil {
 			log.Error("failed to list datasources", "error", err.Error())
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list datasources"))
@@ -40,7 +40,9 @@ func (h *Handler) DatasourceList(
 		// Convert each row from the query to our API representation
 		var datasources []api.Datasource
 		for _, row := range rows {
-			datasources = append(datasources, QToDatasource(row.Datasource))
+			ds := QToDatasource(row.Datasource)
+			ds.IsOAuthAuthenticated = api.NewOptBool(row.IsOauthAuthenticated)
+			datasources = append(datasources, ds)
 		}
 		return datasources, nil
 	})

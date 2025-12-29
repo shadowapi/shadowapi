@@ -1800,14 +1800,16 @@ type ContactSocials struct{}
 
 // Ref: #
 type Datasource struct {
-	UUID      OptString   `json:"uuid"`
-	UserUUID  OptString   `json:"user_uuid"`
-	Type      string      `json:"type"`
-	Name      string      `json:"name"`
-	IsEnabled OptBool     `json:"is_enabled"`
-	Provider  string      `json:"provider"`
-	CreatedAt OptDateTime `json:"created_at"`
-	UpdatedAt OptDateTime `json:"updated_at"`
+	UUID      OptString `json:"uuid"`
+	UserUUID  OptString `json:"user_uuid"`
+	Type      string    `json:"type"`
+	Name      string    `json:"name"`
+	IsEnabled OptBool   `json:"is_enabled"`
+	Provider  string    `json:"provider"`
+	// Whether the OAuth datasource has valid authentication tokens (only applicable for email_oauth type).
+	IsOAuthAuthenticated OptBool     `json:"is_oauth_authenticated"`
+	CreatedAt            OptDateTime `json:"created_at"`
+	UpdatedAt            OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -1838,6 +1840,11 @@ func (s *Datasource) GetIsEnabled() OptBool {
 // GetProvider returns the value of Provider.
 func (s *Datasource) GetProvider() string {
 	return s.Provider
+}
+
+// GetIsOAuthAuthenticated returns the value of IsOAuthAuthenticated.
+func (s *Datasource) GetIsOAuthAuthenticated() OptBool {
+	return s.IsOAuthAuthenticated
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -1878,6 +1885,11 @@ func (s *Datasource) SetIsEnabled(val OptBool) {
 // SetProvider sets the value of Provider.
 func (s *Datasource) SetProvider(val string) {
 	s.Provider = val
+}
+
+// SetIsOAuthAuthenticated sets the value of IsOAuthAuthenticated.
+func (s *Datasource) SetIsOAuthAuthenticated(val OptBool) {
+	s.IsOAuthAuthenticated = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.

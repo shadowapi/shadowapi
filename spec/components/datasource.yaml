@@ -16,6 +16,10 @@ properties:
     type: boolean
   provider:
     type: string
+  is_oauth_authenticated:
+    type: boolean
+    readOnly: true
+    description: Whether the OAuth datasource has valid authentication tokens (only applicable for email_oauth type)
   created_at:
     type: string
     format: date-time

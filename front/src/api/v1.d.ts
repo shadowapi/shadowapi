@@ -1443,6 +1443,8 @@ export interface components {
             name: string;
             is_enabled?: boolean;
             provider: string;
+            /** @description Whether the OAuth datasource has valid authentication tokens (only applicable for email_oauth type) */
+            readonly is_oauth_authenticated?: boolean;
             /** Format: date-time */
             readonly created_at?: string;
             /** Format: date-time */
@@ -1615,20 +1617,21 @@ export interface components {
              */
             updated_at?: string;
         };
+        /** @description OAuth2 token object containing access and refresh tokens. */
         oauth2_client_token_obj: {
             /** @description Access token (JWT or opaque string). */
             access_token: string;
             /** @description Refresh token, if available. */
-            refresh_token: string;
+            refresh_token?: string;
             /**
              * Format: date-time
-             * @description Timestamp when the access token expires.
+             * @description Timestamp when the access token expires (from Go oauth2.Token).
              */
-            expires_at: string;
-            /** @description Raw OAuth2 token response stored as JSON (useful for debugging or extra metadata). */
-            token?: {
-                [key: string]: unknown;
-            };
+            expiry?: string;
+            /** @description Token type (e.g., Bearer). */
+            token_type?: string;
+        } & {
+            [key: string]: unknown;
         };
         oauth2_client_token: {
             /** @description Internal unique ID for the token record. */

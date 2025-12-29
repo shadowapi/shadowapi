@@ -3766,6 +3766,12 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 		e.Str(s.Provider)
 	}
 	{
+		if s.IsOAuthAuthenticated.Set {
+			e.FieldStart("is_oauth_authenticated")
+			s.IsOAuthAuthenticated.Encode(e)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -3779,15 +3785,16 @@ func (s *Datasource) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDatasource = [8]string{
+var jsonFieldsNameOfDatasource = [9]string{
 	0: "uuid",
 	1: "user_uuid",
 	2: "type",
 	3: "name",
 	4: "is_enabled",
 	5: "provider",
-	6: "created_at",
-	7: "updated_at",
+	6: "is_oauth_authenticated",
+	7: "created_at",
+	8: "updated_at",
 }
 
 // Decode decodes Datasource from json.
@@ -3795,7 +3802,7 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Datasource to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -3865,6 +3872,16 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"provider\"")
 			}
+		case "is_oauth_authenticated":
+			if err := func() error {
+				s.IsOAuthAuthenticated.Reset()
+				if err := s.IsOAuthAuthenticated.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_oauth_authenticated\"")
+			}
 		case "created_at":
 			if err := func() error {
 				s.CreatedAt.Reset()
@@ -3894,8 +3911,9 @@ func (s *Datasource) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b00101100,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

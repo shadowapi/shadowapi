@@ -366,6 +366,126 @@ func (q *Queries) ListDatasourcesByWorkspace(ctx context.Context, arg ListDataso
 	return items, nil
 }
 
+const listDatasourcesWithOAuthStatus = `-- name: ListDatasourcesWithOAuthStatus :many
+SELECT
+    datasource.uuid, datasource.workspace_uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at,
+    CASE
+        WHEN datasource.type = 'email_oauth'
+             AND datasource.settings->>'oauth2_token_uuid' IS NOT NULL
+             AND ot.uuid IS NOT NULL
+        THEN true
+        ELSE false
+    END AS is_oauth_authenticated
+FROM datasource
+LEFT JOIN oauth2_token ot ON ot.uuid = (datasource.settings->>'oauth2_token_uuid')::uuid
+ORDER BY datasource.created_at DESC
+LIMIT NULLIF($2::int, 0)
+OFFSET $1
+`
+
+type ListDatasourcesWithOAuthStatusParams struct {
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
+}
+
+type ListDatasourcesWithOAuthStatusRow struct {
+	Datasource           Datasource `json:"datasource"`
+	IsOauthAuthenticated bool       `json:"is_oauth_authenticated"`
+}
+
+func (q *Queries) ListDatasourcesWithOAuthStatus(ctx context.Context, arg ListDatasourcesWithOAuthStatusParams) ([]ListDatasourcesWithOAuthStatusRow, error) {
+	rows, err := q.db.Query(ctx, listDatasourcesWithOAuthStatus, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDatasourcesWithOAuthStatusRow
+	for rows.Next() {
+		var i ListDatasourcesWithOAuthStatusRow
+		if err := rows.Scan(
+			&i.Datasource.UUID,
+			&i.Datasource.WorkspaceUUID,
+			&i.Datasource.UserUUID,
+			&i.Datasource.Name,
+			&i.Datasource.Type,
+			&i.Datasource.IsEnabled,
+			&i.Datasource.Provider,
+			&i.Datasource.Settings,
+			&i.Datasource.CreatedAt,
+			&i.Datasource.UpdatedAt,
+			&i.IsOauthAuthenticated,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDatasourcesWithOAuthStatusByWorkspace = `-- name: ListDatasourcesWithOAuthStatusByWorkspace :many
+SELECT
+    datasource.uuid, datasource.workspace_uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at,
+    CASE
+        WHEN datasource.type = 'email_oauth'
+             AND datasource.settings->>'oauth2_token_uuid' IS NOT NULL
+             AND ot.uuid IS NOT NULL
+        THEN true
+        ELSE false
+    END AS is_oauth_authenticated
+FROM datasource
+LEFT JOIN oauth2_token ot ON ot.uuid = (datasource.settings->>'oauth2_token_uuid')::uuid
+WHERE datasource.workspace_uuid = $1::uuid
+ORDER BY datasource.created_at DESC
+LIMIT NULLIF($3::int, 0)
+OFFSET $2
+`
+
+type ListDatasourcesWithOAuthStatusByWorkspaceParams struct {
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+	Offset        int32       `json:"offset"`
+	Limit         int32       `json:"limit"`
+}
+
+type ListDatasourcesWithOAuthStatusByWorkspaceRow struct {
+	Datasource           Datasource `json:"datasource"`
+	IsOauthAuthenticated bool       `json:"is_oauth_authenticated"`
+}
+
+func (q *Queries) ListDatasourcesWithOAuthStatusByWorkspace(ctx context.Context, arg ListDatasourcesWithOAuthStatusByWorkspaceParams) ([]ListDatasourcesWithOAuthStatusByWorkspaceRow, error) {
+	rows, err := q.db.Query(ctx, listDatasourcesWithOAuthStatusByWorkspace, arg.WorkspaceUUID, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDatasourcesWithOAuthStatusByWorkspaceRow
+	for rows.Next() {
+		var i ListDatasourcesWithOAuthStatusByWorkspaceRow
+		if err := rows.Scan(
+			&i.Datasource.UUID,
+			&i.Datasource.WorkspaceUUID,
+			&i.Datasource.UserUUID,
+			&i.Datasource.Name,
+			&i.Datasource.Type,
+			&i.Datasource.IsEnabled,
+			&i.Datasource.Provider,
+			&i.Datasource.Settings,
+			&i.Datasource.CreatedAt,
+			&i.Datasource.UpdatedAt,
+			&i.IsOauthAuthenticated,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateDatasource = `-- name: UpdateDatasource :exec
 UPDATE datasource
 SET
