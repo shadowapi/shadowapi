@@ -130,7 +130,7 @@ const getOauth2TokenByUUID = `-- name: GetOauth2TokenByUUID :one
 SELECT
     oauth2_token.uuid, oauth2_token.client_uuid, oauth2_token.user_uuid, oauth2_token.token, oauth2_token.created_at, oauth2_token.updated_at, oauth2_token.name
 FROM oauth2_token
-WHERE client_uuid = $1::uuid
+WHERE uuid = $1::uuid
 `
 
 type GetOauth2TokenByUUIDRow struct {

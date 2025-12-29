@@ -34,7 +34,7 @@ WHERE
 SELECT
     sqlc.embed(oauth2_token)
 FROM oauth2_token
-WHERE client_uuid = sqlc.arg('uuid')::uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: GetOauth2ClientTokens :many
 SELECT
