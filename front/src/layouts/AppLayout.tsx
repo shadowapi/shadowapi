@@ -162,6 +162,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/oauth2/credentials': { title: 'OAuth2 Credentials', parent: '/datasources' },
   '/oauth2/credentials/new': { title: 'Add', parent: '/oauth2/credentials' },
   '/storages': { title: 'Data Storages' },
+  '/storages/new': { title: 'Add', parent: '/storages' },
   '/syncpolicies': { title: 'Sync Policies' },
   '/pipelines': { title: 'Data Pipelines' },
   '/workers': { title: 'Workers' },
@@ -191,6 +192,8 @@ function getOpenKeys(relativePath: string): string[] {
     normalizedPath = '/users';
   } else if (relativePath.match(/^\/rbac\/roles\/[0-9a-f-]+$/i) || relativePath === '/rbac/roles/new') {
     normalizedPath = '/rbac/roles';
+  } else if (relativePath.match(/^\/storages\/[0-9a-f-]+$/i) || relativePath === '/storages/new') {
+    normalizedPath = '/storages';
   }
 
   const parentKey = menuParentMap[normalizedPath];
@@ -208,7 +211,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   const oauth2UuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
   const usersUuidMatch = relativePath.match(/^\/users\/([0-9a-f-]+)$/i);
   const rbacRolesUuidMatch = relativePath.match(/^\/rbac\/roles\/([0-9a-f-]+)$/i);
-  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch;
+  const storagesUuidMatch = relativePath.match(/^\/storages\/([0-9a-f-]+)$/i);
+  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch || storagesUuidMatch;
 
   // Determine effective path for breadcrumb chain
   let effectivePath = relativePath;
@@ -220,6 +224,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
     effectivePath = '/users';
   } else if (rbacRolesUuidMatch) {
     effectivePath = '/rbac/roles';
+  } else if (storagesUuidMatch) {
+    effectivePath = '/storages';
   }
 
   // Build the breadcrumb chain by following parent links
@@ -288,6 +294,8 @@ function AppLayout({ children }: AppLayoutProps) {
     menuSelectedPath = '/users';
   } else if (relativePath.match(/^\/rbac\/roles\/[0-9a-f-]+$/i) || relativePath === '/rbac/roles/new') {
     menuSelectedPath = '/rbac/roles';
+  } else if (relativePath.match(/^\/storages\/[0-9a-f-]+$/i) || relativePath === '/storages/new') {
+    menuSelectedPath = '/storages';
   }
   const selectedKeys = [menuSelectedPath];
   const defaultOpenKeys = getOpenKeys(relativePath);
