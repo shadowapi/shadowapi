@@ -15,6 +15,9 @@ type Config struct {
 	// Server is the gRPC server address to connect to
 	Server string `env:"WORKER_SERVER" envDefault:"localhost:9090"`
 
+	// TLS enables TLS for gRPC connections (required for external connections via rpc.meshpump.com)
+	TLS bool `env:"WORKER_TLS" envDefault:"false"`
+
 	// WorkerID is the unique identifier for this worker (set after enrollment)
 	WorkerID string `env:"WORKER_ID"`
 

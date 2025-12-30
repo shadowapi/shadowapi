@@ -67,6 +67,9 @@ The backend supports distributed workers that connect via gRPC for job processin
 - `worker enroll --token=<token> --name=<name>` - Exchange enrollment token for credentials
 - `worker connect` - Connect to backend and start receiving jobs
 
+**TLS Support:**
+Workers can connect over TLS for secure external connections. Set `WORKER_TLS=true` when connecting to production endpoints (e.g., `rpc.meshpump.com:443`). Internal workers within the same network can use plain connections (`WORKER_TLS=false`, default).
+
 **Enrollment Flow:**
 1. Admin creates enrollment token (stored hashed in `worker_enrollment_token` table)
 2. Worker operator runs `worker enroll` with token
@@ -126,6 +129,7 @@ The application uses a subdomain-based architecture for service separation:
 | `{domain}` | SSR | 3000 | Server-rendered public pages |
 | `app.{domain}` | Frontend | 5173 | React SPA (CSR, protected) |
 | `api.{domain}` | Backend | 8080 | REST API |
+| `rpc.{domain}` | Backend | 9090 | gRPC for distributed workers |
 | `oidc.{domain}` | Hydra | 4444 | OAuth2/OIDC |
 
 **Two containers, one codebase:**
@@ -400,7 +404,8 @@ Traefik v3 routes requests based on subdomain:
 |-----------|---------|------|
 | `localtest.me` | SSR | 3000 |
 | `app.localtest.me` | Frontend (CSR) | 5173 |
-| `api.localtest.me` | Backend | 8080 |
+| `api.localtest.me` | Backend (HTTP) | 8080 |
+| `rpc.localtest.me` | Backend (gRPC) | 9090 |
 | `oidc.localtest.me` | Hydra | 4444 |
 
 - Access public pages at `http://localtest.me/start`

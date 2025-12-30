@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log/slog"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/samber/do/v2"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/shadowapi/shadowapi/backend/cmd/worker/internal/workerconfig"
@@ -41,14 +43,21 @@ with the 'connect' command.`,
 		log.Info("connecting to backend for enrollment",
 			"server", cfg.Server,
 			"name", name,
+			"tls", cfg.TLS,
 		)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		conn, err := grpc.NewClient(cfg.Server,
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
+		// Configure transport credentials based on TLS setting
+		var creds credentials.TransportCredentials
+		if cfg.TLS {
+			creds = credentials.NewTLS(&tls.Config{})
+		} else {
+			creds = insecure.NewCredentials()
+		}
+
+		conn, err := grpc.NewClient(cfg.Server, grpc.WithTransportCredentials(creds))
 		if err != nil {
 			return fmt.Errorf("failed to connect: %w", err)
 		}
@@ -80,6 +89,9 @@ with the 'connect' command.`,
 		fmt.Printf("  export WORKER_ID=%s\n", resp.WorkerId)
 		fmt.Printf("  export WORKER_SECRET=%s\n", resp.WorkerSecret)
 		fmt.Printf("  export WORKER_SERVER=%s\n", cfg.Server)
+		if cfg.TLS {
+			fmt.Println("  export WORKER_TLS=true")
+		}
 		fmt.Println()
 		fmt.Println("Then run: worker connect")
 

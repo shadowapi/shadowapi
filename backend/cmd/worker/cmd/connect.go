@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log/slog"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/samber/do/v2"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -41,11 +43,18 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 		log.Info("connecting to backend",
 			"server", cfg.Server,
 			"worker_id", cfg.WorkerID[:8]+"...",
+			"tls", cfg.TLS,
 		)
 
-		conn, err := grpc.NewClient(cfg.Server,
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
+		// Configure transport credentials based on TLS setting
+		var creds credentials.TransportCredentials
+		if cfg.TLS {
+			creds = credentials.NewTLS(&tls.Config{})
+		} else {
+			creds = insecure.NewCredentials()
+		}
+
+		conn, err := grpc.NewClient(cfg.Server, grpc.WithTransportCredentials(creds))
 		if err != nil {
 			return fmt.Errorf("failed to connect: %w", err)
 		}

@@ -47,6 +47,7 @@ services:
       dockerfile: devops/docker/backend/prod.Dockerfile
     x-ports:
       - api.meshpump.com:8080/https
+      - rpc.meshpump.com:9090/https
     environment:
       - BE_HOST=0.0.0.0
       - BE_PORT=8080

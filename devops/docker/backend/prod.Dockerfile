@@ -22,5 +22,5 @@ RUN apk --no-cache add ca-certificates
 
 COPY --from=builder /shadowapi ./shadowapi
 
-EXPOSE 8080
+EXPOSE 8080 9090
 CMD ["/app/shadowapi", "serve"]
