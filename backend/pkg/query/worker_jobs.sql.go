@@ -106,6 +106,33 @@ func (q *Queries) GetWorkerJob(ctx context.Context, argUuid pgtype.UUID) (GetWor
 	return i, err
 }
 
+const getWorkerJobByJobUUID = `-- name: GetWorkerJobByJobUUID :one
+SELECT
+    worker_jobs.uuid, worker_jobs.scheduler_uuid, worker_jobs.job_uuid, worker_jobs.subject, worker_jobs.status, worker_jobs.data, worker_jobs.started_at, worker_jobs.finished_at
+FROM worker_jobs
+WHERE job_uuid = $1::uuid
+`
+
+type GetWorkerJobByJobUUIDRow struct {
+	WorkerJob WorkerJob `json:"worker_job"`
+}
+
+func (q *Queries) GetWorkerJobByJobUUID(ctx context.Context, jobUuid pgtype.UUID) (GetWorkerJobByJobUUIDRow, error) {
+	row := q.db.QueryRow(ctx, getWorkerJobByJobUUID, jobUuid)
+	var i GetWorkerJobByJobUUIDRow
+	err := row.Scan(
+		&i.WorkerJob.UUID,
+		&i.WorkerJob.SchedulerUuid,
+		&i.WorkerJob.JobUuid,
+		&i.WorkerJob.Subject,
+		&i.WorkerJob.Status,
+		&i.WorkerJob.Data,
+		&i.WorkerJob.StartedAt,
+		&i.WorkerJob.FinishedAt,
+	)
+	return i, err
+}
+
 const getWorkerJobs = `-- name: GetWorkerJobs :many
 WITH filtered_worker_jobs AS (
     SELECT w.uuid, w.scheduler_uuid, w.job_uuid, w.subject, w.status, w.data, w.started_at, w.finished_at
@@ -272,6 +299,32 @@ func (q *Queries) UpdateWorkerJob(ctx context.Context, arg UpdateWorkerJobParams
 		arg.Status,
 		arg.Data,
 		arg.FinishedAt,
+		arg.UUID,
+	)
+	return err
+}
+
+const updateWorkerJobStatus = `-- name: UpdateWorkerJobStatus :exec
+UPDATE worker_jobs
+SET
+    status = $1,
+    finished_at = $2,
+    data = $3
+WHERE uuid = $4::uuid
+`
+
+type UpdateWorkerJobStatusParams struct {
+	Status     string             `json:"status"`
+	FinishedAt pgtype.Timestamptz `json:"finished_at"`
+	Data       []byte             `json:"data"`
+	UUID       pgtype.UUID        `json:"uuid"`
+}
+
+func (q *Queries) UpdateWorkerJobStatus(ctx context.Context, arg UpdateWorkerJobStatusParams) error {
+	_, err := q.db.Exec(ctx, updateWorkerJobStatus,
+		arg.Status,
+		arg.FinishedAt,
+		arg.Data,
 		arg.UUID,
 	)
 	return err

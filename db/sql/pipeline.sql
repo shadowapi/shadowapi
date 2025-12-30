@@ -113,3 +113,9 @@ DELETE FROM pipeline WHERE uuid = sqlc.arg('uuid')::uuid;
 DELETE FROM pipeline
 WHERE uuid = sqlc.arg('uuid')::uuid
   AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
+-- name: GetPipelineWorkspaceSlug :one
+SELECT w.slug
+FROM pipeline p
+JOIN workspace w ON p.workspace_uuid = w.uuid
+WHERE p.uuid = sqlc.arg('pipeline_uuid')::uuid;

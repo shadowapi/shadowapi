@@ -29,7 +29,7 @@ type Handler struct {
 	cfg         *config.Config
 	log         *slog.Logger
 	dbp         *pgxpool.Pool
-	wbr         *worker.Broker
+	scheduler   *worker.Scheduler
 	userManager auth.UserManager
 	oauth2Svc   *OAuth2Service
 	enforcer    *rbac.Enforcer
@@ -183,7 +183,7 @@ func Provide(i do.Injector) (*Handler, error) {
 		cfg:         cfg,
 		log:         log,
 		dbp:         do.MustInvoke[*pgxpool.Pool](i),
-		wbr:         do.MustInvoke[*worker.Broker](i),
+		scheduler:   do.MustInvoke[*worker.Scheduler](i),
 		userManager: do.MustInvoke[auth.UserManager](i),
 		enforcer:    do.MustInvoke[*rbac.Enforcer](i),
 	}

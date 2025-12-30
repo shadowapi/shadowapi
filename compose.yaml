@@ -105,6 +105,32 @@ services:
         condition: service_healthy
     restart: always
 
+  # gRPC to NATS bridge for distributed workers
+  grpc2nats:
+    build:
+      context: .
+      dockerfile: devops/docker/grpc2nats/Dockerfile
+    environment:
+      - G2N_DB_URI=${BE_DB_URI}
+      - G2N_NATS_URL=${BE_QUEUE_URL}
+      - G2N_NATS_PREFIX=${BE_QUEUE_PREFIX}
+      - G2N_GRPC_HOST=0.0.0.0
+      - G2N_GRPC_PORT=9090
+      - G2N_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+    depends_on:
+      db:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    labels:
+      - traefik.enable=true
+      # RPC subdomain for gRPC traffic
+      - traefik.http.routers.shadowapi-rpc.rule=Host(`${BE_RPC_SUBDOMAIN}.${BE_DOMAIN}`)
+      - traefik.http.routers.shadowapi-rpc.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.shadowapi-rpc.loadbalancer.server.port=9090
+      - traefik.http.services.shadowapi-rpc.loadbalancer.server.scheme=h2c
+    restart: always
+
   # Distributed gRPC worker
   # Enrollment is handled automatically by bootstrap.sh
   # Worker will wait for credentials if WORKER_ID is empty
@@ -113,14 +139,14 @@ services:
       context: .
       dockerfile: devops/docker/worker/Dockerfile
     environment:
-      - WORKER_SERVER=backend:9090
+      - WORKER_SERVER=grpc2nats:9090
       - WORKER_ID=${WORKER_ID:-}
       - WORKER_SECRET=${WORKER_SECRET:-}
       - WORKER_LOG_LEVEL=${WORKER_LOG_LEVEL:-info}
       - WORKER_HEARTBEAT_INTERVAL=${WORKER_HEARTBEAT_INTERVAL:-30}
       - WORKER_CAPACITY=${WORKER_CAPACITY:-10}
     depends_on:
-      backend:
+      grpc2nats:
         condition: service_started
     restart: unless-stopped
 

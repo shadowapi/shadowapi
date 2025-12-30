@@ -165,6 +165,20 @@ func (q *Queries) GetPipelineByWorkspace(ctx context.Context, arg GetPipelineByW
 	return i, err
 }
 
+const getPipelineWorkspaceSlug = `-- name: GetPipelineWorkspaceSlug :one
+SELECT w.slug
+FROM pipeline p
+JOIN workspace w ON p.workspace_uuid = w.uuid
+WHERE p.uuid = $1::uuid
+`
+
+func (q *Queries) GetPipelineWorkspaceSlug(ctx context.Context, pipelineUuid pgtype.UUID) (string, error) {
+	row := q.db.QueryRow(ctx, getPipelineWorkspaceSlug, pipelineUuid)
+	var slug string
+	err := row.Scan(&slug)
+	return slug, err
+}
+
 const getPipelines = `-- name: GetPipelines :many
 WITH filtered_pipelines AS (
     SELECT p.uuid, p.workspace_uuid, p.datasource_uuid, p.storage_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at

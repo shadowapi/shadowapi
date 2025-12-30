@@ -3,17 +3,18 @@ package scheduler
 import (
 	"context"
 	"encoding/json"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
+	"log/slog"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
+
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/jobs"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/subjects"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
-	"log/slog"
 )
 
 type TokenRefresherScheduler struct {
@@ -87,7 +88,8 @@ func (s *TokenRefresherScheduler) run(ctx context.Context) {
 			s.log.Error("Failed to marshal token refresher job payload", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "err", err)
 			continue
 		}
-		err = s.queue.PublishWithHeaders(ctx, registry.WorkerSubjectTokenRefresh, headers, payload)
+		subject := subjects.GlobalJobSubject(subjects.JobTypeTokenRefresh)
+		err = s.queue.PublishWithHeaders(ctx, subject, headers, payload)
 		if err != nil {
 			s.log.Error("Failed to publish token refresher job", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "err", err)
 			continue

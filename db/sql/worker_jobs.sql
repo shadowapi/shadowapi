@@ -74,3 +74,17 @@ WHERE uuid = sqlc.arg('uuid')::uuid;
 -- name: DeleteWorkerJob :exec
 DELETE FROM worker_jobs
 WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: UpdateWorkerJobStatus :exec
+UPDATE worker_jobs
+SET
+    status = sqlc.arg('status'),
+    finished_at = sqlc.arg('finished_at'),
+    data = sqlc.arg('data')
+WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: GetWorkerJobByJobUUID :one
+SELECT
+    sqlc.embed(worker_jobs)
+FROM worker_jobs
+WHERE job_uuid = sqlc.arg('job_uuid')::uuid;

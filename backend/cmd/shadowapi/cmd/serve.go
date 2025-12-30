@@ -8,27 +8,26 @@ import (
 	"github.com/samber/do/v2"
 	"github.com/spf13/cobra"
 
-	grpcserver "github.com/shadowapi/shadowapi/backend/internal/grpc"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/results"
 )
 
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "starts UI, RESTfull API, and gRPC servers",
+	Short: "starts UI and RESTful API server",
 	Run: func(cmd *cobra.Command, args []string) {
 		// DI must know all modules
 		// injector - DI god-like object, instance of all modules
 		ctx := do.MustInvoke[context.Context](injector)
 		srv := do.MustInvoke[*server.Server](injector)
-		grpcSrv := do.MustInvoke[*grpcserver.Server](injector)
+		resultHandler := do.MustInvoke[*results.Handler](injector)
 
-		// Start gRPC server in a goroutine
-		go func() {
-			if err := grpcSrv.Run(ctx); err != nil {
-				slog.Error("failed to start gRPC server", "error", err)
-			}
-		}()
+		// Start result handler (subscribes to job results from grpc2nats)
+		if err := resultHandler.Start(ctx); err != nil {
+			slog.Error("failed to start result handler", "error", err)
+			return
+		}
 
 		// Start HTTP server (blocking)
 		if err := srv.Run(ctx); err != nil {
@@ -44,7 +43,7 @@ var serveCmd = &cobra.Command{
 		}
 
 		// Graceful shutdown
-		grpcSrv.Shutdown()
+		resultHandler.Stop()
 	},
 }
 

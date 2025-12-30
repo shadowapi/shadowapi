@@ -241,7 +241,7 @@ func (h *Handler) CreateWorkerEnrollmentToken(ctx context.Context, req *api.Work
 	// Get user UUID from context
 	userUUIDStr, err := getUserUUIDFromContext(ctx)
 	if err != nil {
-		return nil, ErrWithCode(401, E(err.Error()))
+		return nil, ErrWithCode(401, E("%s", err.Error()))
 	}
 	userUUID, err := uuid.FromString(userUUIDStr)
 	if err != nil {

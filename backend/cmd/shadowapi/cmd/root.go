@@ -14,7 +14,6 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth/dbauth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
-	grpcserver "github.com/shadowapi/shadowapi/backend/internal/grpc"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/loader"
 	"github.com/shadowapi/shadowapi/backend/internal/log"
@@ -22,6 +21,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/results"
 	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 )
 
@@ -79,9 +79,9 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 
 		do.Provide(injector, handler.Provide)
 		do.Provide(injector, server.Provide)
-		do.Provide(injector, grpcserver.Provide) // gRPC server for distributed workers
+		do.Provide(injector, results.Provide) // Result handler for distributed workers
 
-		// 		do.Provide(injector, worker.ProvideLazy)
+		// Worker scheduler (publishes jobs to NATS for external workers)
 		do.Provide(injector, worker.Provide)
 
 		if modify != nil {

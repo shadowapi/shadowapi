@@ -9,13 +9,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
+	"log/slog"
+
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/metrics"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/registry"
+	"github.com/shadowapi/shadowapi/backend/internal/worker/subjects"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
-	"log/slog"
 )
 
 type SchedulerEmailJobArgs struct {
@@ -96,26 +97,6 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		// If NextRun is set and still in the future, skip this scheduler.
 		if sched.NextRun.Valid && sched.NextRun.Time.After(now) {
 			s.log.Debug("MultiEmailScheduler Skipping scheduler", "schedulerUUID", sched.UUID.String(), "nextRun", sched.NextRun.Time)
-
-			// TODO @reactima remove dummy job
-			jobArgs := SchedulerEmailJobArgs{
-				SchedulerUUID: sched.UUID.String(),
-				JobUUID:       jobUUID,
-				PipelineUUID:  sched.PipelineUuid.String(),
-				LastFetched:   now,
-			}
-			jobPayload, err := json.Marshal(jobArgs)
-			if err != nil {
-				s.log.Error("Failed to marshal dummy job payload", "scheduler", sched.UUID.String(), "err", err)
-				continue
-			}
-			headers := queue.Headers{"X-Job-ID": jobUUID}
-
-			err = s.queue.PublishWithHeaders(ctx, registry.WorkerSubjectDummy, headers, jobPayload)
-			if err != nil {
-				s.log.Error("Failed to publish dummy job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)
-				continue
-			}
 			continue
 		}
 
@@ -133,12 +114,17 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 			continue
 		}
 
-		// TODO @reactima
-		// 1. Check if the pipeline is enabled and not paused, check if pipeline is email_oauth
-		// 2. Consider to check if previous is not running, and decide what to do ... , research best practices first ????
-		headers := queue.Headers{"X-Job-ID": jobUUID}
+		// Get the workspace slug for this pipeline
+		workspaceSlug, err := queries.GetPipelineWorkspaceSlug(ctx, converter.UuidToPgUUID(*sched.PipelineUuid))
+		if err != nil {
+			s.log.Error("Failed to get workspace slug", "pipelineUUID", sched.PipelineUuid.String(), "err", err)
+			continue
+		}
 
-		err = s.queue.PublishWithHeaders(ctx, registry.WorkerSubjectEmailOAuthFetch, headers, jobPayload)
+		headers := queue.Headers{"X-Job-ID": jobUUID}
+		subject := subjects.JobSubject(workspaceSlug, subjects.JobTypeEmailOAuthFetch)
+
+		err = s.queue.PublishWithHeaders(ctx, subject, headers, jobPayload)
 		if err != nil {
 			s.log.Error("Failed to publish job", "schedulerUUID", sched.UUID.String(), "pipelineUUID", sched.PipelineUuid.String(), "err", err)
 			backoffDelay := s.calculateBackoff(sched)
