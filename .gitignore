@@ -49,6 +49,7 @@ front/.env
 devops/ory/hydra/hydra.yaml
 front/dist/
 backend/shadowapi
+backend/worker
 front/playwright-report/
 TODO.md
 test-results/

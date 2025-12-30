@@ -24,5 +24,8 @@ RUN apk add --no-cache bash
 # Copy the binary from builder
 COPY --from=builder /bin/worker /bin/worker
 
-# Default command is connect
-CMD ["/bin/worker", "connect"]
+# Copy entrypoint script
+COPY devops/docker/worker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

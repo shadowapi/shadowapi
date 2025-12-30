@@ -3,14 +3,15 @@ package handler
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -254,11 +255,10 @@ func (h *Handler) CreateWorkerEnrollmentToken(ctx context.Context, req *api.Work
 	}
 	rawToken := base64.URLEncoding.EncodeToString(tokenBytes)
 
-	// Hash the token for storage
-	tokenHash, err := bcrypt.GenerateFromPassword([]byte(rawToken), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
+	// Hash the token for storage using SHA256 (must match gRPC service validation)
+	hasher := sha256.New()
+	hasher.Write([]byte(rawToken))
+	tokenHash := hex.EncodeToString(hasher.Sum(nil))
 
 	// Set expiration (default 24 hours)
 	expiresAt := time.Now().Add(24 * time.Hour)

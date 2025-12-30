@@ -66,6 +66,9 @@ worker-build: ## Build worker binary locally
 worker-enroll: ## Enroll a new worker (requires TOKEN and NAME)
 	cd ./backend && ./bin/worker enroll --token=$(TOKEN) --name=$(NAME)
 
+worker-logs: ## View distributed worker logs
+	docker compose logs -f grpc-worker
+
 ##@ Deployment
 
 deploy: ## Deploy to Uncloud (production)
