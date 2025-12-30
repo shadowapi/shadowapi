@@ -134,7 +134,7 @@ services:
   # Distributed gRPC worker
   # Enrollment is handled automatically by bootstrap.sh
   # Worker will wait for credentials if WORKER_ID is empty
-  grpc-worker:
+  worker:
     build:
       context: .
       dockerfile: devops/docker/worker/Dockerfile

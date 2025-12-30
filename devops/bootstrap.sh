@@ -149,8 +149,8 @@ else
 
         # Run enrollment
         echo "Enrolling worker..."
-        ENROLL_OUTPUT=$(docker compose run --rm grpc-worker /bin/worker enroll \
-            --server=backend:9090 \
+        ENROLL_OUTPUT=$(docker compose run --rm worker /bin/worker enroll \
+            --server=grpc2nats:9090 \
             --token="$ENROLLMENT_TOKEN" \
             --name="default-worker" 2>&1)
 
@@ -169,7 +169,7 @@ else
             echo "Worker enrolled: $WORKER_ID"
 
             # Restart worker service to pick up credentials
-            docker compose up -d grpc-worker
+            docker compose up -d worker
         fi
     fi
 fi

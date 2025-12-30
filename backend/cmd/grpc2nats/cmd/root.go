@@ -13,14 +13,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/bridge"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/config"
+	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/db"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/kv"
+	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/log"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/manager"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/natsconn"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/server"
-	"github.com/shadowapi/shadowapi/backend/internal/log"
 )
 
 var (
