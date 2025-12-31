@@ -9,11 +9,13 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
+	"golang.org/x/oauth2"
 
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
-	"github.com/shadowapi/shadowapi/backend/internal/worker/jobs"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/monitor"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/subjects"
+	"github.com/shadowapi/shadowapi/backend/pkg/jobs"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
@@ -58,9 +60,6 @@ func (s *TokenRefresherScheduler) Start(ctx context.Context) {
 
 func (s *TokenRefresherScheduler) run(ctx context.Context) {
 	queries := query.New(s.dbp)
-	// TODO @reactive
-	// - review
-	// - cut off disabled
 	// Query tokens expiring within the next 5 minutes
 	tokens, err := queries.GetTokensToRefresh(ctx, nil)
 	if err != nil {
@@ -68,20 +67,40 @@ func (s *TokenRefresherScheduler) run(ctx context.Context) {
 		return
 	}
 	for _, tokenRow := range tokens {
+		// Parse the stored token data
+		var storedToken oauth2.Token
+		if err := json.Unmarshal(tokenRow.Oauth2Token.Token, &storedToken); err != nil {
+			s.log.Error("Failed to unmarshal token data", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "err", err)
+			continue
+		}
+
+		// Load the OAuth2 client config
+		clientRow, err := queries.GetOauth2Client(ctx, converter.UuidPtrToPgUUID(tokenRow.Oauth2Token.ClientUuid))
+		if err != nil {
+			s.log.Error("Failed to get OAuth2 client", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "client_uuid", tokenRow.Oauth2Token.ClientUuid.String(), "err", err)
+			continue
+		}
 
 		jobUUID := uuid.Must(uuid.NewV7()).String()
-
 		schedulerUUID := uuid.Must(uuid.NewV7()).String()
 		headers := queue.Headers{"X-Job-ID": jobUUID}
 
-		// TODO @reactima
-		// - fix schedulerUUID
-		// - review expire
+		// Build job args with all data needed for token refresh
 		jobArgs := jobs.TokenRefresherJobArgs{
 			JobUUID:       jobUUID,
 			SchedulerUUID: schedulerUUID,
-			TokenUUID:     tokenRow.Oauth2Token.UUID,
+			TokenUUID:     tokenRow.Oauth2Token.UUID.String(),
 			Expiry:        time.Now().Add(defaultRefreshInterval),
+
+			// OAuth2 token data
+			AccessToken:  storedToken.AccessToken,
+			RefreshToken: storedToken.RefreshToken,
+			TokenExpiry:  storedToken.Expiry,
+
+			// OAuth2 client config
+			ClientID:     clientRow.Oauth2Client.ClientID,
+			ClientSecret: clientRow.Oauth2Client.Secret,
+			Provider:     clientRow.Oauth2Client.Provider,
 		}
 		payload, err := json.Marshal(jobArgs)
 		if err != nil {
@@ -94,6 +113,6 @@ func (s *TokenRefresherScheduler) run(ctx context.Context) {
 			s.log.Error("Failed to publish token refresher job", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "err", err)
 			continue
 		}
-		s.log.Info("Published token refresher job", "token_uuid", tokenRow.Oauth2Token.UUID.String())
+		s.log.Info("Published token refresher job", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "provider", clientRow.Oauth2Client.Provider)
 	}
 }

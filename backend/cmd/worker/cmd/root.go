@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/shadowapi/shadowapi/backend/cmd/worker/internal/executor"
 	"github.com/shadowapi/shadowapi/backend/cmd/worker/internal/workerconfig"
 )
 
@@ -38,6 +39,7 @@ func LoadWorkerConfig(cmd *cobra.Command) {
 		do.ProvideValue(injector, cmd.Context())
 		do.Provide(injector, workerconfig.Provide)
 		do.Provide(injector, workerconfig.ProvideLogger)
+		do.Provide(injector, executor.Provide)
 	}
 }
 

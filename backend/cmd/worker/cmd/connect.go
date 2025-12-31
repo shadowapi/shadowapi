@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/shadowapi/shadowapi/backend/cmd/worker/internal/executor"
 	"github.com/shadowapi/shadowapi/backend/cmd/worker/internal/workerconfig"
 	workerv1 "github.com/shadowapi/shadowapi/backend/pkg/proto/worker/v1"
 )
@@ -35,6 +37,7 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 
 		cfg := do.MustInvoke[*workerconfig.Config](injector)
 		log := do.MustInvoke[*slog.Logger](injector)
+		exec := do.MustInvoke[*executor.Executor](injector)
 
 		if cfg.WorkerID == "" || cfg.WorkerSecret == "" {
 			return fmt.Errorf("WORKER_ID and WORKER_SECRET must be set (run 'enroll' first)")
@@ -103,6 +106,9 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
+		// Mutex to protect stream writes from concurrent goroutines
+		var streamMu sync.Mutex
+
 		// Start heartbeat goroutine
 		go func() {
 			ticker := time.NewTicker(time.Duration(cfg.HeartbeatInterval) * time.Second)
@@ -113,21 +119,31 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 				case <-ctx.Done():
 					return
 				case <-ticker.C:
-					if err := stream.Send(&workerv1.WorkerMessage{
+					activeJobs := exec.ActiveJobs()
+					status := workerv1.WorkerStatus_WORKER_STATUS_IDLE
+					if activeJobs > 0 {
+						status = workerv1.WorkerStatus_WORKER_STATUS_BUSY
+					}
+
+					streamMu.Lock()
+					err := stream.Send(&workerv1.WorkerMessage{
 						Payload: &workerv1.WorkerMessage_Heartbeat{
 							Heartbeat: &workerv1.Heartbeat{
 								Timestamp:  timestamppb.Now(),
-								Status:     workerv1.WorkerStatus_WORKER_STATUS_IDLE,
-								ActiveJobs: 0,
+								Status:     status,
+								ActiveJobs: activeJobs,
 								Capacity:   int32(cfg.Capacity),
 							},
 						},
-					}); err != nil {
+					})
+					streamMu.Unlock()
+
+					if err != nil {
 						log.Error("failed to send heartbeat", "error", err)
 						cancel()
 						return
 					}
-					log.Debug("heartbeat sent")
+					log.Debug("heartbeat sent", "active_jobs", activeJobs, "status", status)
 				}
 			}
 		}()
@@ -149,13 +165,57 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 					)
 
 				case *workerv1.ServerMessage_JobAssignment:
+					job := p.JobAssignment
 					log.Info("job assigned",
-						"job_id", p.JobAssignment.JobId,
-						"job_type", p.JobAssignment.JobType,
-						"workspace", p.JobAssignment.WorkspaceSlug,
+						"job_id", job.JobId,
+						"job_type", job.JobType,
+						"workspace", job.WorkspaceSlug,
 					)
-					// Future: dispatch to job executor
-					// For now, just log that we received it
+
+					// Execute job asynchronously
+					go func() {
+						// Create context with deadline if provided
+						jobCtx := ctx
+						if job.Deadline != nil {
+							var jobCancel context.CancelFunc
+							jobCtx, jobCancel = context.WithDeadline(ctx, job.Deadline.AsTime())
+							defer jobCancel()
+						}
+
+						// Execute the job
+						resultData, err := exec.Execute(jobCtx, job.JobType, job.JobData)
+
+						// Build result message
+						result := &workerv1.JobResult{
+							JobId:      job.JobId,
+							Success:    err == nil,
+							ResultData: resultData,
+						}
+						if err != nil {
+							result.ErrorMessage = err.Error()
+						}
+
+						// Send result back
+						streamMu.Lock()
+						sendErr := stream.Send(&workerv1.WorkerMessage{
+							Payload: &workerv1.WorkerMessage_JobResult{
+								JobResult: result,
+							},
+						})
+						streamMu.Unlock()
+
+						if sendErr != nil {
+							log.Error("failed to send job result",
+								"job_id", job.JobId,
+								"error", sendErr,
+							)
+						} else {
+							log.Info("job result sent",
+								"job_id", job.JobId,
+								"success", result.Success,
+							)
+						}
+					}()
 
 				case *workerv1.ServerMessage_Disconnect:
 					log.Info("disconnect requested by server",

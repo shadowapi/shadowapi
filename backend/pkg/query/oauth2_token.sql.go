@@ -333,3 +333,20 @@ func (q *Queries) UpdateOauth2Token(ctx context.Context, arg UpdateOauth2TokenPa
 	)
 	return err
 }
+
+const updateOauth2TokenData = `-- name: UpdateOauth2TokenData :exec
+UPDATE oauth2_token SET
+    token = $1,
+    updated_at = NOW()
+WHERE uuid = $2::uuid
+`
+
+type UpdateOauth2TokenDataParams struct {
+	Token []byte      `json:"token"`
+	UUID  pgtype.UUID `json:"uuid"`
+}
+
+func (q *Queries) UpdateOauth2TokenData(ctx context.Context, arg UpdateOauth2TokenDataParams) error {
+	_, err := q.db.Exec(ctx, updateOauth2TokenData, arg.Token, arg.UUID)
+	return err
+}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -12,11 +13,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/samber/do/v2"
+	"golang.org/x/oauth2"
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/subjects"
+	"github.com/shadowapi/shadowapi/backend/pkg/jobs"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
@@ -161,5 +164,102 @@ func (h *Handler) handleResult(msg queue.Msg) {
 		"duration_ms", result.DurationMs,
 	)
 
+	// Handle token refresh results specially
+	if isTokenRefreshResult(msg.Subject()) && len(result.ResultData) > 0 {
+		h.handleTokenRefreshResult(ctx, result)
+	}
+
 	msg.Ack()
+}
+
+// isTokenRefreshResult checks if the message is a token refresh result
+func isTokenRefreshResult(subject string) bool {
+	return strings.Contains(subject, "tokenRefresh")
+}
+
+// handleTokenRefreshResult processes a token refresh job result
+func (h *Handler) handleTokenRefreshResult(ctx context.Context, result JobResult) {
+	var refreshResult jobs.TokenRefreshResult
+	if err := json.Unmarshal(result.ResultData, &refreshResult); err != nil {
+		h.log.Error("failed to unmarshal token refresh result", "error", err)
+		return
+	}
+
+	q := query.New(h.dbp)
+
+	if !refreshResult.Success {
+		// Token refresh failed - delete the broken token
+		h.log.Warn("token refresh failed, deleting token", "token_uuid", refreshResult.TokenUUID)
+		tokenUUID, err := uuid.FromString(refreshResult.TokenUUID)
+		if err != nil {
+			h.log.Error("invalid token UUID", "token_uuid", refreshResult.TokenUUID, "error", err)
+			return
+		}
+		if err := q.DeleteOauth2Token(ctx, converter.UuidToPgUUID(tokenUUID)); err != nil {
+			h.log.Error("failed to delete broken token", "token_uuid", refreshResult.TokenUUID, "error", err)
+		}
+		return
+	}
+
+	// Token refresh succeeded - update the token in the database
+	tokenUUID, err := uuid.FromString(refreshResult.TokenUUID)
+	if err != nil {
+		h.log.Error("invalid token UUID", "token_uuid", refreshResult.TokenUUID, "error", err)
+		return
+	}
+
+	// Build the oauth2.Token to store
+	newToken := &oauth2.Token{
+		AccessToken:  refreshResult.AccessToken,
+		RefreshToken: refreshResult.RefreshToken,
+		Expiry:       refreshResult.TokenExpiry,
+		TokenType:    refreshResult.TokenType,
+	}
+	tokenData, err := json.Marshal(newToken)
+	if err != nil {
+		h.log.Error("failed to marshal new token", "error", err)
+		return
+	}
+
+	// Update token in database
+	if err := q.UpdateOauth2TokenData(ctx, query.UpdateOauth2TokenDataParams{
+		UUID:  converter.UuidToPgUUID(tokenUUID),
+		Token: tokenData,
+	}); err != nil {
+		h.log.Error("failed to update token", "token_uuid", refreshResult.TokenUUID, "error", err)
+		return
+	}
+
+	h.log.Info("token updated successfully", "token_uuid", refreshResult.TokenUUID, "new_expiry", refreshResult.TokenExpiry)
+
+	// Schedule next token refresh
+	h.scheduleNextTokenRefresh(ctx, tokenUUID, refreshResult.TokenExpiry)
+}
+
+// scheduleNextTokenRefresh schedules the next token refresh job
+func (h *Handler) scheduleNextTokenRefresh(ctx context.Context, tokenUUID uuid.UUID, expiry time.Time) {
+	// Schedule refresh before expiry (e.g., 5 minutes before)
+	refreshTime := expiry.Add(-5 * time.Minute)
+	if refreshTime.Before(time.Now()) {
+		refreshTime = time.Now().Add(5 * time.Minute)
+	}
+
+	jobUUID := uuid.Must(uuid.NewV7()).String()
+	schedulerUUID := uuid.Must(uuid.NewV7()).String()
+	headers := queue.Headers{"X-Job-ID": jobUUID}
+
+	// We need to load the token data again to get the full OAuth2 config
+	// This is a simplified version - the scheduler will pick it up on next run
+	// For now, just log that rescheduling would happen
+	h.log.Info("next token refresh will be scheduled by scheduler",
+		"token_uuid", tokenUUID.String(),
+		"refresh_time", refreshTime,
+	)
+
+	// Note: The TokenRefresherScheduler runs every 5 minutes and will pick up
+	// tokens that need refreshing based on their expiry time. We don't need
+	// to explicitly schedule here - the scheduler will handle it.
+	_ = jobUUID
+	_ = schedulerUUID
+	_ = headers
 }

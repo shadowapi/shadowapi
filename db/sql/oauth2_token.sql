@@ -79,3 +79,9 @@ WHERE uuid = sqlc.arg('uuid')::uuid;
 -- name: DeleteOauth2TokenByClientUUID :exec
 DELETE FROM oauth2_token
 WHERE client_uuid = sqlc.arg('client_uuid')::uuid;
+
+-- name: UpdateOauth2TokenData :exec
+UPDATE oauth2_token SET
+    token = sqlc.arg('token'),
+    updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;
