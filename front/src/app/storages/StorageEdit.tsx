@@ -216,7 +216,7 @@ function StorageEdit() {
             break;
           }
           case 'postgres': {
-            const { error } = await client.POST('/storage/postgres', {
+            const { data, error } = await client.POST('/storage/postgres', {
               body: {
                 name: values.name,
                 is_enabled: values.is_enabled,
@@ -230,6 +230,13 @@ function StorageEdit() {
               },
             });
             if (error) throw new Error(error.detail);
+            // Redirect to tables page for newly created postgres storage
+            if (data?.uuid) {
+              message.success('Storage created. Now add target tables.');
+              clearTables(storageKey);
+              navigate(`/w/${slug}/storages/${data.uuid}/tables`);
+              return;
+            }
             break;
           }
           case 'hostfiles': {
@@ -468,28 +475,37 @@ function StorageEdit() {
 
               <Divider />
 
-              <Form.Item
-                label={
-                  <Space>
-                    Target Tables
-                    {hasTableChanges && (
-                      <Typography.Text type="warning" style={{ fontSize: 12, fontWeight: 'normal' }}>
-                        <ExclamationCircleOutlined /> unsaved changes
-                      </Typography.Text>
-                    )}
-                  </Space>
-                }
-              >
-                <Button
-                  onClick={() => navigate(`/w/${slug}/storages/${uuid || 'new'}/tables`)}
-                  style={{ width: '100%', textAlign: 'left' }}
+              {isNew ? (
+                <Form.Item label="Target Tables">
+                  <Typography.Text type="secondary">
+                    After saving, you'll be able to add target tables to define where data will be stored.
+                  </Typography.Text>
+                </Form.Item>
+              ) : (
+                <Form.Item
+                  label={
+                    <Space>
+                      Target Tables
+                      {hasTableChanges && (
+                        <Typography.Text type="warning" style={{ fontSize: 12, fontWeight: 'normal' }}>
+                          <ExclamationCircleOutlined /> unsaved changes
+                        </Typography.Text>
+                      )}
+                    </Space>
+                  }
+                  extra="You can add multiple tables to store different types of data."
                 >
-                  <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                    <span>{tablesCount} table{tablesCount !== 1 ? 's' : ''} defined</span>
-                    <RightOutlined />
-                  </Space>
-                </Button>
-              </Form.Item>
+                  <Button
+                    onClick={() => navigate(`/w/${slug}/storages/${uuid}/tables`)}
+                    style={{ width: '100%', textAlign: 'left' }}
+                  >
+                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                      <span>{tablesCount} table{tablesCount !== 1 ? 's' : ''} defined</span>
+                      <RightOutlined />
+                    </Space>
+                  </Button>
+                </Form.Item>
+              )}
             </>
           )}
 

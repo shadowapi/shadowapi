@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Table, Button, Space, Typography, Tag, Popconfirm, message, Empty } from 'antd';
 import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -14,14 +14,24 @@ const { Title } = Typography;
 
 function PostgresTablesList() {
   const navigate = useNavigate();
-  const { uuid } = useParams<{ uuid: string }>();
+  const { uuid: rawUuid } = useParams<{ uuid: string }>();
   const { slug } = useWorkspace();
+  // For route /storages/new/tables, uuid param is undefined (literal 'new' route)
+  // Normalize to 'new' for consistency
+  const uuid = rawUuid || 'new';
   const storageKey = getStorageKey(uuid);
   const isNewStorage = uuid === 'new';
 
   // Read tables from sessionStorage and use state to trigger re-renders after mutations
   const [tables, setLocalTables] = useState<PostgresTable[]>(() => getTables(storageKey));
   const [deleting, setDeleting] = useState<number | null>(null);
+
+  // Redirect to storage edit page if trying to access tables for a new (unsaved) storage
+  useEffect(() => {
+    if (isNewStorage) {
+      navigate(`/w/${slug}/storages/new`, { replace: true });
+    }
+  }, [isNewStorage, navigate, slug]);
 
   const handleDelete = async (index: number) => {
     const newTables = tables.filter((_, i) => i !== index);

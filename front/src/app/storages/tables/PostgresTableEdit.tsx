@@ -39,16 +39,26 @@ const creationModeOptions: { value: CreationMode; label: string; description: st
 
 function PostgresTableEdit() {
   const navigate = useNavigate();
-  const { uuid, index } = useParams<{ uuid: string; index: string }>();
+  const { uuid: rawUuid, index } = useParams<{ uuid: string; index: string }>();
   const { slug } = useWorkspace();
   const [form] = Form.useForm();
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // For route /storages/new/tables/*, uuid param is undefined (literal 'new' route)
+  // Normalize to 'new' for consistency
+  const uuid = rawUuid || 'new';
   const storageKey = getStorageKey(uuid);
   const isNewTable = index === 'new' || index === undefined;
   const isNewStorage = uuid === 'new';
   const tableIndex = isNewTable ? -1 : parseInt(index, 10);
   const [saving, setSaving] = useState(false);
+
+  // Redirect to storage edit page if trying to access tables for a new (unsaved) storage
+  useEffect(() => {
+    if (isNewStorage) {
+      navigate(`/w/${slug}/storages/new`, { replace: true });
+    }
+  }, [isNewStorage, navigate, slug]);
 
   // Initialize fields from sessionStorage or defaults
   const [fields, setFields] = useState<PostgresField[]>(() => {
