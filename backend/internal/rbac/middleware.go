@@ -67,6 +67,12 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"pipelineUpdate": {ResourcePipeline, ActionWrite},
 	"pipelineDelete": {ResourcePipeline, ActionDelete},
 
+	// Mapper operations (pipeline field mapping)
+	// NOTE: MapperSourceFieldsList and MapperTransformsList are excluded from RBAC
+	// because they return static schema metadata and don't require workspace context.
+	// Operations not in this map are allowed by default.
+	"MapperValidate": {ResourcePipeline, ActionWrite},
+
 	// Storage operations
 	// NOTE: These use camelCase but ogen generates PascalCase (e.g., StoragePostgresUpdate)
 	// so they don't actually match and storage operations pass through without RBAC check.

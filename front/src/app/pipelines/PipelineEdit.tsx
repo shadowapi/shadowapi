@@ -20,11 +20,15 @@ import { DeleteOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import type { components } from '../../api/v1';
+import MapperTable from './components/MapperTable';
 
 const { Title, Paragraph } = Typography;
 
 type Datasource = components['schemas']['datasource'];
 type Storage = components['schemas']['storage'];
+type MapperFieldMapping = components['schemas']['mapper_field_mapping'];
+type MapperConfig = components['schemas']['mapper_config'];
+type Pipeline = components['schemas']['pipeline'];
 
 interface FormValues {
   name: string;
@@ -42,7 +46,13 @@ function PipelineEdit() {
   const [saving, setSaving] = useState(false);
   const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [storages, setStorages] = useState<Storage[]>([]);
+  const [mapperMappings, setMapperMappings] = useState<MapperFieldMapping[]>([]);
+  const [selectedStorageUuid, setSelectedStorageUuid] = useState<string | undefined>();
   const isNew = !uuid;
+
+  // Get selected storage type
+  const selectedStorage = storages.find((s) => s.uuid === selectedStorageUuid);
+  const isPostgresStorage = selectedStorage?.type === 'postgres';
 
   // Load datasources and storages for dropdowns
   const loadOptions = useCallback(async () => {
@@ -88,6 +98,19 @@ function PipelineEdit() {
       is_enabled: data.is_enabled ?? false,
     });
 
+    // Set selected storage for MapperTable
+    setSelectedStorageUuid(data.storage_uuid);
+
+    // Extract mapper config from flow nodes if present
+    const flow = data.flow as Pipeline['flow'];
+    if (flow?.nodes) {
+      const mapperNode = flow.nodes.find((n) => n.type === 'mapper');
+      if (mapperNode?.data?.config) {
+        const config = mapperNode.data.config as MapperConfig;
+        setMapperMappings(config.mappings || []);
+      }
+    }
+
     setLoading(false);
   }, [uuid, isNew, navigate, slug, form]);
 
@@ -99,6 +122,28 @@ function PipelineEdit() {
   const handleSubmit = async (values: FormValues) => {
     setSaving(true);
 
+    // Build mapper config
+    const mapperConfig: MapperConfig = {
+      version: '1.0',
+      mappings: mapperMappings,
+    };
+
+    // Build flow with mapper node
+    const flow: Pipeline['flow'] = {
+      nodes: [
+        {
+          id: 'mapper-1',
+          type: 'mapper',
+          position: { x: 0, y: 0 },
+          data: {
+            label: 'Mapper',
+            config: mapperConfig,
+          },
+        },
+      ],
+      edges: [],
+    };
+
     try {
       if (isNew) {
         const { error } = await client.POST('/pipeline', {
@@ -107,6 +152,7 @@ function PipelineEdit() {
             datasource_uuid: values.datasource_uuid,
             storage_uuid: values.storage_uuid,
             is_enabled: values.is_enabled,
+            flow,
           },
         });
         if (error) throw new Error(error.detail);
@@ -119,6 +165,7 @@ function PipelineEdit() {
             datasource_uuid: values.datasource_uuid,
             storage_uuid: values.storage_uuid,
             is_enabled: values.is_enabled,
+            flow,
           },
         });
         if (error) throw new Error(error.detail);
@@ -219,8 +266,22 @@ function PipelineEdit() {
               filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
+              onChange={(value) => setSelectedStorageUuid(value)}
             />
           </Form.Item>
+
+          {selectedStorageUuid && isPostgresStorage && (
+            <Card title="Field Mappings" size="small" style={{ marginBottom: 16 }}>
+              <Paragraph type="secondary" style={{ marginBottom: 16 }}>
+                Map fields from the data source to columns in your storage tables.
+              </Paragraph>
+              <MapperTable
+                storageUuid={selectedStorageUuid}
+                mappings={mapperMappings}
+                onChange={setMapperMappings}
+              />
+            </Card>
+          )}
 
           <Divider />
 
@@ -267,6 +328,11 @@ function PipelineEdit() {
           <Paragraph type="secondary">
             Where extracted data will be saved. Choose from S3, PostgreSQL, or host filesystem
             storage.
+          </Paragraph>
+          <Title level={5}>Field Mappings</Title>
+          <Paragraph type="secondary">
+            Define how source fields from messages and contacts map to your storage tables. Each
+            mapping can include a transformation like lowercase or trim.
           </Paragraph>
           <Title level={5}>Enabled</Title>
           <Paragraph type="secondary">
