@@ -68,6 +68,8 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"pipelineDelete": {ResourcePipeline, ActionDelete},
 
 	// Storage operations
+	// NOTE: These use camelCase but ogen generates PascalCase (e.g., StoragePostgresUpdate)
+	// so they don't actually match and storage operations pass through without RBAC check.
 	"storageList":   {ResourceStorage, ActionRead},
 	"storageCreate": {ResourceStorage, ActionCreate},
 	"storageGet":    {ResourceStorage, ActionRead},

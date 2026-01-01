@@ -571,6 +571,24 @@ func encodeStoragePostgresCreateRequest(
 	return nil
 }
 
+func encodeStoragePostgresTablesReplaceRequest(
+	req []StoragePostgresTable,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		e.ArrStart()
+		for _, elem := range req {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeStoragePostgresUpdateRequest(
 	req *StoragePostgres,
 	r *http.Request,

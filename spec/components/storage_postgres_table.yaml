@@ -1,0 +1,24 @@
+# spec/components/storage_postgres_table.yaml
+type: object
+additionalProperties: false
+description: "Table definition for PostgreSQL storage schema"
+properties:
+  name:
+    type: string
+    description: "Table name (lowercase alphanumeric with underscores)"
+    pattern: "^[a-z][a-z0-9_]*$"
+  creation_mode:
+    type: string
+    description: "How to handle table creation"
+    enum:
+      - auto_create
+      - validate_existing
+  fields:
+    type: array
+    description: "Column definitions for this table"
+    items:
+      $ref: "../openapi.yaml#/components/schemas/StoragePostgresField"
+required:
+  - name
+  - creation_mode
+  - fields

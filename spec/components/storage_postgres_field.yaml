@@ -1,0 +1,32 @@
+# spec/components/storage_postgres_field.yaml
+type: object
+additionalProperties: false
+description: "Field definition for a PostgreSQL table column"
+properties:
+  name:
+    type: string
+    description: "Column name (lowercase alphanumeric with underscores)"
+    pattern: "^[a-z][a-z0-9_]*$"
+  type:
+    type: string
+    description: "PostgreSQL data type"
+    enum:
+      - TEXT
+      - INTEGER
+      - BOOLEAN
+      - TIMESTAMP
+      - JSONB
+  nullable:
+    type: boolean
+    description: "Whether the column allows NULL values"
+    default: true
+  is_primary_key:
+    type: boolean
+    description: "Whether this column is the primary key (max one per table)"
+    default: false
+  default_value:
+    type: string
+    description: "Default value expression (e.g., 'NOW()', 'false', '{}')"
+required:
+  - name
+  - type

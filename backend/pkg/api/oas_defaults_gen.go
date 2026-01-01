@@ -9,3 +9,15 @@ func (s *AuthLoginSubmitReq) setDefaults() {
 		s.Remember.SetTo(val)
 	}
 }
+
+// setDefaults set default value of fields.
+func (s *StoragePostgresField) setDefaults() {
+	{
+		val := bool(true)
+		s.Nullable.SetTo(val)
+	}
+	{
+		val := bool(false)
+		s.IsPrimaryKey.SetTo(val)
+	}
+}

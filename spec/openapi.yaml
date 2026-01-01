@@ -45,6 +45,10 @@ components:
       $ref: "components/storage.yaml"
     StoragePostgres:
       $ref: "components/storage_postgres.yaml"
+    StoragePostgresTable:
+      $ref: "components/storage_postgres_table.yaml"
+    StoragePostgresField:
+      $ref: "components/storage_postgres_field.yaml"
     StorageS3:
       $ref: "components/storage_s3.yaml"
     StorageHostFiles:
@@ -164,6 +168,8 @@ paths:
     $ref: "paths/storage_postgres.yaml"
   /storage/postgres/{uuid}:
     $ref: "paths/storage_postgres_uuid.yaml"
+  /storage/postgres/{uuid}/tables:
+    $ref: "paths/storage_postgres_uuid_tables.yaml"
   /storage/s3:
     $ref: "paths/storage_s3.yaml"
   /storage/s3/{uuid}:

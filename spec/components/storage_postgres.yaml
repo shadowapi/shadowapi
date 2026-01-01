@@ -29,6 +29,11 @@ properties:
   options:
     description: "Additional connection options in URL query format."
     type: string
+  tables:
+    type: array
+    description: "Target table definitions for data export from pipelines"
+    items:
+      $ref: "../openapi.yaml#/components/schemas/StoragePostgresTable"
 required:
   - name
 

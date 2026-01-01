@@ -13722,9 +13722,19 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 			s.Options.Encode(e)
 		}
 	}
+	{
+		if s.Tables != nil {
+			e.FieldStart("tables")
+			e.ArrStart()
+			for _, elem := range s.Tables {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfStoragePostgres = [9]string{
+var jsonFieldsNameOfStoragePostgres = [10]string{
 	0: "uuid",
 	1: "name",
 	2: "is_enabled",
@@ -13734,6 +13744,7 @@ var jsonFieldsNameOfStoragePostgres = [9]string{
 	6: "host",
 	7: "port",
 	8: "options",
+	9: "tables",
 }
 
 // Decode decodes StoragePostgres from json.
@@ -13837,6 +13848,23 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"options\"")
 			}
+		case "tables":
+			if err := func() error {
+				s.Tables = make([]StoragePostgresTable, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem StoragePostgresTable
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Tables = append(s.Tables, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tables\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
@@ -13890,6 +13918,393 @@ func (s *StoragePostgres) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *StoragePostgres) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *StoragePostgresField) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *StoragePostgresField) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		if s.Nullable.Set {
+			e.FieldStart("nullable")
+			s.Nullable.Encode(e)
+		}
+	}
+	{
+		if s.IsPrimaryKey.Set {
+			e.FieldStart("is_primary_key")
+			s.IsPrimaryKey.Encode(e)
+		}
+	}
+	{
+		if s.DefaultValue.Set {
+			e.FieldStart("default_value")
+			s.DefaultValue.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfStoragePostgresField = [5]string{
+	0: "name",
+	1: "type",
+	2: "nullable",
+	3: "is_primary_key",
+	4: "default_value",
+}
+
+// Decode decodes StoragePostgresField from json.
+func (s *StoragePostgresField) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StoragePostgresField to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "nullable":
+			if err := func() error {
+				s.Nullable.Reset()
+				if err := s.Nullable.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nullable\"")
+			}
+		case "is_primary_key":
+			if err := func() error {
+				s.IsPrimaryKey.Reset()
+				if err := s.IsPrimaryKey.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_primary_key\"")
+			}
+		case "default_value":
+			if err := func() error {
+				s.DefaultValue.Reset()
+				if err := s.DefaultValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"default_value\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode StoragePostgresField")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfStoragePostgresField) {
+					name = jsonFieldsNameOfStoragePostgresField[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *StoragePostgresField) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StoragePostgresField) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes StoragePostgresFieldType as json.
+func (s StoragePostgresFieldType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes StoragePostgresFieldType from json.
+func (s *StoragePostgresFieldType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StoragePostgresFieldType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch StoragePostgresFieldType(v) {
+	case StoragePostgresFieldTypeTEXT:
+		*s = StoragePostgresFieldTypeTEXT
+	case StoragePostgresFieldTypeINTEGER:
+		*s = StoragePostgresFieldTypeINTEGER
+	case StoragePostgresFieldTypeBOOLEAN:
+		*s = StoragePostgresFieldTypeBOOLEAN
+	case StoragePostgresFieldTypeTIMESTAMP:
+		*s = StoragePostgresFieldTypeTIMESTAMP
+	case StoragePostgresFieldTypeJSONB:
+		*s = StoragePostgresFieldTypeJSONB
+	default:
+		*s = StoragePostgresFieldType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s StoragePostgresFieldType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StoragePostgresFieldType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *StoragePostgresTable) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *StoragePostgresTable) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("creation_mode")
+		s.CreationMode.Encode(e)
+	}
+	{
+		e.FieldStart("fields")
+		e.ArrStart()
+		for _, elem := range s.Fields {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfStoragePostgresTable = [3]string{
+	0: "name",
+	1: "creation_mode",
+	2: "fields",
+}
+
+// Decode decodes StoragePostgresTable from json.
+func (s *StoragePostgresTable) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StoragePostgresTable to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "creation_mode":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.CreationMode.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"creation_mode\"")
+			}
+		case "fields":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.Fields = make([]StoragePostgresField, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem StoragePostgresField
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Fields = append(s.Fields, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"fields\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode StoragePostgresTable")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfStoragePostgresTable) {
+					name = jsonFieldsNameOfStoragePostgresTable[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *StoragePostgresTable) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StoragePostgresTable) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes StoragePostgresTableCreationMode as json.
+func (s StoragePostgresTableCreationMode) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes StoragePostgresTableCreationMode from json.
+func (s *StoragePostgresTableCreationMode) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StoragePostgresTableCreationMode to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch StoragePostgresTableCreationMode(v) {
+	case StoragePostgresTableCreationModeAutoCreate:
+		*s = StoragePostgresTableCreationModeAutoCreate
+	case StoragePostgresTableCreationModeValidateExisting:
+		*s = StoragePostgresTableCreationModeValidateExisting
+	default:
+		*s = StoragePostgresTableCreationMode(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s StoragePostgresTableCreationMode) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StoragePostgresTableCreationMode) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

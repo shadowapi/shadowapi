@@ -1,0 +1,36 @@
+put:
+  description: Replace all target tables for a PostgreSQL storage instance.
+  operationId: storage-postgres-tables-replace
+  parameters:
+    - description: The UUID of the PostgreSQL storage instance.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../openapi.yaml#/components/schemas/StoragePostgresTable"
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/StoragePostgresTable"
+      description: Tables replaced successfully.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred.
+  tags:
+    - storage
+    - storage-postgres

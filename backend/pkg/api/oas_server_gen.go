@@ -656,6 +656,12 @@ type Handler interface {
 	//
 	// GET /storage/postgres/{uuid}
 	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (*StoragePostgres, error)
+	// StoragePostgresTablesReplace implements storage-postgres-tables-replace operation.
+	//
+	// Replace all target tables for a PostgreSQL storage instance.
+	//
+	// PUT /storage/postgres/{uuid}/tables
+	StoragePostgresTablesReplace(ctx context.Context, req []StoragePostgresTable, params StoragePostgresTablesReplaceParams) ([]StoragePostgresTable, error)
 	// StoragePostgresUpdate implements storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.

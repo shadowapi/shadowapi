@@ -516,6 +516,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/postgres/{uuid}/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Replace all target tables for a PostgreSQL storage instance. */
+        put: operations["storage-postgres-tables-replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/storage/s3": {
         parameters: {
             query?: never;
@@ -1374,6 +1391,8 @@ export interface components {
         PipelineNode: components["schemas"]["pipeline_node"];
         Storage: components["schemas"]["storage"];
         StoragePostgres: components["schemas"]["storage_postgres"];
+        StoragePostgresTable: components["schemas"]["storage_postgres_table"];
+        StoragePostgresField: components["schemas"]["storage_postgres_field"];
         StorageS3: components["schemas"]["storage_s3"];
         StorageHostFiles: components["schemas"]["storage_hostfiles"];
         EmailLabel: components["schemas"]["email_label"];
@@ -1798,6 +1817,40 @@ export interface components {
              */
             readonly updated_at?: string;
         };
+        /** @description Field definition for a PostgreSQL table column */
+        storage_postgres_field: {
+            /** @description Column name (lowercase alphanumeric with underscores) */
+            name: string;
+            /**
+             * @description PostgreSQL data type
+             * @enum {string}
+             */
+            type: "TEXT" | "INTEGER" | "BOOLEAN" | "TIMESTAMP" | "JSONB";
+            /**
+             * @description Whether the column allows NULL values
+             * @default true
+             */
+            nullable: boolean;
+            /**
+             * @description Whether this column is the primary key (max one per table)
+             * @default false
+             */
+            is_primary_key: boolean;
+            /** @description Default value expression (e.g., 'NOW()', 'false', '{}') */
+            default_value?: string;
+        };
+        /** @description Table definition for PostgreSQL storage schema */
+        storage_postgres_table: {
+            /** @description Table name (lowercase alphanumeric with underscores) */
+            name: string;
+            /**
+             * @description How to handle table creation
+             * @enum {string}
+             */
+            creation_mode: "auto_create" | "validate_existing";
+            /** @description Column definitions for this table */
+            fields: components["schemas"]["storage_postgres_field"][];
+        };
         storage_postgres: {
             readonly uuid?: string;
             /** @description The descriptive name for this storage entry. */
@@ -1816,6 +1869,8 @@ export interface components {
             port?: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
+            /** @description Target table definitions for data export from pipelines */
+            tables?: components["schemas"]["storage_postgres_table"][];
         };
         storage_s3: {
             readonly uuid?: string;
@@ -4424,6 +4479,42 @@ export interface operations {
                 content?: never;
             };
             /** @description An error occurred while deleting the PostgreSQL storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-postgres-tables-replace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the PostgreSQL storage instance. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["storage_postgres_table"][];
+            };
+        };
+        responses: {
+            /** @description Tables replaced successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["storage_postgres_table"][];
+                };
+            };
+            /** @description An error occurred. */
             default: {
                 headers: {
                     [name: string]: unknown;

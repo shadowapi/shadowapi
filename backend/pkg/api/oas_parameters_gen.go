@@ -6103,6 +6103,72 @@ func decodeStoragePostgresGetParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// StoragePostgresTablesReplaceParams is parameters of storage-postgres-tables-replace operation.
+type StoragePostgresTablesReplaceParams struct {
+	// The UUID of the PostgreSQL storage instance.
+	UUID string
+}
+
+func unpackStoragePostgresTablesReplaceParams(packed middleware.Parameters) (params StoragePostgresTablesReplaceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStoragePostgresTablesReplaceParams(args [1]string, argsEscaped bool, r *http.Request) (params StoragePostgresTablesReplaceParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // StoragePostgresUpdateParams is parameters of storage-postgres-update operation.
 type StoragePostgresUpdateParams struct {
 	// The UUID of the PostgreSQL storage instance to update.

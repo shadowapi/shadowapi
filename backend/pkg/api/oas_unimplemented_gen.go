@@ -985,6 +985,15 @@ func (UnimplementedHandler) StoragePostgresGet(ctx context.Context, params Stora
 	return r, ht.ErrNotImplemented
 }
 
+// StoragePostgresTablesReplace implements storage-postgres-tables-replace operation.
+//
+// Replace all target tables for a PostgreSQL storage instance.
+//
+// PUT /storage/postgres/{uuid}/tables
+func (UnimplementedHandler) StoragePostgresTablesReplace(ctx context.Context, req []StoragePostgresTable, params StoragePostgresTablesReplaceParams) (r []StoragePostgresTable, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StoragePostgresUpdate implements storage-postgres-update operation.
 //
 // Update details of a specific PostgreSQL storage instance by UUID.

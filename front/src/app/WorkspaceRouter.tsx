@@ -5,6 +5,8 @@ import DataSources from './datasources/DataSources';
 import DataSourceEdit from './datasources/DataSourceEdit';
 import Storages from './storages/Storages';
 import StorageEdit from './storages/StorageEdit';
+import PostgresTablesList from './storages/tables/PostgresTablesList';
+import PostgresTableEdit from './storages/tables/PostgresTableEdit';
 import OAuth2Credentials from './oauth2/OAuth2Credentials';
 import OAuth2CredentialEdit from './oauth2/OAuth2CredentialEdit';
 import Users from './users/Users';
@@ -29,7 +31,13 @@ function WorkspaceRouter() {
         <Route path="datasources/:uuid" element={<DataSourceEdit />} />
         <Route path="storages" element={<Storages />} />
         <Route path="storages/new" element={<StorageEdit />} />
+        <Route path="storages/new/tables" element={<PostgresTablesList />} />
+        <Route path="storages/new/tables/new" element={<PostgresTableEdit />} />
+        <Route path="storages/new/tables/:index" element={<PostgresTableEdit />} />
         <Route path="storages/:uuid" element={<StorageEdit />} />
+        <Route path="storages/:uuid/tables" element={<PostgresTablesList />} />
+        <Route path="storages/:uuid/tables/new" element={<PostgresTableEdit />} />
+        <Route path="storages/:uuid/tables/:index" element={<PostgresTableEdit />} />
         <Route path="pipelines" element={<Pipelines />} />
         <Route path="pipelines/new" element={<PipelineEdit />} />
         <Route path="pipelines/:uuid" element={<PipelineEdit />} />

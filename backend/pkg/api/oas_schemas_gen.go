@@ -7666,6 +7666,8 @@ type StoragePostgres struct {
 	Port OptString `json:"port"`
 	// Additional connection options in URL query format.
 	Options OptString `json:"options"`
+	// Target table definitions for data export from pipelines.
+	Tables []StoragePostgresTable `json:"tables"`
 }
 
 // GetUUID returns the value of UUID.
@@ -7713,6 +7715,11 @@ func (s *StoragePostgres) GetOptions() OptString {
 	return s.Options
 }
 
+// GetTables returns the value of Tables.
+func (s *StoragePostgres) GetTables() []StoragePostgresTable {
+	return s.Tables
+}
+
 // SetUUID sets the value of UUID.
 func (s *StoragePostgres) SetUUID(val OptString) {
 	s.UUID = val
@@ -7758,8 +7765,224 @@ func (s *StoragePostgres) SetOptions(val OptString) {
 	s.Options = val
 }
 
+// SetTables sets the value of Tables.
+func (s *StoragePostgres) SetTables(val []StoragePostgresTable) {
+	s.Tables = val
+}
+
 // StoragePostgresDeleteOK is response for StoragePostgresDelete operation.
 type StoragePostgresDeleteOK struct{}
+
+// Field definition for a PostgreSQL table column.
+// Ref: #
+type StoragePostgresField struct {
+	// Column name (lowercase alphanumeric with underscores).
+	Name string `json:"name"`
+	// PostgreSQL data type.
+	Type StoragePostgresFieldType `json:"type"`
+	// Whether the column allows NULL values.
+	Nullable OptBool `json:"nullable"`
+	// Whether this column is the primary key (max one per table).
+	IsPrimaryKey OptBool `json:"is_primary_key"`
+	// Default value expression (e.g., 'NOW()', 'false', '{}').
+	DefaultValue OptString `json:"default_value"`
+}
+
+// GetName returns the value of Name.
+func (s *StoragePostgresField) GetName() string {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *StoragePostgresField) GetType() StoragePostgresFieldType {
+	return s.Type
+}
+
+// GetNullable returns the value of Nullable.
+func (s *StoragePostgresField) GetNullable() OptBool {
+	return s.Nullable
+}
+
+// GetIsPrimaryKey returns the value of IsPrimaryKey.
+func (s *StoragePostgresField) GetIsPrimaryKey() OptBool {
+	return s.IsPrimaryKey
+}
+
+// GetDefaultValue returns the value of DefaultValue.
+func (s *StoragePostgresField) GetDefaultValue() OptString {
+	return s.DefaultValue
+}
+
+// SetName sets the value of Name.
+func (s *StoragePostgresField) SetName(val string) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *StoragePostgresField) SetType(val StoragePostgresFieldType) {
+	s.Type = val
+}
+
+// SetNullable sets the value of Nullable.
+func (s *StoragePostgresField) SetNullable(val OptBool) {
+	s.Nullable = val
+}
+
+// SetIsPrimaryKey sets the value of IsPrimaryKey.
+func (s *StoragePostgresField) SetIsPrimaryKey(val OptBool) {
+	s.IsPrimaryKey = val
+}
+
+// SetDefaultValue sets the value of DefaultValue.
+func (s *StoragePostgresField) SetDefaultValue(val OptString) {
+	s.DefaultValue = val
+}
+
+// PostgreSQL data type.
+type StoragePostgresFieldType string
+
+const (
+	StoragePostgresFieldTypeTEXT      StoragePostgresFieldType = "TEXT"
+	StoragePostgresFieldTypeINTEGER   StoragePostgresFieldType = "INTEGER"
+	StoragePostgresFieldTypeBOOLEAN   StoragePostgresFieldType = "BOOLEAN"
+	StoragePostgresFieldTypeTIMESTAMP StoragePostgresFieldType = "TIMESTAMP"
+	StoragePostgresFieldTypeJSONB     StoragePostgresFieldType = "JSONB"
+)
+
+// AllValues returns all StoragePostgresFieldType values.
+func (StoragePostgresFieldType) AllValues() []StoragePostgresFieldType {
+	return []StoragePostgresFieldType{
+		StoragePostgresFieldTypeTEXT,
+		StoragePostgresFieldTypeINTEGER,
+		StoragePostgresFieldTypeBOOLEAN,
+		StoragePostgresFieldTypeTIMESTAMP,
+		StoragePostgresFieldTypeJSONB,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StoragePostgresFieldType) MarshalText() ([]byte, error) {
+	switch s {
+	case StoragePostgresFieldTypeTEXT:
+		return []byte(s), nil
+	case StoragePostgresFieldTypeINTEGER:
+		return []byte(s), nil
+	case StoragePostgresFieldTypeBOOLEAN:
+		return []byte(s), nil
+	case StoragePostgresFieldTypeTIMESTAMP:
+		return []byte(s), nil
+	case StoragePostgresFieldTypeJSONB:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StoragePostgresFieldType) UnmarshalText(data []byte) error {
+	switch StoragePostgresFieldType(data) {
+	case StoragePostgresFieldTypeTEXT:
+		*s = StoragePostgresFieldTypeTEXT
+		return nil
+	case StoragePostgresFieldTypeINTEGER:
+		*s = StoragePostgresFieldTypeINTEGER
+		return nil
+	case StoragePostgresFieldTypeBOOLEAN:
+		*s = StoragePostgresFieldTypeBOOLEAN
+		return nil
+	case StoragePostgresFieldTypeTIMESTAMP:
+		*s = StoragePostgresFieldTypeTIMESTAMP
+		return nil
+	case StoragePostgresFieldTypeJSONB:
+		*s = StoragePostgresFieldTypeJSONB
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Table definition for PostgreSQL storage schema.
+// Ref: #
+type StoragePostgresTable struct {
+	// Table name (lowercase alphanumeric with underscores).
+	Name string `json:"name"`
+	// How to handle table creation.
+	CreationMode StoragePostgresTableCreationMode `json:"creation_mode"`
+	// Column definitions for this table.
+	Fields []StoragePostgresField `json:"fields"`
+}
+
+// GetName returns the value of Name.
+func (s *StoragePostgresTable) GetName() string {
+	return s.Name
+}
+
+// GetCreationMode returns the value of CreationMode.
+func (s *StoragePostgresTable) GetCreationMode() StoragePostgresTableCreationMode {
+	return s.CreationMode
+}
+
+// GetFields returns the value of Fields.
+func (s *StoragePostgresTable) GetFields() []StoragePostgresField {
+	return s.Fields
+}
+
+// SetName sets the value of Name.
+func (s *StoragePostgresTable) SetName(val string) {
+	s.Name = val
+}
+
+// SetCreationMode sets the value of CreationMode.
+func (s *StoragePostgresTable) SetCreationMode(val StoragePostgresTableCreationMode) {
+	s.CreationMode = val
+}
+
+// SetFields sets the value of Fields.
+func (s *StoragePostgresTable) SetFields(val []StoragePostgresField) {
+	s.Fields = val
+}
+
+// How to handle table creation.
+type StoragePostgresTableCreationMode string
+
+const (
+	StoragePostgresTableCreationModeAutoCreate       StoragePostgresTableCreationMode = "auto_create"
+	StoragePostgresTableCreationModeValidateExisting StoragePostgresTableCreationMode = "validate_existing"
+)
+
+// AllValues returns all StoragePostgresTableCreationMode values.
+func (StoragePostgresTableCreationMode) AllValues() []StoragePostgresTableCreationMode {
+	return []StoragePostgresTableCreationMode{
+		StoragePostgresTableCreationModeAutoCreate,
+		StoragePostgresTableCreationModeValidateExisting,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StoragePostgresTableCreationMode) MarshalText() ([]byte, error) {
+	switch s {
+	case StoragePostgresTableCreationModeAutoCreate:
+		return []byte(s), nil
+	case StoragePostgresTableCreationModeValidateExisting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StoragePostgresTableCreationMode) UnmarshalText(data []byte) error {
+	switch StoragePostgresTableCreationMode(data) {
+	case StoragePostgresTableCreationModeAutoCreate:
+		*s = StoragePostgresTableCreationModeAutoCreate
+		return nil
+	case StoragePostgresTableCreationModeValidateExisting:
+		*s = StoragePostgresTableCreationModeValidateExisting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #
 type StorageS3 struct {

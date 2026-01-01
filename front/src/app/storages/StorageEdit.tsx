@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useLocation } from 'react-router';
 import {
   Form,
   Input,
@@ -16,9 +16,13 @@ import {
   Col,
   Divider,
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, RightOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
+import { getStorageKey, getTables, setTables, clearTables, hasTables } from '../../lib/storage/storageTablesStore';
+import type { components } from '../../api/v1';
+
+type PostgresTable = components['schemas']['storage_postgres_table'];
 
 const { Title, Paragraph } = Typography;
 
@@ -41,6 +45,7 @@ interface FormValues {
   host?: string;
   port?: string;
   options?: string;
+  tables?: PostgresTable[];
   // Host Files fields
   path?: string;
 }
@@ -60,7 +65,17 @@ function StorageEdit() {
   const [saving, setSaving] = useState(false);
   const [storageType, setStorageType] = useState<StorageType>('s3');
   const [loadedData, setLoadedData] = useState<FormValues | null>(null);
+  const [tablesCount, setTablesCount] = useState(0);
+  const [originalTablesJson, setOriginalTablesJson] = useState<string>('[]');
   const isNew = !uuid;
+  const storageKey = getStorageKey(uuid);
+
+  // Check if tables have unsaved changes
+  const hasTableChanges = (() => {
+    const currentTables = getTables(storageKey);
+    const currentJson = JSON.stringify(currentTables);
+    return currentJson !== originalTablesJson;
+  })();
 
   const selectedType = Form.useWatch('type', form) || storageType;
   const isSameDatabase = Form.useWatch('is_same_database', form);
@@ -116,6 +131,13 @@ function StorageEdit() {
             type: 'postgres',
             is_enabled: data.is_enabled ?? true,
           };
+          // Save tables to sessionStorage (only if not already present from previous edit)
+          const tables = data.tables || [];
+          setOriginalTablesJson(JSON.stringify(tables));
+          if (!hasTables(storageKey)) {
+            setTables(storageKey, tables);
+          }
+          setTablesCount(getTables(storageKey).length);
         }
         break;
       }
@@ -137,7 +159,7 @@ function StorageEdit() {
     // Store loaded data in state - form values will be set after re-render
     setLoadedData(fullData);
     setLoading(false);
-  }, [uuid, isNew, navigate, slug]);
+  }, [uuid, isNew, navigate, slug, storageKey]);
 
   // Set form values after the component has rendered with the correct type
   useEffect(() => {
@@ -160,6 +182,16 @@ function StorageEdit() {
   useEffect(() => {
     loadStorage();
   }, [loadStorage]);
+
+  // Update tables count when returning from tables page or on initial render
+  // Location.key changes on each navigation, triggering refresh when returning from tables page
+  const location = useLocation();
+
+  useEffect(() => {
+    if (selectedType === 'postgres') {
+      setTablesCount(getTables(storageKey).length);
+    }
+  }, [selectedType, storageKey, location.key]);
 
   const handleSubmit = async (values: FormValues) => {
     setSaving(true);
@@ -194,6 +226,7 @@ function StorageEdit() {
                 host: values.host,
                 port: values.port,
                 options: values.options,
+                tables: getTables(storageKey),
               },
             });
             if (error) throw new Error(error.detail);
@@ -243,6 +276,7 @@ function StorageEdit() {
                 host: values.host,
                 port: values.port,
                 options: values.options,
+                tables: getTables(storageKey),
               },
             });
             if (error) throw new Error(error.detail);
@@ -264,6 +298,7 @@ function StorageEdit() {
         message.success('Storage updated');
       }
 
+      clearTables(storageKey);
       navigate(`/w/${slug}/storages`);
     } catch (err) {
       message.error(err instanceof Error ? err.message : 'Failed to save storage');
@@ -430,6 +465,31 @@ function StorageEdit() {
                   </Form.Item>
                 </>
               )}
+
+              <Divider />
+
+              <Form.Item
+                label={
+                  <Space>
+                    Target Tables
+                    {hasTableChanges && (
+                      <Typography.Text type="warning" style={{ fontSize: 12, fontWeight: 'normal' }}>
+                        <ExclamationCircleOutlined /> unsaved changes
+                      </Typography.Text>
+                    )}
+                  </Space>
+                }
+              >
+                <Button
+                  onClick={() => navigate(`/w/${slug}/storages/${uuid || 'new'}/tables`)}
+                  style={{ width: '100%', textAlign: 'left' }}
+                >
+                  <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                    <span>{tablesCount} table{tablesCount !== 1 ? 's' : ''} defined</span>
+                    <RightOutlined />
+                  </Space>
+                </Button>
+              </Form.Item>
             </>
           )}
 
@@ -452,7 +512,10 @@ function StorageEdit() {
               <Button type="primary" htmlType="submit" loading={saving}>
                 {isNew ? 'Create' : 'Save'}
               </Button>
-              <Button onClick={() => navigate(`/w/${slug}/storages`)}>Cancel</Button>
+              <Button onClick={() => {
+                clearTables(storageKey);
+                navigate(`/w/${slug}/storages`);
+              }}>Cancel</Button>
               {!isNew && (
                 <Popconfirm
                   title="Delete storage"
