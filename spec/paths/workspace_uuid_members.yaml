@@ -1,0 +1,56 @@
+get:
+  summary: List workspace members
+  operationId: listWorkspaceMembers
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  responses:
+    "200":
+      description: List of workspace members
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/WorkspaceMember"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+post:
+  summary: Add member to workspace
+  operationId: addWorkspaceMember
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/WorkspaceMember"
+  responses:
+    "201":
+      description: Member added successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkspaceMember"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

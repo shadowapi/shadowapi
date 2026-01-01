@@ -1,0 +1,71 @@
+put:
+  summary: Update member role
+  operationId: updateWorkspaceMemberRole
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            role:
+              type: string
+              enum: [admin, member]
+              description: New role for the member (owner cannot be changed)
+          required:
+            - role
+  responses:
+    "200":
+      description: Member role updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkspaceMember"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Remove member from workspace
+  operationId: removeWorkspaceMember
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+  responses:
+    "204":
+      description: Member removed successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

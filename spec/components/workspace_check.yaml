@@ -1,0 +1,13 @@
+# spec/components/workspace_check.yaml
+# Defines the schema for checking workspace existence
+type: object
+additionalProperties: false
+properties:
+  exists:
+    type: boolean
+    description: Whether the workspace exists
+  display_name:
+    type: string
+    description: Human-readable workspace name (if exists)
+required:
+  - exists

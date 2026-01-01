@@ -1,0 +1,41 @@
+# spec/components/workspace.yaml
+# Defines the schema for a Workspace
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the workspace
+    readOnly: true
+  slug:
+    type: string
+    description: URL-safe identifier (lowercase alphanumeric + hyphens, max 63 chars)
+    pattern: "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$"
+    minLength: 1
+    maxLength: 63
+  display_name:
+    type: string
+    description: Human-readable workspace name
+    minLength: 1
+    maxLength: 255
+  is_enabled:
+    type: boolean
+    description: Whether the workspace is active
+  settings:
+    type: object
+    additionalProperties: true
+    description: Workspace-specific configuration
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of workspace creation
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - slug
+  - display_name

@@ -1,0 +1,23 @@
+get:
+  summary: Check if workspace exists
+  operationId: checkWorkspaceExists
+  parameters:
+    - in: query
+      name: slug
+      required: true
+      schema:
+        type: string
+      description: Workspace slug to check
+  responses:
+    "200":
+      description: Workspace check result
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkspaceCheck"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

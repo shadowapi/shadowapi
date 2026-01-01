@@ -46,11 +46,7 @@ backend/config.yaml
 front/.env
 .env
 .env.gen
-devops/ory/hydra/hydra.yaml
 front/dist/
-backend/shadowapi
-backend/worker
-backend/grpc2nats
 front/playwright-report/
 TODO.md
 test-results/

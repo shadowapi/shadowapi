@@ -1,0 +1,74 @@
+get:
+  summary: Get workspace details
+  operationId: getWorkspace
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  responses:
+    "200":
+      description: Workspace details
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Workspace"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+put:
+  summary: Update workspace
+  operationId: updateWorkspace
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Workspace"
+  responses:
+    "200":
+      description: Workspace updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Workspace"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+delete:
+  summary: Delete workspace
+  operationId: deleteWorkspace
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  responses:
+    "204":
+      description: Workspace deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

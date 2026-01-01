@@ -1,0 +1,48 @@
+# spec/components/workspace_member.yaml
+# Defines the schema for a Workspace Member
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the membership
+    readOnly: true
+  workspace_uuid:
+    type: string
+    format: uuid
+    description: UUID of the workspace
+  user_uuid:
+    type: string
+    format: uuid
+    description: UUID of the user
+  role:
+    type: string
+    enum: [owner, admin, member]
+    description: User's role in the workspace
+  user_email:
+    type: string
+    description: User's email (read-only, included for convenience)
+    readOnly: true
+  user_first_name:
+    type: string
+    description: User's first name (read-only)
+    readOnly: true
+  user_last_name:
+    type: string
+    description: User's last name (read-only)
+    readOnly: true
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of membership creation
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - workspace_uuid
+  - user_uuid
+  - role
