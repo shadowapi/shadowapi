@@ -64,6 +64,7 @@ CREATE TABLE oauth2_token (
   user_uuid UUID, -- Optional: the user this token was issued for (nullable for machine tokens)
 
   token JSONB, -- Raw OAuth2 token response (useful for debugging or extra metadata)
+  expires_at TIMESTAMP WITH TIME ZONE, -- When the token expires
   created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- When the token was stored
   updated_at TIMESTAMP WITH TIME ZONE  -- Last refresh/update of this token
 );

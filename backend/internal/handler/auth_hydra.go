@@ -2,9 +2,11 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
@@ -87,6 +89,10 @@ func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitR
 	)
 	if err != nil {
 		h.log.Error("failed to accept login request", "error", err, "subject", subject)
+		// Check if the login challenge has expired
+		if errors.Is(err, oauth2.ErrLoginChallengeExpired) {
+			return nil, ErrWithCode(http.StatusBadRequest, fmt.Errorf("login session expired, please try again"))
+		}
 		return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("login acceptance failed"))
 	}
 

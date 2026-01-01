@@ -235,6 +235,7 @@ type Oauth2Token struct {
 	ClientUuid *uuid.UUID         `json:"client_uuid"`
 	UserUUID   *uuid.UUID         `json:"user_uuid"`
 	Token      []byte             `json:"token"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 	Name       pgtype.Text        `json:"name"`

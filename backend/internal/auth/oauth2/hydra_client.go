@@ -3,6 +3,7 @@ package oauth2
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -11,6 +12,9 @@ import (
 	"strings"
 	"time"
 )
+
+// ErrLoginChallengeExpired is returned when the login challenge has expired
+var ErrLoginChallengeExpired = errors.New("login challenge expired")
 
 // TokenResponse represents the OAuth2 token endpoint response
 type TokenResponse struct {
@@ -236,6 +240,10 @@ func (c *HydraClient) AcceptLoginRequest(ctx context.Context, challenge, subject
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
 		c.log.Error("accept login request failed", "status", resp.StatusCode, "body", string(respBody))
+		// Check for expired login challenge (401 with request_unauthorized)
+		if resp.StatusCode == http.StatusUnauthorized && strings.Contains(string(respBody), "request_unauthorized") {
+			return "", ErrLoginChallengeExpired
+		}
 		return "", fmt.Errorf("accept login request failed with status %d: %s", resp.StatusCode, string(respBody))
 	}
 
