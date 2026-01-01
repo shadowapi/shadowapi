@@ -1,0 +1,61 @@
+post:
+  summary: Validate a mapper configuration
+  description: Validates field mappings against source schemas and target tables without saving
+  operationId: MapperValidate
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            config:
+              $ref: "../openapi.yaml#/components/schemas/MapperConfig"
+            storage_uuid:
+              type: string
+              format: uuid
+              description: UUID of the target storage to validate table/field existence
+          required:
+            - config
+  responses:
+    "200":
+      description: Validation result
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              is_valid:
+                type: boolean
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    mapping_id:
+                      type: string
+                    field:
+                      type: string
+                    message:
+                      type: string
+              warnings:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    mapping_id:
+                      type: string
+                    field:
+                      type: string
+                    message:
+                      type: string
+            required:
+              - is_valid
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - mapper

@@ -452,6 +452,25 @@ type Handler interface {
 	//
 	// GET /workspace
 	ListWorkspaces(ctx context.Context) ([]Workspace, error)
+	// MapperSourceFieldsList implements MapperSourceFieldsList operation.
+	//
+	// Returns all fields available from Message and Contact entities that can be used as sources in
+	// field mappings.
+	//
+	// GET /mapper/source-fields
+	MapperSourceFieldsList(ctx context.Context, params MapperSourceFieldsListParams) (*MapperSourceFieldsListOK, error)
+	// MapperTransformsList implements MapperTransformsList operation.
+	//
+	// Returns all transform functions that can be applied to field mappings.
+	//
+	// GET /mapper/transforms
+	MapperTransformsList(ctx context.Context, params MapperTransformsListParams) (*MapperTransformsListOK, error)
+	// MapperValidate implements MapperValidate operation.
+	//
+	// Validates field mappings against source schemas and target tables without saving.
+	//
+	// POST /mapper/validate
+	MapperValidate(ctx context.Context, req *MapperValidateReq) (*MapperValidateOK, error)
 	// MessageEmailQuery implements messageEmailQuery operation.
 	//
 	// Execute a search query on email messages.

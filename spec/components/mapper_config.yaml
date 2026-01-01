@@ -1,0 +1,15 @@
+type: object
+additionalProperties: false
+description: Configuration for a mapper node in a pipeline
+properties:
+  version:
+    type: string
+    description: Schema version for forward compatibility
+    default: "1.0"
+  mappings:
+    type: array
+    description: List of field mappings from source to target
+    items:
+      $ref: "../openapi.yaml#/components/schemas/MapperFieldMapping"
+required:
+  - mappings

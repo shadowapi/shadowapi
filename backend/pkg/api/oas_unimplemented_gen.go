@@ -679,6 +679,34 @@ func (UnimplementedHandler) ListWorkspaces(ctx context.Context) (r []Workspace, 
 	return r, ht.ErrNotImplemented
 }
 
+// MapperSourceFieldsList implements MapperSourceFieldsList operation.
+//
+// Returns all fields available from Message and Contact entities that can be used as sources in
+// field mappings.
+//
+// GET /mapper/source-fields
+func (UnimplementedHandler) MapperSourceFieldsList(ctx context.Context, params MapperSourceFieldsListParams) (r *MapperSourceFieldsListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MapperTransformsList implements MapperTransformsList operation.
+//
+// Returns all transform functions that can be applied to field mappings.
+//
+// GET /mapper/transforms
+func (UnimplementedHandler) MapperTransformsList(ctx context.Context, params MapperTransformsListParams) (r *MapperTransformsListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MapperValidate implements MapperValidate operation.
+//
+// Validates field mappings against source schemas and target tables without saving.
+//
+// POST /mapper/validate
+func (UnimplementedHandler) MapperValidate(ctx context.Context, req *MapperValidateReq) (r *MapperValidateOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // MessageEmailQuery implements messageEmailQuery operation.
 //
 // Execute a search query on email messages.

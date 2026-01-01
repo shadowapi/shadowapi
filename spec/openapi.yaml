@@ -105,6 +105,16 @@ components:
       $ref: "components/registered_worker.yaml"
     WorkerEnrollmentToken:
       $ref: "components/worker_enrollment_token.yaml"
+    MapperConfig:
+      $ref: "components/mapper_config.yaml"
+    MapperFieldMapping:
+      $ref: "components/mapper_field_mapping.yaml"
+    MapperTransform:
+      $ref: "components/mapper_transform.yaml"
+    SourceFieldDefinition:
+      $ref: "components/source_field_definition.yaml"
+    TransformDefinition:
+      $ref: "components/transform_definition.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -264,6 +274,12 @@ paths:
     $ref: "paths/worker_enrollment_token.yaml"
   /workers/enrollment-tokens/{uuid}:
     $ref: "paths/worker_enrollment_token_uuid.yaml"
+  /mapper/source-fields:
+    $ref: "paths/mapper_source_fields.yaml"
+  /mapper/transforms:
+    $ref: "paths/mapper_transforms.yaml"
+  /mapper/validate:
+    $ref: "paths/mapper_validate.yaml"
 
 servers:
   - description: Local development server

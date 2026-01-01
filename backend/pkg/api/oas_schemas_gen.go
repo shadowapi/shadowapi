@@ -3184,6 +3184,645 @@ func (s *ListRolesScope) UnmarshalText(data []byte) error {
 	}
 }
 
+// Configuration for a mapper node in a pipeline.
+// Ref: #
+type MapperConfig struct {
+	// Schema version for forward compatibility.
+	Version OptString `json:"version"`
+	// List of field mappings from source to target.
+	Mappings []MapperFieldMapping `json:"mappings"`
+}
+
+// GetVersion returns the value of Version.
+func (s *MapperConfig) GetVersion() OptString {
+	return s.Version
+}
+
+// GetMappings returns the value of Mappings.
+func (s *MapperConfig) GetMappings() []MapperFieldMapping {
+	return s.Mappings
+}
+
+// SetVersion sets the value of Version.
+func (s *MapperConfig) SetVersion(val OptString) {
+	s.Version = val
+}
+
+// SetMappings sets the value of Mappings.
+func (s *MapperConfig) SetMappings(val []MapperFieldMapping) {
+	s.Mappings = val
+}
+
+// Individual field mapping from source to target with optional transformation.
+// Ref: #
+type MapperFieldMapping struct {
+	// Unique identifier for this mapping.
+	ID OptString `json:"id"`
+	// The source entity type.
+	SourceEntity MapperFieldMappingSourceEntity `json:"source_entity"`
+	// The field name from the source entity (e.g., sender, email1).
+	SourceField string             `json:"source_field"`
+	Transform   OptMapperTransform `json:"transform"`
+	// Name of the target table in PostgreSQL storage.
+	TargetTable string `json:"target_table"`
+	// Name of the target column in the table.
+	TargetField string `json:"target_field"`
+	// Whether this mapping is active.
+	IsEnabled OptBool `json:"is_enabled"`
+}
+
+// GetID returns the value of ID.
+func (s *MapperFieldMapping) GetID() OptString {
+	return s.ID
+}
+
+// GetSourceEntity returns the value of SourceEntity.
+func (s *MapperFieldMapping) GetSourceEntity() MapperFieldMappingSourceEntity {
+	return s.SourceEntity
+}
+
+// GetSourceField returns the value of SourceField.
+func (s *MapperFieldMapping) GetSourceField() string {
+	return s.SourceField
+}
+
+// GetTransform returns the value of Transform.
+func (s *MapperFieldMapping) GetTransform() OptMapperTransform {
+	return s.Transform
+}
+
+// GetTargetTable returns the value of TargetTable.
+func (s *MapperFieldMapping) GetTargetTable() string {
+	return s.TargetTable
+}
+
+// GetTargetField returns the value of TargetField.
+func (s *MapperFieldMapping) GetTargetField() string {
+	return s.TargetField
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *MapperFieldMapping) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// SetID sets the value of ID.
+func (s *MapperFieldMapping) SetID(val OptString) {
+	s.ID = val
+}
+
+// SetSourceEntity sets the value of SourceEntity.
+func (s *MapperFieldMapping) SetSourceEntity(val MapperFieldMappingSourceEntity) {
+	s.SourceEntity = val
+}
+
+// SetSourceField sets the value of SourceField.
+func (s *MapperFieldMapping) SetSourceField(val string) {
+	s.SourceField = val
+}
+
+// SetTransform sets the value of Transform.
+func (s *MapperFieldMapping) SetTransform(val OptMapperTransform) {
+	s.Transform = val
+}
+
+// SetTargetTable sets the value of TargetTable.
+func (s *MapperFieldMapping) SetTargetTable(val string) {
+	s.TargetTable = val
+}
+
+// SetTargetField sets the value of TargetField.
+func (s *MapperFieldMapping) SetTargetField(val string) {
+	s.TargetField = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *MapperFieldMapping) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// The source entity type.
+type MapperFieldMappingSourceEntity string
+
+const (
+	MapperFieldMappingSourceEntityMessage MapperFieldMappingSourceEntity = "message"
+	MapperFieldMappingSourceEntityContact MapperFieldMappingSourceEntity = "contact"
+)
+
+// AllValues returns all MapperFieldMappingSourceEntity values.
+func (MapperFieldMappingSourceEntity) AllValues() []MapperFieldMappingSourceEntity {
+	return []MapperFieldMappingSourceEntity{
+		MapperFieldMappingSourceEntityMessage,
+		MapperFieldMappingSourceEntityContact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapperFieldMappingSourceEntity) MarshalText() ([]byte, error) {
+	switch s {
+	case MapperFieldMappingSourceEntityMessage:
+		return []byte(s), nil
+	case MapperFieldMappingSourceEntityContact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapperFieldMappingSourceEntity) UnmarshalText(data []byte) error {
+	switch MapperFieldMappingSourceEntity(data) {
+	case MapperFieldMappingSourceEntityMessage:
+		*s = MapperFieldMappingSourceEntityMessage
+		return nil
+	case MapperFieldMappingSourceEntityContact:
+		*s = MapperFieldMappingSourceEntityContact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MapperSourceFieldsListEntity string
+
+const (
+	MapperSourceFieldsListEntityMessage MapperSourceFieldsListEntity = "message"
+	MapperSourceFieldsListEntityContact MapperSourceFieldsListEntity = "contact"
+)
+
+// AllValues returns all MapperSourceFieldsListEntity values.
+func (MapperSourceFieldsListEntity) AllValues() []MapperSourceFieldsListEntity {
+	return []MapperSourceFieldsListEntity{
+		MapperSourceFieldsListEntityMessage,
+		MapperSourceFieldsListEntityContact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapperSourceFieldsListEntity) MarshalText() ([]byte, error) {
+	switch s {
+	case MapperSourceFieldsListEntityMessage:
+		return []byte(s), nil
+	case MapperSourceFieldsListEntityContact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapperSourceFieldsListEntity) UnmarshalText(data []byte) error {
+	switch MapperSourceFieldsListEntity(data) {
+	case MapperSourceFieldsListEntityMessage:
+		*s = MapperSourceFieldsListEntityMessage
+		return nil
+	case MapperSourceFieldsListEntityContact:
+		*s = MapperSourceFieldsListEntityContact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MapperSourceFieldsListOK struct {
+	Fields []SourceFieldDefinition `json:"fields"`
+}
+
+// GetFields returns the value of Fields.
+func (s *MapperSourceFieldsListOK) GetFields() []SourceFieldDefinition {
+	return s.Fields
+}
+
+// SetFields sets the value of Fields.
+func (s *MapperSourceFieldsListOK) SetFields(val []SourceFieldDefinition) {
+	s.Fields = val
+}
+
+type MapperSourceFieldsListType string
+
+const (
+	MapperSourceFieldsListTypeString   MapperSourceFieldsListType = "string"
+	MapperSourceFieldsListTypeInteger  MapperSourceFieldsListType = "integer"
+	MapperSourceFieldsListTypeBoolean  MapperSourceFieldsListType = "boolean"
+	MapperSourceFieldsListTypeDatetime MapperSourceFieldsListType = "datetime"
+	MapperSourceFieldsListTypeArray    MapperSourceFieldsListType = "array"
+	MapperSourceFieldsListTypeObject   MapperSourceFieldsListType = "object"
+)
+
+// AllValues returns all MapperSourceFieldsListType values.
+func (MapperSourceFieldsListType) AllValues() []MapperSourceFieldsListType {
+	return []MapperSourceFieldsListType{
+		MapperSourceFieldsListTypeString,
+		MapperSourceFieldsListTypeInteger,
+		MapperSourceFieldsListTypeBoolean,
+		MapperSourceFieldsListTypeDatetime,
+		MapperSourceFieldsListTypeArray,
+		MapperSourceFieldsListTypeObject,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapperSourceFieldsListType) MarshalText() ([]byte, error) {
+	switch s {
+	case MapperSourceFieldsListTypeString:
+		return []byte(s), nil
+	case MapperSourceFieldsListTypeInteger:
+		return []byte(s), nil
+	case MapperSourceFieldsListTypeBoolean:
+		return []byte(s), nil
+	case MapperSourceFieldsListTypeDatetime:
+		return []byte(s), nil
+	case MapperSourceFieldsListTypeArray:
+		return []byte(s), nil
+	case MapperSourceFieldsListTypeObject:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapperSourceFieldsListType) UnmarshalText(data []byte) error {
+	switch MapperSourceFieldsListType(data) {
+	case MapperSourceFieldsListTypeString:
+		*s = MapperSourceFieldsListTypeString
+		return nil
+	case MapperSourceFieldsListTypeInteger:
+		*s = MapperSourceFieldsListTypeInteger
+		return nil
+	case MapperSourceFieldsListTypeBoolean:
+		*s = MapperSourceFieldsListTypeBoolean
+		return nil
+	case MapperSourceFieldsListTypeDatetime:
+		*s = MapperSourceFieldsListTypeDatetime
+		return nil
+	case MapperSourceFieldsListTypeArray:
+		*s = MapperSourceFieldsListTypeArray
+		return nil
+	case MapperSourceFieldsListTypeObject:
+		*s = MapperSourceFieldsListTypeObject
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Transformation to apply to a field value.
+// Ref: #
+type MapperTransform struct {
+	// Type of transformation to apply.
+	Type MapperTransformType `json:"type"`
+	// Parameters for the transformation (depends on type).
+	Params OptMapperTransformParams `json:"params"`
+}
+
+// GetType returns the value of Type.
+func (s *MapperTransform) GetType() MapperTransformType {
+	return s.Type
+}
+
+// GetParams returns the value of Params.
+func (s *MapperTransform) GetParams() OptMapperTransformParams {
+	return s.Params
+}
+
+// SetType sets the value of Type.
+func (s *MapperTransform) SetType(val MapperTransformType) {
+	s.Type = val
+}
+
+// SetParams sets the value of Params.
+func (s *MapperTransform) SetParams(val OptMapperTransformParams) {
+	s.Params = val
+}
+
+// Parameters for the transformation (depends on type).
+type MapperTransformParams map[string]jx.Raw
+
+func (s *MapperTransformParams) init() MapperTransformParams {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Type of transformation to apply.
+type MapperTransformType string
+
+const (
+	MapperTransformTypeSet          MapperTransformType = "set"
+	MapperTransformTypeLowercase    MapperTransformType = "lowercase"
+	MapperTransformTypeUppercase    MapperTransformType = "uppercase"
+	MapperTransformTypeTrim         MapperTransformType = "trim"
+	MapperTransformTypeToInteger    MapperTransformType = "to_integer"
+	MapperTransformTypeToBoolean    MapperTransformType = "to_boolean"
+	MapperTransformTypeDateParse    MapperTransformType = "date_parse"
+	MapperTransformTypeRegexExtract MapperTransformType = "regex_extract"
+	MapperTransformTypeConcat       MapperTransformType = "concat"
+	MapperTransformTypeJSONExtract  MapperTransformType = "json_extract"
+)
+
+// AllValues returns all MapperTransformType values.
+func (MapperTransformType) AllValues() []MapperTransformType {
+	return []MapperTransformType{
+		MapperTransformTypeSet,
+		MapperTransformTypeLowercase,
+		MapperTransformTypeUppercase,
+		MapperTransformTypeTrim,
+		MapperTransformTypeToInteger,
+		MapperTransformTypeToBoolean,
+		MapperTransformTypeDateParse,
+		MapperTransformTypeRegexExtract,
+		MapperTransformTypeConcat,
+		MapperTransformTypeJSONExtract,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapperTransformType) MarshalText() ([]byte, error) {
+	switch s {
+	case MapperTransformTypeSet:
+		return []byte(s), nil
+	case MapperTransformTypeLowercase:
+		return []byte(s), nil
+	case MapperTransformTypeUppercase:
+		return []byte(s), nil
+	case MapperTransformTypeTrim:
+		return []byte(s), nil
+	case MapperTransformTypeToInteger:
+		return []byte(s), nil
+	case MapperTransformTypeToBoolean:
+		return []byte(s), nil
+	case MapperTransformTypeDateParse:
+		return []byte(s), nil
+	case MapperTransformTypeRegexExtract:
+		return []byte(s), nil
+	case MapperTransformTypeConcat:
+		return []byte(s), nil
+	case MapperTransformTypeJSONExtract:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapperTransformType) UnmarshalText(data []byte) error {
+	switch MapperTransformType(data) {
+	case MapperTransformTypeSet:
+		*s = MapperTransformTypeSet
+		return nil
+	case MapperTransformTypeLowercase:
+		*s = MapperTransformTypeLowercase
+		return nil
+	case MapperTransformTypeUppercase:
+		*s = MapperTransformTypeUppercase
+		return nil
+	case MapperTransformTypeTrim:
+		*s = MapperTransformTypeTrim
+		return nil
+	case MapperTransformTypeToInteger:
+		*s = MapperTransformTypeToInteger
+		return nil
+	case MapperTransformTypeToBoolean:
+		*s = MapperTransformTypeToBoolean
+		return nil
+	case MapperTransformTypeDateParse:
+		*s = MapperTransformTypeDateParse
+		return nil
+	case MapperTransformTypeRegexExtract:
+		*s = MapperTransformTypeRegexExtract
+		return nil
+	case MapperTransformTypeConcat:
+		*s = MapperTransformTypeConcat
+		return nil
+	case MapperTransformTypeJSONExtract:
+		*s = MapperTransformTypeJSONExtract
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MapperTransformsListInputType string
+
+const (
+	MapperTransformsListInputTypeString   MapperTransformsListInputType = "string"
+	MapperTransformsListInputTypeInteger  MapperTransformsListInputType = "integer"
+	MapperTransformsListInputTypeBoolean  MapperTransformsListInputType = "boolean"
+	MapperTransformsListInputTypeDatetime MapperTransformsListInputType = "datetime"
+	MapperTransformsListInputTypeArray    MapperTransformsListInputType = "array"
+	MapperTransformsListInputTypeObject   MapperTransformsListInputType = "object"
+)
+
+// AllValues returns all MapperTransformsListInputType values.
+func (MapperTransformsListInputType) AllValues() []MapperTransformsListInputType {
+	return []MapperTransformsListInputType{
+		MapperTransformsListInputTypeString,
+		MapperTransformsListInputTypeInteger,
+		MapperTransformsListInputTypeBoolean,
+		MapperTransformsListInputTypeDatetime,
+		MapperTransformsListInputTypeArray,
+		MapperTransformsListInputTypeObject,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapperTransformsListInputType) MarshalText() ([]byte, error) {
+	switch s {
+	case MapperTransformsListInputTypeString:
+		return []byte(s), nil
+	case MapperTransformsListInputTypeInteger:
+		return []byte(s), nil
+	case MapperTransformsListInputTypeBoolean:
+		return []byte(s), nil
+	case MapperTransformsListInputTypeDatetime:
+		return []byte(s), nil
+	case MapperTransformsListInputTypeArray:
+		return []byte(s), nil
+	case MapperTransformsListInputTypeObject:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapperTransformsListInputType) UnmarshalText(data []byte) error {
+	switch MapperTransformsListInputType(data) {
+	case MapperTransformsListInputTypeString:
+		*s = MapperTransformsListInputTypeString
+		return nil
+	case MapperTransformsListInputTypeInteger:
+		*s = MapperTransformsListInputTypeInteger
+		return nil
+	case MapperTransformsListInputTypeBoolean:
+		*s = MapperTransformsListInputTypeBoolean
+		return nil
+	case MapperTransformsListInputTypeDatetime:
+		*s = MapperTransformsListInputTypeDatetime
+		return nil
+	case MapperTransformsListInputTypeArray:
+		*s = MapperTransformsListInputTypeArray
+		return nil
+	case MapperTransformsListInputTypeObject:
+		*s = MapperTransformsListInputTypeObject
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MapperTransformsListOK struct {
+	Transforms []TransformDefinition `json:"transforms"`
+}
+
+// GetTransforms returns the value of Transforms.
+func (s *MapperTransformsListOK) GetTransforms() []TransformDefinition {
+	return s.Transforms
+}
+
+// SetTransforms sets the value of Transforms.
+func (s *MapperTransformsListOK) SetTransforms(val []TransformDefinition) {
+	s.Transforms = val
+}
+
+type MapperValidateOK struct {
+	IsValid  bool                           `json:"is_valid"`
+	Errors   []MapperValidateOKErrorsItem   `json:"errors"`
+	Warnings []MapperValidateOKWarningsItem `json:"warnings"`
+}
+
+// GetIsValid returns the value of IsValid.
+func (s *MapperValidateOK) GetIsValid() bool {
+	return s.IsValid
+}
+
+// GetErrors returns the value of Errors.
+func (s *MapperValidateOK) GetErrors() []MapperValidateOKErrorsItem {
+	return s.Errors
+}
+
+// GetWarnings returns the value of Warnings.
+func (s *MapperValidateOK) GetWarnings() []MapperValidateOKWarningsItem {
+	return s.Warnings
+}
+
+// SetIsValid sets the value of IsValid.
+func (s *MapperValidateOK) SetIsValid(val bool) {
+	s.IsValid = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *MapperValidateOK) SetErrors(val []MapperValidateOKErrorsItem) {
+	s.Errors = val
+}
+
+// SetWarnings sets the value of Warnings.
+func (s *MapperValidateOK) SetWarnings(val []MapperValidateOKWarningsItem) {
+	s.Warnings = val
+}
+
+type MapperValidateOKErrorsItem struct {
+	MappingID OptString `json:"mapping_id"`
+	Field     OptString `json:"field"`
+	Message   OptString `json:"message"`
+}
+
+// GetMappingID returns the value of MappingID.
+func (s *MapperValidateOKErrorsItem) GetMappingID() OptString {
+	return s.MappingID
+}
+
+// GetField returns the value of Field.
+func (s *MapperValidateOKErrorsItem) GetField() OptString {
+	return s.Field
+}
+
+// GetMessage returns the value of Message.
+func (s *MapperValidateOKErrorsItem) GetMessage() OptString {
+	return s.Message
+}
+
+// SetMappingID sets the value of MappingID.
+func (s *MapperValidateOKErrorsItem) SetMappingID(val OptString) {
+	s.MappingID = val
+}
+
+// SetField sets the value of Field.
+func (s *MapperValidateOKErrorsItem) SetField(val OptString) {
+	s.Field = val
+}
+
+// SetMessage sets the value of Message.
+func (s *MapperValidateOKErrorsItem) SetMessage(val OptString) {
+	s.Message = val
+}
+
+type MapperValidateOKWarningsItem struct {
+	MappingID OptString `json:"mapping_id"`
+	Field     OptString `json:"field"`
+	Message   OptString `json:"message"`
+}
+
+// GetMappingID returns the value of MappingID.
+func (s *MapperValidateOKWarningsItem) GetMappingID() OptString {
+	return s.MappingID
+}
+
+// GetField returns the value of Field.
+func (s *MapperValidateOKWarningsItem) GetField() OptString {
+	return s.Field
+}
+
+// GetMessage returns the value of Message.
+func (s *MapperValidateOKWarningsItem) GetMessage() OptString {
+	return s.Message
+}
+
+// SetMappingID sets the value of MappingID.
+func (s *MapperValidateOKWarningsItem) SetMappingID(val OptString) {
+	s.MappingID = val
+}
+
+// SetField sets the value of Field.
+func (s *MapperValidateOKWarningsItem) SetField(val OptString) {
+	s.Field = val
+}
+
+// SetMessage sets the value of Message.
+func (s *MapperValidateOKWarningsItem) SetMessage(val OptString) {
+	s.Message = val
+}
+
+type MapperValidateReq struct {
+	Config MapperConfig `json:"config"`
+	// UUID of the target storage to validate table/field existence.
+	StorageUUID OptUUID `json:"storage_uuid"`
+}
+
+// GetConfig returns the value of Config.
+func (s *MapperValidateReq) GetConfig() MapperConfig {
+	return s.Config
+}
+
+// GetStorageUUID returns the value of StorageUUID.
+func (s *MapperValidateReq) GetStorageUUID() OptUUID {
+	return s.StorageUUID
+}
+
+// SetConfig sets the value of Config.
+func (s *MapperValidateReq) SetConfig(val MapperConfig) {
+	s.Config = val
+}
+
+// SetStorageUUID sets the value of StorageUUID.
+func (s *MapperValidateReq) SetStorageUUID(val OptUUID) {
+	s.StorageUUID = val
+}
+
 // Ref: #
 type Message struct {
 	// Unique identifier for the message.
@@ -4968,6 +5607,236 @@ func (o OptListRolesScope) Or(d ListRolesScope) ListRolesScope {
 	return d
 }
 
+// NewOptMapperSourceFieldsListEntity returns new OptMapperSourceFieldsListEntity with value set to v.
+func NewOptMapperSourceFieldsListEntity(v MapperSourceFieldsListEntity) OptMapperSourceFieldsListEntity {
+	return OptMapperSourceFieldsListEntity{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMapperSourceFieldsListEntity is optional MapperSourceFieldsListEntity.
+type OptMapperSourceFieldsListEntity struct {
+	Value MapperSourceFieldsListEntity
+	Set   bool
+}
+
+// IsSet returns true if OptMapperSourceFieldsListEntity was set.
+func (o OptMapperSourceFieldsListEntity) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMapperSourceFieldsListEntity) Reset() {
+	var v MapperSourceFieldsListEntity
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMapperSourceFieldsListEntity) SetTo(v MapperSourceFieldsListEntity) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMapperSourceFieldsListEntity) Get() (v MapperSourceFieldsListEntity, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMapperSourceFieldsListEntity) Or(d MapperSourceFieldsListEntity) MapperSourceFieldsListEntity {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMapperSourceFieldsListType returns new OptMapperSourceFieldsListType with value set to v.
+func NewOptMapperSourceFieldsListType(v MapperSourceFieldsListType) OptMapperSourceFieldsListType {
+	return OptMapperSourceFieldsListType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMapperSourceFieldsListType is optional MapperSourceFieldsListType.
+type OptMapperSourceFieldsListType struct {
+	Value MapperSourceFieldsListType
+	Set   bool
+}
+
+// IsSet returns true if OptMapperSourceFieldsListType was set.
+func (o OptMapperSourceFieldsListType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMapperSourceFieldsListType) Reset() {
+	var v MapperSourceFieldsListType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMapperSourceFieldsListType) SetTo(v MapperSourceFieldsListType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMapperSourceFieldsListType) Get() (v MapperSourceFieldsListType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMapperSourceFieldsListType) Or(d MapperSourceFieldsListType) MapperSourceFieldsListType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMapperTransform returns new OptMapperTransform with value set to v.
+func NewOptMapperTransform(v MapperTransform) OptMapperTransform {
+	return OptMapperTransform{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMapperTransform is optional MapperTransform.
+type OptMapperTransform struct {
+	Value MapperTransform
+	Set   bool
+}
+
+// IsSet returns true if OptMapperTransform was set.
+func (o OptMapperTransform) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMapperTransform) Reset() {
+	var v MapperTransform
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMapperTransform) SetTo(v MapperTransform) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMapperTransform) Get() (v MapperTransform, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMapperTransform) Or(d MapperTransform) MapperTransform {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMapperTransformParams returns new OptMapperTransformParams with value set to v.
+func NewOptMapperTransformParams(v MapperTransformParams) OptMapperTransformParams {
+	return OptMapperTransformParams{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMapperTransformParams is optional MapperTransformParams.
+type OptMapperTransformParams struct {
+	Value MapperTransformParams
+	Set   bool
+}
+
+// IsSet returns true if OptMapperTransformParams was set.
+func (o OptMapperTransformParams) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMapperTransformParams) Reset() {
+	var v MapperTransformParams
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMapperTransformParams) SetTo(v MapperTransformParams) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMapperTransformParams) Get() (v MapperTransformParams, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMapperTransformParams) Or(d MapperTransformParams) MapperTransformParams {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMapperTransformsListInputType returns new OptMapperTransformsListInputType with value set to v.
+func NewOptMapperTransformsListInputType(v MapperTransformsListInputType) OptMapperTransformsListInputType {
+	return OptMapperTransformsListInputType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMapperTransformsListInputType is optional MapperTransformsListInputType.
+type OptMapperTransformsListInputType struct {
+	Value MapperTransformsListInputType
+	Set   bool
+}
+
+// IsSet returns true if OptMapperTransformsListInputType was set.
+func (o OptMapperTransformsListInputType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMapperTransformsListInputType) Reset() {
+	var v MapperTransformsListInputType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMapperTransformsListInputType) SetTo(v MapperTransformsListInputType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMapperTransformsListInputType) Get() (v MapperTransformsListInputType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMapperTransformsListInputType) Or(d MapperTransformsListInputType) MapperTransformsListInputType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptMessageBodyParsed returns new OptMessageBodyParsed with value set to v.
 func NewOptMessageBodyParsed(v MessageBodyParsed) OptMessageBodyParsed {
 	return OptMessageBodyParsed{
@@ -6008,6 +6877,52 @@ func (o OptTelegramSessionHistoryItemMeta) Get() (v TelegramSessionHistoryItemMe
 
 // Or returns value if set, or given parameter if does not.
 func (o OptTelegramSessionHistoryItemMeta) Or(d TelegramSessionHistoryItemMeta) TelegramSessionHistoryItemMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTransformDefinitionParamsSchema returns new OptTransformDefinitionParamsSchema with value set to v.
+func NewOptTransformDefinitionParamsSchema(v TransformDefinitionParamsSchema) OptTransformDefinitionParamsSchema {
+	return OptTransformDefinitionParamsSchema{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTransformDefinitionParamsSchema is optional TransformDefinitionParamsSchema.
+type OptTransformDefinitionParamsSchema struct {
+	Value TransformDefinitionParamsSchema
+	Set   bool
+}
+
+// IsSet returns true if OptTransformDefinitionParamsSchema was set.
+func (o OptTransformDefinitionParamsSchema) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTransformDefinitionParamsSchema) Reset() {
+	var v TransformDefinitionParamsSchema
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTransformDefinitionParamsSchema) SetTo(v TransformDefinitionParamsSchema) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTransformDefinitionParamsSchema) Get() (v TransformDefinitionParamsSchema, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTransformDefinitionParamsSchema) Or(d TransformDefinitionParamsSchema) TransformDefinitionParamsSchema {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7427,6 +8342,195 @@ func (s *Scheduler) SetUpdatedAt(val OptDateTime) {
 // SchedulerDeleteOK is response for SchedulerDelete operation.
 type SchedulerDeleteOK struct{}
 
+// Definition of a source field available for mapping.
+// Ref: #
+type SourceFieldDefinition struct {
+	// Field name as it appears in the source entity.
+	Name string `json:"name"`
+	// The entity this field belongs to.
+	Entity SourceFieldDefinitionEntity `json:"entity"`
+	// Data type of the field.
+	Type SourceFieldDefinitionType `json:"type"`
+	// Human-readable description of the field.
+	Description OptString `json:"description"`
+	// Whether this field is nested (e.g., body_parsed.subject_text).
+	IsNested OptBool `json:"is_nested"`
+	// JSON path for nested fields (e.g., body_parsed.subject_text).
+	Path OptString `json:"path"`
+}
+
+// GetName returns the value of Name.
+func (s *SourceFieldDefinition) GetName() string {
+	return s.Name
+}
+
+// GetEntity returns the value of Entity.
+func (s *SourceFieldDefinition) GetEntity() SourceFieldDefinitionEntity {
+	return s.Entity
+}
+
+// GetType returns the value of Type.
+func (s *SourceFieldDefinition) GetType() SourceFieldDefinitionType {
+	return s.Type
+}
+
+// GetDescription returns the value of Description.
+func (s *SourceFieldDefinition) GetDescription() OptString {
+	return s.Description
+}
+
+// GetIsNested returns the value of IsNested.
+func (s *SourceFieldDefinition) GetIsNested() OptBool {
+	return s.IsNested
+}
+
+// GetPath returns the value of Path.
+func (s *SourceFieldDefinition) GetPath() OptString {
+	return s.Path
+}
+
+// SetName sets the value of Name.
+func (s *SourceFieldDefinition) SetName(val string) {
+	s.Name = val
+}
+
+// SetEntity sets the value of Entity.
+func (s *SourceFieldDefinition) SetEntity(val SourceFieldDefinitionEntity) {
+	s.Entity = val
+}
+
+// SetType sets the value of Type.
+func (s *SourceFieldDefinition) SetType(val SourceFieldDefinitionType) {
+	s.Type = val
+}
+
+// SetDescription sets the value of Description.
+func (s *SourceFieldDefinition) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetIsNested sets the value of IsNested.
+func (s *SourceFieldDefinition) SetIsNested(val OptBool) {
+	s.IsNested = val
+}
+
+// SetPath sets the value of Path.
+func (s *SourceFieldDefinition) SetPath(val OptString) {
+	s.Path = val
+}
+
+// The entity this field belongs to.
+type SourceFieldDefinitionEntity string
+
+const (
+	SourceFieldDefinitionEntityMessage SourceFieldDefinitionEntity = "message"
+	SourceFieldDefinitionEntityContact SourceFieldDefinitionEntity = "contact"
+)
+
+// AllValues returns all SourceFieldDefinitionEntity values.
+func (SourceFieldDefinitionEntity) AllValues() []SourceFieldDefinitionEntity {
+	return []SourceFieldDefinitionEntity{
+		SourceFieldDefinitionEntityMessage,
+		SourceFieldDefinitionEntityContact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SourceFieldDefinitionEntity) MarshalText() ([]byte, error) {
+	switch s {
+	case SourceFieldDefinitionEntityMessage:
+		return []byte(s), nil
+	case SourceFieldDefinitionEntityContact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SourceFieldDefinitionEntity) UnmarshalText(data []byte) error {
+	switch SourceFieldDefinitionEntity(data) {
+	case SourceFieldDefinitionEntityMessage:
+		*s = SourceFieldDefinitionEntityMessage
+		return nil
+	case SourceFieldDefinitionEntityContact:
+		*s = SourceFieldDefinitionEntityContact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Data type of the field.
+type SourceFieldDefinitionType string
+
+const (
+	SourceFieldDefinitionTypeString   SourceFieldDefinitionType = "string"
+	SourceFieldDefinitionTypeInteger  SourceFieldDefinitionType = "integer"
+	SourceFieldDefinitionTypeBoolean  SourceFieldDefinitionType = "boolean"
+	SourceFieldDefinitionTypeDatetime SourceFieldDefinitionType = "datetime"
+	SourceFieldDefinitionTypeArray    SourceFieldDefinitionType = "array"
+	SourceFieldDefinitionTypeObject   SourceFieldDefinitionType = "object"
+)
+
+// AllValues returns all SourceFieldDefinitionType values.
+func (SourceFieldDefinitionType) AllValues() []SourceFieldDefinitionType {
+	return []SourceFieldDefinitionType{
+		SourceFieldDefinitionTypeString,
+		SourceFieldDefinitionTypeInteger,
+		SourceFieldDefinitionTypeBoolean,
+		SourceFieldDefinitionTypeDatetime,
+		SourceFieldDefinitionTypeArray,
+		SourceFieldDefinitionTypeObject,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SourceFieldDefinitionType) MarshalText() ([]byte, error) {
+	switch s {
+	case SourceFieldDefinitionTypeString:
+		return []byte(s), nil
+	case SourceFieldDefinitionTypeInteger:
+		return []byte(s), nil
+	case SourceFieldDefinitionTypeBoolean:
+		return []byte(s), nil
+	case SourceFieldDefinitionTypeDatetime:
+		return []byte(s), nil
+	case SourceFieldDefinitionTypeArray:
+		return []byte(s), nil
+	case SourceFieldDefinitionTypeObject:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SourceFieldDefinitionType) UnmarshalText(data []byte) error {
+	switch SourceFieldDefinitionType(data) {
+	case SourceFieldDefinitionTypeString:
+		*s = SourceFieldDefinitionTypeString
+		return nil
+	case SourceFieldDefinitionTypeInteger:
+		*s = SourceFieldDefinitionTypeInteger
+		return nil
+	case SourceFieldDefinitionTypeBoolean:
+		*s = SourceFieldDefinitionTypeBoolean
+		return nil
+	case SourceFieldDefinitionTypeDatetime:
+		*s = SourceFieldDefinitionTypeDatetime
+		return nil
+	case SourceFieldDefinitionTypeArray:
+		*s = SourceFieldDefinitionTypeArray
+		return nil
+	case SourceFieldDefinitionTypeObject:
+		*s = SourceFieldDefinitionTypeObject
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Data storage settings object.
 // Ref: #
 type Storage struct {
@@ -8576,6 +9680,248 @@ func (s *TgSessionVerifyReq) SetCode(val OptString) {
 // SetPassword sets the value of Password.
 func (s *TgSessionVerifyReq) SetPassword(val OptString) {
 	s.Password = val
+}
+
+// Definition of an available transform function.
+// Ref: #
+type TransformDefinition struct {
+	// Transform type identifier.
+	Type string `json:"type"`
+	// Human-readable name.
+	DisplayName string `json:"display_name"`
+	// Description of what this transform does.
+	Description OptString `json:"description"`
+	// Accepted input types.
+	InputTypes []TransformDefinitionInputTypesItem `json:"input_types"`
+	// Output type (same means same as input).
+	OutputType TransformDefinitionOutputType `json:"output_type"`
+	// JSON Schema for transform parameters.
+	ParamsSchema OptTransformDefinitionParamsSchema `json:"params_schema"`
+}
+
+// GetType returns the value of Type.
+func (s *TransformDefinition) GetType() string {
+	return s.Type
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *TransformDefinition) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// GetDescription returns the value of Description.
+func (s *TransformDefinition) GetDescription() OptString {
+	return s.Description
+}
+
+// GetInputTypes returns the value of InputTypes.
+func (s *TransformDefinition) GetInputTypes() []TransformDefinitionInputTypesItem {
+	return s.InputTypes
+}
+
+// GetOutputType returns the value of OutputType.
+func (s *TransformDefinition) GetOutputType() TransformDefinitionOutputType {
+	return s.OutputType
+}
+
+// GetParamsSchema returns the value of ParamsSchema.
+func (s *TransformDefinition) GetParamsSchema() OptTransformDefinitionParamsSchema {
+	return s.ParamsSchema
+}
+
+// SetType sets the value of Type.
+func (s *TransformDefinition) SetType(val string) {
+	s.Type = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *TransformDefinition) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// SetDescription sets the value of Description.
+func (s *TransformDefinition) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetInputTypes sets the value of InputTypes.
+func (s *TransformDefinition) SetInputTypes(val []TransformDefinitionInputTypesItem) {
+	s.InputTypes = val
+}
+
+// SetOutputType sets the value of OutputType.
+func (s *TransformDefinition) SetOutputType(val TransformDefinitionOutputType) {
+	s.OutputType = val
+}
+
+// SetParamsSchema sets the value of ParamsSchema.
+func (s *TransformDefinition) SetParamsSchema(val OptTransformDefinitionParamsSchema) {
+	s.ParamsSchema = val
+}
+
+type TransformDefinitionInputTypesItem string
+
+const (
+	TransformDefinitionInputTypesItemString   TransformDefinitionInputTypesItem = "string"
+	TransformDefinitionInputTypesItemInteger  TransformDefinitionInputTypesItem = "integer"
+	TransformDefinitionInputTypesItemBoolean  TransformDefinitionInputTypesItem = "boolean"
+	TransformDefinitionInputTypesItemDatetime TransformDefinitionInputTypesItem = "datetime"
+	TransformDefinitionInputTypesItemArray    TransformDefinitionInputTypesItem = "array"
+	TransformDefinitionInputTypesItemObject   TransformDefinitionInputTypesItem = "object"
+	TransformDefinitionInputTypesItemAny      TransformDefinitionInputTypesItem = "any"
+)
+
+// AllValues returns all TransformDefinitionInputTypesItem values.
+func (TransformDefinitionInputTypesItem) AllValues() []TransformDefinitionInputTypesItem {
+	return []TransformDefinitionInputTypesItem{
+		TransformDefinitionInputTypesItemString,
+		TransformDefinitionInputTypesItemInteger,
+		TransformDefinitionInputTypesItemBoolean,
+		TransformDefinitionInputTypesItemDatetime,
+		TransformDefinitionInputTypesItemArray,
+		TransformDefinitionInputTypesItemObject,
+		TransformDefinitionInputTypesItemAny,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TransformDefinitionInputTypesItem) MarshalText() ([]byte, error) {
+	switch s {
+	case TransformDefinitionInputTypesItemString:
+		return []byte(s), nil
+	case TransformDefinitionInputTypesItemInteger:
+		return []byte(s), nil
+	case TransformDefinitionInputTypesItemBoolean:
+		return []byte(s), nil
+	case TransformDefinitionInputTypesItemDatetime:
+		return []byte(s), nil
+	case TransformDefinitionInputTypesItemArray:
+		return []byte(s), nil
+	case TransformDefinitionInputTypesItemObject:
+		return []byte(s), nil
+	case TransformDefinitionInputTypesItemAny:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TransformDefinitionInputTypesItem) UnmarshalText(data []byte) error {
+	switch TransformDefinitionInputTypesItem(data) {
+	case TransformDefinitionInputTypesItemString:
+		*s = TransformDefinitionInputTypesItemString
+		return nil
+	case TransformDefinitionInputTypesItemInteger:
+		*s = TransformDefinitionInputTypesItemInteger
+		return nil
+	case TransformDefinitionInputTypesItemBoolean:
+		*s = TransformDefinitionInputTypesItemBoolean
+		return nil
+	case TransformDefinitionInputTypesItemDatetime:
+		*s = TransformDefinitionInputTypesItemDatetime
+		return nil
+	case TransformDefinitionInputTypesItemArray:
+		*s = TransformDefinitionInputTypesItemArray
+		return nil
+	case TransformDefinitionInputTypesItemObject:
+		*s = TransformDefinitionInputTypesItemObject
+		return nil
+	case TransformDefinitionInputTypesItemAny:
+		*s = TransformDefinitionInputTypesItemAny
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Output type (same means same as input).
+type TransformDefinitionOutputType string
+
+const (
+	TransformDefinitionOutputTypeString   TransformDefinitionOutputType = "string"
+	TransformDefinitionOutputTypeInteger  TransformDefinitionOutputType = "integer"
+	TransformDefinitionOutputTypeBoolean  TransformDefinitionOutputType = "boolean"
+	TransformDefinitionOutputTypeDatetime TransformDefinitionOutputType = "datetime"
+	TransformDefinitionOutputTypeArray    TransformDefinitionOutputType = "array"
+	TransformDefinitionOutputTypeObject   TransformDefinitionOutputType = "object"
+	TransformDefinitionOutputTypeSame     TransformDefinitionOutputType = "same"
+)
+
+// AllValues returns all TransformDefinitionOutputType values.
+func (TransformDefinitionOutputType) AllValues() []TransformDefinitionOutputType {
+	return []TransformDefinitionOutputType{
+		TransformDefinitionOutputTypeString,
+		TransformDefinitionOutputTypeInteger,
+		TransformDefinitionOutputTypeBoolean,
+		TransformDefinitionOutputTypeDatetime,
+		TransformDefinitionOutputTypeArray,
+		TransformDefinitionOutputTypeObject,
+		TransformDefinitionOutputTypeSame,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TransformDefinitionOutputType) MarshalText() ([]byte, error) {
+	switch s {
+	case TransformDefinitionOutputTypeString:
+		return []byte(s), nil
+	case TransformDefinitionOutputTypeInteger:
+		return []byte(s), nil
+	case TransformDefinitionOutputTypeBoolean:
+		return []byte(s), nil
+	case TransformDefinitionOutputTypeDatetime:
+		return []byte(s), nil
+	case TransformDefinitionOutputTypeArray:
+		return []byte(s), nil
+	case TransformDefinitionOutputTypeObject:
+		return []byte(s), nil
+	case TransformDefinitionOutputTypeSame:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TransformDefinitionOutputType) UnmarshalText(data []byte) error {
+	switch TransformDefinitionOutputType(data) {
+	case TransformDefinitionOutputTypeString:
+		*s = TransformDefinitionOutputTypeString
+		return nil
+	case TransformDefinitionOutputTypeInteger:
+		*s = TransformDefinitionOutputTypeInteger
+		return nil
+	case TransformDefinitionOutputTypeBoolean:
+		*s = TransformDefinitionOutputTypeBoolean
+		return nil
+	case TransformDefinitionOutputTypeDatetime:
+		*s = TransformDefinitionOutputTypeDatetime
+		return nil
+	case TransformDefinitionOutputTypeArray:
+		*s = TransformDefinitionOutputTypeArray
+		return nil
+	case TransformDefinitionOutputTypeObject:
+		*s = TransformDefinitionOutputTypeObject
+		return nil
+	case TransformDefinitionOutputTypeSame:
+		*s = TransformDefinitionOutputTypeSame
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// JSON Schema for transform parameters.
+type TransformDefinitionParamsSchema map[string]jx.Raw
+
+func (s *TransformDefinitionParamsSchema) init() TransformDefinitionParamsSchema {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 type UpdateWorkspaceMemberRoleReq struct {

@@ -3679,6 +3679,233 @@ func decodeListWorkspaceMembersParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// MapperSourceFieldsListParams is parameters of MapperSourceFieldsList operation.
+type MapperSourceFieldsListParams struct {
+	// Filter by source entity type.
+	Entity OptMapperSourceFieldsListEntity
+	// Filter by field data type.
+	Type OptMapperSourceFieldsListType
+}
+
+func unpackMapperSourceFieldsListParams(packed middleware.Parameters) (params MapperSourceFieldsListParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "entity",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Entity = v.(OptMapperSourceFieldsListEntity)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Type = v.(OptMapperSourceFieldsListType)
+		}
+	}
+	return params
+}
+
+func decodeMapperSourceFieldsListParams(args [0]string, argsEscaped bool, r *http.Request) (params MapperSourceFieldsListParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: entity.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "entity",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotEntityVal MapperSourceFieldsListEntity
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotEntityVal = MapperSourceFieldsListEntity(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Entity.SetTo(paramsDotEntityVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Entity.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entity",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTypeVal MapperSourceFieldsListType
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTypeVal = MapperSourceFieldsListType(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Type.SetTo(paramsDotTypeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Type.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "type",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// MapperTransformsListParams is parameters of MapperTransformsList operation.
+type MapperTransformsListParams struct {
+	// Filter transforms by compatible input type.
+	InputType OptMapperTransformsListInputType
+}
+
+func unpackMapperTransformsListParams(packed middleware.Parameters) (params MapperTransformsListParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "input_type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.InputType = v.(OptMapperTransformsListInputType)
+		}
+	}
+	return params
+}
+
+func decodeMapperTransformsListParams(args [0]string, argsEscaped bool, r *http.Request) (params MapperTransformsListParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: input_type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "input_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotInputTypeVal MapperTransformsListInputType
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotInputTypeVal = MapperTransformsListInputType(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.InputType.SetTo(paramsDotInputTypeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.InputType.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "input_type",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // OAuth2ClientCallbackParams is parameters of oauth2-client-callback operation.
 type OAuth2ClientCallbackParams struct {
 	// State UUID.

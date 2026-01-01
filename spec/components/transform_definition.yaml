@@ -1,0 +1,32 @@
+type: object
+additionalProperties: false
+description: Definition of an available transform function
+properties:
+  type:
+    type: string
+    description: Transform type identifier
+  display_name:
+    type: string
+    description: Human-readable name
+  description:
+    type: string
+    description: Description of what this transform does
+  input_types:
+    type: array
+    items:
+      type: string
+      enum: [string, integer, boolean, datetime, array, object, any]
+    description: Accepted input types
+  output_type:
+    type: string
+    enum: [string, integer, boolean, datetime, array, object, same]
+    description: Output type (same means same as input)
+  params_schema:
+    type: object
+    additionalProperties: true
+    description: JSON Schema for transform parameters
+required:
+  - type
+  - display_name
+  - input_types
+  - output_type

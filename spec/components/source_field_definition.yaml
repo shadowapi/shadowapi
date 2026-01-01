@@ -1,0 +1,29 @@
+type: object
+additionalProperties: false
+description: Definition of a source field available for mapping
+properties:
+  name:
+    type: string
+    description: Field name as it appears in the source entity
+  entity:
+    type: string
+    enum: [message, contact]
+    description: The entity this field belongs to
+  type:
+    type: string
+    enum: [string, integer, boolean, datetime, array, object]
+    description: Data type of the field
+  description:
+    type: string
+    description: Human-readable description of the field
+  is_nested:
+    type: boolean
+    description: Whether this field is nested (e.g., body_parsed.subject_text)
+    default: false
+  path:
+    type: string
+    description: JSON path for nested fields (e.g., body_parsed.subject_text)
+required:
+  - name
+  - entity
+  - type

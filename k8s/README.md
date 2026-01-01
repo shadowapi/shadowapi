@@ -12,8 +12,7 @@ The deployment follows a GitOps pattern with:
 ## Services Deployed
 
 - **Frontend**: React application (port 3000 → 80)
-- **Backend**: Go API server (port 8080 → 80)  
-- **Backend-loader**: Go loader service
+- **Backend**: Go API server (port 8080 → 80)
 - **Kratos**: Ory identity management (ports 4433, 4434)
 - **NATS**: Message queue (ports 4222, 8222)
 - **Migration jobs**: Database and Kratos schema migrations
@@ -121,7 +120,6 @@ To customize for your environment:
 k8s/
 ├── base/                    # Base Kubernetes manifests
 │   ├── backend.yaml        # Backend deployment & service
-│   ├── backend-loader.yaml # Loader deployment & service  
 │   ├── configmap.yaml      # Application configuration
 │   ├── frontend.yaml       # Frontend deployment & service
 │   ├── ingress.yaml        # Ingress routing rules

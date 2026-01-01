@@ -1,0 +1,41 @@
+get:
+  summary: List available source fields for mapping
+  description: Returns all fields available from Message and Contact entities that can be used as sources in field mappings
+  operationId: MapperSourceFieldsList
+  parameters:
+    - name: entity
+      in: query
+      description: Filter by source entity type
+      required: false
+      schema:
+        type: string
+        enum: [message, contact]
+    - name: type
+      in: query
+      description: Filter by field data type
+      required: false
+      schema:
+        type: string
+        enum: [string, integer, boolean, datetime, array, object]
+  responses:
+    "200":
+      description: List of available source fields
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fields:
+                type: array
+                items:
+                  $ref: "../openapi.yaml#/components/schemas/SourceFieldDefinition"
+            required:
+              - fields
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - mapper

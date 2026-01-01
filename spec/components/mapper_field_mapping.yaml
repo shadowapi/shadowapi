@@ -1,0 +1,33 @@
+type: object
+additionalProperties: false
+description: Individual field mapping from source to target with optional transformation
+properties:
+  id:
+    type: string
+    description: Unique identifier for this mapping
+  source_entity:
+    type: string
+    enum: [message, contact]
+    description: The source entity type
+  source_field:
+    type: string
+    description: The field name from the source entity (e.g., sender, email1)
+  transform:
+    $ref: "../openapi.yaml#/components/schemas/MapperTransform"
+  target_table:
+    type: string
+    description: Name of the target table in PostgreSQL storage
+    pattern: "^[a-z][a-z0-9_]*$"
+  target_field:
+    type: string
+    description: Name of the target column in the table
+    pattern: "^[a-z][a-z0-9_]*$"
+  is_enabled:
+    type: boolean
+    description: Whether this mapping is active
+    default: true
+required:
+  - source_entity
+  - source_field
+  - target_table
+  - target_field

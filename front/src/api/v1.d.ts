@@ -1368,6 +1368,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/mapper/source-fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List available source fields for mapping
+         * @description Returns all fields available from Message and Contact entities that can be used as sources in field mappings
+         */
+        get: operations["MapperSourceFieldsList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mapper/transforms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List available transform functions
+         * @description Returns all transform functions that can be applied to field mappings
+         */
+        get: operations["MapperTransformsList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mapper/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate a mapper configuration
+         * @description Validates field mappings against source schemas and target tables without saving
+         */
+        post: operations["MapperValidate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1494,6 +1554,11 @@ export interface components {
         RBACRoleAssignment: components["schemas"]["rbac_role_assignment"];
         RegisteredWorker: components["schemas"]["registered_worker"];
         WorkerEnrollmentToken: components["schemas"]["worker_enrollment_token"];
+        MapperConfig: components["schemas"]["mapper_config"];
+        MapperFieldMapping: components["schemas"]["mapper_field_mapping"];
+        MapperTransform: components["schemas"]["mapper_transform"];
+        SourceFieldDefinition: components["schemas"]["source_field_definition"];
+        TransformDefinition: components["schemas"]["transform_definition"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2511,6 +2576,94 @@ export interface components {
              * @description Timestamp of token creation
              */
             readonly created_at?: string;
+        };
+        /** @description Definition of a source field available for mapping */
+        source_field_definition: {
+            /** @description Field name as it appears in the source entity */
+            name: string;
+            /**
+             * @description The entity this field belongs to
+             * @enum {string}
+             */
+            entity: "message" | "contact";
+            /**
+             * @description Data type of the field
+             * @enum {string}
+             */
+            type: "string" | "integer" | "boolean" | "datetime" | "array" | "object";
+            /** @description Human-readable description of the field */
+            description?: string;
+            /**
+             * @description Whether this field is nested (e.g., body_parsed.subject_text)
+             * @default false
+             */
+            is_nested: boolean;
+            /** @description JSON path for nested fields (e.g., body_parsed.subject_text) */
+            path?: string;
+        };
+        /** @description Definition of an available transform function */
+        transform_definition: {
+            /** @description Transform type identifier */
+            type: string;
+            /** @description Human-readable name */
+            display_name: string;
+            /** @description Description of what this transform does */
+            description?: string;
+            /** @description Accepted input types */
+            input_types: ("string" | "integer" | "boolean" | "datetime" | "array" | "object" | "any")[];
+            /**
+             * @description Output type (same means same as input)
+             * @enum {string}
+             */
+            output_type: "string" | "integer" | "boolean" | "datetime" | "array" | "object" | "same";
+            /** @description JSON Schema for transform parameters */
+            params_schema?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description Transformation to apply to a field value */
+        mapper_transform: {
+            /**
+             * @description Type of transformation to apply
+             * @enum {string}
+             */
+            type: "set" | "lowercase" | "uppercase" | "trim" | "to_integer" | "to_boolean" | "date_parse" | "regex_extract" | "concat" | "json_extract";
+            /** @description Parameters for the transformation (depends on type) */
+            params?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description Individual field mapping from source to target with optional transformation */
+        mapper_field_mapping: {
+            /** @description Unique identifier for this mapping */
+            id?: string;
+            /**
+             * @description The source entity type
+             * @enum {string}
+             */
+            source_entity: "message" | "contact";
+            /** @description The field name from the source entity (e.g., sender, email1) */
+            source_field: string;
+            transform?: components["schemas"]["mapper_transform"];
+            /** @description Name of the target table in PostgreSQL storage */
+            target_table: string;
+            /** @description Name of the target column in the table */
+            target_field: string;
+            /**
+             * @description Whether this mapping is active
+             * @default true
+             */
+            is_enabled: boolean;
+        };
+        /** @description Configuration for a mapper node in a pipeline */
+        mapper_config: {
+            /**
+             * @description Schema version for forward compatibility
+             * @default 1.0
+             */
+            version: string;
+            /** @description List of field mappings from source to target */
+            mappings: components["schemas"]["mapper_field_mapping"][];
         };
         email_label: {
             /** Format: int64 */
@@ -7102,6 +7255,128 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    MapperSourceFieldsList: {
+        parameters: {
+            query?: {
+                /** @description Filter by source entity type */
+                entity?: "message" | "contact";
+                /** @description Filter by field data type */
+                type?: "string" | "integer" | "boolean" | "datetime" | "array" | "object";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of available source fields */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        fields: components["schemas"]["source_field_definition"][];
+                    };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    MapperTransformsList: {
+        parameters: {
+            query?: {
+                /** @description Filter transforms by compatible input type */
+                input_type?: "string" | "integer" | "boolean" | "datetime" | "array" | "object";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of available transform functions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        transforms: components["schemas"]["transform_definition"][];
+                    };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    MapperValidate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    config: components["schemas"]["mapper_config"];
+                    /**
+                     * Format: uuid
+                     * @description UUID of the target storage to validate table/field existence
+                     */
+                    storage_uuid?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Validation result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        is_valid: boolean;
+                        errors?: {
+                            mapping_id?: string;
+                            field?: string;
+                            message?: string;
+                        }[];
+                        warnings?: {
+                            mapping_id?: string;
+                            field?: string;
+                            message?: string;
+                        }[];
+                    };
+                };
             };
             /** @description Error */
             default: {

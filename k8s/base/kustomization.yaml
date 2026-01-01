@@ -10,7 +10,6 @@ resources:
   - nats.yaml
   - frontend.yaml
   - backend.yaml
-  - backend-loader.yaml
   - kratos.yaml
   - migrations.yaml
   - ingress.yaml

@@ -15,7 +15,6 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
-	"github.com/shadowapi/shadowapi/backend/internal/loader"
 	"github.com/shadowapi/shadowapi/backend/internal/log"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
@@ -65,9 +64,6 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		do.Provide(injector, config.Provide)
 		do.Provide(injector, log.Provide)
 		do.Provide(injector, db.Provide)
-		do.Provide(injector, loader.Provide)
-
-		// Skip server when subcommand is loader
 		do.Provide(injector, queue.Provide)
 		do.Provide(injector, auth.Provide)
 		do.Provide(injector, workspace.Provide) // Workspace middleware

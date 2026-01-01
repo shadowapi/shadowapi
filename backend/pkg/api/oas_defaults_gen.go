@@ -11,6 +11,30 @@ func (s *AuthLoginSubmitReq) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *MapperConfig) setDefaults() {
+	{
+		val := string("1.0")
+		s.Version.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *MapperFieldMapping) setDefaults() {
+	{
+		val := bool(true)
+		s.IsEnabled.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *SourceFieldDefinition) setDefaults() {
+	{
+		val := bool(false)
+		s.IsNested.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *StoragePostgresField) setDefaults() {
 	{
 		val := bool(true)

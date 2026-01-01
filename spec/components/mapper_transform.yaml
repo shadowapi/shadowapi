@@ -1,0 +1,24 @@
+type: object
+additionalProperties: false
+description: Transformation to apply to a field value
+properties:
+  type:
+    type: string
+    enum:
+      - set
+      - lowercase
+      - uppercase
+      - trim
+      - to_integer
+      - to_boolean
+      - date_parse
+      - regex_extract
+      - concat
+      - json_extract
+    description: Type of transformation to apply
+  params:
+    type: object
+    additionalProperties: true
+    description: Parameters for the transformation (depends on type)
+required:
+  - type
