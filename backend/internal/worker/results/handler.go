@@ -115,8 +115,21 @@ func (h *Handler) handleResult(msg queue.Msg) {
 		"success", result.Success,
 	)
 
-	// Update the worker_jobs table
 	ctx := context.Background()
+
+	// Try to handle test connection results first (they use KV store, not worker_jobs table)
+	if len(result.ResultData) > 0 && h.tryHandleTestConnectionResult(ctx, result) {
+		h.log.Info("test connection result processed", "job_id", result.JobID)
+		msg.Ack()
+		return
+	}
+
+	// Handle token refresh results
+	if len(result.ResultData) > 0 && isTokenRefreshResult(msg.Subject()) {
+		h.handleTokenRefreshResult(ctx, result)
+	}
+
+	// Update the worker_jobs table for regular jobs
 	q := query.New(h.dbp)
 
 	jobUUID, err := uuid.FromString(result.JobID)
@@ -168,16 +181,6 @@ func (h *Handler) handleResult(msg queue.Msg) {
 		"duration_ms", result.DurationMs,
 	)
 
-	// Handle token refresh results specially
-	if isTokenRefreshResult(msg.Subject()) && len(result.ResultData) > 0 {
-		h.handleTokenRefreshResult(ctx, result)
-	}
-
-	// Handle test connection results
-	if isTestConnectionResult(msg.Subject()) && len(result.ResultData) > 0 {
-		h.handleTestConnectionResult(ctx, result)
-	}
-
 	msg.Ack()
 }
 
@@ -186,9 +189,64 @@ func isTokenRefreshResult(subject string) bool {
 	return strings.Contains(subject, "tokenRefresh")
 }
 
-// isTestConnectionResult checks if the message is a test connection result
-func isTestConnectionResult(subject string) bool {
-	return strings.Contains(subject, "testConnection")
+// tryHandleTestConnectionResult attempts to handle a result as a test connection result.
+// Returns true if it was a test connection result (regardless of success), false otherwise.
+func (h *Handler) tryHandleTestConnectionResult(ctx context.Context, result JobResult) bool {
+	var testResult jobs.TestConnectionResult
+	if err := json.Unmarshal(result.ResultData, &testResult); err != nil {
+		// Not a test connection result
+		return false
+	}
+
+	// Check if this looks like a test connection result by verifying required fields
+	if testResult.ResourceType == "" || testResult.JobUUID == "" {
+		return false
+	}
+
+	// Valid resource types for test connections
+	if testResult.ResourceType != "email_oauth" && testResult.ResourceType != "postgres" {
+		return false
+	}
+
+	// Get existing job from KV store
+	job, err := h.jobStore.Get(ctx, testResult.JobUUID)
+	if err != nil {
+		h.log.Error("failed to get test connection job from KV store",
+			"job_uuid", testResult.JobUUID,
+			"error", err,
+		)
+		// Still return true - we identified it as a test connection result
+		return true
+	}
+
+	// Determine status based on success
+	status := "completed"
+	if !testResult.Success {
+		status = "failed"
+	}
+
+	// Update job with result
+	job.Status = status
+	job.Result = result.ResultData
+	job.CompletedAt = time.Now().UTC()
+
+	// Store updated job back to KV
+	if err := h.jobStore.Put(ctx, job); err != nil {
+		h.log.Error("failed to update test connection job in KV store",
+			"job_uuid", testResult.JobUUID,
+			"error", err,
+		)
+		return true
+	}
+
+	h.log.Info("test connection result stored in KV",
+		"job_uuid", testResult.JobUUID,
+		"resource_type", testResult.ResourceType,
+		"resource_uuid", testResult.ResourceUUID,
+		"success", testResult.Success,
+	)
+
+	return true
 }
 
 // handleTokenRefreshResult processes a token refresh job result
@@ -278,48 +336,3 @@ func (h *Handler) scheduleNextTokenRefresh(ctx context.Context, tokenUUID uuid.U
 	_ = headers
 }
 
-// handleTestConnectionResult processes a test connection job result
-func (h *Handler) handleTestConnectionResult(ctx context.Context, result JobResult) {
-	var testResult jobs.TestConnectionResult
-	if err := json.Unmarshal(result.ResultData, &testResult); err != nil {
-		h.log.Error("failed to unmarshal test connection result", "error", err)
-		return
-	}
-
-	// Get existing job from KV store
-	job, err := h.jobStore.Get(ctx, testResult.JobUUID)
-	if err != nil {
-		h.log.Error("failed to get test connection job from KV store",
-			"job_uuid", testResult.JobUUID,
-			"error", err,
-		)
-		return
-	}
-
-	// Determine status based on success
-	status := "completed"
-	if !testResult.Success {
-		status = "failed"
-	}
-
-	// Update job with result
-	job.Status = status
-	job.Result = result.ResultData
-	job.CompletedAt = time.Now().UTC()
-
-	// Store updated job back to KV
-	if err := h.jobStore.Put(ctx, job); err != nil {
-		h.log.Error("failed to update test connection job in KV store",
-			"job_uuid", testResult.JobUUID,
-			"error", err,
-		)
-		return
-	}
-
-	h.log.Info("test connection result processed",
-		"job_uuid", testResult.JobUUID,
-		"resource_type", testResult.ResourceType,
-		"resource_uuid", testResult.ResourceUUID,
-		"success", testResult.Success,
-	)
-}

@@ -10,6 +10,7 @@ import (
 	"github.com/samber/do/v2"
 	"google.golang.org/grpc"
 
+	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/bridge"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/config"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/manager"
 	workerv1 "github.com/shadowapi/shadowapi/backend/pkg/proto/worker/v1"
@@ -31,6 +32,7 @@ func Provide(i do.Injector) (*Server, error) {
 	log := do.MustInvoke[*slog.Logger](i).With("component", "grpc-server")
 	dbp := do.MustInvoke[*pgxpool.Pool](i)
 	mgr := do.MustInvoke[*manager.WorkerManager](i)
+	publisher := do.MustInvoke[*bridge.ResultPublisher](i)
 
 	// Create gRPC server with interceptors
 	grpcSrv := grpc.NewServer(
@@ -43,7 +45,7 @@ func Provide(i do.Injector) (*Server, error) {
 	)
 
 	// Register the worker service
-	workerSvc := NewWorkerService(log, dbp, mgr)
+	workerSvc := NewWorkerService(log, dbp, mgr, publisher)
 	workerv1.RegisterWorkerServiceServer(grpcSrv, workerSvc)
 
 	log.Info("gRPC server initialized",

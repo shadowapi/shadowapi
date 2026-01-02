@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -19,6 +20,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/bridge"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/manager"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 	workerv1 "github.com/shadowapi/shadowapi/backend/pkg/proto/worker/v1"
@@ -27,17 +29,19 @@ import (
 // WorkerService implements the gRPC WorkerService
 type WorkerService struct {
 	workerv1.UnimplementedWorkerServiceServer
-	log     *slog.Logger
-	dbp     *pgxpool.Pool
-	manager *manager.WorkerManager
+	log       *slog.Logger
+	dbp       *pgxpool.Pool
+	manager   *manager.WorkerManager
+	publisher *bridge.ResultPublisher
 }
 
 // NewWorkerService creates a new WorkerService
-func NewWorkerService(log *slog.Logger, dbp *pgxpool.Pool, mgr *manager.WorkerManager) *WorkerService {
+func NewWorkerService(log *slog.Logger, dbp *pgxpool.Pool, mgr *manager.WorkerManager, publisher *bridge.ResultPublisher) *WorkerService {
 	return &WorkerService{
-		log:     log.With("service", "worker-grpc"),
-		dbp:     dbp,
-		manager: mgr,
+		log:       log.With("service", "worker-grpc"),
+		dbp:       dbp,
+		manager:   mgr,
+		publisher: publisher,
 	}
 }
 
@@ -285,15 +289,35 @@ func (s *WorkerService) Connect(stream workerv1.WorkerService_ConnectServer) err
 }
 
 // handleJobResult is called when a worker reports job completion
-// This will be integrated with the bridge to publish results to NATS
+// It publishes the result to NATS so the backend can process it
 func (s *WorkerService) handleJobResult(ctx context.Context, workerID string, result *workerv1.JobResult) {
-	// For now, just log it - the bridge will handle publishing to NATS
 	s.log.Info("job completed",
 		"worker_id", workerID,
 		"job_id", result.JobId,
 		"success", result.Success,
 		"error", result.ErrorMessage,
 	)
+
+	// Convert gRPC result to bridge result format
+	// Note: proto JobResult doesn't include timing info, so we use current time
+	now := time.Now().UTC()
+
+	bridgeResult := &bridge.JobResult{
+		JobID:       result.JobId,
+		WorkerID:    workerID,
+		Success:     result.Success,
+		Error:       result.ErrorMessage,
+		ResultData:  result.ResultData,
+		CompletedAt: now,
+	}
+
+	// Publish to NATS
+	if err := s.publisher.Publish(ctx, bridgeResult); err != nil {
+		s.log.Error("failed to publish job result to NATS",
+			"job_id", result.JobId,
+			"error", err,
+		)
+	}
 }
 
 // hashToken creates a SHA256 hash of the token for storage comparison

@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/samber/do/v2"
+
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/config"
 	"github.com/shadowapi/shadowapi/backend/internal/grpc2nats/natsconn"
 )
@@ -40,6 +42,14 @@ func NewResultPublisher(
 		cfg:  cfg,
 		conn: conn,
 	}
+}
+
+// Provide creates a ResultPublisher for dependency injection
+func ProvideResultPublisher(i do.Injector) (*ResultPublisher, error) {
+	log := do.MustInvoke[*slog.Logger](i)
+	cfg := do.MustInvoke[*config.Config](i)
+	conn := do.MustInvoke[*natsconn.Connection](i)
+	return NewResultPublisher(log, cfg, conn), nil
 }
 
 // Publish sends a job result to NATS

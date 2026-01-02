@@ -67,6 +67,7 @@ func runServer(cmd *cobra.Command, _ []string) {
 	do.Provide(injector, natsconn.Provide)
 	do.Provide(injector, kv.Provide)
 	do.Provide(injector, manager.Provide)
+	do.Provide(injector, bridge.ProvideResultPublisher)
 	do.Provide(injector, server.Provide)
 	do.Provide(injector, bridge.Provide)
 

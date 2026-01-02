@@ -143,11 +143,29 @@ func (h *Handler) DatasourceEmailOAuthUpdate(ctx context.Context, req *api.Datas
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
 		}
 		isEnabled := req.IsEnabled.Or(dse.Datasource.IsEnabled)
+
+		// Parse existing settings to preserve oauth2_token_uuid (set by OAuth callback)
+		var existingSettings struct {
+			OAuth2TokenUUID string `json:"oauth2_token_uuid,omitempty"`
+		}
+		_ = json.Unmarshal(dse.Datasource.Settings, &existingSettings)
+
+		// Marshal request to get base settings
 		newSettings, err := json.Marshal(req)
 		if err != nil {
 			log.Error("failed to marshal settings", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
+
+		// If oauth2_token_uuid exists in existing settings, preserve it
+		if existingSettings.OAuth2TokenUUID != "" {
+			var settingsMap map[string]any
+			if err := json.Unmarshal(newSettings, &settingsMap); err == nil {
+				settingsMap["oauth2_token_uuid"] = existingSettings.OAuth2TokenUUID
+				newSettings, _ = json.Marshal(settingsMap)
+			}
+		}
+
 		// Preserve the existing user_uuid from the database record
 		err = query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
 			UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
