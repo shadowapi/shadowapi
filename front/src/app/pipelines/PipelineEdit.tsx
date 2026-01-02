@@ -23,6 +23,8 @@ import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import type { components } from '../../api/v1';
 import MapperTable from './components/MapperTable';
+import TestConnectionModal from './components/TestConnectionModal';
+import { useConnectionTest } from './components/useConnectionTest';
 
 const { Title, Paragraph } = Typography;
 
@@ -54,6 +56,9 @@ function PipelineEdit() {
   const [mapperMappings, setMapperMappings] = useState<MapperFieldMapping[]>([]);
   const [selectedStorageUuid, setSelectedStorageUuid] = useState<string | undefined>();
   const [selectedDatasourceUuid, setSelectedDatasourceUuid] = useState<string | undefined>();
+  const [testModalOpen, setTestModalOpen] = useState(false);
+  const [pendingFormValues, setPendingFormValues] = useState<FormValues | null>(null);
+  const { state: testState, startTest, cancelTest, reset: resetTest } = useConnectionTest();
   const isNew = !uuid;
   const hasWorkers = workers.length > 0;
 
@@ -136,7 +141,8 @@ function PipelineEdit() {
     loadPipeline();
   }, [loadOptions, loadPipeline]);
 
-  const handleSubmit = async (values: FormValues) => {
+  // Actual save logic extracted to allow calling after test
+  const savePipeline = async (values: FormValues) => {
     setSaving(true);
 
     // Build mapper config
@@ -173,7 +179,7 @@ function PipelineEdit() {
             flow,
           },
         });
-        if (error) throw new Error(error.detail);
+        if (error) throw new Error((error as { detail?: string }).detail);
         message.success('Pipeline created');
       } else {
         const { error } = await client.PUT('/pipeline/{uuid}', {
@@ -187,7 +193,7 @@ function PipelineEdit() {
             flow,
           },
         });
-        if (error) throw new Error(error.detail);
+        if (error) throw new Error((error as { detail?: string }).detail);
         message.success('Pipeline updated');
       }
 
@@ -196,6 +202,75 @@ function PipelineEdit() {
       message.error(err instanceof Error ? err.message : 'Failed to save pipeline');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSubmit = async (values: FormValues) => {
+    const ds = datasources.find((d) => d.uuid === values.datasource_uuid);
+    const st = storages.find((s) => s.uuid === values.storage_uuid);
+
+    // Determine if tests are needed
+    const needsDatasourceTest = ds?.type === 'email_oauth';
+    const needsStorageTest = st?.type === 'postgres';
+
+    if (needsDatasourceTest || needsStorageTest) {
+      // Store form values for later save
+      setPendingFormValues(values);
+
+      // Open modal and start tests
+      setTestModalOpen(true);
+      await startTest(
+        {
+          uuid: values.datasource_uuid,
+          type: ds?.type || '',
+          name: ds?.name || '',
+        },
+        {
+          uuid: values.storage_uuid,
+          type: st?.type || '',
+          name: st?.name || '',
+        }
+      );
+    } else {
+      // No tests needed - save directly
+      await savePipeline(values);
+    }
+  };
+
+  // Modal handlers
+  const handleTestProceed = () => {
+    setTestModalOpen(false);
+    if (pendingFormValues) {
+      savePipeline(pendingFormValues);
+    }
+    setPendingFormValues(null);
+    resetTest();
+  };
+
+  const handleTestCancel = () => {
+    cancelTest();
+    setTestModalOpen(false);
+    setPendingFormValues(null);
+    resetTest();
+  };
+
+  const handleTestRetry = async () => {
+    resetTest();
+    if (pendingFormValues) {
+      const ds = datasources.find((d) => d.uuid === pendingFormValues.datasource_uuid);
+      const st = storages.find((s) => s.uuid === pendingFormValues.storage_uuid);
+      await startTest(
+        {
+          uuid: pendingFormValues.datasource_uuid,
+          type: ds?.type || '',
+          name: ds?.name || '',
+        },
+        {
+          uuid: pendingFormValues.storage_uuid,
+          type: st?.type || '',
+          name: st?.name || '',
+        }
+      );
     }
   };
 
@@ -422,6 +497,14 @@ function PipelineEdit() {
           </Paragraph>
         </Card>
       </Col>
+
+      <TestConnectionModal
+        open={testModalOpen}
+        state={testState}
+        onProceed={handleTestProceed}
+        onCancel={handleTestCancel}
+        onRetry={handleTestRetry}
+      />
     </Row>
   );
 }
