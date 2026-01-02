@@ -4,6 +4,7 @@ INSERT INTO pipeline (
   workspace_uuid,
   datasource_uuid,
   storage_uuid,
+  worker_uuid,
   name,
   type,
   is_enabled,
@@ -15,6 +16,7 @@ INSERT INTO pipeline (
              sqlc.arg('workspace_uuid')::uuid,
              sqlc.arg('datasource_uuid')::uuid,
              sqlc.arg('storage_uuid')::uuid,
+             sqlc.narg('worker_uuid')::uuid,
              NULLIF(sqlc.arg('name'), ''),
              NULLIF(sqlc.arg('type'), ''),
   sqlc.arg('is_enabled')::boolean,
@@ -89,6 +91,7 @@ UPDATE pipeline SET
   "type" = NULLIF(sqlc.arg('type'), ''),
   datasource_uuid = sqlc.arg('datasource_uuid')::uuid,
   storage_uuid = sqlc.arg('storage_uuid')::uuid,
+  worker_uuid = sqlc.narg('worker_uuid')::uuid,
   is_enabled = sqlc.arg('is_enabled')::boolean,
   flow = sqlc.arg('flow'),
   updated_at = NOW()
@@ -100,6 +103,7 @@ UPDATE pipeline SET
   "type" = NULLIF(sqlc.arg('type'), ''),
   datasource_uuid = sqlc.arg('datasource_uuid')::uuid,
   storage_uuid = sqlc.arg('storage_uuid')::uuid,
+  worker_uuid = sqlc.narg('worker_uuid')::uuid,
   is_enabled = sqlc.arg('is_enabled')::boolean,
   flow = sqlc.arg('flow'),
   updated_at = NOW()

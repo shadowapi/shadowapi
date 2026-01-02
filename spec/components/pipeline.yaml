@@ -8,6 +8,12 @@ properties:
     type: string
   storage_uuid:
     type: string
+  worker_uuid:
+    type: string
+    nullable: true
+    description: >
+      UUID of the worker assigned to execute this pipeline.
+      If null, any available worker can execute (Auto mode).
   type:
     type: string
     description: Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid

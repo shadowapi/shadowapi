@@ -12298,6 +12298,12 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 		e.Str(s.StorageUUID)
 	}
 	{
+		if s.WorkerUUID.Set {
+			e.FieldStart("worker_uuid")
+			s.WorkerUUID.Encode(e)
+		}
+	}
+	{
 		if s.Type.Set {
 			e.FieldStart("type")
 			s.Type.Encode(e)
@@ -12333,16 +12339,17 @@ func (s *Pipeline) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPipeline = [9]string{
+var jsonFieldsNameOfPipeline = [10]string{
 	0: "uuid",
 	1: "datasource_uuid",
 	2: "storage_uuid",
-	3: "type",
-	4: "name",
-	5: "is_enabled",
-	6: "flow",
-	7: "created_at",
-	8: "updated_at",
+	3: "worker_uuid",
+	4: "type",
+	5: "name",
+	6: "is_enabled",
+	7: "flow",
+	8: "created_at",
+	9: "updated_at",
 }
 
 // Decode decodes Pipeline from json.
@@ -12388,6 +12395,16 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"storage_uuid\"")
 			}
+		case "worker_uuid":
+			if err := func() error {
+				s.WorkerUUID.Reset()
+				if err := s.WorkerUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worker_uuid\"")
+			}
 		case "type":
 			if err := func() error {
 				s.Type.Reset()
@@ -12399,7 +12416,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "name":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -12460,7 +12477,7 @@ func (s *Pipeline) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00010110,
+		0b00100110,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {

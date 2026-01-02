@@ -15,8 +15,10 @@ import {
   Row,
   Col,
   Divider,
+  Alert,
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, SettingOutlined } from '@ant-design/icons';
+import { Link } from 'react-router';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import type { components } from '../../api/v1';
@@ -29,11 +31,13 @@ type Storage = components['schemas']['storage'];
 type MapperFieldMapping = components['schemas']['mapper_field_mapping'];
 type MapperConfig = components['schemas']['mapper_config'];
 type Pipeline = components['schemas']['pipeline'];
+type RegisteredWorker = components['schemas']['registered_worker'];
 
 interface FormValues {
   name: string;
   datasource_uuid: string;
   storage_uuid: string;
+  worker_uuid: string | null;
   is_enabled: boolean;
 }
 
@@ -46,10 +50,12 @@ function PipelineEdit() {
   const [saving, setSaving] = useState(false);
   const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [storages, setStorages] = useState<Storage[]>([]);
+  const [workers, setWorkers] = useState<RegisteredWorker[]>([]);
   const [mapperMappings, setMapperMappings] = useState<MapperFieldMapping[]>([]);
   const [selectedStorageUuid, setSelectedStorageUuid] = useState<string | undefined>();
   const [selectedDatasourceUuid, setSelectedDatasourceUuid] = useState<string | undefined>();
   const isNew = !uuid;
+  const hasWorkers = workers.length > 0;
 
   // Get selected storage type
   const selectedStorage = storages.find((s) => s.uuid === selectedStorageUuid);
@@ -59,11 +65,12 @@ function PipelineEdit() {
   const selectedDatasource = datasources.find((ds) => ds.uuid === selectedDatasourceUuid);
   const selectedDatasourceType = selectedDatasource?.type;
 
-  // Load datasources and storages for dropdowns
+  // Load datasources, storages, and workers for dropdowns
   const loadOptions = useCallback(async () => {
-    const [dsRes, stRes] = await Promise.all([
+    const [dsRes, stRes, workersRes] = await Promise.all([
       client.GET('/datasource'),
       client.GET('/storage'),
+      client.GET('/workers'),
     ]);
 
     if (dsRes.data) {
@@ -71,6 +78,9 @@ function PipelineEdit() {
     }
     if (stRes.data) {
       setStorages(stRes.data);
+    }
+    if (workersRes.data) {
+      setWorkers(workersRes.data);
     }
   }, []);
 
@@ -100,6 +110,7 @@ function PipelineEdit() {
       name: data.name,
       datasource_uuid: data.datasource_uuid,
       storage_uuid: data.storage_uuid,
+      worker_uuid: data.worker_uuid ?? null,
       is_enabled: data.is_enabled ?? false,
     });
 
@@ -157,6 +168,7 @@ function PipelineEdit() {
             name: values.name,
             datasource_uuid: values.datasource_uuid,
             storage_uuid: values.storage_uuid,
+            worker_uuid: values.worker_uuid,
             is_enabled: values.is_enabled,
             flow,
           },
@@ -170,6 +182,7 @@ function PipelineEdit() {
             name: values.name,
             datasource_uuid: values.datasource_uuid,
             storage_uuid: values.storage_uuid,
+            worker_uuid: values.worker_uuid,
             is_enabled: values.is_enabled,
             flow,
           },
@@ -220,6 +233,15 @@ function PipelineEdit() {
     label: `${st.name} (${st.type})`,
   }));
 
+  const workerOptions = [
+    { value: '', label: 'Auto (any available worker)' },
+    ...workers.map((w) => ({
+      value: w.uuid,
+      label: `${w.name} (${w.status})${w.is_global ? ' - Global' : ''}`,
+      disabled: w.status === 'offline',
+    })),
+  ];
+
   return (
     <Row gutter={24}>
       <Col xs={24} lg={16}>
@@ -229,11 +251,32 @@ function PipelineEdit() {
           </Title>
         </Space>
 
+        {!hasWorkers && isNew && (
+          <Alert
+            message="No workers available"
+            description={
+              <>
+                You need to register at least one worker before creating a pipeline. Workers execute
+                your data sync jobs.{' '}
+                <Link to={`/w/${slug}/workers`}>
+                  <Button type="link" size="small" icon={<SettingOutlined />} style={{ padding: 0 }}>
+                    Go to Workers
+                  </Button>
+                </Link>
+              </>
+            }
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
         <Form
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={{
+            worker_uuid: null,
             is_enabled: true,
           }}
         >
@@ -281,6 +324,22 @@ function PipelineEdit() {
             />
           </Form.Item>
 
+          <Form.Item
+            name="worker_uuid"
+            label="Worker"
+            tooltip="Assign a specific worker to execute this pipeline, or leave as Auto for any available worker"
+          >
+            <Select
+              options={workerOptions}
+              placeholder="Auto (any available worker)"
+              allowClear
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
+
           {selectedStorageUuid && isPostgresStorage && (
             <Card title="Field Mappings" size="small" style={{ marginBottom: 16 }}>
               <Paragraph type="secondary" style={{ marginBottom: 16 }}>
@@ -303,7 +362,12 @@ function PipelineEdit() {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={saving}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={saving}
+                disabled={isNew && !hasWorkers}
+              >
                 {isNew ? 'Create' : 'Save'}
               </Button>
               <Button onClick={() => navigate(`/w/${slug}/pipelines`)}>Cancel</Button>
@@ -340,6 +404,11 @@ function PipelineEdit() {
           <Paragraph type="secondary">
             Where extracted data will be saved. Choose from S3, PostgreSQL, or host filesystem
             storage.
+          </Paragraph>
+          <Title level={5}>Worker</Title>
+          <Paragraph type="secondary">
+            Assign a specific worker to execute this pipeline, or leave as &quot;Auto&quot; to let
+            any available worker process it.
           </Paragraph>
           <Title level={5}>Field Mappings</Title>
           <Paragraph type="secondary">

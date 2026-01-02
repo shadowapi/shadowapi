@@ -246,6 +246,7 @@ type Pipeline struct {
 	WorkspaceUUID  *uuid.UUID         `json:"workspace_uuid"`
 	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
 	StorageUuid    *uuid.UUID         `json:"storage_uuid"`
+	WorkerUUID     *uuid.UUID         `json:"worker_uuid"`
 	Name           string             `json:"name"`
 	Type           string             `json:"type"`
 	IsEnabled      bool               `json:"is_enabled"`

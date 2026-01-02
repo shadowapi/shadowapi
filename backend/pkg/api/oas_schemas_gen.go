@@ -7319,6 +7319,9 @@ type Pipeline struct {
 	UUID           OptString `json:"uuid"`
 	DatasourceUUID string    `json:"datasource_uuid"`
 	StorageUUID    string    `json:"storage_uuid"`
+	// UUID of the worker assigned to execute this pipeline. If null, any available worker can execute
+	// (Auto mode).
+	WorkerUUID OptNilString `json:"worker_uuid"`
 	// Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid.
 	Type OptString `json:"type"`
 	// Pipeline name.
@@ -7346,6 +7349,11 @@ func (s *Pipeline) GetDatasourceUUID() string {
 // GetStorageUUID returns the value of StorageUUID.
 func (s *Pipeline) GetStorageUUID() string {
 	return s.StorageUUID
+}
+
+// GetWorkerUUID returns the value of WorkerUUID.
+func (s *Pipeline) GetWorkerUUID() OptNilString {
+	return s.WorkerUUID
 }
 
 // GetType returns the value of Type.
@@ -7391,6 +7399,11 @@ func (s *Pipeline) SetDatasourceUUID(val string) {
 // SetStorageUUID sets the value of StorageUUID.
 func (s *Pipeline) SetStorageUUID(val string) {
 	s.StorageUUID = val
+}
+
+// SetWorkerUUID sets the value of WorkerUUID.
+func (s *Pipeline) SetWorkerUUID(val OptNilString) {
+	s.WorkerUUID = val
 }
 
 // SetType sets the value of Type.

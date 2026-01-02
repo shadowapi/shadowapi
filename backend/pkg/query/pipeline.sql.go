@@ -18,6 +18,7 @@ INSERT INTO pipeline (
   workspace_uuid,
   datasource_uuid,
   storage_uuid,
+  worker_uuid,
   name,
   type,
   is_enabled,
@@ -29,13 +30,14 @@ INSERT INTO pipeline (
              $2::uuid,
              $3::uuid,
              $4::uuid,
-             NULLIF($5, ''),
+             $5::uuid,
              NULLIF($6, ''),
-  $7::boolean,
-              $8,
+             NULLIF($7, ''),
+  $8::boolean,
+              $9,
              NOW(),
   NOW()
-) RETURNING uuid, workspace_uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at
+) RETURNING uuid, workspace_uuid, datasource_uuid, storage_uuid, worker_uuid, name, type, is_enabled, flow, created_at, updated_at
 `
 
 type CreatePipelineParams struct {
@@ -43,6 +45,7 @@ type CreatePipelineParams struct {
 	WorkspaceUUID  pgtype.UUID `json:"workspace_uuid"`
 	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
 	StorageUuid    pgtype.UUID `json:"storage_uuid"`
+	WorkerUUID     pgtype.UUID `json:"worker_uuid"`
 	Name           interface{} `json:"name"`
 	Type           interface{} `json:"type"`
 	IsEnabled      bool        `json:"is_enabled"`
@@ -55,6 +58,7 @@ func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) 
 		arg.WorkspaceUUID,
 		arg.DatasourceUUID,
 		arg.StorageUuid,
+		arg.WorkerUUID,
 		arg.Name,
 		arg.Type,
 		arg.IsEnabled,
@@ -66,6 +70,7 @@ func (q *Queries) CreatePipeline(ctx context.Context, arg CreatePipelineParams) 
 		&i.WorkspaceUUID,
 		&i.DatasourceUUID,
 		&i.StorageUuid,
+		&i.WorkerUUID,
 		&i.Name,
 		&i.Type,
 		&i.IsEnabled,
@@ -103,7 +108,7 @@ func (q *Queries) DeletePipelineByWorkspace(ctx context.Context, arg DeletePipel
 
 const getPipeline = `-- name: GetPipeline :one
 SELECT
-    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.worker_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 WHERE uuid = $1::uuid
 `
@@ -120,6 +125,7 @@ func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipe
 		&i.Pipeline.WorkspaceUUID,
 		&i.Pipeline.DatasourceUUID,
 		&i.Pipeline.StorageUuid,
+		&i.Pipeline.WorkerUUID,
 		&i.Pipeline.Name,
 		&i.Pipeline.Type,
 		&i.Pipeline.IsEnabled,
@@ -132,7 +138,7 @@ func (q *Queries) GetPipeline(ctx context.Context, argUuid pgtype.UUID) (GetPipe
 
 const getPipelineByWorkspace = `-- name: GetPipelineByWorkspace :one
 SELECT
-    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.worker_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 WHERE uuid = $1::uuid
   AND workspace_uuid = $2::uuid
@@ -155,6 +161,7 @@ func (q *Queries) GetPipelineByWorkspace(ctx context.Context, arg GetPipelineByW
 		&i.Pipeline.WorkspaceUUID,
 		&i.Pipeline.DatasourceUUID,
 		&i.Pipeline.StorageUuid,
+		&i.Pipeline.WorkerUUID,
 		&i.Pipeline.Name,
 		&i.Pipeline.Type,
 		&i.Pipeline.IsEnabled,
@@ -181,7 +188,7 @@ func (q *Queries) GetPipelineWorkspaceSlug(ctx context.Context, pipelineUuid pgt
 
 const getPipelines = `-- name: GetPipelines :many
 WITH filtered_pipelines AS (
-    SELECT p.uuid, p.workspace_uuid, p.datasource_uuid, p.storage_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
+    SELECT p.uuid, p.workspace_uuid, p.datasource_uuid, p.storage_uuid, p.worker_uuid, p.name, p.type, p.is_enabled, p.flow, p.created_at, p.updated_at
     FROM pipeline p
     WHERE
         ($5::uuid IS NULL OR p.workspace_uuid = $5::uuid) AND
@@ -193,7 +200,7 @@ WITH filtered_pipelines AS (
         (NULLIF($11, '') IS NULL OR p.name ILIKE '%' || $11 || '%')
 )
 SELECT
-    uuid, workspace_uuid, datasource_uuid, storage_uuid, name, type, is_enabled, flow, created_at, updated_at,
+    uuid, workspace_uuid, datasource_uuid, storage_uuid, worker_uuid, name, type, is_enabled, flow, created_at, updated_at,
     (SELECT count(*) FROM filtered_pipelines) AS total_count
 FROM filtered_pipelines
 ORDER BY
@@ -227,6 +234,7 @@ type GetPipelinesRow struct {
 	WorkspaceUUID  *uuid.UUID         `json:"workspace_uuid"`
 	DatasourceUUID *uuid.UUID         `json:"datasource_uuid"`
 	StorageUuid    *uuid.UUID         `json:"storage_uuid"`
+	WorkerUUID     *uuid.UUID         `json:"worker_uuid"`
 	Name           string             `json:"name"`
 	Type           string             `json:"type"`
 	IsEnabled      bool               `json:"is_enabled"`
@@ -262,6 +270,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 			&i.WorkspaceUUID,
 			&i.DatasourceUUID,
 			&i.StorageUuid,
+			&i.WorkerUUID,
 			&i.Name,
 			&i.Type,
 			&i.IsEnabled,
@@ -282,7 +291,7 @@ func (q *Queries) GetPipelines(ctx context.Context, arg GetPipelinesParams) ([]G
 
 const listPipelines = `-- name: ListPipelines :many
 SELECT
-    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.worker_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -312,6 +321,7 @@ func (q *Queries) ListPipelines(ctx context.Context, arg ListPipelinesParams) ([
 			&i.Pipeline.WorkspaceUUID,
 			&i.Pipeline.DatasourceUUID,
 			&i.Pipeline.StorageUuid,
+			&i.Pipeline.WorkerUUID,
 			&i.Pipeline.Name,
 			&i.Pipeline.Type,
 			&i.Pipeline.IsEnabled,
@@ -331,7 +341,7 @@ func (q *Queries) ListPipelines(ctx context.Context, arg ListPipelinesParams) ([
 
 const listPipelinesByWorkspace = `-- name: ListPipelinesByWorkspace :many
 SELECT
-    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
+    pipeline.uuid, pipeline.workspace_uuid, pipeline.datasource_uuid, pipeline.storage_uuid, pipeline.worker_uuid, pipeline.name, pipeline.type, pipeline.is_enabled, pipeline.flow, pipeline.created_at, pipeline.updated_at
 FROM pipeline
 WHERE workspace_uuid = $1::uuid
 ORDER BY created_at DESC
@@ -363,6 +373,7 @@ func (q *Queries) ListPipelinesByWorkspace(ctx context.Context, arg ListPipeline
 			&i.Pipeline.WorkspaceUUID,
 			&i.Pipeline.DatasourceUUID,
 			&i.Pipeline.StorageUuid,
+			&i.Pipeline.WorkerUUID,
 			&i.Pipeline.Name,
 			&i.Pipeline.Type,
 			&i.Pipeline.IsEnabled,
@@ -386,10 +397,11 @@ UPDATE pipeline SET
   "type" = NULLIF($2, ''),
   datasource_uuid = $3::uuid,
   storage_uuid = $4::uuid,
-  is_enabled = $5::boolean,
-  flow = $6,
+  worker_uuid = $5::uuid,
+  is_enabled = $6::boolean,
+  flow = $7,
   updated_at = NOW()
-WHERE uuid = $7::uuid
+WHERE uuid = $8::uuid
 `
 
 type UpdatePipelineParams struct {
@@ -397,6 +409,7 @@ type UpdatePipelineParams struct {
 	Type           interface{} `json:"type"`
 	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
 	StorageUuid    pgtype.UUID `json:"storage_uuid"`
+	WorkerUUID     pgtype.UUID `json:"worker_uuid"`
 	IsEnabled      bool        `json:"is_enabled"`
 	Flow           []byte      `json:"flow"`
 	UUID           pgtype.UUID `json:"uuid"`
@@ -408,6 +421,7 @@ func (q *Queries) UpdatePipeline(ctx context.Context, arg UpdatePipelineParams) 
 		arg.Type,
 		arg.DatasourceUUID,
 		arg.StorageUuid,
+		arg.WorkerUUID,
 		arg.IsEnabled,
 		arg.Flow,
 		arg.UUID,
@@ -421,11 +435,12 @@ UPDATE pipeline SET
   "type" = NULLIF($2, ''),
   datasource_uuid = $3::uuid,
   storage_uuid = $4::uuid,
-  is_enabled = $5::boolean,
-  flow = $6,
+  worker_uuid = $5::uuid,
+  is_enabled = $6::boolean,
+  flow = $7,
   updated_at = NOW()
-WHERE uuid = $7::uuid
-  AND workspace_uuid = $8::uuid
+WHERE uuid = $8::uuid
+  AND workspace_uuid = $9::uuid
 `
 
 type UpdatePipelineByWorkspaceParams struct {
@@ -433,6 +448,7 @@ type UpdatePipelineByWorkspaceParams struct {
 	Type           interface{} `json:"type"`
 	DatasourceUUID pgtype.UUID `json:"datasource_uuid"`
 	StorageUuid    pgtype.UUID `json:"storage_uuid"`
+	WorkerUUID     pgtype.UUID `json:"worker_uuid"`
 	IsEnabled      bool        `json:"is_enabled"`
 	Flow           []byte      `json:"flow"`
 	UUID           pgtype.UUID `json:"uuid"`
@@ -445,6 +461,7 @@ func (q *Queries) UpdatePipelineByWorkspace(ctx context.Context, arg UpdatePipel
 		arg.Type,
 		arg.DatasourceUUID,
 		arg.StorageUuid,
+		arg.WorkerUUID,
 		arg.IsEnabled,
 		arg.Flow,
 		arg.UUID,

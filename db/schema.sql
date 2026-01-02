@@ -112,6 +112,7 @@ CREATE TABLE pipeline (
                           workspace_uuid UUID REFERENCES workspace(uuid) ON DELETE CASCADE,
                           datasource_uuid UUID NOT NULL,
                           storage_uuid UUID NOT NULL,
+                          worker_uuid UUID,
                           name VARCHAR NOT NULL,
                           type VARCHAR NOT NULL,
                           is_enabled BOOLEAN NOT NULL DEFAULT FALSE,
@@ -122,6 +123,7 @@ CREATE TABLE pipeline (
 );
 
 CREATE INDEX idx_pipeline_workspace ON pipeline(workspace_uuid);
+CREATE INDEX idx_pipeline_worker ON pipeline(worker_uuid);
 
 
 CREATE TABLE storage(
@@ -499,3 +501,7 @@ CREATE TABLE IF NOT EXISTS worker_enrollment_token (
 );
 
 CREATE INDEX IF NOT EXISTS idx_worker_enrollment_token_expires ON worker_enrollment_token(expires_at);
+
+-- FK for pipeline.worker_uuid (added after registered_worker table is created)
+ALTER TABLE pipeline ADD CONSTRAINT fk_pipeline_worker
+    FOREIGN KEY (worker_uuid) REFERENCES registered_worker(uuid) ON DELETE SET NULL;

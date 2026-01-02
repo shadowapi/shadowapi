@@ -46,10 +46,21 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
 		}
 
+		// Handle optional worker_uuid
+		var pgWorkerUUID pgtype.UUID
+		if req.WorkerUUID.IsSet() && !req.WorkerUUID.IsNull() && req.WorkerUUID.Value != "" {
+			pgWorkerUUID, err = converter.ConvertStringToPgUUID(req.WorkerUUID.Value)
+			if err != nil {
+				log.Error("failed to convert worker uuid", "error", err)
+				return nil, ErrWithCode(http.StatusBadRequest, E("invalid worker uuid"))
+			}
+		}
+
 		qParams := query.CreatePipelineParams{
 			UUID:           pgtype.UUID{Bytes: converter.UToBytes(pipelineUUID), Valid: true},
 			DatasourceUUID: pgDatasourceUUID,
 			StorageUuid:    pgStorageUUID,
+			WorkerUUID:     pgWorkerUUID,
 			Name:           req.Name,
 			Type:           ds.Datasource.Type,
 			IsEnabled:      req.IsEnabled.Or(false),
@@ -159,11 +170,22 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 			newType = req.Type.Value
 		}
 
+		// Handle optional worker_uuid
+		var pgWorkerUUID pgtype.UUID
+		if req.WorkerUUID.IsSet() && !req.WorkerUUID.IsNull() && req.WorkerUUID.Value != "" {
+			pgWorkerUUID, err = converter.ConvertStringToPgUUID(req.WorkerUUID.Value)
+			if err != nil {
+				log.Error("failed to convert worker uuid", "error", err)
+				return nil, ErrWithCode(http.StatusBadRequest, E("invalid worker uuid"))
+			}
+		}
+
 		uParams := query.UpdatePipelineParams{
 			Name:           req.Name,
 			Type:           newType,
 			DatasourceUUID: pgDatasourceUUID,
 			StorageUuid:    pgStorageUUID,
+			WorkerUUID:     pgWorkerUUID,
 			IsEnabled:      req.IsEnabled.Or(false),
 			Flow:           flowData,
 			UUID:           pipelineUUID,
@@ -202,7 +224,6 @@ func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteP
 	return nil
 }
 
-// TODO finish convertion
 // qToApiPipeline converts a db pipeline row into an API pipeline, handling nullable fields safely.
 func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
 	// Safely handle potential nil UUID pointers for datasource and storage
@@ -224,6 +245,11 @@ func qToApiPipeline(dbp query.Pipeline) (api.Pipeline, error) {
 		IsEnabled:      api.NewOptBool(dbp.IsEnabled),
 		CreatedAt:      api.NewOptDateTime(dbp.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(dbp.UpdatedAt.Time),
+	}
+
+	// Handle nullable worker_uuid
+	if dbp.WorkerUUID != nil {
+		out.WorkerUUID = api.NewOptNilString(dbp.WorkerUUID.String())
 	}
 
 	// Unmarshal Flow JSON if present

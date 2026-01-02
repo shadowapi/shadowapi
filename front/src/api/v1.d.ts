@@ -1839,6 +1839,8 @@ export interface components {
             uuid?: string;
             datasource_uuid: string;
             storage_uuid: string;
+            /** @description UUID of the worker assigned to execute this pipeline. If null, any available worker can execute (Auto mode). */
+            worker_uuid?: string | null;
             /** @description Pipeline type (email, telegram, whatsapp, linkedin) pulled from datasource_uuid */
             type?: string;
             /** @description Pipeline name */
