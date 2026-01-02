@@ -505,3 +505,4 @@ CREATE INDEX IF NOT EXISTS idx_worker_enrollment_token_expires ON worker_enrollm
 -- FK for pipeline.worker_uuid (added after registered_worker table is created)
 ALTER TABLE pipeline ADD CONSTRAINT fk_pipeline_worker
     FOREIGN KEY (worker_uuid) REFERENCES registered_worker(uuid) ON DELETE SET NULL;
+

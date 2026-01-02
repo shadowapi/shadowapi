@@ -17,6 +17,7 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
+	"github.com/shadowapi/shadowapi/backend/internal/jobstore"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/subjects"
 	"github.com/shadowapi/shadowapi/backend/pkg/jobs"
@@ -41,6 +42,7 @@ type Handler struct {
 	cfg       *config.Config
 	dbp       *pgxpool.Pool
 	queue     *queue.Queue
+	jobStore  *jobstore.Store
 	cancel    func()
 	consumeCC jetstream.ConsumeContext
 }
@@ -51,12 +53,14 @@ func Provide(i do.Injector) (*Handler, error) {
 	cfg := do.MustInvoke[*config.Config](i)
 	dbp := do.MustInvoke[*pgxpool.Pool](i)
 	q := do.MustInvoke[*queue.Queue](i)
+	js := do.MustInvoke[*jobstore.Store](i)
 
 	return &Handler{
-		log:   log,
-		cfg:   cfg,
-		dbp:   dbp,
-		queue: q,
+		log:      log,
+		cfg:      cfg,
+		dbp:      dbp,
+		queue:    q,
+		jobStore: js,
 	}, nil
 }
 
@@ -169,12 +173,22 @@ func (h *Handler) handleResult(msg queue.Msg) {
 		h.handleTokenRefreshResult(ctx, result)
 	}
 
+	// Handle test connection results
+	if isTestConnectionResult(msg.Subject()) && len(result.ResultData) > 0 {
+		h.handleTestConnectionResult(ctx, result)
+	}
+
 	msg.Ack()
 }
 
 // isTokenRefreshResult checks if the message is a token refresh result
 func isTokenRefreshResult(subject string) bool {
 	return strings.Contains(subject, "tokenRefresh")
+}
+
+// isTestConnectionResult checks if the message is a test connection result
+func isTestConnectionResult(subject string) bool {
+	return strings.Contains(subject, "testConnection")
 }
 
 // handleTokenRefreshResult processes a token refresh job result
@@ -262,4 +276,50 @@ func (h *Handler) scheduleNextTokenRefresh(ctx context.Context, tokenUUID uuid.U
 	_ = jobUUID
 	_ = schedulerUUID
 	_ = headers
+}
+
+// handleTestConnectionResult processes a test connection job result
+func (h *Handler) handleTestConnectionResult(ctx context.Context, result JobResult) {
+	var testResult jobs.TestConnectionResult
+	if err := json.Unmarshal(result.ResultData, &testResult); err != nil {
+		h.log.Error("failed to unmarshal test connection result", "error", err)
+		return
+	}
+
+	// Get existing job from KV store
+	job, err := h.jobStore.Get(ctx, testResult.JobUUID)
+	if err != nil {
+		h.log.Error("failed to get test connection job from KV store",
+			"job_uuid", testResult.JobUUID,
+			"error", err,
+		)
+		return
+	}
+
+	// Determine status based on success
+	status := "completed"
+	if !testResult.Success {
+		status = "failed"
+	}
+
+	// Update job with result
+	job.Status = status
+	job.Result = result.ResultData
+	job.CompletedAt = time.Now().UTC()
+
+	// Store updated job back to KV
+	if err := h.jobStore.Put(ctx, job); err != nil {
+		h.log.Error("failed to update test connection job in KV store",
+			"job_uuid", testResult.JobUUID,
+			"error", err,
+		)
+		return
+	}
+
+	h.log.Info("test connection result processed",
+		"job_uuid", testResult.JobUUID,
+		"resource_type", testResult.ResourceType,
+		"resource_uuid", testResult.ResourceUUID,
+		"success", testResult.Success,
+	)
 }

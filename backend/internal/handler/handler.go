@@ -18,6 +18,8 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/internal/jobstore"
+	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -29,6 +31,8 @@ type Handler struct {
 	cfg         *config.Config
 	log         *slog.Logger
 	dbp         *pgxpool.Pool
+	queue       *queue.Queue
+	jobStore    *jobstore.Store
 	scheduler   *worker.Scheduler
 	userManager auth.UserManager
 	oauth2Svc   *OAuth2Service
@@ -183,6 +187,8 @@ func Provide(i do.Injector) (*Handler, error) {
 		cfg:         cfg,
 		log:         log,
 		dbp:         do.MustInvoke[*pgxpool.Pool](i),
+		queue:       do.MustInvoke[*queue.Queue](i),
+		jobStore:    do.MustInvoke[*jobstore.Store](i),
 		scheduler:   do.MustInvoke[*worker.Scheduler](i),
 		userManager: do.MustInvoke[auth.UserManager](i),
 		enforcer:    do.MustInvoke[*rbac.Enforcer](i),

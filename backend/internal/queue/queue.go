@@ -100,6 +100,16 @@ func (q *Queue) Ensure(ctx context.Context, stream string, subjects []string) er
 	return err
 }
 
+// CreateOrUpdateKeyValue creates or updates a key-value bucket
+func (q *Queue) CreateOrUpdateKeyValue(ctx context.Context, cfg jetstream.KeyValueConfig) (jetstream.KeyValue, error) {
+	return q.js.CreateOrUpdateKeyValue(ctx, cfg)
+}
+
+// Prefix returns the configured queue prefix
+func (q *Queue) Prefix() string {
+	return q.cfg.Queue.Prefix
+}
+
 // Consume messages from the stream with ability to filter by subjects
 func (q *Queue) Consume(
 	ctx context.Context,
