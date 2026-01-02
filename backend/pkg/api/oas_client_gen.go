@@ -9572,6 +9572,23 @@ func (c *Client) sendMapperSourceFieldsList(ctx context.Context, params MapperSo
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "datasource_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "datasource_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.DatasourceType.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"

@@ -17,6 +17,13 @@ get:
       schema:
         type: string
         enum: [string, integer, boolean, datetime, array, object]
+    - name: datasource_type
+      in: query
+      description: Filter by datasource type to show only fields available for that datasource
+      required: false
+      schema:
+        type: string
+        enum: [email, email_oauth, telegram, whatsapp, linkedin]
   responses:
     "200":
       description: List of available source fields

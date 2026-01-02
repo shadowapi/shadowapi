@@ -2,6 +2,153 @@ package mapper
 
 import "github.com/shadowapi/shadowapi/backend/pkg/api"
 
+// DatasourceType represents the type of data source for field filtering.
+type DatasourceType string
+
+const (
+	DatasourceTypeEmail      DatasourceType = "email"
+	DatasourceTypeEmailOAuth DatasourceType = "email_oauth"
+	DatasourceTypeTelegram   DatasourceType = "telegram"
+	DatasourceTypeWhatsapp   DatasourceType = "whatsapp"
+	DatasourceTypeLinkedin   DatasourceType = "linkedin"
+)
+
+// datasourceMessageFields maps datasource types to available message field names.
+// NOTE: Only includes fields that are actually populated by the current implementation.
+// body_parsed.* and meta.* fields are NOT populated (storage always sets BodyParsed: nil).
+var datasourceMessageFields = map[DatasourceType][]string{
+	DatasourceTypeEmail: {
+		// Core identifiers
+		"uuid", "type", "format", "chat_uuid", "thread_uuid", "external_message_id",
+		// Sender and recipients
+		"sender", "recipients",
+		// Content
+		"subject", "body", "attachments",
+		// Timestamps
+		"created_at", "updated_at",
+	},
+	DatasourceTypeEmailOAuth: {
+		// Same as email - Gmail uses the same message structure
+		"uuid", "type", "format", "chat_uuid", "thread_uuid", "external_message_id",
+		// Sender and recipients
+		"sender", "recipients",
+		// Content
+		"subject", "body", "attachments",
+		// Timestamps
+		"created_at", "updated_at",
+	},
+	DatasourceTypeTelegram: {
+		// Core identifiers (no thread_uuid or subject in Telegram)
+		"uuid", "type", "format", "chat_uuid", "external_message_id",
+		// Sender and recipients
+		"sender", "recipients",
+		// Content
+		"body", "reactions", "attachments",
+		// Forwarding and replies (Telegram supports full forwarding)
+		"forward_from", "reply_to_message_uuid",
+		"forward_from_chat_uuid", "forward_from_message_uuid", "forward_meta",
+		// Timestamps
+		"created_at", "updated_at",
+	},
+	DatasourceTypeWhatsapp: {
+		// Core identifiers (no thread_uuid or subject in WhatsApp)
+		"uuid", "type", "format", "chat_uuid", "external_message_id",
+		// Sender and recipients
+		"sender", "recipients",
+		// Content
+		"body", "reactions", "attachments",
+		// Forwarding and replies (limited forwarding info in WhatsApp)
+		"forward_from", "reply_to_message_uuid",
+		// Timestamps
+		"created_at", "updated_at",
+	},
+	DatasourceTypeLinkedin: {
+		// Core identifiers
+		"uuid", "type", "format", "chat_uuid", "thread_uuid", "external_message_id",
+		// Sender and recipients
+		"sender", "recipients",
+		// Content (LinkedIn has simple text messages)
+		"body", "attachments",
+		// Timestamps
+		"created_at", "updated_at",
+	},
+}
+
+// datasourceContactFields maps datasource types to available contact field names.
+var datasourceContactFields = map[DatasourceType][]string{
+	DatasourceTypeEmail: {
+		// Core identifiers
+		"uuid", "user_uuid", "instance_uuid", "status",
+		// Names
+		"first", "last", "middle", "names", "names_search",
+		// Emails (primary contact method for email sources)
+		"email1", "email1_type", "email2", "email2_type",
+		"email3", "email4", "email5", "emails", "email_search",
+		// Timestamps
+		"entry_date", "edit_date",
+	},
+	DatasourceTypeEmailOAuth: {
+		// Same as email
+		"uuid", "user_uuid", "instance_uuid", "status",
+		"first", "last", "middle", "names", "names_search",
+		"email1", "email1_type", "email2", "email2_type",
+		"email3", "email4", "email5", "emails", "email_search",
+		"entry_date", "edit_date",
+	},
+	DatasourceTypeTelegram: {
+		// Core identifiers
+		"uuid", "user_uuid", "instance_uuid", "status",
+		// Names
+		"first", "last", "middle", "names", "names_search",
+		// Telegram-specific
+		"telegram", "telegram_uuid",
+		// Phone (Telegram contacts often have phone)
+		"phone1", "phone1_country", "phones", "phone_search",
+		// Messengers
+		"messengers", "messengers_search",
+		// Profile image
+		"cached_img", "cached_img_data",
+		// Timestamps
+		"entry_date", "edit_date",
+	},
+	DatasourceTypeWhatsapp: {
+		// Core identifiers
+		"uuid", "user_uuid", "instance_uuid", "status",
+		// Names
+		"first", "last", "middle", "names", "names_search",
+		// WhatsApp-specific
+		"whatsapp", "whatsapp_uuid",
+		// Phone (WhatsApp is phone-based)
+		"phone1", "phone1_type", "phone1_country", "phones", "phone_search",
+		// Messengers
+		"messengers", "messengers_search",
+		// Profile image
+		"cached_img", "cached_img_data",
+		// Timestamps
+		"entry_date", "edit_date",
+	},
+	DatasourceTypeLinkedin: {
+		// Core identifiers
+		"uuid", "user_uuid", "instance_uuid", "status",
+		// Names
+		"first", "last", "middle", "names", "names_search",
+		// LinkedIn-specific
+		"linkedin_uuid", "linkedin_url",
+		// Email (LinkedIn provides email)
+		"email1", "email1_type", "emails", "email_search",
+		// Position/Employment (LinkedIn specializes in this)
+		"last_position_id", "last_position_company_id", "last_position_company_name",
+		"last_position_title", "last_position_start_date", "last_position_end_date",
+		"last_position_description", "last_positions",
+		// Socials
+		"socials", "socials_search",
+		// Profile image
+		"cached_img", "cached_img_data",
+		// Timestamps
+		"entry_date", "edit_date",
+	},
+}
+
 // Message source fields - derived from spec/components/message.yaml
 var messageFields = []api.SourceFieldDefinition{
 	// Core identifiers
@@ -204,4 +351,49 @@ func BuildSourceFieldIndex() map[string]api.SourceFieldDefinition {
 		index[key] = f
 	}
 	return index
+}
+
+// FilterByDatasourceType filters source fields by datasource type.
+// If the datasource type is empty or unknown, returns all fields.
+func FilterByDatasourceType(fields []api.SourceFieldDefinition, dsType string) []api.SourceFieldDefinition {
+	if dsType == "" {
+		return fields
+	}
+
+	dt := DatasourceType(dsType)
+
+	// Build lookup sets of allowed field names for messages and contacts
+	allowedMessageFields := make(map[string]bool)
+	allowedContactFields := make(map[string]bool)
+
+	if msgFields, ok := datasourceMessageFields[dt]; ok {
+		for _, f := range msgFields {
+			allowedMessageFields[f] = true
+		}
+	}
+
+	if ctxFields, ok := datasourceContactFields[dt]; ok {
+		for _, f := range ctxFields {
+			allowedContactFields[f] = true
+		}
+	}
+
+	// If unknown datasource type, return all fields
+	if len(allowedMessageFields) == 0 && len(allowedContactFields) == 0 {
+		return fields
+	}
+
+	result := make([]api.SourceFieldDefinition, 0)
+	for _, f := range fields {
+		if f.Entity == api.SourceFieldDefinitionEntityMessage {
+			if allowedMessageFields[f.Name] {
+				result = append(result, f)
+			}
+		} else if f.Entity == api.SourceFieldDefinitionEntityContact {
+			if allowedContactFields[f.Name] {
+				result = append(result, f)
+			}
+		}
+	}
+	return result
 }

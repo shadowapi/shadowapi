@@ -233,6 +233,23 @@ func (s MapperFieldMappingSourceEntity) Validate() error {
 	}
 }
 
+func (s MapperSourceFieldsListDatasourceType) Validate() error {
+	switch s {
+	case "email":
+		return nil
+	case "email_oauth":
+		return nil
+	case "telegram":
+		return nil
+	case "whatsapp":
+		return nil
+	case "linkedin":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s MapperSourceFieldsListEntity) Validate() error {
 	switch s {
 	case "message":

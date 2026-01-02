@@ -3685,6 +3685,8 @@ type MapperSourceFieldsListParams struct {
 	Entity OptMapperSourceFieldsListEntity
 	// Filter by field data type.
 	Type OptMapperSourceFieldsListType
+	// Filter by datasource type to show only fields available for that datasource.
+	DatasourceType OptMapperSourceFieldsListDatasourceType
 }
 
 func unpackMapperSourceFieldsListParams(packed middleware.Parameters) (params MapperSourceFieldsListParams) {
@@ -3704,6 +3706,15 @@ func unpackMapperSourceFieldsListParams(packed middleware.Parameters) (params Ma
 		}
 		if v, ok := packed[key]; ok {
 			params.Type = v.(OptMapperSourceFieldsListType)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "datasource_type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.DatasourceType = v.(OptMapperSourceFieldsListDatasourceType)
 		}
 	}
 	return params
@@ -3819,6 +3830,62 @@ func decodeMapperSourceFieldsListParams(args [0]string, argsEscaped bool, r *htt
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "type",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: datasource_type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "datasource_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotDatasourceTypeVal MapperSourceFieldsListDatasourceType
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDatasourceTypeVal = MapperSourceFieldsListDatasourceType(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.DatasourceType.SetTo(paramsDotDatasourceTypeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.DatasourceType.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "datasource_type",
 			In:   "query",
 			Err:  err,
 		}

@@ -11,6 +11,11 @@ import (
 func (h *Handler) MapperSourceFieldsList(ctx context.Context, params api.MapperSourceFieldsListParams) (*api.MapperSourceFieldsListOK, error) {
 	fields := mapper.GetAllSourceFields()
 
+	// Apply datasource type filter first (most restrictive)
+	if params.DatasourceType.IsSet() {
+		fields = mapper.FilterByDatasourceType(fields, string(params.DatasourceType.Value))
+	}
+
 	// Apply entity filter if provided
 	if params.Entity.IsSet() {
 		fields = mapper.FilterByEntity(fields, params.Entity.Value)

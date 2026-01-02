@@ -3343,6 +3343,68 @@ func (s *MapperFieldMappingSourceEntity) UnmarshalText(data []byte) error {
 	}
 }
 
+type MapperSourceFieldsListDatasourceType string
+
+const (
+	MapperSourceFieldsListDatasourceTypeEmail      MapperSourceFieldsListDatasourceType = "email"
+	MapperSourceFieldsListDatasourceTypeEmailOAuth MapperSourceFieldsListDatasourceType = "email_oauth"
+	MapperSourceFieldsListDatasourceTypeTelegram   MapperSourceFieldsListDatasourceType = "telegram"
+	MapperSourceFieldsListDatasourceTypeWhatsapp   MapperSourceFieldsListDatasourceType = "whatsapp"
+	MapperSourceFieldsListDatasourceTypeLinkedin   MapperSourceFieldsListDatasourceType = "linkedin"
+)
+
+// AllValues returns all MapperSourceFieldsListDatasourceType values.
+func (MapperSourceFieldsListDatasourceType) AllValues() []MapperSourceFieldsListDatasourceType {
+	return []MapperSourceFieldsListDatasourceType{
+		MapperSourceFieldsListDatasourceTypeEmail,
+		MapperSourceFieldsListDatasourceTypeEmailOAuth,
+		MapperSourceFieldsListDatasourceTypeTelegram,
+		MapperSourceFieldsListDatasourceTypeWhatsapp,
+		MapperSourceFieldsListDatasourceTypeLinkedin,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MapperSourceFieldsListDatasourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case MapperSourceFieldsListDatasourceTypeEmail:
+		return []byte(s), nil
+	case MapperSourceFieldsListDatasourceTypeEmailOAuth:
+		return []byte(s), nil
+	case MapperSourceFieldsListDatasourceTypeTelegram:
+		return []byte(s), nil
+	case MapperSourceFieldsListDatasourceTypeWhatsapp:
+		return []byte(s), nil
+	case MapperSourceFieldsListDatasourceTypeLinkedin:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MapperSourceFieldsListDatasourceType) UnmarshalText(data []byte) error {
+	switch MapperSourceFieldsListDatasourceType(data) {
+	case MapperSourceFieldsListDatasourceTypeEmail:
+		*s = MapperSourceFieldsListDatasourceTypeEmail
+		return nil
+	case MapperSourceFieldsListDatasourceTypeEmailOAuth:
+		*s = MapperSourceFieldsListDatasourceTypeEmailOAuth
+		return nil
+	case MapperSourceFieldsListDatasourceTypeTelegram:
+		*s = MapperSourceFieldsListDatasourceTypeTelegram
+		return nil
+	case MapperSourceFieldsListDatasourceTypeWhatsapp:
+		*s = MapperSourceFieldsListDatasourceTypeWhatsapp
+		return nil
+	case MapperSourceFieldsListDatasourceTypeLinkedin:
+		*s = MapperSourceFieldsListDatasourceTypeLinkedin
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type MapperSourceFieldsListEntity string
 
 const (
@@ -5601,6 +5663,52 @@ func (o OptListRolesScope) Get() (v ListRolesScope, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptListRolesScope) Or(d ListRolesScope) ListRolesScope {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMapperSourceFieldsListDatasourceType returns new OptMapperSourceFieldsListDatasourceType with value set to v.
+func NewOptMapperSourceFieldsListDatasourceType(v MapperSourceFieldsListDatasourceType) OptMapperSourceFieldsListDatasourceType {
+	return OptMapperSourceFieldsListDatasourceType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMapperSourceFieldsListDatasourceType is optional MapperSourceFieldsListDatasourceType.
+type OptMapperSourceFieldsListDatasourceType struct {
+	Value MapperSourceFieldsListDatasourceType
+	Set   bool
+}
+
+// IsSet returns true if OptMapperSourceFieldsListDatasourceType was set.
+func (o OptMapperSourceFieldsListDatasourceType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMapperSourceFieldsListDatasourceType) Reset() {
+	var v MapperSourceFieldsListDatasourceType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMapperSourceFieldsListDatasourceType) SetTo(v MapperSourceFieldsListDatasourceType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMapperSourceFieldsListDatasourceType) Get() (v MapperSourceFieldsListDatasourceType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMapperSourceFieldsListDatasourceType) Or(d MapperSourceFieldsListDatasourceType) MapperSourceFieldsListDatasourceType {
 	if v, ok := o.Get(); ok {
 		return v
 	}

@@ -7274,6 +7274,8 @@ export interface operations {
                 entity?: "message" | "contact";
                 /** @description Filter by field data type */
                 type?: "string" | "integer" | "boolean" | "datetime" | "array" | "object";
+                /** @description Filter by datasource type to show only fields available for that datasource */
+                datasource_type?: "email" | "email_oauth" | "telegram" | "whatsapp" | "linkedin";
             };
             header?: never;
             path?: never;

@@ -14158,6 +14158,10 @@ func (s *Server) handleMapperSourceFieldsListRequest(args [0]string, argsEscaped
 					Name: "type",
 					In:   "query",
 				}: params.Type,
+				{
+					Name: "datasource_type",
+					In:   "query",
+				}: params.DatasourceType,
 			},
 			Raw: r,
 		}

@@ -13,6 +13,7 @@ const { Text } = Typography;
 
 interface MapperTableProps {
   storageUuid: string;
+  datasourceType?: string;
   mappings: MapperFieldMapping[];
   onChange: (mappings: MapperFieldMapping[]) => void;
 }
@@ -21,7 +22,7 @@ function generateId(): string {
   return `mapping-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function MapperTable({ storageUuid, mappings, onChange }: MapperTableProps) {
+function MapperTable({ storageUuid, datasourceType, mappings, onChange }: MapperTableProps) {
   const [sourceFields, setSourceFields] = useState<SourceFieldDefinition[]>([]);
   const [transforms, setTransforms] = useState<TransformDefinition[]>([]);
   const [tables, setTables] = useState<StoragePostgresTable[]>([]);
@@ -29,7 +30,11 @@ function MapperTable({ storageUuid, mappings, onChange }: MapperTableProps) {
 
   const loadData = useCallback(async () => {
     const [sourceRes, transformRes, storageRes] = await Promise.all([
-      client.GET('/mapper/source-fields'),
+      client.GET('/mapper/source-fields', {
+        params: {
+          query: datasourceType ? { datasource_type: datasourceType as 'email' | 'email_oauth' | 'telegram' | 'whatsapp' | 'linkedin' } : {},
+        },
+      }),
       client.GET('/mapper/transforms'),
       client.GET('/storage/postgres/{uuid}', {
         params: { path: { uuid: storageUuid } },
@@ -58,7 +63,7 @@ function MapperTable({ storageUuid, mappings, onChange }: MapperTableProps) {
     }
 
     setLoading(false);
-  }, [storageUuid]);
+  }, [storageUuid, datasourceType]);
 
   useEffect(() => {
     void loadData();

@@ -48,11 +48,16 @@ function PipelineEdit() {
   const [storages, setStorages] = useState<Storage[]>([]);
   const [mapperMappings, setMapperMappings] = useState<MapperFieldMapping[]>([]);
   const [selectedStorageUuid, setSelectedStorageUuid] = useState<string | undefined>();
+  const [selectedDatasourceUuid, setSelectedDatasourceUuid] = useState<string | undefined>();
   const isNew = !uuid;
 
   // Get selected storage type
   const selectedStorage = storages.find((s) => s.uuid === selectedStorageUuid);
   const isPostgresStorage = selectedStorage?.type === 'postgres';
+
+  // Get selected datasource type for mapper field filtering
+  const selectedDatasource = datasources.find((ds) => ds.uuid === selectedDatasourceUuid);
+  const selectedDatasourceType = selectedDatasource?.type;
 
   // Load datasources and storages for dropdowns
   const loadOptions = useCallback(async () => {
@@ -98,7 +103,8 @@ function PipelineEdit() {
       is_enabled: data.is_enabled ?? false,
     });
 
-    // Set selected storage for MapperTable
+    // Set selected datasource and storage for MapperTable
+    setSelectedDatasourceUuid(data.datasource_uuid);
     setSelectedStorageUuid(data.storage_uuid);
 
     // Extract mapper config from flow nodes if present
@@ -251,6 +257,11 @@ function PipelineEdit() {
               filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
+              onChange={(value) => {
+                setSelectedDatasourceUuid(value);
+                // Clear mappings when datasource changes to avoid invalid field selections
+                setMapperMappings([]);
+              }}
             />
           </Form.Item>
 
@@ -277,6 +288,7 @@ function PipelineEdit() {
               </Paragraph>
               <MapperTable
                 storageUuid={selectedStorageUuid}
+                datasourceType={selectedDatasourceType}
                 mappings={mapperMappings}
                 onChange={setMapperMappings}
               />
