@@ -138,6 +138,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/datasource/email_oauth/{uuid}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Initiate a connection test for an OAuth email datasource. Returns a job UUID that can be polled for results. */
+        post: operations["datasource-email-oauth-test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/datasource/{uuid}/oauth2/client": {
         parameters: {
             query?: never;
@@ -497,6 +514,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/postgres/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Test a PostgreSQL storage connection using inline parameters (without saving).
+         *     Use this endpoint to validate connection parameters before creating or updating a storage.
+         *     - For is_same_database=true, returns immediate success (200).
+         *     - For external databases, returns a job UUID (202) that can be polled for results.
+         */
+        post: operations["storage-postgres-test-inline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/storage/postgres/{uuid}": {
         parameters: {
             query?: never;
@@ -511,6 +550,27 @@ export interface paths {
         post?: never;
         /** @description Delete a specific PostgreSQL storage instance by UUID. */
         delete: operations["storage-postgres-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/postgres/{uuid}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Initiate a connection test for a PostgreSQL storage.
+         *     - For storages with is_same_database=true, returns immediate success (200).
+         *     - For external databases, returns a job UUID (202) that can be polled for results.
+         */
+        post: operations["storage-postgres-test"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1428,6 +1488,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/test-connection-job/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get the status and result of a test connection job. */
+        get: operations["test-connection-job-get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1559,6 +1636,9 @@ export interface components {
         MapperTransform: components["schemas"]["mapper_transform"];
         SourceFieldDefinition: components["schemas"]["source_field_definition"];
         TransformDefinition: components["schemas"]["transform_definition"];
+        TestConnectionResult: components["schemas"]["test_connection_result"];
+        TestConnectionJob: components["schemas"]["test_connection_job"];
+        StoragePostgresTestRequest: components["schemas"]["storage_postgres_test_request"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -1646,6 +1726,59 @@ export interface components {
             readonly created_at?: string;
             /** Format: date-time */
             readonly updated_at?: string;
+        };
+        /** @description Result of a connection test */
+        test_connection_result: {
+            /** @description Whether the connection test succeeded */
+            success: boolean;
+            /**
+             * @description Categorized error code for programmatic handling
+             * @enum {string}
+             */
+            error_code?: "auth_failed" | "invalid_credentials" | "connection_refused" | "connection_timeout" | "host_unreachable" | "dns_failure" | "ssl_required" | "imap_disabled" | "oauth_scope_insufficient" | "unknown";
+            /** @description Human-readable error description */
+            error_message?: string;
+            /** @description Detailed technical error message */
+            error_details?: string;
+            /** @description Test duration in milliseconds */
+            duration_ms?: number;
+            /**
+             * Format: date-time
+             * @description When the test was performed
+             */
+            tested_at?: string;
+            /** @description Additional test details (e.g., IMAP host, DB version) */
+            details?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description A test connection job record */
+        test_connection_job: {
+            /** @description The unique identifier of the test connection job */
+            readonly uuid: string;
+            /**
+             * @description Type of resource being tested
+             * @enum {string}
+             */
+            resource_type: "email_oauth" | "postgres";
+            /** @description UUID of the resource being tested */
+            resource_uuid: string;
+            /**
+             * @description Current job status
+             * @enum {string}
+             */
+            status: "pending" | "running" | "completed" | "failed";
+            result?: components["schemas"]["test_connection_result"];
+            /**
+             * Format: date-time
+             * @description When the job was created
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description When the job completed (if finished)
+             */
+            readonly completed_at?: string;
         };
         /** @description List of session logs for an account */
         telegram_session_history: {
@@ -1934,10 +2067,29 @@ export interface components {
             host?: string;
             /** @description The port number on which the PostgreSQL database server is listening. */
             port?: string;
+            /** @description The database name to connect to. Defaults to 'postgres' if not provided. */
+            database?: string;
             /** @description Additional connection options in URL query format. */
             options?: string;
             /** @description Target table definitions for data export from pipelines */
             tables?: components["schemas"]["storage_postgres_table"][];
+        };
+        /** @description Request body for testing PostgreSQL connection before save */
+        storage_postgres_test_request: {
+            /** @description If true, use the app's primary Postgres connection. If false, use custom credentials. */
+            is_same_database?: boolean;
+            /** @description The username used to connect to the PostgreSQL database. */
+            user?: string;
+            /** @description The password used to connect to the PostgreSQL database. */
+            password?: string;
+            /** @description The hostname or IP address of the PostgreSQL database server. */
+            host?: string;
+            /** @description The port number on which the PostgreSQL database server is listening. */
+            port?: string;
+            /** @description The database name. Defaults to 'postgres' if not provided. */
+            database?: string;
+            /** @description Additional connection options in URL query format. */
+            options?: string;
         };
         storage_s3: {
             readonly uuid?: string;
@@ -3271,6 +3423,38 @@ export interface operations {
             };
         };
     };
+    "datasource-email-oauth-test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the OAuth email datasource to test. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Test job created successfully. Poll the returned job UUID for results. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["test_connection_job"];
+                };
+            };
+            /** @description An error occurred while initiating the connection test. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
     "datasource-set-oauth2-client": {
         parameters: {
             query?: never;
@@ -4546,6 +4730,48 @@ export interface operations {
             };
         };
     };
+    "storage-postgres-test-inline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["storage_postgres_test_request"];
+            };
+        };
+        responses: {
+            /** @description Test completed immediately (for is_same_database=true). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["test_connection_result"];
+                };
+            };
+            /** @description Test job created. Poll the returned job UUID for results. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["test_connection_job"];
+                };
+            };
+            /** @description An error occurred while initiating the connection test. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
     "storage-postgres-get": {
         parameters: {
             query?: never;
@@ -4634,6 +4860,47 @@ export interface operations {
                 content?: never;
             };
             /** @description An error occurred while deleting the PostgreSQL storage instance. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-postgres-test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the PostgreSQL storage to test. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Test completed immediately (for is_same_database=true). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["test_connection_result"];
+                };
+            };
+            /** @description Test job created. Poll the returned job UUID for results. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["test_connection_job"];
+                };
+            };
+            /** @description An error occurred while initiating the connection test. */
             default: {
                 headers: {
                     [name: string]: unknown;
@@ -7383,6 +7650,38 @@ export interface operations {
                 };
             };
             /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "test-connection-job-get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the test connection job. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Test connection job retrieved successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["test_connection_job"];
+                };
+            };
+            /** @description An error occurred while retrieving the job. */
             default: {
                 headers: {
                     [name: string]: unknown;

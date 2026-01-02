@@ -15,11 +15,14 @@ import {
   Row,
   Col,
   Divider,
+  Collapse,
 } from 'antd';
-import { DeleteOutlined, RightOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { DeleteOutlined, RightOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import { getStorageKey, getTables, setTables, clearTables, hasTables } from '../../lib/storage/storageTablesStore';
+import { useStorageConnectionTest } from './hooks/useStorageConnectionTest';
+import StorageTestModal from './components/StorageTestModal';
 import type { components } from '../../api/v1';
 
 type PostgresTable = components['schemas']['storage_postgres_table'];
@@ -40,14 +43,82 @@ interface FormValues {
   secret_access_key?: string;
   // PostgreSQL fields
   is_same_database?: boolean;
+  connection_string?: string;
   user?: string;
   password?: string;
   host?: string;
   port?: string;
+  database?: string;
   options?: string;
   tables?: PostgresTable[];
   // Host Files fields
   path?: string;
+}
+
+// PostgreSQL connection string utilities
+interface PostgresConnectionParams {
+  host?: string;
+  port?: string;
+  user?: string;
+  password?: string;
+  database?: string;
+  options?: string;
+}
+
+function parsePostgresUrl(url: string): PostgresConnectionParams | null {
+  if (!url) return null;
+
+  try {
+    // Handle postgres:// and postgresql:// schemes
+    const normalized = url.replace(/^postgresql:\/\//, 'postgres://');
+    if (!normalized.startsWith('postgres://')) return null;
+
+    const urlObj = new URL(normalized);
+
+    // Extract path (database name) - remove leading slash
+    const database = urlObj.pathname.slice(1) || undefined;
+
+    return {
+      host: urlObj.hostname || undefined,
+      port: urlObj.port || undefined,
+      user: urlObj.username ? decodeURIComponent(urlObj.username) : undefined,
+      password: urlObj.password ? decodeURIComponent(urlObj.password) : undefined,
+      database,
+      options: urlObj.search ? urlObj.search.slice(1) : undefined, // Remove leading ?
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildPostgresUrl(params: PostgresConnectionParams): string {
+  const { host, port, user, password, database, options } = params;
+
+  if (!host) return '';
+
+  let url = 'postgres://';
+
+  if (user) {
+    url += encodeURIComponent(user);
+    if (password) {
+      url += ':' + encodeURIComponent(password);
+    }
+    url += '@';
+  }
+
+  url += host;
+
+  if (port) {
+    url += ':' + port;
+  }
+
+  url += '/' + (database || '');
+
+  if (options) {
+    url += '?' + options;
+  }
+
+  return url;
 }
 
 const typeOptions = [
@@ -67,6 +138,9 @@ function StorageEdit() {
   const [loadedData, setLoadedData] = useState<FormValues | null>(null);
   const [tablesCount, setTablesCount] = useState(0);
   const [originalTablesJson, setOriginalTablesJson] = useState<string>('[]');
+  const [testModalOpen, setTestModalOpen] = useState(false);
+  const [pendingFormValues, setPendingFormValues] = useState<FormValues | null>(null);
+  const { state: testState, testPostgresConnection, cancel: cancelTest, reset: resetTest } = useStorageConnectionTest();
   const isNew = !uuid;
   const storageKey = getStorageKey(uuid);
 
@@ -79,6 +153,50 @@ function StorageEdit() {
 
   const selectedType = Form.useWatch('type', form) || storageType;
   const isSameDatabase = Form.useWatch('is_same_database', form);
+
+  // Track if we're syncing to prevent loops
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Handle connection string changes - parse and update individual fields
+  const handleConnectionStringChange = useCallback(
+    (value: string) => {
+      if (isSyncing) return;
+
+      const parsed = parsePostgresUrl(value);
+      if (parsed) {
+        setIsSyncing(true);
+        form.setFieldsValue({
+          host: parsed.host || '',
+          port: parsed.port || '',
+          user: parsed.user || '',
+          password: parsed.password || '',
+          database: parsed.database || '',
+          options: parsed.options || '',
+        });
+        // Use setTimeout to ensure state updates complete
+        setTimeout(() => setIsSyncing(false), 0);
+      }
+    },
+    [form, isSyncing]
+  );
+
+  // Handle individual field changes - rebuild connection string
+  const handleFieldChange = useCallback(() => {
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    const values = form.getFieldsValue();
+    const connStr = buildPostgresUrl({
+      host: values.host,
+      port: values.port,
+      user: values.user,
+      password: values.password,
+      database: values.database,
+      options: values.options,
+    });
+    form.setFieldValue('connection_string', connStr);
+    setTimeout(() => setIsSyncing(false), 0);
+  }, [form, isSyncing]);
 
   // Load existing storage for edit mode
   const loadStorage = useCallback(async () => {
@@ -126,10 +244,20 @@ function StorageEdit() {
           params: { path: { uuid: uuid! } },
         });
         if (data) {
+          // Build connection string from individual fields
+          const connStr = buildPostgresUrl({
+            host: data.host,
+            port: data.port,
+            user: data.user,
+            password: data.password,
+            database: data.database,
+            options: data.options,
+          });
           fullData = {
             ...data,
             type: 'postgres',
             is_enabled: data.is_enabled ?? true,
+            connection_string: connStr,
           };
           // Save tables to sessionStorage (only if not already present from previous edit)
           const tables = data.tables || [];
@@ -193,7 +321,8 @@ function StorageEdit() {
     }
   }, [selectedType, storageKey, location.key]);
 
-  const handleSubmit = async (values: FormValues) => {
+  // Extract save logic to separate function for reuse after test
+  const saveStorage = async (values: FormValues) => {
     setSaving(true);
 
     try {
@@ -225,6 +354,7 @@ function StorageEdit() {
                 password: values.password,
                 host: values.host,
                 port: values.port,
+                database: values.database,
                 options: values.options,
                 tables: getTables(storageKey),
               },
@@ -282,6 +412,7 @@ function StorageEdit() {
                 password: values.password,
                 host: values.host,
                 port: values.port,
+                database: values.database,
                 options: values.options,
                 tables: getTables(storageKey),
               },
@@ -311,6 +442,63 @@ function StorageEdit() {
       message.error(err instanceof Error ? err.message : 'Failed to save storage');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSubmit = async (values: FormValues) => {
+    // Check if this is postgres with external database that needs testing
+    const needsTest = values.type === 'postgres' && !values.is_same_database;
+
+    if (needsTest) {
+      // Store form values and open test modal
+      setPendingFormValues(values);
+      setTestModalOpen(true);
+
+      // Start test with form values
+      await testPostgresConnection({
+        is_same_database: values.is_same_database,
+        user: values.user,
+        password: values.password,
+        host: values.host,
+        port: values.port,
+        database: values.database,
+        options: values.options,
+      });
+    } else {
+      // No test needed (s3, hostfiles, or postgres with same database)
+      await saveStorage(values);
+    }
+  };
+
+  // Modal handlers
+  const handleTestProceed = () => {
+    setTestModalOpen(false);
+    if (pendingFormValues) {
+      saveStorage(pendingFormValues);
+    }
+    setPendingFormValues(null);
+    resetTest();
+  };
+
+  const handleTestCancel = () => {
+    cancelTest();
+    setTestModalOpen(false);
+    setPendingFormValues(null);
+    resetTest();
+  };
+
+  const handleTestRetry = async () => {
+    resetTest();
+    if (pendingFormValues) {
+      await testPostgresConnection({
+        is_same_database: pendingFormValues.is_same_database,
+        user: pendingFormValues.user,
+        password: pendingFormValues.password,
+        host: pendingFormValues.host,
+        port: pendingFormValues.port,
+        database: pendingFormValues.database,
+        options: pendingFormValues.options,
+      });
     }
   };
 
@@ -451,25 +639,67 @@ function StorageEdit() {
 
               {!isSameDatabase && (
                 <>
-                  <Form.Item name="host" label="Host">
-                    <Input placeholder="localhost" />
-                  </Form.Item>
-                  <Form.Item name="port" label="Port">
-                    <Input placeholder="5432" />
-                  </Form.Item>
-                  <Form.Item name="user" label="Username">
-                    <Input placeholder="postgres" />
-                  </Form.Item>
-                  <Form.Item name="password" label="Password">
-                    <Input.Password placeholder="Database password" />
-                  </Form.Item>
                   <Form.Item
-                    name="options"
-                    label="Connection Options"
-                    extra="Additional connection options in URL query format"
+                    name="connection_string"
+                    label="Connection String"
+                    extra="Example: postgres://user:password@localhost:5432/database?sslmode=require"
                   >
-                    <Input placeholder="sslmode=require&connect_timeout=10" />
+                    <Input
+                      placeholder="postgres://user:password@host:5432/database"
+                      onChange={(e) => handleConnectionStringChange(e.target.value)}
+                    />
                   </Form.Item>
+
+                  <Collapse
+                    ghost
+                    items={[
+                      {
+                        key: 'manual',
+                        label: (
+                          <Space>
+                            <SettingOutlined />
+                            Manual Configuration
+                          </Space>
+                        ),
+                        children: (
+                          <>
+                            <Form.Item name="host" label="Host">
+                              <Input placeholder="localhost" onChange={handleFieldChange} />
+                            </Form.Item>
+                            <Form.Item name="port" label="Port">
+                              <Input placeholder="5432" onChange={handleFieldChange} />
+                            </Form.Item>
+                            <Form.Item
+                              name="database"
+                              label="Database"
+                              extra="Defaults to 'postgres' if not specified"
+                            >
+                              <Input placeholder="postgres" onChange={handleFieldChange} />
+                            </Form.Item>
+                            <Form.Item name="user" label="Username">
+                              <Input placeholder="postgres" onChange={handleFieldChange} />
+                            </Form.Item>
+                            <Form.Item name="password" label="Password">
+                              <Input.Password
+                                placeholder="Database password"
+                                onChange={handleFieldChange}
+                              />
+                            </Form.Item>
+                            <Form.Item
+                              name="options"
+                              label="Connection Options"
+                              extra="Additional connection options in URL query format"
+                            >
+                              <Input
+                                placeholder="sslmode=require&connect_timeout=10"
+                                onChange={handleFieldChange}
+                              />
+                            </Form.Item>
+                          </>
+                        ),
+                      },
+                    ]}
+                  />
                 </>
               )}
 
@@ -573,6 +803,15 @@ function StorageEdit() {
           </Paragraph>
         </Card>
       </Col>
+
+      <StorageTestModal
+        open={testModalOpen}
+        state={testState}
+        storageName={form.getFieldValue('name') || 'Storage'}
+        onProceed={handleTestProceed}
+        onCancel={handleTestCancel}
+        onRetry={handleTestRetry}
+      />
     </Row>
   );
 }

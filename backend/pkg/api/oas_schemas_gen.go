@@ -6991,6 +6991,144 @@ func (o OptTelegramSessionHistoryItemMeta) Or(d TelegramSessionHistoryItemMeta) 
 	return d
 }
 
+// NewOptTestConnectionResult returns new OptTestConnectionResult with value set to v.
+func NewOptTestConnectionResult(v TestConnectionResult) OptTestConnectionResult {
+	return OptTestConnectionResult{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTestConnectionResult is optional TestConnectionResult.
+type OptTestConnectionResult struct {
+	Value TestConnectionResult
+	Set   bool
+}
+
+// IsSet returns true if OptTestConnectionResult was set.
+func (o OptTestConnectionResult) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTestConnectionResult) Reset() {
+	var v TestConnectionResult
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTestConnectionResult) SetTo(v TestConnectionResult) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTestConnectionResult) Get() (v TestConnectionResult, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTestConnectionResult) Or(d TestConnectionResult) TestConnectionResult {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTestConnectionResultDetails returns new OptTestConnectionResultDetails with value set to v.
+func NewOptTestConnectionResultDetails(v TestConnectionResultDetails) OptTestConnectionResultDetails {
+	return OptTestConnectionResultDetails{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTestConnectionResultDetails is optional TestConnectionResultDetails.
+type OptTestConnectionResultDetails struct {
+	Value TestConnectionResultDetails
+	Set   bool
+}
+
+// IsSet returns true if OptTestConnectionResultDetails was set.
+func (o OptTestConnectionResultDetails) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTestConnectionResultDetails) Reset() {
+	var v TestConnectionResultDetails
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTestConnectionResultDetails) SetTo(v TestConnectionResultDetails) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTestConnectionResultDetails) Get() (v TestConnectionResultDetails, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTestConnectionResultDetails) Or(d TestConnectionResultDetails) TestConnectionResultDetails {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTestConnectionResultErrorCode returns new OptTestConnectionResultErrorCode with value set to v.
+func NewOptTestConnectionResultErrorCode(v TestConnectionResultErrorCode) OptTestConnectionResultErrorCode {
+	return OptTestConnectionResultErrorCode{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTestConnectionResultErrorCode is optional TestConnectionResultErrorCode.
+type OptTestConnectionResultErrorCode struct {
+	Value TestConnectionResultErrorCode
+	Set   bool
+}
+
+// IsSet returns true if OptTestConnectionResultErrorCode was set.
+func (o OptTestConnectionResultErrorCode) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTestConnectionResultErrorCode) Reset() {
+	var v TestConnectionResultErrorCode
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTestConnectionResultErrorCode) SetTo(v TestConnectionResultErrorCode) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTestConnectionResultErrorCode) Get() (v TestConnectionResultErrorCode, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTestConnectionResultErrorCode) Or(d TestConnectionResultErrorCode) TestConnectionResultErrorCode {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptTransformDefinitionParamsSchema returns new OptTransformDefinitionParamsSchema with value set to v.
 func NewOptTransformDefinitionParamsSchema(v TransformDefinitionParamsSchema) OptTransformDefinitionParamsSchema {
 	return OptTransformDefinitionParamsSchema{
@@ -8889,6 +9027,8 @@ type StoragePostgres struct {
 	Host OptString `json:"host"`
 	// The port number on which the PostgreSQL database server is listening.
 	Port OptString `json:"port"`
+	// The database name to connect to. Defaults to 'postgres' if not provided.
+	Database OptString `json:"database"`
 	// Additional connection options in URL query format.
 	Options OptString `json:"options"`
 	// Target table definitions for data export from pipelines.
@@ -8933,6 +9073,11 @@ func (s *StoragePostgres) GetHost() OptString {
 // GetPort returns the value of Port.
 func (s *StoragePostgres) GetPort() OptString {
 	return s.Port
+}
+
+// GetDatabase returns the value of Database.
+func (s *StoragePostgres) GetDatabase() OptString {
+	return s.Database
 }
 
 // GetOptions returns the value of Options.
@@ -8983,6 +9128,11 @@ func (s *StoragePostgres) SetHost(val OptString) {
 // SetPort sets the value of Port.
 func (s *StoragePostgres) SetPort(val OptString) {
 	s.Port = val
+}
+
+// SetDatabase sets the value of Database.
+func (s *StoragePostgres) SetDatabase(val OptString) {
+	s.Database = val
 }
 
 // SetOptions sets the value of Options.
@@ -9207,6 +9357,95 @@ func (s *StoragePostgresTableCreationMode) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Request body for testing PostgreSQL connection before save.
+// Ref: #
+type StoragePostgresTestRequest struct {
+	// If true, use the app's primary Postgres connection. If false, use custom credentials.
+	IsSameDatabase OptBool `json:"is_same_database"`
+	// The username used to connect to the PostgreSQL database.
+	User OptString `json:"user"`
+	// The password used to connect to the PostgreSQL database.
+	Password OptString `json:"password"`
+	// The hostname or IP address of the PostgreSQL database server.
+	Host OptString `json:"host"`
+	// The port number on which the PostgreSQL database server is listening.
+	Port OptString `json:"port"`
+	// The database name. Defaults to 'postgres' if not provided.
+	Database OptString `json:"database"`
+	// Additional connection options in URL query format.
+	Options OptString `json:"options"`
+}
+
+// GetIsSameDatabase returns the value of IsSameDatabase.
+func (s *StoragePostgresTestRequest) GetIsSameDatabase() OptBool {
+	return s.IsSameDatabase
+}
+
+// GetUser returns the value of User.
+func (s *StoragePostgresTestRequest) GetUser() OptString {
+	return s.User
+}
+
+// GetPassword returns the value of Password.
+func (s *StoragePostgresTestRequest) GetPassword() OptString {
+	return s.Password
+}
+
+// GetHost returns the value of Host.
+func (s *StoragePostgresTestRequest) GetHost() OptString {
+	return s.Host
+}
+
+// GetPort returns the value of Port.
+func (s *StoragePostgresTestRequest) GetPort() OptString {
+	return s.Port
+}
+
+// GetDatabase returns the value of Database.
+func (s *StoragePostgresTestRequest) GetDatabase() OptString {
+	return s.Database
+}
+
+// GetOptions returns the value of Options.
+func (s *StoragePostgresTestRequest) GetOptions() OptString {
+	return s.Options
+}
+
+// SetIsSameDatabase sets the value of IsSameDatabase.
+func (s *StoragePostgresTestRequest) SetIsSameDatabase(val OptBool) {
+	s.IsSameDatabase = val
+}
+
+// SetUser sets the value of User.
+func (s *StoragePostgresTestRequest) SetUser(val OptString) {
+	s.User = val
+}
+
+// SetPassword sets the value of Password.
+func (s *StoragePostgresTestRequest) SetPassword(val OptString) {
+	s.Password = val
+}
+
+// SetHost sets the value of Host.
+func (s *StoragePostgresTestRequest) SetHost(val OptString) {
+	s.Host = val
+}
+
+// SetPort sets the value of Port.
+func (s *StoragePostgresTestRequest) SetPort(val OptString) {
+	s.Port = val
+}
+
+// SetDatabase sets the value of Database.
+func (s *StoragePostgresTestRequest) SetDatabase(val OptString) {
+	s.Database = val
+}
+
+// SetOptions sets the value of Options.
+func (s *StoragePostgresTestRequest) SetOptions(val OptString) {
+	s.Options = val
 }
 
 // Ref: #
@@ -9721,6 +9960,397 @@ func (s *TelegramUser) SetLastName(val OptString) {
 // SetPhone sets the value of Phone.
 func (s *TelegramUser) SetPhone(val OptString) {
 	s.Phone = val
+}
+
+// A test connection job record.
+// Ref: #
+type TestConnectionJob struct {
+	// The unique identifier of the test connection job.
+	UUID string `json:"uuid"`
+	// Type of resource being tested.
+	ResourceType TestConnectionJobResourceType `json:"resource_type"`
+	// UUID of the resource being tested.
+	ResourceUUID string `json:"resource_uuid"`
+	// Current job status.
+	Status TestConnectionJobStatus `json:"status"`
+	Result OptTestConnectionResult `json:"result"`
+	// When the job was created.
+	CreatedAt OptDateTime `json:"created_at"`
+	// When the job completed (if finished).
+	CompletedAt OptDateTime `json:"completed_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *TestConnectionJob) GetUUID() string {
+	return s.UUID
+}
+
+// GetResourceType returns the value of ResourceType.
+func (s *TestConnectionJob) GetResourceType() TestConnectionJobResourceType {
+	return s.ResourceType
+}
+
+// GetResourceUUID returns the value of ResourceUUID.
+func (s *TestConnectionJob) GetResourceUUID() string {
+	return s.ResourceUUID
+}
+
+// GetStatus returns the value of Status.
+func (s *TestConnectionJob) GetStatus() TestConnectionJobStatus {
+	return s.Status
+}
+
+// GetResult returns the value of Result.
+func (s *TestConnectionJob) GetResult() OptTestConnectionResult {
+	return s.Result
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *TestConnectionJob) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetCompletedAt returns the value of CompletedAt.
+func (s *TestConnectionJob) GetCompletedAt() OptDateTime {
+	return s.CompletedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *TestConnectionJob) SetUUID(val string) {
+	s.UUID = val
+}
+
+// SetResourceType sets the value of ResourceType.
+func (s *TestConnectionJob) SetResourceType(val TestConnectionJobResourceType) {
+	s.ResourceType = val
+}
+
+// SetResourceUUID sets the value of ResourceUUID.
+func (s *TestConnectionJob) SetResourceUUID(val string) {
+	s.ResourceUUID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *TestConnectionJob) SetStatus(val TestConnectionJobStatus) {
+	s.Status = val
+}
+
+// SetResult sets the value of Result.
+func (s *TestConnectionJob) SetResult(val OptTestConnectionResult) {
+	s.Result = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *TestConnectionJob) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetCompletedAt sets the value of CompletedAt.
+func (s *TestConnectionJob) SetCompletedAt(val OptDateTime) {
+	s.CompletedAt = val
+}
+
+func (*TestConnectionJob) storagePostgresTestInlineRes() {}
+func (*TestConnectionJob) storagePostgresTestRes()       {}
+
+// Type of resource being tested.
+type TestConnectionJobResourceType string
+
+const (
+	TestConnectionJobResourceTypeEmailOAuth TestConnectionJobResourceType = "email_oauth"
+	TestConnectionJobResourceTypePostgres   TestConnectionJobResourceType = "postgres"
+)
+
+// AllValues returns all TestConnectionJobResourceType values.
+func (TestConnectionJobResourceType) AllValues() []TestConnectionJobResourceType {
+	return []TestConnectionJobResourceType{
+		TestConnectionJobResourceTypeEmailOAuth,
+		TestConnectionJobResourceTypePostgres,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TestConnectionJobResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case TestConnectionJobResourceTypeEmailOAuth:
+		return []byte(s), nil
+	case TestConnectionJobResourceTypePostgres:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TestConnectionJobResourceType) UnmarshalText(data []byte) error {
+	switch TestConnectionJobResourceType(data) {
+	case TestConnectionJobResourceTypeEmailOAuth:
+		*s = TestConnectionJobResourceTypeEmailOAuth
+		return nil
+	case TestConnectionJobResourceTypePostgres:
+		*s = TestConnectionJobResourceTypePostgres
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Current job status.
+type TestConnectionJobStatus string
+
+const (
+	TestConnectionJobStatusPending   TestConnectionJobStatus = "pending"
+	TestConnectionJobStatusRunning   TestConnectionJobStatus = "running"
+	TestConnectionJobStatusCompleted TestConnectionJobStatus = "completed"
+	TestConnectionJobStatusFailed    TestConnectionJobStatus = "failed"
+)
+
+// AllValues returns all TestConnectionJobStatus values.
+func (TestConnectionJobStatus) AllValues() []TestConnectionJobStatus {
+	return []TestConnectionJobStatus{
+		TestConnectionJobStatusPending,
+		TestConnectionJobStatusRunning,
+		TestConnectionJobStatusCompleted,
+		TestConnectionJobStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TestConnectionJobStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case TestConnectionJobStatusPending:
+		return []byte(s), nil
+	case TestConnectionJobStatusRunning:
+		return []byte(s), nil
+	case TestConnectionJobStatusCompleted:
+		return []byte(s), nil
+	case TestConnectionJobStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TestConnectionJobStatus) UnmarshalText(data []byte) error {
+	switch TestConnectionJobStatus(data) {
+	case TestConnectionJobStatusPending:
+		*s = TestConnectionJobStatusPending
+		return nil
+	case TestConnectionJobStatusRunning:
+		*s = TestConnectionJobStatusRunning
+		return nil
+	case TestConnectionJobStatusCompleted:
+		*s = TestConnectionJobStatusCompleted
+		return nil
+	case TestConnectionJobStatusFailed:
+		*s = TestConnectionJobStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Result of a connection test.
+// Ref: #
+type TestConnectionResult struct {
+	// Whether the connection test succeeded.
+	Success bool `json:"success"`
+	// Categorized error code for programmatic handling.
+	ErrorCode OptTestConnectionResultErrorCode `json:"error_code"`
+	// Human-readable error description.
+	ErrorMessage OptString `json:"error_message"`
+	// Detailed technical error message.
+	ErrorDetails OptString `json:"error_details"`
+	// Test duration in milliseconds.
+	DurationMs OptInt `json:"duration_ms"`
+	// When the test was performed.
+	TestedAt OptDateTime `json:"tested_at"`
+	// Additional test details (e.g., IMAP host, DB version).
+	Details OptTestConnectionResultDetails `json:"details"`
+}
+
+// GetSuccess returns the value of Success.
+func (s *TestConnectionResult) GetSuccess() bool {
+	return s.Success
+}
+
+// GetErrorCode returns the value of ErrorCode.
+func (s *TestConnectionResult) GetErrorCode() OptTestConnectionResultErrorCode {
+	return s.ErrorCode
+}
+
+// GetErrorMessage returns the value of ErrorMessage.
+func (s *TestConnectionResult) GetErrorMessage() OptString {
+	return s.ErrorMessage
+}
+
+// GetErrorDetails returns the value of ErrorDetails.
+func (s *TestConnectionResult) GetErrorDetails() OptString {
+	return s.ErrorDetails
+}
+
+// GetDurationMs returns the value of DurationMs.
+func (s *TestConnectionResult) GetDurationMs() OptInt {
+	return s.DurationMs
+}
+
+// GetTestedAt returns the value of TestedAt.
+func (s *TestConnectionResult) GetTestedAt() OptDateTime {
+	return s.TestedAt
+}
+
+// GetDetails returns the value of Details.
+func (s *TestConnectionResult) GetDetails() OptTestConnectionResultDetails {
+	return s.Details
+}
+
+// SetSuccess sets the value of Success.
+func (s *TestConnectionResult) SetSuccess(val bool) {
+	s.Success = val
+}
+
+// SetErrorCode sets the value of ErrorCode.
+func (s *TestConnectionResult) SetErrorCode(val OptTestConnectionResultErrorCode) {
+	s.ErrorCode = val
+}
+
+// SetErrorMessage sets the value of ErrorMessage.
+func (s *TestConnectionResult) SetErrorMessage(val OptString) {
+	s.ErrorMessage = val
+}
+
+// SetErrorDetails sets the value of ErrorDetails.
+func (s *TestConnectionResult) SetErrorDetails(val OptString) {
+	s.ErrorDetails = val
+}
+
+// SetDurationMs sets the value of DurationMs.
+func (s *TestConnectionResult) SetDurationMs(val OptInt) {
+	s.DurationMs = val
+}
+
+// SetTestedAt sets the value of TestedAt.
+func (s *TestConnectionResult) SetTestedAt(val OptDateTime) {
+	s.TestedAt = val
+}
+
+// SetDetails sets the value of Details.
+func (s *TestConnectionResult) SetDetails(val OptTestConnectionResultDetails) {
+	s.Details = val
+}
+
+func (*TestConnectionResult) storagePostgresTestInlineRes() {}
+func (*TestConnectionResult) storagePostgresTestRes()       {}
+
+// Additional test details (e.g., IMAP host, DB version).
+type TestConnectionResultDetails map[string]jx.Raw
+
+func (s *TestConnectionResultDetails) init() TestConnectionResultDetails {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Categorized error code for programmatic handling.
+type TestConnectionResultErrorCode string
+
+const (
+	TestConnectionResultErrorCodeAuthFailed             TestConnectionResultErrorCode = "auth_failed"
+	TestConnectionResultErrorCodeInvalidCredentials     TestConnectionResultErrorCode = "invalid_credentials"
+	TestConnectionResultErrorCodeConnectionRefused      TestConnectionResultErrorCode = "connection_refused"
+	TestConnectionResultErrorCodeConnectionTimeout      TestConnectionResultErrorCode = "connection_timeout"
+	TestConnectionResultErrorCodeHostUnreachable        TestConnectionResultErrorCode = "host_unreachable"
+	TestConnectionResultErrorCodeDNSFailure             TestConnectionResultErrorCode = "dns_failure"
+	TestConnectionResultErrorCodeSslRequired            TestConnectionResultErrorCode = "ssl_required"
+	TestConnectionResultErrorCodeImapDisabled           TestConnectionResultErrorCode = "imap_disabled"
+	TestConnectionResultErrorCodeOAuthScopeInsufficient TestConnectionResultErrorCode = "oauth_scope_insufficient"
+	TestConnectionResultErrorCodeUnknown                TestConnectionResultErrorCode = "unknown"
+)
+
+// AllValues returns all TestConnectionResultErrorCode values.
+func (TestConnectionResultErrorCode) AllValues() []TestConnectionResultErrorCode {
+	return []TestConnectionResultErrorCode{
+		TestConnectionResultErrorCodeAuthFailed,
+		TestConnectionResultErrorCodeInvalidCredentials,
+		TestConnectionResultErrorCodeConnectionRefused,
+		TestConnectionResultErrorCodeConnectionTimeout,
+		TestConnectionResultErrorCodeHostUnreachable,
+		TestConnectionResultErrorCodeDNSFailure,
+		TestConnectionResultErrorCodeSslRequired,
+		TestConnectionResultErrorCodeImapDisabled,
+		TestConnectionResultErrorCodeOAuthScopeInsufficient,
+		TestConnectionResultErrorCodeUnknown,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TestConnectionResultErrorCode) MarshalText() ([]byte, error) {
+	switch s {
+	case TestConnectionResultErrorCodeAuthFailed:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeInvalidCredentials:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeConnectionRefused:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeConnectionTimeout:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeHostUnreachable:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeDNSFailure:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeSslRequired:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeImapDisabled:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeOAuthScopeInsufficient:
+		return []byte(s), nil
+	case TestConnectionResultErrorCodeUnknown:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TestConnectionResultErrorCode) UnmarshalText(data []byte) error {
+	switch TestConnectionResultErrorCode(data) {
+	case TestConnectionResultErrorCodeAuthFailed:
+		*s = TestConnectionResultErrorCodeAuthFailed
+		return nil
+	case TestConnectionResultErrorCodeInvalidCredentials:
+		*s = TestConnectionResultErrorCodeInvalidCredentials
+		return nil
+	case TestConnectionResultErrorCodeConnectionRefused:
+		*s = TestConnectionResultErrorCodeConnectionRefused
+		return nil
+	case TestConnectionResultErrorCodeConnectionTimeout:
+		*s = TestConnectionResultErrorCodeConnectionTimeout
+		return nil
+	case TestConnectionResultErrorCodeHostUnreachable:
+		*s = TestConnectionResultErrorCodeHostUnreachable
+		return nil
+	case TestConnectionResultErrorCodeDNSFailure:
+		*s = TestConnectionResultErrorCodeDNSFailure
+		return nil
+	case TestConnectionResultErrorCodeSslRequired:
+		*s = TestConnectionResultErrorCodeSslRequired
+		return nil
+	case TestConnectionResultErrorCodeImapDisabled:
+		*s = TestConnectionResultErrorCodeImapDisabled
+		return nil
+	case TestConnectionResultErrorCodeOAuthScopeInsufficient:
+		*s = TestConnectionResultErrorCodeOAuthScopeInsufficient
+		return nil
+	case TestConnectionResultErrorCodeUnknown:
+		*s = TestConnectionResultErrorCodeUnknown
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type TgSessionCreateReq struct {

@@ -247,6 +247,16 @@ func (UnimplementedHandler) DatasourceEmailOAuthList(ctx context.Context, params
 	return r, ht.ErrNotImplemented
 }
 
+// DatasourceEmailOAuthTest implements datasource-email-oauth-test operation.
+//
+// Initiate a connection test for an OAuth email datasource. Returns a job UUID that can be polled
+// for results.
+//
+// POST /datasource/email_oauth/{uuid}/test
+func (UnimplementedHandler) DatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (r *TestConnectionJob, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DatasourceEmailOAuthUpdate implements datasource-email-oauth-update operation.
 //
 // Update an existing email OAuth datasource.
@@ -1022,6 +1032,29 @@ func (UnimplementedHandler) StoragePostgresTablesReplace(ctx context.Context, re
 	return r, ht.ErrNotImplemented
 }
 
+// StoragePostgresTest implements storage-postgres-test operation.
+//
+// Initiate a connection test for a PostgreSQL storage.
+// - For storages with is_same_database=true, returns immediate success (200).
+// - For external databases, returns a job UUID (202) that can be polled for results.
+//
+// POST /storage/postgres/{uuid}/test
+func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (r StoragePostgresTestRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StoragePostgresTestInline implements storage-postgres-test-inline operation.
+//
+// Test a PostgreSQL storage connection using inline parameters (without saving).
+// Use this endpoint to validate connection parameters before creating or updating a storage.
+// - For is_same_database=true, returns immediate success (200).
+// - For external databases, returns a job UUID (202) that can be polled for results.
+//
+// POST /storage/postgres/test
+func (UnimplementedHandler) StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (r StoragePostgresTestInlineRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StoragePostgresUpdate implements storage-postgres-update operation.
 //
 // Update details of a specific PostgreSQL storage instance by UUID.
@@ -1109,6 +1142,15 @@ func (UnimplementedHandler) SyncpolicyList(ctx context.Context, params Syncpolic
 //
 // PUT /syncpolicy/{uuid}
 func (UnimplementedHandler) SyncpolicyUpdate(ctx context.Context, req *SyncPolicy, params SyncpolicyUpdateParams) (r *SyncPolicy, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// TestConnectionJobGet implements test-connection-job-get operation.
+//
+// Get the status and result of a test connection job.
+//
+// GET /test-connection-job/{uuid}
+func (UnimplementedHandler) TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (r *TestConnectionJob, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -26,6 +26,9 @@ properties:
   port:
     description: "The port number on which the PostgreSQL database server is listening."
     type: string
+  database:
+    description: "The database name to connect to. Defaults to 'postgres' if not provided."
+    type: string
   options:
     description: "Additional connection options in URL query format."
     type: string

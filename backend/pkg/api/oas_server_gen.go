@@ -164,6 +164,13 @@ type Handler interface {
 	//
 	// GET /datasource/email_oauth
 	DatasourceEmailOAuthList(ctx context.Context, params DatasourceEmailOAuthListParams) ([]DatasourceEmailOAuth, error)
+	// DatasourceEmailOAuthTest implements datasource-email-oauth-test operation.
+	//
+	// Initiate a connection test for an OAuth email datasource. Returns a job UUID that can be polled
+	// for results.
+	//
+	// POST /datasource/email_oauth/{uuid}/test
+	DatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (*TestConnectionJob, error)
 	// DatasourceEmailOAuthUpdate implements datasource-email-oauth-update operation.
 	//
 	// Update an existing email OAuth datasource.
@@ -681,6 +688,23 @@ type Handler interface {
 	//
 	// PUT /storage/postgres/{uuid}/tables
 	StoragePostgresTablesReplace(ctx context.Context, req []StoragePostgresTable, params StoragePostgresTablesReplaceParams) ([]StoragePostgresTable, error)
+	// StoragePostgresTest implements storage-postgres-test operation.
+	//
+	// Initiate a connection test for a PostgreSQL storage.
+	// - For storages with is_same_database=true, returns immediate success (200).
+	// - For external databases, returns a job UUID (202) that can be polled for results.
+	//
+	// POST /storage/postgres/{uuid}/test
+	StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (StoragePostgresTestRes, error)
+	// StoragePostgresTestInline implements storage-postgres-test-inline operation.
+	//
+	// Test a PostgreSQL storage connection using inline parameters (without saving).
+	// Use this endpoint to validate connection parameters before creating or updating a storage.
+	// - For is_same_database=true, returns immediate success (200).
+	// - For external databases, returns a job UUID (202) that can be polled for results.
+	//
+	// POST /storage/postgres/test
+	StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (StoragePostgresTestInlineRes, error)
 	// StoragePostgresUpdate implements storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.
@@ -741,6 +765,12 @@ type Handler interface {
 	//
 	// PUT /syncpolicy/{uuid}
 	SyncpolicyUpdate(ctx context.Context, req *SyncPolicy, params SyncpolicyUpdateParams) (*SyncPolicy, error)
+	// TestConnectionJobGet implements test-connection-job-get operation.
+	//
+	// Get the status and result of a test connection job.
+	//
+	// GET /test-connection-job/{uuid}
+	TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (*TestConnectionJob, error)
 	// TgSessionCreate implements tg-session-create operation.
 	//
 	// Create a new Telegram session.

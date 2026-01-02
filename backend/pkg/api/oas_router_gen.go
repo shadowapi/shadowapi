@@ -418,12 +418,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								}
 
 								// Param: "uuid"
-								// Leaf parameter
-								args[0] = elem
-								elem = ""
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[0] = elem[:idx]
+								elem = elem[idx:]
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch r.Method {
 									case "DELETE":
 										s.handleDatasourceEmailOAuthDeleteRequest([1]string{
@@ -442,6 +445,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									}
 
 									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/test"
+									origElem := elem
+									if l := len("/test"); len(elem) >= l && elem[0:l] == "/test" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "POST":
+											s.handleDatasourceEmailOAuthTestRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "POST")
+										}
+
+										return
+									}
+
+									elem = origElem
 								}
 
 								elem = origElem
@@ -1642,6 +1670,32 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									break
 								}
 
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 't': // Prefix: "test"
+									origElem := elem
+									if l := len("test"); len(elem) >= l && elem[0:l] == "test" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "POST":
+											s.handleStoragePostgresTestInlineRequest([0]string{}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "POST")
+										}
+
+										return
+									}
+
+									elem = origElem
+								}
 								// Param: "uuid"
 								// Match until "/"
 								idx := strings.IndexByte(elem, '/')
@@ -1672,26 +1726,64 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									return
 								}
 								switch elem[0] {
-								case '/': // Prefix: "/tables"
+								case '/': // Prefix: "/t"
 									origElem := elem
-									if l := len("/tables"); len(elem) >= l && elem[0:l] == "/tables" {
+									if l := len("/t"); len(elem) >= l && elem[0:l] == "/t" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
-										// Leaf node.
-										switch r.Method {
-										case "PUT":
-											s.handleStoragePostgresTablesReplaceRequest([1]string{
-												args[0],
-											}, elemIsEscaped, w, r)
-										default:
-											s.notAllowed(w, r, "PUT")
+										break
+									}
+									switch elem[0] {
+									case 'a': // Prefix: "ables"
+										origElem := elem
+										if l := len("ables"); len(elem) >= l && elem[0:l] == "ables" {
+											elem = elem[l:]
+										} else {
+											break
 										}
 
-										return
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "PUT":
+												s.handleStoragePostgresTablesReplaceRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "PUT")
+											}
+
+											return
+										}
+
+										elem = origElem
+									case 'e': // Prefix: "est"
+										origElem := elem
+										if l := len("est"); len(elem) >= l && elem[0:l] == "est" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "POST":
+												s.handleStoragePostgresTestRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "POST")
+											}
+
+											return
+										}
+
+										elem = origElem
 									}
 
 									elem = origElem
@@ -1871,36 +1963,79 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "telegram"
+			case 't': // Prefix: "te"
 				origElem := elem
-				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
+				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'l': // Prefix: "legram"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "id"
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "PUT":
+								s.handleTgSessionVerifyRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 's': // Prefix: "st-connection-job/"
+					origElem := elem
+					if l := len("st-connection-job/"); len(elem) >= l && elem[0:l] == "st-connection-job/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
 					// Leaf parameter
 					args[0] = elem
 					elem = ""
@@ -1908,12 +2043,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch r.Method {
-						case "PUT":
-							s.handleTgSessionVerifyRequest([1]string{
+						case "GET":
+							s.handleTestConnectionJobGetRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "PUT")
+							s.notAllowed(w, r, "GET")
 						}
 
 						return
@@ -2933,12 +3068,15 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								}
 
 								// Param: "uuid"
-								// Leaf parameter
-								args[0] = elem
-								elem = ""
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[0] = elem[:idx]
+								elem = elem[idx:]
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch method {
 									case "DELETE":
 										r.name = DatasourceEmailOAuthDeleteOperation
@@ -2967,6 +3105,33 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									default:
 										return
 									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/test"
+									origElem := elem
+									if l := len("/test"); len(elem) >= l && elem[0:l] == "/test" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "POST":
+											r.name = DatasourceEmailOAuthTestOperation
+											r.summary = ""
+											r.operationID = "datasource-email-oauth-test"
+											r.pathPattern = "/datasource/email_oauth/{uuid}/test"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
 								}
 
 								elem = origElem
@@ -4423,6 +4588,36 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									break
 								}
 
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 't': // Prefix: "test"
+									origElem := elem
+									if l := len("test"); len(elem) >= l && elem[0:l] == "test" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "POST":
+											r.name = StoragePostgresTestInlineOperation
+											r.summary = ""
+											r.operationID = "storage-postgres-test-inline"
+											r.pathPattern = "/storage/postgres/test"
+											r.args = args
+											r.count = 0
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
+								}
 								// Param: "uuid"
 								// Match until "/"
 								idx := strings.IndexByte(elem, '/')
@@ -4463,28 +4658,68 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 								}
 								switch elem[0] {
-								case '/': // Prefix: "/tables"
+								case '/': // Prefix: "/t"
 									origElem := elem
-									if l := len("/tables"); len(elem) >= l && elem[0:l] == "/tables" {
+									if l := len("/t"); len(elem) >= l && elem[0:l] == "/t" {
 										elem = elem[l:]
 									} else {
 										break
 									}
 
 									if len(elem) == 0 {
-										// Leaf node.
-										switch method {
-										case "PUT":
-											r.name = StoragePostgresTablesReplaceOperation
-											r.summary = ""
-											r.operationID = "storage-postgres-tables-replace"
-											r.pathPattern = "/storage/postgres/{uuid}/tables"
-											r.args = args
-											r.count = 1
-											return r, true
-										default:
-											return
+										break
+									}
+									switch elem[0] {
+									case 'a': // Prefix: "ables"
+										origElem := elem
+										if l := len("ables"); len(elem) >= l && elem[0:l] == "ables" {
+											elem = elem[l:]
+										} else {
+											break
 										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "PUT":
+												r.name = StoragePostgresTablesReplaceOperation
+												r.summary = ""
+												r.operationID = "storage-postgres-tables-replace"
+												r.pathPattern = "/storage/postgres/{uuid}/tables"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+
+										elem = origElem
+									case 'e': // Prefix: "est"
+										origElem := elem
+										if l := len("est"); len(elem) >= l && elem[0:l] == "est" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "POST":
+												r.name = StoragePostgresTestOperation
+												r.summary = ""
+												r.operationID = "storage-postgres-test"
+												r.pathPattern = "/storage/postgres/{uuid}/test"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
+										}
+
+										elem = origElem
 									}
 
 									elem = origElem
@@ -4706,46 +4941,91 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "telegram"
+			case 't': // Prefix: "te"
 				origElem := elem
-				if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
+				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = TgSessionListOperation
-						r.summary = ""
-						r.operationID = "tg-session-list"
-						r.pathPattern = "/telegram"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = TgSessionCreateOperation
-						r.summary = ""
-						r.operationID = "tg-session-create"
-						r.pathPattern = "/telegram"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
+					break
 				}
 				switch elem[0] {
-				case '/': // Prefix: "/"
+				case 'l': // Prefix: "legram"
 					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
-					// Param: "id"
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = TgSessionListOperation
+							r.summary = ""
+							r.operationID = "tg-session-list"
+							r.pathPattern = "/telegram"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = TgSessionCreateOperation
+							r.summary = ""
+							r.operationID = "tg-session-create"
+							r.pathPattern = "/telegram"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+						origElem := elem
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "id"
+						// Leaf parameter
+						args[0] = elem
+						elem = ""
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "PUT":
+								r.name = TgSessionVerifyOperation
+								r.summary = ""
+								r.operationID = "tg-session-verify"
+								r.pathPattern = "/telegram/{id}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+
+					elem = origElem
+				case 's': // Prefix: "st-connection-job/"
+					origElem := elem
+					if l := len("st-connection-job/"); len(elem) >= l && elem[0:l] == "st-connection-job/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					// Param: "uuid"
 					// Leaf parameter
 					args[0] = elem
 					elem = ""
@@ -4753,11 +5033,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch method {
-						case "PUT":
-							r.name = TgSessionVerifyOperation
+						case "GET":
+							r.name = TestConnectionJobGetOperation
 							r.summary = ""
-							r.operationID = "tg-session-verify"
-							r.pathPattern = "/telegram/{id}"
+							r.operationID = "test-connection-job-get"
+							r.pathPattern = "/test-connection-job/{uuid}"
 							r.args = args
 							r.count = 1
 							return r, true

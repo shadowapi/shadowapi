@@ -923,6 +923,72 @@ func decodeDatasourceEmailOAuthListParams(args [0]string, argsEscaped bool, r *h
 	return params, nil
 }
 
+// DatasourceEmailOAuthTestParams is parameters of datasource-email-oauth-test operation.
+type DatasourceEmailOAuthTestParams struct {
+	// The UUID of the OAuth email datasource to test.
+	UUID string
+}
+
+func unpackDatasourceEmailOAuthTestParams(packed middleware.Parameters) (params DatasourceEmailOAuthTestParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDatasourceEmailOAuthTestParams(args [1]string, argsEscaped bool, r *http.Request) (params DatasourceEmailOAuthTestParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DatasourceEmailOAuthUpdateParams is parameters of datasource-email-oauth-update operation.
 type DatasourceEmailOAuthUpdateParams struct {
 	// UUID of the email OAuth datasource.
@@ -6463,6 +6529,72 @@ func decodeStoragePostgresTablesReplaceParams(args [1]string, argsEscaped bool, 
 	return params, nil
 }
 
+// StoragePostgresTestParams is parameters of storage-postgres-test operation.
+type StoragePostgresTestParams struct {
+	// The UUID of the PostgreSQL storage to test.
+	UUID string
+}
+
+func unpackStoragePostgresTestParams(packed middleware.Parameters) (params StoragePostgresTestParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStoragePostgresTestParams(args [1]string, argsEscaped bool, r *http.Request) (params StoragePostgresTestParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // StoragePostgresUpdateParams is parameters of storage-postgres-update operation.
 type StoragePostgresUpdateParams struct {
 	// The UUID of the PostgreSQL storage instance to update.
@@ -6994,6 +7126,72 @@ func unpackSyncpolicyUpdateParams(packed middleware.Parameters) (params Syncpoli
 }
 
 func decodeSyncpolicyUpdateParams(args [1]string, argsEscaped bool, r *http.Request) (params SyncpolicyUpdateParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// TestConnectionJobGetParams is parameters of test-connection-job-get operation.
+type TestConnectionJobGetParams struct {
+	// The UUID of the test connection job.
+	UUID string
+}
+
+func unpackTestConnectionJobGetParams(packed middleware.Parameters) (params TestConnectionJobGetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeTestConnectionJobGetParams(args [1]string, argsEscaped bool, r *http.Request) (params TestConnectionJobGetParams, _ error) {
 	// Decode path: uuid.
 	if err := func() error {
 		param := args[0]

@@ -12070,6 +12070,106 @@ func (s *OptTelegramSessionHistoryItemMeta) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes TestConnectionResult as json.
+func (o OptTestConnectionResult) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TestConnectionResult from json.
+func (o *OptTestConnectionResult) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTestConnectionResult to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTestConnectionResult) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTestConnectionResult) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TestConnectionResultDetails as json.
+func (o OptTestConnectionResultDetails) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes TestConnectionResultDetails from json.
+func (o *OptTestConnectionResultDetails) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTestConnectionResultDetails to nil")
+	}
+	o.Set = true
+	o.Value = make(TestConnectionResultDetails)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTestConnectionResultDetails) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTestConnectionResultDetails) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TestConnectionResultErrorCode as json.
+func (o OptTestConnectionResultErrorCode) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes TestConnectionResultErrorCode from json.
+func (o *OptTestConnectionResultErrorCode) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptTestConnectionResultErrorCode to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptTestConnectionResultErrorCode) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptTestConnectionResultErrorCode) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes TransformDefinitionParamsSchema as json.
 func (o OptTransformDefinitionParamsSchema) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -15356,6 +15456,12 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Database.Set {
+			e.FieldStart("database")
+			s.Database.Encode(e)
+		}
+	}
+	{
 		if s.Options.Set {
 			e.FieldStart("options")
 			s.Options.Encode(e)
@@ -15373,17 +15479,18 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStoragePostgres = [10]string{
-	0: "uuid",
-	1: "name",
-	2: "is_enabled",
-	3: "is_same_database",
-	4: "user",
-	5: "password",
-	6: "host",
-	7: "port",
-	8: "options",
-	9: "tables",
+var jsonFieldsNameOfStoragePostgres = [11]string{
+	0:  "uuid",
+	1:  "name",
+	2:  "is_enabled",
+	3:  "is_same_database",
+	4:  "user",
+	5:  "password",
+	6:  "host",
+	7:  "port",
+	8:  "database",
+	9:  "options",
+	10: "tables",
 }
 
 // Decode decodes StoragePostgres from json.
@@ -15476,6 +15583,16 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"port\"")
+			}
+		case "database":
+			if err := func() error {
+				s.Database.Reset()
+				if err := s.Database.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"database\"")
 			}
 		case "options":
 			if err := func() error {
@@ -15944,6 +16061,171 @@ func (s StoragePostgresTableCreationMode) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *StoragePostgresTableCreationMode) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *StoragePostgresTestRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *StoragePostgresTestRequest) encodeFields(e *jx.Encoder) {
+	{
+		if s.IsSameDatabase.Set {
+			e.FieldStart("is_same_database")
+			s.IsSameDatabase.Encode(e)
+		}
+	}
+	{
+		if s.User.Set {
+			e.FieldStart("user")
+			s.User.Encode(e)
+		}
+	}
+	{
+		if s.Password.Set {
+			e.FieldStart("password")
+			s.Password.Encode(e)
+		}
+	}
+	{
+		if s.Host.Set {
+			e.FieldStart("host")
+			s.Host.Encode(e)
+		}
+	}
+	{
+		if s.Port.Set {
+			e.FieldStart("port")
+			s.Port.Encode(e)
+		}
+	}
+	{
+		if s.Database.Set {
+			e.FieldStart("database")
+			s.Database.Encode(e)
+		}
+	}
+	{
+		if s.Options.Set {
+			e.FieldStart("options")
+			s.Options.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfStoragePostgresTestRequest = [7]string{
+	0: "is_same_database",
+	1: "user",
+	2: "password",
+	3: "host",
+	4: "port",
+	5: "database",
+	6: "options",
+}
+
+// Decode decodes StoragePostgresTestRequest from json.
+func (s *StoragePostgresTestRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StoragePostgresTestRequest to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "is_same_database":
+			if err := func() error {
+				s.IsSameDatabase.Reset()
+				if err := s.IsSameDatabase.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_same_database\"")
+			}
+		case "user":
+			if err := func() error {
+				s.User.Reset()
+				if err := s.User.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user\"")
+			}
+		case "password":
+			if err := func() error {
+				s.Password.Reset()
+				if err := s.Password.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"password\"")
+			}
+		case "host":
+			if err := func() error {
+				s.Host.Reset()
+				if err := s.Host.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"host\"")
+			}
+		case "port":
+			if err := func() error {
+				s.Port.Reset()
+				if err := s.Port.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"port\"")
+			}
+		case "database":
+			if err := func() error {
+				s.Database.Reset()
+				if err := s.Database.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"database\"")
+			}
+		case "options":
+			if err := func() error {
+				s.Options.Reset()
+				if err := s.Options.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"options\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode StoragePostgresTestRequest")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *StoragePostgresTestRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StoragePostgresTestRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -17346,6 +17628,596 @@ func (s *TelegramUser) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *TelegramUser) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TestConnectionJob) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TestConnectionJob) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("uuid")
+		e.Str(s.UUID)
+	}
+	{
+		e.FieldStart("resource_type")
+		s.ResourceType.Encode(e)
+	}
+	{
+		e.FieldStart("resource_uuid")
+		e.Str(s.ResourceUUID)
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		if s.Result.Set {
+			e.FieldStart("result")
+			s.Result.Encode(e)
+		}
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.CompletedAt.Set {
+			e.FieldStart("completed_at")
+			s.CompletedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfTestConnectionJob = [7]string{
+	0: "uuid",
+	1: "resource_type",
+	2: "resource_uuid",
+	3: "status",
+	4: "result",
+	5: "created_at",
+	6: "completed_at",
+}
+
+// Decode decodes TestConnectionJob from json.
+func (s *TestConnectionJob) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TestConnectionJob to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.UUID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "resource_type":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.ResourceType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resource_type\"")
+			}
+		case "resource_uuid":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.ResourceUUID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resource_uuid\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "result":
+			if err := func() error {
+				s.Result.Reset()
+				if err := s.Result.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"result\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "completed_at":
+			if err := func() error {
+				s.CompletedAt.Reset()
+				if err := s.CompletedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"completed_at\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TestConnectionJob")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTestConnectionJob) {
+					name = jsonFieldsNameOfTestConnectionJob[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TestConnectionJob) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TestConnectionJob) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TestConnectionJobResourceType as json.
+func (s TestConnectionJobResourceType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes TestConnectionJobResourceType from json.
+func (s *TestConnectionJobResourceType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TestConnectionJobResourceType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch TestConnectionJobResourceType(v) {
+	case TestConnectionJobResourceTypeEmailOAuth:
+		*s = TestConnectionJobResourceTypeEmailOAuth
+	case TestConnectionJobResourceTypePostgres:
+		*s = TestConnectionJobResourceTypePostgres
+	default:
+		*s = TestConnectionJobResourceType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TestConnectionJobResourceType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TestConnectionJobResourceType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TestConnectionJobStatus as json.
+func (s TestConnectionJobStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes TestConnectionJobStatus from json.
+func (s *TestConnectionJobStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TestConnectionJobStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch TestConnectionJobStatus(v) {
+	case TestConnectionJobStatusPending:
+		*s = TestConnectionJobStatusPending
+	case TestConnectionJobStatusRunning:
+		*s = TestConnectionJobStatusRunning
+	case TestConnectionJobStatusCompleted:
+		*s = TestConnectionJobStatusCompleted
+	case TestConnectionJobStatusFailed:
+		*s = TestConnectionJobStatusFailed
+	default:
+		*s = TestConnectionJobStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TestConnectionJobStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TestConnectionJobStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TestConnectionResult) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TestConnectionResult) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("success")
+		e.Bool(s.Success)
+	}
+	{
+		if s.ErrorCode.Set {
+			e.FieldStart("error_code")
+			s.ErrorCode.Encode(e)
+		}
+	}
+	{
+		if s.ErrorMessage.Set {
+			e.FieldStart("error_message")
+			s.ErrorMessage.Encode(e)
+		}
+	}
+	{
+		if s.ErrorDetails.Set {
+			e.FieldStart("error_details")
+			s.ErrorDetails.Encode(e)
+		}
+	}
+	{
+		if s.DurationMs.Set {
+			e.FieldStart("duration_ms")
+			s.DurationMs.Encode(e)
+		}
+	}
+	{
+		if s.TestedAt.Set {
+			e.FieldStart("tested_at")
+			s.TestedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.Details.Set {
+			e.FieldStart("details")
+			s.Details.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfTestConnectionResult = [7]string{
+	0: "success",
+	1: "error_code",
+	2: "error_message",
+	3: "error_details",
+	4: "duration_ms",
+	5: "tested_at",
+	6: "details",
+}
+
+// Decode decodes TestConnectionResult from json.
+func (s *TestConnectionResult) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TestConnectionResult to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "success":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Bool()
+				s.Success = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"success\"")
+			}
+		case "error_code":
+			if err := func() error {
+				s.ErrorCode.Reset()
+				if err := s.ErrorCode.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"error_code\"")
+			}
+		case "error_message":
+			if err := func() error {
+				s.ErrorMessage.Reset()
+				if err := s.ErrorMessage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"error_message\"")
+			}
+		case "error_details":
+			if err := func() error {
+				s.ErrorDetails.Reset()
+				if err := s.ErrorDetails.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"error_details\"")
+			}
+		case "duration_ms":
+			if err := func() error {
+				s.DurationMs.Reset()
+				if err := s.DurationMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"duration_ms\"")
+			}
+		case "tested_at":
+			if err := func() error {
+				s.TestedAt.Reset()
+				if err := s.TestedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tested_at\"")
+			}
+		case "details":
+			if err := func() error {
+				s.Details.Reset()
+				if err := s.Details.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"details\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TestConnectionResult")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTestConnectionResult) {
+					name = jsonFieldsNameOfTestConnectionResult[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TestConnectionResult) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TestConnectionResult) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TestConnectionResultDetails) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TestConnectionResultDetails) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes TestConnectionResultDetails from json.
+func (s *TestConnectionResultDetails) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TestConnectionResultDetails to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TestConnectionResultDetails")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TestConnectionResultDetails) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TestConnectionResultDetails) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes TestConnectionResultErrorCode as json.
+func (s TestConnectionResultErrorCode) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes TestConnectionResultErrorCode from json.
+func (s *TestConnectionResultErrorCode) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TestConnectionResultErrorCode to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch TestConnectionResultErrorCode(v) {
+	case TestConnectionResultErrorCodeAuthFailed:
+		*s = TestConnectionResultErrorCodeAuthFailed
+	case TestConnectionResultErrorCodeInvalidCredentials:
+		*s = TestConnectionResultErrorCodeInvalidCredentials
+	case TestConnectionResultErrorCodeConnectionRefused:
+		*s = TestConnectionResultErrorCodeConnectionRefused
+	case TestConnectionResultErrorCodeConnectionTimeout:
+		*s = TestConnectionResultErrorCodeConnectionTimeout
+	case TestConnectionResultErrorCodeHostUnreachable:
+		*s = TestConnectionResultErrorCodeHostUnreachable
+	case TestConnectionResultErrorCodeDNSFailure:
+		*s = TestConnectionResultErrorCodeDNSFailure
+	case TestConnectionResultErrorCodeSslRequired:
+		*s = TestConnectionResultErrorCodeSslRequired
+	case TestConnectionResultErrorCodeImapDisabled:
+		*s = TestConnectionResultErrorCodeImapDisabled
+	case TestConnectionResultErrorCodeOAuthScopeInsufficient:
+		*s = TestConnectionResultErrorCodeOAuthScopeInsufficient
+	case TestConnectionResultErrorCodeUnknown:
+		*s = TestConnectionResultErrorCodeUnknown
+	default:
+		*s = TestConnectionResultErrorCode(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TestConnectionResultErrorCode) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TestConnectionResultErrorCode) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

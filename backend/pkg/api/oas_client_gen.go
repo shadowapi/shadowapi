@@ -185,6 +185,13 @@ type Invoker interface {
 	//
 	// GET /datasource/email_oauth
 	DatasourceEmailOAuthList(ctx context.Context, params DatasourceEmailOAuthListParams) ([]DatasourceEmailOAuth, error)
+	// DatasourceEmailOAuthTest invokes datasource-email-oauth-test operation.
+	//
+	// Initiate a connection test for an OAuth email datasource. Returns a job UUID that can be polled
+	// for results.
+	//
+	// POST /datasource/email_oauth/{uuid}/test
+	DatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (*TestConnectionJob, error)
 	// DatasourceEmailOAuthUpdate invokes datasource-email-oauth-update operation.
 	//
 	// Update an existing email OAuth datasource.
@@ -702,6 +709,23 @@ type Invoker interface {
 	//
 	// PUT /storage/postgres/{uuid}/tables
 	StoragePostgresTablesReplace(ctx context.Context, request []StoragePostgresTable, params StoragePostgresTablesReplaceParams) ([]StoragePostgresTable, error)
+	// StoragePostgresTest invokes storage-postgres-test operation.
+	//
+	// Initiate a connection test for a PostgreSQL storage.
+	// - For storages with is_same_database=true, returns immediate success (200).
+	// - For external databases, returns a job UUID (202) that can be polled for results.
+	//
+	// POST /storage/postgres/{uuid}/test
+	StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (StoragePostgresTestRes, error)
+	// StoragePostgresTestInline invokes storage-postgres-test-inline operation.
+	//
+	// Test a PostgreSQL storage connection using inline parameters (without saving).
+	// Use this endpoint to validate connection parameters before creating or updating a storage.
+	// - For is_same_database=true, returns immediate success (200).
+	// - For external databases, returns a job UUID (202) that can be polled for results.
+	//
+	// POST /storage/postgres/test
+	StoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (StoragePostgresTestInlineRes, error)
 	// StoragePostgresUpdate invokes storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.
@@ -762,6 +786,12 @@ type Invoker interface {
 	//
 	// PUT /syncpolicy/{uuid}
 	SyncpolicyUpdate(ctx context.Context, request *SyncPolicy, params SyncpolicyUpdateParams) (*SyncPolicy, error)
+	// TestConnectionJobGet invokes test-connection-job-get operation.
+	//
+	// Get the status and result of a test connection job.
+	//
+	// GET /test-connection-job/{uuid}
+	TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (*TestConnectionJob, error)
 	// TgSessionCreate invokes tg-session-create operation.
 	//
 	// Create a new Telegram session.
@@ -3604,6 +3634,131 @@ func (c *Client) sendDatasourceEmailOAuthList(ctx context.Context, params Dataso
 
 	stage = "DecodeResponse"
 	result, err := decodeDatasourceEmailOAuthListResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DatasourceEmailOAuthTest invokes datasource-email-oauth-test operation.
+//
+// Initiate a connection test for an OAuth email datasource. Returns a job UUID that can be polled
+// for results.
+//
+// POST /datasource/email_oauth/{uuid}/test
+func (c *Client) DatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (*TestConnectionJob, error) {
+	res, err := c.sendDatasourceEmailOAuthTest(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (res *TestConnectionJob, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("datasource-email-oauth-test"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/datasource/email_oauth/{uuid}/test"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DatasourceEmailOAuthTestOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/datasource/email_oauth/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/test"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DatasourceEmailOAuthTestOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDatasourceEmailOAuthTestResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -14183,6 +14338,243 @@ func (c *Client) sendStoragePostgresTablesReplace(ctx context.Context, request [
 	return result, nil
 }
 
+// StoragePostgresTest invokes storage-postgres-test operation.
+//
+// Initiate a connection test for a PostgreSQL storage.
+// - For storages with is_same_database=true, returns immediate success (200).
+// - For external databases, returns a job UUID (202) that can be polled for results.
+//
+// POST /storage/postgres/{uuid}/test
+func (c *Client) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (StoragePostgresTestRes, error) {
+	res, err := c.sendStoragePostgresTest(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendStoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (res StoragePostgresTestRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("storage-postgres-test"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/postgres/{uuid}/test"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, StoragePostgresTestOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/storage/postgres/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/test"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresTestOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeStoragePostgresTestResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// StoragePostgresTestInline invokes storage-postgres-test-inline operation.
+//
+// Test a PostgreSQL storage connection using inline parameters (without saving).
+// Use this endpoint to validate connection parameters before creating or updating a storage.
+// - For is_same_database=true, returns immediate success (200).
+// - For external databases, returns a job UUID (202) that can be polled for results.
+//
+// POST /storage/postgres/test
+func (c *Client) StoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (StoragePostgresTestInlineRes, error) {
+	res, err := c.sendStoragePostgresTestInline(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendStoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (res StoragePostgresTestInlineRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("storage-postgres-test-inline"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/postgres/test"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, StoragePostgresTestInlineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/storage/postgres/test"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeStoragePostgresTestInlineRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresTestInlineOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeStoragePostgresTestInlineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // StoragePostgresUpdate invokes storage-postgres-update operation.
 //
 // Update details of a specific PostgreSQL storage instance by UUID.
@@ -15405,6 +15797,129 @@ func (c *Client) sendSyncpolicyUpdate(ctx context.Context, request *SyncPolicy, 
 
 	stage = "DecodeResponse"
 	result, err := decodeSyncpolicyUpdateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// TestConnectionJobGet invokes test-connection-job-get operation.
+//
+// Get the status and result of a test connection job.
+//
+// GET /test-connection-job/{uuid}
+func (c *Client) TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (*TestConnectionJob, error) {
+	res, err := c.sendTestConnectionJobGet(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendTestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (res *TestConnectionJob, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("test-connection-job-get"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/test-connection-job/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, TestConnectionJobGetOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/test-connection-job/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, TestConnectionJobGetOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeTestConnectionJobGetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
