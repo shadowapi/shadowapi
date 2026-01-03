@@ -18,6 +18,8 @@ import PipelineEdit from './pipelines/PipelineEdit';
 import RegisteredWorkers from './workers/RegisteredWorkers';
 import ActiveJobs from './workers/ActiveJobs';
 import EnrollmentTokens from './workers/EnrollmentTokens';
+import Schedulers from './schedulers/Schedulers';
+import SchedulerEdit from './schedulers/SchedulerEdit';
 
 /**
  * WorkspaceRouter handles all routes under /w/:slug/*
@@ -55,6 +57,9 @@ function WorkspaceRouter() {
         <Route path="rbac/roles" element={<Roles />} />
         <Route path="rbac/roles/new" element={<RoleEdit />} />
         <Route path="rbac/roles/:uuid" element={<RoleEdit />} />
+        <Route path="schedulers" element={<Schedulers />} />
+        <Route path="schedulers/new" element={<SchedulerEdit />} />
+        <Route path="schedulers/:uuid" element={<SchedulerEdit />} />
       </Routes>
     </WorkspaceProvider>
   );

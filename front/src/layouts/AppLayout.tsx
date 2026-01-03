@@ -188,6 +188,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/workers/jobs': { title: 'Active Jobs' },
   '/workers/tokens': { title: 'Enrollment Tokens' },
   '/schedulers': { title: 'Schedulers' },
+  '/schedulers/new': { title: 'Add', parent: '/schedulers' },
   '/logs': { title: 'Logs' },
 };
 
@@ -219,6 +220,8 @@ function getOpenKeys(relativePath: string): string[] {
     normalizedPath = '/storages';
   } else if (relativePath.match(/^\/pipelines\/[0-9a-f-]+$/i) || relativePath === '/pipelines/new') {
     normalizedPath = '/pipelines';
+  } else if (relativePath.match(/^\/schedulers\/[0-9a-f-]+$/i) || relativePath === '/schedulers/new') {
+    normalizedPath = '/schedulers';
   }
 
   const parentKey = menuParentMap[normalizedPath];
@@ -238,7 +241,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   const rbacRolesUuidMatch = relativePath.match(/^\/rbac\/roles\/([0-9a-f-]+)$/i);
   const storagesUuidMatch = relativePath.match(/^\/storages\/([0-9a-f-]+)$/i);
   const pipelinesUuidMatch = relativePath.match(/^\/pipelines\/([0-9a-f-]+)$/i);
-  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch || storagesUuidMatch || pipelinesUuidMatch;
+  const schedulersUuidMatch = relativePath.match(/^\/schedulers\/([0-9a-f-]+)$/i);
+  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch || storagesUuidMatch || pipelinesUuidMatch || schedulersUuidMatch;
 
   // Determine effective path for breadcrumb chain
   let effectivePath = relativePath;
@@ -254,6 +258,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
     effectivePath = '/storages';
   } else if (pipelinesUuidMatch) {
     effectivePath = '/pipelines';
+  } else if (schedulersUuidMatch) {
+    effectivePath = '/schedulers';
   }
 
   // Build the breadcrumb chain by following parent links
@@ -326,6 +332,8 @@ function AppLayout({ children }: AppLayoutProps) {
     menuSelectedPath = '/storages';
   } else if (relativePath.match(/^\/pipelines\/[0-9a-f-]+$/i) || relativePath === '/pipelines/new') {
     menuSelectedPath = '/pipelines';
+  } else if (relativePath.match(/^\/schedulers\/[0-9a-f-]+$/i) || relativePath === '/schedulers/new') {
+    menuSelectedPath = '/schedulers';
   }
   const selectedKeys = [menuSelectedPath];
   const defaultOpenKeys = getOpenKeys(relativePath);
