@@ -383,7 +383,7 @@ CREATE TABLE "scheduler" (
 
 CREATE TABLE IF NOT EXISTS worker_jobs (
                                            uuid             UUID PRIMARY KEY,
-                                           scheduler_uuid      UUID NOT NULL,
+                                           scheduler_uuid      UUID,  -- NULL for ad-hoc jobs like test connections
                                            job_uuid      UUID NOT NULL,
                                            subject     VARCHAR NOT NULL,
                                            status      VARCHAR NOT NULL,            -- e.g. "running", "completed", "failed", "retry"

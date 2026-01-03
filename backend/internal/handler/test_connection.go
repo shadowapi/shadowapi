@@ -103,6 +103,22 @@ func (h *Handler) DatasourceEmailOAuthTest(ctx context.Context, params api.Datas
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
 	}
 
+	// Also create worker_jobs record for Active Jobs tracking
+	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionEmailOAuth)
+	_, err = q.CreateWorkerJob(ctx, query.CreateWorkerJobParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true},
+		SchedulerUuid: pgtype.UUID{Valid: false}, // No scheduler for test connections
+		JobUuid:       pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true},
+		Subject:       subject,
+		Status:        "running",
+		Data:          []byte(`{"type":"test_connection","resource_type":"email_oauth","resource_uuid":"` + params.UUID + `"}`),
+		FinishedAt:    pgtype.Timestamptz{Valid: false},
+	})
+	if err != nil {
+		log.Warn("failed to create worker_jobs record", "error", err)
+		// Don't fail the request, the job was already created in KV store
+	}
+
 	// Build job args
 	jobArgs := jobs.TestConnectionEmailOAuthJobArgs{
 		JobUUID:        jobUUID.String(),
@@ -119,7 +135,6 @@ func (h *Handler) DatasourceEmailOAuthTest(ctx context.Context, params api.Datas
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
 	}
 
-	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionEmailOAuth)
 	headers := queue.Headers{"X-Job-ID": jobUUID.String()}
 	if err := h.queue.PublishWithHeaders(ctx, subject, headers, payload); err != nil {
 		log.Error("failed to publish job", "error", err)
@@ -196,6 +211,22 @@ func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePos
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
 	}
 
+	// Also create worker_jobs record for Active Jobs tracking
+	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionPostgres)
+	_, err = q.CreateWorkerJob(ctx, query.CreateWorkerJobParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true},
+		SchedulerUuid: pgtype.UUID{Valid: false}, // No scheduler for test connections
+		JobUuid:       pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true},
+		Subject:       subject,
+		Status:        "running",
+		Data:          []byte(`{"type":"test_connection","resource_type":"postgres","resource_uuid":"` + params.UUID + `"}`),
+		FinishedAt:    pgtype.Timestamptz{Valid: false},
+	})
+	if err != nil {
+		log.Warn("failed to create worker_jobs record", "error", err)
+		// Don't fail the request, the job was already created in KV store
+	}
+
 	// Build job args
 	jobArgs := jobs.TestConnectionPostgresJobArgs{
 		JobUUID:     jobUUID.String(),
@@ -215,7 +246,6 @@ func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePos
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
 	}
 
-	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionPostgres)
 	headers := queue.Headers{"X-Job-ID": jobUUID.String()}
 	if err := h.queue.PublishWithHeaders(ctx, subject, headers, payload); err != nil {
 		log.Error("failed to publish job", "error", err)
@@ -269,6 +299,23 @@ func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.Storag
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
 	}
 
+	// Also create worker_jobs record for Active Jobs tracking
+	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionPostgres)
+	q := query.New(h.dbp)
+	_, err = q.CreateWorkerJob(ctx, query.CreateWorkerJobParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true},
+		SchedulerUuid: pgtype.UUID{Valid: false}, // No scheduler for test connections
+		JobUuid:       pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true},
+		Subject:       subject,
+		Status:        "running",
+		Data:          []byte(`{"type":"test_connection","resource_type":"postgres","inline":true}`),
+		FinishedAt:    pgtype.Timestamptz{Valid: false},
+	})
+	if err != nil {
+		log.Warn("failed to create worker_jobs record", "error", err)
+		// Don't fail the request, the job was already created in KV store
+	}
+
 	// Build job args
 	jobArgs := jobs.TestConnectionPostgresJobArgs{
 		JobUUID:     jobUUID.String(),
@@ -288,7 +335,6 @@ func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.Storag
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
 	}
 
-	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionPostgres)
 	headers := queue.Headers{"X-Job-ID": jobUUID.String()}
 	if err := h.queue.PublishWithHeaders(ctx, subject, headers, payload); err != nil {
 		log.Error("failed to publish job", "error", err)

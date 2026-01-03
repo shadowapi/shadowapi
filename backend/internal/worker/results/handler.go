@@ -252,6 +252,32 @@ func (h *Handler) tryHandleTestConnectionResult(ctx context.Context, result JobR
 		return true
 	}
 
+	// Also update worker_jobs table for Active Jobs tracking
+	q := query.New(h.dbp)
+	jobUUID, err := uuid.FromString(testResult.JobUUID)
+	if err != nil {
+		h.log.Error("invalid job UUID for worker_jobs update", "job_uuid", testResult.JobUUID, "error", err)
+	} else {
+		// Build error data JSON
+		var errorData []byte
+		if !testResult.Success && testResult.ErrorMessage != "" {
+			errorData = []byte(`{"error":"` + testResult.ErrorMessage + `"}`)
+		}
+
+		err = q.UpdateWorkerJobStatus(ctx, query.UpdateWorkerJobStatusParams{
+			UUID:       converter.UuidToPgUUID(jobUUID),
+			Status:     status,
+			FinishedAt: pgtype.Timestamptz{Time: result.CompletedAt, Valid: true},
+			Data:       errorData,
+		})
+		if err != nil {
+			h.log.Warn("failed to update worker_jobs for test connection",
+				"job_uuid", testResult.JobUUID,
+				"error", err,
+			)
+		}
+	}
+
 	h.log.Info("test connection result stored in KV",
 		"job_uuid", testResult.JobUUID,
 		"resource_type", testResult.ResourceType,

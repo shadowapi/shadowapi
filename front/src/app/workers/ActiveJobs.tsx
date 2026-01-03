@@ -33,6 +33,22 @@ type WorkerJob = components['schemas']['worker_jobs'];
 
 const POLLING_INTERVAL = 5000; // 5 seconds
 
+// Human-readable job type titles
+const JOB_TYPE_TITLES: Record<string, string> = {
+  tokenRefresh: 'Refresh OAuth Token',
+  testConnectionEmailOAuth: 'Test Email Connection',
+  testConnectionPostgres: 'Test PostgreSQL Connection',
+  emailOAuthFetch: 'Fetch OAuth Emails',
+  emailApplyPipeline: 'Apply Email Pipeline',
+  dummy: 'Test Job',
+};
+
+function getJobTitle(subject: string): string {
+  const parts = subject.split('.');
+  const jobType = parts[parts.length - 1];
+  return JOB_TYPE_TITLES[jobType] || jobType;
+}
+
 const TIME_PERIOD_OPTIONS = [
   { value: 1, label: '1 minute' },
   { value: 5, label: '5 minutes' },
@@ -158,16 +174,14 @@ function ActiveJobs() {
 
   const columns: ColumnsType<WorkerJob> = [
     {
-      title: 'Subject',
+      title: 'Job Type',
       dataIndex: 'subject',
       key: 'subject',
       render: (subject: string) => {
-        // Extract job type from subject (e.g., "shadowapi.jobs.global.tokenRefresh" -> "tokenRefresh")
-        const parts = subject.split('.');
-        const jobType = parts[parts.length - 1];
+        const title = getJobTitle(subject);
         return (
           <Tooltip title={subject}>
-            <Text strong>{jobType}</Text>
+            <Text strong>{title}</Text>
           </Tooltip>
         );
       },
