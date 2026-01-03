@@ -21,6 +21,9 @@ import {
   BookOutlined,
   SafetyOutlined,
   CrownOutlined,
+  RobotOutlined,
+  ThunderboltOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
@@ -80,9 +83,26 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/pipelines`}>Data Pipelines</Link>,
     },
     {
-      key: '/workers',
+      key: '/workers-menu',
       icon: <SettingOutlined />,
-      label: <Link to={`${basePath}/workers`}>Workers</Link>,
+      label: 'Workers',
+      children: [
+        {
+          key: '/workers',
+          icon: <RobotOutlined />,
+          label: <Link to={`${basePath}/workers`}>External Workers</Link>,
+        },
+        {
+          key: '/workers/jobs',
+          icon: <ThunderboltOutlined />,
+          label: <Link to={`${basePath}/workers/jobs`}>Internal Jobs</Link>,
+        },
+        {
+          key: '/workers/tokens',
+          icon: <KeyOutlined />,
+          label: <Link to={`${basePath}/workers/tokens`}>Enrollment Tokens</Link>,
+        },
+      ],
     },
     {
       key: '/rbac',
@@ -164,7 +184,9 @@ const routeConfig: Record<string, RouteConfig> = {
   '/syncpolicies': { title: 'Sync Policies' },
   '/pipelines': { title: 'Data Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
-  '/workers': { title: 'Workers' },
+  '/workers': { title: 'External Workers' },
+  '/workers/jobs': { title: 'Internal Jobs' },
+  '/workers/tokens': { title: 'Enrollment Tokens' },
   '/schedulers': { title: 'Schedulers' },
   '/logs': { title: 'Logs' },
 };
@@ -176,6 +198,9 @@ const menuParentMap: Record<string, string> = {
   '/oauth2/credentials': '/datasources-menu',
   '/users': '/rbac',
   '/rbac/roles': '/rbac',
+  '/workers': '/workers-menu',
+  '/workers/jobs': '/workers-menu',
+  '/workers/tokens': '/workers-menu',
 };
 
 // Helper to find parent keys for a given relative path
