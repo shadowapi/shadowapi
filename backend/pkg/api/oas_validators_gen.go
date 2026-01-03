@@ -10,6 +10,14 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+func (s DatasourceEmailListOKApplicationJSON) Validate() error {
+	alias := ([]DatasourceEmail)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
 func (s *DatasourceEmailOAuth) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -33,6 +41,31 @@ func (s *DatasourceEmailOAuth) Validate() error {
 	return nil
 }
 
+func (s DatasourceEmailOAuthListOKApplicationJSON) Validate() error {
+	alias := ([]DatasourceEmailOAuth)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s DatasourceEmailOAuthProvider) Validate() error {
 	switch s {
 	case "gmail":
@@ -42,6 +75,46 @@ func (s DatasourceEmailOAuthProvider) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s DatasourceLinkedinListOKApplicationJSON) Validate() error {
+	alias := ([]DatasourceLinkedin)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s DatasourceListOKApplicationJSON) Validate() error {
+	alias := ([]Datasource)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s DatasourceTelegramListOKApplicationJSON) Validate() error {
+	alias := ([]DatasourceTelegram)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s DatasourceWhatsappListOKApplicationJSON) Validate() error {
+	alias := ([]DatasourceWhatsapp)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s FileListOKApplicationJSON) Validate() error {
+	alias := ([]FileObject)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
 }
 
 func (s *GetUserRolesOK) Validate() error {
@@ -81,6 +154,39 @@ func (s *GetUserRolesOK) Validate() error {
 	return nil
 }
 
+func (s ListContactsOKApplicationJSON) Validate() error {
+	alias := ([]Contact)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s ListPermissionsOKApplicationJSON) Validate() error {
+	alias := ([]RbacPermission)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s ListPermissionsScope) Validate() error {
 	switch s {
 	case "global":
@@ -92,6 +198,56 @@ func (s ListPermissionsScope) Validate() error {
 	}
 }
 
+func (s ListRegisteredWorkersOKApplicationJSON) Validate() error {
+	alias := ([]RegisteredWorker)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ListRolesOKApplicationJSON) Validate() error {
+	alias := ([]RbacRole)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s ListRolesScope) Validate() error {
 	switch s {
 	case "global":
@@ -101,6 +257,89 @@ func (s ListRolesScope) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s ListUsersOKApplicationJSON) Validate() error {
+	alias := ([]User)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ListWorkerEnrollmentTokensOKApplicationJSON) Validate() error {
+	alias := ([]WorkerEnrollmentToken)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s ListWorkspaceMembersOKApplicationJSON) Validate() error {
+	alias := ([]WorkspaceMember)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ListWorkspacesOKApplicationJSON) Validate() error {
+	alias := ([]Workspace)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *MapperConfig) Validate() error {
@@ -614,6 +853,44 @@ func (s *MessageQuery) Validate() error {
 	return nil
 }
 
+func (s *MessageQueryJob) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s MessageQueryJobStatus) Validate() error {
+	switch s {
+	case "pending":
+		return nil
+	case "running":
+		return nil
+	case "completed":
+		return nil
+	case "failed":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *MessageQueryOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -777,6 +1054,29 @@ func (s *MessageWhatsappQueryOK) Validate() error {
 	return nil
 }
 
+func (s *NatsMessagesList) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Messages == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "messages",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *OAuth2ClientListOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -841,6 +1141,14 @@ func (s OAuth2ClientLoginReqQuery) Validate() error {
 
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s OAuth2ClientTokenListOKApplicationJSON) Validate() error {
+	alias := ([]OAuth2ClientToken)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
 	}
 	return nil
 }
@@ -1445,6 +1753,31 @@ func (s *Scheduler) Validate() error {
 	return nil
 }
 
+func (s SchedulerListOKApplicationJSON) Validate() error {
+	alias := ([]Scheduler)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *SourceFieldDefinition) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -1507,6 +1840,14 @@ func (s SourceFieldDefinitionType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s StorageListOKApplicationJSON) Validate() error {
+	alias := ([]Storage)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	return nil
 }
 
 func (s StorageListOrderBy) Validate() error {
@@ -1729,6 +2070,72 @@ func (s *StoragePostgresIntrospectTablesResponse) Validate() error {
 	return nil
 }
 
+func (s *StoragePostgresMessagesQueryReq) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Limit.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           1,
+					MaxSet:        true,
+					Max:           1000,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Offset.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "offset",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *StoragePostgresTable) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -1875,6 +2282,31 @@ func (s StoragePostgresTableCreationMode) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s StoragePostgresTablesReplaceOKApplicationJSON) Validate() error {
+	alias := ([]StoragePostgresTable)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *SyncpolicyListOK) Validate() error {

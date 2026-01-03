@@ -1,0 +1,15 @@
+# spec/components/nats_messages_list.yaml
+type: object
+additionalProperties: false
+description: List of messages from NATS stream
+properties:
+  messages:
+    type: array
+    items:
+      $ref: "./nats_message.yaml"
+  total:
+    type: integer
+    description: Total number of messages returned
+required:
+  - messages
+  - total

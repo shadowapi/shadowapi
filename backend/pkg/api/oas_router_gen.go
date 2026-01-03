@@ -975,6 +975,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'n': // Prefix: "nats/messages"
+				origElem := elem
+				if l := len("nats/messages"); len(elem) >= l && elem[0:l] == "nats/messages" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleNatsMessagesListRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
+				elem = origElem
 			case 'o': // Prefix: "oauth2/"
 				origElem := elem
 				if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
@@ -1788,6 +1809,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											}
 
 											elem = origElem
+										}
+
+										elem = origElem
+									case 'm': // Prefix: "messages/query"
+										origElem := elem
+										if l := len("messages/query"); len(elem) >= l && elem[0:l] == "messages/query" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "POST":
+												s.handleStoragePostgresMessagesQueryRequest([1]string{
+													args[0],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "POST")
+											}
+
+											return
 										}
 
 										elem = origElem
@@ -3843,6 +3887,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
+			case 'n': // Prefix: "nats/messages"
+				origElem := elem
+				if l := len("nats/messages"); len(elem) >= l && elem[0:l] == "nats/messages" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = NatsMessagesListOperation
+						r.summary = "Get last messages from NATS stream"
+						r.operationID = "nats-messages-list"
+						r.pathPattern = "/nats/messages"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+				elem = origElem
 			case 'o': // Prefix: "oauth2/"
 				origElem := elem
 				if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
@@ -4815,6 +4884,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											}
 
 											elem = origElem
+										}
+
+										elem = origElem
+									case 'm': // Prefix: "messages/query"
+										origElem := elem
+										if l := len("messages/query"); len(elem) >= l && elem[0:l] == "messages/query" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "POST":
+												r.name = StoragePostgresMessagesQueryOperation
+												r.summary = "Query messages from PostgreSQL storage"
+												r.operationID = "storage-postgres-messages-query"
+												r.pathPattern = "/storage/postgres/{uuid}/messages/query"
+												r.args = args
+												r.count = 1
+												return r, true
+											default:
+												return
+											}
 										}
 
 										elem = origElem

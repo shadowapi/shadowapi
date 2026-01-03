@@ -18,7 +18,7 @@ var _ Handler = UnimplementedHandler{}
 // Add member to workspace.
 //
 // POST /workspace/{uuid}/members
-func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *WorkspaceMember, params AddWorkspaceMemberParams) (r *WorkspaceMember, _ error) {
+func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *WorkspaceMember, params AddWorkspaceMemberParams) (r AddWorkspaceMemberRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -27,8 +27,8 @@ func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *Workspa
 // Assign a role to a user.
 //
 // POST /rbac/user/{user_uuid}/roles
-func (UnimplementedHandler) AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq, params AssignRoleToUserParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq, params AssignRoleToUserParams) (r AssignRoleToUserRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // AuthConsent implements auth-consent operation.
@@ -36,7 +36,7 @@ func (UnimplementedHandler) AssignRoleToUser(ctx context.Context, req *AssignRol
 // Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
 //
 // GET /auth/consent
-func (UnimplementedHandler) AuthConsent(ctx context.Context, params AuthConsentParams) (r *AuthConsentFound, _ error) {
+func (UnimplementedHandler) AuthConsent(ctx context.Context, params AuthConsentParams) (r AuthConsentRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -45,7 +45,7 @@ func (UnimplementedHandler) AuthConsent(ctx context.Context, params AuthConsentP
 // Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
 //
 // GET /auth/login
-func (UnimplementedHandler) AuthLogin(ctx context.Context, params AuthLoginParams) (r *AuthLoginFound, _ error) {
+func (UnimplementedHandler) AuthLogin(ctx context.Context, params AuthLoginParams) (r AuthLoginRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -54,7 +54,7 @@ func (UnimplementedHandler) AuthLogin(ctx context.Context, params AuthLoginParam
 // Submit login credentials for Hydra authentication flow.
 //
 // POST /auth/login
-func (UnimplementedHandler) AuthLoginSubmit(ctx context.Context, req *AuthLoginSubmitReq) (r *AuthLoginSubmitOK, _ error) {
+func (UnimplementedHandler) AuthLoginSubmit(ctx context.Context, req *AuthLoginSubmitReq) (r AuthLoginSubmitRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -63,7 +63,7 @@ func (UnimplementedHandler) AuthLoginSubmit(ctx context.Context, req *AuthLoginS
 // Initiate OAuth2 authorization flow. Returns the authorization URL for redirect.
 //
 // POST /auth/oauth2/authorize
-func (UnimplementedHandler) AuthOAuth2Authorize(ctx context.Context, req *AuthOAuth2AuthorizeReq) (r *AuthOAuth2AuthorizeOK, _ error) {
+func (UnimplementedHandler) AuthOAuth2Authorize(ctx context.Context, req *AuthOAuth2AuthorizeReq) (r AuthOAuth2AuthorizeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -72,7 +72,7 @@ func (UnimplementedHandler) AuthOAuth2Authorize(ctx context.Context, req *AuthOA
 // OAuth2 callback handler. Exchanges authorization code for tokens and sets cookies.
 //
 // GET /auth/oauth2/callback
-func (UnimplementedHandler) AuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (r *AuthOAuth2CallbackFound, _ error) {
+func (UnimplementedHandler) AuthOAuth2Callback(ctx context.Context, params AuthOAuth2CallbackParams) (r AuthOAuth2CallbackRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -81,7 +81,7 @@ func (UnimplementedHandler) AuthOAuth2Callback(ctx context.Context, params AuthO
 // Logout the user by revoking tokens and clearing cookies.
 //
 // POST /auth/oauth2/logout
-func (UnimplementedHandler) AuthOAuth2Logout(ctx context.Context) (r *AuthOAuth2LogoutOKHeaders, _ error) {
+func (UnimplementedHandler) AuthOAuth2Logout(ctx context.Context) (r AuthOAuth2LogoutRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -90,7 +90,7 @@ func (UnimplementedHandler) AuthOAuth2Logout(ctx context.Context) (r *AuthOAuth2
 // Refresh the access token using the refresh token cookie.
 //
 // POST /auth/oauth2/refresh
-func (UnimplementedHandler) AuthOAuth2Refresh(ctx context.Context) (r *AuthOAuth2RefreshOKHeaders, _ error) {
+func (UnimplementedHandler) AuthOAuth2Refresh(ctx context.Context) (r AuthOAuth2RefreshRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -99,7 +99,7 @@ func (UnimplementedHandler) AuthOAuth2Refresh(ctx context.Context) (r *AuthOAuth
 // Check current session status without triggering token refresh. Always returns 200.
 //
 // GET /auth/oauth2/session
-func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r *AuthOAuth2SessionOK, _ error) {
+func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r AuthOAuth2SessionRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -108,7 +108,7 @@ func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r *AuthOAuth
 // Check if a user has permission.
 //
 // POST /rbac/check
-func (UnimplementedHandler) CheckPermission(ctx context.Context, req *CheckPermissionReq) (r *CheckPermissionOK, _ error) {
+func (UnimplementedHandler) CheckPermission(ctx context.Context, req *CheckPermissionReq) (r CheckPermissionRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -117,7 +117,7 @@ func (UnimplementedHandler) CheckPermission(ctx context.Context, req *CheckPermi
 // Check if workspace exists.
 //
 // GET /workspace/check
-func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (r *WorkspaceCheck, _ error) {
+func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (r CheckWorkspaceExistsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -126,7 +126,7 @@ func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params Che
 // Create a new contact record.
 //
 // POST /contact
-func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r *Contact, _ error) {
+func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r CreateContactRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -135,7 +135,7 @@ func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r 
 // Create a new role.
 //
 // POST /rbac/role
-func (UnimplementedHandler) CreateRole(ctx context.Context, req *RbacRole) (r *RbacRole, _ error) {
+func (UnimplementedHandler) CreateRole(ctx context.Context, req *RbacRole) (r CreateRoleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -144,7 +144,7 @@ func (UnimplementedHandler) CreateRole(ctx context.Context, req *RbacRole) (r *R
 // Create a new user.
 //
 // POST /user
-func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r *User, _ error) {
+func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r CreateUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -153,7 +153,7 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *User) (r *User,
 // Returns a token that can be used to create an empty session in Zitadel for frontend authentication.
 //
 // POST /user/session
-func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r *UserSessionToken, _ error) {
+func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r CreateUserSessionRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -162,7 +162,7 @@ func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r *UserSessi
 // Create worker enrollment token.
 //
 // POST /workers/enrollment-tokens
-func (UnimplementedHandler) CreateWorkerEnrollmentToken(ctx context.Context, req *WorkerEnrollmentToken) (r *WorkerEnrollmentToken, _ error) {
+func (UnimplementedHandler) CreateWorkerEnrollmentToken(ctx context.Context, req *WorkerEnrollmentToken) (r CreateWorkerEnrollmentTokenRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -171,7 +171,7 @@ func (UnimplementedHandler) CreateWorkerEnrollmentToken(ctx context.Context, req
 // Create a new workspace.
 //
 // POST /workspace
-func (UnimplementedHandler) CreateWorkspace(ctx context.Context, req *Workspace) (r *Workspace, _ error) {
+func (UnimplementedHandler) CreateWorkspace(ctx context.Context, req *Workspace) (r CreateWorkspaceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -180,7 +180,7 @@ func (UnimplementedHandler) CreateWorkspace(ctx context.Context, req *Workspace)
 // Create a new email datasource.
 //
 // POST /datasource/email
-func (UnimplementedHandler) DatasourceEmailCreate(ctx context.Context, req *DatasourceEmail) (r *DatasourceEmail, _ error) {
+func (UnimplementedHandler) DatasourceEmailCreate(ctx context.Context, req *DatasourceEmail) (r DatasourceEmailCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -189,8 +189,8 @@ func (UnimplementedHandler) DatasourceEmailCreate(ctx context.Context, req *Data
 // Delete an email datasource.
 //
 // DELETE /datasource/email/{uuid}
-func (UnimplementedHandler) DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DatasourceEmailDelete(ctx context.Context, params DatasourceEmailDeleteParams) (r DatasourceEmailDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DatasourceEmailGet implements datasource-email-get operation.
@@ -198,7 +198,7 @@ func (UnimplementedHandler) DatasourceEmailDelete(ctx context.Context, params Da
 // Get email datasources.
 //
 // GET /datasource/email/{uuid}
-func (UnimplementedHandler) DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (r *DatasourceEmail, _ error) {
+func (UnimplementedHandler) DatasourceEmailGet(ctx context.Context, params DatasourceEmailGetParams) (r DatasourceEmailGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -207,7 +207,7 @@ func (UnimplementedHandler) DatasourceEmailGet(ctx context.Context, params Datas
 // List email datasources.
 //
 // GET /datasource/email
-func (UnimplementedHandler) DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (r []DatasourceEmail, _ error) {
+func (UnimplementedHandler) DatasourceEmailList(ctx context.Context, params DatasourceEmailListParams) (r DatasourceEmailListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -216,7 +216,7 @@ func (UnimplementedHandler) DatasourceEmailList(ctx context.Context, params Data
 // Create a new email OAuth datasource.
 //
 // POST /datasource/email_oauth
-func (UnimplementedHandler) DatasourceEmailOAuthCreate(ctx context.Context, req *DatasourceEmailOAuth) (r *DatasourceEmailOAuth, _ error) {
+func (UnimplementedHandler) DatasourceEmailOAuthCreate(ctx context.Context, req *DatasourceEmailOAuth) (r DatasourceEmailOAuthCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -225,8 +225,8 @@ func (UnimplementedHandler) DatasourceEmailOAuthCreate(ctx context.Context, req 
 // Delete an email OAuth datasource.
 //
 // DELETE /datasource/email_oauth/{uuid}
-func (UnimplementedHandler) DatasourceEmailOAuthDelete(ctx context.Context, params DatasourceEmailOAuthDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DatasourceEmailOAuthDelete(ctx context.Context, params DatasourceEmailOAuthDeleteParams) (r DatasourceEmailOAuthDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DatasourceEmailOAuthGet implements datasource-email-oauth-get operation.
@@ -234,7 +234,7 @@ func (UnimplementedHandler) DatasourceEmailOAuthDelete(ctx context.Context, para
 // Retrieve an OAuth2‑based email datasource.
 //
 // GET /datasource/email_oauth/{uuid}
-func (UnimplementedHandler) DatasourceEmailOAuthGet(ctx context.Context, params DatasourceEmailOAuthGetParams) (r *DatasourceEmailOAuth, _ error) {
+func (UnimplementedHandler) DatasourceEmailOAuthGet(ctx context.Context, params DatasourceEmailOAuthGetParams) (r DatasourceEmailOAuthGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -243,7 +243,7 @@ func (UnimplementedHandler) DatasourceEmailOAuthGet(ctx context.Context, params 
 // List OAuth2‑based email datasources.
 //
 // GET /datasource/email_oauth
-func (UnimplementedHandler) DatasourceEmailOAuthList(ctx context.Context, params DatasourceEmailOAuthListParams) (r []DatasourceEmailOAuth, _ error) {
+func (UnimplementedHandler) DatasourceEmailOAuthList(ctx context.Context, params DatasourceEmailOAuthListParams) (r DatasourceEmailOAuthListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -253,7 +253,7 @@ func (UnimplementedHandler) DatasourceEmailOAuthList(ctx context.Context, params
 // for results.
 //
 // POST /datasource/email_oauth/{uuid}/test
-func (UnimplementedHandler) DatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (r *TestConnectionJob, _ error) {
+func (UnimplementedHandler) DatasourceEmailOAuthTest(ctx context.Context, params DatasourceEmailOAuthTestParams) (r DatasourceEmailOAuthTestRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -262,7 +262,7 @@ func (UnimplementedHandler) DatasourceEmailOAuthTest(ctx context.Context, params
 // Update an existing email OAuth datasource.
 //
 // PUT /datasource/email_oauth/{uuid}
-func (UnimplementedHandler) DatasourceEmailOAuthUpdate(ctx context.Context, req *DatasourceEmailOAuth, params DatasourceEmailOAuthUpdateParams) (r *DatasourceEmailOAuth, _ error) {
+func (UnimplementedHandler) DatasourceEmailOAuthUpdate(ctx context.Context, req *DatasourceEmailOAuth, params DatasourceEmailOAuthUpdateParams) (r DatasourceEmailOAuthUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -271,7 +271,7 @@ func (UnimplementedHandler) DatasourceEmailOAuthUpdate(ctx context.Context, req 
 // Update an email datasource.
 //
 // PUT /datasource/email/{uuid}
-func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmail, params DatasourceEmailUpdateParams) (r *DatasourceEmail, _ error) {
+func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmail, params DatasourceEmailUpdateParams) (r DatasourceEmailUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -280,7 +280,7 @@ func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *Data
 // Create a new LinkedIn datasource.
 //
 // POST /datasource/linkedin
-func (UnimplementedHandler) DatasourceLinkedinCreate(ctx context.Context, req *DatasourceLinkedin) (r *DatasourceLinkedin, _ error) {
+func (UnimplementedHandler) DatasourceLinkedinCreate(ctx context.Context, req *DatasourceLinkedin) (r DatasourceLinkedinCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -289,8 +289,8 @@ func (UnimplementedHandler) DatasourceLinkedinCreate(ctx context.Context, req *D
 // Delete a LinkedIn datasource.
 //
 // DELETE /datasource/linkedin/{uuid}
-func (UnimplementedHandler) DatasourceLinkedinDelete(ctx context.Context, params DatasourceLinkedinDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DatasourceLinkedinDelete(ctx context.Context, params DatasourceLinkedinDeleteParams) (r DatasourceLinkedinDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DatasourceLinkedinGet implements datasource-linkedin-get operation.
@@ -298,7 +298,7 @@ func (UnimplementedHandler) DatasourceLinkedinDelete(ctx context.Context, params
 // Get a LinkedIn datasource.
 //
 // GET /datasource/linkedin/{uuid}
-func (UnimplementedHandler) DatasourceLinkedinGet(ctx context.Context, params DatasourceLinkedinGetParams) (r *DatasourceLinkedin, _ error) {
+func (UnimplementedHandler) DatasourceLinkedinGet(ctx context.Context, params DatasourceLinkedinGetParams) (r DatasourceLinkedinGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -307,7 +307,7 @@ func (UnimplementedHandler) DatasourceLinkedinGet(ctx context.Context, params Da
 // List all LinkedIn datasources.
 //
 // GET /datasource/linkedin
-func (UnimplementedHandler) DatasourceLinkedinList(ctx context.Context, params DatasourceLinkedinListParams) (r []DatasourceLinkedin, _ error) {
+func (UnimplementedHandler) DatasourceLinkedinList(ctx context.Context, params DatasourceLinkedinListParams) (r DatasourceLinkedinListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -316,7 +316,7 @@ func (UnimplementedHandler) DatasourceLinkedinList(ctx context.Context, params D
 // Update a LinkedIn datasource.
 //
 // PUT /datasource/linkedin/{uuid}
-func (UnimplementedHandler) DatasourceLinkedinUpdate(ctx context.Context, req *DatasourceLinkedin, params DatasourceLinkedinUpdateParams) (r *DatasourceLinkedin, _ error) {
+func (UnimplementedHandler) DatasourceLinkedinUpdate(ctx context.Context, req *DatasourceLinkedin, params DatasourceLinkedinUpdateParams) (r DatasourceLinkedinUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -325,7 +325,7 @@ func (UnimplementedHandler) DatasourceLinkedinUpdate(ctx context.Context, req *D
 // Retrieve a list of datasource objects.
 //
 // GET /datasource
-func (UnimplementedHandler) DatasourceList(ctx context.Context, params DatasourceListParams) (r []Datasource, _ error) {
+func (UnimplementedHandler) DatasourceList(ctx context.Context, params DatasourceListParams) (r DatasourceListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -334,8 +334,8 @@ func (UnimplementedHandler) DatasourceList(ctx context.Context, params Datasourc
 // Set OAuth2 client to the datasource.
 //
 // PUT /datasource/{uuid}/oauth2/client
-func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (r DatasourceSetOAuth2ClientRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DatasourceTelegramCreate implements datasource-telegram-create operation.
@@ -343,7 +343,7 @@ func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *
 // Create a new Telegram datasource.
 //
 // POST /datasource/telegram
-func (UnimplementedHandler) DatasourceTelegramCreate(ctx context.Context, req *DatasourceTelegram) (r *DatasourceTelegram, _ error) {
+func (UnimplementedHandler) DatasourceTelegramCreate(ctx context.Context, req *DatasourceTelegram) (r DatasourceTelegramCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -352,8 +352,8 @@ func (UnimplementedHandler) DatasourceTelegramCreate(ctx context.Context, req *D
 // Delete a Telegram datasource.
 //
 // DELETE /datasource/telegram/{uuid}
-func (UnimplementedHandler) DatasourceTelegramDelete(ctx context.Context, params DatasourceTelegramDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DatasourceTelegramDelete(ctx context.Context, params DatasourceTelegramDeleteParams) (r DatasourceTelegramDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DatasourceTelegramGet implements datasource-telegram-get operation.
@@ -361,7 +361,7 @@ func (UnimplementedHandler) DatasourceTelegramDelete(ctx context.Context, params
 // Get a Telegram datasource.
 //
 // GET /datasource/telegram/{uuid}
-func (UnimplementedHandler) DatasourceTelegramGet(ctx context.Context, params DatasourceTelegramGetParams) (r *DatasourceTelegram, _ error) {
+func (UnimplementedHandler) DatasourceTelegramGet(ctx context.Context, params DatasourceTelegramGetParams) (r DatasourceTelegramGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -370,7 +370,7 @@ func (UnimplementedHandler) DatasourceTelegramGet(ctx context.Context, params Da
 // List all Telegram datasources.
 //
 // GET /datasource/telegram
-func (UnimplementedHandler) DatasourceTelegramList(ctx context.Context, params DatasourceTelegramListParams) (r []DatasourceTelegram, _ error) {
+func (UnimplementedHandler) DatasourceTelegramList(ctx context.Context, params DatasourceTelegramListParams) (r DatasourceTelegramListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -379,7 +379,7 @@ func (UnimplementedHandler) DatasourceTelegramList(ctx context.Context, params D
 // Update a Telegram datasource.
 //
 // PUT /datasource/telegram/{uuid}
-func (UnimplementedHandler) DatasourceTelegramUpdate(ctx context.Context, req *DatasourceTelegram, params DatasourceTelegramUpdateParams) (r *DatasourceTelegram, _ error) {
+func (UnimplementedHandler) DatasourceTelegramUpdate(ctx context.Context, req *DatasourceTelegram, params DatasourceTelegramUpdateParams) (r DatasourceTelegramUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -388,7 +388,7 @@ func (UnimplementedHandler) DatasourceTelegramUpdate(ctx context.Context, req *D
 // Create a new WhatsApp datasource.
 //
 // POST /datasource/whatsapp
-func (UnimplementedHandler) DatasourceWhatsappCreate(ctx context.Context, req *DatasourceWhatsapp) (r *DatasourceWhatsapp, _ error) {
+func (UnimplementedHandler) DatasourceWhatsappCreate(ctx context.Context, req *DatasourceWhatsapp) (r DatasourceWhatsappCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -397,8 +397,8 @@ func (UnimplementedHandler) DatasourceWhatsappCreate(ctx context.Context, req *D
 // Delete a WhatsApp datasource.
 //
 // DELETE /datasource/whatsapp/{uuid}
-func (UnimplementedHandler) DatasourceWhatsappDelete(ctx context.Context, params DatasourceWhatsappDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DatasourceWhatsappDelete(ctx context.Context, params DatasourceWhatsappDeleteParams) (r DatasourceWhatsappDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DatasourceWhatsappGet implements datasource-whatsapp-get operation.
@@ -406,7 +406,7 @@ func (UnimplementedHandler) DatasourceWhatsappDelete(ctx context.Context, params
 // Get a WhatsApp datasource.
 //
 // GET /datasource/whatsapp/{uuid}
-func (UnimplementedHandler) DatasourceWhatsappGet(ctx context.Context, params DatasourceWhatsappGetParams) (r *DatasourceWhatsapp, _ error) {
+func (UnimplementedHandler) DatasourceWhatsappGet(ctx context.Context, params DatasourceWhatsappGetParams) (r DatasourceWhatsappGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -415,7 +415,7 @@ func (UnimplementedHandler) DatasourceWhatsappGet(ctx context.Context, params Da
 // List all WhatsApp datasources.
 //
 // GET /datasource/whatsapp
-func (UnimplementedHandler) DatasourceWhatsappList(ctx context.Context, params DatasourceWhatsappListParams) (r []DatasourceWhatsapp, _ error) {
+func (UnimplementedHandler) DatasourceWhatsappList(ctx context.Context, params DatasourceWhatsappListParams) (r DatasourceWhatsappListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -424,7 +424,7 @@ func (UnimplementedHandler) DatasourceWhatsappList(ctx context.Context, params D
 // Update a WhatsApp datasource.
 //
 // PUT /datasource/whatsapp/{uuid}
-func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (r *DatasourceWhatsapp, _ error) {
+func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (r DatasourceWhatsappUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -433,8 +433,8 @@ func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *D
 // Delete a contact record.
 //
 // DELETE /contact/{uuid}
-func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteContactParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteContactParams) (r DeleteContactRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DeleteRegisteredWorker implements deleteRegisteredWorker operation.
@@ -442,8 +442,8 @@ func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteCont
 // Delete registered worker.
 //
 // DELETE /workers/{uuid}
-func (UnimplementedHandler) DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) (r DeleteRegisteredWorkerRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DeleteRole implements deleteRole operation.
@@ -451,8 +451,8 @@ func (UnimplementedHandler) DeleteRegisteredWorker(ctx context.Context, params D
 // Delete a role.
 //
 // DELETE /rbac/role/{uuid}
-func (UnimplementedHandler) DeleteRole(ctx context.Context, params DeleteRoleParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DeleteRole(ctx context.Context, params DeleteRoleParams) (r DeleteRoleRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DeleteUser implements deleteUser operation.
@@ -460,8 +460,8 @@ func (UnimplementedHandler) DeleteRole(ctx context.Context, params DeleteRolePar
 // Delete user.
 //
 // DELETE /user/{uuid}
-func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserParams) (r DeleteUserRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DeleteWorkerEnrollmentToken implements deleteWorkerEnrollmentToken operation.
@@ -469,8 +469,8 @@ func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserPar
 // Delete worker enrollment token.
 //
 // DELETE /workers/enrollment-tokens/{uuid}
-func (UnimplementedHandler) DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) (r DeleteWorkerEnrollmentTokenRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // DeleteWorkspace implements deleteWorkspace operation.
@@ -478,8 +478,8 @@ func (UnimplementedHandler) DeleteWorkerEnrollmentToken(ctx context.Context, par
 // Delete workspace.
 //
 // DELETE /workspace/{uuid}
-func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) (r DeleteWorkspaceRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // FileCreate implements file-create operation.
@@ -487,7 +487,7 @@ func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWo
 // Upload a new file and create its record.
 //
 // POST /file
-func (UnimplementedHandler) FileCreate(ctx context.Context, req *UploadFileRequest) (r *UploadFileResponse, _ error) {
+func (UnimplementedHandler) FileCreate(ctx context.Context, req *UploadFileRequest) (r FileCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -496,8 +496,8 @@ func (UnimplementedHandler) FileCreate(ctx context.Context, req *UploadFileReque
 // Delete a stored file.
 //
 // DELETE /file/{uuid}
-func (UnimplementedHandler) FileDelete(ctx context.Context, params FileDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) FileDelete(ctx context.Context, params FileDeleteParams) (r FileDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // FileGet implements file-get operation.
@@ -505,7 +505,7 @@ func (UnimplementedHandler) FileDelete(ctx context.Context, params FileDeletePar
 // Retrieve details of a stored file.
 //
 // GET /file/{uuid}
-func (UnimplementedHandler) FileGet(ctx context.Context, params FileGetParams) (r *FileObject, _ error) {
+func (UnimplementedHandler) FileGet(ctx context.Context, params FileGetParams) (r FileGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -514,7 +514,7 @@ func (UnimplementedHandler) FileGet(ctx context.Context, params FileGetParams) (
 // Retrieve a list of stored files.
 //
 // GET /file
-func (UnimplementedHandler) FileList(ctx context.Context, params FileListParams) (r []FileObject, _ error) {
+func (UnimplementedHandler) FileList(ctx context.Context, params FileListParams) (r FileListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -523,7 +523,7 @@ func (UnimplementedHandler) FileList(ctx context.Context, params FileListParams)
 // Update metadata of a stored file.
 //
 // PUT /file/{uuid}
-func (UnimplementedHandler) FileUpdate(ctx context.Context, req *FileUpdateReq, params FileUpdateParams) (r *FileObject, _ error) {
+func (UnimplementedHandler) FileUpdate(ctx context.Context, req *FileUpdateReq, params FileUpdateParams) (r FileUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -532,7 +532,7 @@ func (UnimplementedHandler) FileUpdate(ctx context.Context, req *FileUpdateReq, 
 // Generate a download link for a stored file.
 //
 // POST /storage/file-link
-func (UnimplementedHandler) GenerateDownloadLink(ctx context.Context, req *GenerateDownloadLinkRequest) (r *GenerateDownloadLinkResponse, _ error) {
+func (UnimplementedHandler) GenerateDownloadLink(ctx context.Context, req *GenerateDownloadLinkRequest) (r GenerateDownloadLinkRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -541,7 +541,7 @@ func (UnimplementedHandler) GenerateDownloadLink(ctx context.Context, req *Gener
 // Generate a pre-signed URL for file upload.
 //
 // POST /storage/upload-url
-func (UnimplementedHandler) GeneratePresignedUploadUrl(ctx context.Context, req *UploadPresignedUrlRequest) (r *UploadPresignedUrlResponse, _ error) {
+func (UnimplementedHandler) GeneratePresignedUploadUrl(ctx context.Context, req *UploadPresignedUrlRequest) (r GeneratePresignedUploadUrlRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -550,7 +550,7 @@ func (UnimplementedHandler) GeneratePresignedUploadUrl(ctx context.Context, req 
 // Get contact details.
 //
 // GET /contact/{uuid}
-func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactParams) (r *Contact, _ error) {
+func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactParams) (r GetContactRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -559,7 +559,7 @@ func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactPar
 // Get current user profile.
 //
 // GET /profile
-func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
+func (UnimplementedHandler) GetProfile(ctx context.Context) (r GetProfileRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -568,7 +568,7 @@ func (UnimplementedHandler) GetProfile(ctx context.Context) (r *User, _ error) {
 // Get registered worker details.
 //
 // GET /workers/{uuid}
-func (UnimplementedHandler) GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (r *RegisteredWorker, _ error) {
+func (UnimplementedHandler) GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (r GetRegisteredWorkerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -577,7 +577,7 @@ func (UnimplementedHandler) GetRegisteredWorker(ctx context.Context, params GetR
 // Get role details.
 //
 // GET /rbac/role/{uuid}
-func (UnimplementedHandler) GetRole(ctx context.Context, params GetRoleParams) (r *RbacRole, _ error) {
+func (UnimplementedHandler) GetRole(ctx context.Context, params GetRoleParams) (r GetRoleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -586,7 +586,7 @@ func (UnimplementedHandler) GetRole(ctx context.Context, params GetRoleParams) (
 // Get user details.
 //
 // GET /user/{uuid}
-func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (r *User, _ error) {
+func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (r GetUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -595,7 +595,7 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 // Get roles for a user.
 //
 // GET /rbac/user/{user_uuid}/roles
-func (UnimplementedHandler) GetUserRoles(ctx context.Context, params GetUserRolesParams) (r *GetUserRolesOK, _ error) {
+func (UnimplementedHandler) GetUserRoles(ctx context.Context, params GetUserRolesParams) (r GetUserRolesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -604,7 +604,7 @@ func (UnimplementedHandler) GetUserRoles(ctx context.Context, params GetUserRole
 // Get worker enrollment token details.
 //
 // GET /workers/enrollment-tokens/{uuid}
-func (UnimplementedHandler) GetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (r *WorkerEnrollmentToken, _ error) {
+func (UnimplementedHandler) GetWorkerEnrollmentToken(ctx context.Context, params GetWorkerEnrollmentTokenParams) (r GetWorkerEnrollmentTokenRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -613,7 +613,7 @@ func (UnimplementedHandler) GetWorkerEnrollmentToken(ctx context.Context, params
 // Get workspace details.
 //
 // GET /workspace/{uuid}
-func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (r *Workspace, _ error) {
+func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (r GetWorkspaceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -622,7 +622,7 @@ func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspac
 // List all contacts.
 //
 // GET /contact
-func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ error) {
+func (UnimplementedHandler) ListContacts(ctx context.Context) (r ListContactsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -631,7 +631,7 @@ func (UnimplementedHandler) ListContacts(ctx context.Context) (r []Contact, _ er
 // List all permissions.
 //
 // GET /rbac/permission
-func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPermissionsParams) (r []RbacPermission, _ error) {
+func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPermissionsParams) (r ListPermissionsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -640,7 +640,7 @@ func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPerm
 // List registered workers.
 //
 // GET /workers
-func (UnimplementedHandler) ListRegisteredWorkers(ctx context.Context) (r []RegisteredWorker, _ error) {
+func (UnimplementedHandler) ListRegisteredWorkers(ctx context.Context) (r ListRegisteredWorkersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -649,7 +649,7 @@ func (UnimplementedHandler) ListRegisteredWorkers(ctx context.Context) (r []Regi
 // List all roles.
 //
 // GET /rbac/role
-func (UnimplementedHandler) ListRoles(ctx context.Context, params ListRolesParams) (r []RbacRole, _ error) {
+func (UnimplementedHandler) ListRoles(ctx context.Context, params ListRolesParams) (r ListRolesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -658,7 +658,7 @@ func (UnimplementedHandler) ListRoles(ctx context.Context, params ListRolesParam
 // List all users.
 //
 // GET /user
-func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
+func (UnimplementedHandler) ListUsers(ctx context.Context) (r ListUsersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -667,7 +667,7 @@ func (UnimplementedHandler) ListUsers(ctx context.Context) (r []User, _ error) {
 // List worker enrollment tokens.
 //
 // GET /workers/enrollment-tokens
-func (UnimplementedHandler) ListWorkerEnrollmentTokens(ctx context.Context) (r []WorkerEnrollmentToken, _ error) {
+func (UnimplementedHandler) ListWorkerEnrollmentTokens(ctx context.Context) (r ListWorkerEnrollmentTokensRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -676,7 +676,7 @@ func (UnimplementedHandler) ListWorkerEnrollmentTokens(ctx context.Context) (r [
 // List workspace members.
 //
 // GET /workspace/{uuid}/members
-func (UnimplementedHandler) ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) (r []WorkspaceMember, _ error) {
+func (UnimplementedHandler) ListWorkspaceMembers(ctx context.Context, params ListWorkspaceMembersParams) (r ListWorkspaceMembersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -685,7 +685,7 @@ func (UnimplementedHandler) ListWorkspaceMembers(ctx context.Context, params Lis
 // List all workspaces.
 //
 // GET /workspace
-func (UnimplementedHandler) ListWorkspaces(ctx context.Context) (r []Workspace, _ error) {
+func (UnimplementedHandler) ListWorkspaces(ctx context.Context) (r ListWorkspacesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -695,7 +695,7 @@ func (UnimplementedHandler) ListWorkspaces(ctx context.Context) (r []Workspace, 
 // field mappings.
 //
 // GET /mapper/source-fields
-func (UnimplementedHandler) MapperSourceFieldsList(ctx context.Context, params MapperSourceFieldsListParams) (r *MapperSourceFieldsListOK, _ error) {
+func (UnimplementedHandler) MapperSourceFieldsList(ctx context.Context, params MapperSourceFieldsListParams) (r MapperSourceFieldsListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -704,7 +704,7 @@ func (UnimplementedHandler) MapperSourceFieldsList(ctx context.Context, params M
 // Returns all transform functions that can be applied to field mappings.
 //
 // GET /mapper/transforms
-func (UnimplementedHandler) MapperTransformsList(ctx context.Context, params MapperTransformsListParams) (r *MapperTransformsListOK, _ error) {
+func (UnimplementedHandler) MapperTransformsList(ctx context.Context, params MapperTransformsListParams) (r MapperTransformsListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -713,7 +713,7 @@ func (UnimplementedHandler) MapperTransformsList(ctx context.Context, params Map
 // Validates field mappings against source schemas and target tables without saving.
 //
 // POST /mapper/validate
-func (UnimplementedHandler) MapperValidate(ctx context.Context, req *MapperValidateReq) (r *MapperValidateOK, _ error) {
+func (UnimplementedHandler) MapperValidate(ctx context.Context, req *MapperValidateReq) (r MapperValidateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -722,7 +722,7 @@ func (UnimplementedHandler) MapperValidate(ctx context.Context, req *MapperValid
 // Execute a search query on email messages.
 //
 // POST /message/email/query
-func (UnimplementedHandler) MessageEmailQuery(ctx context.Context, req *MessageQuery) (r *MessageEmailQueryOK, _ error) {
+func (UnimplementedHandler) MessageEmailQuery(ctx context.Context, req *MessageQuery) (r MessageEmailQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -731,7 +731,7 @@ func (UnimplementedHandler) MessageEmailQuery(ctx context.Context, req *MessageQ
 // Execute a search query on LinkedIn messages.
 //
 // POST /message/linkedin/query
-func (UnimplementedHandler) MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (r *MessageLinkedinQueryOK, _ error) {
+func (UnimplementedHandler) MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (r MessageLinkedinQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -740,7 +740,7 @@ func (UnimplementedHandler) MessageLinkedinQuery(ctx context.Context, req *Messa
 // Execute a search query on unified messages.
 //
 // POST /message/query
-func (UnimplementedHandler) MessageQuery(ctx context.Context, req *MessageQuery) (r *MessageQueryOK, _ error) {
+func (UnimplementedHandler) MessageQuery(ctx context.Context, req *MessageQuery) (r MessageQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -749,7 +749,7 @@ func (UnimplementedHandler) MessageQuery(ctx context.Context, req *MessageQuery)
 // Execute a search query on Telegram messages.
 //
 // POST /message/telegram/query
-func (UnimplementedHandler) MessageTelegramQuery(ctx context.Context, req *MessageQuery) (r *MessageTelegramQueryOK, _ error) {
+func (UnimplementedHandler) MessageTelegramQuery(ctx context.Context, req *MessageQuery) (r MessageTelegramQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -758,7 +758,17 @@ func (UnimplementedHandler) MessageTelegramQuery(ctx context.Context, req *Messa
 // Execute a search query on WhatsApp messages.
 //
 // POST /message/whatsapp/query
-func (UnimplementedHandler) MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (r *MessageWhatsappQueryOK, _ error) {
+func (UnimplementedHandler) MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (r MessageWhatsappQueryRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// NatsMessagesList implements nats-messages-list operation.
+//
+// Retrieves the last N messages from the NATS data stream for the current workspace.
+// These are message records that were published during message query jobs.
+//
+// GET /nats/messages
+func (UnimplementedHandler) NatsMessagesList(ctx context.Context, params NatsMessagesListParams) (r NatsMessagesListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -767,7 +777,7 @@ func (UnimplementedHandler) MessageWhatsappQuery(ctx context.Context, req *Messa
 // Serve OAuth2 client callback.
 //
 // GET /oauth2/callback
-func (UnimplementedHandler) OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (r *OAuth2ClientCallbackFound, _ error) {
+func (UnimplementedHandler) OAuth2ClientCallback(ctx context.Context, params OAuth2ClientCallbackParams) (r OAuth2ClientCallbackRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -776,7 +786,7 @@ func (UnimplementedHandler) OAuth2ClientCallback(ctx context.Context, params OAu
 // Create OAuth2 client.
 //
 // POST /oauth2/client
-func (UnimplementedHandler) OAuth2ClientCreate(ctx context.Context, req *OAuth2ClientCreateReq) (r *OAuth2Client, _ error) {
+func (UnimplementedHandler) OAuth2ClientCreate(ctx context.Context, req *OAuth2ClientCreateReq) (r OAuth2ClientCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -785,8 +795,8 @@ func (UnimplementedHandler) OAuth2ClientCreate(ctx context.Context, req *OAuth2C
 // Delete OAuth2 client.
 //
 // DELETE /oauth2/client/{uuid}
-func (UnimplementedHandler) OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) OAuth2ClientDelete(ctx context.Context, params OAuth2ClientDeleteParams) (r OAuth2ClientDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // OAuth2ClientGet implements oauth2-client-get operation.
@@ -794,7 +804,7 @@ func (UnimplementedHandler) OAuth2ClientDelete(ctx context.Context, params OAuth
 // Get OAuth2 client details.
 //
 // GET /oauth2/client/{uuid}
-func (UnimplementedHandler) OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (r *OAuth2Client, _ error) {
+func (UnimplementedHandler) OAuth2ClientGet(ctx context.Context, params OAuth2ClientGetParams) (r OAuth2ClientGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -803,7 +813,7 @@ func (UnimplementedHandler) OAuth2ClientGet(ctx context.Context, params OAuth2Cl
 // List OAuth2 clients.
 //
 // GET /oauth2/client
-func (UnimplementedHandler) OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (r *OAuth2ClientListOK, _ error) {
+func (UnimplementedHandler) OAuth2ClientList(ctx context.Context, params OAuth2ClientListParams) (r OAuth2ClientListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -812,7 +822,7 @@ func (UnimplementedHandler) OAuth2ClientList(ctx context.Context, params OAuth2C
 // Start OAuth2 login flow.
 //
 // POST /oauth2/login
-func (UnimplementedHandler) OAuth2ClientLogin(ctx context.Context, req *OAuth2ClientLoginReq) (r *OAuth2ClientLoginOK, _ error) {
+func (UnimplementedHandler) OAuth2ClientLogin(ctx context.Context, req *OAuth2ClientLoginReq) (r OAuth2ClientLoginRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -821,8 +831,8 @@ func (UnimplementedHandler) OAuth2ClientLogin(ctx context.Context, req *OAuth2Cl
 // Delete OAuth2 client token.
 //
 // DELETE /oauth2/client/{datasource_uuid}/token/{uuid}
-func (UnimplementedHandler) OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) OAuth2ClientTokenDelete(ctx context.Context, params OAuth2ClientTokenDeleteParams) (r OAuth2ClientTokenDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // OAuth2ClientTokenList implements oauth2-client-token-list operation.
@@ -830,7 +840,7 @@ func (UnimplementedHandler) OAuth2ClientTokenDelete(ctx context.Context, params 
 // List OAuth2 client tokens.
 //
 // GET /oauth2/client/{datasource_uuid}/token
-func (UnimplementedHandler) OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (r []OAuth2ClientToken, _ error) {
+func (UnimplementedHandler) OAuth2ClientTokenList(ctx context.Context, params OAuth2ClientTokenListParams) (r OAuth2ClientTokenListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -839,7 +849,7 @@ func (UnimplementedHandler) OAuth2ClientTokenList(ctx context.Context, params OA
 // Update OAuth2 client.
 //
 // PUT /oauth2/client/{uuid}
-func (UnimplementedHandler) OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (r *OAuth2Client, _ error) {
+func (UnimplementedHandler) OAuth2ClientUpdate(ctx context.Context, req *OAuth2ClientUpdateReq, params OAuth2ClientUpdateParams) (r OAuth2ClientUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -848,7 +858,7 @@ func (UnimplementedHandler) OAuth2ClientUpdate(ctx context.Context, req *OAuth2C
 // Create a new pipeline for a datasource.
 //
 // POST /pipeline
-func (UnimplementedHandler) PipelineCreate(ctx context.Context, req *Pipeline) (r *Pipeline, _ error) {
+func (UnimplementedHandler) PipelineCreate(ctx context.Context, req *Pipeline) (r PipelineCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -857,8 +867,8 @@ func (UnimplementedHandler) PipelineCreate(ctx context.Context, req *Pipeline) (
 // Delete a specific pipeline by UUID.
 //
 // DELETE /pipeline/{uuid}
-func (UnimplementedHandler) PipelineDelete(ctx context.Context, params PipelineDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) PipelineDelete(ctx context.Context, params PipelineDeleteParams) (r PipelineDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // PipelineGet implements pipeline-get operation.
@@ -866,7 +876,7 @@ func (UnimplementedHandler) PipelineDelete(ctx context.Context, params PipelineD
 // Retrieve a specific pipeline by its UUID.
 //
 // GET /pipeline/{uuid}
-func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetParams) (r *Pipeline, _ error) {
+func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetParams) (r PipelineGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -875,7 +885,7 @@ func (UnimplementedHandler) PipelineGet(ctx context.Context, params PipelineGetP
 // Get all pipelines.
 //
 // GET /pipeline
-func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineListParams) (r *PipelineListOK, _ error) {
+func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineListParams) (r PipelineListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -884,7 +894,7 @@ func (UnimplementedHandler) PipelineList(ctx context.Context, params PipelineLis
 // Update an existing pipeline.
 //
 // PUT /pipeline/{uuid}
-func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (r *Pipeline, _ error) {
+func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (r PipelineUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -893,8 +903,8 @@ func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, p
 // Remove a role from a user.
 //
 // DELETE /rbac/user/{user_uuid}/roles/{role_name}
-func (UnimplementedHandler) RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) (r RemoveRoleFromUserRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // RemoveWorkspaceMember implements removeWorkspaceMember operation.
@@ -902,8 +912,8 @@ func (UnimplementedHandler) RemoveRoleFromUser(ctx context.Context, params Remov
 // Remove member from workspace.
 //
 // DELETE /workspace/{uuid}/members/{user_uuid}
-func (UnimplementedHandler) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) (r RemoveWorkspaceMemberRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // SchedulerCreate implements scheduler-create operation.
@@ -911,7 +921,7 @@ func (UnimplementedHandler) RemoveWorkspaceMember(ctx context.Context, params Re
 // Create scheduler.
 //
 // POST /scheduler
-func (UnimplementedHandler) SchedulerCreate(ctx context.Context, req *Scheduler) (r *Scheduler, _ error) {
+func (UnimplementedHandler) SchedulerCreate(ctx context.Context, req *Scheduler) (r SchedulerCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -920,8 +930,8 @@ func (UnimplementedHandler) SchedulerCreate(ctx context.Context, req *Scheduler)
 // Delete scheduler.
 //
 // DELETE /scheduler/{uuid}
-func (UnimplementedHandler) SchedulerDelete(ctx context.Context, params SchedulerDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) SchedulerDelete(ctx context.Context, params SchedulerDeleteParams) (r SchedulerDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // SchedulerGet implements scheduler-get operation.
@@ -929,7 +939,7 @@ func (UnimplementedHandler) SchedulerDelete(ctx context.Context, params Schedule
 // Get scheduler by UUID.
 //
 // GET /scheduler/{uuid}
-func (UnimplementedHandler) SchedulerGet(ctx context.Context, params SchedulerGetParams) (r *Scheduler, _ error) {
+func (UnimplementedHandler) SchedulerGet(ctx context.Context, params SchedulerGetParams) (r SchedulerGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -938,7 +948,7 @@ func (UnimplementedHandler) SchedulerGet(ctx context.Context, params SchedulerGe
 // Retrieve all schedulers for the authenticated user.
 //
 // GET /scheduler
-func (UnimplementedHandler) SchedulerList(ctx context.Context, params SchedulerListParams) (r []Scheduler, _ error) {
+func (UnimplementedHandler) SchedulerList(ctx context.Context, params SchedulerListParams) (r SchedulerListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -947,7 +957,7 @@ func (UnimplementedHandler) SchedulerList(ctx context.Context, params SchedulerL
 // Update scheduler.
 //
 // PUT /scheduler/{uuid}
-func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (r *Scheduler, _ error) {
+func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (r SchedulerUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -956,7 +966,7 @@ func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler,
 // Create a new Host Files storage instance.
 //
 // POST /storage/hostfiles
-func (UnimplementedHandler) StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (r *StorageHostfiles, _ error) {
+func (UnimplementedHandler) StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (r StorageHostfilesCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -965,8 +975,8 @@ func (UnimplementedHandler) StorageHostfilesCreate(ctx context.Context, req *Sto
 // Delete a specific Host Files storage instance by UUID.
 //
 // DELETE /storage/hostfiles/{uuid}
-func (UnimplementedHandler) StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (r StorageHostfilesDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // StorageHostfilesGet implements storage-hostfiles-get operation.
@@ -974,7 +984,7 @@ func (UnimplementedHandler) StorageHostfilesDelete(ctx context.Context, params S
 // Retrieve details of a specific Host Files storage instance by UUID.
 //
 // GET /storage/hostfiles/{uuid}
-func (UnimplementedHandler) StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (r *StorageHostfiles, _ error) {
+func (UnimplementedHandler) StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (r StorageHostfilesGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -983,7 +993,7 @@ func (UnimplementedHandler) StorageHostfilesGet(ctx context.Context, params Stor
 // Update details of a specific Host Files storage instance by UUID.
 //
 // PUT /storage/hostfiles/{uuid}
-func (UnimplementedHandler) StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (r *StorageHostfiles, _ error) {
+func (UnimplementedHandler) StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (r StorageHostfilesUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -992,7 +1002,7 @@ func (UnimplementedHandler) StorageHostfilesUpdate(ctx context.Context, req *Sto
 // Retrieve a list of data storage objects.
 //
 // GET /storage
-func (UnimplementedHandler) StorageList(ctx context.Context, params StorageListParams) (r []Storage, _ error) {
+func (UnimplementedHandler) StorageList(ctx context.Context, params StorageListParams) (r StorageListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1001,7 +1011,7 @@ func (UnimplementedHandler) StorageList(ctx context.Context, params StorageListP
 // Create a new PostgreSQL storage instance.
 //
 // POST /storage/postgres
-func (UnimplementedHandler) StoragePostgresCreate(ctx context.Context, req *StoragePostgres) (r *StoragePostgres, _ error) {
+func (UnimplementedHandler) StoragePostgresCreate(ctx context.Context, req *StoragePostgres) (r StoragePostgresCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1010,8 +1020,8 @@ func (UnimplementedHandler) StoragePostgresCreate(ctx context.Context, req *Stor
 // Delete a specific PostgreSQL storage instance by UUID.
 //
 // DELETE /storage/postgres/{uuid}
-func (UnimplementedHandler) StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) StoragePostgresDelete(ctx context.Context, params StoragePostgresDeleteParams) (r StoragePostgresDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // StoragePostgresGet implements storage-postgres-get operation.
@@ -1019,7 +1029,7 @@ func (UnimplementedHandler) StoragePostgresDelete(ctx context.Context, params St
 // Retrieve details of a specific PostgreSQL storage instance by UUID.
 //
 // GET /storage/postgres/{uuid}
-func (UnimplementedHandler) StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (r *StoragePostgres, _ error) {
+func (UnimplementedHandler) StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (r StoragePostgresGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1028,7 +1038,7 @@ func (UnimplementedHandler) StoragePostgresGet(ctx context.Context, params Stora
 // Get schema information for a specific table in the PostgreSQL database.
 //
 // GET /storage/postgres/{uuid}/introspect/tables/{table_name}
-func (UnimplementedHandler) StoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (r *StoragePostgresIntrospectTableResponse, _ error) {
+func (UnimplementedHandler) StoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (r StoragePostgresIntrospectTableRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1037,7 +1047,18 @@ func (UnimplementedHandler) StoragePostgresIntrospectTable(ctx context.Context, 
 // List all tables in the PostgreSQL database connected via this storage.
 //
 // GET /storage/postgres/{uuid}/introspect/tables
-func (UnimplementedHandler) StoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (r *StoragePostgresIntrospectTablesResponse, _ error) {
+func (UnimplementedHandler) StoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (r StoragePostgresIntrospectTablesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StoragePostgresMessagesQuery implements storage-postgres-messages-query operation.
+//
+// Triggers a job to query messages from a PostgreSQL storage.
+// Individual message records are streamed to NATS on the specified subject.
+// Subscribe to the nats_subject in the response to receive records.
+//
+// POST /storage/postgres/{uuid}/messages/query
+func (UnimplementedHandler) StoragePostgresMessagesQuery(ctx context.Context, req OptStoragePostgresMessagesQueryReq, params StoragePostgresMessagesQueryParams) (r StoragePostgresMessagesQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1046,7 +1067,7 @@ func (UnimplementedHandler) StoragePostgresIntrospectTables(ctx context.Context,
 // Create a new table in the PostgreSQL database.
 //
 // POST /storage/postgres/{uuid}/tables/create
-func (UnimplementedHandler) StoragePostgresTablesCreate(ctx context.Context, req *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (r *StoragePostgresTableCreateResponse, _ error) {
+func (UnimplementedHandler) StoragePostgresTablesCreate(ctx context.Context, req *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (r StoragePostgresTablesCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1055,7 +1076,7 @@ func (UnimplementedHandler) StoragePostgresTablesCreate(ctx context.Context, req
 // Replace all target tables for a PostgreSQL storage instance.
 //
 // PUT /storage/postgres/{uuid}/tables
-func (UnimplementedHandler) StoragePostgresTablesReplace(ctx context.Context, req []StoragePostgresTable, params StoragePostgresTablesReplaceParams) (r []StoragePostgresTable, _ error) {
+func (UnimplementedHandler) StoragePostgresTablesReplace(ctx context.Context, req []StoragePostgresTable, params StoragePostgresTablesReplaceParams) (r StoragePostgresTablesReplaceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1065,7 +1086,7 @@ func (UnimplementedHandler) StoragePostgresTablesReplace(ctx context.Context, re
 // Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/{uuid}/test
-func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (r *TestConnectionJob, _ error) {
+func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (r StoragePostgresTestRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1076,7 +1097,7 @@ func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params Stor
 // Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/test
-func (UnimplementedHandler) StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (r *TestConnectionJob, _ error) {
+func (UnimplementedHandler) StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (r StoragePostgresTestInlineRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1085,7 +1106,7 @@ func (UnimplementedHandler) StoragePostgresTestInline(ctx context.Context, req *
 // Update details of a specific PostgreSQL storage instance by UUID.
 //
 // PUT /storage/postgres/{uuid}
-func (UnimplementedHandler) StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (r *StoragePostgres, _ error) {
+func (UnimplementedHandler) StoragePostgresUpdate(ctx context.Context, req *StoragePostgres, params StoragePostgresUpdateParams) (r StoragePostgresUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1094,7 +1115,7 @@ func (UnimplementedHandler) StoragePostgresUpdate(ctx context.Context, req *Stor
 // Create a new S3 storage instance.
 //
 // POST /storage/s3
-func (UnimplementedHandler) StorageS3Create(ctx context.Context, req *StorageS3) (r *StorageS3, _ error) {
+func (UnimplementedHandler) StorageS3Create(ctx context.Context, req *StorageS3) (r StorageS3CreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1103,8 +1124,8 @@ func (UnimplementedHandler) StorageS3Create(ctx context.Context, req *StorageS3)
 // Delete a specific S3 storage instance by UUID.
 //
 // DELETE /storage/s3/{uuid}
-func (UnimplementedHandler) StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) StorageS3Delete(ctx context.Context, params StorageS3DeleteParams) (r StorageS3DeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // StorageS3Get implements storage-s3-get operation.
@@ -1112,7 +1133,7 @@ func (UnimplementedHandler) StorageS3Delete(ctx context.Context, params StorageS
 // Retrieve details of a specific S3 storage instance by UUID.
 //
 // GET /storage/s3/{uuid}
-func (UnimplementedHandler) StorageS3Get(ctx context.Context, params StorageS3GetParams) (r *StorageS3, _ error) {
+func (UnimplementedHandler) StorageS3Get(ctx context.Context, params StorageS3GetParams) (r StorageS3GetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1121,7 +1142,7 @@ func (UnimplementedHandler) StorageS3Get(ctx context.Context, params StorageS3Ge
 // Update details of a specific S3 storage instance by UUID.
 //
 // PUT /storage/s3/{uuid}
-func (UnimplementedHandler) StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (r *StorageS3, _ error) {
+func (UnimplementedHandler) StorageS3Update(ctx context.Context, req *StorageS3, params StorageS3UpdateParams) (r StorageS3UpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1130,7 +1151,7 @@ func (UnimplementedHandler) StorageS3Update(ctx context.Context, req *StorageS3,
 // Create a new sync policy.
 //
 // POST /syncpolicy
-func (UnimplementedHandler) SyncpolicyCreate(ctx context.Context, req *SyncPolicy) (r *SyncPolicy, _ error) {
+func (UnimplementedHandler) SyncpolicyCreate(ctx context.Context, req *SyncPolicy) (r SyncpolicyCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1139,8 +1160,8 @@ func (UnimplementedHandler) SyncpolicyCreate(ctx context.Context, req *SyncPolic
 // Delete a sync policy by uuid.
 //
 // DELETE /syncpolicy/{uuid}
-func (UnimplementedHandler) SyncpolicyDelete(ctx context.Context, params SyncpolicyDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) SyncpolicyDelete(ctx context.Context, params SyncpolicyDeleteParams) (r SyncpolicyDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // SyncpolicyGet implements syncpolicy-get operation.
@@ -1148,7 +1169,7 @@ func (UnimplementedHandler) SyncpolicyDelete(ctx context.Context, params Syncpol
 // Retrieve a specific sync policy by uuid.
 //
 // GET /syncpolicy/{uuid}
-func (UnimplementedHandler) SyncpolicyGet(ctx context.Context, params SyncpolicyGetParams) (r *SyncPolicy, _ error) {
+func (UnimplementedHandler) SyncpolicyGet(ctx context.Context, params SyncpolicyGetParams) (r SyncpolicyGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1157,7 +1178,7 @@ func (UnimplementedHandler) SyncpolicyGet(ctx context.Context, params Syncpolicy
 // Retrieve a list of sync policies for the authenticated user.
 //
 // GET /syncpolicy
-func (UnimplementedHandler) SyncpolicyList(ctx context.Context, params SyncpolicyListParams) (r *SyncpolicyListOK, _ error) {
+func (UnimplementedHandler) SyncpolicyList(ctx context.Context, params SyncpolicyListParams) (r SyncpolicyListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1166,7 +1187,7 @@ func (UnimplementedHandler) SyncpolicyList(ctx context.Context, params Syncpolic
 // Update a sync policy by uuid.
 //
 // PUT /syncpolicy/{uuid}
-func (UnimplementedHandler) SyncpolicyUpdate(ctx context.Context, req *SyncPolicy, params SyncpolicyUpdateParams) (r *SyncPolicy, _ error) {
+func (UnimplementedHandler) SyncpolicyUpdate(ctx context.Context, req *SyncPolicy, params SyncpolicyUpdateParams) (r SyncpolicyUpdateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1175,7 +1196,7 @@ func (UnimplementedHandler) SyncpolicyUpdate(ctx context.Context, req *SyncPolic
 // Get the status and result of a test connection job.
 //
 // GET /test-connection-job/{uuid}
-func (UnimplementedHandler) TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (r *TestConnectionJob, _ error) {
+func (UnimplementedHandler) TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (r TestConnectionJobGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1184,7 +1205,7 @@ func (UnimplementedHandler) TestConnectionJobGet(ctx context.Context, params Tes
 // Create a new Telegram session.
 //
 // POST /telegram
-func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (r *Telegram, _ error) {
+func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (r TgSessionCreateRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1193,7 +1214,7 @@ func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionC
 // List all Telegram sessions for the authenticated user.
 //
 // GET /telegram
-func (UnimplementedHandler) TgSessionList(ctx context.Context) (r *TgSessionListOK, _ error) {
+func (UnimplementedHandler) TgSessionList(ctx context.Context) (r TgSessionListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1202,7 +1223,7 @@ func (UnimplementedHandler) TgSessionList(ctx context.Context) (r *TgSessionList
 // Complete the session creation process by verifying the code.
 //
 // PUT /telegram/{id}
-func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (r *Telegram, _ error) {
+func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (r TgSessionVerifyRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1211,7 +1232,7 @@ func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionV
 // Update contact details.
 //
 // PUT /contact/{uuid}
-func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (r *Contact, _ error) {
+func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (r UpdateContactRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1220,7 +1241,7 @@ func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, par
 // Update current user profile.
 //
 // PUT /profile
-func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile) (r *User, _ error) {
+func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile) (r UpdateProfileRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1229,7 +1250,7 @@ func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile)
 // Update registered worker.
 //
 // PUT /workers/{uuid}
-func (UnimplementedHandler) UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (r *RegisteredWorker, _ error) {
+func (UnimplementedHandler) UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (r UpdateRegisteredWorkerRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1238,7 +1259,7 @@ func (UnimplementedHandler) UpdateRegisteredWorker(ctx context.Context, req *Reg
 // Update a role.
 //
 // PUT /rbac/role/{uuid}
-func (UnimplementedHandler) UpdateRole(ctx context.Context, req *RbacRole, params UpdateRoleParams) (r *RbacRole, _ error) {
+func (UnimplementedHandler) UpdateRole(ctx context.Context, req *RbacRole, params UpdateRoleParams) (r UpdateRoleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1247,7 +1268,7 @@ func (UnimplementedHandler) UpdateRole(ctx context.Context, req *RbacRole, param
 // Update user details.
 //
 // PUT /user/{uuid}
-func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (r *User, _ error) {
+func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (r UpdateUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1256,7 +1277,7 @@ func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params Up
 // Update workspace.
 //
 // PUT /workspace/{uuid}
-func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace, params UpdateWorkspaceParams) (r *Workspace, _ error) {
+func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace, params UpdateWorkspaceParams) (r UpdateWorkspaceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1265,7 +1286,7 @@ func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace,
 // Update member role.
 //
 // PUT /workspace/{uuid}/members/{user_uuid}
-func (UnimplementedHandler) UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (r *WorkspaceMember, _ error) {
+func (UnimplementedHandler) UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (r UpdateWorkspaceMemberRoleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1274,7 +1295,7 @@ func (UnimplementedHandler) UpdateWorkspaceMemberRole(ctx context.Context, req *
 // Upload a file.
 //
 // POST /storage/upload
-func (UnimplementedHandler) UploadFile(ctx context.Context, req *UploadFileRequest) (r *UploadFileResponse, _ error) {
+func (UnimplementedHandler) UploadFile(ctx context.Context, req *UploadFileRequest) (r UploadFileRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1283,8 +1304,8 @@ func (UnimplementedHandler) UploadFile(ctx context.Context, req *UploadFileReque
 // Signal cancellation for a running job; returns 204 if accepted.
 //
 // POST /workerjobs/{uuid}/cancel
-func (UnimplementedHandler) WorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) WorkerJobsCancel(ctx context.Context, params WorkerJobsCancelParams) (r WorkerJobsCancelRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // WorkerJobsDelete implements worker-jobs-delete operation.
@@ -1292,8 +1313,8 @@ func (UnimplementedHandler) WorkerJobsCancel(ctx context.Context, params WorkerJ
 // Delete a worker job by uuid.
 //
 // DELETE /workerjobs/{uuid}
-func (UnimplementedHandler) WorkerJobsDelete(ctx context.Context, params WorkerJobsDeleteParams) error {
-	return ht.ErrNotImplemented
+func (UnimplementedHandler) WorkerJobsDelete(ctx context.Context, params WorkerJobsDeleteParams) (r WorkerJobsDeleteRes, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // WorkerJobsGet implements worker-jobs-get operation.
@@ -1301,7 +1322,7 @@ func (UnimplementedHandler) WorkerJobsDelete(ctx context.Context, params WorkerJ
 // Retrieve a specific worker job by uuid.
 //
 // GET /workerjobs/{uuid}
-func (UnimplementedHandler) WorkerJobsGet(ctx context.Context, params WorkerJobsGetParams) (r *WorkerJobs, _ error) {
+func (UnimplementedHandler) WorkerJobsGet(ctx context.Context, params WorkerJobsGetParams) (r WorkerJobsGetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1310,14 +1331,6 @@ func (UnimplementedHandler) WorkerJobsGet(ctx context.Context, params WorkerJobs
 // Retrieve a list of worker jobs.
 //
 // GET /workerjobs
-func (UnimplementedHandler) WorkerJobsList(ctx context.Context, params WorkerJobsListParams) (r *WorkerJobsListOK, _ error) {
+func (UnimplementedHandler) WorkerJobsList(ctx context.Context, params WorkerJobsListParams) (r WorkerJobsListRes, _ error) {
 	return r, ht.ErrNotImplemented
-}
-
-// NewError creates *ErrorStatusCode from error returned by handler.
-//
-// Used for common default response.
-func (UnimplementedHandler) NewError(ctx context.Context, err error) (r *ErrorStatusCode) {
-	r = new(ErrorStatusCode)
-	return r
 }

@@ -73,9 +73,21 @@ function getMenuItems(basePath: string): MenuItem[] {
       ],
     },
     {
-      key: '/storages',
+      key: '/storages-menu',
       icon: <DatabaseOutlined />,
-      label: <Link to={`${basePath}/storages`}>Data Storages</Link>,
+      label: 'Data Storages',
+      children: [
+        {
+          key: '/storages',
+          icon: <DatabaseOutlined />,
+          label: <Link to={`${basePath}/storages`}>Storages</Link>,
+        },
+        {
+          key: '/storages/messages',
+          icon: <MessageOutlined />,
+          label: <Link to={`${basePath}/storages/messages`}>Last Messages</Link>,
+        },
+      ],
     },
     {
       key: '/automation-menu',
@@ -186,8 +198,9 @@ const routeConfig: Record<string, RouteConfig> = {
   '/datasources/new': { title: 'Add', parent: '/datasources' },
   '/oauth2/credentials': { title: 'OAuth2 Credentials', parent: '/datasources' },
   '/oauth2/credentials/new': { title: 'Add', parent: '/oauth2/credentials' },
-  '/storages': { title: 'Data Storages' },
+  '/storages': { title: 'Storages' },
   '/storages/new': { title: 'Add', parent: '/storages' },
+  '/storages/messages': { title: 'Last Messages' },
   '/syncpolicies': { title: 'Sync Policies' },
   '/pipelines': { title: 'Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
@@ -204,6 +217,8 @@ const menuParentMap: Record<string, string> = {
   '/files': '/messages',
   '/datasources': '/datasources-menu',
   '/oauth2/credentials': '/datasources-menu',
+  '/storages': '/storages-menu',
+  '/storages/messages': '/storages-menu',
   '/users': '/rbac',
   '/rbac/roles': '/rbac',
   '/pipelines': '/automation-menu',

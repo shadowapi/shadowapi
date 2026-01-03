@@ -3,7 +3,6 @@
 package api
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
@@ -12,12 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *ErrorStatusCode) Error() string {
-	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
-}
-
 // AssignRoleToUserCreated is response for AssignRoleToUser operation.
 type AssignRoleToUserCreated struct{}
+
+func (*AssignRoleToUserCreated) assignRoleToUserRes() {}
 
 type AssignRoleToUserReq struct {
 	// Name of the role to assign.
@@ -61,6 +58,8 @@ func (s *AuthConsentFound) SetLocation(val OptString) {
 	s.Location = val
 }
 
+func (*AuthConsentFound) authConsentRes() {}
+
 // AuthLoginFound is response for AuthLogin operation.
 type AuthLoginFound struct {
 	Location OptString
@@ -76,6 +75,8 @@ func (s *AuthLoginFound) SetLocation(val OptString) {
 	s.Location = val
 }
 
+func (*AuthLoginFound) authLoginRes() {}
+
 type AuthLoginSubmitOK struct {
 	// The URL to redirect the user to.
 	RedirectTo string `json:"redirect_to"`
@@ -90,6 +91,8 @@ func (s *AuthLoginSubmitOK) GetRedirectTo() string {
 func (s *AuthLoginSubmitOK) SetRedirectTo(val string) {
 	s.RedirectTo = val
 }
+
+func (*AuthLoginSubmitOK) authLoginSubmitRes() {}
 
 type AuthLoginSubmitReq struct {
 	// The login challenge from Hydra.
@@ -169,6 +172,8 @@ func (s *AuthOAuth2AuthorizeOK) SetState(val string) {
 	s.State = val
 }
 
+func (*AuthOAuth2AuthorizeOK) authOAuth2AuthorizeRes() {}
+
 type AuthOAuth2AuthorizeReq struct {
 	// Where to redirect after successful authentication.
 	RedirectURI string `json:"redirect_uri"`
@@ -209,6 +214,8 @@ func (s *AuthOAuth2CallbackFound) SetLocation(val OptString) {
 func (s *AuthOAuth2CallbackFound) SetSetCookie(val []string) {
 	s.SetCookie = val
 }
+
+func (*AuthOAuth2CallbackFound) authOAuth2CallbackRes() {}
 
 type AuthOAuth2LogoutOK struct {
 	// Whether logout was successful.
@@ -251,6 +258,8 @@ func (s *AuthOAuth2LogoutOKHeaders) SetResponse(val AuthOAuth2LogoutOK) {
 	s.Response = val
 }
 
+func (*AuthOAuth2LogoutOKHeaders) authOAuth2LogoutRes() {}
+
 type AuthOAuth2RefreshOK struct {
 	// Access token expiration time in seconds.
 	ExpiresIn int `json:"expires_in"`
@@ -292,6 +301,8 @@ func (s *AuthOAuth2RefreshOKHeaders) SetResponse(val AuthOAuth2RefreshOK) {
 	s.Response = val
 }
 
+func (*AuthOAuth2RefreshOKHeaders) authOAuth2RefreshRes() {}
+
 type AuthOAuth2SessionOK struct {
 	// Whether the user has a valid session.
 	Authenticated bool `json:"authenticated"`
@@ -318,6 +329,8 @@ func (s *AuthOAuth2SessionOK) SetAuthenticated(val bool) {
 func (s *AuthOAuth2SessionOK) SetExpiresIn(val OptInt) {
 	s.ExpiresIn = val
 }
+
+func (*AuthOAuth2SessionOK) authOAuth2SessionRes() {}
 
 type BearerAuth struct {
 	Token string
@@ -347,6 +360,8 @@ func (s *CheckPermissionOK) GetAllowed() OptBool {
 func (s *CheckPermissionOK) SetAllowed(val OptBool) {
 	s.Allowed = val
 }
+
+func (*CheckPermissionOK) checkPermissionRes() {}
 
 type CheckPermissionReq struct {
 	// User UUID to check.
@@ -1778,6 +1793,10 @@ func (s *Contact) SetLastKpiEntryDate(val OptDateTime) {
 	s.LastKpiEntryDate = val
 }
 
+func (*Contact) createContactRes() {}
+func (*Contact) getContactRes()    {}
+func (*Contact) updateContactRes() {}
+
 type ContactCachedImgData struct{}
 
 type ContactCrawl struct{}
@@ -2060,8 +2079,18 @@ func (s *DatasourceEmail) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*DatasourceEmail) datasourceEmailCreateRes() {}
+func (*DatasourceEmail) datasourceEmailGetRes()    {}
+func (*DatasourceEmail) datasourceEmailUpdateRes() {}
+
 // DatasourceEmailDeleteOK is response for DatasourceEmailDelete operation.
 type DatasourceEmailDeleteOK struct{}
+
+func (*DatasourceEmailDeleteOK) datasourceEmailDeleteRes() {}
+
+type DatasourceEmailListOKApplicationJSON []DatasourceEmail
+
+func (*DatasourceEmailListOKApplicationJSON) datasourceEmailListRes() {}
 
 // OAuth2‑enabled email datasource object representation.
 // Ref: #
@@ -2181,8 +2210,18 @@ func (s *DatasourceEmailOAuth) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*DatasourceEmailOAuth) datasourceEmailOAuthCreateRes() {}
+func (*DatasourceEmailOAuth) datasourceEmailOAuthGetRes()    {}
+func (*DatasourceEmailOAuth) datasourceEmailOAuthUpdateRes() {}
+
 // DatasourceEmailOAuthDeleteOK is response for DatasourceEmailOAuthDelete operation.
 type DatasourceEmailOAuthDeleteOK struct{}
+
+func (*DatasourceEmailOAuthDeleteOK) datasourceEmailOAuthDeleteRes() {}
+
+type DatasourceEmailOAuthListOKApplicationJSON []DatasourceEmailOAuth
+
+func (*DatasourceEmailOAuthListOKApplicationJSON) datasourceEmailOAuthListRes() {}
 
 // Email provider type (gmail for Gmail/Google Workspace, google for generic Google OAuth2).
 type DatasourceEmailOAuthProvider string
@@ -2345,8 +2384,18 @@ func (s *DatasourceLinkedin) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*DatasourceLinkedin) datasourceLinkedinCreateRes() {}
+func (*DatasourceLinkedin) datasourceLinkedinGetRes()    {}
+func (*DatasourceLinkedin) datasourceLinkedinUpdateRes() {}
+
 // DatasourceLinkedinDeleteOK is response for DatasourceLinkedinDelete operation.
 type DatasourceLinkedinDeleteOK struct{}
+
+func (*DatasourceLinkedinDeleteOK) datasourceLinkedinDeleteRes() {}
+
+type DatasourceLinkedinListOKApplicationJSON []DatasourceLinkedin
+
+func (*DatasourceLinkedinListOKApplicationJSON) datasourceLinkedinListRes() {}
 
 // Arbitrary LinkedIn bridging config pulled from linkedin.tpl.yaml
 // (presence bridging, encryption, etc.).
@@ -2361,8 +2410,14 @@ func (s *DatasourceLinkedinSettings) init() DatasourceLinkedinSettings {
 	return m
 }
 
+type DatasourceListOKApplicationJSON []Datasource
+
+func (*DatasourceListOKApplicationJSON) datasourceListRes() {}
+
 // DatasourceSetOAuth2ClientNoContent is response for DatasourceSetOAuth2Client operation.
 type DatasourceSetOAuth2ClientNoContent struct{}
+
+func (*DatasourceSetOAuth2ClientNoContent) datasourceSetOAuth2ClientRes() {}
 
 type DatasourceSetOAuth2ClientReq struct {
 	// OAuth2 client ID.
@@ -2555,8 +2610,18 @@ func (s *DatasourceTelegram) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*DatasourceTelegram) datasourceTelegramCreateRes() {}
+func (*DatasourceTelegram) datasourceTelegramGetRes()    {}
+func (*DatasourceTelegram) datasourceTelegramUpdateRes() {}
+
 // DatasourceTelegramDeleteOK is response for DatasourceTelegramDelete operation.
 type DatasourceTelegramDeleteOK struct{}
+
+func (*DatasourceTelegramDeleteOK) datasourceTelegramDeleteRes() {}
+
+type DatasourceTelegramListOKApplicationJSON []DatasourceTelegram
+
+func (*DatasourceTelegramListOKApplicationJSON) datasourceTelegramListRes() {}
 
 // Arbitrary key-value metadata about the account.
 type DatasourceTelegramMeta map[string]jx.Raw
@@ -2702,8 +2767,18 @@ func (s *DatasourceWhatsapp) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*DatasourceWhatsapp) datasourceWhatsappCreateRes() {}
+func (*DatasourceWhatsapp) datasourceWhatsappGetRes()    {}
+func (*DatasourceWhatsapp) datasourceWhatsappUpdateRes() {}
+
 // DatasourceWhatsappDeleteOK is response for DatasourceWhatsappDelete operation.
 type DatasourceWhatsappDeleteOK struct{}
+
+func (*DatasourceWhatsappDeleteOK) datasourceWhatsappDeleteRes() {}
+
+type DatasourceWhatsappListOKApplicationJSON []DatasourceWhatsapp
+
+func (*DatasourceWhatsappListOKApplicationJSON) datasourceWhatsappListRes() {}
 
 // Additional WhatsApp bridging config from whatsapp.tpl.yaml
 // (proxy, presence bridging, call notices, status broadcast, etc.).
@@ -2721,20 +2796,32 @@ func (s *DatasourceWhatsappSettings) init() DatasourceWhatsappSettings {
 // DeleteContactOK is response for DeleteContact operation.
 type DeleteContactOK struct{}
 
+func (*DeleteContactOK) deleteContactRes() {}
+
 // DeleteRegisteredWorkerOK is response for DeleteRegisteredWorker operation.
 type DeleteRegisteredWorkerOK struct{}
+
+func (*DeleteRegisteredWorkerOK) deleteRegisteredWorkerRes() {}
 
 // DeleteRoleNoContent is response for DeleteRole operation.
 type DeleteRoleNoContent struct{}
 
+func (*DeleteRoleNoContent) deleteRoleRes() {}
+
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
+
+func (*DeleteUserOK) deleteUserRes() {}
 
 // DeleteWorkerEnrollmentTokenOK is response for DeleteWorkerEnrollmentToken operation.
 type DeleteWorkerEnrollmentTokenOK struct{}
 
+func (*DeleteWorkerEnrollmentTokenOK) deleteWorkerEnrollmentTokenRes() {}
+
 // DeleteWorkspaceNoContent is response for DeleteWorkspace operation.
 type DeleteWorkspaceNoContent struct{}
+
+func (*DeleteWorkspaceNoContent) deleteWorkspaceRes() {}
 
 // Ref: #
 type Error struct {
@@ -2775,6 +2862,8 @@ func (s *Error) SetErrors(val []ErrorErrorsItem) {
 func (s *Error) SetStatus(val OptInt64) {
 	s.Status = val
 }
+
+func (*Error) natsMessagesListRes() {}
 
 type ErrorErrorsItem struct {
 	// Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'.
@@ -2841,8 +2930,159 @@ func (s *ErrorStatusCode) SetResponse(val Error) {
 	s.Response = val
 }
 
+func (*ErrorStatusCode) addWorkspaceMemberRes()              {}
+func (*ErrorStatusCode) assignRoleToUserRes()                {}
+func (*ErrorStatusCode) authConsentRes()                     {}
+func (*ErrorStatusCode) authLoginRes()                       {}
+func (*ErrorStatusCode) authLoginSubmitRes()                 {}
+func (*ErrorStatusCode) authOAuth2AuthorizeRes()             {}
+func (*ErrorStatusCode) authOAuth2CallbackRes()              {}
+func (*ErrorStatusCode) authOAuth2LogoutRes()                {}
+func (*ErrorStatusCode) authOAuth2RefreshRes()               {}
+func (*ErrorStatusCode) authOAuth2SessionRes()               {}
+func (*ErrorStatusCode) checkPermissionRes()                 {}
+func (*ErrorStatusCode) checkWorkspaceExistsRes()            {}
+func (*ErrorStatusCode) createContactRes()                   {}
+func (*ErrorStatusCode) createRoleRes()                      {}
+func (*ErrorStatusCode) createUserRes()                      {}
+func (*ErrorStatusCode) createUserSessionRes()               {}
+func (*ErrorStatusCode) createWorkerEnrollmentTokenRes()     {}
+func (*ErrorStatusCode) createWorkspaceRes()                 {}
+func (*ErrorStatusCode) datasourceEmailCreateRes()           {}
+func (*ErrorStatusCode) datasourceEmailDeleteRes()           {}
+func (*ErrorStatusCode) datasourceEmailGetRes()              {}
+func (*ErrorStatusCode) datasourceEmailListRes()             {}
+func (*ErrorStatusCode) datasourceEmailOAuthCreateRes()      {}
+func (*ErrorStatusCode) datasourceEmailOAuthDeleteRes()      {}
+func (*ErrorStatusCode) datasourceEmailOAuthGetRes()         {}
+func (*ErrorStatusCode) datasourceEmailOAuthListRes()        {}
+func (*ErrorStatusCode) datasourceEmailOAuthTestRes()        {}
+func (*ErrorStatusCode) datasourceEmailOAuthUpdateRes()      {}
+func (*ErrorStatusCode) datasourceEmailUpdateRes()           {}
+func (*ErrorStatusCode) datasourceLinkedinCreateRes()        {}
+func (*ErrorStatusCode) datasourceLinkedinDeleteRes()        {}
+func (*ErrorStatusCode) datasourceLinkedinGetRes()           {}
+func (*ErrorStatusCode) datasourceLinkedinListRes()          {}
+func (*ErrorStatusCode) datasourceLinkedinUpdateRes()        {}
+func (*ErrorStatusCode) datasourceListRes()                  {}
+func (*ErrorStatusCode) datasourceSetOAuth2ClientRes()       {}
+func (*ErrorStatusCode) datasourceTelegramCreateRes()        {}
+func (*ErrorStatusCode) datasourceTelegramDeleteRes()        {}
+func (*ErrorStatusCode) datasourceTelegramGetRes()           {}
+func (*ErrorStatusCode) datasourceTelegramListRes()          {}
+func (*ErrorStatusCode) datasourceTelegramUpdateRes()        {}
+func (*ErrorStatusCode) datasourceWhatsappCreateRes()        {}
+func (*ErrorStatusCode) datasourceWhatsappDeleteRes()        {}
+func (*ErrorStatusCode) datasourceWhatsappGetRes()           {}
+func (*ErrorStatusCode) datasourceWhatsappListRes()          {}
+func (*ErrorStatusCode) datasourceWhatsappUpdateRes()        {}
+func (*ErrorStatusCode) deleteContactRes()                   {}
+func (*ErrorStatusCode) deleteRegisteredWorkerRes()          {}
+func (*ErrorStatusCode) deleteRoleRes()                      {}
+func (*ErrorStatusCode) deleteUserRes()                      {}
+func (*ErrorStatusCode) deleteWorkerEnrollmentTokenRes()     {}
+func (*ErrorStatusCode) deleteWorkspaceRes()                 {}
+func (*ErrorStatusCode) fileCreateRes()                      {}
+func (*ErrorStatusCode) fileDeleteRes()                      {}
+func (*ErrorStatusCode) fileGetRes()                         {}
+func (*ErrorStatusCode) fileListRes()                        {}
+func (*ErrorStatusCode) fileUpdateRes()                      {}
+func (*ErrorStatusCode) generateDownloadLinkRes()            {}
+func (*ErrorStatusCode) generatePresignedUploadUrlRes()      {}
+func (*ErrorStatusCode) getContactRes()                      {}
+func (*ErrorStatusCode) getProfileRes()                      {}
+func (*ErrorStatusCode) getRegisteredWorkerRes()             {}
+func (*ErrorStatusCode) getRoleRes()                         {}
+func (*ErrorStatusCode) getUserRes()                         {}
+func (*ErrorStatusCode) getUserRolesRes()                    {}
+func (*ErrorStatusCode) getWorkerEnrollmentTokenRes()        {}
+func (*ErrorStatusCode) getWorkspaceRes()                    {}
+func (*ErrorStatusCode) listContactsRes()                    {}
+func (*ErrorStatusCode) listPermissionsRes()                 {}
+func (*ErrorStatusCode) listRegisteredWorkersRes()           {}
+func (*ErrorStatusCode) listRolesRes()                       {}
+func (*ErrorStatusCode) listUsersRes()                       {}
+func (*ErrorStatusCode) listWorkerEnrollmentTokensRes()      {}
+func (*ErrorStatusCode) listWorkspaceMembersRes()            {}
+func (*ErrorStatusCode) listWorkspacesRes()                  {}
+func (*ErrorStatusCode) mapperSourceFieldsListRes()          {}
+func (*ErrorStatusCode) mapperTransformsListRes()            {}
+func (*ErrorStatusCode) mapperValidateRes()                  {}
+func (*ErrorStatusCode) messageEmailQueryRes()               {}
+func (*ErrorStatusCode) messageLinkedinQueryRes()            {}
+func (*ErrorStatusCode) messageQueryRes()                    {}
+func (*ErrorStatusCode) messageTelegramQueryRes()            {}
+func (*ErrorStatusCode) messageWhatsappQueryRes()            {}
+func (*ErrorStatusCode) oAuth2ClientCallbackRes()            {}
+func (*ErrorStatusCode) oAuth2ClientCreateRes()              {}
+func (*ErrorStatusCode) oAuth2ClientDeleteRes()              {}
+func (*ErrorStatusCode) oAuth2ClientGetRes()                 {}
+func (*ErrorStatusCode) oAuth2ClientListRes()                {}
+func (*ErrorStatusCode) oAuth2ClientLoginRes()               {}
+func (*ErrorStatusCode) oAuth2ClientTokenDeleteRes()         {}
+func (*ErrorStatusCode) oAuth2ClientTokenListRes()           {}
+func (*ErrorStatusCode) oAuth2ClientUpdateRes()              {}
+func (*ErrorStatusCode) pipelineCreateRes()                  {}
+func (*ErrorStatusCode) pipelineDeleteRes()                  {}
+func (*ErrorStatusCode) pipelineGetRes()                     {}
+func (*ErrorStatusCode) pipelineListRes()                    {}
+func (*ErrorStatusCode) pipelineUpdateRes()                  {}
+func (*ErrorStatusCode) removeRoleFromUserRes()              {}
+func (*ErrorStatusCode) removeWorkspaceMemberRes()           {}
+func (*ErrorStatusCode) schedulerCreateRes()                 {}
+func (*ErrorStatusCode) schedulerDeleteRes()                 {}
+func (*ErrorStatusCode) schedulerGetRes()                    {}
+func (*ErrorStatusCode) schedulerListRes()                   {}
+func (*ErrorStatusCode) schedulerUpdateRes()                 {}
+func (*ErrorStatusCode) storageHostfilesCreateRes()          {}
+func (*ErrorStatusCode) storageHostfilesDeleteRes()          {}
+func (*ErrorStatusCode) storageHostfilesGetRes()             {}
+func (*ErrorStatusCode) storageHostfilesUpdateRes()          {}
+func (*ErrorStatusCode) storageListRes()                     {}
+func (*ErrorStatusCode) storagePostgresCreateRes()           {}
+func (*ErrorStatusCode) storagePostgresDeleteRes()           {}
+func (*ErrorStatusCode) storagePostgresGetRes()              {}
+func (*ErrorStatusCode) storagePostgresIntrospectTableRes()  {}
+func (*ErrorStatusCode) storagePostgresIntrospectTablesRes() {}
+func (*ErrorStatusCode) storagePostgresTablesCreateRes()     {}
+func (*ErrorStatusCode) storagePostgresTablesReplaceRes()    {}
+func (*ErrorStatusCode) storagePostgresTestInlineRes()       {}
+func (*ErrorStatusCode) storagePostgresTestRes()             {}
+func (*ErrorStatusCode) storagePostgresUpdateRes()           {}
+func (*ErrorStatusCode) storageS3CreateRes()                 {}
+func (*ErrorStatusCode) storageS3DeleteRes()                 {}
+func (*ErrorStatusCode) storageS3GetRes()                    {}
+func (*ErrorStatusCode) storageS3UpdateRes()                 {}
+func (*ErrorStatusCode) syncpolicyCreateRes()                {}
+func (*ErrorStatusCode) syncpolicyDeleteRes()                {}
+func (*ErrorStatusCode) syncpolicyGetRes()                   {}
+func (*ErrorStatusCode) syncpolicyListRes()                  {}
+func (*ErrorStatusCode) syncpolicyUpdateRes()                {}
+func (*ErrorStatusCode) testConnectionJobGetRes()            {}
+func (*ErrorStatusCode) tgSessionCreateRes()                 {}
+func (*ErrorStatusCode) tgSessionListRes()                   {}
+func (*ErrorStatusCode) tgSessionVerifyRes()                 {}
+func (*ErrorStatusCode) updateContactRes()                   {}
+func (*ErrorStatusCode) updateProfileRes()                   {}
+func (*ErrorStatusCode) updateRegisteredWorkerRes()          {}
+func (*ErrorStatusCode) updateRoleRes()                      {}
+func (*ErrorStatusCode) updateUserRes()                      {}
+func (*ErrorStatusCode) updateWorkspaceMemberRoleRes()       {}
+func (*ErrorStatusCode) updateWorkspaceRes()                 {}
+func (*ErrorStatusCode) uploadFileRes()                      {}
+func (*ErrorStatusCode) workerJobsCancelRes()                {}
+func (*ErrorStatusCode) workerJobsDeleteRes()                {}
+func (*ErrorStatusCode) workerJobsGetRes()                   {}
+func (*ErrorStatusCode) workerJobsListRes()                  {}
+
 // FileDeleteOK is response for FileDelete operation.
 type FileDeleteOK struct{}
+
+func (*FileDeleteOK) fileDeleteRes() {}
+
+type FileListOKApplicationJSON []FileObject
+
+func (*FileListOKApplicationJSON) fileListRes() {}
 
 // Represents a stored file, independent of the storage backend.
 // Ref: #/FileObject
@@ -3017,6 +3257,9 @@ func (s *FileObject) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*FileObject) fileGetRes()    {}
+func (*FileObject) fileUpdateRes() {}
+
 type FileUpdateReq struct {
 	// Updated name of the file.
 	Name string `json:"name"`
@@ -3077,6 +3320,8 @@ func (s *GenerateDownloadLinkResponse) SetURL(val OptString) {
 	s.URL = val
 }
 
+func (*GenerateDownloadLinkResponse) generateDownloadLinkRes() {}
+
 type GetUserRolesOK struct {
 	UserUUID OptUUID              `json:"user_uuid"`
 	Roles    []RbacRoleAssignment `json:"roles"`
@@ -3101,6 +3346,16 @@ func (s *GetUserRolesOK) SetUserUUID(val OptUUID) {
 func (s *GetUserRolesOK) SetRoles(val []RbacRoleAssignment) {
 	s.Roles = val
 }
+
+func (*GetUserRolesOK) getUserRolesRes() {}
+
+type ListContactsOKApplicationJSON []Contact
+
+func (*ListContactsOKApplicationJSON) listContactsRes() {}
+
+type ListPermissionsOKApplicationJSON []RbacPermission
+
+func (*ListPermissionsOKApplicationJSON) listPermissionsRes() {}
 
 type ListPermissionsScope string
 
@@ -3143,6 +3398,14 @@ func (s *ListPermissionsScope) UnmarshalText(data []byte) error {
 	}
 }
 
+type ListRegisteredWorkersOKApplicationJSON []RegisteredWorker
+
+func (*ListRegisteredWorkersOKApplicationJSON) listRegisteredWorkersRes() {}
+
+type ListRolesOKApplicationJSON []RbacRole
+
+func (*ListRolesOKApplicationJSON) listRolesRes() {}
+
 type ListRolesScope string
 
 const (
@@ -3183,6 +3446,22 @@ func (s *ListRolesScope) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+type ListUsersOKApplicationJSON []User
+
+func (*ListUsersOKApplicationJSON) listUsersRes() {}
+
+type ListWorkerEnrollmentTokensOKApplicationJSON []WorkerEnrollmentToken
+
+func (*ListWorkerEnrollmentTokensOKApplicationJSON) listWorkerEnrollmentTokensRes() {}
+
+type ListWorkspaceMembersOKApplicationJSON []WorkspaceMember
+
+func (*ListWorkspaceMembersOKApplicationJSON) listWorkspaceMembersRes() {}
+
+type ListWorkspacesOKApplicationJSON []Workspace
+
+func (*ListWorkspacesOKApplicationJSON) listWorkspacesRes() {}
 
 // Configuration for a mapper node in a pipeline.
 // Ref: #
@@ -3459,6 +3738,8 @@ func (s *MapperSourceFieldsListOK) GetFields() []SourceFieldDefinition {
 func (s *MapperSourceFieldsListOK) SetFields(val []SourceFieldDefinition) {
 	s.Fields = val
 }
+
+func (*MapperSourceFieldsListOK) mapperSourceFieldsListRes() {}
 
 type MapperSourceFieldsListType string
 
@@ -3751,6 +4032,8 @@ func (s *MapperTransformsListOK) SetTransforms(val []TransformDefinition) {
 	s.Transforms = val
 }
 
+func (*MapperTransformsListOK) mapperTransformsListRes() {}
+
 type MapperValidateOK struct {
 	IsValid  bool                           `json:"is_valid"`
 	Errors   []MapperValidateOKErrorsItem   `json:"errors"`
@@ -3786,6 +4069,8 @@ func (s *MapperValidateOK) SetErrors(val []MapperValidateOKErrorsItem) {
 func (s *MapperValidateOK) SetWarnings(val []MapperValidateOKWarningsItem) {
 	s.Warnings = val
 }
+
+func (*MapperValidateOK) mapperValidateRes() {}
 
 type MapperValidateOKErrorsItem struct {
 	MappingID OptString `json:"mapping_id"`
@@ -4243,6 +4528,8 @@ func (s *MessageEmailQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
+func (*MessageEmailQueryOK) messageEmailQueryRes() {}
+
 // Additional context or metadata about the forwarded message.
 type MessageForwardMeta map[string]jx.Raw
 
@@ -4269,6 +4556,8 @@ func (s *MessageLinkedinQueryOK) GetMessages() []Message {
 func (s *MessageLinkedinQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
+
+func (*MessageLinkedinQueryOK) messageLinkedinQueryRes() {}
 
 // Ref: #
 type MessageMeta struct {
@@ -4435,6 +4724,213 @@ func (s *MessageQuery) SetFuzzy(val OptBool) {
 	s.Fuzzy = val
 }
 
+// A message query job that streams results to NATS.
+// Ref: #
+type MessageQueryJob struct {
+	// The unique identifier of the query job.
+	UUID string `json:"uuid"`
+	// UUID of the storage being queried.
+	StorageUUID string `json:"storage_uuid"`
+	// Current job status.
+	Status MessageQueryJobStatus `json:"status"`
+	// NATS subject where individual message records will be published.
+	NatsSubject string `json:"nats_subject"`
+	// Maximum number of messages to query.
+	Limit OptInt `json:"limit"`
+	// Offset for pagination.
+	Offset OptInt `json:"offset"`
+	// Table to query from.
+	TableName OptString `json:"table_name"`
+	// Number of messages queried (available after completion).
+	MessagesQueried OptInt `json:"messages_queried"`
+	// Number of messages published to NATS (available after completion).
+	MessagesPublished OptInt `json:"messages_published"`
+	// Number of errors during processing (available after completion).
+	ErrorCount OptInt `json:"error_count"`
+	// When the job was created.
+	CreatedAt OptDateTime `json:"created_at"`
+	// When the job completed (if finished).
+	CompletedAt OptDateTime `json:"completed_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *MessageQueryJob) GetUUID() string {
+	return s.UUID
+}
+
+// GetStorageUUID returns the value of StorageUUID.
+func (s *MessageQueryJob) GetStorageUUID() string {
+	return s.StorageUUID
+}
+
+// GetStatus returns the value of Status.
+func (s *MessageQueryJob) GetStatus() MessageQueryJobStatus {
+	return s.Status
+}
+
+// GetNatsSubject returns the value of NatsSubject.
+func (s *MessageQueryJob) GetNatsSubject() string {
+	return s.NatsSubject
+}
+
+// GetLimit returns the value of Limit.
+func (s *MessageQueryJob) GetLimit() OptInt {
+	return s.Limit
+}
+
+// GetOffset returns the value of Offset.
+func (s *MessageQueryJob) GetOffset() OptInt {
+	return s.Offset
+}
+
+// GetTableName returns the value of TableName.
+func (s *MessageQueryJob) GetTableName() OptString {
+	return s.TableName
+}
+
+// GetMessagesQueried returns the value of MessagesQueried.
+func (s *MessageQueryJob) GetMessagesQueried() OptInt {
+	return s.MessagesQueried
+}
+
+// GetMessagesPublished returns the value of MessagesPublished.
+func (s *MessageQueryJob) GetMessagesPublished() OptInt {
+	return s.MessagesPublished
+}
+
+// GetErrorCount returns the value of ErrorCount.
+func (s *MessageQueryJob) GetErrorCount() OptInt {
+	return s.ErrorCount
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *MessageQueryJob) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetCompletedAt returns the value of CompletedAt.
+func (s *MessageQueryJob) GetCompletedAt() OptDateTime {
+	return s.CompletedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *MessageQueryJob) SetUUID(val string) {
+	s.UUID = val
+}
+
+// SetStorageUUID sets the value of StorageUUID.
+func (s *MessageQueryJob) SetStorageUUID(val string) {
+	s.StorageUUID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *MessageQueryJob) SetStatus(val MessageQueryJobStatus) {
+	s.Status = val
+}
+
+// SetNatsSubject sets the value of NatsSubject.
+func (s *MessageQueryJob) SetNatsSubject(val string) {
+	s.NatsSubject = val
+}
+
+// SetLimit sets the value of Limit.
+func (s *MessageQueryJob) SetLimit(val OptInt) {
+	s.Limit = val
+}
+
+// SetOffset sets the value of Offset.
+func (s *MessageQueryJob) SetOffset(val OptInt) {
+	s.Offset = val
+}
+
+// SetTableName sets the value of TableName.
+func (s *MessageQueryJob) SetTableName(val OptString) {
+	s.TableName = val
+}
+
+// SetMessagesQueried sets the value of MessagesQueried.
+func (s *MessageQueryJob) SetMessagesQueried(val OptInt) {
+	s.MessagesQueried = val
+}
+
+// SetMessagesPublished sets the value of MessagesPublished.
+func (s *MessageQueryJob) SetMessagesPublished(val OptInt) {
+	s.MessagesPublished = val
+}
+
+// SetErrorCount sets the value of ErrorCount.
+func (s *MessageQueryJob) SetErrorCount(val OptInt) {
+	s.ErrorCount = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *MessageQueryJob) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetCompletedAt sets the value of CompletedAt.
+func (s *MessageQueryJob) SetCompletedAt(val OptDateTime) {
+	s.CompletedAt = val
+}
+
+func (*MessageQueryJob) storagePostgresMessagesQueryRes() {}
+
+// Current job status.
+type MessageQueryJobStatus string
+
+const (
+	MessageQueryJobStatusPending   MessageQueryJobStatus = "pending"
+	MessageQueryJobStatusRunning   MessageQueryJobStatus = "running"
+	MessageQueryJobStatusCompleted MessageQueryJobStatus = "completed"
+	MessageQueryJobStatusFailed    MessageQueryJobStatus = "failed"
+)
+
+// AllValues returns all MessageQueryJobStatus values.
+func (MessageQueryJobStatus) AllValues() []MessageQueryJobStatus {
+	return []MessageQueryJobStatus{
+		MessageQueryJobStatusPending,
+		MessageQueryJobStatusRunning,
+		MessageQueryJobStatusCompleted,
+		MessageQueryJobStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageQueryJobStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageQueryJobStatusPending:
+		return []byte(s), nil
+	case MessageQueryJobStatusRunning:
+		return []byte(s), nil
+	case MessageQueryJobStatusCompleted:
+		return []byte(s), nil
+	case MessageQueryJobStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageQueryJobStatus) UnmarshalText(data []byte) error {
+	switch MessageQueryJobStatus(data) {
+	case MessageQueryJobStatusPending:
+		*s = MessageQueryJobStatusPending
+		return nil
+	case MessageQueryJobStatusRunning:
+		*s = MessageQueryJobStatusRunning
+		return nil
+	case MessageQueryJobStatusCompleted:
+		*s = MessageQueryJobStatusCompleted
+		return nil
+	case MessageQueryJobStatusFailed:
+		*s = MessageQueryJobStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type MessageQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -4449,6 +4945,8 @@ func (s *MessageQueryOK) GetMessages() []Message {
 func (s *MessageQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
+
+func (*MessageQueryOK) messageQueryRes() {}
 
 // Sort order by timestamp ('asc' or 'desc').
 type MessageQueryOrder string
@@ -4638,6 +5136,8 @@ func (s *MessageTelegramQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
 
+func (*MessageTelegramQueryOK) messageTelegramQueryRes() {}
+
 type MessageWhatsappQueryOK struct {
 	// List of messages matching the query.
 	Messages []Message `json:"messages"`
@@ -4652,6 +5152,115 @@ func (s *MessageWhatsappQueryOK) GetMessages() []Message {
 func (s *MessageWhatsappQueryOK) SetMessages(val []Message) {
 	s.Messages = val
 }
+
+func (*MessageWhatsappQueryOK) messageWhatsappQueryRes() {}
+
+// A message record from NATS stream.
+// Ref: #
+type NatsMessage struct {
+	// Stream sequence number.
+	Sequence int `json:"sequence"`
+	// NATS subject the message was published to.
+	Subject string `json:"subject"`
+	// Unix timestamp in milliseconds when the message was published.
+	Timestamp int `json:"timestamp"`
+	// The job ID that published this message.
+	JobID OptString `json:"job_id"`
+	// The message data payload (JSON parsed).
+	Data OptNatsMessageData `json:"data"`
+}
+
+// GetSequence returns the value of Sequence.
+func (s *NatsMessage) GetSequence() int {
+	return s.Sequence
+}
+
+// GetSubject returns the value of Subject.
+func (s *NatsMessage) GetSubject() string {
+	return s.Subject
+}
+
+// GetTimestamp returns the value of Timestamp.
+func (s *NatsMessage) GetTimestamp() int {
+	return s.Timestamp
+}
+
+// GetJobID returns the value of JobID.
+func (s *NatsMessage) GetJobID() OptString {
+	return s.JobID
+}
+
+// GetData returns the value of Data.
+func (s *NatsMessage) GetData() OptNatsMessageData {
+	return s.Data
+}
+
+// SetSequence sets the value of Sequence.
+func (s *NatsMessage) SetSequence(val int) {
+	s.Sequence = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *NatsMessage) SetSubject(val string) {
+	s.Subject = val
+}
+
+// SetTimestamp sets the value of Timestamp.
+func (s *NatsMessage) SetTimestamp(val int) {
+	s.Timestamp = val
+}
+
+// SetJobID sets the value of JobID.
+func (s *NatsMessage) SetJobID(val OptString) {
+	s.JobID = val
+}
+
+// SetData sets the value of Data.
+func (s *NatsMessage) SetData(val OptNatsMessageData) {
+	s.Data = val
+}
+
+// The message data payload (JSON parsed).
+type NatsMessageData map[string]jx.Raw
+
+func (s *NatsMessageData) init() NatsMessageData {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// List of messages from NATS stream.
+// Ref: #
+type NatsMessagesList struct {
+	Messages []NatsMessage `json:"messages"`
+	// Total number of messages returned.
+	Total int `json:"total"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *NatsMessagesList) GetMessages() []NatsMessage {
+	return s.Messages
+}
+
+// GetTotal returns the value of Total.
+func (s *NatsMessagesList) GetTotal() int {
+	return s.Total
+}
+
+// SetMessages sets the value of Messages.
+func (s *NatsMessagesList) SetMessages(val []NatsMessage) {
+	s.Messages = val
+}
+
+// SetTotal sets the value of Total.
+func (s *NatsMessagesList) SetTotal(val int) {
+	s.Total = val
+}
+
+func (*NatsMessagesList) natsMessagesListRes() {}
 
 // Ref: #
 type OAuth2Client struct {
@@ -4741,6 +5350,10 @@ func (s *OAuth2Client) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*OAuth2Client) oAuth2ClientCreateRes() {}
+func (*OAuth2Client) oAuth2ClientGetRes()    {}
+func (*OAuth2Client) oAuth2ClientUpdateRes() {}
+
 // OAuth2ClientCallbackFound is response for OAuth2ClientCallback operation.
 type OAuth2ClientCallbackFound struct {
 	Location OptURI
@@ -4755,6 +5368,8 @@ func (s *OAuth2ClientCallbackFound) GetLocation() OptURI {
 func (s *OAuth2ClientCallbackFound) SetLocation(val OptURI) {
 	s.Location = val
 }
+
+func (*OAuth2ClientCallbackFound) oAuth2ClientCallbackRes() {}
 
 type OAuth2ClientCreateReq struct {
 	// Name of the client.
@@ -4810,6 +5425,8 @@ func (s *OAuth2ClientCreateReq) SetClientID(val string) {
 // OAuth2ClientDeleteOK is response for OAuth2ClientDelete operation.
 type OAuth2ClientDeleteOK struct{}
 
+func (*OAuth2ClientDeleteOK) oAuth2ClientDeleteRes() {}
+
 type OAuth2ClientListOK struct {
 	// List of OAuth2 clients.
 	Clients []OAuth2Client `json:"clients"`
@@ -4825,6 +5442,8 @@ func (s *OAuth2ClientListOK) SetClients(val []OAuth2Client) {
 	s.Clients = val
 }
 
+func (*OAuth2ClientListOK) oAuth2ClientListRes() {}
+
 type OAuth2ClientLoginOK struct {
 	// Auth code URL.
 	AuthCodeURL string `json:"auth_code_url"`
@@ -4839,6 +5458,8 @@ func (s *OAuth2ClientLoginOK) GetAuthCodeURL() string {
 func (s *OAuth2ClientLoginOK) SetAuthCodeURL(val string) {
 	s.AuthCodeURL = val
 }
+
+func (*OAuth2ClientLoginOK) oAuth2ClientLoginRes() {}
 
 type OAuth2ClientLoginReq struct {
 	// Query parameters.
@@ -4944,6 +5565,12 @@ func (s *OAuth2ClientToken) SetUpdatedAt(val OptDateTime) {
 
 // OAuth2ClientTokenDeleteOK is response for OAuth2ClientTokenDelete operation.
 type OAuth2ClientTokenDeleteOK struct{}
+
+func (*OAuth2ClientTokenDeleteOK) oAuth2ClientTokenDeleteRes() {}
+
+type OAuth2ClientTokenListOKApplicationJSON []OAuth2ClientToken
+
+func (*OAuth2ClientTokenListOKApplicationJSON) oAuth2ClientTokenListRes() {}
 
 // OAuth2 token object containing access and refresh tokens.
 // Ref: #
@@ -6313,6 +6940,52 @@ func (o OptMessageReactions) Or(d MessageReactions) MessageReactions {
 	return d
 }
 
+// NewOptNatsMessageData returns new OptNatsMessageData with value set to v.
+func NewOptNatsMessageData(v NatsMessageData) OptNatsMessageData {
+	return OptNatsMessageData{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNatsMessageData is optional NatsMessageData.
+type OptNatsMessageData struct {
+	Value NatsMessageData
+	Set   bool
+}
+
+// IsSet returns true if OptNatsMessageData was set.
+func (o OptNatsMessageData) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNatsMessageData) Reset() {
+	var v NatsMessageData
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNatsMessageData) SetTo(v NatsMessageData) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNatsMessageData) Get() (v NatsMessageData, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNatsMessageData) Or(d NatsMessageData) NatsMessageData {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilDateTime returns new OptNilDateTime with value set to v.
 func NewOptNilDateTime(v time.Time) OptNilDateTime {
 	return OptNilDateTime{
@@ -6801,6 +7474,52 @@ func (o OptStorageListOrderDirection) Get() (v StorageListOrderDirection, ok boo
 
 // Or returns value if set, or given parameter if does not.
 func (o OptStorageListOrderDirection) Or(d StorageListOrderDirection) StorageListOrderDirection {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptStoragePostgresMessagesQueryReq returns new OptStoragePostgresMessagesQueryReq with value set to v.
+func NewOptStoragePostgresMessagesQueryReq(v StoragePostgresMessagesQueryReq) OptStoragePostgresMessagesQueryReq {
+	return OptStoragePostgresMessagesQueryReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptStoragePostgresMessagesQueryReq is optional StoragePostgresMessagesQueryReq.
+type OptStoragePostgresMessagesQueryReq struct {
+	Value StoragePostgresMessagesQueryReq
+	Set   bool
+}
+
+// IsSet returns true if OptStoragePostgresMessagesQueryReq was set.
+func (o OptStoragePostgresMessagesQueryReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptStoragePostgresMessagesQueryReq) Reset() {
+	var v StoragePostgresMessagesQueryReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptStoragePostgresMessagesQueryReq) SetTo(v StoragePostgresMessagesQueryReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptStoragePostgresMessagesQueryReq) Get() (v StoragePostgresMessagesQueryReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptStoragePostgresMessagesQueryReq) Or(d StoragePostgresMessagesQueryReq) StoragePostgresMessagesQueryReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7574,8 +8293,14 @@ func (s *Pipeline) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*Pipeline) pipelineCreateRes() {}
+func (*Pipeline) pipelineGetRes()    {}
+func (*Pipeline) pipelineUpdateRes() {}
+
 // PipelineDeleteOK is response for PipelineDelete operation.
 type PipelineDeleteOK struct{}
+
+func (*PipelineDeleteOK) pipelineDeleteRes() {}
 
 // Ref: #
 type PipelineEdge struct {
@@ -7705,6 +8430,8 @@ func (s *PipelineListOK) GetPipelines() []Pipeline {
 func (s *PipelineListOK) SetPipelines(val []Pipeline) {
 	s.Pipelines = val
 }
+
+func (*PipelineListOK) pipelineListRes() {}
 
 // Ref: #
 type PipelineNode struct {
@@ -8153,6 +8880,10 @@ func (s *RbacRole) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*RbacRole) createRoleRes() {}
+func (*RbacRole) getRoleRes()    {}
+func (*RbacRole) updateRoleRes() {}
+
 // Ref: #
 type RbacRoleAssignment struct {
 	// UUID of the user.
@@ -8418,6 +9149,9 @@ func (s *RegisteredWorker) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*RegisteredWorker) getRegisteredWorkerRes()    {}
+func (*RegisteredWorker) updateRegisteredWorkerRes() {}
+
 // Arbitrary key-value metadata labels.
 type RegisteredWorkerLabels map[string]jx.Raw
 
@@ -8482,8 +9216,12 @@ func (s *RegisteredWorkerStatus) UnmarshalText(data []byte) error {
 // RemoveRoleFromUserNoContent is response for RemoveRoleFromUser operation.
 type RemoveRoleFromUserNoContent struct{}
 
+func (*RemoveRoleFromUserNoContent) removeRoleFromUserRes() {}
+
 // RemoveWorkspaceMemberNoContent is response for RemoveWorkspaceMember operation.
 type RemoveWorkspaceMemberNoContent struct{}
+
+func (*RemoveWorkspaceMemberNoContent) removeWorkspaceMemberRes() {}
 
 // Ref: #
 type Scheduler struct {
@@ -8634,8 +9372,18 @@ func (s *Scheduler) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*Scheduler) schedulerCreateRes() {}
+func (*Scheduler) schedulerGetRes()    {}
+func (*Scheduler) schedulerUpdateRes() {}
+
 // SchedulerDeleteOK is response for SchedulerDelete operation.
 type SchedulerDeleteOK struct{}
+
+func (*SchedulerDeleteOK) schedulerDeleteRes() {}
+
+type SchedulerListOKApplicationJSON []Scheduler
+
+func (*SchedulerListOKApplicationJSON) schedulerListRes() {}
 
 // Definition of a source field available for mapping.
 // Ref: #
@@ -8954,8 +9702,18 @@ func (s *StorageHostfiles) SetPath(val string) {
 	s.Path = val
 }
 
+func (*StorageHostfiles) storageHostfilesCreateRes() {}
+func (*StorageHostfiles) storageHostfilesGetRes()    {}
+func (*StorageHostfiles) storageHostfilesUpdateRes() {}
+
 // StorageHostfilesDeleteOK is response for StorageHostfilesDelete operation.
 type StorageHostfilesDeleteOK struct{}
+
+func (*StorageHostfilesDeleteOK) storageHostfilesDeleteRes() {}
+
+type StorageListOKApplicationJSON []Storage
+
+func (*StorageListOKApplicationJSON) storageListRes() {}
 
 type StorageListOrderBy string
 
@@ -9169,8 +9927,14 @@ func (s *StoragePostgres) SetTables(val []StoragePostgresTable) {
 	s.Tables = val
 }
 
+func (*StoragePostgres) storagePostgresCreateRes() {}
+func (*StoragePostgres) storagePostgresGetRes()    {}
+func (*StoragePostgres) storagePostgresUpdateRes() {}
+
 // StoragePostgresDeleteOK is response for StoragePostgresDelete operation.
 type StoragePostgresDeleteOK struct{}
+
+func (*StoragePostgresDeleteOK) storagePostgresDeleteRes() {}
 
 // Field definition for a PostgreSQL table column.
 // Ref: #
@@ -9533,6 +10297,8 @@ func (s *StoragePostgresIntrospectTableResponse) SetRowCount(val OptInt) {
 	s.RowCount = val
 }
 
+func (*StoragePostgresIntrospectTableResponse) storagePostgresIntrospectTableRes() {}
+
 // Response containing list of tables in the database.
 // Ref: #/StoragePostgresIntrospectTablesResponse
 type StoragePostgresIntrospectTablesResponse struct {
@@ -9547,6 +10313,85 @@ func (s *StoragePostgresIntrospectTablesResponse) GetTables() []StoragePostgresI
 // SetTables sets the value of Tables.
 func (s *StoragePostgresIntrospectTablesResponse) SetTables(val []StoragePostgresIntrospectTable) {
 	s.Tables = val
+}
+
+func (*StoragePostgresIntrospectTablesResponse) storagePostgresIntrospectTablesRes() {}
+
+type StoragePostgresMessagesQueryBadRequest Error
+
+func (*StoragePostgresMessagesQueryBadRequest) storagePostgresMessagesQueryRes() {}
+
+type StoragePostgresMessagesQueryInternalServerError Error
+
+func (*StoragePostgresMessagesQueryInternalServerError) storagePostgresMessagesQueryRes() {}
+
+type StoragePostgresMessagesQueryNotFound Error
+
+func (*StoragePostgresMessagesQueryNotFound) storagePostgresMessagesQueryRes() {}
+
+// Request to query messages from PostgreSQL storage.
+// Ref: #
+type StoragePostgresMessagesQueryReq struct {
+	// Maximum number of messages to query (default 100).
+	Limit OptInt `json:"limit"`
+	// Offset for pagination (default 0).
+	Offset OptInt `json:"offset"`
+	// Table to query from (default "messages").
+	TableName OptString `json:"table_name"`
+	// Column to order by (default "created_at").
+	OrderBy OptString `json:"order_by"`
+	// Order descending (default true).
+	OrderDesc OptBool `json:"order_desc"`
+}
+
+// GetLimit returns the value of Limit.
+func (s *StoragePostgresMessagesQueryReq) GetLimit() OptInt {
+	return s.Limit
+}
+
+// GetOffset returns the value of Offset.
+func (s *StoragePostgresMessagesQueryReq) GetOffset() OptInt {
+	return s.Offset
+}
+
+// GetTableName returns the value of TableName.
+func (s *StoragePostgresMessagesQueryReq) GetTableName() OptString {
+	return s.TableName
+}
+
+// GetOrderBy returns the value of OrderBy.
+func (s *StoragePostgresMessagesQueryReq) GetOrderBy() OptString {
+	return s.OrderBy
+}
+
+// GetOrderDesc returns the value of OrderDesc.
+func (s *StoragePostgresMessagesQueryReq) GetOrderDesc() OptBool {
+	return s.OrderDesc
+}
+
+// SetLimit sets the value of Limit.
+func (s *StoragePostgresMessagesQueryReq) SetLimit(val OptInt) {
+	s.Limit = val
+}
+
+// SetOffset sets the value of Offset.
+func (s *StoragePostgresMessagesQueryReq) SetOffset(val OptInt) {
+	s.Offset = val
+}
+
+// SetTableName sets the value of TableName.
+func (s *StoragePostgresMessagesQueryReq) SetTableName(val OptString) {
+	s.TableName = val
+}
+
+// SetOrderBy sets the value of OrderBy.
+func (s *StoragePostgresMessagesQueryReq) SetOrderBy(val OptString) {
+	s.OrderBy = val
+}
+
+// SetOrderDesc sets the value of OrderDesc.
+func (s *StoragePostgresMessagesQueryReq) SetOrderDesc(val OptBool) {
+	s.OrderDesc = val
 }
 
 // Table definition for PostgreSQL storage schema.
@@ -9683,6 +10528,8 @@ func (s *StoragePostgresTableCreateResponse) SetError(val OptString) {
 	s.Error = val
 }
 
+func (*StoragePostgresTableCreateResponse) storagePostgresTablesCreateRes() {}
+
 // How to handle table creation.
 type StoragePostgresTableCreationMode string
 
@@ -9724,6 +10571,10 @@ func (s *StoragePostgresTableCreationMode) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+type StoragePostgresTablesReplaceOKApplicationJSON []StoragePostgresTable
+
+func (*StoragePostgresTablesReplaceOKApplicationJSON) storagePostgresTablesReplaceRes() {}
 
 // Request body for testing PostgreSQL connection before save.
 // Ref: #
@@ -9901,8 +10752,14 @@ func (s *StorageS3) SetSecretAccessKey(val string) {
 	s.SecretAccessKey = val
 }
 
+func (*StorageS3) storageS3CreateRes() {}
+func (*StorageS3) storageS3GetRes()    {}
+func (*StorageS3) storageS3UpdateRes() {}
+
 // StorageS3DeleteOK is response for StorageS3Delete operation.
 type StorageS3DeleteOK struct{}
+
+func (*StorageS3DeleteOK) storageS3DeleteRes() {}
 
 // Ref: #
 type SyncPolicy struct {
@@ -10040,6 +10897,10 @@ func (s *SyncPolicy) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*SyncPolicy) syncpolicyCreateRes() {}
+func (*SyncPolicy) syncpolicyGetRes()    {}
+func (*SyncPolicy) syncpolicyUpdateRes() {}
+
 // Additional key-value settings for the sync policy.
 type SyncPolicySettings map[string]jx.Raw
 
@@ -10055,6 +10916,8 @@ func (s *SyncPolicySettings) init() SyncPolicySettings {
 // SyncpolicyDeleteOK is response for SyncpolicyDelete operation.
 type SyncpolicyDeleteOK struct{}
 
+func (*SyncpolicyDeleteOK) syncpolicyDeleteRes() {}
+
 type SyncpolicyListOK struct {
 	Policies []SyncPolicy `json:"policies"`
 }
@@ -10068,6 +10931,8 @@ func (s *SyncpolicyListOK) GetPolicies() []SyncPolicy {
 func (s *SyncpolicyListOK) SetPolicies(val []SyncPolicy) {
 	s.Policies = val
 }
+
+func (*SyncpolicyListOK) syncpolicyListRes() {}
 
 // Telegram API session and user representation.
 // Ref: #
@@ -10145,6 +11010,9 @@ func (s *Telegram) SetCreatedAt(val time.Time) {
 func (s *Telegram) SetUser(val TelegramUser) {
 	s.User = val
 }
+
+func (*Telegram) tgSessionCreateRes() {}
+func (*Telegram) tgSessionVerifyRes() {}
 
 type TelegramParticipants []TelegramParticipantsItem
 
@@ -10403,6 +11271,11 @@ func (s *TestConnectionJob) SetCreatedAt(val OptDateTime) {
 func (s *TestConnectionJob) SetCompletedAt(val OptDateTime) {
 	s.CompletedAt = val
 }
+
+func (*TestConnectionJob) datasourceEmailOAuthTestRes()  {}
+func (*TestConnectionJob) storagePostgresTestInlineRes() {}
+func (*TestConnectionJob) storagePostgresTestRes()       {}
+func (*TestConnectionJob) testConnectionJobGetRes()      {}
 
 // Type of resource being tested.
 type TestConnectionJobResourceType string
@@ -10741,6 +11614,8 @@ func (s *TgSessionListOK) SetTotal(val OptInt) {
 func (s *TgSessionListOK) SetSessions(val []Telegram) {
 	s.Sessions = val
 }
+
+func (*TgSessionListOK) tgSessionListRes() {}
 
 type TgSessionVerifyReq struct {
 	// Hash of the phone code.
@@ -11137,6 +12012,9 @@ func (s *UploadFileResponse) SetFile(val OptFileObject) {
 	s.File = val
 }
 
+func (*UploadFileResponse) fileCreateRes() {}
+func (*UploadFileResponse) uploadFileRes() {}
+
 // Request to generate a pre-signed URL for upload.
 // Ref: #/UploadPresignedUrlRequest
 type UploadPresignedUrlRequest struct {
@@ -11252,6 +12130,8 @@ func (s *UploadPresignedUrlResponse) SetUploadURL(val OptString) {
 func (s *UploadPresignedUrlResponse) SetFile(val OptFileObject) {
 	s.File = val
 }
+
+func (*UploadPresignedUrlResponse) generatePresignedUploadUrlRes() {}
 
 // Ref: #
 type User struct {
@@ -11377,6 +12257,12 @@ func (s *User) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*User) createUserRes()    {}
+func (*User) getProfileRes()    {}
+func (*User) getUserRes()       {}
+func (*User) updateProfileRes() {}
+func (*User) updateUserRes()    {}
+
 // Arbitrary key-value metadata about the user.
 type UserMeta map[string]jx.Raw
 
@@ -11483,6 +12369,8 @@ func (s *UserSessionToken) SetZitadelURL(val string) {
 func (s *UserSessionToken) SetExpiresIn(val int) {
 	s.ExpiresIn = val
 }
+
+func (*UserSessionToken) createUserSessionRes() {}
 
 // Ref: #
 type WorkerEnrollmentToken struct {
@@ -11608,6 +12496,9 @@ func (s *WorkerEnrollmentToken) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
+func (*WorkerEnrollmentToken) createWorkerEnrollmentTokenRes() {}
+func (*WorkerEnrollmentToken) getWorkerEnrollmentTokenRes()    {}
+
 // Ref: #
 type WorkerJobs struct {
 	// Unique identifier.
@@ -11708,8 +12599,12 @@ func (s *WorkerJobs) SetFinishedAt(val OptDateTime) {
 	s.FinishedAt = val
 }
 
+func (*WorkerJobs) workerJobsGetRes() {}
+
 // WorkerJobsCancelNoContent is response for WorkerJobsCancel operation.
 type WorkerJobsCancelNoContent struct{}
+
+func (*WorkerJobsCancelNoContent) workerJobsCancelRes() {}
 
 // Arbitrary JSON data about job details, logs, errors, etc.
 type WorkerJobsData map[string]jx.Raw
@@ -11726,6 +12621,8 @@ func (s *WorkerJobsData) init() WorkerJobsData {
 // WorkerJobsDeleteOK is response for WorkerJobsDelete operation.
 type WorkerJobsDeleteOK struct{}
 
+func (*WorkerJobsDeleteOK) workerJobsDeleteRes() {}
+
 type WorkerJobsListOK struct {
 	Jobs []WorkerJobs `json:"jobs"`
 }
@@ -11739,6 +12636,8 @@ func (s *WorkerJobsListOK) GetJobs() []WorkerJobs {
 func (s *WorkerJobsListOK) SetJobs(val []WorkerJobs) {
 	s.Jobs = val
 }
+
+func (*WorkerJobsListOK) workerJobsListRes() {}
 
 // Ref: #
 type Workspace struct {
@@ -11828,6 +12727,10 @@ func (s *Workspace) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
+func (*Workspace) createWorkspaceRes() {}
+func (*Workspace) getWorkspaceRes()    {}
+func (*Workspace) updateWorkspaceRes() {}
+
 // Ref: #
 type WorkspaceCheck struct {
 	// Whether the workspace exists.
@@ -11855,6 +12758,8 @@ func (s *WorkspaceCheck) SetExists(val bool) {
 func (s *WorkspaceCheck) SetDisplayName(val OptString) {
 	s.DisplayName = val
 }
+
+func (*WorkspaceCheck) checkWorkspaceExistsRes() {}
 
 // Ref: #
 type WorkspaceMember struct {
@@ -11967,6 +12872,9 @@ func (s *WorkspaceMember) SetCreatedAt(val OptDateTime) {
 func (s *WorkspaceMember) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
+
+func (*WorkspaceMember) addWorkspaceMemberRes()        {}
+func (*WorkspaceMember) updateWorkspaceMemberRoleRes() {}
 
 // User's role in the workspace.
 type WorkspaceMemberRole string

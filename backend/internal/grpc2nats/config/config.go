@@ -118,3 +118,8 @@ func (s SubjectConfig) WorkerStatus(workerID string) string {
 func (s SubjectConfig) WorkerStatusAll() string {
 	return s.Prefix + ".workers.status.>"
 }
+
+// DataAll returns the subject pattern for all data records: {prefix}.data.>
+func (s SubjectConfig) DataAll() string {
+	return s.Prefix + ".data.>"
+}

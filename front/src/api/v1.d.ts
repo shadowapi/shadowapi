@@ -1554,6 +1554,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/postgres/{uuid}/messages/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Query messages from PostgreSQL storage
+         * @description Triggers a job to query messages from a PostgreSQL storage.
+         *     Individual message records are streamed to NATS on the specified subject.
+         *     Subscribe to the nats_subject in the response to receive records.
+         */
+        post: operations["storage-postgres-messages-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/nats/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get last messages from NATS stream
+         * @description Retrieves the last N messages from the NATS data stream for the current workspace.
+         *     These are message records that were published during message query jobs.
+         */
+        get: operations["nats-messages-list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1751,6 +1794,10 @@ export interface components {
             /** @description Error message if creation failed */
             error?: string;
         };
+        MessageQueryJob: components["schemas"]["message_query_job"];
+        StoragePostgresMessagesQueryReq: components["schemas"]["storage_postgres_messages_query_req"];
+        NatsMessage: components["schemas"]["nats_message"];
+        NatsMessagesList: components["schemas"]["nats_messages_list"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2935,6 +2982,76 @@ export interface components {
             version: string;
             /** @description List of field mappings from source to target */
             mappings: components["schemas"]["mapper_field_mapping"][];
+        };
+        /** @description Request to query messages from PostgreSQL storage */
+        storage_postgres_messages_query_req: {
+            /** @description Maximum number of messages to query (default 100) */
+            limit?: number;
+            /** @description Offset for pagination (default 0) */
+            offset?: number;
+            /** @description Table to query from (default "messages") */
+            table_name?: string;
+            /** @description Column to order by (default "created_at") */
+            order_by?: string;
+            /** @description Order descending (default true) */
+            order_desc?: boolean;
+        };
+        /** @description A message query job that streams results to NATS */
+        message_query_job: {
+            /** @description The unique identifier of the query job */
+            readonly uuid: string;
+            /** @description UUID of the storage being queried */
+            storage_uuid: string;
+            /**
+             * @description Current job status
+             * @enum {string}
+             */
+            status: "pending" | "running" | "completed" | "failed";
+            /** @description NATS subject where individual message records will be published */
+            readonly nats_subject: string;
+            /** @description Maximum number of messages to query */
+            limit?: number;
+            /** @description Offset for pagination */
+            offset?: number;
+            /** @description Table to query from */
+            table_name?: string;
+            /** @description Number of messages queried (available after completion) */
+            readonly messages_queried?: number;
+            /** @description Number of messages published to NATS (available after completion) */
+            readonly messages_published?: number;
+            /** @description Number of errors during processing (available after completion) */
+            readonly error_count?: number;
+            /**
+             * Format: date-time
+             * @description When the job was created
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description When the job completed (if finished)
+             */
+            readonly completed_at?: string;
+        };
+        /** @description A message record from NATS stream */
+        nats_message: {
+            /** @description Stream sequence number */
+            readonly sequence: number;
+            /** @description NATS subject the message was published to */
+            readonly subject: string;
+            /** @description Unix timestamp in milliseconds when the message was published */
+            readonly timestamp: number;
+            /** @description The job ID that published this message */
+            job_id?: string;
+            /** @description The message data payload (JSON parsed) */
+            data?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description List of messages from NATS stream */
+        nats_messages_list: {
+            messages: components["schemas"]["nats_message"][];
+            /** @description Total number of messages returned */
+            total: number;
         };
         email_label: {
             /** Format: int64 */
@@ -7884,6 +8001,92 @@ export interface operations {
             };
             /** @description An error occurred while retrieving the job. */
             default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-postgres-messages-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description PostgreSQL storage UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["storage_postgres_messages_query_req"];
+            };
+        };
+        responses: {
+            /** @description Message query job created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["message_query_job"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Storage not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "nats-messages-list": {
+        parameters: {
+            query?: {
+                /** @description Maximum number of messages to return */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of messages from NATS stream */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["nats_messages_list"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

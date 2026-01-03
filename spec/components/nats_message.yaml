@@ -1,0 +1,28 @@
+# spec/components/nats_message.yaml
+type: object
+additionalProperties: false
+description: A message record from NATS stream
+properties:
+  sequence:
+    type: integer
+    description: Stream sequence number
+    readOnly: true
+  subject:
+    type: string
+    description: NATS subject the message was published to
+    readOnly: true
+  timestamp:
+    type: integer
+    description: Unix timestamp in milliseconds when the message was published
+    readOnly: true
+  job_id:
+    type: string
+    description: The job ID that published this message
+  data:
+    type: object
+    additionalProperties: true
+    description: The message data payload (JSON parsed)
+required:
+  - sequence
+  - subject
+  - timestamp

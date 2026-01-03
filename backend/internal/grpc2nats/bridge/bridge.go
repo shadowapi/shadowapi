@@ -71,6 +71,15 @@ func (b *Bridge) Start(ctx context.Context) error {
 		return err
 	}
 
+	// Ensure the data stream exists for message records
+	dataStreamName := "data"
+	dataSubjects := []string{subjects.DataAll()}
+
+	_, err = b.conn.EnsureStream(ctx, dataStreamName, dataSubjects)
+	if err != nil {
+		return err
+	}
+
 	b.log.Info("subscribing to job subjects", "pattern", subjects.JobsAll())
 
 	// Subscribe to all job subjects

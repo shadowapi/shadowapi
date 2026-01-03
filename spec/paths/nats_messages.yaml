@@ -1,0 +1,31 @@
+# spec/paths/nats_messages.yaml
+get:
+  operationId: nats-messages-list
+  summary: Get last messages from NATS stream
+  description: |
+    Retrieves the last N messages from the NATS data stream for the current workspace.
+    These are message records that were published during message query jobs.
+  tags:
+    - NATS
+  parameters:
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+        maximum: 500
+      description: Maximum number of messages to return
+  responses:
+    "200":
+      description: List of messages from NATS stream
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/NatsMessagesList"
+    "500":
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

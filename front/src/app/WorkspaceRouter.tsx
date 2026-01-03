@@ -5,6 +5,7 @@ import DataSources from './datasources/DataSources';
 import DataSourceEdit from './datasources/DataSourceEdit';
 import Storages from './storages/Storages';
 import StorageEdit from './storages/StorageEdit';
+import LastMessages from './storages/LastMessages';
 import PostgresTablesList from './storages/tables/PostgresTablesList';
 import PostgresTableEdit from './storages/tables/PostgresTableEdit';
 import OAuth2Credentials from './oauth2/OAuth2Credentials';
@@ -34,6 +35,7 @@ function WorkspaceRouter() {
         <Route path="datasources/new" element={<DataSourceEdit />} />
         <Route path="datasources/:uuid" element={<DataSourceEdit />} />
         <Route path="storages" element={<Storages />} />
+        <Route path="storages/messages" element={<LastMessages />} />
         <Route path="storages/new" element={<StorageEdit />} />
         <Route path="storages/new/tables" element={<PostgresTablesList />} />
         <Route path="storages/new/tables/new" element={<PostgresTableEdit />} />

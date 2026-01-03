@@ -141,3 +141,94 @@ func (q *Queue) Consume(
 	}
 	return cc.Stop, nil
 }
+
+// StreamMessage represents a message retrieved from a stream
+type StreamMessage struct {
+	Subject   string
+	Data      []byte
+	Headers   map[string]string
+	Sequence  uint64
+	Timestamp int64
+}
+
+// GetLastMessages retrieves the last N messages from a stream for a given subject filter
+func (q *Queue) GetLastMessages(ctx context.Context, stream string, subjectFilter string, limit int) ([]StreamMessage, error) {
+	log := q.log.With("method", "GetLastMessages", "stream", stream, "subject", subjectFilter, "limit", limit)
+	log.Debug("fetching last messages")
+
+	// Get the stream
+	s, err := q.js.Stream(ctx, stream)
+	if err != nil {
+		log.Error("failed to get stream", "error", err)
+		return nil, err
+	}
+
+	// Get stream info to find the last sequence
+	info, err := s.Info(ctx)
+	if err != nil {
+		log.Error("failed to get stream info", "error", err)
+		return nil, err
+	}
+
+	if info.State.Msgs == 0 {
+		return []StreamMessage{}, nil
+	}
+
+	// Create an ephemeral consumer that delivers from the last N messages
+	consumerCfg := jetstream.ConsumerConfig{
+		AckPolicy:      jetstream.AckNonePolicy,
+		DeliverPolicy:  jetstream.DeliverLastPerSubjectPolicy,
+		FilterSubject:  subjectFilter,
+		MaxDeliver:     1,
+		InactiveThreshold: 30_000_000_000, // 30 seconds
+	}
+
+	// If we want last N messages, we need to use DeliverByStartSequence
+	// Calculate start sequence
+	startSeq := uint64(1)
+	if info.State.LastSeq > uint64(limit) {
+		startSeq = info.State.LastSeq - uint64(limit) + 1
+	}
+
+	consumerCfg.DeliverPolicy = jetstream.DeliverByStartSequencePolicy
+	consumerCfg.OptStartSeq = startSeq
+
+	consumer, err := s.CreateConsumer(ctx, consumerCfg)
+	if err != nil {
+		log.Error("failed to create consumer", "error", err)
+		return nil, err
+	}
+
+	// Fetch messages
+	messages := make([]StreamMessage, 0, limit)
+	batch, err := consumer.Fetch(limit, jetstream.FetchMaxWait(2_000_000_000)) // 2 seconds
+	if err != nil {
+		log.Error("failed to fetch messages", "error", err)
+		return nil, err
+	}
+
+	for msg := range batch.Messages() {
+		meta, _ := msg.Metadata()
+		headers := make(map[string]string)
+		for k, v := range msg.Headers() {
+			if len(v) > 0 {
+				headers[k] = v[0]
+			}
+		}
+
+		messages = append(messages, StreamMessage{
+			Subject:   msg.Subject(),
+			Data:      msg.Data(),
+			Headers:   headers,
+			Sequence:  meta.Sequence.Stream,
+			Timestamp: meta.Timestamp.UnixMilli(),
+		})
+	}
+
+	if batch.Error() != nil {
+		log.Warn("batch fetch error", "error", batch.Error())
+	}
+
+	log.Debug("fetched messages", "count", len(messages))
+	return messages, nil
+}

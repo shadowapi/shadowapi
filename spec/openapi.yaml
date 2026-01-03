@@ -133,6 +133,14 @@ components:
       $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateRequest"
     StoragePostgresTableCreateResponse:
       $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateResponse"
+    MessageQueryJob:
+      $ref: "components/message_query_job.yaml"
+    StoragePostgresMessagesQueryReq:
+      $ref: "components/storage_postgres_messages_query_req.yaml"
+    NatsMessage:
+      $ref: "components/nats_message.yaml"
+    NatsMessagesList:
+      $ref: "components/nats_messages_list.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -312,6 +320,10 @@ paths:
     $ref: "paths/mapper_validate.yaml"
   /test-connection-job/{uuid}:
     $ref: "paths/test_connection_job_uuid.yaml"
+  /storage/postgres/{uuid}/messages/query:
+    $ref: "paths/storage_postgres_uuid_messages_query.yaml"
+  /nats/messages:
+    $ref: "paths/nats_messages.yaml"
 
 servers:
   - description: Local development server
