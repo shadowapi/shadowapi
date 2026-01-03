@@ -132,6 +132,9 @@ services:
       - WORKER_LOG_LEVEL=${WORKER_LOG_LEVEL:-info}
       - WORKER_HEARTBEAT_INTERVAL=${WORKER_HEARTBEAT_INTERVAL:-30}
       - WORKER_CAPACITY=${WORKER_CAPACITY:-10}
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       grpc2nats:
         condition: service_started

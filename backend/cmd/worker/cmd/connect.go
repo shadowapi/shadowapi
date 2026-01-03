@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -22,6 +23,28 @@ import (
 	"github.com/shadowapi/shadowapi/backend/cmd/worker/internal/workerconfig"
 	workerv1 "github.com/shadowapi/shadowapi/backend/pkg/proto/worker/v1"
 )
+
+// jobResultCheck is used to extract the Success field from job result data.
+// Job handlers encode success/failure in their result payload, not just the error return.
+type jobResultCheck struct {
+	Success bool `json:"success"`
+}
+
+// checkJobSuccess determines the actual success status by checking both
+// the handler error and the Success field in the result data payload.
+func checkJobSuccess(resultData []byte, handlerErr error) bool {
+	if handlerErr != nil {
+		return false
+	}
+	if len(resultData) == 0 {
+		return true // No result data, assume success
+	}
+	var check jobResultCheck
+	if err := json.Unmarshal(resultData, &check); err != nil {
+		return true // Can't parse, assume success based on nil handler error
+	}
+	return check.Success
+}
 
 var connectCmd = &cobra.Command{
 	Use:   "connect",
@@ -186,9 +209,10 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 						resultData, err := exec.Execute(jobCtx, job.JobType, job.JobData)
 
 						// Build result message
+						// Check both handler error and result payload for actual success status
 						result := &workerv1.JobResult{
 							JobId:      job.JobId,
-							Success:    err == nil,
+							Success:    checkJobSuccess(resultData, err),
 							ResultData: resultData,
 						}
 						if err != nil {

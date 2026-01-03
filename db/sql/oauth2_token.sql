@@ -24,13 +24,15 @@ FROM oauth2_token
 WHERE client_uuid = sqlc.arg('client_uuid')::uuid;
 
 -- name: GetTokensToRefresh :many
+-- Find tokens expiring within the next 5 minutes that haven't been refreshed recently
 SELECT
     sqlc.embed(oauth2_token)
 FROM oauth2_token
 WHERE
    (NULLIF(sqlc.arg('client_uuid'), '') IS NULL OR oauth2_token.client_uuid = sqlc.arg('client_uuid')::uuid) AND
-    expires_at < NOW() AND
-    (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 hour');
+    expires_at > NOW() AND
+    expires_at < NOW() + INTERVAL '5 minutes' AND
+    (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 minute');
 
 -- name: GetOauth2TokenByUUID :one
 SELECT

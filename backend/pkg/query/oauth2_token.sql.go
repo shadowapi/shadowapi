@@ -283,14 +283,16 @@ SELECT
 FROM oauth2_token
 WHERE
    (NULLIF($1, '') IS NULL OR oauth2_token.client_uuid = $1::uuid) AND
-    expires_at < NOW() AND
-    (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 hour')
+    expires_at > NOW() AND
+    expires_at < NOW() + INTERVAL '5 minutes' AND
+    (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 minute')
 `
 
 type GetTokensToRefreshRow struct {
 	Oauth2Token Oauth2Token `json:"oauth2_token"`
 }
 
+// Find tokens expiring within the next 5 minutes that haven't been refreshed recently
 func (q *Queries) GetTokensToRefresh(ctx context.Context, clientUuid interface{}) ([]GetTokensToRefreshRow, error) {
 	rows, err := q.db.Query(ctx, getTokensToRefresh, clientUuid)
 	if err != nil {
