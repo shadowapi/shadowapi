@@ -11,7 +11,6 @@ import {
   Tag,
   Modal,
   Form,
-  InputNumber,
   Input,
   Alert,
 } from 'antd';
@@ -133,7 +132,7 @@ function LastMessages() {
     loadStorages();
     setSelectedStorage(null);
     fetchForm.resetFields();
-    fetchForm.setFieldsValue({ limit: 100, table_name: 'messages' });
+    fetchForm.setFieldsValue({ table_name: 'messages' });
     setFetchModalVisible(true);
   };
 
@@ -162,7 +161,6 @@ function LastMessages() {
       const { error } = await client.POST('/storage/postgres/{uuid}/messages/query', {
         params: { path: { uuid: values.storage_uuid } },
         body: {
-          limit: values.limit,
           table_name: values.table_name,
         },
       });
@@ -173,7 +171,7 @@ function LastMessages() {
         return;
       }
 
-      message.success(`Query job started. Fetching up to ${values.limit} messages...`);
+      message.success('Query job started. Fetching messages...');
       setFetchModalVisible(false);
       setFetching(false);
 
@@ -321,7 +319,7 @@ function LastMessages() {
         dataSource={messages}
         rowKey="sequence"
         loading={loading}
-        pagination={{ pageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'] }}
+        pagination={false}
         locale={{
           emptyText: (
             <Empty
@@ -492,24 +490,14 @@ function LastMessages() {
           )}
 
           {selectedStorage?.type === 'postgres' && (
-            <>
-              <Form.Item
-                name="table_name"
-                label="Table Name"
-                rules={[{ required: true, message: 'Please enter table name' }]}
-                initialValue="messages"
-              >
-                <Input placeholder="messages" />
-              </Form.Item>
-              <Form.Item
-                name="limit"
-                label="Maximum Messages"
-                rules={[{ required: true, message: 'Please enter limit' }]}
-                initialValue={100}
-              >
-                <InputNumber min={1} max={1000} style={{ width: '100%' }} />
-              </Form.Item>
-            </>
+            <Form.Item
+              name="table_name"
+              label="Table Name"
+              rules={[{ required: true, message: 'Please enter table name' }]}
+              initialValue="messages"
+            >
+              <Input placeholder="messages" />
+            </Form.Item>
           )}
         </Form>
       </Modal>
