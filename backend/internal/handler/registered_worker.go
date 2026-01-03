@@ -366,6 +366,15 @@ func (h *Handler) mapWorkerToAPI(ctx context.Context, q *query.Queries, w query.
 		apiWorker.Status = api.NewOptRegisteredWorkerStatus(api.RegisteredWorkerStatusDraining)
 	}
 
+	// Get active jobs and capacity from KV store (if worker is online)
+	if w.Status == "online" && h.workerStore != nil {
+		state, err := h.workerStore.Get(ctx, w.UUID.String())
+		if err == nil && state != nil {
+			apiWorker.ActiveJobs = api.NewOptInt(int(state.ActiveJobs))
+			apiWorker.Capacity = api.NewOptInt(int(state.Capacity))
+		}
+	}
+
 	// Map version
 	if w.Version.Valid {
 		apiWorker.Version = api.NewOptString(w.Version.String)

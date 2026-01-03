@@ -14197,6 +14197,18 @@ func (s *RegisteredWorker) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.ActiveJobs.Set {
+			e.FieldStart("active_jobs")
+			s.ActiveJobs.Encode(e)
+		}
+	}
+	{
+		if s.Capacity.Set {
+			e.FieldStart("capacity")
+			s.Capacity.Encode(e)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -14210,7 +14222,7 @@ func (s *RegisteredWorker) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRegisteredWorker = [12]string{
+var jsonFieldsNameOfRegisteredWorker = [14]string{
 	0:  "uuid",
 	1:  "name",
 	2:  "status",
@@ -14221,8 +14233,10 @@ var jsonFieldsNameOfRegisteredWorker = [12]string{
 	7:  "last_heartbeat",
 	8:  "last_connected_at",
 	9:  "connected_from",
-	10: "created_at",
-	11: "updated_at",
+	10: "active_jobs",
+	11: "capacity",
+	12: "created_at",
+	13: "updated_at",
 }
 
 // Decode decodes RegisteredWorker from json.
@@ -14344,6 +14358,26 @@ func (s *RegisteredWorker) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"connected_from\"")
+			}
+		case "active_jobs":
+			if err := func() error {
+				s.ActiveJobs.Reset()
+				if err := s.ActiveJobs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"active_jobs\"")
+			}
+		case "capacity":
+			if err := func() error {
+				s.Capacity.Reset()
+				if err := s.Capacity.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"capacity\"")
 			}
 		case "created_at":
 			if err := func() error {

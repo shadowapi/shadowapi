@@ -23,6 +23,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/storages"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
+	"github.com/shadowapi/shadowapi/backend/internal/workerstore"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
@@ -34,6 +35,7 @@ type Handler struct {
 	dbp            *pgxpool.Pool
 	queue          *queue.Queue
 	jobStore       *jobstore.Store
+	workerStore    *workerstore.Store
 	scheduler      *worker.Scheduler
 	userManager    auth.UserManager
 	oauth2Svc      *OAuth2Service
@@ -193,6 +195,7 @@ func Provide(i do.Injector) (*Handler, error) {
 		dbp:            dbp,
 		queue:          do.MustInvoke[*queue.Queue](i),
 		jobStore:       do.MustInvoke[*jobstore.Store](i),
+		workerStore:    do.MustInvoke[*workerstore.Store](i),
 		scheduler:      do.MustInvoke[*worker.Scheduler](i),
 		userManager:    do.MustInvoke[auth.UserManager](i),
 		enforcer:       do.MustInvoke[*rbac.Enforcer](i),

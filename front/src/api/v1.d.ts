@@ -2797,6 +2797,10 @@ export interface components {
             readonly last_connected_at?: string;
             /** @description IP address or hostname the worker connected from */
             readonly connected_from?: string;
+            /** @description Number of jobs currently being processed by this worker */
+            readonly active_jobs?: number;
+            /** @description Maximum number of concurrent jobs this worker can handle */
+            readonly capacity?: number;
             /**
              * Format: date-time
              * @description Timestamp of worker registration

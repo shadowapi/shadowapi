@@ -95,7 +95,7 @@ function getMenuItems(basePath: string): MenuItem[] {
         {
           key: '/workers/jobs',
           icon: <ThunderboltOutlined />,
-          label: <Link to={`${basePath}/workers/jobs`}>Internal Jobs</Link>,
+          label: <Link to={`${basePath}/workers/jobs`}>Active Jobs</Link>,
         },
         {
           key: '/workers/tokens',
@@ -185,7 +185,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/pipelines': { title: 'Data Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
   '/workers': { title: 'Registered Workers' },
-  '/workers/jobs': { title: 'Internal Jobs' },
+  '/workers/jobs': { title: 'Active Jobs' },
   '/workers/tokens': { title: 'Enrollment Tokens' },
   '/schedulers': { title: 'Schedulers' },
   '/logs': { title: 'Logs' },

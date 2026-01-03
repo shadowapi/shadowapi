@@ -45,6 +45,14 @@ properties:
     type: string
     description: IP address or hostname the worker connected from
     readOnly: true
+  active_jobs:
+    type: integer
+    description: Number of jobs currently being processed by this worker
+    readOnly: true
+  capacity:
+    type: integer
+    description: Maximum number of concurrent jobs this worker can handle
+    readOnly: true
   created_at:
     type: string
     format: date-time

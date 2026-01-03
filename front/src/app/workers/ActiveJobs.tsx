@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   Typography,
   Space,
@@ -8,6 +8,11 @@ import {
   message,
   Popconfirm,
   Tooltip,
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Select,
 } from 'antd';
 import {
   DeleteOutlined,
@@ -16,16 +21,25 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   SyncOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import type { components } from '../../api/v1';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 type WorkerJob = components['schemas']['worker_jobs'];
 
-const POLLING_INTERVAL = 10000; // 10 seconds
+const POLLING_INTERVAL = 5000; // 5 seconds
+
+const TIME_PERIOD_OPTIONS = [
+  { value: 1, label: '1 minute' },
+  { value: 5, label: '5 minutes' },
+  { value: 15, label: '15 minutes' },
+  { value: 30, label: '30 minutes' },
+  { value: 60, label: '1 hour' },
+];
 
 function calculateDuration(startedAt?: string, finishedAt?: string): string {
   if (!startedAt) return '-';
@@ -39,15 +53,38 @@ function calculateDuration(startedAt?: string, finishedAt?: string): string {
   return `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`;
 }
 
-function InternalJobs() {
+function formatTimeAgo(dateStr?: string): string {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+
+  if (diffSecs < 60) return `${diffSecs}s ago`;
+  const diffMins = Math.floor(diffSecs / 60);
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  return `${diffHours}h ${diffMins % 60}m ago`;
+}
+
+function isWithinTimeWindow(dateStr: string | undefined, windowMinutes: number): boolean {
+  if (!dateStr) return false;
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  return diffMs <= windowMinutes * 60 * 1000;
+}
+
+function ActiveJobs() {
   const [jobs, setJobs] = useState<WorkerJob[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timePeriod, setTimePeriod] = useState(5); // Default 5 minutes
   const pollingPausedRef = useRef(false);
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
     const { data, error } = await client.GET('/workerjobs', {
-      params: { query: { offset: 0, limit: 100 } },
+      params: { query: { offset: 0, limit: 200 } },
     });
     if (error) {
       message.error('Failed to load jobs');
@@ -103,11 +140,37 @@ function InternalJobs() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
+  // Filter jobs to show only recent ones or currently running
+  const recentJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      // Always show running jobs
+      if (job.status === 'running') return true;
+      // Show completed/failed jobs from the selected time period
+      const relevantTime = job.finished_at || job.started_at;
+      return isWithinTimeWindow(relevantTime, timePeriod);
+    });
+  }, [jobs, timePeriod]);
+
+  // Calculate stats
+  const runningCount = recentJobs.filter((j) => j.status === 'running').length;
+  const completedCount = recentJobs.filter((j) => j.status === 'completed' || j.status === 'done').length;
+  const failedCount = recentJobs.filter((j) => j.status === 'failed').length;
+
   const columns: ColumnsType<WorkerJob> = [
     {
       title: 'Subject',
       dataIndex: 'subject',
       key: 'subject',
+      render: (subject: string) => {
+        // Extract job type from subject (e.g., "shadowapi.jobs.global.tokenRefresh" -> "tokenRefresh")
+        const parts = subject.split('.');
+        const jobType = parts[parts.length - 1];
+        return (
+          <Tooltip title={subject}>
+            <Text strong>{jobType}</Text>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Status',
@@ -133,16 +196,10 @@ function InternalJobs() {
       },
     },
     {
-      title: 'Started At',
+      title: 'Started',
       dataIndex: 'started_at',
       key: 'started_at',
-      render: (v: string) => (v ? new Date(v).toLocaleString() : '-'),
-    },
-    {
-      title: 'Finished At',
-      dataIndex: 'finished_at',
-      key: 'finished_at',
-      render: (v: string) => (v ? new Date(v).toLocaleString() : '-'),
+      render: (v: string) => formatTimeAgo(v),
     },
     {
       title: 'Duration',
@@ -180,30 +237,79 @@ function InternalJobs() {
     },
   ];
 
-  const runningCount = jobs.filter((j) => j.status === 'running').length;
-
   return (
     <>
       <Space style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Space>
-          <Title level={4} style={{ margin: 0 }}>Internal Jobs</Title>
+          <Title level={4} style={{ margin: 0 }}>Active Jobs</Title>
+          <Select
+            value={timePeriod}
+            onChange={setTimePeriod}
+            options={TIME_PERIOD_OPTIONS}
+            style={{ width: 120 }}
+            suffixIcon={<ClockCircleOutlined />}
+          />
           {runningCount > 0 && (
-            <Tag color="blue">{runningCount} running</Tag>
+            <Tag color="processing" icon={<SyncOutlined spin />}>
+              {runningCount} running
+            </Tag>
           )}
         </Space>
         <Button icon={<ReloadOutlined />} onClick={loadJobs}>
           Refresh
         </Button>
       </Space>
+
+      {/* Summary Cards */}
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={8}>
+          <Card size="small">
+            <Statistic
+              title="Running"
+              value={runningCount}
+              valueStyle={{ color: runningCount > 0 ? '#1890ff' : undefined }}
+              prefix={<SyncOutlined spin={runningCount > 0} />}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card size="small">
+            <Statistic
+              title="Completed"
+              value={completedCount}
+              valueStyle={{ color: '#3f8600' }}
+              prefix={<CheckCircleOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card size="small">
+            <Statistic
+              title="Failed"
+              value={failedCount}
+              valueStyle={{ color: failedCount > 0 ? '#cf1322' : undefined }}
+              prefix={<CloseCircleOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
       <Table
         columns={columns}
-        dataSource={jobs}
+        dataSource={recentJobs}
         rowKey="uuid"
         loading={loading}
         pagination={{ pageSize: 20 }}
+        locale={{ emptyText: `No jobs in the last ${TIME_PERIOD_OPTIONS.find(o => o.value === timePeriod)?.label || timePeriod + ' minutes'}` }}
       />
+
+      {recentJobs.length > 0 && (
+        <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
+          Showing {recentJobs.length} job{recentJobs.length !== 1 ? 's' : ''} from the last {TIME_PERIOD_OPTIONS.find(o => o.value === timePeriod)?.label || timePeriod + ' minutes'}
+        </Text>
+      )}
     </>
   );
 }
 
-export default InternalJobs;
+export default ActiveJobs;

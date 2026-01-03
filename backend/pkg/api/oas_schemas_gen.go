@@ -8268,6 +8268,10 @@ type RegisteredWorker struct {
 	LastConnectedAt OptDateTime `json:"last_connected_at"`
 	// IP address or hostname the worker connected from.
 	ConnectedFrom OptString `json:"connected_from"`
+	// Number of jobs currently being processed by this worker.
+	ActiveJobs OptInt `json:"active_jobs"`
+	// Maximum number of concurrent jobs this worker can handle.
+	Capacity OptInt `json:"capacity"`
 	// Timestamp of worker registration.
 	CreatedAt OptDateTime `json:"created_at"`
 	// Timestamp of last update.
@@ -8322,6 +8326,16 @@ func (s *RegisteredWorker) GetLastConnectedAt() OptDateTime {
 // GetConnectedFrom returns the value of ConnectedFrom.
 func (s *RegisteredWorker) GetConnectedFrom() OptString {
 	return s.ConnectedFrom
+}
+
+// GetActiveJobs returns the value of ActiveJobs.
+func (s *RegisteredWorker) GetActiveJobs() OptInt {
+	return s.ActiveJobs
+}
+
+// GetCapacity returns the value of Capacity.
+func (s *RegisteredWorker) GetCapacity() OptInt {
+	return s.Capacity
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -8382,6 +8396,16 @@ func (s *RegisteredWorker) SetLastConnectedAt(val OptDateTime) {
 // SetConnectedFrom sets the value of ConnectedFrom.
 func (s *RegisteredWorker) SetConnectedFrom(val OptString) {
 	s.ConnectedFrom = val
+}
+
+// SetActiveJobs sets the value of ActiveJobs.
+func (s *RegisteredWorker) SetActiveJobs(val OptInt) {
+	s.ActiveJobs = val
+}
+
+// SetCapacity sets the value of Capacity.
+func (s *RegisteredWorker) SetCapacity(val OptInt) {
+	s.Capacity = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
