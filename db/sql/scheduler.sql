@@ -10,6 +10,7 @@ INSERT INTO scheduler (
     last_run,
     is_enabled,
     is_paused,
+    batch_size,
     created_at,
     updated_at
 ) VALUES (
@@ -23,6 +24,7 @@ INSERT INTO scheduler (
              sqlc.arg('last_run'),
              sqlc.arg('is_enabled')::boolean,
              sqlc.arg('is_paused')::boolean,
+             sqlc.arg('batch_size')::int,
              NOW(),
              NOW()
          ) RETURNING *;
@@ -72,6 +74,7 @@ UPDATE scheduler SET
                      last_run = sqlc.arg('last_run'),
                      is_enabled = sqlc.arg('is_enabled')::boolean,
                      is_paused = sqlc.arg('is_paused')::boolean,
+                     batch_size = sqlc.arg('batch_size')::int,
                      updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 

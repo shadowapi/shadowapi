@@ -27,6 +27,14 @@ func (s *MapperFieldMapping) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *Scheduler) setDefaults() {
+	{
+		val := int(100)
+		s.BatchSize.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *SourceFieldDefinition) setDefaults() {
 	{
 		val := bool(false)

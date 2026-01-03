@@ -26,6 +26,12 @@ properties:
     type: boolean
   is_paused:
     type: boolean
+  batch_size:
+    type: integer
+    description: Number of items to process per scheduled execution
+    default: 100
+    minimum: 1
+    maximum: 10000
   created_at:
     type: string
     format: date-time

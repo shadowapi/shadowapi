@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import {
   Form,
   Input,
+  InputNumber,
   Button,
   Space,
   Typography,
@@ -69,6 +70,7 @@ interface FormValues {
   timezone: string;
   is_enabled: boolean;
   is_paused: boolean;
+  batch_size: number;
 }
 
 function SchedulerEdit() {
@@ -127,6 +129,7 @@ function SchedulerEdit() {
       timezone: data.timezone || 'UTC',
       is_enabled: data.is_enabled ?? false,
       is_paused: data.is_paused ?? false,
+      batch_size: data.batch_size ?? 100,
     });
 
     setLoading(false);
@@ -148,6 +151,7 @@ function SchedulerEdit() {
       timezone: values.timezone,
       is_enabled: values.is_enabled,
       is_paused: values.is_paused,
+      batch_size: values.batch_size,
     };
 
     try {
@@ -234,6 +238,7 @@ function SchedulerEdit() {
             is_enabled: true,
             is_paused: false,
             cron_expression: '0 * * * *',
+            batch_size: 100,
           }}
         >
           <Form.Item
@@ -317,6 +322,15 @@ function SchedulerEdit() {
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
             />
+          </Form.Item>
+
+          <Form.Item
+            name="batch_size"
+            label="Batch Size"
+            tooltip="Number of items to process per scheduled execution"
+            rules={[{ required: true, message: 'Batch size is required' }]}
+          >
+            <InputNumber min={1} max={10000} style={{ width: 200 }} />
           </Form.Item>
 
           <Divider />

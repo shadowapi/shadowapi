@@ -374,6 +374,7 @@ CREATE TABLE "scheduler" (
                              last_run           TIMESTAMP WITH TIME ZONE,
                              is_enabled         BOOLEAN NOT NULL DEFAULT TRUE,
                              is_paused         BOOLEAN NOT NULL DEFAULT FALSE,
+                             batch_size         INTEGER NOT NULL DEFAULT 100, -- number of items to process per execution
 
                              created_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                              updated_at         TIMESTAMP WITH TIME ZONE,

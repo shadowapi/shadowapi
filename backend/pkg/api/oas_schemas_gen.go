@@ -8498,8 +8498,10 @@ type Scheduler struct {
 	LastRun        OptDateTime    `json:"last_run"`
 	IsEnabled      OptBool        `json:"is_enabled"`
 	IsPaused       OptBool        `json:"is_paused"`
-	CreatedAt      OptDateTime    `json:"created_at"`
-	UpdatedAt      OptDateTime    `json:"updated_at"`
+	// Number of items to process per scheduled execution.
+	BatchSize OptInt      `json:"batch_size"`
+	CreatedAt OptDateTime `json:"created_at"`
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -8550,6 +8552,11 @@ func (s *Scheduler) GetIsEnabled() OptBool {
 // GetIsPaused returns the value of IsPaused.
 func (s *Scheduler) GetIsPaused() OptBool {
 	return s.IsPaused
+}
+
+// GetBatchSize returns the value of BatchSize.
+func (s *Scheduler) GetBatchSize() OptInt {
+	return s.BatchSize
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -8610,6 +8617,11 @@ func (s *Scheduler) SetIsEnabled(val OptBool) {
 // SetIsPaused sets the value of IsPaused.
 func (s *Scheduler) SetIsPaused(val OptBool) {
 	s.IsPaused = val
+}
+
+// SetBatchSize sets the value of BatchSize.
+func (s *Scheduler) SetBatchSize(val OptInt) {
+	s.BatchSize = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.

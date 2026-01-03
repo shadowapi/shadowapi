@@ -1781,6 +1781,11 @@ export interface components {
             last_run?: string;
             is_enabled?: boolean;
             is_paused?: boolean;
+            /**
+             * @description Number of items to process per scheduled execution
+             * @default 100
+             */
+            batch_size: number;
             /** Format: date-time */
             created_at?: string;
             /** Format: date-time */

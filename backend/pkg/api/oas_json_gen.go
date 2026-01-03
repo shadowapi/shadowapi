@@ -14622,6 +14622,12 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.BatchSize.Set {
+			e.FieldStart("batch_size")
+			s.BatchSize.Encode(e)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -14635,7 +14641,7 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfScheduler = [12]string{
+var jsonFieldsNameOfScheduler = [13]string{
 	0:  "uuid",
 	1:  "pipeline_uuid",
 	2:  "schedule_type",
@@ -14646,8 +14652,9 @@ var jsonFieldsNameOfScheduler = [12]string{
 	7:  "last_run",
 	8:  "is_enabled",
 	9:  "is_paused",
-	10: "created_at",
-	11: "updated_at",
+	10: "batch_size",
+	11: "created_at",
+	12: "updated_at",
 }
 
 // Decode decodes Scheduler from json.
@@ -14656,6 +14663,7 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode Scheduler to nil")
 	}
 	var requiredBitSet [2]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -14762,6 +14770,16 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_paused\"")
+			}
+		case "batch_size":
+			if err := func() error {
+				s.BatchSize.Reset()
+				if err := s.BatchSize.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"batch_size\"")
 			}
 		case "created_at":
 			if err := func() error {
