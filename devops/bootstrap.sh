@@ -35,10 +35,16 @@ sed -e "s/__HYDRA_SECRETS_SYSTEM__/$HYDRA_SECRETS_SYSTEM/" \
     -e "s/__OAUTH2_CLIENT_ID__/pending-creation/" \
     .env.template > .env
 
+# Cross-platform sed -i (works on both macOS and Linux)
+sed_inplace() {
+    local file="${@: -1}"  # Last argument is the file
+    sed -i.bak "$@" && rm -f "$file.bak"
+}
+
 # Restore preserved worker credentials
 if [ -n "$PRESERVED_WORKER_ID" ] && [ -n "$PRESERVED_WORKER_SECRET" ]; then
-    sed -i "s/^WORKER_ID=.*/WORKER_ID=$PRESERVED_WORKER_ID/" .env
-    sed -i "s/^WORKER_SECRET=.*/WORKER_SECRET=$PRESERVED_WORKER_SECRET/" .env
+    sed_inplace "s/^WORKER_ID=.*/WORKER_ID=$PRESERVED_WORKER_ID/" .env
+    sed_inplace "s/^WORKER_SECRET=.*/WORKER_SECRET=$PRESERVED_WORKER_SECRET/" .env
     echo "Worker credentials preserved from previous .env"
 fi
 echo ".env created successfully"
@@ -105,7 +111,7 @@ else
     echo "OAuth2 client created: $CLIENT_ID"
 
     # Update .env with the generated client ID
-    sed -i "s/^BE_OAUTH2_SPA_CLIENT_ID=.*/BE_OAUTH2_SPA_CLIENT_ID=$CLIENT_ID/" .env
+    sed_inplace "s/^BE_OAUTH2_SPA_CLIENT_ID=.*/BE_OAUTH2_SPA_CLIENT_ID=$CLIENT_ID/" .env
     echo "Updated .env with client ID"
 fi
 
@@ -164,12 +170,9 @@ else
             echo "$ENROLL_OUTPUT"
         else
             # Update .env with worker credentials
-            sed -i "s/^WORKER_ID=.*/WORKER_ID=$WORKER_ID/" .env
-            sed -i "s/^WORKER_SECRET=.*/WORKER_SECRET=$WORKER_SECRET/" .env
+            sed_inplace "s/^WORKER_ID=.*/WORKER_ID=$WORKER_ID/" .env
+            sed_inplace "s/^WORKER_SECRET=.*/WORKER_SECRET=$WORKER_SECRET/" .env
             echo "Worker enrolled: $WORKER_ID"
-
-            # Restart worker service to pick up credentials
-            docker compose up -d worker
         fi
     fi
 fi
@@ -200,3 +203,9 @@ if [ -n "$ENROLLED_WORKER_ID" ]; then
 fi
 echo ""
 echo "The admin user has super_admin role and owns 'internal' and 'demo' workspaces."
+
+# Step 8: Restart all services to ensure they pick up latest .env
+echo ""
+echo "Restarting all services..."
+docker compose restart
+echo "All services restarted."
