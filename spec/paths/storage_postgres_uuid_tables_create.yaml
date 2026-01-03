@@ -1,0 +1,32 @@
+post:
+  description: Create a new table in the PostgreSQL database.
+  operationId: storage-postgres-tables-create
+  parameters:
+    - description: The UUID of the PostgreSQL storage instance.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateRequest"
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateResponse"
+      description: Table created successfully.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred.
+  tags:
+    - storage
+    - storage-postgres

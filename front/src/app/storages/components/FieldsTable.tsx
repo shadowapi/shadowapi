@@ -8,6 +8,7 @@ type FieldType = PostgresField['type'];
 interface FieldsTableProps {
   fields: PostgresField[];
   onChange: (fields: PostgresField[]) => void;
+  readOnly?: boolean;
 }
 
 const fieldTypeOptions: { value: FieldType; label: string }[] = [
@@ -18,7 +19,7 @@ const fieldTypeOptions: { value: FieldType; label: string }[] = [
   { value: 'JSONB', label: 'JSONB' },
 ];
 
-function FieldsTable({ fields, onChange }: FieldsTableProps) {
+function FieldsTable({ fields, onChange, readOnly = false }: FieldsTableProps) {
   const updateField = (index: number, updates: Partial<PostgresField>) => {
     const newFields = [...fields];
     newFields[index] = { ...newFields[index], ...updates };
@@ -46,29 +47,35 @@ function FieldsTable({ fields, onChange }: FieldsTableProps) {
       dataIndex: 'name',
       key: 'name',
       width: 150,
-      render: (value: string, _: PostgresField, index: number) => (
-        <Input
-          value={value}
-          placeholder="column_name"
-          onChange={(e) => updateField(index, { name: e.target.value })}
-          size="small"
-        />
-      ),
+      render: (value: string, _: PostgresField, index: number) =>
+        readOnly ? (
+          <code>{value}</code>
+        ) : (
+          <Input
+            value={value}
+            placeholder="column_name"
+            onChange={(e) => updateField(index, { name: e.target.value })}
+            size="small"
+          />
+        ),
     },
     {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
       width: 120,
-      render: (value: FieldType, _: PostgresField, index: number) => (
-        <Select
-          value={value}
-          options={fieldTypeOptions}
-          onChange={(newType) => updateField(index, { type: newType })}
-          size="small"
-          style={{ width: '100%' }}
-        />
-      ),
+      render: (value: FieldType, _: PostgresField, index: number) =>
+        readOnly ? (
+          <span>{value}</span>
+        ) : (
+          <Select
+            value={value}
+            options={fieldTypeOptions}
+            onChange={(newType) => updateField(index, { type: newType })}
+            size="small"
+            style={{ width: '100%' }}
+          />
+        ),
     },
     {
       title: 'Nullable',
@@ -79,7 +86,7 @@ function FieldsTable({ fields, onChange }: FieldsTableProps) {
       render: (value: boolean, _: PostgresField, index: number) => (
         <Checkbox
           checked={value}
-          disabled={fields[index].is_primary_key}
+          disabled={readOnly || fields[index].is_primary_key}
           onChange={(e) => updateField(index, { nullable: e.target.checked })}
         />
       ),
@@ -93,6 +100,7 @@ function FieldsTable({ fields, onChange }: FieldsTableProps) {
       render: (value: boolean, _: PostgresField, index: number) => (
         <Checkbox
           checked={value}
+          disabled={readOnly}
           onChange={(e) => {
             const updates: Partial<PostgresField> = { is_primary_key: e.target.checked };
             // Primary key cannot be nullable
@@ -109,29 +117,36 @@ function FieldsTable({ fields, onChange }: FieldsTableProps) {
       dataIndex: 'default_value',
       key: 'default_value',
       width: 120,
-      render: (value: string | undefined, _: PostgresField, index: number) => (
-        <Input
-          value={value || ''}
-          placeholder="NOW()"
-          onChange={(e) => updateField(index, { default_value: e.target.value || undefined })}
-          size="small"
-        />
-      ),
+      render: (value: string | undefined, _: PostgresField, index: number) =>
+        readOnly ? (
+          <span>{value || '-'}</span>
+        ) : (
+          <Input
+            value={value || ''}
+            placeholder="NOW()"
+            onChange={(e) => updateField(index, { default_value: e.target.value || undefined })}
+            size="small"
+          />
+        ),
     },
-    {
-      title: '',
-      key: 'actions',
-      width: 50,
-      render: (_: unknown, __: PostgresField, index: number) => (
-        <Button
-          type="text"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => deleteField(index)}
-          size="small"
-        />
-      ),
-    },
+    ...(readOnly
+      ? []
+      : [
+          {
+            title: '',
+            key: 'actions',
+            width: 50,
+            render: (_: unknown, __: PostgresField, index: number) => (
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => deleteField(index)}
+                size="small"
+              />
+            ),
+          },
+        ]),
   ];
 
   return (
@@ -144,11 +159,13 @@ function FieldsTable({ fields, onChange }: FieldsTableProps) {
         size="small"
         bordered
       />
-      <Space style={{ marginTop: 8 }}>
-        <Button type="dashed" onClick={addField} icon={<PlusOutlined />} size="small">
-          Add Field
-        </Button>
-      </Space>
+      {!readOnly && (
+        <Space style={{ marginTop: 8 }}>
+          <Button type="dashed" onClick={addField} icon={<PlusOutlined />} size="small">
+            Add Field
+          </Button>
+        </Space>
+      )}
     </div>
   );
 }

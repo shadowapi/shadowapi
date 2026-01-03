@@ -1,29 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Table, Button, Space, Typography, Tag, Popconfirm, message, Empty } from 'antd';
-import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Typography, Tag, Popconfirm, message, Empty, Spin, Card, Divider, Alert } from 'antd';
+import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, ImportOutlined, ReloadOutlined, DatabaseOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useWorkspace } from '../../../lib/workspace/WorkspaceContext';
-import { getStorageKey, getTables, setTables } from '../../../lib/storage/storageTablesStore';
 import client from '../../../api/client';
 import type { components } from '../../../api/v1';
 
 type PostgresTable = components['schemas']['storage_postgres_table'];
+type IntrospectTable = components['schemas']['StoragePostgresIntrospectTable'];
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 function PostgresTablesList() {
   const navigate = useNavigate();
   const { uuid: rawUuid } = useParams<{ uuid: string }>();
   const { slug } = useWorkspace();
-  // For route /storages/new/tables, uuid param is undefined (literal 'new' route)
-  // Normalize to 'new' for consistency
   const uuid = rawUuid || 'new';
-  const storageKey = getStorageKey(uuid);
   const isNewStorage = uuid === 'new';
 
-  // Read tables from sessionStorage and use state to trigger re-renders after mutations
-  const [tables, setLocalTables] = useState<PostgresTable[]>(() => getTables(storageKey));
+  // Configured tables from storage settings
+  const [configuredTables, setConfiguredTables] = useState<PostgresTable[]>([]);
+  // Available tables from database introspection
+  const [dbTables, setDbTables] = useState<IntrospectTable[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [introspecting, setIntrospecting] = useState(false);
+  const [introspectError, setIntrospectError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   // Redirect to storage edit page if trying to access tables for a new (unsaved) storage
@@ -33,39 +35,83 @@ function PostgresTablesList() {
     }
   }, [isNewStorage, navigate, slug]);
 
-  const handleDelete = async (index: number) => {
-    const newTables = tables.filter((_, i) => i !== index);
+  // Load configured tables from storage settings
+  const loadConfiguredTables = useCallback(async () => {
+    if (isNewStorage || !uuid) return;
 
-    // Save to sessionStorage
-    setTables(storageKey, newTables);
-    setLocalTables(newTables);
+    const { data, error } = await client.GET('/storage/postgres/{uuid}', {
+      params: { path: { uuid } },
+    });
 
-    // For existing storages, also save to backend
-    if (!isNewStorage && uuid) {
-      setDeleting(index);
-      try {
-        const { error } = await client.PUT('/storage/postgres/{uuid}/tables', {
-          params: { path: { uuid } },
-          body: newTables,
-        });
-
-        if (error) {
-          message.error(error.detail || 'Failed to save changes');
-          setDeleting(null);
-          return;
-        }
-
-        message.success('Table removed');
-      } catch (err) {
-        message.error('Failed to save changes');
-      }
-      setDeleting(null);
-    } else {
-      message.success('Table removed');
+    if (error) {
+      message.error('Failed to load storage');
+      return;
     }
+
+    setConfiguredTables(data?.tables || []);
+  }, [uuid, isNewStorage]);
+
+  // Introspect database tables
+  const introspectTables = useCallback(async () => {
+    if (isNewStorage || !uuid) return;
+
+    setIntrospecting(true);
+    setIntrospectError(null);
+
+    const { data, error } = await client.GET('/storage/postgres/{uuid}/introspect/tables', {
+      params: { path: { uuid } },
+    });
+
+    setIntrospecting(false);
+
+    if (error) {
+      setIntrospectError(error.detail || 'Failed to connect to database');
+      return;
+    }
+
+    setDbTables(data?.tables || []);
+  }, [uuid, isNewStorage]);
+
+  // Initial load
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      await loadConfiguredTables();
+      await introspectTables();
+      setLoading(false);
+    };
+    load();
+  }, [loadConfiguredTables, introspectTables]);
+
+  const handleDelete = async (index: number) => {
+    const newTables = configuredTables.filter((_, i) => i !== index);
+
+    setDeleting(index);
+    try {
+      const { error } = await client.PUT('/storage/postgres/{uuid}/tables', {
+        params: { path: { uuid } },
+        body: newTables,
+      });
+
+      if (error) {
+        message.error(error.detail || 'Failed to save changes');
+        setDeleting(null);
+        return;
+      }
+
+      setConfiguredTables(newTables);
+      message.success('Table removed');
+    } catch {
+      message.error('Failed to save changes');
+    }
+    setDeleting(null);
   };
 
-  const columns: ColumnsType<PostgresTable> = [
+  // Filter out tables that are already configured
+  const configuredNames = new Set(configuredTables.map((t) => t.name));
+  const unconfiguredDbTables = dbTables.filter((t) => !configuredNames.has(t.name));
+
+  const configuredColumns: ColumnsType<PostgresTable> = [
     {
       title: 'Table Name',
       dataIndex: 'name',
@@ -79,7 +125,7 @@ function PostgresTablesList() {
       width: 150,
       render: (mode: string) => (
         <Tag color={mode === 'auto_create' ? 'green' : 'blue'}>
-          {mode === 'auto_create' ? 'Auto Create' : 'Validate'}
+          {mode === 'auto_create' ? 'Create' : 'Validate'}
         </Tag>
       ),
     },
@@ -96,7 +142,7 @@ function PostgresTablesList() {
       render: (_: unknown, __: PostgresTable, index: number) => (
         <Popconfirm
           title="Remove table"
-          description="Are you sure you want to remove this table definition?"
+          description="Are you sure you want to remove this table configuration?"
           onConfirm={(e) => {
             e?.stopPropagation();
             handleDelete(index);
@@ -110,12 +156,66 @@ function PostgresTablesList() {
             danger
             icon={<DeleteOutlined />}
             size="small"
+            loading={deleting === index}
             onClick={(e) => e.stopPropagation()}
           />
         </Popconfirm>
       ),
     },
   ];
+
+  const dbTableColumns: ColumnsType<IntrospectTable> = [
+    {
+      title: 'Table Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string) => <code>{name}</code>,
+    },
+    {
+      title: 'Rows',
+      dataIndex: 'row_count',
+      key: 'row_count',
+      width: 120,
+      render: (count: number) =>
+        count !== undefined ? (
+          <Text type="secondary">~{count.toLocaleString()}</Text>
+        ) : (
+          <Text type="secondary">-</Text>
+        ),
+    },
+    {
+      title: 'Primary Key',
+      dataIndex: 'has_primary_key',
+      key: 'has_primary_key',
+      width: 120,
+      render: (hasPK: boolean) =>
+        hasPK ? <Tag color="green">Yes</Tag> : <Tag>No</Tag>,
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 100,
+      render: (_: unknown, record: IntrospectTable) => (
+        <Button
+          type="link"
+          icon={<ImportOutlined />}
+          onClick={() =>
+            navigate(`/w/${slug}/storages/${uuid}/tables/new?import=${encodeURIComponent(record.name)}`)
+          }
+        >
+          Import
+        </Button>
+      ),
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -140,34 +240,99 @@ function PostgresTablesList() {
         </Button>
       </Space>
 
-      {tables.length === 0 ? (
-        <Empty
-          description={
-            isNewStorage
-              ? 'No tables defined yet. Add tables to define where data will be stored.'
-              : 'No tables defined. Add tables to define where data will be stored.'
-          }
-        >
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate(`/w/${slug}/storages/${uuid}/tables/new`)}
+      {/* Configured Tables Section */}
+      <Card
+        title="Configured Tables"
+        size="small"
+        style={{ marginBottom: 16 }}
+        extra={
+          <Text type="secondary">{configuredTables.length} table(s)</Text>
+        }
+      >
+        {configuredTables.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="No tables configured yet. Add tables to define where data will be stored."
           >
-            Add Table
-          </Button>
-        </Empty>
-      ) : (
-        <Table
-          dataSource={tables}
-          columns={columns}
-          rowKey={(_, index) => `table-${index}`}
-          pagination={false}
-          onRow={(_, index) => ({
-            onClick: () => navigate(`/w/${slug}/storages/${uuid}/tables/${index}`),
-            style: { cursor: 'pointer' },
-          })}
-        />
-      )}
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate(`/w/${slug}/storages/${uuid}/tables/new`)}
+            >
+              Add Table
+            </Button>
+          </Empty>
+        ) : (
+          <Table
+            dataSource={configuredTables}
+            columns={configuredColumns}
+            rowKey={(_, index) => `configured-${index}`}
+            pagination={false}
+            size="small"
+            onRow={(_, index) => ({
+              onClick: () => navigate(`/w/${slug}/storages/${uuid}/tables/${index}`),
+              style: { cursor: 'pointer' },
+            })}
+          />
+        )}
+      </Card>
+
+      <Divider />
+
+      {/* Available Database Tables Section */}
+      <Card
+        title={
+          <Space>
+            <DatabaseOutlined />
+            Available in Database
+          </Space>
+        }
+        size="small"
+        extra={
+          <Space>
+            <Text type="secondary">{unconfiguredDbTables.length} table(s)</Text>
+            <Button
+              icon={<ReloadOutlined />}
+              size="small"
+              loading={introspecting}
+              onClick={introspectTables}
+            >
+              Refresh
+            </Button>
+          </Space>
+        }
+      >
+        {introspectError ? (
+          <Alert
+            type="warning"
+            message="Could not connect to database"
+            description={introspectError}
+            showIcon
+            action={
+              <Button size="small" onClick={introspectTables} loading={introspecting}>
+                Retry
+              </Button>
+            }
+          />
+        ) : unconfiguredDbTables.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              dbTables.length === 0
+                ? 'No tables found in database. You can create new tables.'
+                : 'All database tables are already configured.'
+            }
+          />
+        ) : (
+          <Table
+            dataSource={unconfiguredDbTables}
+            columns={dbTableColumns}
+            rowKey="name"
+            pagination={false}
+            size="small"
+          />
+        )}
+      </Card>
     </>
   );
 }

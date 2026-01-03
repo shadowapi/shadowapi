@@ -1,0 +1,32 @@
+get:
+  description: Get schema information for a specific table in the PostgreSQL database.
+  operationId: storage-postgres-introspect-table
+  parameters:
+    - description: The UUID of the PostgreSQL storage instance.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+    - description: The name of the table to introspect.
+      in: path
+      name: table_name
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: "../components/storage_postgres_introspect.yaml#/StoragePostgresIntrospectTableResponse"
+      description: Table schema information.
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred.
+  tags:
+    - storage
+    - storage-postgres

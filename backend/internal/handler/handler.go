@@ -21,6 +21,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/jobstore"
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
+	"github.com/shadowapi/shadowapi/backend/internal/storages"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
@@ -28,15 +29,16 @@ import (
 
 // Handler is the server handler
 type Handler struct {
-	cfg         *config.Config
-	log         *slog.Logger
-	dbp         *pgxpool.Pool
-	queue       *queue.Queue
-	jobStore    *jobstore.Store
-	scheduler   *worker.Scheduler
-	userManager auth.UserManager
-	oauth2Svc   *OAuth2Service
-	enforcer    *rbac.Enforcer
+	cfg            *config.Config
+	log            *slog.Logger
+	dbp            *pgxpool.Pool
+	queue          *queue.Queue
+	jobStore       *jobstore.Store
+	scheduler      *worker.Scheduler
+	userManager    auth.UserManager
+	oauth2Svc      *OAuth2Service
+	enforcer       *rbac.Enforcer
+	storageManager *storages.Manager
 }
 
 func (h *Handler) DB() *pgxpool.Pool {
@@ -183,15 +185,18 @@ func Provide(i do.Injector) (*Handler, error) {
 	cfg := do.MustInvoke[*config.Config](i)
 	log := do.MustInvoke[*slog.Logger](i)
 
+	dbp := do.MustInvoke[*pgxpool.Pool](i)
+
 	h := &Handler{
-		cfg:         cfg,
-		log:         log,
-		dbp:         do.MustInvoke[*pgxpool.Pool](i),
-		queue:       do.MustInvoke[*queue.Queue](i),
-		jobStore:    do.MustInvoke[*jobstore.Store](i),
-		scheduler:   do.MustInvoke[*worker.Scheduler](i),
-		userManager: do.MustInvoke[auth.UserManager](i),
-		enforcer:    do.MustInvoke[*rbac.Enforcer](i),
+		cfg:            cfg,
+		log:            log,
+		dbp:            dbp,
+		queue:          do.MustInvoke[*queue.Queue](i),
+		jobStore:       do.MustInvoke[*jobstore.Store](i),
+		scheduler:      do.MustInvoke[*worker.Scheduler](i),
+		userManager:    do.MustInvoke[auth.UserManager](i),
+		enforcer:       do.MustInvoke[*rbac.Enforcer](i),
+		storageManager: storages.NewManager(log, dbp),
 	}
 
 	// Initialize OAuth2 service if configured

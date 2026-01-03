@@ -682,6 +682,24 @@ type Handler interface {
 	//
 	// GET /storage/postgres/{uuid}
 	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (*StoragePostgres, error)
+	// StoragePostgresIntrospectTable implements storage-postgres-introspect-table operation.
+	//
+	// Get schema information for a specific table in the PostgreSQL database.
+	//
+	// GET /storage/postgres/{uuid}/introspect/tables/{table_name}
+	StoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (*StoragePostgresIntrospectTableResponse, error)
+	// StoragePostgresIntrospectTables implements storage-postgres-introspect-tables operation.
+	//
+	// List all tables in the PostgreSQL database connected via this storage.
+	//
+	// GET /storage/postgres/{uuid}/introspect/tables
+	StoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (*StoragePostgresIntrospectTablesResponse, error)
+	// StoragePostgresTablesCreate implements storage-postgres-tables-create operation.
+	//
+	// Create a new table in the PostgreSQL database.
+	//
+	// POST /storage/postgres/{uuid}/tables/create
+	StoragePostgresTablesCreate(ctx context.Context, req *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (*StoragePostgresTableCreateResponse, error)
 	// StoragePostgresTablesReplace implements storage-postgres-tables-replace operation.
 	//
 	// Replace all target tables for a PostgreSQL storage instance.

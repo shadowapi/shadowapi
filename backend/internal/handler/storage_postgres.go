@@ -224,6 +224,86 @@ func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.St
 	})
 }
 
+// StoragePostgresIntrospectTables lists all tables in the connected PostgreSQL database.
+func (h *Handler) StoragePostgresIntrospectTables(ctx context.Context, params api.StoragePostgresIntrospectTablesParams) (*api.StoragePostgresIntrospectTablesResponse, error) {
+	log := h.log.With("handler", "StoragePostgresIntrospectTables")
+
+	tables, err := h.storageManager.ListTables(ctx, params.UUID)
+	if err != nil {
+		log.Error("failed to list tables", "error", err, "storageUUID", params.UUID)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list tables: %s", err.Error()))
+	}
+
+	result := make([]api.StoragePostgresIntrospectTable, len(tables))
+	for i, t := range tables {
+		result[i] = api.StoragePostgresIntrospectTable{
+			Name:          t.Name,
+			RowCount:      api.NewOptInt(int(t.RowCount)),
+			HasPrimaryKey: api.NewOptBool(t.HasPrimaryKey),
+		}
+	}
+
+	return &api.StoragePostgresIntrospectTablesResponse{
+		Tables: result,
+	}, nil
+}
+
+// StoragePostgresIntrospectTable returns the schema information for a specific table.
+func (h *Handler) StoragePostgresIntrospectTable(ctx context.Context, params api.StoragePostgresIntrospectTableParams) (*api.StoragePostgresIntrospectTableResponse, error) {
+	log := h.log.With("handler", "StoragePostgresIntrospectTable")
+
+	schema, err := h.storageManager.GetTableFields(ctx, params.UUID, params.TableName)
+	if err != nil {
+		log.Error("failed to get table fields", "error", err, "storageUUID", params.UUID, "tableName", params.TableName)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get table fields: %s", err.Error()))
+	}
+
+	fields := make([]api.StoragePostgresIntrospectField, len(schema.Fields))
+	for i, f := range schema.Fields {
+		fields[i] = api.StoragePostgresIntrospectField{
+			Name:         f.Name,
+			Type:         api.StoragePostgresIntrospectFieldType(f.Type),
+			PgType:       api.NewOptString(f.PgType),
+			Nullable:     f.Nullable,
+			IsPrimaryKey: f.IsPrimaryKey,
+			DefaultValue: api.NewOptString(f.DefaultValue),
+		}
+	}
+
+	return &api.StoragePostgresIntrospectTableResponse{
+		Name:     schema.Name,
+		Exists:   schema.Exists,
+		Fields:   fields,
+		RowCount: api.NewOptInt(int(schema.RowCount)),
+	}, nil
+}
+
+// StoragePostgresTablesCreate creates a new table in the PostgreSQL database.
+func (h *Handler) StoragePostgresTablesCreate(ctx context.Context, req *api.StoragePostgresTableCreateRequest, params api.StoragePostgresTablesCreateParams) (*api.StoragePostgresTableCreateResponse, error) {
+	log := h.log.With("handler", "StoragePostgresTablesCreate")
+
+	dropIfExists := false
+	if req.DropIfExists.IsSet() {
+		dropIfExists = req.DropIfExists.Value
+	}
+
+	wasDropped, err := h.storageManager.CreateTable(ctx, params.UUID, req.Name, req.Fields, dropIfExists)
+	if err != nil {
+		log.Error("failed to create table", "error", err, "storageUUID", params.UUID, "tableName", req.Name)
+		return &api.StoragePostgresTableCreateResponse{
+			Success:   false,
+			TableName: api.NewOptString(req.Name),
+			Error:     api.NewOptString(err.Error()),
+		}, nil
+	}
+
+	return &api.StoragePostgresTableCreateResponse{
+		Success:    true,
+		TableName:  api.NewOptString(req.Name),
+		WasDropped: api.NewOptBool(wasDropped),
+	}, nil
+}
+
 // validatePostgresTables validates table definitions for a PostgreSQL storage.
 func validatePostgresTables(tables []api.StoragePostgresTable) error {
 	if len(tables) == 0 {

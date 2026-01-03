@@ -121,6 +121,18 @@ components:
       $ref: "components/test_connection_job.yaml"
     StoragePostgresTestRequest:
       $ref: "components/storage_postgres_test_request.yaml"
+    StoragePostgresIntrospectTable:
+      $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresIntrospectTable"
+    StoragePostgresIntrospectField:
+      $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresIntrospectField"
+    StoragePostgresIntrospectTablesResponse:
+      $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresIntrospectTablesResponse"
+    StoragePostgresIntrospectTableResponse:
+      $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresIntrospectTableResponse"
+    StoragePostgresTableCreateRequest:
+      $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateRequest"
+    StoragePostgresTableCreateResponse:
+      $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateResponse"
 
   securitySchemes:
     # Bearer token-based auth
@@ -192,6 +204,12 @@ paths:
     $ref: "paths/storage_postgres_uuid_test.yaml"
   /storage/postgres/{uuid}/tables:
     $ref: "paths/storage_postgres_uuid_tables.yaml"
+  /storage/postgres/{uuid}/tables/create:
+    $ref: "paths/storage_postgres_uuid_tables_create.yaml"
+  /storage/postgres/{uuid}/introspect/tables:
+    $ref: "paths/storage_postgres_uuid_introspect_tables.yaml"
+  /storage/postgres/{uuid}/introspect/tables/{table_name}:
+    $ref: "paths/storage_postgres_uuid_introspect_table.yaml"
   /storage/s3:
     $ref: "paths/storage_s3.yaml"
   /storage/s3/{uuid}:

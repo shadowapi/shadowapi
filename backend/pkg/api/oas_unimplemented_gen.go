@@ -1023,6 +1023,33 @@ func (UnimplementedHandler) StoragePostgresGet(ctx context.Context, params Stora
 	return r, ht.ErrNotImplemented
 }
 
+// StoragePostgresIntrospectTable implements storage-postgres-introspect-table operation.
+//
+// Get schema information for a specific table in the PostgreSQL database.
+//
+// GET /storage/postgres/{uuid}/introspect/tables/{table_name}
+func (UnimplementedHandler) StoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (r *StoragePostgresIntrospectTableResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StoragePostgresIntrospectTables implements storage-postgres-introspect-tables operation.
+//
+// List all tables in the PostgreSQL database connected via this storage.
+//
+// GET /storage/postgres/{uuid}/introspect/tables
+func (UnimplementedHandler) StoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (r *StoragePostgresIntrospectTablesResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// StoragePostgresTablesCreate implements storage-postgres-tables-create operation.
+//
+// Create a new table in the PostgreSQL database.
+//
+// POST /storage/postgres/{uuid}/tables/create
+func (UnimplementedHandler) StoragePostgresTablesCreate(ctx context.Context, req *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (r *StoragePostgresTableCreateResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // StoragePostgresTablesReplace implements storage-postgres-tables-replace operation.
 //
 // Replace all target tables for a PostgreSQL storage instance.

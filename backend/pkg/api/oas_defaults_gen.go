@@ -45,3 +45,11 @@ func (s *StoragePostgresField) setDefaults() {
 		s.IsPrimaryKey.SetTo(val)
 	}
 }
+
+// setDefaults set default value of fields.
+func (s *StoragePostgresTableCreateRequest) setDefaults() {
+	{
+		val := bool(false)
+		s.DropIfExists.SetTo(val)
+	}
+}

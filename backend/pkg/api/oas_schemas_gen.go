@@ -9264,6 +9264,255 @@ func (s *StoragePostgresFieldType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Information about a column in a database table.
+// Ref: #/StoragePostgresIntrospectField
+type StoragePostgresIntrospectField struct {
+	// Column name.
+	Name string `json:"name"`
+	// Mapped field type (TEXT, INTEGER, BOOLEAN, TIMESTAMP, JSONB).
+	Type StoragePostgresIntrospectFieldType `json:"type"`
+	// Original PostgreSQL data type.
+	PgType OptString `json:"pg_type"`
+	// Whether the column allows NULL values.
+	Nullable bool `json:"nullable"`
+	// Whether this column is the primary key.
+	IsPrimaryKey bool `json:"is_primary_key"`
+	// Default value expression if any.
+	DefaultValue OptString `json:"default_value"`
+}
+
+// GetName returns the value of Name.
+func (s *StoragePostgresIntrospectField) GetName() string {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *StoragePostgresIntrospectField) GetType() StoragePostgresIntrospectFieldType {
+	return s.Type
+}
+
+// GetPgType returns the value of PgType.
+func (s *StoragePostgresIntrospectField) GetPgType() OptString {
+	return s.PgType
+}
+
+// GetNullable returns the value of Nullable.
+func (s *StoragePostgresIntrospectField) GetNullable() bool {
+	return s.Nullable
+}
+
+// GetIsPrimaryKey returns the value of IsPrimaryKey.
+func (s *StoragePostgresIntrospectField) GetIsPrimaryKey() bool {
+	return s.IsPrimaryKey
+}
+
+// GetDefaultValue returns the value of DefaultValue.
+func (s *StoragePostgresIntrospectField) GetDefaultValue() OptString {
+	return s.DefaultValue
+}
+
+// SetName sets the value of Name.
+func (s *StoragePostgresIntrospectField) SetName(val string) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *StoragePostgresIntrospectField) SetType(val StoragePostgresIntrospectFieldType) {
+	s.Type = val
+}
+
+// SetPgType sets the value of PgType.
+func (s *StoragePostgresIntrospectField) SetPgType(val OptString) {
+	s.PgType = val
+}
+
+// SetNullable sets the value of Nullable.
+func (s *StoragePostgresIntrospectField) SetNullable(val bool) {
+	s.Nullable = val
+}
+
+// SetIsPrimaryKey sets the value of IsPrimaryKey.
+func (s *StoragePostgresIntrospectField) SetIsPrimaryKey(val bool) {
+	s.IsPrimaryKey = val
+}
+
+// SetDefaultValue sets the value of DefaultValue.
+func (s *StoragePostgresIntrospectField) SetDefaultValue(val OptString) {
+	s.DefaultValue = val
+}
+
+// Mapped field type (TEXT, INTEGER, BOOLEAN, TIMESTAMP, JSONB).
+type StoragePostgresIntrospectFieldType string
+
+const (
+	StoragePostgresIntrospectFieldTypeTEXT      StoragePostgresIntrospectFieldType = "TEXT"
+	StoragePostgresIntrospectFieldTypeINTEGER   StoragePostgresIntrospectFieldType = "INTEGER"
+	StoragePostgresIntrospectFieldTypeBOOLEAN   StoragePostgresIntrospectFieldType = "BOOLEAN"
+	StoragePostgresIntrospectFieldTypeTIMESTAMP StoragePostgresIntrospectFieldType = "TIMESTAMP"
+	StoragePostgresIntrospectFieldTypeJSONB     StoragePostgresIntrospectFieldType = "JSONB"
+)
+
+// AllValues returns all StoragePostgresIntrospectFieldType values.
+func (StoragePostgresIntrospectFieldType) AllValues() []StoragePostgresIntrospectFieldType {
+	return []StoragePostgresIntrospectFieldType{
+		StoragePostgresIntrospectFieldTypeTEXT,
+		StoragePostgresIntrospectFieldTypeINTEGER,
+		StoragePostgresIntrospectFieldTypeBOOLEAN,
+		StoragePostgresIntrospectFieldTypeTIMESTAMP,
+		StoragePostgresIntrospectFieldTypeJSONB,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StoragePostgresIntrospectFieldType) MarshalText() ([]byte, error) {
+	switch s {
+	case StoragePostgresIntrospectFieldTypeTEXT:
+		return []byte(s), nil
+	case StoragePostgresIntrospectFieldTypeINTEGER:
+		return []byte(s), nil
+	case StoragePostgresIntrospectFieldTypeBOOLEAN:
+		return []byte(s), nil
+	case StoragePostgresIntrospectFieldTypeTIMESTAMP:
+		return []byte(s), nil
+	case StoragePostgresIntrospectFieldTypeJSONB:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StoragePostgresIntrospectFieldType) UnmarshalText(data []byte) error {
+	switch StoragePostgresIntrospectFieldType(data) {
+	case StoragePostgresIntrospectFieldTypeTEXT:
+		*s = StoragePostgresIntrospectFieldTypeTEXT
+		return nil
+	case StoragePostgresIntrospectFieldTypeINTEGER:
+		*s = StoragePostgresIntrospectFieldTypeINTEGER
+		return nil
+	case StoragePostgresIntrospectFieldTypeBOOLEAN:
+		*s = StoragePostgresIntrospectFieldTypeBOOLEAN
+		return nil
+	case StoragePostgresIntrospectFieldTypeTIMESTAMP:
+		*s = StoragePostgresIntrospectFieldTypeTIMESTAMP
+		return nil
+	case StoragePostgresIntrospectFieldTypeJSONB:
+		*s = StoragePostgresIntrospectFieldTypeJSONB
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Information about a table in the database.
+// Ref: #/StoragePostgresIntrospectTable
+type StoragePostgresIntrospectTable struct {
+	// Table name.
+	Name string `json:"name"`
+	// Approximate number of rows in the table.
+	RowCount OptInt `json:"row_count"`
+	// Whether the table has a primary key.
+	HasPrimaryKey OptBool `json:"has_primary_key"`
+}
+
+// GetName returns the value of Name.
+func (s *StoragePostgresIntrospectTable) GetName() string {
+	return s.Name
+}
+
+// GetRowCount returns the value of RowCount.
+func (s *StoragePostgresIntrospectTable) GetRowCount() OptInt {
+	return s.RowCount
+}
+
+// GetHasPrimaryKey returns the value of HasPrimaryKey.
+func (s *StoragePostgresIntrospectTable) GetHasPrimaryKey() OptBool {
+	return s.HasPrimaryKey
+}
+
+// SetName sets the value of Name.
+func (s *StoragePostgresIntrospectTable) SetName(val string) {
+	s.Name = val
+}
+
+// SetRowCount sets the value of RowCount.
+func (s *StoragePostgresIntrospectTable) SetRowCount(val OptInt) {
+	s.RowCount = val
+}
+
+// SetHasPrimaryKey sets the value of HasPrimaryKey.
+func (s *StoragePostgresIntrospectTable) SetHasPrimaryKey(val OptBool) {
+	s.HasPrimaryKey = val
+}
+
+// Response containing table schema information.
+// Ref: #/StoragePostgresIntrospectTableResponse
+type StoragePostgresIntrospectTableResponse struct {
+	// Table name.
+	Name string `json:"name"`
+	// Whether the table exists in the database.
+	Exists bool                             `json:"exists"`
+	Fields []StoragePostgresIntrospectField `json:"fields"`
+	// Approximate number of rows.
+	RowCount OptInt `json:"row_count"`
+}
+
+// GetName returns the value of Name.
+func (s *StoragePostgresIntrospectTableResponse) GetName() string {
+	return s.Name
+}
+
+// GetExists returns the value of Exists.
+func (s *StoragePostgresIntrospectTableResponse) GetExists() bool {
+	return s.Exists
+}
+
+// GetFields returns the value of Fields.
+func (s *StoragePostgresIntrospectTableResponse) GetFields() []StoragePostgresIntrospectField {
+	return s.Fields
+}
+
+// GetRowCount returns the value of RowCount.
+func (s *StoragePostgresIntrospectTableResponse) GetRowCount() OptInt {
+	return s.RowCount
+}
+
+// SetName sets the value of Name.
+func (s *StoragePostgresIntrospectTableResponse) SetName(val string) {
+	s.Name = val
+}
+
+// SetExists sets the value of Exists.
+func (s *StoragePostgresIntrospectTableResponse) SetExists(val bool) {
+	s.Exists = val
+}
+
+// SetFields sets the value of Fields.
+func (s *StoragePostgresIntrospectTableResponse) SetFields(val []StoragePostgresIntrospectField) {
+	s.Fields = val
+}
+
+// SetRowCount sets the value of RowCount.
+func (s *StoragePostgresIntrospectTableResponse) SetRowCount(val OptInt) {
+	s.RowCount = val
+}
+
+// Response containing list of tables in the database.
+// Ref: #/StoragePostgresIntrospectTablesResponse
+type StoragePostgresIntrospectTablesResponse struct {
+	Tables []StoragePostgresIntrospectTable `json:"tables"`
+}
+
+// GetTables returns the value of Tables.
+func (s *StoragePostgresIntrospectTablesResponse) GetTables() []StoragePostgresIntrospectTable {
+	return s.Tables
+}
+
+// SetTables sets the value of Tables.
+func (s *StoragePostgresIntrospectTablesResponse) SetTables(val []StoragePostgresIntrospectTable) {
+	s.Tables = val
+}
+
 // Table definition for PostgreSQL storage schema.
 // Ref: #
 type StoragePostgresTable struct {
@@ -9303,6 +9552,99 @@ func (s *StoragePostgresTable) SetCreationMode(val StoragePostgresTableCreationM
 // SetFields sets the value of Fields.
 func (s *StoragePostgresTable) SetFields(val []StoragePostgresField) {
 	s.Fields = val
+}
+
+// Request to create a table in the database.
+// Ref: #/StoragePostgresTableCreateRequest
+type StoragePostgresTableCreateRequest struct {
+	// Table name (lowercase alphanumeric with underscores).
+	Name   string                 `json:"name"`
+	Fields []StoragePostgresField `json:"fields"`
+	// Drop the table first if it already exists.
+	DropIfExists OptBool `json:"drop_if_exists"`
+}
+
+// GetName returns the value of Name.
+func (s *StoragePostgresTableCreateRequest) GetName() string {
+	return s.Name
+}
+
+// GetFields returns the value of Fields.
+func (s *StoragePostgresTableCreateRequest) GetFields() []StoragePostgresField {
+	return s.Fields
+}
+
+// GetDropIfExists returns the value of DropIfExists.
+func (s *StoragePostgresTableCreateRequest) GetDropIfExists() OptBool {
+	return s.DropIfExists
+}
+
+// SetName sets the value of Name.
+func (s *StoragePostgresTableCreateRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetFields sets the value of Fields.
+func (s *StoragePostgresTableCreateRequest) SetFields(val []StoragePostgresField) {
+	s.Fields = val
+}
+
+// SetDropIfExists sets the value of DropIfExists.
+func (s *StoragePostgresTableCreateRequest) SetDropIfExists(val OptBool) {
+	s.DropIfExists = val
+}
+
+// Response from table creation.
+// Ref: #/StoragePostgresTableCreateResponse
+type StoragePostgresTableCreateResponse struct {
+	// Whether the table was created successfully.
+	Success bool `json:"success"`
+	// Name of the created table.
+	TableName OptString `json:"table_name"`
+	// Whether an existing table was dropped first.
+	WasDropped OptBool `json:"was_dropped"`
+	// Error message if creation failed.
+	Error OptString `json:"error"`
+}
+
+// GetSuccess returns the value of Success.
+func (s *StoragePostgresTableCreateResponse) GetSuccess() bool {
+	return s.Success
+}
+
+// GetTableName returns the value of TableName.
+func (s *StoragePostgresTableCreateResponse) GetTableName() OptString {
+	return s.TableName
+}
+
+// GetWasDropped returns the value of WasDropped.
+func (s *StoragePostgresTableCreateResponse) GetWasDropped() OptBool {
+	return s.WasDropped
+}
+
+// GetError returns the value of Error.
+func (s *StoragePostgresTableCreateResponse) GetError() OptString {
+	return s.Error
+}
+
+// SetSuccess sets the value of Success.
+func (s *StoragePostgresTableCreateResponse) SetSuccess(val bool) {
+	s.Success = val
+}
+
+// SetTableName sets the value of TableName.
+func (s *StoragePostgresTableCreateResponse) SetTableName(val OptString) {
+	s.TableName = val
+}
+
+// SetWasDropped sets the value of WasDropped.
+func (s *StoragePostgresTableCreateResponse) SetWasDropped(val OptBool) {
+	s.WasDropped = val
+}
+
+// SetError sets the value of Error.
+func (s *StoragePostgresTableCreateResponse) SetError(val OptString) {
+	s.Error = val
 }
 
 // How to handle table creation.

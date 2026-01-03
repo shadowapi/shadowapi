@@ -6463,6 +6463,258 @@ func decodeStoragePostgresGetParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// StoragePostgresIntrospectTableParams is parameters of storage-postgres-introspect-table operation.
+type StoragePostgresIntrospectTableParams struct {
+	// The UUID of the PostgreSQL storage instance.
+	UUID string
+	// The name of the table to introspect.
+	TableName string
+}
+
+func unpackStoragePostgresIntrospectTableParams(packed middleware.Parameters) (params StoragePostgresIntrospectTableParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "table_name",
+			In:   "path",
+		}
+		params.TableName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStoragePostgresIntrospectTableParams(args [2]string, argsEscaped bool, r *http.Request) (params StoragePostgresIntrospectTableParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: table_name.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "table_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TableName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "table_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// StoragePostgresIntrospectTablesParams is parameters of storage-postgres-introspect-tables operation.
+type StoragePostgresIntrospectTablesParams struct {
+	// The UUID of the PostgreSQL storage instance.
+	UUID string
+}
+
+func unpackStoragePostgresIntrospectTablesParams(packed middleware.Parameters) (params StoragePostgresIntrospectTablesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStoragePostgresIntrospectTablesParams(args [1]string, argsEscaped bool, r *http.Request) (params StoragePostgresIntrospectTablesParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// StoragePostgresTablesCreateParams is parameters of storage-postgres-tables-create operation.
+type StoragePostgresTablesCreateParams struct {
+	// The UUID of the PostgreSQL storage instance.
+	UUID string
+}
+
+func unpackStoragePostgresTablesCreateParams(packed middleware.Parameters) (params StoragePostgresTablesCreateParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeStoragePostgresTablesCreateParams(args [1]string, argsEscaped bool, r *http.Request) (params StoragePostgresTablesCreateParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // StoragePostgresTablesReplaceParams is parameters of storage-postgres-tables-replace operation.
 type StoragePostgresTablesReplaceParams struct {
 	// The UUID of the PostgreSQL storage instance.

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { Table, Button, Space, Typography, message, Tag, Popconfirm } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, TableOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
@@ -105,9 +105,20 @@ function Storages() {
     {
       title: '',
       key: 'actions',
-      width: 60,
+      width: 120,
       render: (_, record) => (
         <Space size="small" onClick={(e) => e.stopPropagation()}>
+          {record.type === 'postgres' && (
+            <Button
+              type="text"
+              icon={<TableOutlined />}
+              title="Configure Tables"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/w/${slug}/storages/${record.uuid}/tables`);
+              }}
+            />
+          )}
           <Popconfirm
             title="Delete storage"
             description="Are you sure you want to delete this storage?"

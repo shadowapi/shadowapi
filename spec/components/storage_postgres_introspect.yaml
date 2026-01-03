@@ -1,0 +1,135 @@
+# spec/components/storage_postgres_introspect.yaml
+
+# Schema for introspection table info
+StoragePostgresIntrospectTable:
+  type: object
+  additionalProperties: false
+  description: "Information about a table in the database"
+  properties:
+    name:
+      type: string
+      description: "Table name"
+    row_count:
+      type: integer
+      description: "Approximate number of rows in the table"
+    has_primary_key:
+      type: boolean
+      description: "Whether the table has a primary key"
+  required:
+    - name
+
+# Schema for introspection table field
+StoragePostgresIntrospectField:
+  type: object
+  additionalProperties: false
+  description: "Information about a column in a database table"
+  properties:
+    name:
+      type: string
+      description: "Column name"
+    type:
+      type: string
+      description: "Mapped field type (TEXT, INTEGER, BOOLEAN, TIMESTAMP, JSONB)"
+      enum:
+        - TEXT
+        - INTEGER
+        - BOOLEAN
+        - TIMESTAMP
+        - JSONB
+    pg_type:
+      type: string
+      description: "Original PostgreSQL data type"
+    nullable:
+      type: boolean
+      description: "Whether the column allows NULL values"
+    is_primary_key:
+      type: boolean
+      description: "Whether this column is the primary key"
+    default_value:
+      type: string
+      description: "Default value expression if any"
+  required:
+    - name
+    - type
+    - nullable
+    - is_primary_key
+
+# Response for listing tables
+StoragePostgresIntrospectTablesResponse:
+  type: object
+  additionalProperties: false
+  description: "Response containing list of tables in the database"
+  properties:
+    tables:
+      type: array
+      items:
+        $ref: "#/StoragePostgresIntrospectTable"
+  required:
+    - tables
+
+# Response for getting table fields
+StoragePostgresIntrospectTableResponse:
+  type: object
+  additionalProperties: false
+  description: "Response containing table schema information"
+  properties:
+    name:
+      type: string
+      description: "Table name"
+    exists:
+      type: boolean
+      description: "Whether the table exists in the database"
+    fields:
+      type: array
+      items:
+        $ref: "#/StoragePostgresIntrospectField"
+    row_count:
+      type: integer
+      description: "Approximate number of rows"
+  required:
+    - name
+    - exists
+
+# Request for creating a table
+StoragePostgresTableCreateRequest:
+  type: object
+  additionalProperties: false
+  description: "Request to create a table in the database"
+  properties:
+    name:
+      type: string
+      description: "Table name (lowercase alphanumeric with underscores)"
+      pattern: "^[a-z][a-z0-9_]*$"
+    fields:
+      type: array
+      items:
+        $ref: "../openapi.yaml#/components/schemas/StoragePostgresField"
+      minItems: 1
+    drop_if_exists:
+      type: boolean
+      description: "Drop the table first if it already exists"
+      default: false
+  required:
+    - name
+    - fields
+
+# Response for table creation
+StoragePostgresTableCreateResponse:
+  type: object
+  additionalProperties: false
+  description: "Response from table creation"
+  properties:
+    success:
+      type: boolean
+      description: "Whether the table was created successfully"
+    table_name:
+      type: string
+      description: "Name of the created table"
+    was_dropped:
+      type: boolean
+      description: "Whether an existing table was dropped first"
+    error:
+      type: string
+      description: "Error message if creation failed"
+  required:
+    - success

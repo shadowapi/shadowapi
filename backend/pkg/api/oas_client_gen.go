@@ -703,6 +703,24 @@ type Invoker interface {
 	//
 	// GET /storage/postgres/{uuid}
 	StoragePostgresGet(ctx context.Context, params StoragePostgresGetParams) (*StoragePostgres, error)
+	// StoragePostgresIntrospectTable invokes storage-postgres-introspect-table operation.
+	//
+	// Get schema information for a specific table in the PostgreSQL database.
+	//
+	// GET /storage/postgres/{uuid}/introspect/tables/{table_name}
+	StoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (*StoragePostgresIntrospectTableResponse, error)
+	// StoragePostgresIntrospectTables invokes storage-postgres-introspect-tables operation.
+	//
+	// List all tables in the PostgreSQL database connected via this storage.
+	//
+	// GET /storage/postgres/{uuid}/introspect/tables
+	StoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (*StoragePostgresIntrospectTablesResponse, error)
+	// StoragePostgresTablesCreate invokes storage-postgres-tables-create operation.
+	//
+	// Create a new table in the PostgreSQL database.
+	//
+	// POST /storage/postgres/{uuid}/tables/create
+	StoragePostgresTablesCreate(ctx context.Context, request *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (*StoragePostgresTableCreateResponse, error)
 	// StoragePostgresTablesReplace invokes storage-postgres-tables-replace operation.
 	//
 	// Replace all target tables for a PostgreSQL storage instance.
@@ -14202,6 +14220,399 @@ func (c *Client) sendStoragePostgresGet(ctx context.Context, params StoragePostg
 
 	stage = "DecodeResponse"
 	result, err := decodeStoragePostgresGetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// StoragePostgresIntrospectTable invokes storage-postgres-introspect-table operation.
+//
+// Get schema information for a specific table in the PostgreSQL database.
+//
+// GET /storage/postgres/{uuid}/introspect/tables/{table_name}
+func (c *Client) StoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (*StoragePostgresIntrospectTableResponse, error) {
+	res, err := c.sendStoragePostgresIntrospectTable(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendStoragePostgresIntrospectTable(ctx context.Context, params StoragePostgresIntrospectTableParams) (res *StoragePostgresIntrospectTableResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("storage-postgres-introspect-table"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/storage/postgres/{uuid}/introspect/tables/{table_name}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, StoragePostgresIntrospectTableOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/storage/postgres/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/introspect/tables/"
+	{
+		// Encode "table_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "table_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TableName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresIntrospectTableOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeStoragePostgresIntrospectTableResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// StoragePostgresIntrospectTables invokes storage-postgres-introspect-tables operation.
+//
+// List all tables in the PostgreSQL database connected via this storage.
+//
+// GET /storage/postgres/{uuid}/introspect/tables
+func (c *Client) StoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (*StoragePostgresIntrospectTablesResponse, error) {
+	res, err := c.sendStoragePostgresIntrospectTables(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendStoragePostgresIntrospectTables(ctx context.Context, params StoragePostgresIntrospectTablesParams) (res *StoragePostgresIntrospectTablesResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("storage-postgres-introspect-tables"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/storage/postgres/{uuid}/introspect/tables"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, StoragePostgresIntrospectTablesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/storage/postgres/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/introspect/tables"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresIntrospectTablesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeStoragePostgresIntrospectTablesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// StoragePostgresTablesCreate invokes storage-postgres-tables-create operation.
+//
+// Create a new table in the PostgreSQL database.
+//
+// POST /storage/postgres/{uuid}/tables/create
+func (c *Client) StoragePostgresTablesCreate(ctx context.Context, request *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (*StoragePostgresTableCreateResponse, error) {
+	res, err := c.sendStoragePostgresTablesCreate(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendStoragePostgresTablesCreate(ctx context.Context, request *StoragePostgresTableCreateRequest, params StoragePostgresTablesCreateParams) (res *StoragePostgresTableCreateResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("storage-postgres-tables-create"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/storage/postgres/{uuid}/tables/create"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, StoragePostgresTablesCreateOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/storage/postgres/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tables/create"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeStoragePostgresTablesCreateRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, StoragePostgresTablesCreateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeStoragePostgresTablesCreateResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

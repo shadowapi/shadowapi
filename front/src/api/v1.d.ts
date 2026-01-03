@@ -591,6 +591,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/postgres/{uuid}/tables/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Create a new table in the PostgreSQL database. */
+        post: operations["storage-postgres-tables-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/postgres/{uuid}/introspect/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all tables in the PostgreSQL database connected via this storage. */
+        get: operations["storage-postgres-introspect-tables"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/postgres/{uuid}/introspect/tables/{table_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get schema information for a specific table in the PostgreSQL database. */
+        get: operations["storage-postgres-introspect-table"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/storage/s3": {
         parameters: {
             query?: never;
@@ -1637,6 +1688,69 @@ export interface components {
         TestConnectionResult: components["schemas"]["test_connection_result"];
         TestConnectionJob: components["schemas"]["test_connection_job"];
         StoragePostgresTestRequest: components["schemas"]["storage_postgres_test_request"];
+        /** @description Information about a table in the database */
+        StoragePostgresIntrospectTable: {
+            /** @description Table name */
+            name: string;
+            /** @description Approximate number of rows in the table */
+            row_count?: number;
+            /** @description Whether the table has a primary key */
+            has_primary_key?: boolean;
+        };
+        /** @description Information about a column in a database table */
+        StoragePostgresIntrospectField: {
+            /** @description Column name */
+            name: string;
+            /**
+             * @description Mapped field type (TEXT, INTEGER, BOOLEAN, TIMESTAMP, JSONB)
+             * @enum {string}
+             */
+            type: "TEXT" | "INTEGER" | "BOOLEAN" | "TIMESTAMP" | "JSONB";
+            /** @description Original PostgreSQL data type */
+            pg_type?: string;
+            /** @description Whether the column allows NULL values */
+            nullable: boolean;
+            /** @description Whether this column is the primary key */
+            is_primary_key: boolean;
+            /** @description Default value expression if any */
+            default_value?: string;
+        };
+        /** @description Response containing list of tables in the database */
+        StoragePostgresIntrospectTablesResponse: {
+            tables: components["schemas"]["StoragePostgresIntrospectTable"][];
+        };
+        /** @description Response containing table schema information */
+        StoragePostgresIntrospectTableResponse: {
+            /** @description Table name */
+            name: string;
+            /** @description Whether the table exists in the database */
+            exists: boolean;
+            fields?: components["schemas"]["StoragePostgresIntrospectField"][];
+            /** @description Approximate number of rows */
+            row_count?: number;
+        };
+        /** @description Request to create a table in the database */
+        StoragePostgresTableCreateRequest: {
+            /** @description Table name (lowercase alphanumeric with underscores) */
+            name: string;
+            fields: components["schemas"]["storage_postgres_field"][];
+            /**
+             * @description Drop the table first if it already exists
+             * @default false
+             */
+            drop_if_exists: boolean;
+        };
+        /** @description Response from table creation */
+        StoragePostgresTableCreateResponse: {
+            /** @description Whether the table was created successfully */
+            success: boolean;
+            /** @description Name of the created table */
+            table_name?: string;
+            /** @description Whether an existing table was dropped first */
+            was_dropped?: boolean;
+            /** @description Error message if creation failed */
+            error?: string;
+        };
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -4910,6 +5024,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["storage_postgres_table"][];
+                };
+            };
+            /** @description An error occurred. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-postgres-tables-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the PostgreSQL storage instance. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoragePostgresTableCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Table created successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoragePostgresTableCreateResponse"];
+                };
+            };
+            /** @description An error occurred. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-postgres-introspect-tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the PostgreSQL storage instance. */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of tables in the database. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoragePostgresIntrospectTablesResponse"];
+                };
+            };
+            /** @description An error occurred. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "storage-postgres-introspect-table": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The UUID of the PostgreSQL storage instance. */
+                uuid: string;
+                /** @description The name of the table to introspect. */
+                table_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Table schema information. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoragePostgresIntrospectTableResponse"];
                 };
             };
             /** @description An error occurred. */
