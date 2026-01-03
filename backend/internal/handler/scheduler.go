@@ -45,6 +45,7 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 			NextRun:        converter.NullTimestamptz(),
 			LastRun:        converter.NullTimestamptz(),
 			IsEnabled:      req.IsEnabled.Or(false),
+			IsPaused:       req.IsPaused.Or(false),
 			BatchSize:      int32(req.BatchSize.Or(100)),
 		}
 
@@ -187,6 +188,13 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 			batchSize = scheduler.Scheduler.BatchSize
 		}
 
+		var isPaused bool
+		if req.IsPaused.IsSet() {
+			isPaused = req.IsPaused.Value
+		} else {
+			isPaused = scheduler.Scheduler.IsPaused
+		}
+
 		uParams := query.UpdateSchedulerParams{
 			CronExpression: converter.ConvertOptNilStringToPgText(req.CronExpression),
 			RunAt:          converter.NullTimestamptz(),
@@ -194,6 +202,7 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 			NextRun:        converter.NullTimestamptz(),
 			LastRun:        converter.NullTimestamptz(),
 			IsEnabled:      isEnabled,
+			IsPaused:       isPaused,
 			BatchSize:      batchSize,
 			UUID:           schUUID,
 		}
@@ -229,6 +238,7 @@ func qToApiScheduler(s query.Scheduler) (api.Scheduler, error) {
 		NextRun:        api.NewOptDateTime(s.NextRun.Time),
 		LastRun:        api.NewOptDateTime(s.LastRun.Time),
 		IsEnabled:      api.NewOptBool(s.IsEnabled),
+		IsPaused:       api.NewOptBool(s.IsPaused),
 		BatchSize:      api.NewOptInt(int(s.BatchSize)),
 		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
@@ -249,6 +259,7 @@ func qToApiSchedulerRow(s query.GetSchedulerRow) (api.Scheduler, error) {
 		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
 		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
 		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
+		IsPaused:       api.NewOptBool(s.Scheduler.IsPaused),
 		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
 		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
@@ -268,6 +279,7 @@ func qToApiSchedulersRow(s query.GetSchedulersRow) (api.Scheduler, error) {
 		NextRun:        api.NewOptDateTime(s.NextRun.Time),
 		LastRun:        api.NewOptDateTime(s.LastRun.Time),
 		IsEnabled:      api.NewOptBool(s.IsEnabled),
+		IsPaused:       api.NewOptBool(s.IsPaused),
 		BatchSize:      api.NewOptInt(int(s.BatchSize)),
 		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
@@ -287,6 +299,7 @@ func qToApiListSchedulersRow(s query.ListSchedulersRow) (api.Scheduler, error) {
 		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
 		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
 		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
+		IsPaused:       api.NewOptBool(s.Scheduler.IsPaused),
 		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
 		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
