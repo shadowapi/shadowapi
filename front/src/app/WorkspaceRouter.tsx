@@ -15,7 +15,7 @@ import Roles from './rbac/Roles';
 import RoleEdit from './rbac/RoleEdit';
 import Pipelines from './pipelines/Pipelines';
 import PipelineEdit from './pipelines/PipelineEdit';
-import ExternalWorkers from './workers/ExternalWorkers';
+import RegisteredWorkers from './workers/RegisteredWorkers';
 import InternalJobs from './workers/InternalJobs';
 import EnrollmentTokens from './workers/EnrollmentTokens';
 
@@ -43,7 +43,7 @@ function WorkspaceRouter() {
         <Route path="pipelines" element={<Pipelines />} />
         <Route path="pipelines/new" element={<PipelineEdit />} />
         <Route path="pipelines/:uuid" element={<PipelineEdit />} />
-        <Route path="workers" element={<ExternalWorkers />} />
+        <Route path="workers" element={<RegisteredWorkers />} />
         <Route path="workers/jobs" element={<InternalJobs />} />
         <Route path="workers/tokens" element={<EnrollmentTokens />} />
         <Route path="oauth2/credentials" element={<OAuth2Credentials />} />

@@ -90,7 +90,7 @@ function getMenuItems(basePath: string): MenuItem[] {
         {
           key: '/workers',
           icon: <RobotOutlined />,
-          label: <Link to={`${basePath}/workers`}>External Workers</Link>,
+          label: <Link to={`${basePath}/workers`}>Registered Workers</Link>,
         },
         {
           key: '/workers/jobs',
@@ -184,7 +184,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/syncpolicies': { title: 'Sync Policies' },
   '/pipelines': { title: 'Data Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
-  '/workers': { title: 'External Workers' },
+  '/workers': { title: 'Registered Workers' },
   '/workers/jobs': { title: 'Internal Jobs' },
   '/workers/tokens': { title: 'Enrollment Tokens' },
   '/schedulers': { title: 'Schedulers' },

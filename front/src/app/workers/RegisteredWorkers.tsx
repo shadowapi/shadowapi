@@ -40,7 +40,7 @@ function formatTimeAgo(dateStr?: string): string {
   return `${diffDays}d ago`;
 }
 
-function ExternalWorkers() {
+function RegisteredWorkers() {
   const [workers, setWorkers] = useState<RegisteredWorker[]>([]);
   const [loading, setLoading] = useState(true);
   const pollingPausedRef = useRef(false);
@@ -162,7 +162,7 @@ function ExternalWorkers() {
     <>
       <Space style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Space>
-          <Title level={4} style={{ margin: 0 }}>External Workers</Title>
+          <Title level={4} style={{ margin: 0 }}>Registered Workers</Title>
           {onlineCount > 0 && (
             <Tag color="green">{onlineCount} online</Tag>
           )}
@@ -177,10 +177,10 @@ function ExternalWorkers() {
         rowKey="uuid"
         loading={loading}
         pagination={false}
-        locale={{ emptyText: 'No external workers registered' }}
+        locale={{ emptyText: 'No workers registered' }}
       />
     </>
   );
 }
 
-export default ExternalWorkers;
+export default RegisteredWorkers;
