@@ -78,9 +78,21 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/storages`}>Data Storages</Link>,
     },
     {
-      key: '/pipelines',
-      icon: <NodeIndexOutlined />,
-      label: <Link to={`${basePath}/pipelines`}>Data Pipelines</Link>,
+      key: '/automation-menu',
+      icon: <ThunderboltOutlined />,
+      label: 'Automation',
+      children: [
+        {
+          key: '/pipelines',
+          icon: <NodeIndexOutlined />,
+          label: <Link to={`${basePath}/pipelines`}>Pipelines</Link>,
+        },
+        {
+          key: '/schedulers',
+          icon: <ScheduleOutlined />,
+          label: <Link to={`${basePath}/schedulers`}>Schedules</Link>,
+        },
+      ],
     },
     {
       key: '/workers-menu',
@@ -139,11 +151,6 @@ function getMenuItems(basePath: string): MenuItem[] {
       label: <Link to={`${basePath}/syncpolicies`}>Sync Policies</Link>,
     },
     {
-      key: '/schedulers',
-      icon: <ScheduleOutlined />,
-      label: <Link to={`${basePath}/schedulers`}>Schedulers</Link>,
-    },
-    {
       key: '/logs',
       icon: <UnorderedListOutlined />,
       label: <Link to={`${basePath}/logs`}>Logs</Link>,
@@ -182,12 +189,12 @@ const routeConfig: Record<string, RouteConfig> = {
   '/storages': { title: 'Data Storages' },
   '/storages/new': { title: 'Add', parent: '/storages' },
   '/syncpolicies': { title: 'Sync Policies' },
-  '/pipelines': { title: 'Data Pipelines' },
+  '/pipelines': { title: 'Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
   '/workers': { title: 'Registered Workers' },
   '/workers/jobs': { title: 'Active Jobs' },
   '/workers/tokens': { title: 'Enrollment Tokens' },
-  '/schedulers': { title: 'Schedulers' },
+  '/schedulers': { title: 'Schedules' },
   '/schedulers/new': { title: 'Add', parent: '/schedulers' },
   '/logs': { title: 'Logs' },
 };
@@ -199,6 +206,8 @@ const menuParentMap: Record<string, string> = {
   '/oauth2/credentials': '/datasources-menu',
   '/users': '/rbac',
   '/rbac/roles': '/rbac',
+  '/pipelines': '/automation-menu',
+  '/schedulers': '/automation-menu',
   '/workers': '/workers-menu',
   '/workers/jobs': '/workers-menu',
   '/workers/tokens': '/workers-menu',
