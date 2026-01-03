@@ -14,7 +14,7 @@ import (
 // Execute a search query on unified messages.
 //
 // POST /message/query
-func (h *Handler) MessageQuery(ctx context.Context, req *api.MessageQuery) (*api.MessageQueryOK, error) {
+func (h *Handler) MessageQuery(ctx context.Context, req *api.MessageQuery) (api.MessageQueryRes, error) {
 	log := h.log.With("handler", "MessageQuery")
 	params := convertMessageQueryToParams(req, "unified")
 	rows, err := query.New(h.dbp).GetMessages(ctx, params)
@@ -37,7 +37,7 @@ func (h *Handler) MessageQuery(ctx context.Context, req *api.MessageQuery) (*api
 // MessageEmailQuery implements MessageEmailQuery operation.
 // Execute a search query on email Message.
 // POST /message/email/query
-func (h *Handler) MessageEmailQuery(ctx context.Context, req *api.MessageQuery) (*api.MessageEmailQueryOK, error) {
+func (h *Handler) MessageEmailQuery(ctx context.Context, req *api.MessageQuery) (api.MessageEmailQueryRes, error) {
 	log := h.log.With("handler", "MessageEmailQuery")
 	params := convertMessageQueryToParams(req, "email")
 	rows, err := query.New(h.dbp).GetMessages(ctx, params)
@@ -60,7 +60,7 @@ func (h *Handler) MessageEmailQuery(ctx context.Context, req *api.MessageQuery) 
 // MessageLinkedinQuery implements MessageLinkedinQuery operation.
 // Execute a search query on LinkedIn Message.
 // POST /message/linkedin/query
-func (h *Handler) MessageLinkedinQuery(ctx context.Context, req *api.MessageQuery) (*api.MessageLinkedinQueryOK, error) {
+func (h *Handler) MessageLinkedinQuery(ctx context.Context, req *api.MessageQuery) (api.MessageLinkedinQueryRes, error) {
 	log := h.log.With("handler", "MessageLinkedinQuery")
 	params := convertMessageQueryToParams(req, "linkedin")
 	rows, err := query.New(h.dbp).GetMessages(ctx, params)
@@ -83,7 +83,7 @@ func (h *Handler) MessageLinkedinQuery(ctx context.Context, req *api.MessageQuer
 // MessageTelegramQuery implements MessageTelegramQuery operation.
 // Execute a search query on Telegram Message.
 // POST /message/telegram/query
-func (h *Handler) MessageTelegramQuery(ctx context.Context, req *api.MessageQuery) (*api.MessageTelegramQueryOK, error) {
+func (h *Handler) MessageTelegramQuery(ctx context.Context, req *api.MessageQuery) (api.MessageTelegramQueryRes, error) {
 	log := h.log.With("handler", "MessageTelegramQuery")
 	params := convertMessageQueryToParams(req, "telegram")
 	rows, err := query.New(h.dbp).GetMessages(ctx, params)
@@ -106,7 +106,7 @@ func (h *Handler) MessageTelegramQuery(ctx context.Context, req *api.MessageQuer
 // MessageWhatsappQuery implements MessageWhatsappQuery operation.
 // Execute a search query on WhatsApp Message.
 // POST /message/whatsapp/query
-func (h *Handler) MessageWhatsappQuery(ctx context.Context, req *api.MessageQuery) (*api.MessageWhatsappQueryOK, error) {
+func (h *Handler) MessageWhatsappQuery(ctx context.Context, req *api.MessageQuery) (api.MessageWhatsappQueryRes, error) {
 	log := h.log.With("handler", "MessageWhatsappQuery")
 	params := convertMessageQueryToParams(req, "whatsapp")
 	rows, err := query.New(h.dbp).GetMessages(ctx, params)

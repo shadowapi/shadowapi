@@ -23,7 +23,7 @@ import (
 
 // DatasourceEmailOAuthTest initiates a connection test for an OAuth email datasource.
 // POST /datasource/email_oauth/{uuid}/test
-func (h *Handler) DatasourceEmailOAuthTest(ctx context.Context, params api.DatasourceEmailOAuthTestParams) (*api.TestConnectionJob, error) {
+func (h *Handler) DatasourceEmailOAuthTest(ctx context.Context, params api.DatasourceEmailOAuthTestParams) (api.DatasourceEmailOAuthTestRes, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthTest")
 
 	// Parse datasource UUID
@@ -156,7 +156,7 @@ func (h *Handler) DatasourceEmailOAuthTest(ctx context.Context, params api.Datas
 
 // StoragePostgresTest initiates a connection test for a PostgreSQL storage.
 // POST /storage/postgres/{uuid}/test
-func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePostgresTestParams) (*api.TestConnectionJob, error) {
+func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePostgresTestParams) (api.StoragePostgresTestRes, error) {
 	log := h.log.With("handler", "StoragePostgresTest")
 
 	// Parse storage UUID
@@ -267,7 +267,7 @@ func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePos
 
 // StoragePostgresTestInline tests a PostgreSQL connection using inline parameters (without saving).
 // POST /storage/postgres/test
-func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.StoragePostgresTestRequest) (*api.TestConnectionJob, error) {
+func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.StoragePostgresTestRequest) (api.StoragePostgresTestInlineRes, error) {
 	log := h.log.With("handler", "StoragePostgresTestInline")
 
 	// Extract and validate required fields
@@ -353,7 +353,7 @@ func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.Storag
 
 // TestConnectionJobGet retrieves the status and result of a test connection job.
 // GET /test-connection-job/{uuid}
-func (h *Handler) TestConnectionJobGet(ctx context.Context, params api.TestConnectionJobGetParams) (*api.TestConnectionJob, error) {
+func (h *Handler) TestConnectionJobGet(ctx context.Context, params api.TestConnectionJobGetParams) (api.TestConnectionJobGetRes, error) {
 	log := h.log.With("handler", "TestConnectionJobGet")
 
 	// Get job from KV store

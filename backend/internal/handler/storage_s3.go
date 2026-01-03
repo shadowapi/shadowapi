@@ -15,7 +15,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) StorageS3Create(ctx context.Context, req *api.StorageS3) (*api.StorageS3, error) {
+func (h *Handler) StorageS3Create(ctx context.Context, req *api.StorageS3) (api.StorageS3CreateRes, error) {
 	log := h.log.With("handler", "StorageS3Create")
 
 	storageUUID := uuid.Must(uuid.NewV7())
@@ -49,23 +49,23 @@ func (h *Handler) StorageS3Create(ctx context.Context, req *api.StorageS3) (*api
 	return &resp, nil
 }
 
-func (h *Handler) StorageS3Delete(ctx context.Context, params api.StorageS3DeleteParams) error {
+func (h *Handler) StorageS3Delete(ctx context.Context, params api.StorageS3DeleteParams) (api.StorageS3DeleteRes, error) {
 	log := h.log.With("handler", "StorageS3Delete")
 
 	s3UUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("invalid s3 UUID", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid s3 storage UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid s3 storage UUID"))
 	}
 
 	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(s3UUID), Valid: true}); err != nil {
 		log.Error("failed to delete s3 storage", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete s3 storage"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete s3 storage"))
 	}
-	return nil
+	return &api.StorageS3DeleteOK{}, nil
 }
 
-func (h *Handler) StorageS3Get(ctx context.Context, params api.StorageS3GetParams) (*api.StorageS3, error) {
+func (h *Handler) StorageS3Get(ctx context.Context, params api.StorageS3GetParams) (api.StorageS3GetRes, error) {
 	log := h.log.With("handler", "StorageS3Get")
 
 	id, err := uuid.FromString(params.UUID)
@@ -82,7 +82,7 @@ func (h *Handler) StorageS3Get(ctx context.Context, params api.StorageS3GetParam
 	return QToStorageS3(storage)
 }
 
-func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, params api.StorageS3UpdateParams) (*api.StorageS3, error) {
+func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, params api.StorageS3UpdateParams) (api.StorageS3UpdateRes, error) {
 	log := h.log.With("handler", "StorageS3Update")
 
 	s3UUID, err := uuid.FromString(params.UUID)
@@ -91,7 +91,7 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid s3 storage UUID"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StorageS3, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StorageS3UpdateRes, error) {
 		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(s3UUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get s3 storage", "error", err)
@@ -122,7 +122,13 @@ func (h *Handler) StorageS3Update(ctx context.Context, req *api.StorageS3, param
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update s3 storage"))
 		}
 
-		return h.StorageS3Get(ctx, api.StorageS3GetParams{UUID: params.UUID})
+		// Re-fetch and return the updated storage
+		updatedStorage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(s3UUID), Valid: true})
+		if err != nil {
+			log.Error("failed to get updated s3 storage", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated storage"))
+		}
+		return QToStorageS3(updatedStorage)
 	})
 }
 

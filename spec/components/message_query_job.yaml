@@ -1,0 +1,63 @@
+# spec/components/message_query_job.yaml
+type: object
+additionalProperties: false
+description: A message query job that streams results to NATS
+properties:
+  uuid:
+    type: string
+    description: The unique identifier of the query job
+    readOnly: true
+  storage_uuid:
+    type: string
+    description: UUID of the storage being queried
+  status:
+    type: string
+    description: Current job status
+    enum:
+      - pending
+      - running
+      - completed
+      - failed
+  nats_subject:
+    type: string
+    description: NATS subject where individual message records will be published
+    readOnly: true
+  limit:
+    type: integer
+    description: Maximum number of messages per table
+  offset:
+    type: integer
+    description: Offset for pagination per table
+  tables_queried:
+    type: array
+    items:
+      type: string
+    description: Names of tables that were queried
+    readOnly: true
+  messages_queried:
+    type: integer
+    description: Number of messages queried (available after completion)
+    readOnly: true
+  messages_published:
+    type: integer
+    description: Number of messages published to NATS (available after completion)
+    readOnly: true
+  error_count:
+    type: integer
+    description: Number of errors during processing (available after completion)
+    readOnly: true
+  created_at:
+    type: string
+    format: date-time
+    description: When the job was created
+    readOnly: true
+  completed_at:
+    type: string
+    format: date-time
+    description: When the job completed (if finished)
+    readOnly: true
+required:
+  - uuid
+  - storage_uuid
+  - status
+  - nats_subject

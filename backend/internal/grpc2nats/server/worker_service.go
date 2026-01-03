@@ -284,6 +284,16 @@ func (s *WorkerService) Connect(stream workerv1.WorkerService_ConnectServer) err
 			// Job results are published to NATS by the bridge
 			// The bridge will pick this up via a callback
 			s.handleJobResult(ctx, workerUUID.String(), p.JobResult)
+
+		case *workerv1.WorkerMessage_DataRecord:
+			s.log.Debug("data record received",
+				"worker_id", workerUUID,
+				"job_id", p.DataRecord.JobId,
+				"sequence", p.DataRecord.Sequence,
+				"subject", p.DataRecord.Subject,
+			)
+			// Data records are published to NATS directly
+			s.handleDataRecord(ctx, workerUUID.String(), p.DataRecord)
 		}
 	}
 }
@@ -315,6 +325,27 @@ func (s *WorkerService) handleJobResult(ctx context.Context, workerID string, re
 	if err := s.publisher.Publish(ctx, bridgeResult); err != nil {
 		s.log.Error("failed to publish job result to NATS",
 			"job_id", result.JobId,
+			"error", err,
+		)
+	}
+}
+
+// handleDataRecord is called when a worker streams a data record during job execution
+// It publishes the record directly to the specified NATS subject
+func (s *WorkerService) handleDataRecord(ctx context.Context, workerID string, record *workerv1.DataRecord) {
+	bridgeRecord := &bridge.DataRecord{
+		JobID:    record.JobId,
+		WorkerID: workerID,
+		Sequence: record.Sequence,
+		Data:     record.Data,
+	}
+
+	// Publish to the specified NATS subject
+	if err := s.publisher.PublishDataRecord(ctx, record.Subject, bridgeRecord); err != nil {
+		s.log.Error("failed to publish data record to NATS",
+			"job_id", record.JobId,
+			"sequence", record.Sequence,
+			"subject", record.Subject,
 			"error", err,
 		)
 	}

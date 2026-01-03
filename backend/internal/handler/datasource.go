@@ -13,11 +13,11 @@ import (
 func (h *Handler) DatasourceList(
 	ctx context.Context,
 	params api.DatasourceListParams, // Has Offset, Limit only
-) ([]api.Datasource, error) {
+) (api.DatasourceListRes, error) {
 	// Because ogen only defines offset/limit in DatasourceListParams,
 	// we can unify them into a single function.
 	log := h.log.With("handler", "DatasourceList")
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) ([]api.Datasource, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.DatasourceListRes, error) {
 		var offset, limit int32
 		if params.Offset.IsSet() {
 			offset = params.Offset.Value
@@ -44,7 +44,8 @@ func (h *Handler) DatasourceList(
 			ds.IsOAuthAuthenticated = api.NewOptBool(row.IsOauthAuthenticated)
 			datasources = append(datasources, ds)
 		}
-		return datasources, nil
+		res := api.DatasourceListOKApplicationJSON(datasources)
+		return &res, nil
 	})
 }
 

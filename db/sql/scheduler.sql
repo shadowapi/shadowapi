@@ -8,6 +8,7 @@ INSERT INTO scheduler (
     timezone,
     next_run,
     last_run,
+    last_uid,
     is_enabled,
     is_paused,
     batch_size,
@@ -22,6 +23,7 @@ INSERT INTO scheduler (
              sqlc.arg('timezone'),
              sqlc.arg('next_run'),
              sqlc.arg('last_run'),
+             COALESCE(sqlc.arg('last_uid')::bigint, 0),
              sqlc.arg('is_enabled')::boolean,
              sqlc.arg('is_paused')::boolean,
              sqlc.arg('batch_size')::int,
@@ -72,6 +74,7 @@ UPDATE scheduler SET
                      timezone = sqlc.arg('timezone'),
                      next_run = sqlc.arg('next_run'),
                      last_run = sqlc.arg('last_run'),
+                     last_uid = COALESCE(sqlc.arg('last_uid')::bigint, last_uid),
                      is_enabled = sqlc.arg('is_enabled')::boolean,
                      is_paused = sqlc.arg('is_paused')::boolean,
                      batch_size = sqlc.arg('batch_size')::int,
@@ -80,3 +83,18 @@ WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: DeleteScheduler :exec
 DELETE FROM scheduler WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: UpdateSchedulerLastRun :exec
+-- Update the scheduler's last successful fetch timestamp
+UPDATE scheduler SET
+    last_run = sqlc.arg('last_run'),
+    updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: UpdateSchedulerFetchProgress :exec
+-- Update the scheduler's fetch progress (last_uid for incremental IMAP fetch)
+UPDATE scheduler SET
+    last_uid = sqlc.arg('last_uid')::bigint,
+    last_run = sqlc.arg('last_run'),
+    updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;

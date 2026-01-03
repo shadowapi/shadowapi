@@ -515,6 +515,13 @@ type Handler interface {
 	//
 	// GET /nats/messages
 	NatsMessagesList(ctx context.Context, params NatsMessagesListParams) (NatsMessagesListRes, error)
+	// NatsMessagesPurge implements nats-messages-purge operation.
+	//
+	// Purges (deletes) all messages from the NATS data stream for the current workspace.
+	// This is a destructive operation and cannot be undone.
+	//
+	// DELETE /nats/messages
+	NatsMessagesPurge(ctx context.Context) (NatsMessagesPurgeRes, error)
 	// OAuth2ClientCallback implements oauth2-client-callback operation.
 	//
 	// Serve OAuth2 client callback.

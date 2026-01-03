@@ -85,3 +85,39 @@ func (h *Handler) NatsMessagesList(ctx context.Context, params api.NatsMessagesL
 		Total:    len(messages),
 	}, nil
 }
+
+// NatsMessagesPurge purges all messages from the NATS data stream for the current workspace
+// DELETE /nats/messages
+func (h *Handler) NatsMessagesPurge(ctx context.Context) (api.NatsMessagesPurgeRes, error) {
+	log := h.log.With("handler", "NatsMessagesPurge")
+
+	// Get workspace from context
+	workspaceSlug := workspace.GetWorkspaceSlug(ctx)
+	if workspaceSlug == "" {
+		workspaceSlug = "internal"
+	}
+
+	// Build subject filter for this workspace's messages
+	subjectFilter := subjects.DataSubject(workspaceSlug, "messages")
+
+	log.Debug("purging NATS messages",
+		"workspace", workspaceSlug,
+		"subject", subjectFilter,
+	)
+
+	// Purge messages from NATS stream
+	purged, err := h.queue.PurgeStream(ctx, subjects.DataStreamName, subjectFilter)
+	if err != nil {
+		log.Error("failed to purge messages from NATS", "error", err)
+		return &api.Error{
+			Status: api.NewOptInt64(500),
+			Detail: api.NewOptString("Failed to purge messages"),
+		}, nil
+	}
+
+	log.Info("purged NATS messages", "count", purged)
+
+	return &api.NatsMessagesPurgeResponse{
+		Purged: int(purged),
+	}, nil
+}

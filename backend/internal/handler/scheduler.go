@@ -16,9 +16,9 @@ import (
 // SchedulerCreate implements scheduler-create operation.
 //
 // POST /scheduler
-func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api.Scheduler, error) {
+func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (api.SchedulerCreateRes, error) {
 	log := h.log.With("handler", "SchedulerCreate")
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Scheduler, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.SchedulerCreateRes, error) {
 		// Generate a new UUID for the scheduler
 		schedulerUUID := uuid.Must(uuid.NewV7())
 		pgPipelineUUID, err := converter.ConvertStringToPgUUID(req.PipelineUUID)
@@ -44,6 +44,7 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 			Timezone:       req.Timezone.Or("UTC"),
 			NextRun:        converter.NullTimestamptz(),
 			LastRun:        converter.NullTimestamptz(),
+			LastUid:        0, // Start from beginning
 			IsEnabled:      req.IsEnabled.Or(false),
 			IsPaused:       req.IsPaused.Or(false),
 			BatchSize:      int32(req.BatchSize.Or(100)),
@@ -67,25 +68,25 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (*api
 // SchedulerDelete implements scheduler-delete operation.
 //
 // DELETE /scheduler/{uuid}
-func (h *Handler) SchedulerDelete(ctx context.Context, params api.SchedulerDeleteParams) error {
+func (h *Handler) SchedulerDelete(ctx context.Context, params api.SchedulerDeleteParams) (api.SchedulerDeleteRes, error) {
 	log := h.log.With("handler", "SchedulerDelete")
 	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
 	}
 	err = query.New(h.dbp).DeleteScheduler(ctx, schUUID)
 	if err != nil {
 		log.Error("failed to delete scheduler", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete scheduler"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete scheduler"))
 	}
-	return nil
+	return &api.SchedulerDeleteOK{}, nil
 }
 
 // SchedulerGet implements scheduler-get operation.
 //
 // GET /scheduler/{uuid}
-func (h *Handler) SchedulerGet(ctx context.Context, params api.SchedulerGetParams) (*api.Scheduler, error) {
+func (h *Handler) SchedulerGet(ctx context.Context, params api.SchedulerGetParams) (api.SchedulerGetRes, error) {
 	log := h.log.With("handler", "SchedulerGet")
 	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
@@ -108,7 +109,7 @@ func (h *Handler) SchedulerGet(ctx context.Context, params api.SchedulerGetParam
 // SchedulerList implements scheduler-list operation.
 //
 // GET /scheduler
-func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListParams) ([]api.Scheduler, error) {
+func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListParams) (api.SchedulerListRes, error) {
 	log := h.log.With("handler", "SchedulerList")
 	limit := int32(50)
 	offset := int32(0)
@@ -128,7 +129,7 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 
 		PipelineUuid: "", // set further below if query has ?pipeline_uuid
 		IsEnabled:    -1, // -1 means "either"
-		IsPaused:     -1, // FIX: use -1 so we don’t implicitly filter out paused rows
+		IsPaused:     -1, // FIX: use -1 so we don't implicitly filter out paused rows
 	}
 
 	if params.PipelineUUID.IsSet() {
@@ -155,20 +156,21 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 		}
 		out = append(out, apiItem)
 	}
-	return out, nil
+	res := api.SchedulerListOKApplicationJSON(out)
+	return &res, nil
 }
 
 // SchedulerUpdate implements scheduler-update operation.
 //
 // PUT /scheduler/{uuid}
-func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, params api.SchedulerUpdateParams) (*api.Scheduler, error) {
+func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, params api.SchedulerUpdateParams) (api.SchedulerUpdateRes, error) {
 	log := h.log.With("handler", "SchedulerUpdate")
 	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Scheduler, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.SchedulerUpdateRes, error) {
 		scheduler, err := query.New(tx).GetScheduler(ctx, schUUID)
 		if err != nil {
 			log.Error("failed to get scheduler", "error", err)
@@ -201,6 +203,7 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 			Timezone:       req.Timezone.Or("UTC"),
 			NextRun:        converter.NullTimestamptz(),
 			LastRun:        converter.NullTimestamptz(),
+			LastUid:        0, // Preserve existing value via COALESCE
 			IsEnabled:      isEnabled,
 			IsPaused:       isPaused,
 			BatchSize:      batchSize,

@@ -13,7 +13,7 @@ import (
 // AuthLogin handles the Hydra login redirect.
 // GET /api/v1/auth/login?login_challenge=xxx
 // If the user has a remembered session, accept immediately. Otherwise redirect to frontend login page.
-func (h *Handler) AuthLogin(ctx context.Context, params api.AuthLoginParams) (*api.AuthLoginFound, error) {
+func (h *Handler) AuthLogin(ctx context.Context, params api.AuthLoginParams) (api.AuthLoginRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}
@@ -57,7 +57,7 @@ func (h *Handler) AuthLogin(ctx context.Context, params api.AuthLoginParams) (*a
 // AuthLoginSubmit handles login form submission.
 // POST /api/v1/auth/login
 // Authenticates user credentials and accepts the Hydra login request.
-func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitReq) (*api.AuthLoginSubmitOK, error) {
+func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitReq) (api.AuthLoginSubmitRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}
@@ -106,7 +106,7 @@ func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitR
 // AuthConsent handles the Hydra consent redirect.
 // GET /api/v1/auth/consent?consent_challenge=xxx
 // Auto-approves consent and redirects back to Hydra.
-func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams) (*api.AuthConsentFound, error) {
+func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams) (api.AuthConsentRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}

@@ -337,6 +337,10 @@ type NatsMessagesListRes interface {
 	natsMessagesListRes()
 }
 
+type NatsMessagesPurgeRes interface {
+	natsMessagesPurgeRes()
+}
+
 type OAuth2ClientCallbackRes interface {
 	oAuth2ClientCallbackRes()
 }

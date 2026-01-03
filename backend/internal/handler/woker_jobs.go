@@ -18,7 +18,7 @@ import (
 
 // WorkerJobsGet retrieves a specific worker job by uuid.
 // GET /workerjobs/{uuid}
-func (h *Handler) WorkerJobsGet(ctx context.Context, params api.WorkerJobsGetParams) (*api.WorkerJobs, error) {
+func (h *Handler) WorkerJobsGet(ctx context.Context, params api.WorkerJobsGetParams) (api.WorkerJobsGetRes, error) {
 	log := h.log.With("handler", "WorkerJobsGet")
 	jobUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
@@ -43,7 +43,7 @@ func (h *Handler) WorkerJobsGet(ctx context.Context, params api.WorkerJobsGetPar
 
 // WorkerJobsList retrieves a list of worker jobs.
 // GET /workerjobs
-func (h *Handler) WorkerJobsList(ctx context.Context, params api.WorkerJobsListParams) (*api.WorkerJobsListOK, error) {
+func (h *Handler) WorkerJobsList(ctx context.Context, params api.WorkerJobsListParams) (api.WorkerJobsListRes, error) {
 	log := h.log.With("handler", "WorkerJobsList")
 
 	limit := int32(50)
@@ -79,20 +79,20 @@ func (h *Handler) WorkerJobsList(ctx context.Context, params api.WorkerJobsListP
 
 // WorkerJobsDelete deletes a specific worker job by uuid.
 // DELETE /workerjobs/{uuid}
-func (h *Handler) WorkerJobsDelete(ctx context.Context, params api.WorkerJobsDeleteParams) error {
+func (h *Handler) WorkerJobsDelete(ctx context.Context, params api.WorkerJobsDeleteParams) (api.WorkerJobsDeleteRes, error) {
 	log := h.log.With("handler", "WorkerJobsDelete")
 	jobUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("invalid worker job uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid worker job uuid"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid worker job uuid"))
 	}
 
 	err = query.New(h.dbp).DeleteWorkerJob(ctx, pgtype.UUID{Bytes: converter.UToBytes(jobUUID), Valid: true})
 	if err != nil {
 		log.Error("failed to delete worker job", "error", err)
-		return ErrWithCode(http.StatusNotFound, E("worker job not found or could not be deleted"))
+		return nil, ErrWithCode(http.StatusNotFound, E("worker job not found or could not be deleted"))
 	}
-	return nil
+	return &api.WorkerJobsDeleteOK{}, nil
 }
 
 func qToApiWorkerJobsRow(dbRow query.WorkerJob) (api.WorkerJobs, error) {

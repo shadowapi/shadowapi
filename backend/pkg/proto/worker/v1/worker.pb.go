@@ -221,6 +221,7 @@ type WorkerMessage struct {
 	//	*WorkerMessage_Authenticate
 	//	*WorkerMessage_Heartbeat
 	//	*WorkerMessage_JobResult
+	//	*WorkerMessage_DataRecord
 	Payload       isWorkerMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -290,6 +291,15 @@ func (x *WorkerMessage) GetJobResult() *JobResult {
 	return nil
 }
 
+func (x *WorkerMessage) GetDataRecord() *DataRecord {
+	if x != nil {
+		if x, ok := x.Payload.(*WorkerMessage_DataRecord); ok {
+			return x.DataRecord
+		}
+	}
+	return nil
+}
+
 type isWorkerMessage_Payload interface {
 	isWorkerMessage_Payload()
 }
@@ -306,11 +316,87 @@ type WorkerMessage_JobResult struct {
 	JobResult *JobResult `protobuf:"bytes,3,opt,name=job_result,json=jobResult,proto3,oneof"`
 }
 
+type WorkerMessage_DataRecord struct {
+	DataRecord *DataRecord `protobuf:"bytes,4,opt,name=data_record,json=dataRecord,proto3,oneof"`
+}
+
 func (*WorkerMessage_Authenticate) isWorkerMessage_Payload() {}
 
 func (*WorkerMessage_Heartbeat) isWorkerMessage_Payload() {}
 
 func (*WorkerMessage_JobResult) isWorkerMessage_Payload() {}
+
+func (*WorkerMessage_DataRecord) isWorkerMessage_Payload() {}
+
+// DataRecord allows workers to stream individual data records during job execution
+// These records are published to NATS on the specified subject
+type DataRecord struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"` // Job ID this record belongs to
+	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"`          // NATS subject to publish to
+	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`                // JSON-encoded record data
+	Sequence      int64                  `protobuf:"varint,4,opt,name=sequence,proto3" json:"sequence,omitempty"`       // Sequence number within the job
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DataRecord) Reset() {
+	*x = DataRecord{}
+	mi := &file_worker_v1_worker_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DataRecord) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DataRecord) ProtoMessage() {}
+
+func (x *DataRecord) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_v1_worker_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DataRecord.ProtoReflect.Descriptor instead.
+func (*DataRecord) Descriptor() ([]byte, []int) {
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *DataRecord) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *DataRecord) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *DataRecord) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *DataRecord) GetSequence() int64 {
+	if x != nil {
+		return x.Sequence
+	}
+	return 0
+}
 
 // Authenticate sent as first message on Connect
 type Authenticate struct {
@@ -323,7 +409,7 @@ type Authenticate struct {
 
 func (x *Authenticate) Reset() {
 	*x = Authenticate{}
-	mi := &file_worker_v1_worker_proto_msgTypes[3]
+	mi := &file_worker_v1_worker_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -335,7 +421,7 @@ func (x *Authenticate) String() string {
 func (*Authenticate) ProtoMessage() {}
 
 func (x *Authenticate) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[3]
+	mi := &file_worker_v1_worker_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -348,7 +434,7 @@ func (x *Authenticate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Authenticate.ProtoReflect.Descriptor instead.
 func (*Authenticate) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{3}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Authenticate) GetWorkerId() string {
@@ -378,7 +464,7 @@ type Heartbeat struct {
 
 func (x *Heartbeat) Reset() {
 	*x = Heartbeat{}
-	mi := &file_worker_v1_worker_proto_msgTypes[4]
+	mi := &file_worker_v1_worker_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -390,7 +476,7 @@ func (x *Heartbeat) String() string {
 func (*Heartbeat) ProtoMessage() {}
 
 func (x *Heartbeat) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[4]
+	mi := &file_worker_v1_worker_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -403,7 +489,7 @@ func (x *Heartbeat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Heartbeat.ProtoReflect.Descriptor instead.
 func (*Heartbeat) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{4}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Heartbeat) GetTimestamp() *timestamppb.Timestamp {
@@ -447,7 +533,7 @@ type JobResult struct {
 
 func (x *JobResult) Reset() {
 	*x = JobResult{}
-	mi := &file_worker_v1_worker_proto_msgTypes[5]
+	mi := &file_worker_v1_worker_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -459,7 +545,7 @@ func (x *JobResult) String() string {
 func (*JobResult) ProtoMessage() {}
 
 func (x *JobResult) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[5]
+	mi := &file_worker_v1_worker_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -472,7 +558,7 @@ func (x *JobResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobResult.ProtoReflect.Descriptor instead.
 func (*JobResult) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{5}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *JobResult) GetJobId() string {
@@ -519,7 +605,7 @@ type ServerMessage struct {
 
 func (x *ServerMessage) Reset() {
 	*x = ServerMessage{}
-	mi := &file_worker_v1_worker_proto_msgTypes[6]
+	mi := &file_worker_v1_worker_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -531,7 +617,7 @@ func (x *ServerMessage) String() string {
 func (*ServerMessage) ProtoMessage() {}
 
 func (x *ServerMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[6]
+	mi := &file_worker_v1_worker_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -544,7 +630,7 @@ func (x *ServerMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerMessage.ProtoReflect.Descriptor instead.
 func (*ServerMessage) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{6}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ServerMessage) GetPayload() isServerMessage_Payload {
@@ -631,7 +717,7 @@ type AuthenticateAck struct {
 
 func (x *AuthenticateAck) Reset() {
 	*x = AuthenticateAck{}
-	mi := &file_worker_v1_worker_proto_msgTypes[7]
+	mi := &file_worker_v1_worker_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -643,7 +729,7 @@ func (x *AuthenticateAck) String() string {
 func (*AuthenticateAck) ProtoMessage() {}
 
 func (x *AuthenticateAck) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[7]
+	mi := &file_worker_v1_worker_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -656,7 +742,7 @@ func (x *AuthenticateAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthenticateAck.ProtoReflect.Descriptor instead.
 func (*AuthenticateAck) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{7}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AuthenticateAck) GetSuccess() bool {
@@ -697,7 +783,7 @@ type HeartbeatAck struct {
 
 func (x *HeartbeatAck) Reset() {
 	*x = HeartbeatAck{}
-	mi := &file_worker_v1_worker_proto_msgTypes[8]
+	mi := &file_worker_v1_worker_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -709,7 +795,7 @@ func (x *HeartbeatAck) String() string {
 func (*HeartbeatAck) ProtoMessage() {}
 
 func (x *HeartbeatAck) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[8]
+	mi := &file_worker_v1_worker_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -722,7 +808,7 @@ func (x *HeartbeatAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartbeatAck.ProtoReflect.Descriptor instead.
 func (*HeartbeatAck) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{8}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *HeartbeatAck) GetServerTime() *timestamppb.Timestamp {
@@ -746,7 +832,7 @@ type JobAssignment struct {
 
 func (x *JobAssignment) Reset() {
 	*x = JobAssignment{}
-	mi := &file_worker_v1_worker_proto_msgTypes[9]
+	mi := &file_worker_v1_worker_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -758,7 +844,7 @@ func (x *JobAssignment) String() string {
 func (*JobAssignment) ProtoMessage() {}
 
 func (x *JobAssignment) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[9]
+	mi := &file_worker_v1_worker_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -771,7 +857,7 @@ func (x *JobAssignment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobAssignment.ProtoReflect.Descriptor instead.
 func (*JobAssignment) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{9}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *JobAssignment) GetJobId() string {
@@ -819,7 +905,7 @@ type Disconnect struct {
 
 func (x *Disconnect) Reset() {
 	*x = Disconnect{}
-	mi := &file_worker_v1_worker_proto_msgTypes[10]
+	mi := &file_worker_v1_worker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -831,7 +917,7 @@ func (x *Disconnect) String() string {
 func (*Disconnect) ProtoMessage() {}
 
 func (x *Disconnect) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_v1_worker_proto_msgTypes[10]
+	mi := &file_worker_v1_worker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -844,7 +930,7 @@ func (x *Disconnect) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Disconnect.ProtoReflect.Descriptor instead.
 func (*Disconnect) Descriptor() ([]byte, []int) {
-	return file_worker_v1_worker_proto_rawDescGZIP(), []int{10}
+	return file_worker_v1_worker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Disconnect) GetReason() string {
@@ -872,13 +958,21 @@ const file_worker_v1_worker_proto_rawDesc = "" +
 	"\tworker_id\x18\x01 \x01(\tR\bworkerId\x12#\n" +
 	"\rworker_secret\x18\x02 \x01(\tR\fworkerSecret\x12-\n" +
 	"\x12allowed_workspaces\x18\x03 \x03(\tR\x11allowedWorkspaces\x12\x1b\n" +
-	"\tis_global\x18\x04 \x01(\bR\bisGlobal\"\xc6\x01\n" +
+	"\tis_global\x18\x04 \x01(\bR\bisGlobal\"\x80\x02\n" +
 	"\rWorkerMessage\x12=\n" +
 	"\fauthenticate\x18\x01 \x01(\v2\x17.worker.v1.AuthenticateH\x00R\fauthenticate\x124\n" +
 	"\theartbeat\x18\x02 \x01(\v2\x14.worker.v1.HeartbeatH\x00R\theartbeat\x125\n" +
 	"\n" +
-	"job_result\x18\x03 \x01(\v2\x14.worker.v1.JobResultH\x00R\tjobResultB\t\n" +
-	"\apayload\"P\n" +
+	"job_result\x18\x03 \x01(\v2\x14.worker.v1.JobResultH\x00R\tjobResult\x128\n" +
+	"\vdata_record\x18\x04 \x01(\v2\x15.worker.v1.DataRecordH\x00R\n" +
+	"dataRecordB\t\n" +
+	"\apayload\"m\n" +
+	"\n" +
+	"DataRecord\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
+	"\asubject\x18\x02 \x01(\tR\asubject\x12\x12\n" +
+	"\x04data\x18\x03 \x01(\fR\x04data\x12\x1a\n" +
+	"\bsequence\x18\x04 \x01(\x03R\bsequence\"P\n" +
 	"\fAuthenticate\x12\x1b\n" +
 	"\tworker_id\x18\x01 \x01(\tR\bworkerId\x12#\n" +
 	"\rworker_secret\x18\x02 \x01(\tR\fworkerSecret\"\xb3\x01\n" +
@@ -943,45 +1037,47 @@ func file_worker_v1_worker_proto_rawDescGZIP() []byte {
 }
 
 var file_worker_v1_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_worker_v1_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_worker_v1_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_worker_v1_worker_proto_goTypes = []any{
 	(WorkerStatus)(0),             // 0: worker.v1.WorkerStatus
 	(*EnrollRequest)(nil),         // 1: worker.v1.EnrollRequest
 	(*EnrollResponse)(nil),        // 2: worker.v1.EnrollResponse
 	(*WorkerMessage)(nil),         // 3: worker.v1.WorkerMessage
-	(*Authenticate)(nil),          // 4: worker.v1.Authenticate
-	(*Heartbeat)(nil),             // 5: worker.v1.Heartbeat
-	(*JobResult)(nil),             // 6: worker.v1.JobResult
-	(*ServerMessage)(nil),         // 7: worker.v1.ServerMessage
-	(*AuthenticateAck)(nil),       // 8: worker.v1.AuthenticateAck
-	(*HeartbeatAck)(nil),          // 9: worker.v1.HeartbeatAck
-	(*JobAssignment)(nil),         // 10: worker.v1.JobAssignment
-	(*Disconnect)(nil),            // 11: worker.v1.Disconnect
-	nil,                           // 12: worker.v1.EnrollRequest.LabelsEntry
-	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
+	(*DataRecord)(nil),            // 4: worker.v1.DataRecord
+	(*Authenticate)(nil),          // 5: worker.v1.Authenticate
+	(*Heartbeat)(nil),             // 6: worker.v1.Heartbeat
+	(*JobResult)(nil),             // 7: worker.v1.JobResult
+	(*ServerMessage)(nil),         // 8: worker.v1.ServerMessage
+	(*AuthenticateAck)(nil),       // 9: worker.v1.AuthenticateAck
+	(*HeartbeatAck)(nil),          // 10: worker.v1.HeartbeatAck
+	(*JobAssignment)(nil),         // 11: worker.v1.JobAssignment
+	(*Disconnect)(nil),            // 12: worker.v1.Disconnect
+	nil,                           // 13: worker.v1.EnrollRequest.LabelsEntry
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 }
 var file_worker_v1_worker_proto_depIdxs = []int32{
-	12, // 0: worker.v1.EnrollRequest.labels:type_name -> worker.v1.EnrollRequest.LabelsEntry
-	4,  // 1: worker.v1.WorkerMessage.authenticate:type_name -> worker.v1.Authenticate
-	5,  // 2: worker.v1.WorkerMessage.heartbeat:type_name -> worker.v1.Heartbeat
-	6,  // 3: worker.v1.WorkerMessage.job_result:type_name -> worker.v1.JobResult
-	13, // 4: worker.v1.Heartbeat.timestamp:type_name -> google.protobuf.Timestamp
-	0,  // 5: worker.v1.Heartbeat.status:type_name -> worker.v1.WorkerStatus
-	8,  // 6: worker.v1.ServerMessage.authenticate_ack:type_name -> worker.v1.AuthenticateAck
-	9,  // 7: worker.v1.ServerMessage.heartbeat_ack:type_name -> worker.v1.HeartbeatAck
-	10, // 8: worker.v1.ServerMessage.job_assignment:type_name -> worker.v1.JobAssignment
-	11, // 9: worker.v1.ServerMessage.disconnect:type_name -> worker.v1.Disconnect
-	13, // 10: worker.v1.HeartbeatAck.server_time:type_name -> google.protobuf.Timestamp
-	13, // 11: worker.v1.JobAssignment.deadline:type_name -> google.protobuf.Timestamp
-	1,  // 12: worker.v1.WorkerService.Enroll:input_type -> worker.v1.EnrollRequest
-	3,  // 13: worker.v1.WorkerService.Connect:input_type -> worker.v1.WorkerMessage
-	2,  // 14: worker.v1.WorkerService.Enroll:output_type -> worker.v1.EnrollResponse
-	7,  // 15: worker.v1.WorkerService.Connect:output_type -> worker.v1.ServerMessage
-	14, // [14:16] is the sub-list for method output_type
-	12, // [12:14] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	13, // 0: worker.v1.EnrollRequest.labels:type_name -> worker.v1.EnrollRequest.LabelsEntry
+	5,  // 1: worker.v1.WorkerMessage.authenticate:type_name -> worker.v1.Authenticate
+	6,  // 2: worker.v1.WorkerMessage.heartbeat:type_name -> worker.v1.Heartbeat
+	7,  // 3: worker.v1.WorkerMessage.job_result:type_name -> worker.v1.JobResult
+	4,  // 4: worker.v1.WorkerMessage.data_record:type_name -> worker.v1.DataRecord
+	14, // 5: worker.v1.Heartbeat.timestamp:type_name -> google.protobuf.Timestamp
+	0,  // 6: worker.v1.Heartbeat.status:type_name -> worker.v1.WorkerStatus
+	9,  // 7: worker.v1.ServerMessage.authenticate_ack:type_name -> worker.v1.AuthenticateAck
+	10, // 8: worker.v1.ServerMessage.heartbeat_ack:type_name -> worker.v1.HeartbeatAck
+	11, // 9: worker.v1.ServerMessage.job_assignment:type_name -> worker.v1.JobAssignment
+	12, // 10: worker.v1.ServerMessage.disconnect:type_name -> worker.v1.Disconnect
+	14, // 11: worker.v1.HeartbeatAck.server_time:type_name -> google.protobuf.Timestamp
+	14, // 12: worker.v1.JobAssignment.deadline:type_name -> google.protobuf.Timestamp
+	1,  // 13: worker.v1.WorkerService.Enroll:input_type -> worker.v1.EnrollRequest
+	3,  // 14: worker.v1.WorkerService.Connect:input_type -> worker.v1.WorkerMessage
+	2,  // 15: worker.v1.WorkerService.Enroll:output_type -> worker.v1.EnrollResponse
+	8,  // 16: worker.v1.WorkerService.Connect:output_type -> worker.v1.ServerMessage
+	15, // [15:17] is the sub-list for method output_type
+	13, // [13:15] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_worker_v1_worker_proto_init() }
@@ -993,8 +1089,9 @@ func file_worker_v1_worker_proto_init() {
 		(*WorkerMessage_Authenticate)(nil),
 		(*WorkerMessage_Heartbeat)(nil),
 		(*WorkerMessage_JobResult)(nil),
+		(*WorkerMessage_DataRecord)(nil),
 	}
-	file_worker_v1_worker_proto_msgTypes[6].OneofWrappers = []any{
+	file_worker_v1_worker_proto_msgTypes[7].OneofWrappers = []any{
 		(*ServerMessage_AuthenticateAck)(nil),
 		(*ServerMessage_HeartbeatAck)(nil),
 		(*ServerMessage_JobAssignment)(nil),
@@ -1006,7 +1103,7 @@ func file_worker_v1_worker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_v1_worker_proto_rawDesc), len(file_worker_v1_worker_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   12,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

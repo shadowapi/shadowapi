@@ -18,7 +18,7 @@ import (
 // Create a new contact record.
 //
 // POST /contact
-func (h *Handler) CreateContact(ctx context.Context, req *api.Contact) (*api.Contact, error) {
+func (h *Handler) CreateContact(ctx context.Context, req *api.Contact) (api.CreateContactRes, error) {
 	log := h.log.With("handler", "CreateContact")
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Contact, error) {
@@ -52,13 +52,13 @@ func (h *Handler) CreateContact(ctx context.Context, req *api.Contact) (*api.Con
 // Delete a contact record.
 //
 // DELETE /contact/{uuid}
-func (h *Handler) DeleteContact(ctx context.Context, params api.DeleteContactParams) error {
+func (h *Handler) DeleteContact(ctx context.Context, params api.DeleteContactParams) (api.DeleteContactRes, error) {
 	log := h.log.With("handler", "DeleteContact")
 
 	contactUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("invalid contact uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid contact UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid contact UUID"))
 	}
 
 	err = query.New(h.dbp).DeleteContact(ctx, contactUUID)
@@ -66,12 +66,12 @@ func (h *Handler) DeleteContact(ctx context.Context, params api.DeleteContactPar
 	case err == pgx.ErrNoRows:
 		// Possibly return 404 if you want the caller to know it's missing
 		log.Warn("no contact found to delete", "contact_uuid", contactUUID)
-		return nil
+		return &api.DeleteContactOK{}, nil
 	case err != nil:
 		log.Error("failed to delete contact", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete contact"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete contact"))
 	}
-	return nil
+	return &api.DeleteContactOK{}, nil
 }
 
 // GetContact implements getContact operation.
@@ -79,7 +79,7 @@ func (h *Handler) DeleteContact(ctx context.Context, params api.DeleteContactPar
 // Get contact details.
 //
 // GET /contact/{uuid}
-func (h *Handler) GetContact(ctx context.Context, params api.GetContactParams) (*api.Contact, error) {
+func (h *Handler) GetContact(ctx context.Context, params api.GetContactParams) (api.GetContactRes, error) {
 	log := h.log.With("handler", "GetContact")
 
 	contactUUID, err := uuid.FromString(params.UUID)
@@ -110,7 +110,7 @@ func (h *Handler) GetContact(ctx context.Context, params api.GetContactParams) (
 // List all contacts.
 //
 // GET /contact
-func (h *Handler) ListContacts(ctx context.Context) ([]api.Contact, error) {
+func (h *Handler) ListContacts(ctx context.Context) (api.ListContactsRes, error) {
 	log := h.log.With("handler", "ListContacts")
 
 	// For demonstration, we'll set an offset=0, limit=100.
@@ -134,7 +134,8 @@ func (h *Handler) ListContacts(ctx context.Context) ([]api.Contact, error) {
 		results = append(results, *apiC)
 	}
 
-	return results, nil
+	res := api.ListContactsOKApplicationJSON(results)
+	return &res, nil
 }
 
 // UpdateContact implements updateContact operation.
@@ -142,7 +143,7 @@ func (h *Handler) ListContacts(ctx context.Context) ([]api.Contact, error) {
 // Update contact details.
 //
 // PUT /contact/{uuid}
-func (h *Handler) UpdateContact(ctx context.Context, req *api.Contact, params api.UpdateContactParams) (*api.Contact, error) {
+func (h *Handler) UpdateContact(ctx context.Context, req *api.Contact, params api.UpdateContactParams) (api.UpdateContactRes, error) {
 	log := h.log.With("handler", "UpdateContact")
 
 	contactUUID, err := uuid.FromString(params.UUID)
@@ -151,7 +152,7 @@ func (h *Handler) UpdateContact(ctx context.Context, req *api.Contact, params ap
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid contact UUID"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Contact, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.UpdateContactRes, error) {
 		// fetch existing contact
 		existing, err := query.New(tx).GetContact(ctx, contactUUID)
 		if err == pgx.ErrNoRows {

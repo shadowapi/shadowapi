@@ -772,6 +772,16 @@ func (UnimplementedHandler) NatsMessagesList(ctx context.Context, params NatsMes
 	return r, ht.ErrNotImplemented
 }
 
+// NatsMessagesPurge implements nats-messages-purge operation.
+//
+// Purges (deletes) all messages from the NATS data stream for the current workspace.
+// This is a destructive operation and cannot be undone.
+//
+// DELETE /nats/messages
+func (UnimplementedHandler) NatsMessagesPurge(ctx context.Context) (r NatsMessagesPurgeRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // OAuth2ClientCallback implements oauth2-client-callback operation.
 //
 // Serve OAuth2 client callback.

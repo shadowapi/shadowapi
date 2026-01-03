@@ -160,6 +160,43 @@ func (q *Queries) GetOauth2TokenByUUID(ctx context.Context, argUuid pgtype.UUID)
 	return i, err
 }
 
+const getOauth2TokenWithClient = `-- name: GetOauth2TokenWithClient :one
+SELECT
+    ot.uuid as token_uuid,
+    ot.token,
+    ot.expires_at,
+    oc.client_id,
+    oc.secret as client_secret,
+    oc.provider
+FROM oauth2_token ot
+INNER JOIN oauth2_client oc ON ot.client_uuid = oc.uuid
+WHERE ot.uuid = $1::uuid
+`
+
+type GetOauth2TokenWithClientRow struct {
+	TokenUuid    uuid.UUID          `json:"token_uuid"`
+	Token        []byte             `json:"token"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	ClientID     string             `json:"client_id"`
+	ClientSecret string             `json:"client_secret"`
+	Provider     string             `json:"provider"`
+}
+
+// Get OAuth2 token with client details for email fetch job
+func (q *Queries) GetOauth2TokenWithClient(ctx context.Context, tokenUuid pgtype.UUID) (GetOauth2TokenWithClientRow, error) {
+	row := q.db.QueryRow(ctx, getOauth2TokenWithClient, tokenUuid)
+	var i GetOauth2TokenWithClientRow
+	err := row.Scan(
+		&i.TokenUuid,
+		&i.Token,
+		&i.ExpiresAt,
+		&i.ClientID,
+		&i.ClientSecret,
+		&i.Provider,
+	)
+	return i, err
+}
+
 const getOauth2Tokens = `-- name: GetOauth2Tokens :many
 WITH filtered_oauth2_tokens AS (
     SELECT ot.uuid, ot.client_uuid, ot.user_uuid, ot.token, ot.expires_at, ot.created_at, ot.updated_at, ot.name
@@ -283,8 +320,13 @@ SELECT
 FROM oauth2_token
 WHERE
    (NULLIF($1, '') IS NULL OR oauth2_token.client_uuid = $1::uuid) AND
-    expires_at > NOW() AND
-    expires_at < NOW() + INTERVAL '5 minutes' AND
+    (
+        -- About to expire (within 5 minutes)
+        (expires_at > NOW() AND expires_at < NOW() + INTERVAL '5 minutes')
+        OR
+        -- Already expired but within last 24 hours (attempt refresh with refresh_token)
+        (expires_at <= NOW() AND expires_at > NOW() - INTERVAL '24 hours')
+    ) AND
     (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 minute')
 `
 
@@ -292,7 +334,7 @@ type GetTokensToRefreshRow struct {
 	Oauth2Token Oauth2Token `json:"oauth2_token"`
 }
 
-// Find tokens expiring within the next 5 minutes that haven't been refreshed recently
+// Find tokens that need refresh: either expiring within 5 minutes OR already expired within last 24 hours
 func (q *Queries) GetTokensToRefresh(ctx context.Context, clientUuid interface{}) ([]GetTokensToRefreshRow, error) {
 	rows, err := q.db.Query(ctx, getTokensToRefresh, clientUuid)
 	if err != nil {

@@ -37,7 +37,7 @@ func (h *Handler) handleGmailToken(
 	token *oauth2.Token,
 	stateQuery url.Values,
 	clientID string,
-) (*api.OAuth2ClientCallbackFound, error) {
+) (api.OAuth2ClientCallbackRes, error) {
 
 	log.Info("0. handleGmailToken", "client_id", clientID, "state_query", stateQuery)
 
@@ -94,7 +94,7 @@ func (h *Handler) handleGmailToken(
 	}
 
 	// 4) Start transaction
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.OAuth2ClientCallbackFound, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.OAuth2ClientCallbackRes, error) {
 		q := query.New(tx)
 
 		// 4.1) Remove previous token for this client (single‑token semantics)

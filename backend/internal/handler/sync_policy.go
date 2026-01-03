@@ -16,9 +16,9 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*api.SyncPolicy, error) {
+func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (api.SyncpolicyCreateRes, error) {
 	log := h.log.With("handler", "SyncpolicyCreate")
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.SyncPolicy, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.SyncpolicyCreateRes, error) {
 		policyUUID := uuid.Must(uuid.NewV7())
 		pgPipelineUUID, err := converter.ConvertStringToPgUUID(req.PipelineUUID)
 		if err != nil {
@@ -66,22 +66,22 @@ func (h *Handler) SyncpolicyCreate(ctx context.Context, req *api.SyncPolicy) (*a
 	})
 }
 
-func (h *Handler) SyncpolicyDelete(ctx context.Context, params api.SyncpolicyDeleteParams) error {
+func (h *Handler) SyncpolicyDelete(ctx context.Context, params api.SyncpolicyDeleteParams) (api.SyncpolicyDeleteRes, error) {
 	log := h.log.With("handler", "SyncpolicyDelete")
 	policyUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("invalid policy uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid sync policy uuid"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid sync policy uuid"))
 	}
 	err = query.New(h.dbp).DeleteSyncPolicy(ctx, pgtype.UUID{Bytes: converter.UToBytes(policyUUID), Valid: true})
 	if err != nil {
 		log.Error("failed to delete sync policy", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete sync policy"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete sync policy"))
 	}
-	return nil
+	return &api.SyncpolicyDeleteOK{}, nil
 }
 
-func (h *Handler) SyncpolicyGet(ctx context.Context, params api.SyncpolicyGetParams) (*api.SyncPolicy, error) {
+func (h *Handler) SyncpolicyGet(ctx context.Context, params api.SyncpolicyGetParams) (api.SyncpolicyGetRes, error) {
 	log := h.log.With("handler", "SyncpolicyGet")
 	policyUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
@@ -112,7 +112,7 @@ func (h *Handler) SyncpolicyGet(ctx context.Context, params api.SyncpolicyGetPar
 	return &out, nil
 }
 
-func (h *Handler) SyncpolicyList(ctx context.Context, params api.SyncpolicyListParams) (*api.SyncpolicyListOK, error) {
+func (h *Handler) SyncpolicyList(ctx context.Context, params api.SyncpolicyListParams) (api.SyncpolicyListRes, error) {
 	log := h.log.With("handler", "SyncpolicyList")
 	limit := int32(50)
 	offset := int32(0)
@@ -148,14 +148,14 @@ func (h *Handler) SyncpolicyList(ctx context.Context, params api.SyncpolicyListP
 	return out, nil
 }
 
-func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, params api.SyncpolicyUpdateParams) (*api.SyncPolicy, error) {
+func (h *Handler) SyncpolicyUpdate(ctx context.Context, req *api.SyncPolicy, params api.SyncpolicyUpdateParams) (api.SyncpolicyUpdateRes, error) {
 	log := h.log.With("handler", "SyncpolicyUpdate")
 	policyUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("invalid policy uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid sync policy uuid"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.SyncPolicy, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.SyncpolicyUpdateRes, error) {
 		existing, err := query.New(tx).GetSyncPolicies(ctx, query.GetSyncPoliciesParams{
 			OrderBy:        nil,
 			OrderDirection: "asc",

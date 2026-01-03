@@ -15,7 +15,7 @@ import (
 // Standard code generate CRUD
 
 // OAuth2ClientCreate creates a new OAuth2 client.
-func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientCreateReq) (*api.OAuth2Client, error) {
+func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientCreateReq) (api.OAuth2ClientCreateRes, error) {
 	log := h.log.With("handler", "OAuth2ClientCreate")
 
 	clientUUID := uuid.Must(uuid.NewV7())
@@ -48,26 +48,26 @@ func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientC
 }
 
 // OAuth2ClientDelete deletes an OAuth2 client.
-func (h *Handler) OAuth2ClientDelete(ctx context.Context, params api.OAuth2ClientDeleteParams) error {
+func (h *Handler) OAuth2ClientDelete(ctx context.Context, params api.OAuth2ClientDeleteParams) (api.OAuth2ClientDeleteRes, error) {
 	log := h.log.With("handler", "OAuth2ClientDelete")
 	clientUUID, err := converter.ConvertStringToPgUUID(params.UUID)
 	if err != nil {
 		log.Error("invalid UUID", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
 	}
 	err = query.New(h.dbp).DeleteOauth2Client(ctx, clientUUID)
 	if err == pgx.ErrNoRows {
 		log.Error("no such oauth2 client", "uuid", params.UUID)
-		return ErrWithCode(http.StatusNotFound, E("no such oauth2 client"))
+		return nil, ErrWithCode(http.StatusNotFound, E("no such oauth2 client"))
 	} else if err != nil {
 		log.Error("failed to delete oauth2 client", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("internal server error"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
-	return nil
+	return &api.OAuth2ClientDeleteOK{}, nil
 }
 
 // OAuth2ClientGet retrieves OAuth2 client details.
-func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGetParams) (*api.OAuth2Client, error) {
+func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGetParams) (api.OAuth2ClientGetRes, error) {
 	log := h.log.With("handler", "OAuth2ClientGet")
 	clientUUID, err := converter.ConvertStringToPgUUID(params.UUID)
 	if err != nil {
@@ -96,7 +96,7 @@ func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGe
 }
 
 // OAuth2ClientList lists all OAuth2 clients.
-func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientListParams) (*api.OAuth2ClientListOK, error) {
+func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientListParams) (api.OAuth2ClientListRes, error) {
 	log := h.log.With("handler", "OAuth2ClientList")
 
 	offset := params.Offset.Or(0)
@@ -131,7 +131,7 @@ func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientL
 }
 
 // OAuth2ClientTokenList lists tokens for the OAuth2 client associated with a datasource.
-func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2ClientTokenListParams) ([]api.OAuth2ClientToken, error) {
+func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2ClientTokenListParams) (api.OAuth2ClientTokenListRes, error) {
 	log := h.log.With("handler", "OAuth2ClientTokenList", "datasourceUUID", params.DatasourceUUID)
 	q := query.New(h.dbp)
 
@@ -200,11 +200,12 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 		}
 		out = append(out, token)
 	}
-	return out, nil
+	res := api.OAuth2ClientTokenListOKApplicationJSON(out)
+	return &res, nil
 }
 
 // OAuth2ClientUpdate updates an OAuth2 client.
-func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (*api.OAuth2Client, error) {
+func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (api.OAuth2ClientUpdateRes, error) {
 	log := h.log.With("handler", "OAuth2ClientUpdate", "clientUUID", params.UUID)
 	q := query.New(h.dbp)
 	clientUUID, err := converter.ConvertStringToPgUUID(params.UUID)

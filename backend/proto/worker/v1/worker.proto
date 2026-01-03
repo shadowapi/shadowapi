@@ -37,7 +37,17 @@ message WorkerMessage {
     Authenticate authenticate = 1;
     Heartbeat heartbeat = 2;
     JobResult job_result = 3;
+    DataRecord data_record = 4;
   }
+}
+
+// DataRecord allows workers to stream individual data records during job execution
+// These records are published to NATS on the specified subject
+message DataRecord {
+  string job_id = 1;           // Job ID this record belongs to
+  string subject = 2;          // NATS subject to publish to
+  bytes data = 3;              // JSON-encoded record data
+  int64 sequence = 4;          // Sequence number within the job
 }
 
 // Authenticate sent as first message on Connect

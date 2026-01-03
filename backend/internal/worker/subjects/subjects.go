@@ -14,6 +14,9 @@ const (
 
 	// ResultsStreamName is the NATS JetStream stream for results
 	ResultsStreamName = "results"
+
+	// DataStreamName is the NATS JetStream stream for data records
+	DataStreamName = "data"
 )
 
 // Job types
@@ -26,6 +29,9 @@ const (
 	// Test connection job types
 	JobTypeTestConnectionEmailOAuth = "testConnectionEmailOAuth"
 	JobTypeTestConnectionPostgres   = "testConnectionPostgres"
+
+	// Data query job types
+	JobTypeMessageQuery = "messageQuery"
 )
 
 // JobSubject returns the subject for publishing a job
@@ -75,5 +81,24 @@ func AllJobSubjects() []string {
 func AllResultSubjects() []string {
 	return []string{
 		fmt.Sprintf("%s.results.>", Prefix),
+	}
+}
+
+// DataSubject returns the subject for publishing data records
+// Format: shadowapi.data.workspace.{slug}.{dataType}
+func DataSubject(workspaceSlug, dataType string) string {
+	return fmt.Sprintf("%s.data.workspace.%s.%s", Prefix, workspaceSlug, dataType)
+}
+
+// AllDataPattern returns the subject pattern to match all data records
+// Format: shadowapi.data.>
+func AllDataPattern() string {
+	return fmt.Sprintf("%s.data.>", Prefix)
+}
+
+// AllDataSubjects returns all known data subject patterns for stream setup
+func AllDataSubjects() []string {
+	return []string{
+		fmt.Sprintf("%s.data.>", Prefix),
 	}
 }

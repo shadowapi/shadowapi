@@ -536,6 +536,13 @@ type Invoker interface {
 	//
 	// GET /nats/messages
 	NatsMessagesList(ctx context.Context, params NatsMessagesListParams) (NatsMessagesListRes, error)
+	// NatsMessagesPurge invokes nats-messages-purge operation.
+	//
+	// Purges (deletes) all messages from the NATS data stream for the current workspace.
+	// This is a destructive operation and cannot be undone.
+	//
+	// DELETE /nats/messages
+	NatsMessagesPurge(ctx context.Context) (NatsMessagesPurgeRes, error)
 	// OAuth2ClientCallback invokes oauth2-client-callback operation.
 	//
 	// Serve OAuth2 client callback.
@@ -10722,6 +10729,112 @@ func (c *Client) sendNatsMessagesList(ctx context.Context, params NatsMessagesLi
 
 	stage = "DecodeResponse"
 	result, err := decodeNatsMessagesListResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// NatsMessagesPurge invokes nats-messages-purge operation.
+//
+// Purges (deletes) all messages from the NATS data stream for the current workspace.
+// This is a destructive operation and cannot be undone.
+//
+// DELETE /nats/messages
+func (c *Client) NatsMessagesPurge(ctx context.Context) (NatsMessagesPurgeRes, error) {
+	res, err := c.sendNatsMessagesPurge(ctx)
+	return res, err
+}
+
+func (c *Client) sendNatsMessagesPurge(ctx context.Context) (res NatsMessagesPurgeRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("nats-messages-purge"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/nats/messages"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, NatsMessagesPurgeOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/nats/messages"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, NatsMessagesPurgeOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeNatsMessagesPurgeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

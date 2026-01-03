@@ -90,6 +90,7 @@ const (
 	MessageTelegramQueryOperation            OperationName = "MessageTelegramQuery"
 	MessageWhatsappQueryOperation            OperationName = "MessageWhatsappQuery"
 	NatsMessagesListOperation                OperationName = "NatsMessagesList"
+	NatsMessagesPurgeOperation               OperationName = "NatsMessagesPurge"
 	OAuth2ClientCallbackOperation            OperationName = "OAuth2ClientCallback"
 	OAuth2ClientCreateOperation              OperationName = "OAuth2ClientCreate"
 	OAuth2ClientDeleteOperation              OperationName = "OAuth2ClientDelete"

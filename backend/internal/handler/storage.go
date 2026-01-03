@@ -12,8 +12,8 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams) ([]api.Storage, error) {
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) ([]api.Storage, error) {
+func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams) (api.StorageListRes, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StorageListRes, error) {
 		// Build GetStoragesParams with default values.
 		arg := query.GetStoragesParams{
 			OrderBy:        "created_at",
@@ -64,6 +64,7 @@ func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams)
 		for _, row := range rows {
 			storages = append(storages, QToStorage(row))
 		}
-		return storages, nil
+		res := api.StorageListOKApplicationJSON(storages)
+		return &res, nil
 	})
 }

@@ -205,8 +205,31 @@ Requires WORKER_ID and WORKER_SECRET environment variables to be set
 							defer jobCancel()
 						}
 
-						// Execute the job
-						resultData, err := exec.Execute(jobCtx, job.JobType, job.JobData)
+						var resultData []byte
+						var err error
+
+						// Check if this is a streaming job
+						if exec.IsStreamingJob(job.JobType) {
+							// Create record sender callback that sends DataRecord via gRPC
+							sendRecord := func(record executor.DataRecord) error {
+								streamMu.Lock()
+								defer streamMu.Unlock()
+								return stream.Send(&workerv1.WorkerMessage{
+									Payload: &workerv1.WorkerMessage_DataRecord{
+										DataRecord: &workerv1.DataRecord{
+											JobId:    job.JobId,
+											Subject:  record.Subject,
+											Data:     record.Data,
+											Sequence: record.Sequence,
+										},
+									},
+								})
+							}
+							resultData, err = exec.ExecuteStreaming(jobCtx, job.JobType, job.JobData, sendRecord)
+						} else {
+							// Execute regular job
+							resultData, err = exec.Execute(jobCtx, job.JobType, job.JobData)
+						}
 
 						// Build result message
 						// Check both handler error and result payload for actual success status

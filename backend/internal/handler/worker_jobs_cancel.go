@@ -8,15 +8,14 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 )
 
-func (h *Handler) WorkerJobsCancel(ctx context.Context, params api.WorkerJobsCancelParams) error {
+func (h *Handler) WorkerJobsCancel(ctx context.Context, params api.WorkerJobsCancelParams) (api.WorkerJobsCancelRes, error) {
 	log := h.log.With("handler", "WorkerJobsCancel", "uuid", params.UUID)
 
 	if !worker.CancelJob(params.UUID) {
 		log.Error("job not found or already finished")
-		return ErrWithCode(http.StatusNotFound, E("job not found or already running"))
+		return nil, ErrWithCode(http.StatusNotFound, E("job not found or already running"))
 	}
 
 	log.Info("cancellation signaled")
-	// returning nil ⇒ 204 No Content
-	return nil
+	return &api.WorkerJobsCancelNoContent{}, nil
 }

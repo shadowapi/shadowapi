@@ -19,7 +19,7 @@ import (
 // List all workspaces accessible to the current user.
 //
 // GET /workspace
-func (h *Handler) ListWorkspaces(ctx context.Context) ([]api.Workspace, error) {
+func (h *Handler) ListWorkspaces(ctx context.Context) (api.ListWorkspacesRes, error) {
 	q := query.New(h.dbp)
 
 	workspaces, err := q.ListWorkspaces(ctx)
@@ -33,7 +33,8 @@ func (h *Handler) ListWorkspaces(ctx context.Context) ([]api.Workspace, error) {
 		result = append(result, qWorkspaceToAPI(w))
 	}
 
-	return result, nil
+	res := api.ListWorkspacesOKApplicationJSON(result)
+	return &res, nil
 }
 
 // GetWorkspace implements getWorkspace operation.
@@ -41,7 +42,7 @@ func (h *Handler) ListWorkspaces(ctx context.Context) ([]api.Workspace, error) {
 // Get workspace details.
 //
 // GET /workspace/{uuid}
-func (h *Handler) GetWorkspace(ctx context.Context, params api.GetWorkspaceParams) (*api.Workspace, error) {
+func (h *Handler) GetWorkspace(ctx context.Context, params api.GetWorkspaceParams) (api.GetWorkspaceRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
@@ -63,7 +64,7 @@ func (h *Handler) GetWorkspace(ctx context.Context, params api.GetWorkspaceParam
 // Create a new workspace.
 //
 // POST /workspace
-func (h *Handler) CreateWorkspace(ctx context.Context, req *api.Workspace) (*api.Workspace, error) {
+func (h *Handler) CreateWorkspace(ctx context.Context, req *api.Workspace) (api.CreateWorkspaceRes, error) {
 	q := query.New(h.dbp)
 
 	// Generate UUID if not provided
@@ -108,7 +109,7 @@ func (h *Handler) CreateWorkspace(ctx context.Context, req *api.Workspace) (*api
 // Update workspace details.
 //
 // PUT /workspace/{uuid}
-func (h *Handler) UpdateWorkspace(ctx context.Context, req *api.Workspace, params api.UpdateWorkspaceParams) (*api.Workspace, error) {
+func (h *Handler) UpdateWorkspace(ctx context.Context, req *api.Workspace, params api.UpdateWorkspaceParams) (api.UpdateWorkspaceRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
@@ -163,7 +164,7 @@ func (h *Handler) UpdateWorkspace(ctx context.Context, req *api.Workspace, param
 // Delete a workspace.
 //
 // DELETE /workspace/{uuid}
-func (h *Handler) DeleteWorkspace(ctx context.Context, params api.DeleteWorkspaceParams) error {
+func (h *Handler) DeleteWorkspace(ctx context.Context, params api.DeleteWorkspaceParams) (api.DeleteWorkspaceRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
@@ -172,19 +173,19 @@ func (h *Handler) DeleteWorkspace(ctx context.Context, params api.DeleteWorkspac
 	_, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(http.StatusNotFound, E("workspace not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("workspace not found"))
 		}
 		h.log.Error("failed to get workspace", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to get workspace"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get workspace"))
 	}
 
 	err = q.DeleteWorkspace(ctx, workspaceUUID)
 	if err != nil {
 		h.log.Error("failed to delete workspace", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete workspace"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete workspace"))
 	}
 
-	return nil
+	return &api.DeleteWorkspaceNoContent{}, nil
 }
 
 // CheckWorkspaceExists implements checkWorkspaceExists operation.
@@ -192,7 +193,7 @@ func (h *Handler) DeleteWorkspace(ctx context.Context, params api.DeleteWorkspac
 // Check if a workspace slug exists.
 //
 // GET /workspace/check/{slug}
-func (h *Handler) CheckWorkspaceExists(ctx context.Context, params api.CheckWorkspaceExistsParams) (*api.WorkspaceCheck, error) {
+func (h *Handler) CheckWorkspaceExists(ctx context.Context, params api.CheckWorkspaceExistsParams) (api.CheckWorkspaceExistsRes, error) {
 	q := query.New(h.dbp)
 
 	workspace, err := q.GetWorkspaceBySlug(ctx, params.Slug)
@@ -217,7 +218,7 @@ func (h *Handler) CheckWorkspaceExists(ctx context.Context, params api.CheckWork
 // List all members of a workspace.
 //
 // GET /workspace/{uuid}/members
-func (h *Handler) ListWorkspaceMembers(ctx context.Context, params api.ListWorkspaceMembersParams) ([]api.WorkspaceMember, error) {
+func (h *Handler) ListWorkspaceMembers(ctx context.Context, params api.ListWorkspaceMembersParams) (api.ListWorkspaceMembersRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
@@ -248,7 +249,8 @@ func (h *Handler) ListWorkspaceMembers(ctx context.Context, params api.ListWorks
 		result = append(result, apiMember)
 	}
 
-	return result, nil
+	res := api.ListWorkspaceMembersOKApplicationJSON(result)
+	return &res, nil
 }
 
 // AddWorkspaceMember implements addWorkspaceMember operation.
@@ -256,7 +258,7 @@ func (h *Handler) ListWorkspaceMembers(ctx context.Context, params api.ListWorks
 // Add a member to a workspace.
 //
 // POST /workspace/{uuid}/members
-func (h *Handler) AddWorkspaceMember(ctx context.Context, req *api.WorkspaceMember, params api.AddWorkspaceMemberParams) (*api.WorkspaceMember, error) {
+func (h *Handler) AddWorkspaceMember(ctx context.Context, req *api.WorkspaceMember, params api.AddWorkspaceMemberParams) (api.AddWorkspaceMemberRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
@@ -323,7 +325,7 @@ func (h *Handler) AddWorkspaceMember(ctx context.Context, req *api.WorkspaceMemb
 // Remove a member from a workspace.
 //
 // DELETE /workspace/{uuid}/members/{user_uuid}
-func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWorkspaceMemberParams) error {
+func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWorkspaceMemberParams) (api.RemoveWorkspaceMemberRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
@@ -333,10 +335,10 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 	_, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(http.StatusNotFound, E("workspace not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("workspace not found"))
 		}
 		h.log.Error("failed to get workspace", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to get workspace"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get workspace"))
 	}
 
 	// Check if member exists
@@ -346,10 +348,10 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 	})
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(http.StatusNotFound, E("member not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("member not found"))
 		}
 		h.log.Error("failed to get workspace member", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to get workspace member"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get workspace member"))
 	}
 
 	// Prevent removing the last owner
@@ -357,7 +359,7 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 		members, err := q.ListWorkspaceMembersByWorkspace(ctx, &workspaceUUID)
 		if err != nil {
 			h.log.Error("failed to list workspace members", "error", err)
-			return ErrWithCode(http.StatusInternalServerError, E("failed to list workspace members"))
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list workspace members"))
 		}
 
 		ownerCount := 0
@@ -367,7 +369,7 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 			}
 		}
 		if ownerCount <= 1 {
-			return ErrWithCode(http.StatusBadRequest, E("cannot remove the last owner of a workspace"))
+			return nil, ErrWithCode(http.StatusBadRequest, E("cannot remove the last owner of a workspace"))
 		}
 	}
 
@@ -377,10 +379,10 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 	})
 	if err != nil {
 		h.log.Error("failed to remove workspace member", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to remove workspace member"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to remove workspace member"))
 	}
 
-	return nil
+	return &api.RemoveWorkspaceMemberNoContent{}, nil
 }
 
 // UpdateWorkspaceMemberRole implements updateWorkspaceMemberRole operation.
@@ -388,7 +390,7 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 // Update a member's role in a workspace.
 //
 // PUT /workspace/{uuid}/members/{user_uuid}
-func (h *Handler) UpdateWorkspaceMemberRole(ctx context.Context, req *api.UpdateWorkspaceMemberRoleReq, params api.UpdateWorkspaceMemberRoleParams) (*api.WorkspaceMember, error) {
+func (h *Handler) UpdateWorkspaceMemberRole(ctx context.Context, req *api.UpdateWorkspaceMemberRoleReq, params api.UpdateWorkspaceMemberRoleParams) (api.UpdateWorkspaceMemberRoleRes, error) {
 	q := query.New(h.dbp)
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)

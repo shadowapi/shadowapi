@@ -20,7 +20,7 @@ import (
 // List all roles.
 //
 // GET /rbac/role
-func (h *Handler) ListRoles(ctx context.Context, params api.ListRolesParams) ([]api.RbacRole, error) {
+func (h *Handler) ListRoles(ctx context.Context, params api.ListRolesParams) (api.ListRolesRes, error) {
 	q := query.New(h.dbp)
 
 	var roles []query.RbacRole
@@ -42,7 +42,8 @@ func (h *Handler) ListRoles(ctx context.Context, params api.ListRolesParams) ([]
 		result = append(result, qRoleToAPI(r))
 	}
 
-	return result, nil
+	res := api.ListRolesOKApplicationJSON(result)
+	return &res, nil
 }
 
 // CreateRole implements createRole operation.
@@ -50,7 +51,7 @@ func (h *Handler) ListRoles(ctx context.Context, params api.ListRolesParams) ([]
 // Create a new role.
 //
 // POST /rbac/role
-func (h *Handler) CreateRole(ctx context.Context, req *api.RbacRole) (*api.RbacRole, error) {
+func (h *Handler) CreateRole(ctx context.Context, req *api.RbacRole) (api.CreateRoleRes, error) {
 	q := query.New(h.dbp)
 
 	// Generate UUID
@@ -101,7 +102,7 @@ func (h *Handler) CreateRole(ctx context.Context, req *api.RbacRole) (*api.RbacR
 // Get role details.
 //
 // GET /rbac/role/{uuid}
-func (h *Handler) GetRole(ctx context.Context, params api.GetRoleParams) (*api.RbacRole, error) {
+func (h *Handler) GetRole(ctx context.Context, params api.GetRoleParams) (api.GetRoleRes, error) {
 	q := query.New(h.dbp)
 
 	roleUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
@@ -123,7 +124,7 @@ func (h *Handler) GetRole(ctx context.Context, params api.GetRoleParams) (*api.R
 // Update a role.
 //
 // PUT /rbac/role/{uuid}
-func (h *Handler) UpdateRole(ctx context.Context, req *api.RbacRole, params api.UpdateRoleParams) (*api.RbacRole, error) {
+func (h *Handler) UpdateRole(ctx context.Context, req *api.RbacRole, params api.UpdateRoleParams) (api.UpdateRoleRes, error) {
 	q := query.New(h.dbp)
 
 	roleUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
@@ -171,7 +172,7 @@ func (h *Handler) UpdateRole(ctx context.Context, req *api.RbacRole, params api.
 // Delete a role.
 //
 // DELETE /rbac/role/{uuid}
-func (h *Handler) DeleteRole(ctx context.Context, params api.DeleteRoleParams) error {
+func (h *Handler) DeleteRole(ctx context.Context, params api.DeleteRoleParams) (api.DeleteRoleRes, error) {
 	q := query.New(h.dbp)
 
 	roleUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
@@ -180,22 +181,22 @@ func (h *Handler) DeleteRole(ctx context.Context, params api.DeleteRoleParams) e
 	role, err := q.GetRoleByUUID(ctx, roleUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(http.StatusNotFound, E("role not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("role not found"))
 		}
 		h.log.Error("failed to get role", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
 	}
 
 	if role.IsSystem {
-		return ErrWithCode(http.StatusForbidden, E("cannot delete system role"))
+		return nil, ErrWithCode(http.StatusForbidden, E("cannot delete system role"))
 	}
 
 	if err := q.DeleteRole(ctx, roleUUID); err != nil {
 		h.log.Error("failed to delete role", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete role"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete role"))
 	}
 
-	return nil
+	return &api.DeleteRoleNoContent{}, nil
 }
 
 // ListPermissions implements listPermissions operation.
@@ -203,7 +204,7 @@ func (h *Handler) DeleteRole(ctx context.Context, params api.DeleteRoleParams) e
 // List all permissions.
 //
 // GET /rbac/permission
-func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermissionsParams) ([]api.RbacPermission, error) {
+func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermissionsParams) (api.ListPermissionsRes, error) {
 	q := query.New(h.dbp)
 
 	var perms []query.RbacPermission
@@ -227,7 +228,8 @@ func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermission
 		result = append(result, qPermissionToAPI(p))
 	}
 
-	return result, nil
+	res := api.ListPermissionsOKApplicationJSON(result)
+	return &res, nil
 }
 
 // GetUserRoles implements getUserRoles operation.
@@ -235,7 +237,7 @@ func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermission
 // Get roles for a user.
 //
 // GET /rbac/user/{user_uuid}/roles
-func (h *Handler) GetUserRoles(ctx context.Context, params api.GetUserRolesParams) (*api.GetUserRolesOK, error) {
+func (h *Handler) GetUserRoles(ctx context.Context, params api.GetUserRolesParams) (api.GetUserRolesRes, error) {
 	q := query.New(h.dbp)
 
 	userUUID := params.UserUUID.String()
@@ -285,26 +287,26 @@ func (h *Handler) GetUserRoles(ctx context.Context, params api.GetUserRolesParam
 // Assign a role to a user.
 //
 // POST /rbac/user/{user_uuid}/roles
-func (h *Handler) AssignRoleToUser(ctx context.Context, req *api.AssignRoleToUserReq, params api.AssignRoleToUserParams) error {
+func (h *Handler) AssignRoleToUser(ctx context.Context, req *api.AssignRoleToUserReq, params api.AssignRoleToUserParams) (api.AssignRoleToUserRes, error) {
 	q := query.New(h.dbp)
 
 	// Verify role exists
 	_, err := q.GetRoleByName(ctx, req.RoleName)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(http.StatusNotFound, E("role not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("role not found"))
 		}
 		h.log.Error("failed to get role", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
 	}
 
 	userUUID := params.UserUUID.String()
 	if err := h.enforcer.AddRoleForUserInDomain(userUUID, req.RoleName, req.Domain); err != nil {
 		h.log.Error("failed to assign role", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to assign role"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to assign role"))
 	}
 
-	return nil
+	return &api.AssignRoleToUserCreated{}, nil
 }
 
 // RemoveRoleFromUser implements removeRoleFromUser operation.
@@ -312,15 +314,15 @@ func (h *Handler) AssignRoleToUser(ctx context.Context, req *api.AssignRoleToUse
 // Remove a role from a user.
 //
 // DELETE /rbac/user/{user_uuid}/roles/{role_name}
-func (h *Handler) RemoveRoleFromUser(ctx context.Context, params api.RemoveRoleFromUserParams) error {
+func (h *Handler) RemoveRoleFromUser(ctx context.Context, params api.RemoveRoleFromUserParams) (api.RemoveRoleFromUserRes, error) {
 	userUUID := params.UserUUID.String()
 
 	if err := h.enforcer.RemoveRoleForUserInDomain(userUUID, params.RoleName, params.Domain); err != nil {
 		h.log.Error("failed to remove role", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to remove role"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to remove role"))
 	}
 
-	return nil
+	return &api.RemoveRoleFromUserNoContent{}, nil
 }
 
 // CheckPermission implements checkPermission operation.
@@ -328,7 +330,7 @@ func (h *Handler) RemoveRoleFromUser(ctx context.Context, params api.RemoveRoleF
 // Check if a user has permission.
 //
 // POST /rbac/check
-func (h *Handler) CheckPermission(ctx context.Context, req *api.CheckPermissionReq) (*api.CheckPermissionOK, error) {
+func (h *Handler) CheckPermission(ctx context.Context, req *api.CheckPermissionReq) (api.CheckPermissionRes, error) {
 	allowed, err := h.enforcer.Enforce(
 		req.UserUUID.String(),
 		req.Domain,

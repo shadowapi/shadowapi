@@ -2863,7 +2863,8 @@ func (s *Error) SetStatus(val OptInt64) {
 	s.Status = val
 }
 
-func (*Error) natsMessagesListRes() {}
+func (*Error) natsMessagesListRes()  {}
+func (*Error) natsMessagesPurgeRes() {}
 
 type ErrorErrorsItem struct {
 	// Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'.
@@ -4735,12 +4736,12 @@ type MessageQueryJob struct {
 	Status MessageQueryJobStatus `json:"status"`
 	// NATS subject where individual message records will be published.
 	NatsSubject string `json:"nats_subject"`
-	// Maximum number of messages to query.
+	// Maximum number of messages per table.
 	Limit OptInt `json:"limit"`
-	// Offset for pagination.
+	// Offset for pagination per table.
 	Offset OptInt `json:"offset"`
-	// Table to query from.
-	TableName OptString `json:"table_name"`
+	// Names of tables that were queried.
+	TablesQueried []string `json:"tables_queried"`
 	// Number of messages queried (available after completion).
 	MessagesQueried OptInt `json:"messages_queried"`
 	// Number of messages published to NATS (available after completion).
@@ -4783,9 +4784,9 @@ func (s *MessageQueryJob) GetOffset() OptInt {
 	return s.Offset
 }
 
-// GetTableName returns the value of TableName.
-func (s *MessageQueryJob) GetTableName() OptString {
-	return s.TableName
+// GetTablesQueried returns the value of TablesQueried.
+func (s *MessageQueryJob) GetTablesQueried() []string {
+	return s.TablesQueried
 }
 
 // GetMessagesQueried returns the value of MessagesQueried.
@@ -4843,9 +4844,9 @@ func (s *MessageQueryJob) SetOffset(val OptInt) {
 	s.Offset = val
 }
 
-// SetTableName sets the value of TableName.
-func (s *MessageQueryJob) SetTableName(val OptString) {
-	s.TableName = val
+// SetTablesQueried sets the value of TablesQueried.
+func (s *MessageQueryJob) SetTablesQueried(val []string) {
+	s.TablesQueried = val
 }
 
 // SetMessagesQueried sets the value of MessagesQueried.
@@ -5261,6 +5262,24 @@ func (s *NatsMessagesList) SetTotal(val int) {
 }
 
 func (*NatsMessagesList) natsMessagesListRes() {}
+
+// Ref: #
+type NatsMessagesPurgeResponse struct {
+	// Number of messages purged from the stream.
+	Purged int `json:"purged"`
+}
+
+// GetPurged returns the value of Purged.
+func (s *NatsMessagesPurgeResponse) GetPurged() int {
+	return s.Purged
+}
+
+// SetPurged sets the value of Purged.
+func (s *NatsMessagesPurgeResponse) SetPurged(val int) {
+	s.Purged = val
+}
+
+func (*NatsMessagesPurgeResponse) natsMessagesPurgeRes() {}
 
 // Ref: #
 type OAuth2Client struct {
@@ -10329,19 +10348,14 @@ type StoragePostgresMessagesQueryNotFound Error
 
 func (*StoragePostgresMessagesQueryNotFound) storagePostgresMessagesQueryRes() {}
 
-// Request to query messages from PostgreSQL storage.
+// Request to query messages from PostgreSQL storage. Fetches data from all configured tables and
+// combines fields as JSON.
 // Ref: #
 type StoragePostgresMessagesQueryReq struct {
-	// Maximum number of messages to query (default 100).
+	// Maximum number of messages to query per table (default 100).
 	Limit OptInt `json:"limit"`
-	// Offset for pagination (default 0).
+	// Offset for pagination per table (default 0).
 	Offset OptInt `json:"offset"`
-	// Table to query from (default "messages").
-	TableName OptString `json:"table_name"`
-	// Column to order by (default "created_at").
-	OrderBy OptString `json:"order_by"`
-	// Order descending (default true).
-	OrderDesc OptBool `json:"order_desc"`
 }
 
 // GetLimit returns the value of Limit.
@@ -10354,21 +10368,6 @@ func (s *StoragePostgresMessagesQueryReq) GetOffset() OptInt {
 	return s.Offset
 }
 
-// GetTableName returns the value of TableName.
-func (s *StoragePostgresMessagesQueryReq) GetTableName() OptString {
-	return s.TableName
-}
-
-// GetOrderBy returns the value of OrderBy.
-func (s *StoragePostgresMessagesQueryReq) GetOrderBy() OptString {
-	return s.OrderBy
-}
-
-// GetOrderDesc returns the value of OrderDesc.
-func (s *StoragePostgresMessagesQueryReq) GetOrderDesc() OptBool {
-	return s.OrderDesc
-}
-
 // SetLimit sets the value of Limit.
 func (s *StoragePostgresMessagesQueryReq) SetLimit(val OptInt) {
 	s.Limit = val
@@ -10377,21 +10376,6 @@ func (s *StoragePostgresMessagesQueryReq) SetLimit(val OptInt) {
 // SetOffset sets the value of Offset.
 func (s *StoragePostgresMessagesQueryReq) SetOffset(val OptInt) {
 	s.Offset = val
-}
-
-// SetTableName sets the value of TableName.
-func (s *StoragePostgresMessagesQueryReq) SetTableName(val OptString) {
-	s.TableName = val
-}
-
-// SetOrderBy sets the value of OrderBy.
-func (s *StoragePostgresMessagesQueryReq) SetOrderBy(val OptString) {
-	s.OrderBy = val
-}
-
-// SetOrderDesc sets the value of OrderDesc.
-func (s *StoragePostgresMessagesQueryReq) SetOrderDesc(val OptBool) {
-	s.OrderDesc = val
 }
 
 // Table definition for PostgreSQL storage schema.

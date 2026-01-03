@@ -15,9 +15,9 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.Pipeline, error) {
+func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (api.PipelineCreateRes, error) {
 	log := h.log.With("handler", "PipelineCreate")
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.PipelineCreateRes, error) {
 		pipelineUUID := uuid.Must(uuid.NewV7())
 		pgDatasourceUUID, err := converter.ConvertStringToPgUUID(req.DatasourceUUID)
 		if err != nil {
@@ -80,7 +80,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (*api.P
 	})
 }
 
-func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams) (*api.Pipeline, error) {
+func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams) (api.PipelineGetRes, error) {
 	log := h.log.With("handler", "PipelineGet")
 	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
@@ -100,7 +100,7 @@ func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams)
 	return &out, nil
 }
 
-func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParams) (*api.PipelineListOK, error) {
+func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParams) (api.PipelineListRes, error) {
 	log := h.log.With("handler", "PipelineList")
 	limit := int32(50)
 	offset := int32(0)
@@ -131,14 +131,14 @@ func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParam
 	return out, nil
 }
 
-func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params api.PipelineUpdateParams) (*api.Pipeline, error) {
+func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params api.PipelineUpdateParams) (api.PipelineUpdateRes, error) {
 	log := h.log.With("handler", "PipelineUpdate")
 	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.Pipeline, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.PipelineUpdateRes, error) {
 		existingRow, err := query.New(tx).GetPipeline(ctx, pipelineUUID)
 		if err != nil {
 			log.Error("failed to get existing pipeline", "error", err)
@@ -209,19 +209,19 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 	})
 }
 
-func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) error {
+func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) (api.PipelineDeleteRes, error) {
 	log := h.log.With("handler", "PipelineDelete")
 	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
 	}
 	err = query.New(h.dbp).DeletePipeline(ctx, pipelineUUID)
 	if err != nil {
 		log.Error("failed to delete pipeline", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete pipeline"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete pipeline"))
 	}
-	return nil
+	return &api.PipelineDeleteOK{}, nil
 }
 
 // qToApiPipeline converts a db pipeline row into an API pipeline, handling nullable fields safely.

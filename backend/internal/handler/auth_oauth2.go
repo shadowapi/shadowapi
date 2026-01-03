@@ -104,7 +104,7 @@ func generatePKCE() (verifier, challenge string, err error) {
 }
 
 // AuthOAuth2Authorize initiates the OAuth2 authorization flow
-func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2AuthorizeReq) (*api.AuthOAuth2AuthorizeOK, error) {
+func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2AuthorizeReq) (api.AuthOAuth2AuthorizeRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}
@@ -150,7 +150,7 @@ func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2Au
 }
 
 // AuthOAuth2Callback handles the OAuth2 callback from Hydra
-func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2CallbackParams) (*api.AuthOAuth2CallbackFound, error) {
+func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2CallbackParams) (api.AuthOAuth2CallbackRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}
@@ -222,7 +222,7 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 }
 
 // AuthOAuth2Refresh refreshes the access token
-func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2RefreshOKHeaders, error) {
+func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (api.AuthOAuth2RefreshRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}
@@ -262,7 +262,7 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (*api.AuthOAuth2Refresh
 
 // AuthOAuth2Session checks if the user has a valid session without triggering token refresh.
 // Always returns 200 to avoid console errors for unauthenticated users.
-func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2SessionOK, error) {
+func (h *Handler) AuthOAuth2Session(ctx context.Context) (api.AuthOAuth2SessionRes, error) {
 	if h.oauth2Svc == nil {
 		return &api.AuthOAuth2SessionOK{Authenticated: false}, nil
 	}
@@ -304,7 +304,7 @@ func (h *Handler) AuthOAuth2Session(ctx context.Context) (*api.AuthOAuth2Session
 }
 
 // AuthOAuth2Logout logs out the user
-func (h *Handler) AuthOAuth2Logout(ctx context.Context) (*api.AuthOAuth2LogoutOKHeaders, error) {
+func (h *Handler) AuthOAuth2Logout(ctx context.Context) (api.AuthOAuth2LogoutRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}

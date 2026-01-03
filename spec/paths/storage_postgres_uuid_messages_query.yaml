@@ -1,0 +1,49 @@
+# spec/paths/storage_postgres_uuid_messages_query.yaml
+post:
+  operationId: storage-postgres-messages-query
+  summary: Query messages from PostgreSQL storage
+  description: |
+    Triggers a job to query messages from a PostgreSQL storage.
+    Individual message records are streamed to NATS on the specified subject.
+    Subscribe to the nats_subject in the response to receive records.
+  tags:
+    - Storage
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: PostgreSQL storage UUID
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/StoragePostgresMessagesQueryReq"
+  responses:
+    "202":
+      description: Message query job created
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/MessageQueryJob"
+    "400":
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    "404":
+      description: Storage not found
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    "500":
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

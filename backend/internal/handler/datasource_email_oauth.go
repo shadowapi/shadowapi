@@ -17,7 +17,7 @@ import (
 
 // DatasourceEmailOAuthCreate creates a new OAuth2‑based email datasource.
 // POST /datasource/email_oauth
-func (h *Handler) DatasourceEmailOAuthCreate(ctx context.Context, req *api.DatasourceEmailOAuth) (*api.DatasourceEmailOAuth, error) {
+func (h *Handler) DatasourceEmailOAuthCreate(ctx context.Context, req *api.DatasourceEmailOAuth) (api.DatasourceEmailOAuthCreateRes, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthCreate")
 
 	// Get user UUID from authenticated session
@@ -60,23 +60,23 @@ func (h *Handler) DatasourceEmailOAuthCreate(ctx context.Context, req *api.Datas
 
 // DatasourceEmailOAuthDelete deletes an OAuth2‑based email datasource.
 // DELETE /datasource/email_oauth/{uuid}
-func (h *Handler) DatasourceEmailOAuthDelete(ctx context.Context, params api.DatasourceEmailOAuthDeleteParams) error {
+func (h *Handler) DatasourceEmailOAuthDelete(ctx context.Context, params api.DatasourceEmailOAuthDeleteParams) (api.DatasourceEmailOAuthDeleteRes, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthDelete")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
 	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true}); err != nil {
 		log.Error("failed to delete datasource", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
 	}
-	return nil
+	return &api.DatasourceEmailOAuthDeleteOK{}, nil
 }
 
 // DatasourceEmailOAuthGet retrieves a single OAuth2‑based email datasource.
 // GET /datasource/email_oauth/{uuid}
-func (h *Handler) DatasourceEmailOAuthGet(ctx context.Context, params api.DatasourceEmailOAuthGetParams) (*api.DatasourceEmailOAuth, error) {
+func (h *Handler) DatasourceEmailOAuthGet(ctx context.Context, params api.DatasourceEmailOAuthGetParams) (api.DatasourceEmailOAuthGetRes, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthGet")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *Handler) DatasourceEmailOAuthGet(ctx context.Context, params api.Dataso
 
 // DatasourceEmailOAuthList lists all OAuth2‑based email datasources.
 // GET /datasource/email_oauth
-func (h *Handler) DatasourceEmailOAuthList(ctx context.Context, params api.DatasourceEmailOAuthListParams) ([]api.DatasourceEmailOAuth, error) {
+func (h *Handler) DatasourceEmailOAuthList(ctx context.Context, params api.DatasourceEmailOAuthListParams) (api.DatasourceEmailOAuthListRes, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthList")
 	offset := params.Offset.Or(0)
 	limit := params.Limit.Or(0)
@@ -124,19 +124,20 @@ func (h *Handler) DatasourceEmailOAuthList(ctx context.Context, params api.Datas
 		}
 		result = append(result, *out)
 	}
-	return result, nil
+	res := api.DatasourceEmailOAuthListOKApplicationJSON(result)
+	return &res, nil
 }
 
 // DatasourceEmailOAuthUpdate updates an existing OAuth2‑based email datasource.
 // PUT /datasource/email_oauth/{uuid}
-func (h *Handler) DatasourceEmailOAuthUpdate(ctx context.Context, req *api.DatasourceEmailOAuth, params api.DatasourceEmailOAuthUpdateParams) (*api.DatasourceEmailOAuth, error) {
+func (h *Handler) DatasourceEmailOAuthUpdate(ctx context.Context, req *api.DatasourceEmailOAuth, params api.DatasourceEmailOAuthUpdateParams) (api.DatasourceEmailOAuthUpdateRes, error) {
 	log := h.log.With("handler", "DatasourceEmailOAuthUpdate")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceEmailOAuth, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.DatasourceEmailOAuthUpdateRes, error) {
 		dse, err := query.New(tx).GetDatasource(ctx, pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get datasource", "error", err)
@@ -180,7 +181,7 @@ func (h *Handler) DatasourceEmailOAuthUpdate(ctx context.Context, req *api.Datas
 			log.Error("failed to update datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update datasource"))
 		}
-		return h.DatasourceEmailOAuthGet(ctx, api.DatasourceEmailOAuthGetParams{UUID: params.UUID})
+		return QToDatasourceEmailOAuthRow(dse)
 	})
 }
 

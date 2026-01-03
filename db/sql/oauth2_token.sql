@@ -24,14 +24,19 @@ FROM oauth2_token
 WHERE client_uuid = sqlc.arg('client_uuid')::uuid;
 
 -- name: GetTokensToRefresh :many
--- Find tokens expiring within the next 5 minutes that haven't been refreshed recently
+-- Find tokens that need refresh: either expiring within 5 minutes OR already expired within last 24 hours
 SELECT
     sqlc.embed(oauth2_token)
 FROM oauth2_token
 WHERE
    (NULLIF(sqlc.arg('client_uuid'), '') IS NULL OR oauth2_token.client_uuid = sqlc.arg('client_uuid')::uuid) AND
-    expires_at > NOW() AND
-    expires_at < NOW() + INTERVAL '5 minutes' AND
+    (
+        -- About to expire (within 5 minutes)
+        (expires_at > NOW() AND expires_at < NOW() + INTERVAL '5 minutes')
+        OR
+        -- Already expired but within last 24 hours (attempt refresh with refresh_token)
+        (expires_at <= NOW() AND expires_at > NOW() - INTERVAL '24 hours')
+    ) AND
     (updated_at IS NULL OR updated_at < NOW() - INTERVAL '1 minute');
 
 -- name: GetOauth2TokenByUUID :one
@@ -91,3 +96,16 @@ UPDATE oauth2_token SET
     expires_at = sqlc.arg('expires_at'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: GetOauth2TokenWithClient :one
+-- Get OAuth2 token with client details for email fetch job
+SELECT
+    ot.uuid as token_uuid,
+    ot.token,
+    ot.expires_at,
+    oc.client_id,
+    oc.secret as client_secret,
+    oc.provider
+FROM oauth2_token ot
+INNER JOIN oauth2_client oc ON ot.client_uuid = oc.uuid
+WHERE ot.uuid = sqlc.arg('token_uuid')::uuid;

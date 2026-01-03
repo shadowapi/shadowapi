@@ -172,6 +172,75 @@ func (q *Queries) GetPipelineByWorkspace(ctx context.Context, arg GetPipelineByW
 	return i, err
 }
 
+const getPipelineWithDetails = `-- name: GetPipelineWithDetails :one
+SELECT
+    p.uuid as pipeline_uuid,
+    p.workspace_uuid,
+    p.name as pipeline_name,
+    p.type as pipeline_type,
+    p.is_enabled as pipeline_enabled,
+    p.flow as pipeline_flow,
+    w.slug as workspace_slug,
+    d.uuid as datasource_uuid,
+    d.name as datasource_name,
+    d.type as datasource_type,
+    d.provider as datasource_provider,
+    d.settings as datasource_settings,
+    s.uuid as storage_uuid,
+    s.name as storage_name,
+    s.type as storage_type,
+    s.settings as storage_settings
+FROM pipeline p
+INNER JOIN workspace w ON p.workspace_uuid = w.uuid
+INNER JOIN datasource d ON p.datasource_uuid = d.uuid
+INNER JOIN storage s ON p.storage_uuid = s.uuid
+WHERE p.uuid = $1::uuid
+`
+
+type GetPipelineWithDetailsRow struct {
+	PipelineUuid       uuid.UUID  `json:"pipeline_uuid"`
+	WorkspaceUUID      *uuid.UUID `json:"workspace_uuid"`
+	PipelineName       string     `json:"pipeline_name"`
+	PipelineType       string     `json:"pipeline_type"`
+	PipelineEnabled    bool       `json:"pipeline_enabled"`
+	PipelineFlow       []byte     `json:"pipeline_flow"`
+	WorkspaceSlug      string     `json:"workspace_slug"`
+	DatasourceUUID     uuid.UUID  `json:"datasource_uuid"`
+	DatasourceName     string     `json:"datasource_name"`
+	DatasourceType     string     `json:"datasource_type"`
+	DatasourceProvider string     `json:"datasource_provider"`
+	DatasourceSettings []byte     `json:"datasource_settings"`
+	StorageUuid        uuid.UUID  `json:"storage_uuid"`
+	StorageName        string     `json:"storage_name"`
+	StorageType        string     `json:"storage_type"`
+	StorageSettings    []byte     `json:"storage_settings"`
+}
+
+// Get a pipeline with its associated datasource and storage settings for scheduler
+func (q *Queries) GetPipelineWithDetails(ctx context.Context, pipelineUuid pgtype.UUID) (GetPipelineWithDetailsRow, error) {
+	row := q.db.QueryRow(ctx, getPipelineWithDetails, pipelineUuid)
+	var i GetPipelineWithDetailsRow
+	err := row.Scan(
+		&i.PipelineUuid,
+		&i.WorkspaceUUID,
+		&i.PipelineName,
+		&i.PipelineType,
+		&i.PipelineEnabled,
+		&i.PipelineFlow,
+		&i.WorkspaceSlug,
+		&i.DatasourceUUID,
+		&i.DatasourceName,
+		&i.DatasourceType,
+		&i.DatasourceProvider,
+		&i.DatasourceSettings,
+		&i.StorageUuid,
+		&i.StorageName,
+		&i.StorageType,
+		&i.StorageSettings,
+	)
+	return i, err
+}
+
 const getPipelineWorkspaceSlug = `-- name: GetPipelineWorkspaceSlug :one
 SELECT w.slug
 FROM pipeline p

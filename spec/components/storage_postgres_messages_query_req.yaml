@@ -1,0 +1,14 @@
+# spec/components/storage_postgres_messages_query_req.yaml
+type: object
+additionalProperties: false
+description: Request to query messages from PostgreSQL storage. Fetches data from all configured tables and combines fields as JSON.
+properties:
+  limit:
+    type: integer
+    description: Maximum number of messages to query per table (default 100)
+    minimum: 1
+    maximum: 1000
+  offset:
+    type: integer
+    description: Offset for pagination per table (default 0)
+    minimum: 0

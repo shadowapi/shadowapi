@@ -986,10 +986,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if len(elem) == 0 {
 					// Leaf node.
 					switch r.Method {
+					case "DELETE":
+						s.handleNatsMessagesPurgeRequest([0]string{}, elemIsEscaped, w, r)
 					case "GET":
 						s.handleNatsMessagesListRequest([0]string{}, elemIsEscaped, w, r)
 					default:
-						s.notAllowed(w, r, "GET")
+						s.notAllowed(w, r, "DELETE,GET")
 					}
 
 					return
@@ -3898,6 +3900,14 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				if len(elem) == 0 {
 					// Leaf node.
 					switch method {
+					case "DELETE":
+						r.name = NatsMessagesPurgeOperation
+						r.summary = "Purge all messages from NATS stream"
+						r.operationID = "nats-messages-purge"
+						r.pathPattern = "/nats/messages"
+						r.args = args
+						r.count = 0
+						return r, true
 					case "GET":
 						r.name = NatsMessagesListOperation
 						r.summary = "Get last messages from NATS stream"

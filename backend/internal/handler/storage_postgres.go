@@ -18,7 +18,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePostgres) (*api.StoragePostgres, error) {
+func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePostgres) (api.StoragePostgresCreateRes, error) {
 	log := h.log.With("handler", "StoragePostgresCreate")
 
 	// Validate table definitions
@@ -59,24 +59,24 @@ func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePos
 	return &resp, nil
 }
 
-func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StoragePostgresDeleteParams) error {
+func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StoragePostgresDeleteParams) (api.StoragePostgresDeleteRes, error) {
 	log := h.log.With("handler", "StoragePostgresDelete")
 
 	storageUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse storage uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
 	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true}); err != nil {
 		log.Error("failed to delete storage", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete storage"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete storage"))
 	}
 
-	return nil
+	return &api.StoragePostgresDeleteOK{}, nil
 }
 
-func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePostgresGetParams) (*api.StoragePostgres, error) {
+func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePostgresGetParams) (api.StoragePostgresGetRes, error) {
 	log := h.log.With("handler", "StoragePostgresGet")
 
 	id, err := uuid.FromString(params.UUID)
@@ -95,7 +95,7 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 	return QToStoragePostgres(storages)
 }
 
-func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePostgres, params api.StoragePostgresUpdateParams) (*api.StoragePostgres, error) {
+func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePostgres, params api.StoragePostgresUpdateParams) (api.StoragePostgresUpdateRes, error) {
 	log := h.log.With("handler", "StoragePostgresUpdate")
 
 	// Validate table definitions
@@ -109,7 +109,7 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.StoragePostgres, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StoragePostgresUpdateRes, error) {
 		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
 		if err != nil {
 			log.Error("failed to get storage", "error", err)
@@ -141,7 +141,13 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update storage"))
 		}
 
-		return h.StoragePostgresGet(ctx, api.StoragePostgresGetParams{UUID: params.UUID})
+		// Re-fetch and return the updated storage
+		updatedStorage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
+		if err != nil {
+			log.Error("failed to get updated storage", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated storage"))
+		}
+		return QToStoragePostgres(updatedStorage)
 	})
 }
 
@@ -156,7 +162,7 @@ func QToStoragePostgres(row query.GetStorageRow) (*api.StoragePostgres, error) {
 	return &s, nil
 }
 
-func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.StoragePostgresTable, params api.StoragePostgresTablesReplaceParams) ([]api.StoragePostgresTable, error) {
+func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.StoragePostgresTable, params api.StoragePostgresTablesReplaceParams) (api.StoragePostgresTablesReplaceRes, error) {
 	log := h.log.With("handler", "StoragePostgresTablesReplace")
 
 	// Validate table definitions
@@ -170,7 +176,7 @@ func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.St
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) ([]api.StoragePostgresTable, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StoragePostgresTablesReplaceRes, error) {
 		// Get existing storage
 		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
 		if err != nil {
@@ -220,12 +226,13 @@ func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.St
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update storage"))
 		}
 
-		return req, nil
+		res := api.StoragePostgresTablesReplaceOKApplicationJSON(req)
+		return &res, nil
 	})
 }
 
 // StoragePostgresIntrospectTables lists all tables in the connected PostgreSQL database.
-func (h *Handler) StoragePostgresIntrospectTables(ctx context.Context, params api.StoragePostgresIntrospectTablesParams) (*api.StoragePostgresIntrospectTablesResponse, error) {
+func (h *Handler) StoragePostgresIntrospectTables(ctx context.Context, params api.StoragePostgresIntrospectTablesParams) (api.StoragePostgresIntrospectTablesRes, error) {
 	log := h.log.With("handler", "StoragePostgresIntrospectTables")
 
 	tables, err := h.storageManager.ListTables(ctx, params.UUID)
@@ -249,7 +256,7 @@ func (h *Handler) StoragePostgresIntrospectTables(ctx context.Context, params ap
 }
 
 // StoragePostgresIntrospectTable returns the schema information for a specific table.
-func (h *Handler) StoragePostgresIntrospectTable(ctx context.Context, params api.StoragePostgresIntrospectTableParams) (*api.StoragePostgresIntrospectTableResponse, error) {
+func (h *Handler) StoragePostgresIntrospectTable(ctx context.Context, params api.StoragePostgresIntrospectTableParams) (api.StoragePostgresIntrospectTableRes, error) {
 	log := h.log.With("handler", "StoragePostgresIntrospectTable")
 
 	schema, err := h.storageManager.GetTableFields(ctx, params.UUID, params.TableName)
@@ -279,7 +286,7 @@ func (h *Handler) StoragePostgresIntrospectTable(ctx context.Context, params api
 }
 
 // StoragePostgresTablesCreate creates a new table in the PostgreSQL database.
-func (h *Handler) StoragePostgresTablesCreate(ctx context.Context, req *api.StoragePostgresTableCreateRequest, params api.StoragePostgresTablesCreateParams) (*api.StoragePostgresTableCreateResponse, error) {
+func (h *Handler) StoragePostgresTablesCreate(ctx context.Context, req *api.StoragePostgresTableCreateRequest, params api.StoragePostgresTablesCreateParams) (api.StoragePostgresTablesCreateRes, error) {
 	log := h.log.With("handler", "StoragePostgresTablesCreate")
 
 	dropIfExists := false

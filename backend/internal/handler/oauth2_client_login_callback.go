@@ -27,7 +27,7 @@ import (
 //  2. Preferred:  body contains `query.datasource_uuid` – we first resolve the datasource, then its attached OAuth2 client.
 //
 // The second form is what the current React UI issues.
-func (h *Handler) OAuth2ClientLogin(ctx context.Context, req *api.OAuth2ClientLoginReq) (*api.OAuth2ClientLoginOK, error) {
+func (h *Handler) OAuth2ClientLogin(ctx context.Context, req *api.OAuth2ClientLoginReq) (api.OAuth2ClientLoginRes, error) {
 	log := h.log.With("handler", "OAuth2ClientLogin")
 	q := query.New(h.dbp)
 
@@ -116,7 +116,7 @@ func (h *Handler) OAuth2ClientLogin(ctx context.Context, req *api.OAuth2ClientLo
 }
 
 // OAuth2ClientCallback exchanges the `code` for tokens, persists them and redirects back to UI.
-func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2ClientCallbackParams) (*api.OAuth2ClientCallbackFound, error) {
+func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2ClientCallbackParams) (api.OAuth2ClientCallbackRes, error) {
 	log := h.log.With("handler", "OAuth2ClientCallback")
 	q := query.New(h.dbp)
 
@@ -167,28 +167,28 @@ func (h *Handler) OAuth2ClientCallback(ctx context.Context, params api.OAuth2Cli
 }
 
 // OAuth2ClientTokenDelete revokes the token at the provider and removes it from DB.
-func (h *Handler) OAuth2ClientTokenDelete(ctx context.Context, params api.OAuth2ClientTokenDeleteParams) error {
+func (h *Handler) OAuth2ClientTokenDelete(ctx context.Context, params api.OAuth2ClientTokenDeleteParams) (api.OAuth2ClientTokenDeleteRes, error) {
 	log := h.log.With("handler", "OAuth2ClientTokenDelete", "tokenUUID", params.UUID)
 	q := query.New(h.dbp)
 
 	tokenPgUUID, err := converter.ConvertStringToPgUUID(params.UUID)
 	if err != nil {
-		return ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
 	}
 
 	// Retrieve token row so we know which provider to revoke against.
 	tokRow, err := q.GetOauth2TokenByUUID(ctx, tokenPgUUID)
 	if err == pgx.ErrNoRows {
-		return ErrWithCode(http.StatusNotFound, E("token not found"))
+		return nil, ErrWithCode(http.StatusNotFound, E("token not found"))
 	} else if err != nil {
 		log.Error("failed to fetch token", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("internal error"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("internal error"))
 	}
 
 	clientCfg, err := oauthTools.GetClientConfig(ctx, h.dbp, tokRow.Oauth2Token.ClientUuid.String())
 	if err != nil {
 		log.Error("failed to resolve client", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("internal error"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("internal error"))
 	}
 
 	// Unmarshal stored token JSON so we can pick refresh/access tokens
@@ -206,9 +206,9 @@ func (h *Handler) OAuth2ClientTokenDelete(ctx context.Context, params api.OAuth2
 	// Finally delete from DB
 	if err := q.DeleteOauth2Token(ctx, tokenPgUUID); err != nil {
 		log.Error("failed to delete oauth2 token", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("internal error"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("internal error"))
 	}
-	return nil
+	return &api.OAuth2ClientTokenDeleteOK{}, nil
 }
 
 // revokeGoogleToken calls https://oauth2.googleapis.com/revoke

@@ -1591,7 +1591,12 @@ export interface paths {
         get: operations["nats-messages-list"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Purge all messages from NATS stream
+         * @description Purges (deletes) all messages from the NATS data stream for the current workspace.
+         *     This is a destructive operation and cannot be undone.
+         */
+        delete: operations["nats-messages-purge"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1798,6 +1803,7 @@ export interface components {
         StoragePostgresMessagesQueryReq: components["schemas"]["storage_postgres_messages_query_req"];
         NatsMessage: components["schemas"]["nats_message"];
         NatsMessagesList: components["schemas"]["nats_messages_list"];
+        NatsMessagesPurgeResponse: components["schemas"]["nats_messages_purge_response"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2983,18 +2989,12 @@ export interface components {
             /** @description List of field mappings from source to target */
             mappings: components["schemas"]["mapper_field_mapping"][];
         };
-        /** @description Request to query messages from PostgreSQL storage */
+        /** @description Request to query messages from PostgreSQL storage. Fetches data from all configured tables and combines fields as JSON. */
         storage_postgres_messages_query_req: {
-            /** @description Maximum number of messages to query (default 100) */
+            /** @description Maximum number of messages to query per table (default 100) */
             limit?: number;
-            /** @description Offset for pagination (default 0) */
+            /** @description Offset for pagination per table (default 0) */
             offset?: number;
-            /** @description Table to query from (default "messages") */
-            table_name?: string;
-            /** @description Column to order by (default "created_at") */
-            order_by?: string;
-            /** @description Order descending (default true) */
-            order_desc?: boolean;
         };
         /** @description A message query job that streams results to NATS */
         message_query_job: {
@@ -3009,12 +3009,12 @@ export interface components {
             status: "pending" | "running" | "completed" | "failed";
             /** @description NATS subject where individual message records will be published */
             readonly nats_subject: string;
-            /** @description Maximum number of messages to query */
+            /** @description Maximum number of messages per table */
             limit?: number;
-            /** @description Offset for pagination */
+            /** @description Offset for pagination per table */
             offset?: number;
-            /** @description Table to query from */
-            table_name?: string;
+            /** @description Names of tables that were queried */
+            readonly tables_queried?: string[];
             /** @description Number of messages queried (available after completion) */
             readonly messages_queried?: number;
             /** @description Number of messages published to NATS (available after completion) */
@@ -3052,6 +3052,10 @@ export interface components {
             messages: components["schemas"]["nats_message"][];
             /** @description Total number of messages returned */
             total: number;
+        };
+        nats_messages_purge_response: {
+            /** @description Number of messages purged from the stream */
+            purged: number;
         };
         email_label: {
             /** Format: int64 */
@@ -8083,6 +8087,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["nats_messages_list"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "nats-messages-purge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Messages purged successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["nats_messages_purge_response"];
                 };
             };
             /** @description Internal server error */

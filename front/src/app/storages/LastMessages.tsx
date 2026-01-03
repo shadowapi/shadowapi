@@ -21,6 +21,8 @@ import {
   CloudDownloadOutlined,
   SyncOutlined,
   DatabaseOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
@@ -100,6 +102,30 @@ function LastMessages() {
   const [loadingStorages, setLoadingStorages] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [fetchForm] = Form.useForm();
+  const [cleaning, setCleaning] = useState(false);
+
+  const handleClean = async () => {
+    Modal.confirm({
+      title: 'Clean All Messages',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Are you sure you want to delete all messages from the queue? This action cannot be undone.',
+      okText: 'Clean',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        setCleaning(true);
+        const { data, error } = await client.DELETE('/nats/messages');
+        if (error) {
+          message.error('Failed to clean messages');
+          setCleaning(false);
+          return;
+        }
+        message.success(`Cleaned ${data?.purged || 0} messages`);
+        setCleaning(false);
+        loadMessages();
+      },
+    });
+  };
 
   const loadMessages = useCallback(async () => {
     setLoading(true);
@@ -132,7 +158,6 @@ function LastMessages() {
     loadStorages();
     setSelectedStorage(null);
     fetchForm.resetFields();
-    fetchForm.setFieldsValue({ table_name: 'messages' });
     setFetchModalVisible(true);
   };
 
@@ -160,9 +185,7 @@ function LastMessages() {
 
       const { error } = await client.POST('/storage/postgres/{uuid}/messages/query', {
         params: { path: { uuid: values.storage_uuid } },
-        body: {
-          table_name: values.table_name,
-        },
+        body: {},
       });
 
       if (error) {
@@ -310,6 +333,15 @@ function LastMessages() {
           </Button>
           <Button icon={<ReloadOutlined />} onClick={loadMessages}>
             Refresh
+          </Button>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleClean}
+            loading={cleaning}
+            disabled={messages.length === 0}
+          >
+            Clean
           </Button>
         </Space>
       </Space>
@@ -490,14 +522,12 @@ function LastMessages() {
           )}
 
           {selectedStorage?.type === 'postgres' && (
-            <Form.Item
-              name="table_name"
-              label="Table Name"
-              rules={[{ required: true, message: 'Please enter table name' }]}
-              initialValue="messages"
-            >
-              <Input placeholder="messages" />
-            </Form.Item>
+            <Alert
+              message="Messages will be fetched from all configured tables in this storage."
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
           )}
         </Form>
       </Modal>

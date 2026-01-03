@@ -3,6 +3,7 @@ package bridge
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -96,9 +97,50 @@ func (p *ResultPublisher) PublishError(ctx context.Context, jobID, workerID, err
 	return p.Publish(ctx, result)
 }
 
+// DataRecord represents a data record streamed during job execution
+type DataRecord struct {
+	JobID    string `json:"job_id"`
+	WorkerID string `json:"worker_id"`
+	Sequence int64  `json:"sequence"`
+	Data     []byte `json:"data"`
+}
+
+// PublishDataRecord sends a data record to the specified NATS subject
+func (p *ResultPublisher) PublishDataRecord(ctx context.Context, subject string, record *DataRecord) error {
+	headers := map[string]string{
+		"X-Job-ID":    record.JobID,
+		"X-Worker-ID": record.WorkerID,
+		"X-Sequence":  intToString(record.Sequence),
+	}
+
+	// Publish the raw data directly (already JSON-encoded by worker)
+	if err := p.conn.PublishWithHeaders(ctx, subject, headers, record.Data); err != nil {
+		p.log.Error("failed to publish data record",
+			"job_id", record.JobID,
+			"sequence", record.Sequence,
+			"subject", subject,
+			"error", err,
+		)
+		return err
+	}
+
+	p.log.Debug("data record published",
+		"job_id", record.JobID,
+		"worker_id", record.WorkerID,
+		"sequence", record.Sequence,
+		"subject", subject,
+	)
+
+	return nil
+}
+
 func boolToString(b bool) string {
 	if b {
 		return "true"
 	}
 	return "false"
+}
+
+func intToString(i int64) string {
+	return fmt.Sprintf("%d", i)
 }

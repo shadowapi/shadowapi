@@ -11,8 +11,12 @@ import (
 // Create a new user.
 //
 // POST /user
-func (h *Handler) CreateUser(ctx context.Context, req *api.User) (*api.User, error) {
-	return h.userManager.CreateUser(ctx, req)
+func (h *Handler) CreateUser(ctx context.Context, req *api.User) (api.CreateUserRes, error) {
+	user, err := h.userManager.CreateUser(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // DeleteUser implements deleteUser operation.
@@ -20,8 +24,11 @@ func (h *Handler) CreateUser(ctx context.Context, req *api.User) (*api.User, err
 // Delete user.
 //
 // DELETE /user/{uuid}
-func (h *Handler) DeleteUser(ctx context.Context, params api.DeleteUserParams) error {
-	return h.userManager.DeleteUser(ctx, params.UUID)
+func (h *Handler) DeleteUser(ctx context.Context, params api.DeleteUserParams) (api.DeleteUserRes, error) {
+	if err := h.userManager.DeleteUser(ctx, params.UUID); err != nil {
+		return nil, err
+	}
+	return &api.DeleteUserOK{}, nil
 }
 
 // GetUser implements getUser operation.
@@ -29,8 +36,12 @@ func (h *Handler) DeleteUser(ctx context.Context, params api.DeleteUserParams) e
 // Get user details.
 //
 // GET /user/{uuid}
-func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (*api.User, error) {
-	return h.userManager.GetUser(ctx, params.UUID)
+func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (api.GetUserRes, error) {
+	user, err := h.userManager.GetUser(ctx, params.UUID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // ListUsers implements listUsers operation.
@@ -38,8 +49,13 @@ func (h *Handler) GetUser(ctx context.Context, params api.GetUserParams) (*api.U
 // List all users.
 //
 // GET /user
-func (h *Handler) ListUsers(ctx context.Context) ([]api.User, error) {
-	return h.userManager.ListUsers(ctx)
+func (h *Handler) ListUsers(ctx context.Context) (api.ListUsersRes, error) {
+	users, err := h.userManager.ListUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := api.ListUsersOKApplicationJSON(users)
+	return &res, nil
 }
 
 // UpdateUser implements updateUser operation.
@@ -47,15 +63,19 @@ func (h *Handler) ListUsers(ctx context.Context) ([]api.User, error) {
 // Update user details.
 //
 // PUT /user/{uuid}
-func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.UpdateUserParams) (*api.User, error) {
-	return h.userManager.UpdateUser(ctx, req, params.UUID)
+func (h *Handler) UpdateUser(ctx context.Context, req *api.User, params api.UpdateUserParams) (api.UpdateUserRes, error) {
+	user, err := h.userManager.UpdateUser(ctx, req, params.UUID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // CreateUserSession implements createUserSession operation.
 // This endpoint is no longer supported without Zitadel.
 //
 // POST /users/session
-func (h *Handler) CreateUserSession(ctx context.Context) (*api.UserSessionToken, error) {
+func (h *Handler) CreateUserSession(ctx context.Context) (api.CreateUserSessionRes, error) {
 	h.log.Error("session token creation is not supported")
 	return nil, ErrWithCode(400, E("session token creation is not supported"))
 }

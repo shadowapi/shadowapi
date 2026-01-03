@@ -232,3 +232,49 @@ func (q *Queue) GetLastMessages(ctx context.Context, stream string, subjectFilte
 	log.Debug("fetched messages", "count", len(messages))
 	return messages, nil
 }
+
+// PurgeStream purges all messages from a stream, optionally filtered by subject
+func (q *Queue) PurgeStream(ctx context.Context, stream string, subjectFilter string) (uint64, error) {
+	log := q.log.With("method", "PurgeStream", "stream", stream, "subject", subjectFilter)
+	log.Debug("purging stream messages")
+
+	// Get the stream
+	s, err := q.js.Stream(ctx, stream)
+	if err != nil {
+		log.Error("failed to get stream", "error", err)
+		return 0, err
+	}
+
+	// Get message count before purge
+	infoBefore, err := s.Info(ctx)
+	if err != nil {
+		log.Error("failed to get stream info", "error", err)
+		return 0, err
+	}
+	msgsBefore := infoBefore.State.Msgs
+
+	// Purge with subject filter
+	var opts []jetstream.StreamPurgeOpt
+	if subjectFilter != "" {
+		opts = append(opts, jetstream.WithPurgeSubject(subjectFilter))
+	}
+
+	err = s.Purge(ctx, opts...)
+	if err != nil {
+		log.Error("failed to purge stream", "error", err)
+		return 0, err
+	}
+
+	// Get message count after purge
+	infoAfter, err := s.Info(ctx)
+	if err != nil {
+		log.Error("failed to get stream info after purge", "error", err)
+		// Still return success with estimated count
+		return msgsBefore, nil
+	}
+	msgsAfter := infoAfter.State.Msgs
+
+	purged := msgsBefore - msgsAfter
+	log.Info("purged messages from stream", "purged", purged)
+	return purged, nil
+}

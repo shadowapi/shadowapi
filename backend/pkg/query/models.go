@@ -302,6 +302,7 @@ type Scheduler struct {
 	Timezone       string             `json:"timezone"`
 	NextRun        pgtype.Timestamptz `json:"next_run"`
 	LastRun        pgtype.Timestamptz `json:"last_run"`
+	LastUid        int64              `json:"last_uid"`
 	IsEnabled      bool               `json:"is_enabled"`
 	IsPaused       bool               `json:"is_paused"`
 	BatchSize      int32              `json:"batch_size"`

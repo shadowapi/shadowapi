@@ -25,7 +25,7 @@ import (
 //  3. The fallback storage type is "hostfiles" or could come from the storage row details—
 //     you might adapt this to read from the storage row, e.g. row.Type = "s3"/"postgres" etc.
 //  4. We default the file name to "untitled_file" if none is provided.
-func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*api.UploadFileResponse, error) {
+func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (api.FileCreateRes, error) {
 	log := h.log.With("handler", "FileCreate")
 
 	// 1. Ensure storage_uuid is present
@@ -34,7 +34,7 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 		return nil, ErrWithCode(http.StatusBadRequest, E("storage_uuid is required"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.UploadFileResponse, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.FileCreateRes, error) {
 		// 1. Validate StorageUUID and fetch the row
 		sUUID, err := uuid.FromString(req.StorageUUID)
 		if err != nil {
@@ -100,24 +100,24 @@ func (h *Handler) FileCreate(ctx context.Context, req *api.UploadFileRequest) (*
 // Possible issues or limitations:
 // 1. Returning 200 if file doesn't exist (warn log). You might want to return 404 instead.
 // 2. We do no cleanup of actual file data if it exists on disk or S3; it's purely a metadata delete.
-func (h *Handler) FileDelete(ctx context.Context, params api.FileDeleteParams) error {
+func (h *Handler) FileDelete(ctx context.Context, params api.FileDeleteParams) (api.FileDeleteRes, error) {
 	log := h.log.With("handler", "FileDelete")
 
 	fileUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("invalid file UUID", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid file UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid file UUID"))
 	}
 
 	if err := query.New(h.dbp).DeleteFile(ctx, pgtype.UUID{Bytes: [16]byte(fileUUID.Bytes()), Valid: true}); err == pgx.ErrNoRows {
 		log.Warn("no file found to delete", "file_uuid", fileUUID)
-		return nil // or return 404 if you prefer to surface that?
+		return &api.FileDeleteOK{}, nil // or return 404 if you prefer to surface that?
 	} else if err != nil {
 		log.Error("failed to delete file", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete file"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete file"))
 	}
 
-	return nil
+	return &api.FileDeleteOK{}, nil
 }
 
 // FileGet implements file-get operation.
@@ -126,8 +126,8 @@ func (h *Handler) FileDelete(ctx context.Context, params api.FileDeleteParams) e
 //
 // Possible issues or limitations:
 // 1. We only fetch metadata, not the actual file content.
-// 2. The “StorageUUID” field is blank if we haven't associated a storage row.
-func (h *Handler) FileGet(ctx context.Context, params api.FileGetParams) (*api.FileObject, error) {
+// 2. The "StorageUUID" field is blank if we haven't associated a storage row.
+func (h *Handler) FileGet(ctx context.Context, params api.FileGetParams) (api.FileGetRes, error) {
 	log := h.log.With("handler", "FileGet")
 
 	fileUUID, err := uuid.FromString(params.UUID)
@@ -169,7 +169,7 @@ func (h *Handler) FileGet(ctx context.Context, params api.FileGetParams) (*api.F
 // Possible issues or limitations:
 // 1. Very simple pagination logic (limit + offset).
 // 2. We don't return total count, so the client doesn't know how many more exist.
-func (h *Handler) FileList(ctx context.Context, params api.FileListParams) ([]api.FileObject, error) {
+func (h *Handler) FileList(ctx context.Context, params api.FileListParams) (api.FileListRes, error) {
 	log := h.log.With("handler", "FileList")
 
 	limit := int32(50)
@@ -209,7 +209,8 @@ func (h *Handler) FileList(ctx context.Context, params api.FileListParams) ([]ap
 		results = append(results, fo)
 	}
 
-	return results, nil
+	res := api.FileListOKApplicationJSON(results)
+	return &res, nil
 }
 
 // FileUpdate implements file-update operation.
@@ -219,7 +220,7 @@ func (h *Handler) FileList(ctx context.Context, params api.FileListParams) ([]ap
 // This example only updates the file's Name field for brevity.
 // We keep the old StorageType, StorageUuid, MimeType, Size, Data, etc.
 // If you need to update other fields, expand the code accordingly.
-func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params api.FileUpdateParams) (*api.FileObject, error) {
+func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params api.FileUpdateParams) (api.FileUpdateRes, error) {
 	log := h.log.With("handler", "FileUpdate")
 
 	fileUUID, err := uuid.FromString(params.UUID)
@@ -228,7 +229,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid file UUID"))
 	}
 
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.FileObject, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.FileUpdateRes, error) {
 		// 1. Fetch the record to ensure it exists
 		oldFileRow, err := query.New(tx).GetFile(ctx, pgtype.UUID{Bytes: converter.UToBytes(fileUUID), Valid: true})
 		if err == pgx.ErrNoRows {
@@ -288,7 +289,7 @@ func (h *Handler) FileUpdate(ctx context.Context, req *api.FileUpdateReq, params
 // Possible issues or limitations:
 // 1. We don't do real signing; we just append file UUID to a dummy URL.
 // 2. We aren't verifying if the user has permissions to download the file.
-func (h *Handler) GenerateDownloadLink(ctx context.Context, req *api.GenerateDownloadLinkRequest) (*api.GenerateDownloadLinkResponse, error) {
+func (h *Handler) GenerateDownloadLink(ctx context.Context, req *api.GenerateDownloadLinkRequest) (api.GenerateDownloadLinkRes, error) {
 	log := h.log.With("handler", "GenerateDownloadLink")
 
 	// Check that the file exists
@@ -326,7 +327,7 @@ func (h *Handler) GenerateDownloadLink(ctx context.Context, req *api.GenerateDow
 // 2) Look up storage row in DB.
 // 3) Insert file record with name & mimeType from request, or fallback defaults.
 // 4) Return the newly created record.
-func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*api.UploadFileResponse, error) {
+func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (api.UploadFileRes, error) {
 	log := h.log.With("handler", "UploadFile")
 
 	if req.StorageUUID == "" {
@@ -334,7 +335,7 @@ func (h *Handler) UploadFile(ctx context.Context, req *api.UploadFileRequest) (*
 		return nil, ErrWithCode(http.StatusBadRequest, E("storage_uuid is required"))
 	}
 
-	resp, err := db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.UploadFileResponse, error) {
+	resp, err := db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.UploadFileRes, error) {
 		sUUID, convErr := uuid.FromString(req.StorageUUID)
 		if convErr != nil {
 			log.Error("invalid storage_uuid", "error", convErr)

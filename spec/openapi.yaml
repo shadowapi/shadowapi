@@ -141,6 +141,8 @@ components:
       $ref: "components/nats_message.yaml"
     NatsMessagesList:
       $ref: "components/nats_messages_list.yaml"
+    NatsMessagesPurgeResponse:
+      $ref: "components/nats_messages_purge_response.yaml"
 
   securitySchemes:
     # Bearer token-based auth

@@ -130,6 +130,13 @@ func (h *Handler) handleResult(msg queue.Msg) {
 		return
 	}
 
+	// Handle email fetch results
+	if emailFetchResult := isEmailFetchResult(result.ResultData); emailFetchResult != nil {
+		h.handleEmailFetchResultDirect(ctx, emailFetchResult)
+		msg.Ack()
+		return
+	}
+
 	// Update the worker_jobs table for regular jobs
 	q := query.New(h.dbp)
 
@@ -368,5 +375,99 @@ func (h *Handler) scheduleNextTokenRefresh(ctx context.Context, tokenUUID uuid.U
 	_ = jobUUID
 	_ = schedulerUUID
 	_ = headers
+}
+
+// isEmailFetchResult checks if the result data is an email fetch result
+func isEmailFetchResult(data []byte) *jobs.EmailFetchResult {
+	if len(data) == 0 {
+		return nil
+	}
+	var result jobs.EmailFetchResult
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil
+	}
+	// Email fetch results have PipelineUUID and JobUUID
+	if result.PipelineUUID != "" && result.JobUUID != "" {
+		return &result
+	}
+	return nil
+}
+
+// handleEmailFetchResultDirect processes email fetch job results
+func (h *Handler) handleEmailFetchResultDirect(ctx context.Context, fetchResult *jobs.EmailFetchResult) {
+	q := query.New(h.dbp)
+
+	// Update worker_jobs table
+	jobUUID, err := uuid.FromString(fetchResult.JobUUID)
+	if err != nil {
+		h.log.Error("invalid job UUID for email fetch result", "job_uuid", fetchResult.JobUUID, "error", err)
+		return
+	}
+
+	status := "done"
+	if !fetchResult.Success {
+		status = "failed"
+	}
+
+	// Build result data JSON with statistics
+	var resultData []byte
+	resultJSON := map[string]any{
+		"messages_fetched": fetchResult.MessagesFetched,
+		"messages_stored":  fetchResult.MessagesStored,
+		"error_count":      fetchResult.ErrorCount,
+		"duration_ms":      fetchResult.DurationMs,
+	}
+	if fetchResult.Error != "" {
+		resultJSON["error"] = fetchResult.Error
+	}
+	resultData, _ = json.Marshal(resultJSON)
+
+	// Update worker_jobs status
+	err = q.UpdateWorkerJobStatus(ctx, query.UpdateWorkerJobStatusParams{
+		UUID:       converter.UuidToPgUUID(jobUUID),
+		Status:     status,
+		FinishedAt: pgtype.Timestamptz{Time: fetchResult.CompletedAt, Valid: true},
+		Data:       resultData,
+	})
+	if err != nil {
+		h.log.Warn("failed to update worker_jobs for email fetch",
+			"job_uuid", fetchResult.JobUUID,
+			"error", err,
+		)
+	}
+
+	// If successful, update the scheduler's fetch progress (last_uid)
+	if fetchResult.Success && fetchResult.LastUID > 0 && fetchResult.SchedulerUUID != "" {
+		schedUUID, err := uuid.FromString(fetchResult.SchedulerUUID)
+		if err != nil {
+			h.log.Error("invalid scheduler UUID", "scheduler_uuid", fetchResult.SchedulerUUID, "error", err)
+		} else {
+			err = q.UpdateSchedulerFetchProgress(ctx, query.UpdateSchedulerFetchProgressParams{
+				UUID:    converter.UuidToPgUUID(schedUUID),
+				LastUid: int64(fetchResult.LastUID),
+				LastRun: pgtype.Timestamptz{Time: fetchResult.CompletedAt, Valid: true},
+			})
+			if err != nil {
+				h.log.Warn("failed to update scheduler fetch progress",
+					"scheduler_uuid", fetchResult.SchedulerUUID,
+					"error", err,
+				)
+			} else {
+				h.log.Debug("updated scheduler fetch progress",
+					"scheduler_uuid", fetchResult.SchedulerUUID,
+					"last_uid", fetchResult.LastUID,
+				)
+			}
+		}
+	}
+
+	h.log.Info("email fetch result processed",
+		"job_uuid", fetchResult.JobUUID,
+		"pipeline_uuid", fetchResult.PipelineUUID,
+		"success", fetchResult.Success,
+		"messages_fetched", fetchResult.MessagesFetched,
+		"messages_stored", fetchResult.MessagesStored,
+		"error_count", fetchResult.ErrorCount,
+	)
 }
 

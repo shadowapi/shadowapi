@@ -29,3 +29,25 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+
+delete:
+  operationId: nats-messages-purge
+  summary: Purge all messages from NATS stream
+  description: |
+    Purges (deletes) all messages from the NATS data stream for the current workspace.
+    This is a destructive operation and cannot be undone.
+  tags:
+    - NATS
+  responses:
+    "200":
+      description: Messages purged successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/NatsMessagesPurgeResponse"
+    "500":
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

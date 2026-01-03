@@ -9977,9 +9977,13 @@ func (s *MessageQueryJob) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.TableName.Set {
-			e.FieldStart("table_name")
-			s.TableName.Encode(e)
+		if s.TablesQueried != nil {
+			e.FieldStart("tables_queried")
+			e.ArrStart()
+			for _, elem := range s.TablesQueried {
+				e.Str(elem)
+			}
+			e.ArrEnd()
 		}
 	}
 	{
@@ -10021,7 +10025,7 @@ var jsonFieldsNameOfMessageQueryJob = [12]string{
 	3:  "nats_subject",
 	4:  "limit",
 	5:  "offset",
-	6:  "table_name",
+	6:  "tables_queried",
 	7:  "messages_queried",
 	8:  "messages_published",
 	9:  "error_count",
@@ -10104,15 +10108,24 @@ func (s *MessageQueryJob) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"offset\"")
 			}
-		case "table_name":
+		case "tables_queried":
 			if err := func() error {
-				s.TableName.Reset()
-				if err := s.TableName.Decode(d); err != nil {
+				s.TablesQueried = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.TablesQueried = append(s.TablesQueried, elem)
+					return nil
+				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table_name\"")
+				return errors.Wrap(err, "decode field \"tables_queried\"")
 			}
 		case "messages_queried":
 			if err := func() error {
@@ -11110,6 +11123,102 @@ func (s *NatsMessagesList) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NatsMessagesList) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NatsMessagesPurgeResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NatsMessagesPurgeResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("purged")
+		e.Int(s.Purged)
+	}
+}
+
+var jsonFieldsNameOfNatsMessagesPurgeResponse = [1]string{
+	0: "purged",
+}
+
+// Decode decodes NatsMessagesPurgeResponse from json.
+func (s *NatsMessagesPurgeResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NatsMessagesPurgeResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "purged":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Purged = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"purged\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NatsMessagesPurgeResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNatsMessagesPurgeResponse) {
+					name = jsonFieldsNameOfNatsMessagesPurgeResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NatsMessagesPurgeResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NatsMessagesPurgeResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -18314,32 +18423,11 @@ func (s *StoragePostgresMessagesQueryReq) encodeFields(e *jx.Encoder) {
 			s.Offset.Encode(e)
 		}
 	}
-	{
-		if s.TableName.Set {
-			e.FieldStart("table_name")
-			s.TableName.Encode(e)
-		}
-	}
-	{
-		if s.OrderBy.Set {
-			e.FieldStart("order_by")
-			s.OrderBy.Encode(e)
-		}
-	}
-	{
-		if s.OrderDesc.Set {
-			e.FieldStart("order_desc")
-			s.OrderDesc.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfStoragePostgresMessagesQueryReq = [5]string{
+var jsonFieldsNameOfStoragePostgresMessagesQueryReq = [2]string{
 	0: "limit",
 	1: "offset",
-	2: "table_name",
-	3: "order_by",
-	4: "order_desc",
 }
 
 // Decode decodes StoragePostgresMessagesQueryReq from json.
@@ -18369,36 +18457,6 @@ func (s *StoragePostgresMessagesQueryReq) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"offset\"")
-			}
-		case "table_name":
-			if err := func() error {
-				s.TableName.Reset()
-				if err := s.TableName.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table_name\"")
-			}
-		case "order_by":
-			if err := func() error {
-				s.OrderBy.Reset()
-				if err := s.OrderBy.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"order_by\"")
-			}
-		case "order_desc":
-			if err := func() error {
-				s.OrderDesc.Reset()
-				if err := s.OrderDesc.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"order_desc\"")
 			}
 		default:
 			return errors.Errorf("unexpected field %q", k)

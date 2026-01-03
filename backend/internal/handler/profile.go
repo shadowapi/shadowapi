@@ -11,7 +11,7 @@ import (
 
 // GetProfile implements getProfile operation.
 // Returns the current authenticated user's profile.
-func (h *Handler) GetProfile(ctx context.Context) (*api.User, error) {
+func (h *Handler) GetProfile(ctx context.Context) (api.GetProfileRes, error) {
 	// Get user claims from context (set by auth middleware)
 	claims, ok := ctx.Value(auth.UserClaimsContextKey).(*oauth2.Claims)
 	if !ok || claims == nil {
@@ -60,7 +60,7 @@ func convertRolesToAPI(rolesMap map[string][]string) []api.UserRolesItem {
 }
 
 // UpdateProfile implements updateProfile operation.
-func (h *Handler) UpdateProfile(ctx context.Context, req *api.UserProfile) (*api.User, error) {
+func (h *Handler) UpdateProfile(ctx context.Context, req *api.UserProfile) (api.UpdateProfileRes, error) {
 	// Get user claims from context
 	claims, ok := ctx.Value(auth.UserClaimsContextKey).(*oauth2.Claims)
 	if !ok || claims == nil {

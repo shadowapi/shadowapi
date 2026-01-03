@@ -20,7 +20,7 @@ import (
 // ListRegisteredWorkers implements listRegisteredWorkers operation.
 //
 // GET /workers
-func (h *Handler) ListRegisteredWorkers(ctx context.Context) ([]api.RegisteredWorker, error) {
+func (h *Handler) ListRegisteredWorkers(ctx context.Context) (api.ListRegisteredWorkersRes, error) {
 	q := query.New(h.dbp)
 
 	workers, err := q.ListRegisteredWorkers(ctx, query.ListRegisteredWorkersParams{
@@ -41,13 +41,14 @@ func (h *Handler) ListRegisteredWorkers(ctx context.Context) ([]api.RegisteredWo
 		result = append(result, apiWorker)
 	}
 
-	return result, nil
+	res := api.ListRegisteredWorkersOKApplicationJSON(result)
+	return &res, nil
 }
 
 // GetRegisteredWorker implements getRegisteredWorker operation.
 //
 // GET /workers/{uuid}
-func (h *Handler) GetRegisteredWorker(ctx context.Context, params api.GetRegisteredWorkerParams) (*api.RegisteredWorker, error) {
+func (h *Handler) GetRegisteredWorker(ctx context.Context, params api.GetRegisteredWorkerParams) (api.GetRegisteredWorkerRes, error) {
 	workerUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		return nil, ErrWithCode(400, E("invalid UUID format"))
@@ -73,7 +74,7 @@ func (h *Handler) GetRegisteredWorker(ctx context.Context, params api.GetRegiste
 // UpdateRegisteredWorker implements updateRegisteredWorker operation.
 //
 // PUT /workers/{uuid}
-func (h *Handler) UpdateRegisteredWorker(ctx context.Context, req *api.RegisteredWorker, params api.UpdateRegisteredWorkerParams) (*api.RegisteredWorker, error) {
+func (h *Handler) UpdateRegisteredWorker(ctx context.Context, req *api.RegisteredWorker, params api.UpdateRegisteredWorkerParams) (api.UpdateRegisteredWorkerRes, error) {
 	workerUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		return nil, ErrWithCode(400, E("invalid UUID format"))
@@ -192,10 +193,10 @@ func (h *Handler) UpdateRegisteredWorker(ctx context.Context, req *api.Registere
 // DeleteRegisteredWorker implements deleteRegisteredWorker operation.
 //
 // DELETE /workers/{uuid}
-func (h *Handler) DeleteRegisteredWorker(ctx context.Context, params api.DeleteRegisteredWorkerParams) error {
+func (h *Handler) DeleteRegisteredWorker(ctx context.Context, params api.DeleteRegisteredWorkerParams) (api.DeleteRegisteredWorkerRes, error) {
 	workerUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
-		return ErrWithCode(400, E("invalid UUID format"))
+		return nil, ErrWithCode(400, E("invalid UUID format"))
 	}
 
 	q := query.New(h.dbp)
@@ -204,18 +205,21 @@ func (h *Handler) DeleteRegisteredWorker(ctx context.Context, params api.DeleteR
 	_, err = q.GetRegisteredWorker(ctx, workerUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(404, E("worker not found"))
+			return nil, ErrWithCode(404, E("worker not found"))
 		}
-		return err
+		return nil, err
 	}
 
-	return q.DeleteRegisteredWorker(ctx, workerUUID)
+	if err := q.DeleteRegisteredWorker(ctx, workerUUID); err != nil {
+		return nil, err
+	}
+	return &api.DeleteRegisteredWorkerOK{}, nil
 }
 
 // ListWorkerEnrollmentTokens implements listWorkerEnrollmentTokens operation.
 //
 // GET /workers/enrollment-tokens
-func (h *Handler) ListWorkerEnrollmentTokens(ctx context.Context) ([]api.WorkerEnrollmentToken, error) {
+func (h *Handler) ListWorkerEnrollmentTokens(ctx context.Context) (api.ListWorkerEnrollmentTokensRes, error) {
 	q := query.New(h.dbp)
 
 	tokens, err := q.ListEnrollmentTokens(ctx, query.ListEnrollmentTokensParams{
@@ -231,13 +235,14 @@ func (h *Handler) ListWorkerEnrollmentTokens(ctx context.Context) ([]api.WorkerE
 		result = append(result, h.mapEnrollmentTokenToAPI(t, ""))
 	}
 
-	return result, nil
+	res := api.ListWorkerEnrollmentTokensOKApplicationJSON(result)
+	return &res, nil
 }
 
 // CreateWorkerEnrollmentToken implements createWorkerEnrollmentToken operation.
 //
 // POST /workers/enrollment-tokens
-func (h *Handler) CreateWorkerEnrollmentToken(ctx context.Context, req *api.WorkerEnrollmentToken) (*api.WorkerEnrollmentToken, error) {
+func (h *Handler) CreateWorkerEnrollmentToken(ctx context.Context, req *api.WorkerEnrollmentToken) (api.CreateWorkerEnrollmentTokenRes, error) {
 	// Get user UUID from context
 	userUUIDStr, err := getUserUUIDFromContext(ctx)
 	if err != nil {
@@ -306,7 +311,7 @@ func (h *Handler) CreateWorkerEnrollmentToken(ctx context.Context, req *api.Work
 // GetWorkerEnrollmentToken implements getWorkerEnrollmentToken operation.
 //
 // GET /workers/enrollment-tokens/{uuid}
-func (h *Handler) GetWorkerEnrollmentToken(ctx context.Context, params api.GetWorkerEnrollmentTokenParams) (*api.WorkerEnrollmentToken, error) {
+func (h *Handler) GetWorkerEnrollmentToken(ctx context.Context, params api.GetWorkerEnrollmentTokenParams) (api.GetWorkerEnrollmentTokenRes, error) {
 	tokenUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		return nil, ErrWithCode(400, E("invalid UUID format"))
@@ -328,10 +333,10 @@ func (h *Handler) GetWorkerEnrollmentToken(ctx context.Context, params api.GetWo
 // DeleteWorkerEnrollmentToken implements deleteWorkerEnrollmentToken operation.
 //
 // DELETE /workers/enrollment-tokens/{uuid}
-func (h *Handler) DeleteWorkerEnrollmentToken(ctx context.Context, params api.DeleteWorkerEnrollmentTokenParams) error {
+func (h *Handler) DeleteWorkerEnrollmentToken(ctx context.Context, params api.DeleteWorkerEnrollmentTokenParams) (api.DeleteWorkerEnrollmentTokenRes, error) {
 	tokenUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
-		return ErrWithCode(400, E("invalid UUID format"))
+		return nil, ErrWithCode(400, E("invalid UUID format"))
 	}
 
 	q := query.New(h.dbp)
@@ -340,12 +345,15 @@ func (h *Handler) DeleteWorkerEnrollmentToken(ctx context.Context, params api.De
 	_, err = q.GetEnrollmentToken(ctx, tokenUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ErrWithCode(404, E("token not found"))
+			return nil, ErrWithCode(404, E("token not found"))
 		}
-		return err
+		return nil, err
 	}
 
-	return q.DeleteEnrollmentToken(ctx, tokenUUID)
+	if err := q.DeleteEnrollmentToken(ctx, tokenUUID); err != nil {
+		return nil, err
+	}
+	return &api.DeleteWorkerEnrollmentTokenOK{}, nil
 }
 
 // mapWorkerToAPI converts a database worker to API worker

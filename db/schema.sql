@@ -372,6 +372,7 @@ CREATE TABLE "scheduler" (
                              timezone           VARCHAR NOT NULL DEFAULT 'UTC',
                              next_run           TIMESTAMP WITH TIME ZONE,
                              last_run           TIMESTAMP WITH TIME ZONE,
+                             last_uid           BIGINT NOT NULL DEFAULT 0, -- last processed IMAP UID for incremental fetch
                              is_enabled         BOOLEAN NOT NULL DEFAULT TRUE,
                              is_paused         BOOLEAN NOT NULL DEFAULT FALSE,
                              batch_size         INTEGER NOT NULL DEFAULT 100, -- number of items to process per execution

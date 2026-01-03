@@ -15,7 +15,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-func (h *Handler) DatasourceWhatsappCreate(ctx context.Context, req *api.DatasourceWhatsapp) (*api.DatasourceWhatsapp, error) {
+func (h *Handler) DatasourceWhatsappCreate(ctx context.Context, req *api.DatasourceWhatsapp) (api.DatasourceWhatsappCreateRes, error) {
 	log := h.log.With("handler", "DatasourceWhatsappCreate")
 
 	// Get user UUID from authenticated session
@@ -56,21 +56,21 @@ func (h *Handler) DatasourceWhatsappCreate(ctx context.Context, req *api.Datasou
 	return &resp, nil
 }
 
-func (h *Handler) DatasourceWhatsappDelete(ctx context.Context, params api.DatasourceWhatsappDeleteParams) error {
+func (h *Handler) DatasourceWhatsappDelete(ctx context.Context, params api.DatasourceWhatsappDeleteParams) (api.DatasourceWhatsappDeleteRes, error) {
 	log := h.log.With("handler", "DatasourceWhatsappDelete")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
-		return ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
 	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true}); err != nil {
 		log.Error("failed to delete datasource", "error", err)
-		return ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
 	}
-	return nil
+	return &api.DatasourceWhatsappDeleteOK{}, nil
 }
 
-func (h *Handler) DatasourceWhatsappGet(ctx context.Context, params api.DatasourceWhatsappGetParams) (*api.DatasourceWhatsapp, error) {
+func (h *Handler) DatasourceWhatsappGet(ctx context.Context, params api.DatasourceWhatsappGetParams) (api.DatasourceWhatsappGetRes, error) {
 	log := h.log.With("handler", "DatasourceWhatsappGet")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
@@ -85,14 +85,14 @@ func (h *Handler) DatasourceWhatsappGet(ctx context.Context, params api.Datasour
 	return QToDatasourceWhatsappRow(dse)
 }
 
-func (h *Handler) DatasourceWhatsappUpdate(ctx context.Context, req *api.DatasourceWhatsapp, params api.DatasourceWhatsappUpdateParams) (*api.DatasourceWhatsapp, error) {
+func (h *Handler) DatasourceWhatsappUpdate(ctx context.Context, req *api.DatasourceWhatsapp, params api.DatasourceWhatsappUpdateParams) (api.DatasourceWhatsappUpdateRes, error) {
 	log := h.log.With("handler", "DatasourceWhatsappUpdate")
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (*api.DatasourceWhatsapp, error) {
+	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.DatasourceWhatsappUpdateRes, error) {
 		dse, err := query.New(tx).GetDatasource(ctx, pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true})
 		if err != nil {
 			log.Error("failed to get datasource", "error", err)
@@ -117,6 +117,6 @@ func (h *Handler) DatasourceWhatsappUpdate(ctx context.Context, req *api.Datasou
 			log.Error("failed to update datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update datasource"))
 		}
-		return h.DatasourceWhatsappGet(ctx, api.DatasourceWhatsappGetParams{UUID: params.UUID})
+		return QToDatasourceWhatsappRow(dse)
 	})
 }

@@ -3801,6 +3801,39 @@ func encodeNatsMessagesListResponse(response NatsMessagesListRes, w http.Respons
 	}
 }
 
+func encodeNatsMessagesPurgeResponse(response NatsMessagesPurgeRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *NatsMessagesPurgeResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *Error:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(500)
+		span.SetStatus(codes.Error, http.StatusText(500))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeOAuth2ClientCallbackResponse(response OAuth2ClientCallbackRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *OAuth2ClientCallbackFound:

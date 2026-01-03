@@ -123,3 +123,28 @@ SELECT w.slug
 FROM pipeline p
 JOIN workspace w ON p.workspace_uuid = w.uuid
 WHERE p.uuid = sqlc.arg('pipeline_uuid')::uuid;
+
+-- name: GetPipelineWithDetails :one
+-- Get a pipeline with its associated datasource and storage settings for scheduler
+SELECT
+    p.uuid as pipeline_uuid,
+    p.workspace_uuid,
+    p.name as pipeline_name,
+    p.type as pipeline_type,
+    p.is_enabled as pipeline_enabled,
+    p.flow as pipeline_flow,
+    w.slug as workspace_slug,
+    d.uuid as datasource_uuid,
+    d.name as datasource_name,
+    d.type as datasource_type,
+    d.provider as datasource_provider,
+    d.settings as datasource_settings,
+    s.uuid as storage_uuid,
+    s.name as storage_name,
+    s.type as storage_type,
+    s.settings as storage_settings
+FROM pipeline p
+INNER JOIN workspace w ON p.workspace_uuid = w.uuid
+INNER JOIN datasource d ON p.datasource_uuid = d.uuid
+INNER JOIN storage s ON p.storage_uuid = s.uuid
+WHERE p.uuid = sqlc.arg('pipeline_uuid')::uuid;
