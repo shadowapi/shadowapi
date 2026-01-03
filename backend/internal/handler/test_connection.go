@@ -141,7 +141,7 @@ func (h *Handler) DatasourceEmailOAuthTest(ctx context.Context, params api.Datas
 
 // StoragePostgresTest initiates a connection test for a PostgreSQL storage.
 // POST /storage/postgres/{uuid}/test
-func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePostgresTestParams) (api.StoragePostgresTestRes, error) {
+func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePostgresTestParams) (*api.TestConnectionJob, error) {
 	log := h.log.With("handler", "StoragePostgresTest")
 
 	// Parse storage UUID
@@ -170,27 +170,16 @@ func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePos
 
 	// Parse settings
 	var settings struct {
-		IsSameDatabase bool   `json:"is_same_database"`
-		Host           string `json:"host"`
-		Port           string `json:"port"`
-		User           string `json:"user"`
-		Password       string `json:"password"`
-		Database       string `json:"database"`
-		Options        string `json:"options"`
+		Host     string `json:"host"`
+		Port     string `json:"port"`
+		User     string `json:"user"`
+		Password string `json:"password"`
+		Database string `json:"database"`
+		Options  string `json:"options"`
 	}
 	if err := json.Unmarshal(storage.Storage.Settings, &settings); err != nil {
 		log.Error("failed to parse storage settings", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("invalid storage settings"))
-	}
-
-	// Handle is_same_database case - return immediate success
-	if settings.IsSameDatabase {
-		log.Debug("storage uses same database, returning immediate success", "storage_uuid", params.UUID)
-		return &api.TestConnectionResult{
-			Success:    true,
-			DurationMs: api.NewOptInt(0),
-			TestedAt:   api.NewOptDateTime(time.Now()),
-		}, nil
 	}
 
 	// Create job record in KV store
@@ -248,20 +237,10 @@ func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePos
 
 // StoragePostgresTestInline tests a PostgreSQL connection using inline parameters (without saving).
 // POST /storage/postgres/test
-func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.StoragePostgresTestRequest) (api.StoragePostgresTestInlineRes, error) {
+func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.StoragePostgresTestRequest) (*api.TestConnectionJob, error) {
 	log := h.log.With("handler", "StoragePostgresTestInline")
 
-	// Handle is_same_database case - return immediate success
-	if req.IsSameDatabase.Or(false) {
-		log.Debug("using same database, returning immediate success")
-		return &api.TestConnectionResult{
-			Success:    true,
-			DurationMs: api.NewOptInt(0),
-			TestedAt:   api.NewOptDateTime(time.Now()),
-		}, nil
-	}
-
-	// Extract and validate required fields for external database
+	// Extract and validate required fields
 	host := req.Host.Or("")
 	port := req.Port.Or("5432")
 	user := req.User.Or("")
@@ -270,10 +249,10 @@ func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.Storag
 	options := req.Options.Or("")
 
 	if host == "" {
-		return nil, ErrWithCode(http.StatusBadRequest, E("host is required for external database"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("host is required"))
 	}
 	if user == "" {
-		return nil, ErrWithCode(http.StatusBadRequest, E("user is required for external database"))
+		return nil, ErrWithCode(http.StatusBadRequest, E("user is required"))
 	}
 
 	// Create job record in KV store

@@ -21540,8 +21540,7 @@ func (s *Server) handleStoragePostgresTablesReplaceRequest(args [1]string, argsE
 // handleStoragePostgresTestRequest handles storage-postgres-test operation.
 //
 // Initiate a connection test for a PostgreSQL storage.
-// - For storages with is_same_database=true, returns immediate success (200).
-// - For external databases, returns a job UUID (202) that can be polled for results.
+// Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/{uuid}/test
 func (s *Server) handleStoragePostgresTestRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -21670,7 +21669,7 @@ func (s *Server) handleStoragePostgresTestRequest(args [1]string, argsEscaped bo
 		return
 	}
 
-	var response StoragePostgresTestRes
+	var response *TestConnectionJob
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -21690,7 +21689,7 @@ func (s *Server) handleStoragePostgresTestRequest(args [1]string, argsEscaped bo
 		type (
 			Request  = struct{}
 			Params   = StoragePostgresTestParams
-			Response = StoragePostgresTestRes
+			Response = *TestConnectionJob
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -21738,8 +21737,7 @@ func (s *Server) handleStoragePostgresTestRequest(args [1]string, argsEscaped bo
 //
 // Test a PostgreSQL storage connection using inline parameters (without saving).
 // Use this endpoint to validate connection parameters before creating or updating a storage.
-// - For is_same_database=true, returns immediate success (200).
-// - For external databases, returns a job UUID (202) that can be polled for results.
+// Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/test
 func (s *Server) handleStoragePostgresTestInlineRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -21873,7 +21871,7 @@ func (s *Server) handleStoragePostgresTestInlineRequest(args [0]string, argsEsca
 		}
 	}()
 
-	var response StoragePostgresTestInlineRes
+	var response *TestConnectionJob
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -21888,7 +21886,7 @@ func (s *Server) handleStoragePostgresTestInlineRequest(args [0]string, argsEsca
 		type (
 			Request  = *StoragePostgresTestRequest
 			Params   = struct{}
-			Response = StoragePostgresTestInlineRes
+			Response = *TestConnectionJob
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

@@ -9017,8 +9017,6 @@ type StoragePostgres struct {
 	Name string `json:"name"`
 	// Indicates whether this storage is enabled.
 	IsEnabled OptBool `json:"is_enabled"`
-	// If true, reuse the app's primary Postgres connection. If false, use custom credentials below.
-	IsSameDatabase OptBool `json:"is_same_database"`
 	// The username used to connect to the PostgreSQL database.
 	User OptString `json:"user"`
 	// The password used to connect to the PostgreSQL database.
@@ -9048,11 +9046,6 @@ func (s *StoragePostgres) GetName() string {
 // GetIsEnabled returns the value of IsEnabled.
 func (s *StoragePostgres) GetIsEnabled() OptBool {
 	return s.IsEnabled
-}
-
-// GetIsSameDatabase returns the value of IsSameDatabase.
-func (s *StoragePostgres) GetIsSameDatabase() OptBool {
-	return s.IsSameDatabase
 }
 
 // GetUser returns the value of User.
@@ -9103,11 +9096,6 @@ func (s *StoragePostgres) SetName(val string) {
 // SetIsEnabled sets the value of IsEnabled.
 func (s *StoragePostgres) SetIsEnabled(val OptBool) {
 	s.IsEnabled = val
-}
-
-// SetIsSameDatabase sets the value of IsSameDatabase.
-func (s *StoragePostgres) SetIsSameDatabase(val OptBool) {
-	s.IsSameDatabase = val
 }
 
 // SetUser sets the value of User.
@@ -9362,8 +9350,6 @@ func (s *StoragePostgresTableCreationMode) UnmarshalText(data []byte) error {
 // Request body for testing PostgreSQL connection before save.
 // Ref: #
 type StoragePostgresTestRequest struct {
-	// If true, use the app's primary Postgres connection. If false, use custom credentials.
-	IsSameDatabase OptBool `json:"is_same_database"`
 	// The username used to connect to the PostgreSQL database.
 	User OptString `json:"user"`
 	// The password used to connect to the PostgreSQL database.
@@ -9376,11 +9362,6 @@ type StoragePostgresTestRequest struct {
 	Database OptString `json:"database"`
 	// Additional connection options in URL query format.
 	Options OptString `json:"options"`
-}
-
-// GetIsSameDatabase returns the value of IsSameDatabase.
-func (s *StoragePostgresTestRequest) GetIsSameDatabase() OptBool {
-	return s.IsSameDatabase
 }
 
 // GetUser returns the value of User.
@@ -9411,11 +9392,6 @@ func (s *StoragePostgresTestRequest) GetDatabase() OptString {
 // GetOptions returns the value of Options.
 func (s *StoragePostgresTestRequest) GetOptions() OptString {
 	return s.Options
-}
-
-// SetIsSameDatabase sets the value of IsSameDatabase.
-func (s *StoragePostgresTestRequest) SetIsSameDatabase(val OptBool) {
-	s.IsSameDatabase = val
 }
 
 // SetUser sets the value of User.
@@ -10050,9 +10026,6 @@ func (s *TestConnectionJob) SetCompletedAt(val OptDateTime) {
 	s.CompletedAt = val
 }
 
-func (*TestConnectionJob) storagePostgresTestInlineRes() {}
-func (*TestConnectionJob) storagePostgresTestRes()       {}
-
 // Type of resource being tested.
 type TestConnectionJobResourceType string
 
@@ -10239,9 +10212,6 @@ func (s *TestConnectionResult) SetTestedAt(val OptDateTime) {
 func (s *TestConnectionResult) SetDetails(val OptTestConnectionResultDetails) {
 	s.Details = val
 }
-
-func (*TestConnectionResult) storagePostgresTestInlineRes() {}
-func (*TestConnectionResult) storagePostgresTestRes()       {}
 
 // Additional test details (e.g., IMAP host, DB version).
 type TestConnectionResultDetails map[string]jx.Raw

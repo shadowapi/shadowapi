@@ -1035,11 +1035,10 @@ func (UnimplementedHandler) StoragePostgresTablesReplace(ctx context.Context, re
 // StoragePostgresTest implements storage-postgres-test operation.
 //
 // Initiate a connection test for a PostgreSQL storage.
-// - For storages with is_same_database=true, returns immediate success (200).
-// - For external databases, returns a job UUID (202) that can be polled for results.
+// Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/{uuid}/test
-func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (r StoragePostgresTestRes, _ error) {
+func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (r *TestConnectionJob, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1047,11 +1046,10 @@ func (UnimplementedHandler) StoragePostgresTest(ctx context.Context, params Stor
 //
 // Test a PostgreSQL storage connection using inline parameters (without saving).
 // Use this endpoint to validate connection parameters before creating or updating a storage.
-// - For is_same_database=true, returns immediate success (200).
-// - For external databases, returns a job UUID (202) that can be polled for results.
+// Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/test
-func (UnimplementedHandler) StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (r StoragePostgresTestInlineRes, _ error) {
+func (UnimplementedHandler) StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (r *TestConnectionJob, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

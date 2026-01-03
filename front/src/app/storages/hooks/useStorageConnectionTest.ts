@@ -9,7 +9,6 @@ type TestConnectionJob = components['schemas']['test_connection_job'];
 type TestConnectionResult = components['schemas']['test_connection_result'];
 
 export interface PostgresTestParams {
-  is_same_database?: boolean;
   user?: string;
   password?: string;
   host?: string;
@@ -82,23 +81,9 @@ export function useStorageConnectionTest() {
     abortRef.current = false;
     setState({ status: 'testing', remainingSeconds: MAX_POLL_ATTEMPTS });
 
-    // is_same_database = true means we don't need an external test
-    if (params.is_same_database) {
-      setState({
-        status: 'completed',
-        result: {
-          success: true,
-          skipped: true,
-          skipReason: 'Using application database - no external test needed',
-        },
-      });
-      return;
-    }
-
     // Call inline test endpoint
-    const { data, error, response } = await client.POST('/storage/postgres/test', {
+    const { data, error } = await client.POST('/storage/postgres/test', {
       body: {
-        is_same_database: params.is_same_database ?? false,
         user: params.user,
         password: params.password,
         host: params.host,
@@ -114,19 +99,6 @@ export function useStorageConnectionTest() {
         result: {
           success: false,
           errorMessage: (error as { detail?: string }).detail || 'Failed to start test',
-        },
-      });
-      return;
-    }
-
-    // Check for immediate success (200)
-    if (response.status === 200 && data && 'success' in data) {
-      const result = data as TestConnectionResult;
-      setState({
-        status: 'completed',
-        result: {
-          success: result.success,
-          durationMs: result.duration_ms ?? 0,
         },
       });
       return;

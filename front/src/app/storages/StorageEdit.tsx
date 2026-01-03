@@ -9,13 +9,13 @@ import {
   message,
   Card,
   Select,
-  Switch,
   Spin,
   Popconfirm,
   Row,
   Col,
   Divider,
   Collapse,
+  Switch,
 } from 'antd';
 import { DeleteOutlined, RightOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import client from '../../api/client';
@@ -42,7 +42,6 @@ interface FormValues {
   access_key_id?: string;
   secret_access_key?: string;
   // PostgreSQL fields
-  is_same_database?: boolean;
   connection_string?: string;
   user?: string;
   password?: string;
@@ -152,7 +151,6 @@ function StorageEdit() {
   })();
 
   const selectedType = Form.useWatch('type', form) || storageType;
-  const isSameDatabase = Form.useWatch('is_same_database', form);
 
   // Track if we're syncing to prevent loops
   const [isSyncing, setIsSyncing] = useState(false);
@@ -349,7 +347,6 @@ function StorageEdit() {
               body: {
                 name: values.name,
                 is_enabled: values.is_enabled,
-                is_same_database: values.is_same_database,
                 user: values.user,
                 password: values.password,
                 host: values.host,
@@ -407,7 +404,6 @@ function StorageEdit() {
               body: {
                 name: values.name,
                 is_enabled: values.is_enabled,
-                is_same_database: values.is_same_database,
                 user: values.user,
                 password: values.password,
                 host: values.host,
@@ -446,26 +442,47 @@ function StorageEdit() {
   };
 
   const handleSubmit = async (values: FormValues) => {
-    // Check if this is postgres with external database that needs testing
-    const needsTest = values.type === 'postgres' && !values.is_same_database;
+    // Check if this is postgres that needs testing
+    const needsTest = values.type === 'postgres';
 
     if (needsTest) {
-      // Store form values and open test modal
-      setPendingFormValues(values);
-      setTestModalOpen(true);
-
-      // Start test with form values
-      await testPostgresConnection({
-        is_same_database: values.is_same_database,
+      // Parse connection string if individual fields are empty
+      // This handles the case where the user fills connection_string and immediately clicks Create
+      let testParams = {
         user: values.user,
         password: values.password,
         host: values.host,
         port: values.port,
         database: values.database,
         options: values.options,
-      });
+      };
+
+      if (!values.host && values.connection_string) {
+        const parsed = parsePostgresUrl(values.connection_string);
+        if (parsed) {
+          testParams = {
+            user: parsed.user,
+            password: parsed.password,
+            host: parsed.host,
+            port: parsed.port,
+            database: parsed.database,
+            options: parsed.options,
+          };
+          // Also update form values for saving later
+          const updatedValues = { ...values, ...parsed };
+          setPendingFormValues(updatedValues);
+        } else {
+          setPendingFormValues(values);
+        }
+      } else {
+        setPendingFormValues(values);
+      }
+
+      // Open test modal and start test
+      setTestModalOpen(true);
+      await testPostgresConnection(testParams);
     } else {
-      // No test needed (s3, hostfiles, or postgres with same database)
+      // No test needed (s3, hostfiles)
       await saveStorage(values);
     }
   };
@@ -491,7 +508,6 @@ function StorageEdit() {
     resetTest();
     if (pendingFormValues) {
       await testPostgresConnection({
-        is_same_database: pendingFormValues.is_same_database,
         user: pendingFormValues.user,
         password: pendingFormValues.password,
         host: pendingFormValues.host,
@@ -555,7 +571,6 @@ function StorageEdit() {
           initialValues={{
             type: 's3',
             is_enabled: true,
-            is_same_database: false,
           }}
         >
           <Form.Item
@@ -629,79 +644,66 @@ function StorageEdit() {
           {selectedType === 'postgres' && (
             <>
               <Form.Item
-                name="is_same_database"
-                label="Use Application Database"
-                valuePropName="checked"
-                extra="Use the same PostgreSQL database as the application"
+                name="connection_string"
+                label="Connection String"
+                extra="Example: postgres://user:password@localhost:5432/database?sslmode=require"
               >
-                <Switch />
+                <Input
+                  placeholder="postgres://user:password@host:5432/database"
+                  onChange={(e) => handleConnectionStringChange(e.target.value)}
+                />
               </Form.Item>
 
-              {!isSameDatabase && (
-                <>
-                  <Form.Item
-                    name="connection_string"
-                    label="Connection String"
-                    extra="Example: postgres://user:password@localhost:5432/database?sslmode=require"
-                  >
-                    <Input
-                      placeholder="postgres://user:password@host:5432/database"
-                      onChange={(e) => handleConnectionStringChange(e.target.value)}
-                    />
-                  </Form.Item>
-
-                  <Collapse
-                    ghost
-                    items={[
-                      {
-                        key: 'manual',
-                        label: (
-                          <Space>
-                            <SettingOutlined />
-                            Manual Configuration
-                          </Space>
-                        ),
-                        children: (
-                          <>
-                            <Form.Item name="host" label="Host">
-                              <Input placeholder="localhost" onChange={handleFieldChange} />
-                            </Form.Item>
-                            <Form.Item name="port" label="Port">
-                              <Input placeholder="5432" onChange={handleFieldChange} />
-                            </Form.Item>
-                            <Form.Item
-                              name="database"
-                              label="Database"
-                              extra="Defaults to 'postgres' if not specified"
-                            >
-                              <Input placeholder="postgres" onChange={handleFieldChange} />
-                            </Form.Item>
-                            <Form.Item name="user" label="Username">
-                              <Input placeholder="postgres" onChange={handleFieldChange} />
-                            </Form.Item>
-                            <Form.Item name="password" label="Password">
-                              <Input.Password
-                                placeholder="Database password"
-                                onChange={handleFieldChange}
-                              />
-                            </Form.Item>
-                            <Form.Item
-                              name="options"
-                              label="Connection Options"
-                              extra="Additional connection options in URL query format"
-                            >
-                              <Input
-                                placeholder="sslmode=require&connect_timeout=10"
-                                onChange={handleFieldChange}
-                              />
-                            </Form.Item>
-                          </>
-                        ),
-                      },
-                    ]}
-                  />
-                </>
-              )}
+              <Collapse
+                ghost
+                items={[
+                  {
+                    key: 'manual',
+                    label: (
+                      <Space>
+                        <SettingOutlined />
+                        Manual Configuration
+                      </Space>
+                    ),
+                    children: (
+                      <>
+                        <Form.Item name="host" label="Host">
+                          <Input placeholder="localhost" onChange={handleFieldChange} />
+                        </Form.Item>
+                        <Form.Item name="port" label="Port">
+                          <Input placeholder="5432" onChange={handleFieldChange} />
+                        </Form.Item>
+                        <Form.Item
+                          name="database"
+                          label="Database"
+                          extra="Defaults to 'postgres' if not specified"
+                        >
+                          <Input placeholder="postgres" onChange={handleFieldChange} />
+                        </Form.Item>
+                        <Form.Item name="user" label="Username">
+                          <Input placeholder="postgres" onChange={handleFieldChange} />
+                        </Form.Item>
+                        <Form.Item name="password" label="Password">
+                          <Input.Password
+                            placeholder="Database password"
+                            onChange={handleFieldChange}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          name="options"
+                          label="Connection Options"
+                          extra="Additional connection options in URL query format"
+                        >
+                          <Input
+                            placeholder="sslmode=require&connect_timeout=10"
+                            onChange={handleFieldChange}
+                          />
+                        </Form.Item>
+                      </>
+                    ),
+                  },
+                ]}
+              />
 
               <Divider />
 
@@ -793,8 +795,8 @@ function StorageEdit() {
           </Paragraph>
           <Title level={5}>PostgreSQL</Title>
           <Paragraph type="secondary">
-            Store data directly in a PostgreSQL database. Can use the application's own database
-            or connect to an external instance.
+            Store data directly in a PostgreSQL database. Connect to any PostgreSQL instance
+            to store structured data.
           </Paragraph>
           <Title level={5}>Host Files</Title>
           <Paragraph type="secondary">

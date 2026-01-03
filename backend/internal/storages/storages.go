@@ -22,9 +22,8 @@ import (
 
 // ProvideDynamicPGConnections uses your main Postgres pool (dbp) to query for
 // storages of type "postgres" (using query.GetStorages). It unmarshals each
-// row's settings into api.StoragePostgres and, depending on `IsSameDatabase`,
-// either reuses dbp or builds a new *pgxpool.Pool. The resulting map is keyed
-// by the storage.UUID string.
+// row's settings into api.StoragePostgres and builds a new *pgxpool.Pool.
+// The resulting map is keyed by the storage.UUID string.
 func ProvideDynamicPGConnections(i do.Injector) (map[string]*pgxpool.Pool, error) {
 	ctx := do.MustInvoke[context.Context](i)
 	log := do.MustInvoke[*slog.Logger](i)
@@ -44,15 +43,6 @@ func ProvideDynamicPGConnections(i do.Injector) (map[string]*pgxpool.Pool, error
 		if err := json.Unmarshal(record.Settings, &pgSettings); err != nil {
 			log.Error("failed to unmarshal postgres settings",
 				"error", err,
-				"storageUUID", uuidStr,
-			)
-			continue
-		}
-
-		if pgSettings.IsSameDatabase.IsSet() && pgSettings.IsSameDatabase.Value {
-			// Reuse the main *pgxpool.Pool
-			pgMap[uuidStr] = dbp
-			log.Info("added Postgres connection (reuse main dbp)",
 				"storageUUID", uuidStr,
 			)
 			continue
@@ -212,14 +202,6 @@ func ReconnectDynamicPGConnections(ctx context.Context, pgMap map[string]*pgxpoo
 						if err := json.Unmarshal(record.Settings, &pgSettings); err != nil {
 							log.Error("failed to unmarshal Postgres settings for reconnect",
 								"storageUUID", uuidStr, "error", err,
-							)
-							continue
-						}
-
-						if pgSettings.IsSameDatabase.IsSet() && pgSettings.IsSameDatabase.Value {
-							pgMap[uuidStr] = dbp
-							log.Info("reconnected Postgres with main dbp",
-								"storageUUID", uuidStr,
 							)
 							continue
 						}

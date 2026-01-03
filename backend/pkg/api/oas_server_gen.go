@@ -691,20 +691,18 @@ type Handler interface {
 	// StoragePostgresTest implements storage-postgres-test operation.
 	//
 	// Initiate a connection test for a PostgreSQL storage.
-	// - For storages with is_same_database=true, returns immediate success (200).
-	// - For external databases, returns a job UUID (202) that can be polled for results.
+	// Returns a job UUID (202) that can be polled for results.
 	//
 	// POST /storage/postgres/{uuid}/test
-	StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (StoragePostgresTestRes, error)
+	StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (*TestConnectionJob, error)
 	// StoragePostgresTestInline implements storage-postgres-test-inline operation.
 	//
 	// Test a PostgreSQL storage connection using inline parameters (without saving).
 	// Use this endpoint to validate connection parameters before creating or updating a storage.
-	// - For is_same_database=true, returns immediate success (200).
-	// - For external databases, returns a job UUID (202) that can be polled for results.
+	// Returns a job UUID (202) that can be polled for results.
 	//
 	// POST /storage/postgres/test
-	StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (StoragePostgresTestInlineRes, error)
+	StoragePostgresTestInline(ctx context.Context, req *StoragePostgresTestRequest) (*TestConnectionJob, error)
 	// StoragePostgresUpdate implements storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.

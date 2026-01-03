@@ -1,8 +1,7 @@
 post:
   description: |
     Initiate a connection test for a PostgreSQL storage.
-    - For storages with is_same_database=true, returns immediate success (200).
-    - For external databases, returns a job UUID (202) that can be polled for results.
+    Returns a job UUID (202) that can be polled for results.
   operationId: storage-postgres-test
   parameters:
     - description: The UUID of the PostgreSQL storage to test.
@@ -12,12 +11,6 @@ post:
       schema:
         type: string
   responses:
-    "200":
-      description: Test completed immediately (for is_same_database=true).
-      content:
-        application/json:
-          schema:
-            $ref: "../openapi.yaml#/components/schemas/TestConnectionResult"
     "202":
       description: Test job created. Poll the returned job UUID for results.
       content:

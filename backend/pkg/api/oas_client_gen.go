@@ -712,20 +712,18 @@ type Invoker interface {
 	// StoragePostgresTest invokes storage-postgres-test operation.
 	//
 	// Initiate a connection test for a PostgreSQL storage.
-	// - For storages with is_same_database=true, returns immediate success (200).
-	// - For external databases, returns a job UUID (202) that can be polled for results.
+	// Returns a job UUID (202) that can be polled for results.
 	//
 	// POST /storage/postgres/{uuid}/test
-	StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (StoragePostgresTestRes, error)
+	StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (*TestConnectionJob, error)
 	// StoragePostgresTestInline invokes storage-postgres-test-inline operation.
 	//
 	// Test a PostgreSQL storage connection using inline parameters (without saving).
 	// Use this endpoint to validate connection parameters before creating or updating a storage.
-	// - For is_same_database=true, returns immediate success (200).
-	// - For external databases, returns a job UUID (202) that can be polled for results.
+	// Returns a job UUID (202) that can be polled for results.
 	//
 	// POST /storage/postgres/test
-	StoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (StoragePostgresTestInlineRes, error)
+	StoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (*TestConnectionJob, error)
 	// StoragePostgresUpdate invokes storage-postgres-update operation.
 	//
 	// Update details of a specific PostgreSQL storage instance by UUID.
@@ -14341,16 +14339,15 @@ func (c *Client) sendStoragePostgresTablesReplace(ctx context.Context, request [
 // StoragePostgresTest invokes storage-postgres-test operation.
 //
 // Initiate a connection test for a PostgreSQL storage.
-// - For storages with is_same_database=true, returns immediate success (200).
-// - For external databases, returns a job UUID (202) that can be polled for results.
+// Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/{uuid}/test
-func (c *Client) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (StoragePostgresTestRes, error) {
+func (c *Client) StoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (*TestConnectionJob, error) {
 	res, err := c.sendStoragePostgresTest(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendStoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (res StoragePostgresTestRes, err error) {
+func (c *Client) sendStoragePostgresTest(ctx context.Context, params StoragePostgresTestParams) (res *TestConnectionJob, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-postgres-test"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -14468,16 +14465,15 @@ func (c *Client) sendStoragePostgresTest(ctx context.Context, params StoragePost
 //
 // Test a PostgreSQL storage connection using inline parameters (without saving).
 // Use this endpoint to validate connection parameters before creating or updating a storage.
-// - For is_same_database=true, returns immediate success (200).
-// - For external databases, returns a job UUID (202) that can be polled for results.
+// Returns a job UUID (202) that can be polled for results.
 //
 // POST /storage/postgres/test
-func (c *Client) StoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (StoragePostgresTestInlineRes, error) {
+func (c *Client) StoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (*TestConnectionJob, error) {
 	res, err := c.sendStoragePostgresTestInline(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendStoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (res StoragePostgresTestInlineRes, err error) {
+func (c *Client) sendStoragePostgresTestInline(ctx context.Context, request *StoragePostgresTestRequest) (res *TestConnectionJob, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("storage-postgres-test-inline"),
 		semconv.HTTPRequestMethodKey.String("POST"),

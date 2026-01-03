@@ -1647,70 +1647,32 @@ func encodeStoragePostgresTablesReplaceResponse(response []StoragePostgresTable,
 	return nil
 }
 
-func encodeStoragePostgresTestResponse(response StoragePostgresTestRes, w http.ResponseWriter, span trace.Span) error {
-	switch response := response.(type) {
-	case *TestConnectionResult:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
+func encodeStoragePostgresTestResponse(response *TestConnectionJob, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(202)
+	span.SetStatus(codes.Ok, http.StatusText(202))
 
-		e := new(jx.Encoder)
-		response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		return nil
-
-	case *TestConnectionJob:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(202)
-		span.SetStatus(codes.Ok, http.StatusText(202))
-
-		e := new(jx.Encoder)
-		response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		return nil
-
-	default:
-		return errors.Errorf("unexpected response type: %T", response)
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
 	}
+
+	return nil
 }
 
-func encodeStoragePostgresTestInlineResponse(response StoragePostgresTestInlineRes, w http.ResponseWriter, span trace.Span) error {
-	switch response := response.(type) {
-	case *TestConnectionResult:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
+func encodeStoragePostgresTestInlineResponse(response *TestConnectionJob, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(202)
+	span.SetStatus(codes.Ok, http.StatusText(202))
 
-		e := new(jx.Encoder)
-		response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		return nil
-
-	case *TestConnectionJob:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(202)
-		span.SetStatus(codes.Ok, http.StatusText(202))
-
-		e := new(jx.Encoder)
-		response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		return nil
-
-	default:
-		return errors.Errorf("unexpected response type: %T", response)
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
 	}
+
+	return nil
 }
 
 func encodeStoragePostgresUpdateResponse(response *StoragePostgres, w http.ResponseWriter, span trace.Span) error {

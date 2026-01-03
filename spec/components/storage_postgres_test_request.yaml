@@ -2,9 +2,6 @@ type: object
 additionalProperties: false
 description: Request body for testing PostgreSQL connection before save
 properties:
-  is_same_database:
-    type: boolean
-    description: "If true, use the app's primary Postgres connection. If false, use custom credentials."
   user:
     description: "The username used to connect to the PostgreSQL database."
     type: string

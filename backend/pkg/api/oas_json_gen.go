@@ -15426,12 +15426,6 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.IsSameDatabase.Set {
-			e.FieldStart("is_same_database")
-			s.IsSameDatabase.Encode(e)
-		}
-	}
-	{
 		if s.User.Set {
 			e.FieldStart("user")
 			s.User.Encode(e)
@@ -15479,18 +15473,17 @@ func (s *StoragePostgres) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStoragePostgres = [11]string{
-	0:  "uuid",
-	1:  "name",
-	2:  "is_enabled",
-	3:  "is_same_database",
-	4:  "user",
-	5:  "password",
-	6:  "host",
-	7:  "port",
-	8:  "database",
-	9:  "options",
-	10: "tables",
+var jsonFieldsNameOfStoragePostgres = [10]string{
+	0: "uuid",
+	1: "name",
+	2: "is_enabled",
+	3: "user",
+	4: "password",
+	5: "host",
+	6: "port",
+	7: "database",
+	8: "options",
+	9: "tables",
 }
 
 // Decode decodes StoragePostgres from json.
@@ -15533,16 +15526,6 @@ func (s *StoragePostgres) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"is_enabled\"")
-			}
-		case "is_same_database":
-			if err := func() error {
-				s.IsSameDatabase.Reset()
-				if err := s.IsSameDatabase.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_same_database\"")
 			}
 		case "user":
 			if err := func() error {
@@ -16075,12 +16058,6 @@ func (s *StoragePostgresTestRequest) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *StoragePostgresTestRequest) encodeFields(e *jx.Encoder) {
 	{
-		if s.IsSameDatabase.Set {
-			e.FieldStart("is_same_database")
-			s.IsSameDatabase.Encode(e)
-		}
-	}
-	{
 		if s.User.Set {
 			e.FieldStart("user")
 			s.User.Encode(e)
@@ -16118,14 +16095,13 @@ func (s *StoragePostgresTestRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStoragePostgresTestRequest = [7]string{
-	0: "is_same_database",
-	1: "user",
-	2: "password",
-	3: "host",
-	4: "port",
-	5: "database",
-	6: "options",
+var jsonFieldsNameOfStoragePostgresTestRequest = [6]string{
+	0: "user",
+	1: "password",
+	2: "host",
+	3: "port",
+	4: "database",
+	5: "options",
 }
 
 // Decode decodes StoragePostgresTestRequest from json.
@@ -16136,16 +16112,6 @@ func (s *StoragePostgresTestRequest) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "is_same_database":
-			if err := func() error {
-				s.IsSameDatabase.Reset()
-				if err := s.IsSameDatabase.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_same_database\"")
-			}
 		case "user":
 			if err := func() error {
 				s.User.Reset()

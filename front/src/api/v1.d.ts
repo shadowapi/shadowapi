@@ -526,8 +526,7 @@ export interface paths {
         /**
          * @description Test a PostgreSQL storage connection using inline parameters (without saving).
          *     Use this endpoint to validate connection parameters before creating or updating a storage.
-         *     - For is_same_database=true, returns immediate success (200).
-         *     - For external databases, returns a job UUID (202) that can be polled for results.
+         *     Returns a job UUID (202) that can be polled for results.
          */
         post: operations["storage-postgres-test-inline"];
         delete?: never;
@@ -566,8 +565,7 @@ export interface paths {
         put?: never;
         /**
          * @description Initiate a connection test for a PostgreSQL storage.
-         *     - For storages with is_same_database=true, returns immediate success (200).
-         *     - For external databases, returns a job UUID (202) that can be polled for results.
+         *     Returns a job UUID (202) that can be polled for results.
          */
         post: operations["storage-postgres-test"];
         delete?: never;
@@ -2057,8 +2055,6 @@ export interface components {
             name: string;
             /** @description Indicates whether this storage is enabled. */
             is_enabled?: boolean;
-            /** @description If true, reuse the app's primary Postgres connection. If false, use custom credentials below. */
-            is_same_database?: boolean;
             /** @description The username used to connect to the PostgreSQL database. */
             user?: string;
             /** @description The password used to connect to the PostgreSQL database. */
@@ -2076,8 +2072,6 @@ export interface components {
         };
         /** @description Request body for testing PostgreSQL connection before save */
         storage_postgres_test_request: {
-            /** @description If true, use the app's primary Postgres connection. If false, use custom credentials. */
-            is_same_database?: boolean;
             /** @description The username used to connect to the PostgreSQL database. */
             user?: string;
             /** @description The password used to connect to the PostgreSQL database. */
@@ -4743,15 +4737,6 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Test completed immediately (for is_same_database=true). */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["test_connection_result"];
-                };
-            };
             /** @description Test job created. Poll the returned job UUID for results. */
             202: {
                 headers: {
@@ -4882,15 +4867,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Test completed immediately (for is_same_database=true). */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["test_connection_result"];
-                };
-            };
             /** @description Test job created. Poll the returned job UUID for results. */
             202: {
                 headers: {
