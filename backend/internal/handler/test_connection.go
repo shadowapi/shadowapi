@@ -246,6 +246,86 @@ func (h *Handler) StoragePostgresTest(ctx context.Context, params api.StoragePos
 	}, nil
 }
 
+// StoragePostgresTestInline tests a PostgreSQL connection using inline parameters (without saving).
+// POST /storage/postgres/test
+func (h *Handler) StoragePostgresTestInline(ctx context.Context, req *api.StoragePostgresTestRequest) (api.StoragePostgresTestInlineRes, error) {
+	log := h.log.With("handler", "StoragePostgresTestInline")
+
+	// Handle is_same_database case - return immediate success
+	if req.IsSameDatabase.Or(false) {
+		log.Debug("using same database, returning immediate success")
+		return &api.TestConnectionResult{
+			Success:    true,
+			DurationMs: api.NewOptInt(0),
+			TestedAt:   api.NewOptDateTime(time.Now()),
+		}, nil
+	}
+
+	// Extract and validate required fields for external database
+	host := req.Host.Or("")
+	port := req.Port.Or("5432")
+	user := req.User.Or("")
+	password := req.Password.Or("")
+	database := req.Database.Or("postgres")
+	options := req.Options.Or("")
+
+	if host == "" {
+		return nil, ErrWithCode(http.StatusBadRequest, E("host is required for external database"))
+	}
+	if user == "" {
+		return nil, ErrWithCode(http.StatusBadRequest, E("user is required for external database"))
+	}
+
+	// Create job record in KV store
+	jobUUID := uuid.Must(uuid.NewV7())
+	err := h.jobStore.Put(ctx, &jobstore.JobResult{
+		UUID:         jobUUID.String(),
+		ResourceType: "postgres",
+		ResourceUUID: "", // No resource UUID since not saved yet
+		Status:       "pending",
+		CreatedAt:    time.Now().UTC(),
+	})
+	if err != nil {
+		log.Error("failed to create test connection job", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
+	}
+
+	// Build job args
+	jobArgs := jobs.TestConnectionPostgresJobArgs{
+		JobUUID:     jobUUID.String(),
+		StorageUUID: "", // Empty - not saved yet
+		Host:        host,
+		Port:        port,
+		User:        user,
+		Password:    password,
+		Database:    database,
+		Options:     options,
+	}
+
+	// Publish job to NATS
+	payload, err := json.Marshal(jobArgs)
+	if err != nil {
+		log.Error("failed to marshal job args", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create test job"))
+	}
+
+	subject := subjects.GlobalJobSubject(subjects.JobTypeTestConnectionPostgres)
+	headers := queue.Headers{"X-Job-ID": jobUUID.String()}
+	if err := h.queue.PublishWithHeaders(ctx, subject, headers, payload); err != nil {
+		log.Error("failed to publish job", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to dispatch test job"))
+	}
+
+	log.Info("PostgreSQL inline connection test job created", "job_uuid", jobUUID.String())
+
+	return &api.TestConnectionJob{
+		UUID:         jobUUID.String(),
+		ResourceType: api.TestConnectionJobResourceTypePostgres,
+		ResourceUUID: "", // Empty for inline test
+		Status:       api.TestConnectionJobStatusPending,
+	}, nil
+}
+
 // TestConnectionJobGet retrieves the status and result of a test connection job.
 // GET /test-connection-job/{uuid}
 func (h *Handler) TestConnectionJobGet(ctx context.Context, params api.TestConnectionJobGetParams) (*api.TestConnectionJob, error) {

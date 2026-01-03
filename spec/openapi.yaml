@@ -115,6 +115,12 @@ components:
       $ref: "components/source_field_definition.yaml"
     TransformDefinition:
       $ref: "components/transform_definition.yaml"
+    TestConnectionResult:
+      $ref: "components/test_connection_result.yaml"
+    TestConnectionJob:
+      $ref: "components/test_connection_job.yaml"
+    StoragePostgresTestRequest:
+      $ref: "components/storage_postgres_test_request.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -138,6 +144,8 @@ paths:
     $ref: "paths/datasource_email_oauth.yaml"
   /datasource/email_oauth/{uuid}:
     $ref: "paths/datasource_email_oauth_uuid.yaml"
+  /datasource/email_oauth/{uuid}/test:
+    $ref: "paths/datasource_email_oauth_uuid_test.yaml"
   /datasource/{uuid}/oauth2/client:
     $ref: "paths/datasource_uuid_oauth2_client.yaml"
   /datasource/telegram:
@@ -176,8 +184,12 @@ paths:
     $ref: "paths/storage.yaml"
   /storage/postgres:
     $ref: "paths/storage_postgres.yaml"
+  /storage/postgres/test:
+    $ref: "paths/storage_postgres_test.yaml"
   /storage/postgres/{uuid}:
     $ref: "paths/storage_postgres_uuid.yaml"
+  /storage/postgres/{uuid}/test:
+    $ref: "paths/storage_postgres_uuid_test.yaml"
   /storage/postgres/{uuid}/tables:
     $ref: "paths/storage_postgres_uuid_tables.yaml"
   /storage/s3:
@@ -280,6 +292,8 @@ paths:
     $ref: "paths/mapper_transforms.yaml"
   /mapper/validate:
     $ref: "paths/mapper_validate.yaml"
+  /test-connection-job/{uuid}:
+    $ref: "paths/test_connection_job_uuid.yaml"
 
 servers:
   - description: Local development server

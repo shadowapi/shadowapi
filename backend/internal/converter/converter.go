@@ -4,10 +4,12 @@ package converter
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
-	"strings"
 )
 
 func BytesToUUID(b []byte) ([16]byte, error) {
@@ -170,4 +172,13 @@ func GoogleToGofrsUUIDPtr(googleUUID [16]byte) *uuid.UUID {
 // GofrsToGoogleUUID converts a gofrs/uuid.UUID to a google/uuid.UUID
 func GofrsToGoogleUUID(gofrsUUID uuid.UUID) [16]byte {
 	return [16]byte(gofrsUUID)
+}
+
+// TimeToPgTimestamptz converts a time.Time to pgtype.Timestamptz.
+// If the time is zero, returns an invalid (null) Timestamptz.
+func TimeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
+	if t.IsZero() {
+		return pgtype.Timestamptz{Valid: false}
+	}
+	return pgtype.Timestamptz{Time: t, Valid: true}
 }

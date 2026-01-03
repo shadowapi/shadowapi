@@ -40,6 +40,8 @@ func Provide(i do.Injector) (*Executor, error) {
 // registerHandlers registers all job handlers.
 func (e *Executor) registerHandlers() {
 	e.handlers["tokenRefresh"] = e.handleTokenRefresh
+	e.handlers["testConnectionEmailOAuth"] = e.handleTestConnectionEmailOAuth
+	e.handlers["testConnectionPostgres"] = e.handleTestConnectionPostgres
 }
 
 // Execute runs a job by its type and returns the result.

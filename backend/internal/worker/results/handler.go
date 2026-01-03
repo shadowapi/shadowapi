@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -125,8 +124,10 @@ func (h *Handler) handleResult(msg queue.Msg) {
 	}
 
 	// Handle token refresh results
-	if len(result.ResultData) > 0 && isTokenRefreshResult(msg.Subject()) {
-		h.handleTokenRefreshResult(ctx, result)
+	if refreshResult := isTokenRefreshResult(result.ResultData); refreshResult != nil {
+		h.handleTokenRefreshResultDirect(ctx, refreshResult)
+		msg.Ack()
+		return
 	}
 
 	// Update the worker_jobs table for regular jobs
@@ -184,9 +185,21 @@ func (h *Handler) handleResult(msg queue.Msg) {
 	msg.Ack()
 }
 
-// isTokenRefreshResult checks if the message is a token refresh result
-func isTokenRefreshResult(subject string) bool {
-	return strings.Contains(subject, "tokenRefresh")
+// isTokenRefreshResult checks if the result data is a token refresh result by trying to unmarshal it.
+// Returns the unmarshalled result if successful, nil otherwise.
+func isTokenRefreshResult(data []byte) *jobs.TokenRefreshResult {
+	if len(data) == 0 {
+		return nil
+	}
+	var result jobs.TokenRefreshResult
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil
+	}
+	// Token refresh results have a non-empty TokenUUID and no ResourceType field
+	if result.TokenUUID != "" {
+		return &result
+	}
+	return nil
 }
 
 // tryHandleTestConnectionResult attempts to handle a result as a test connection result.
@@ -249,14 +262,8 @@ func (h *Handler) tryHandleTestConnectionResult(ctx context.Context, result JobR
 	return true
 }
 
-// handleTokenRefreshResult processes a token refresh job result
-func (h *Handler) handleTokenRefreshResult(ctx context.Context, result JobResult) {
-	var refreshResult jobs.TokenRefreshResult
-	if err := json.Unmarshal(result.ResultData, &refreshResult); err != nil {
-		h.log.Error("failed to unmarshal token refresh result", "error", err)
-		return
-	}
-
+// handleTokenRefreshResultDirect processes a pre-parsed token refresh job result
+func (h *Handler) handleTokenRefreshResultDirect(ctx context.Context, refreshResult *jobs.TokenRefreshResult) {
 	q := query.New(h.dbp)
 
 	if !refreshResult.Success {
@@ -295,8 +302,9 @@ func (h *Handler) handleTokenRefreshResult(ctx context.Context, result JobResult
 
 	// Update token in database
 	if err := q.UpdateOauth2TokenData(ctx, query.UpdateOauth2TokenDataParams{
-		UUID:  converter.UuidToPgUUID(tokenUUID),
-		Token: tokenData,
+		UUID:      converter.UuidToPgUUID(tokenUUID),
+		Token:     tokenData,
+		ExpiresAt: converter.TimeToPgTimestamptz(refreshResult.TokenExpiry),
 	}); err != nil {
 		h.log.Error("failed to update token", "token_uuid", refreshResult.TokenUUID, "error", err)
 		return

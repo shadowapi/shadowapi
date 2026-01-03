@@ -1,0 +1,36 @@
+post:
+  description: |
+    Test a PostgreSQL storage connection using inline parameters (without saving).
+    Use this endpoint to validate connection parameters before creating or updating a storage.
+    - For is_same_database=true, returns immediate success (200).
+    - For external databases, returns a job UUID (202) that can be polled for results.
+  operationId: storage-postgres-test-inline
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/StoragePostgresTestRequest"
+  responses:
+    "200":
+      description: Test completed immediately (for is_same_database=true).
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/TestConnectionResult"
+    "202":
+      description: Test job created. Poll the returned job UUID for results.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/TestConnectionJob"
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while initiating the connection test.
+  tags:
+    - storage
+    - storage-postgres
+    - test-connection

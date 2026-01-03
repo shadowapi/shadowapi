@@ -72,11 +72,12 @@ func (t *TokenStore) saveToken(token *oauth2.Token) error {
 		return err
 	}
 
-	update := query.UpdateOauth2TokenParams{
-		UUID:  converter.UuidToPgUUID(t.tokenUUID),
-		Token: tokenData,
+	update := query.UpdateOauth2TokenDataParams{
+		UUID:      converter.UuidToPgUUID(t.tokenUUID),
+		Token:     tokenData,
+		ExpiresAt: converter.TimeToPgTimestamptz(token.Expiry),
 	}
-	if err := tx.UpdateOauth2Token(t.ctx, update); err != nil {
+	if err := tx.UpdateOauth2TokenData(t.ctx, update); err != nil {
 		slog.Error("failed to update token", "error", err)
 		return err
 	}

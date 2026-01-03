@@ -119,13 +119,13 @@ SELECT
     sqlc.embed(datasource),
     CASE
         WHEN datasource.type = 'email_oauth'
-             AND datasource.settings->>'oauth2_token_uuid' IS NOT NULL
+             AND datasource.settings->>'oauth2_client_uuid' IS NOT NULL
              AND ot.uuid IS NOT NULL
         THEN true
         ELSE false
     END AS is_oauth_authenticated
 FROM datasource
-LEFT JOIN oauth2_token ot ON ot.uuid = (datasource.settings->>'oauth2_token_uuid')::uuid
+LEFT JOIN oauth2_token ot ON ot.client_uuid = (datasource.settings->>'oauth2_client_uuid')::uuid
 ORDER BY datasource.created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 OFFSET sqlc.arg('offset');
@@ -135,13 +135,13 @@ SELECT
     sqlc.embed(datasource),
     CASE
         WHEN datasource.type = 'email_oauth'
-             AND datasource.settings->>'oauth2_token_uuid' IS NOT NULL
+             AND datasource.settings->>'oauth2_client_uuid' IS NOT NULL
              AND ot.uuid IS NOT NULL
         THEN true
         ELSE false
     END AS is_oauth_authenticated
 FROM datasource
-LEFT JOIN oauth2_token ot ON ot.uuid = (datasource.settings->>'oauth2_token_uuid')::uuid
+LEFT JOIN oauth2_token ot ON ot.client_uuid = (datasource.settings->>'oauth2_client_uuid')::uuid
 WHERE datasource.workspace_uuid = sqlc.arg('workspace_uuid')::uuid
 ORDER BY datasource.created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)

@@ -371,13 +371,13 @@ SELECT
     datasource.uuid, datasource.workspace_uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at,
     CASE
         WHEN datasource.type = 'email_oauth'
-             AND datasource.settings->>'oauth2_token_uuid' IS NOT NULL
+             AND datasource.settings->>'oauth2_client_uuid' IS NOT NULL
              AND ot.uuid IS NOT NULL
         THEN true
         ELSE false
     END AS is_oauth_authenticated
 FROM datasource
-LEFT JOIN oauth2_token ot ON ot.uuid = (datasource.settings->>'oauth2_token_uuid')::uuid
+LEFT JOIN oauth2_token ot ON ot.client_uuid = (datasource.settings->>'oauth2_client_uuid')::uuid
 ORDER BY datasource.created_at DESC
 LIMIT NULLIF($2::int, 0)
 OFFSET $1
@@ -430,13 +430,13 @@ SELECT
     datasource.uuid, datasource.workspace_uuid, datasource.user_uuid, datasource.name, datasource.type, datasource.is_enabled, datasource.provider, datasource.settings, datasource.created_at, datasource.updated_at,
     CASE
         WHEN datasource.type = 'email_oauth'
-             AND datasource.settings->>'oauth2_token_uuid' IS NOT NULL
+             AND datasource.settings->>'oauth2_client_uuid' IS NOT NULL
              AND ot.uuid IS NOT NULL
         THEN true
         ELSE false
     END AS is_oauth_authenticated
 FROM datasource
-LEFT JOIN oauth2_token ot ON ot.uuid = (datasource.settings->>'oauth2_token_uuid')::uuid
+LEFT JOIN oauth2_token ot ON ot.client_uuid = (datasource.settings->>'oauth2_client_uuid')::uuid
 WHERE datasource.workspace_uuid = $1::uuid
 ORDER BY datasource.created_at DESC
 LIMIT NULLIF($3::int, 0)

@@ -1,0 +1,27 @@
+post:
+  description: Initiate a connection test for an OAuth email datasource. Returns a job UUID that can be polled for results.
+  operationId: datasource-email-oauth-test
+  parameters:
+    - description: The UUID of the OAuth email datasource to test.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "202":
+      description: Test job created successfully. Poll the returned job UUID for results.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/TestConnectionJob"
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while initiating the connection test.
+  tags:
+    - datasource
+    - datasource-email-oauth
+    - test-connection

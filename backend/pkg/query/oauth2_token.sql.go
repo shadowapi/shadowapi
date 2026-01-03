@@ -18,6 +18,7 @@ INSERT INTO oauth2_token (
     client_uuid,
     user_uuid,
     token,
+    expires_at,
     created_at,
     updated_at
 ) VALUES (
@@ -25,16 +26,18 @@ INSERT INTO oauth2_token (
     $2::uuid,
     $3::uuid,
     $4,
+    $5,
     NOW(),
     NOW()
 ) RETURNING uuid, client_uuid, user_uuid, token, expires_at, created_at, updated_at, name
 `
 
 type CreateOauth2TokenParams struct {
-	UUID       pgtype.UUID `json:"uuid"`
-	ClientUuid pgtype.UUID `json:"client_uuid"`
-	UserUUID   pgtype.UUID `json:"user_uuid"`
-	Token      []byte      `json:"token"`
+	UUID       pgtype.UUID        `json:"uuid"`
+	ClientUuid pgtype.UUID        `json:"client_uuid"`
+	UserUUID   pgtype.UUID        `json:"user_uuid"`
+	Token      []byte             `json:"token"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
 }
 
 func (q *Queries) CreateOauth2Token(ctx context.Context, arg CreateOauth2TokenParams) (Oauth2Token, error) {
@@ -43,6 +46,7 @@ func (q *Queries) CreateOauth2Token(ctx context.Context, arg CreateOauth2TokenPa
 		arg.ClientUuid,
 		arg.UserUUID,
 		arg.Token,
+		arg.ExpiresAt,
 	)
 	var i Oauth2Token
 	err := row.Scan(
@@ -318,18 +322,20 @@ func (q *Queries) GetTokensToRefresh(ctx context.Context, clientUuid interface{}
 
 const updateOauth2Token = `-- name: UpdateOauth2Token :exec
 UPDATE oauth2_token SET
-                        client_uuid = $1::uuid,
+    client_uuid = $1::uuid,
     user_uuid = $2::uuid,
     token = $3,
+    expires_at = $4,
     updated_at = NOW()
-WHERE uuid = $4::uuid
+WHERE uuid = $5::uuid
 `
 
 type UpdateOauth2TokenParams struct {
-	ClientUuid pgtype.UUID `json:"client_uuid"`
-	UserUUID   pgtype.UUID `json:"user_uuid"`
-	Token      []byte      `json:"token"`
-	UUID       pgtype.UUID `json:"uuid"`
+	ClientUuid pgtype.UUID        `json:"client_uuid"`
+	UserUUID   pgtype.UUID        `json:"user_uuid"`
+	Token      []byte             `json:"token"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
+	UUID       pgtype.UUID        `json:"uuid"`
 }
 
 func (q *Queries) UpdateOauth2Token(ctx context.Context, arg UpdateOauth2TokenParams) error {
@@ -337,6 +343,7 @@ func (q *Queries) UpdateOauth2Token(ctx context.Context, arg UpdateOauth2TokenPa
 		arg.ClientUuid,
 		arg.UserUUID,
 		arg.Token,
+		arg.ExpiresAt,
 		arg.UUID,
 	)
 	return err
@@ -345,16 +352,18 @@ func (q *Queries) UpdateOauth2Token(ctx context.Context, arg UpdateOauth2TokenPa
 const updateOauth2TokenData = `-- name: UpdateOauth2TokenData :exec
 UPDATE oauth2_token SET
     token = $1,
+    expires_at = $2,
     updated_at = NOW()
-WHERE uuid = $2::uuid
+WHERE uuid = $3::uuid
 `
 
 type UpdateOauth2TokenDataParams struct {
-	Token []byte      `json:"token"`
-	UUID  pgtype.UUID `json:"uuid"`
+	Token     []byte             `json:"token"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	UUID      pgtype.UUID        `json:"uuid"`
 }
 
 func (q *Queries) UpdateOauth2TokenData(ctx context.Context, arg UpdateOauth2TokenDataParams) error {
-	_, err := q.db.Exec(ctx, updateOauth2TokenData, arg.Token, arg.UUID)
+	_, err := q.db.Exec(ctx, updateOauth2TokenData, arg.Token, arg.ExpiresAt, arg.UUID)
 	return err
 }

@@ -1,0 +1,25 @@
+get:
+  description: Get the status and result of a test connection job.
+  operationId: test-connection-job-get
+  parameters:
+    - description: The UUID of the test connection job.
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Test connection job retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/TestConnectionJob"
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: An error occurred while retrieving the job.
+  tags:
+    - test-connection

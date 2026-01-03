@@ -1,0 +1,43 @@
+# spec/components/test_connection_job.yaml
+type: object
+additionalProperties: false
+description: A test connection job record
+properties:
+  uuid:
+    type: string
+    description: The unique identifier of the test connection job
+    readOnly: true
+  resource_type:
+    type: string
+    description: Type of resource being tested
+    enum:
+      - email_oauth
+      - postgres
+  resource_uuid:
+    type: string
+    description: UUID of the resource being tested
+  status:
+    type: string
+    description: Current job status
+    enum:
+      - pending
+      - running
+      - completed
+      - failed
+  result:
+    $ref: "../openapi.yaml#/components/schemas/TestConnectionResult"
+  created_at:
+    type: string
+    format: date-time
+    description: When the job was created
+    readOnly: true
+  completed_at:
+    type: string
+    format: date-time
+    description: When the job completed (if finished)
+    readOnly: true
+required:
+  - uuid
+  - resource_type
+  - resource_uuid
+  - status

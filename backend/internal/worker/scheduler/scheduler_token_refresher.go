@@ -59,13 +59,15 @@ func (s *TokenRefresherScheduler) Start(ctx context.Context) {
 }
 
 func (s *TokenRefresherScheduler) run(ctx context.Context) {
+	s.log.Debug("token refresh scheduler tick")
 	queries := query.New(s.dbp)
 	// Query tokens expiring within the next 5 minutes
-	tokens, err := queries.GetTokensToRefresh(ctx, nil)
+	tokens, err := queries.GetTokensToRefresh(ctx, "")
 	if err != nil {
 		s.log.Error("Failed fetching tokens to refresh", "err", err)
 		return
 	}
+	s.log.Debug("found tokens to refresh", "count", len(tokens))
 	for _, tokenRow := range tokens {
 		// Parse the stored token data
 		var storedToken oauth2.Token

@@ -109,6 +109,7 @@ func (h *Handler) handleGmailToken(
 			ClientUuid: pgClientUUID,
 			UserUUID:   pgUserUUID,
 			Token:      tokenData,
+			ExpiresAt:  converter.TimeToPgTimestamptz(token.Expiry),
 		})
 
 		if _, err := q.CreateOauth2Token(ctx, query.CreateOauth2TokenParams{
@@ -116,6 +117,7 @@ func (h *Handler) handleGmailToken(
 			ClientUuid: pgClientUUID,
 			UserUUID:   pgUserUUID,
 			Token:      tokenData,
+			ExpiresAt:  converter.TimeToPgTimestamptz(token.Expiry),
 		}); err != nil {
 			log.Error("4.2 create oauth2 token", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("can't add oauth2 token"))

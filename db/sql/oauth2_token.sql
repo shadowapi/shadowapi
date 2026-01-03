@@ -4,6 +4,7 @@ INSERT INTO oauth2_token (
     client_uuid,
     user_uuid,
     token,
+    expires_at,
     created_at,
     updated_at
 ) VALUES (
@@ -11,6 +12,7 @@ INSERT INTO oauth2_token (
     sqlc.arg('client_uuid')::uuid,
     sqlc.arg('user_uuid')::uuid,
     sqlc.arg('token'),
+    sqlc.arg('expires_at'),
     NOW(),
     NOW()
 ) RETURNING *;
@@ -66,9 +68,10 @@ OFFSET sqlc.arg('offset')::int;
 
 -- name: UpdateOauth2Token :exec
 UPDATE oauth2_token SET
-                        client_uuid = sqlc.arg('client_uuid')::uuid,
+    client_uuid = sqlc.arg('client_uuid')::uuid,
     user_uuid = sqlc.arg('user_uuid')::uuid,
     token = sqlc.arg('token'),
+    expires_at = sqlc.arg('expires_at'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
@@ -83,5 +86,6 @@ WHERE client_uuid = sqlc.arg('client_uuid')::uuid;
 -- name: UpdateOauth2TokenData :exec
 UPDATE oauth2_token SET
     token = sqlc.arg('token'),
+    expires_at = sqlc.arg('expires_at'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;

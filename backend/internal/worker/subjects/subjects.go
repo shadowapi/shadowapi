@@ -22,6 +22,10 @@ const (
 	JobTypeEmailApplyPipeline = "emailApplyPipeline"
 	JobTypeTokenRefresh       = "tokenRefresh"
 	JobTypeDummy              = "dummy"
+
+	// Test connection job types
+	JobTypeTestConnectionEmailOAuth = "testConnectionEmailOAuth"
+	JobTypeTestConnectionPostgres   = "testConnectionPostgres"
 )
 
 // JobSubject returns the subject for publishing a job

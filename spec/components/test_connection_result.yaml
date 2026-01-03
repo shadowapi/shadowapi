@@ -1,0 +1,41 @@
+# spec/components/test_connection_result.yaml
+type: object
+additionalProperties: false
+description: Result of a connection test
+properties:
+  success:
+    type: boolean
+    description: Whether the connection test succeeded
+  error_code:
+    type: string
+    description: Categorized error code for programmatic handling
+    enum:
+      - auth_failed
+      - invalid_credentials
+      - connection_refused
+      - connection_timeout
+      - host_unreachable
+      - dns_failure
+      - ssl_required
+      - imap_disabled
+      - oauth_scope_insufficient
+      - unknown
+  error_message:
+    type: string
+    description: Human-readable error description
+  error_details:
+    type: string
+    description: Detailed technical error message
+  duration_ms:
+    type: integer
+    description: Test duration in milliseconds
+  tested_at:
+    type: string
+    format: date-time
+    description: When the test was performed
+  details:
+    type: object
+    additionalProperties: true
+    description: Additional test details (e.g., IMAP host, DB version)
+required:
+  - success
