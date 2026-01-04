@@ -264,7 +264,7 @@ The application uses path-based workspaces on a single domain:
 
 **How it works:**
 - All requests go to a single domain (`localtest.me`)
-- Workspace context is derived from URL path (`/w/{slug}/*`)
+- Workspace context is derived from URL path (`/w/{slug}/*`) and JWT claims
 - Users are global (one user, one email across all workspaces)
 - Users can be members of multiple workspaces with different roles (owner, admin, member)
 - Workspace membership is checked by middleware before accessing workspace-scoped resources
@@ -308,6 +308,37 @@ The application uses path-based workspaces on a single domain:
 **Default workspaces:**
 - `internal` and `demo` workspaces are created automatically on first startup
 - Admin user is added as owner to both workspaces using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
+
+**Workspace-scoped JWT tokens:**
+
+JWT access tokens contain workspace context in the `ext` field:
+```json
+{
+  "sub": "user-uuid",
+  "ext": {
+    "workspace_id": "workspace-uuid",
+    "workspace_slug": "internal"
+  }
+}
+```
+
+This enables stateless authorization without per-request database lookups for workspace UUID.
+
+**Workspace context extraction (priority order):**
+1. JWT claims (`ext.workspace_id`, `ext.workspace_slug`) - checked first
+2. URL path (`/w/{slug}/...`) - fallback when JWT has no workspace claims
+
+**Workspace switching flow:**
+1. User calls `POST /api/v1/auth/workspace/switch` with target workspace slug
+2. Backend validates user is member of target workspace
+3. Backend returns OAuth2 authorization URL with workspace in state
+4. Frontend redirects to Hydra (session is remembered, no login required)
+5. Consent handler extracts workspace from state, embeds in new JWT
+6. New tokens issued with workspace claims → user redirected to `/w/{slug}`
+
+**Trade-offs:**
+- Requires OAuth2 flow to switch workspaces (not instant navigation)
+- Token is bound to single workspace per session
 
 ### RBAC (Role-Based Access Control)
 
