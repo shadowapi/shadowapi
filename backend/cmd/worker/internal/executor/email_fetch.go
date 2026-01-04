@@ -13,10 +13,159 @@ import (
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/jobs"
+	"github.com/shadowapi/shadowapi/backend/pkg/transforms"
 )
+
+// parsedBody caches the result of parsing the email body to avoid re-parsing.
+type parsedBody struct {
+	parsed      bool
+	body        string
+	headers     map[string]string
+	contentType string
+}
+
+// ensureParsed lazily parses the email body on first access.
+func (pb *parsedBody) ensureParsed(msg *imap.Message, section *imap.BodySectionName) {
+	if pb.parsed {
+		return
+	}
+	pb.parsed = true
+	pb.headers = make(map[string]string)
+
+	if body := msg.GetBody(section); body != nil {
+		if parsed, err := mail.ReadMessage(body); err == nil {
+			bodyBytes, _ := io.ReadAll(parsed.Body)
+			pb.body = string(bodyBytes)
+
+			// Cache headers
+			pb.headers["From"] = parsed.Header.Get("From")
+			pb.headers["To"] = parsed.Header.Get("To")
+			pb.headers["Cc"] = parsed.Header.Get("Cc")
+			pb.contentType = parsed.Header.Get("Content-Type")
+		}
+	}
+}
+
+// fieldExtractor extracts a specific field from an IMAP message.
+type fieldExtractor func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any
+
+// fieldExtractors maps source field keys to their extraction functions.
+var fieldExtractors = map[string]fieldExtractor{
+	"message.uuid": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		return uuid.Must(uuid.NewV7()).String()
+	},
+	"message.type": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		return "email"
+	},
+	"message.format": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		pb.ensureParsed(msg, section)
+		if pb.contentType != "" && strings.Contains(strings.ToLower(pb.contentType), "html") {
+			return "html"
+		}
+		return "text"
+	},
+	"message.subject": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope != nil {
+			return msg.Envelope.Subject
+		}
+		return ""
+	},
+	"message.sender": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope != nil && len(msg.Envelope.From) > 0 {
+			return msg.Envelope.From[0].Address()
+		}
+		return ""
+	},
+	"message.recipients": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope == nil {
+			return ""
+		}
+		var recipients []string
+		for _, addr := range msg.Envelope.To {
+			recipients = append(recipients, addr.Address())
+		}
+		for _, addr := range msg.Envelope.Cc {
+			recipients = append(recipients, addr.Address())
+		}
+		return strings.Join(recipients, ",")
+	},
+	"message.body": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		pb.ensureParsed(msg, section)
+		return pb.body
+	},
+	"message.created_at": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope != nil && !msg.Envelope.Date.IsZero() {
+			return msg.Envelope.Date
+		}
+		return time.Time{}
+	},
+	"message.external_message_id": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope != nil {
+			return msg.Envelope.MessageId
+		}
+		return ""
+	},
+	"message.reply_to": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope != nil && len(msg.Envelope.ReplyTo) > 0 {
+			return msg.Envelope.ReplyTo[0].Address()
+		}
+		return ""
+	},
+	"message.in_reply_to": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		if msg.Envelope != nil {
+			return msg.Envelope.InReplyTo
+		}
+		return ""
+	},
+	"message.header_from": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		pb.ensureParsed(msg, section)
+		return pb.headers["From"]
+	},
+	"message.header_to": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		pb.ensureParsed(msg, section)
+		return pb.headers["To"]
+	},
+	"message.header_cc": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		pb.ensureParsed(msg, section)
+		return pb.headers["Cc"]
+	},
+	"message.content_type": func(msg *imap.Message, section *imap.BodySectionName, pb *parsedBody) any {
+		pb.ensureParsed(msg, section)
+		return pb.contentType
+	},
+}
+
+// collectRequiredFields pre-computes which fields need extraction based on mapper config.
+func collectRequiredFields(config jobs.MapperConfigData) map[string]bool {
+	required := make(map[string]bool)
+
+	for _, m := range config.Mappings {
+		if !m.IsEnabled {
+			continue
+		}
+
+		// Add the primary source field
+		fieldKey := m.SourceEntity + "." + m.SourceField
+		required[fieldKey] = true
+
+		// Check for concat transform which may reference other fields
+		if m.Transform != nil && m.Transform.Type == "concat" {
+			if parts, ok := transforms.GetParamParts(m.Transform.Params); ok {
+				for _, part := range parts {
+					if part.Type == "field" {
+						required[part.Value] = true
+					}
+				}
+			}
+		}
+	}
+
+	return required
+}
 
 // handleEmailFetch fetches emails via IMAP and stores them in external PostgreSQL
 func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, error) {
@@ -116,6 +265,9 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 	}
 	defer pool.Close()
 
+	// Pre-compute required fields from mapper config (lazy extraction optimization)
+	requiredFields := collectRequiredFields(args.MapperConfig)
+
 	// Create mapper executor
 	mapperExec := newJobMapperExecutor(args.MapperConfig)
 
@@ -139,8 +291,8 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 			highestUID = msg.Uid
 		}
 
-		// Convert IMAP message to source data map
-		sourceData := e.imapToSourceData(msg, section)
+		// Convert IMAP message to source data map (only extracts required fields)
+		sourceData := e.imapToSourceData(msg, section, requiredFields)
 
 		// Apply mapper transformations
 		tableData, err := mapperExec.Execute(sourceData)
@@ -254,70 +406,17 @@ func (e *Executor) connectEmailPostgres(ctx context.Context, args jobs.EmailFetc
 	return pool, nil
 }
 
-// imapToSourceData extracts email data into a flat map for mapper processing
-func (e *Executor) imapToSourceData(msg *imap.Message, section *imap.BodySectionName) map[string]any {
+// imapToSourceData extracts only the required fields from an IMAP message.
+// This is a lazy extraction optimization - fields not in requiredFields are not extracted,
+// avoiding expensive operations like body parsing when not needed.
+func (e *Executor) imapToSourceData(msg *imap.Message, section *imap.BodySectionName, requiredFields map[string]bool) map[string]any {
 	data := make(map[string]any)
+	pb := &parsedBody{} // Lazy body parsing
 
-	// Set default values
-	data["message.type"] = "email"
-	data["message.format"] = "text"
-
-	if msg.Envelope != nil {
-		data["message.subject"] = msg.Envelope.Subject
-
-		if len(msg.Envelope.From) > 0 {
-			data["message.sender"] = msg.Envelope.From[0].Address()
-		}
-
-		var recipients []string
-		for _, addr := range msg.Envelope.To {
-			recipients = append(recipients, addr.Address())
-		}
-		for _, addr := range msg.Envelope.Cc {
-			recipients = append(recipients, addr.Address())
-		}
-		if len(recipients) > 0 {
-			data["message.recipients"] = strings.Join(recipients, ",")
-		}
-
-		if !msg.Envelope.Date.IsZero() {
-			data["message.created_at"] = msg.Envelope.Date
-		}
-
-		data["message.external_message_id"] = msg.Envelope.MessageId
-
-		// Reply-to
-		if len(msg.Envelope.ReplyTo) > 0 {
-			data["message.reply_to"] = msg.Envelope.ReplyTo[0].Address()
-		}
-
-		// In-Reply-To header
-		if msg.Envelope.InReplyTo != "" {
-			data["message.in_reply_to"] = msg.Envelope.InReplyTo
-		}
-	}
-
-	// Read body
-	if body := msg.GetBody(section); body != nil {
-		if parsed, err := mail.ReadMessage(body); err == nil {
-			bodyBytes, _ := io.ReadAll(parsed.Body)
-			data["message.body"] = string(bodyBytes)
-
-			// Extract additional headers
-			if from := parsed.Header.Get("From"); from != "" {
-				data["message.header_from"] = from
-			}
-			if to := parsed.Header.Get("To"); to != "" {
-				data["message.header_to"] = to
-			}
-			if cc := parsed.Header.Get("Cc"); cc != "" {
-				data["message.header_cc"] = cc
-			}
-			if contentType := parsed.Header.Get("Content-Type"); contentType != "" {
-				data["message.content_type"] = contentType
-				if strings.Contains(strings.ToLower(contentType), "html") {
-					data["message.format"] = "html"
-				}
+	for fieldKey := range requiredFields {
+		if extractor, ok := fieldExtractors[fieldKey]; ok {
+			if value := extractor(msg, section, pb); value != nil {
+				data[fieldKey] = value
 			}
 		}
 	}
@@ -378,9 +477,9 @@ func (e *jobMapperExecutor) Execute(sourceData map[string]any) (map[string]map[s
 			continue
 		}
 
-		// Apply transform if specified
+		// Apply transform if specified (pass sourceData for transforms like concat)
 		if mapping.Transform != nil {
-			value = e.applyTransform(value, mapping.Transform)
+			value = e.applyTransform(value, mapping.Transform, sourceData)
 		}
 
 		// Store in result by table
@@ -393,39 +492,22 @@ func (e *jobMapperExecutor) Execute(sourceData map[string]any) (map[string]map[s
 	return result, nil
 }
 
-// applyTransform applies a transformation to a value
-func (e *jobMapperExecutor) applyTransform(value any, transform *jobs.MapperTransformData) any {
-	str, ok := value.(string)
-	if !ok {
-		// Try to convert to string for basic transforms
-		switch v := value.(type) {
-		case time.Time:
-			str = v.Format(time.RFC3339)
-			ok = true
-		case int, int64, float64:
-			str = fmt.Sprintf("%v", v)
-			ok = true
-		}
-	}
-
-	if !ok {
+// applyTransform applies a transformation using the shared transforms package.
+// This provides full parity with the backend mapper (all 9 transform types).
+func (e *jobMapperExecutor) applyTransform(value any, transform *jobs.MapperTransformData, sourceData map[string]any) any {
+	if transform == nil {
 		return value
 	}
 
-	switch transform.Type {
-	case "lowercase":
-		return strings.ToLower(str)
-	case "uppercase":
-		return strings.ToUpper(str)
-	case "trim":
-		return strings.TrimSpace(str)
-	case "set":
-		// Return static value from params
-		if val, ok := transform.Params["value"]; ok {
-			return val
-		}
-		return value
-	default:
+	t := transforms.Transform{
+		Type:   transform.Type,
+		Params: transform.Params,
+	}
+
+	result, err := transforms.Apply(value, t, sourceData)
+	if err != nil {
+		// Graceful degradation: return original value on transform error
 		return value
 	}
+	return result
 }

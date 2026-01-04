@@ -3,13 +3,9 @@ package mapper
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/transforms"
 )
 
 // Executor applies mapper configurations to source data.
@@ -255,211 +251,26 @@ func buildSourceData(message *api.Message, contact *api.Contact) map[string]any 
 	return data
 }
 
-// getParam extracts a parameter from the optional transform params.
-func getParam(transform api.MapperTransform, key string) ([]byte, bool) {
-	if !transform.Params.IsSet() {
-		return nil, false
-	}
-	v, ok := transform.Params.Value[key]
-	return v, ok
-}
-
-// applyTransform applies a transformation to a value.
+// applyTransform applies a transformation to a value using the shared transforms package.
 func applyTransform(value any, transform api.MapperTransform, sourceData map[string]any) (any, error) {
-	switch transform.Type {
-	case api.MapperTransformTypeSet:
-		if v, ok := getParam(transform, "value"); ok {
-			var staticValue string
-			if err := json.Unmarshal(v, &staticValue); err == nil {
-				return staticValue, nil
-			}
-		}
-		return nil, fmt.Errorf("set transform requires 'value' parameter")
-
-	case api.MapperTransformTypeLowercase:
-		return strings.ToLower(toString(value)), nil
-
-	case api.MapperTransformTypeUppercase:
-		return strings.ToUpper(toString(value)), nil
-
-	case api.MapperTransformTypeTrim:
-		return strings.TrimSpace(toString(value)), nil
-
-	case api.MapperTransformTypeToInteger:
-		return strconv.ParseInt(toString(value), 10, 64)
-
-	case api.MapperTransformTypeToBoolean:
-		return parseBool(toString(value))
-
-	case api.MapperTransformTypeDateParse:
-		format := "2006-01-02 15:04:05"
-		if f, ok := getParam(transform, "format"); ok {
-			var formatStr string
-			if err := json.Unmarshal(f, &formatStr); err == nil {
-				format = formatStr
-			}
-		}
-		loc := time.UTC
-		if tz, ok := getParam(transform, "timezone"); ok {
-			var tzStr string
-			if err := json.Unmarshal(tz, &tzStr); err == nil {
-				if parsedLoc, err := time.LoadLocation(tzStr); err == nil {
-					loc = parsedLoc
-				}
-			}
-		}
-		return time.ParseInLocation(format, toString(value), loc)
-
-	case api.MapperTransformTypeRegexExtract:
-		var pattern string
-		if p, ok := getParam(transform, "pattern"); ok {
-			if err := json.Unmarshal(p, &pattern); err != nil {
-				return nil, fmt.Errorf("invalid pattern parameter")
-			}
-		} else {
-			return nil, fmt.Errorf("regex_extract requires 'pattern' parameter")
-		}
-		group := 1
-		if g, ok := getParam(transform, "group"); ok {
-			var groupInt int
-			if err := json.Unmarshal(g, &groupInt); err == nil {
-				group = groupInt
-			}
-		}
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("invalid regex pattern: %w", err)
-		}
-		matches := re.FindStringSubmatch(toString(value))
-		if len(matches) > group {
-			return matches[group], nil
-		}
-		return "", nil
-
-	case api.MapperTransformTypeConcat:
-		var parts []struct {
-			Type  string `json:"type"`
-			Value string `json:"value"`
-		}
-		if p, ok := getParam(transform, "parts"); ok {
-			if err := json.Unmarshal(p, &parts); err != nil {
-				return nil, fmt.Errorf("invalid parts parameter: %w", err)
-			}
-		} else {
-			return nil, fmt.Errorf("concat requires 'parts' parameter")
-		}
-		separator := ""
-		if s, ok := getParam(transform, "separator"); ok {
-			var sepStr string
-			if err := json.Unmarshal(s, &sepStr); err == nil {
-				separator = sepStr
-			}
-		}
-		var resultParts []string
-		for _, part := range parts {
-			switch part.Type {
-			case "field":
-				if v, exists := sourceData[part.Value]; exists {
-					resultParts = append(resultParts, toString(v))
-				}
-			case "static":
-				resultParts = append(resultParts, part.Value)
-			}
-		}
-		return strings.Join(resultParts, separator), nil
-
-	case api.MapperTransformTypeJSONExtract:
-		var path string
-		if p, ok := getParam(transform, "path"); ok {
-			if err := json.Unmarshal(p, &path); err != nil {
-				return nil, fmt.Errorf("invalid path parameter")
-			}
-		} else {
-			return nil, fmt.Errorf("json_extract requires 'path' parameter")
-		}
-		return extractJSONPath(value, path)
-
-	default:
-		return value, nil
+	t := transforms.Transform{
+		Type:   string(transform.Type),
+		Params: extractParams(transform.Params),
 	}
+	return transforms.Apply(value, t, sourceData)
 }
 
-// toString converts any value to string.
-func toString(value any) string {
-	switch v := value.(type) {
-	case string:
-		return v
-	case int:
-		return strconv.Itoa(v)
-	case int64:
-		return strconv.FormatInt(v, 10)
-	case float64:
-		return strconv.FormatFloat(v, 'f', -1, 64)
-	case bool:
-		return strconv.FormatBool(v)
-	case time.Time:
-		return v.Format(time.RFC3339)
-	default:
-		if v == nil {
-			return ""
-		}
-		b, err := json.Marshal(v)
-		if err != nil {
-			return fmt.Sprintf("%v", v)
-		}
-		return string(b)
+// extractParams converts API transform params to a simple map.
+func extractParams(opt api.OptMapperTransformParams) map[string]any {
+	if !opt.IsSet() {
+		return nil
 	}
-}
-
-// parseBool parses a string as boolean.
-func parseBool(s string) (bool, error) {
-	s = strings.ToLower(strings.TrimSpace(s))
-	switch s {
-	case "true", "1", "yes", "on":
-		return true, nil
-	case "false", "0", "no", "off", "":
-		return false, nil
-	default:
-		return false, fmt.Errorf("cannot parse '%s' as boolean", s)
-	}
-}
-
-// extractJSONPath extracts a value from JSON using a simple path expression.
-func extractJSONPath(value any, path string) (any, error) {
-	// Convert to JSON if needed
-	var data map[string]any
-	switch v := value.(type) {
-	case map[string]any:
-		data = v
-	case string:
-		if err := json.Unmarshal([]byte(v), &data); err != nil {
-			return nil, fmt.Errorf("cannot parse as JSON: %w", err)
-		}
-	default:
-		b, err := json.Marshal(v)
-		if err != nil {
-			return nil, fmt.Errorf("cannot marshal to JSON: %w", err)
-		}
-		if err := json.Unmarshal(b, &data); err != nil {
-			return nil, fmt.Errorf("cannot parse as JSON object: %w", err)
+	result := make(map[string]any)
+	for k, v := range opt.Value {
+		var parsed any
+		if err := json.Unmarshal(v, &parsed); err == nil {
+			result[k] = parsed
 		}
 	}
-
-	// Navigate the path
-	parts := strings.Split(path, ".")
-	var current any = data
-	for _, part := range parts {
-		switch c := current.(type) {
-		case map[string]any:
-			var ok bool
-			current, ok = c[part]
-			if !ok {
-				return nil, nil // Path not found
-			}
-		default:
-			return nil, nil // Cannot navigate further
-		}
-	}
-
-	return current, nil
+	return result
 }
