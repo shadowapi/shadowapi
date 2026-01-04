@@ -8,24 +8,30 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
-
-// Standard code generate CRUD
 
 // OAuth2ClientCreate creates a new OAuth2 client.
 func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientCreateReq) (api.OAuth2ClientCreateRes, error) {
 	log := h.log.With("handler", "OAuth2ClientCreate")
 
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	clientUUID := uuid.Must(uuid.NewV7())
 	create := query.CreateOauth2ClientParams{
-		UUID:     converter.UuidToPgUUID(clientUUID),
-		Name:     req.Name,
-		Provider: req.Provider,
-		// New required field.
-		ClientID: req.ClientID,
-		Secret:   req.Secret,
+		UUID:          converter.UuidToPgUUID(clientUUID),
+		WorkspaceUUID: workspaceUUID,
+		Name:          req.Name,
+		Provider:      req.Provider,
+		ClientID:      req.ClientID,
+		Secret:        req.Secret,
 	}
 	obj, err := query.New(h.dbp).CreateOauth2Client(ctx, create)
 	if err != nil {
@@ -37,6 +43,9 @@ func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientC
 		Name:     obj.Name,
 		Provider: obj.Provider,
 		ClientID: obj.ClientID,
+	}
+	if obj.WorkspaceUUID != nil {
+		out.WorkspaceUUID = api.NewOptUUID(converter.GofrsToGoogleUUID(*obj.WorkspaceUUID))
 	}
 	if obj.CreatedAt.Valid {
 		out.CreatedAt = api.NewOptDateTime(obj.CreatedAt.Time)
@@ -50,12 +59,25 @@ func (h *Handler) OAuth2ClientCreate(ctx context.Context, req *api.OAuth2ClientC
 // OAuth2ClientDelete deletes an OAuth2 client.
 func (h *Handler) OAuth2ClientDelete(ctx context.Context, params api.OAuth2ClientDeleteParams) (api.OAuth2ClientDeleteRes, error) {
 	log := h.log.With("handler", "OAuth2ClientDelete")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	clientUUID, err := converter.ConvertStringToPgUUID(params.UUID)
 	if err != nil {
 		log.Error("invalid UUID", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
 	}
-	err = query.New(h.dbp).DeleteOauth2Client(ctx, clientUUID)
+
+	deleteParams := query.DeleteOauth2ClientParams{
+		UUID:          clientUUID,
+		WorkspaceUUID: workspaceUUID,
+	}
+	err = query.New(h.dbp).DeleteOauth2Client(ctx, deleteParams)
 	if err == pgx.ErrNoRows {
 		log.Error("no such oauth2 client", "uuid", params.UUID)
 		return nil, ErrWithCode(http.StatusNotFound, E("no such oauth2 client"))
@@ -69,13 +91,29 @@ func (h *Handler) OAuth2ClientDelete(ctx context.Context, params api.OAuth2Clien
 // OAuth2ClientGet retrieves OAuth2 client details.
 func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGetParams) (api.OAuth2ClientGetRes, error) {
 	log := h.log.With("handler", "OAuth2ClientGet")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	clientUUID, err := converter.ConvertStringToPgUUID(params.UUID)
 	if err != nil {
 		log.Error("invalid UUID", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid UUID"))
 	}
-	details, err := query.New(h.dbp).GetOauth2Client(ctx, clientUUID)
-	if err != nil {
+
+	getParams := query.GetOauth2ClientParams{
+		UUID:          clientUUID,
+		WorkspaceUUID: workspaceUUID,
+	}
+	details, err := query.New(h.dbp).GetOauth2Client(ctx, getParams)
+	if err == pgx.ErrNoRows {
+		log.Error("oauth2 client not found", "uuid", params.UUID)
+		return nil, ErrWithCode(http.StatusNotFound, E("oauth2 client not found"))
+	} else if err != nil {
 		log.Error("failed to get client details", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get client details"))
 	}
@@ -86,6 +124,9 @@ func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGe
 		ClientID: details.Oauth2Client.ClientID,
 		Secret:   details.Oauth2Client.Secret,
 	}
+	if details.Oauth2Client.WorkspaceUUID != nil {
+		result.WorkspaceUUID = api.NewOptUUID(converter.GofrsToGoogleUUID(*details.Oauth2Client.WorkspaceUUID))
+	}
 	if details.Oauth2Client.CreatedAt.Valid {
 		result.CreatedAt = api.NewOptDateTime(details.Oauth2Client.CreatedAt.Time)
 	}
@@ -95,17 +136,25 @@ func (h *Handler) OAuth2ClientGet(ctx context.Context, params api.OAuth2ClientGe
 	return result, nil
 }
 
-// OAuth2ClientList lists all OAuth2 clients.
+// OAuth2ClientList lists all OAuth2 clients in the workspace.
 func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientListParams) (api.OAuth2ClientListRes, error) {
 	log := h.log.With("handler", "OAuth2ClientList")
 
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	offset := params.Offset.Or(0)
 	limit := params.Limit.Or(0)
-	qParams := query.ListOauth2ClientsParams{
-		Offset: offset,
-		Limit:  limit,
+	qParams := query.ListOauth2ClientsByWorkspaceParams{
+		WorkspaceUUID: workspaceUUID,
+		Offset:        offset,
+		Limit:         limit,
 	}
-	clients, err := query.New(h.dbp).ListOauth2Clients(ctx, qParams)
+	clients, err := query.New(h.dbp).ListOauth2ClientsByWorkspace(ctx, qParams)
 	if err != nil && err != pgx.ErrNoRows {
 		log.Error("failed to list oauth2 clients", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
@@ -118,6 +167,9 @@ func (h *Handler) OAuth2ClientList(ctx context.Context, params api.OAuth2ClientL
 			Provider: c.Oauth2Client.Provider,
 			ClientID: c.Oauth2Client.ClientID,
 			Secret:   c.Oauth2Client.Secret,
+		}
+		if c.Oauth2Client.WorkspaceUUID != nil {
+			a.WorkspaceUUID = api.NewOptUUID(converter.GofrsToGoogleUUID(*c.Oauth2Client.WorkspaceUUID))
 		}
 		if c.Oauth2Client.CreatedAt.Valid {
 			a.CreatedAt = api.NewOptDateTime(c.Oauth2Client.CreatedAt.Time)
@@ -207,6 +259,14 @@ func (h *Handler) OAuth2ClientTokenList(ctx context.Context, params api.OAuth2Cl
 // OAuth2ClientUpdate updates an OAuth2 client.
 func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientUpdateReq, params api.OAuth2ClientUpdateParams) (api.OAuth2ClientUpdateRes, error) {
 	log := h.log.With("handler", "OAuth2ClientUpdate", "clientUUID", params.UUID)
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	q := query.New(h.dbp)
 	clientUUID, err := converter.ConvertStringToPgUUID(params.UUID)
 	if err != nil {
@@ -214,11 +274,12 @@ func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientU
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid client id"))
 	}
 	update := query.UpdateOauth2ClientParams{
-		Name:     req.Name,
-		Provider: req.Provider,
-		Secret:   req.Secret,
-		ClientID: req.ClientID,
-		UUID:     clientUUID,
+		Name:          req.Name,
+		Provider:      req.Provider,
+		Secret:        req.Secret,
+		ClientID:      req.ClientID,
+		UUID:          clientUUID,
+		WorkspaceUUID: workspaceUUID,
 	}
 	if err := q.UpdateOauth2Client(ctx, update); err == pgx.ErrNoRows {
 		log.Error("no such oauth2 client")
@@ -227,20 +288,26 @@ func (h *Handler) OAuth2ClientUpdate(ctx context.Context, req *api.OAuth2ClientU
 		log.Error("failed to update oauth2 client", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
-	raw, err := q.GetOauth2Client(ctx, clientUUID)
+
+	getParams := query.GetOauth2ClientParams{
+		UUID:          clientUUID,
+		WorkspaceUUID: workspaceUUID,
+	}
+	raw, err := q.GetOauth2Client(ctx, getParams)
 	if err != nil {
 		log.Error("failed to get oauth2 client after update", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("internal server error"))
 	}
 
 	out := api.OAuth2Client{
-		UUID:      api.NewOptString(raw.Oauth2Client.UUID.String()),
-		Name:      raw.Oauth2Client.Name,
-		Provider:  raw.Oauth2Client.Provider,
-		ClientID:  raw.Oauth2Client.ClientID,
-		Secret:    raw.Oauth2Client.Secret,
-		CreatedAt: api.NewOptDateTime(raw.Oauth2Client.CreatedAt.Time),
-		UpdatedAt: api.NewOptDateTime(raw.Oauth2Client.UpdatedAt.Time),
+		UUID:     api.NewOptString(raw.Oauth2Client.UUID.String()),
+		Name:     raw.Oauth2Client.Name,
+		Provider: raw.Oauth2Client.Provider,
+		ClientID: raw.Oauth2Client.ClientID,
+		Secret:   raw.Oauth2Client.Secret,
+	}
+	if raw.Oauth2Client.WorkspaceUUID != nil {
+		out.WorkspaceUUID = api.NewOptUUID(converter.GofrsToGoogleUUID(*raw.Oauth2Client.WorkspaceUUID))
 	}
 	if raw.Oauth2Client.CreatedAt.Valid {
 		out.CreatedAt = api.NewOptDateTime(raw.Oauth2Client.CreatedAt.Time)

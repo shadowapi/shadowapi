@@ -76,8 +76,8 @@ func (s *TokenRefresherScheduler) run(ctx context.Context) {
 			continue
 		}
 
-		// Load the OAuth2 client config
-		clientRow, err := queries.GetOauth2Client(ctx, converter.UuidPtrToPgUUID(tokenRow.Oauth2Token.ClientUuid))
+		// Load the OAuth2 client config (uses GetOauth2ClientByUUID since scheduler runs without workspace context)
+		clientRow, err := queries.GetOauth2ClientByUUID(ctx, converter.UuidPtrToPgUUID(tokenRow.Oauth2Token.ClientUuid))
 		if err != nil {
 			s.log.Error("Failed to get OAuth2 client", "token_uuid", tokenRow.Oauth2Token.UUID.String(), "client_uuid", tokenRow.Oauth2Token.ClientUuid.String(), "err", err)
 			continue

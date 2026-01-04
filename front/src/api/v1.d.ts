@@ -2075,7 +2075,12 @@ export interface components {
         };
         oauth2_client: {
             /** @description Internal unique ID for the client. */
-            uuid?: string;
+            readonly uuid?: string;
+            /**
+             * Format: uuid
+             * @description Workspace this client belongs to.
+             */
+            readonly workspace_uuid?: string;
             /** @description Friendly name for the admin UI. */
             name: string;
             /** @description Name of the OAuth2 provider (e.g., 'github', 'google'). */
@@ -2088,12 +2093,12 @@ export interface components {
              * Format: date-time
              * @description Timestamp when the client was registered.
              */
-            created_at?: string;
+            readonly created_at?: string;
             /**
              * Format: date-time
              * @description Timestamp when the client was last updated.
              */
-            updated_at?: string;
+            readonly updated_at?: string;
         };
         /** @description OAuth2 token object containing access and refresh tokens. */
         oauth2_client_token_obj: {

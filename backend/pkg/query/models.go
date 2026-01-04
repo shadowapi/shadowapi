@@ -204,13 +204,14 @@ type Message struct {
 }
 
 type Oauth2Client struct {
-	UUID      uuid.UUID          `json:"uuid"`
-	Name      string             `json:"name"`
-	Provider  string             `json:"provider"`
-	ClientID  string             `json:"client_id"`
-	Secret    string             `json:"secret"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UUID          uuid.UUID          `json:"uuid"`
+	WorkspaceUUID *uuid.UUID         `json:"workspace_uuid"`
+	Name          string             `json:"name"`
+	Provider      string             `json:"provider"`
+	ClientID      string             `json:"client_id"`
+	Secret        string             `json:"secret"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Oauth2State struct {

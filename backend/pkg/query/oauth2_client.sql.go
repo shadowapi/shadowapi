@@ -15,6 +15,7 @@ import (
 const createOauth2Client = `-- name: CreateOauth2Client :one
 INSERT INTO oauth2_client (
     uuid,
+    workspace_uuid,
     name,
     provider,
     client_id,
@@ -23,26 +24,29 @@ INSERT INTO oauth2_client (
     updated_at
 ) VALUES (
              $1::uuid,
-             $2,
+             $2::uuid,
              $3,
              $4,
              $5,
+             $6,
              NOW(),
              NOW()
-         ) RETURNING uuid, name, provider, client_id, secret, created_at, updated_at
+         ) RETURNING uuid, workspace_uuid, name, provider, client_id, secret, created_at, updated_at
 `
 
 type CreateOauth2ClientParams struct {
-	UUID     pgtype.UUID `json:"uuid"`
-	Name     string      `json:"name"`
-	Provider string      `json:"provider"`
-	ClientID string      `json:"client_id"`
-	Secret   string      `json:"secret"`
+	UUID          pgtype.UUID `json:"uuid"`
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+	Name          string      `json:"name"`
+	Provider      string      `json:"provider"`
+	ClientID      string      `json:"client_id"`
+	Secret        string      `json:"secret"`
 }
 
 func (q *Queries) CreateOauth2Client(ctx context.Context, arg CreateOauth2ClientParams) (Oauth2Client, error) {
 	row := q.db.QueryRow(ctx, createOauth2Client,
 		arg.UUID,
+		arg.WorkspaceUUID,
 		arg.Name,
 		arg.Provider,
 		arg.ClientID,
@@ -51,6 +55,7 @@ func (q *Queries) CreateOauth2Client(ctx context.Context, arg CreateOauth2Client
 	var i Oauth2Client
 	err := row.Scan(
 		&i.UUID,
+		&i.WorkspaceUUID,
 		&i.Name,
 		&i.Provider,
 		&i.ClientID,
@@ -64,29 +69,70 @@ func (q *Queries) CreateOauth2Client(ctx context.Context, arg CreateOauth2Client
 const deleteOauth2Client = `-- name: DeleteOauth2Client :exec
 DELETE FROM oauth2_client
 WHERE uuid = $1::uuid
+  AND workspace_uuid = $2::uuid
 `
 
-func (q *Queries) DeleteOauth2Client(ctx context.Context, argUuid pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, deleteOauth2Client, argUuid)
+type DeleteOauth2ClientParams struct {
+	UUID          pgtype.UUID `json:"uuid"`
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+}
+
+func (q *Queries) DeleteOauth2Client(ctx context.Context, arg DeleteOauth2ClientParams) error {
+	_, err := q.db.Exec(ctx, deleteOauth2Client, arg.UUID, arg.WorkspaceUUID)
 	return err
 }
 
 const getOauth2Client = `-- name: GetOauth2Client :one
 SELECT
-    oauth2_client.uuid, oauth2_client.name, oauth2_client.provider, oauth2_client.client_id, oauth2_client.secret, oauth2_client.created_at, oauth2_client.updated_at
+    oauth2_client.uuid, oauth2_client.workspace_uuid, oauth2_client.name, oauth2_client.provider, oauth2_client.client_id, oauth2_client.secret, oauth2_client.created_at, oauth2_client.updated_at
 FROM oauth2_client
 WHERE uuid = $1::uuid
+  AND workspace_uuid = $2::uuid
 `
+
+type GetOauth2ClientParams struct {
+	UUID          pgtype.UUID `json:"uuid"`
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+}
 
 type GetOauth2ClientRow struct {
 	Oauth2Client Oauth2Client `json:"oauth2_client"`
 }
 
-func (q *Queries) GetOauth2Client(ctx context.Context, argUuid pgtype.UUID) (GetOauth2ClientRow, error) {
-	row := q.db.QueryRow(ctx, getOauth2Client, argUuid)
+func (q *Queries) GetOauth2Client(ctx context.Context, arg GetOauth2ClientParams) (GetOauth2ClientRow, error) {
+	row := q.db.QueryRow(ctx, getOauth2Client, arg.UUID, arg.WorkspaceUUID)
 	var i GetOauth2ClientRow
 	err := row.Scan(
 		&i.Oauth2Client.UUID,
+		&i.Oauth2Client.WorkspaceUUID,
+		&i.Oauth2Client.Name,
+		&i.Oauth2Client.Provider,
+		&i.Oauth2Client.ClientID,
+		&i.Oauth2Client.Secret,
+		&i.Oauth2Client.CreatedAt,
+		&i.Oauth2Client.UpdatedAt,
+	)
+	return i, err
+}
+
+const getOauth2ClientByUUID = `-- name: GetOauth2ClientByUUID :one
+SELECT
+    oauth2_client.uuid, oauth2_client.workspace_uuid, oauth2_client.name, oauth2_client.provider, oauth2_client.client_id, oauth2_client.secret, oauth2_client.created_at, oauth2_client.updated_at
+FROM oauth2_client
+WHERE uuid = $1::uuid
+`
+
+type GetOauth2ClientByUUIDRow struct {
+	Oauth2Client Oauth2Client `json:"oauth2_client"`
+}
+
+// Used internally when we need to look up a client without workspace context (e.g., token operations)
+func (q *Queries) GetOauth2ClientByUUID(ctx context.Context, argUuid pgtype.UUID) (GetOauth2ClientByUUIDRow, error) {
+	row := q.db.QueryRow(ctx, getOauth2ClientByUUID, argUuid)
+	var i GetOauth2ClientByUUIDRow
+	err := row.Scan(
+		&i.Oauth2Client.UUID,
+		&i.Oauth2Client.WorkspaceUUID,
 		&i.Oauth2Client.Name,
 		&i.Oauth2Client.Provider,
 		&i.Oauth2Client.ClientID,
@@ -99,14 +145,14 @@ func (q *Queries) GetOauth2Client(ctx context.Context, argUuid pgtype.UUID) (Get
 
 const getOauth2Clients = `-- name: GetOauth2Clients :many
 WITH filtered_oauth2_clients AS (
-    SELECT oc.uuid, oc.name, oc.provider, oc.client_id, oc.secret, oc.created_at, oc.updated_at
+    SELECT oc.uuid, oc.workspace_uuid, oc.name, oc.provider, oc.client_id, oc.secret, oc.created_at, oc.updated_at
     FROM oauth2_client oc
-    WHERE
-        (NULLIF($5, '') IS NULL OR oc.name = $5)
-      AND (NULLIF($6, '') IS NULL OR oc.provider = $6)
+    WHERE workspace_uuid = $5::uuid
+      AND (NULLIF($6, '') IS NULL OR oc.name = $6)
+      AND (NULLIF($7, '') IS NULL OR oc.provider = $7)
 )
 SELECT
-    uuid, name, provider, client_id, secret, created_at, updated_at,
+    uuid, workspace_uuid, name, provider, client_id, secret, created_at, updated_at,
     (SELECT count(*) FROM filtered_oauth2_clients) as total_count
 FROM filtered_oauth2_clients
 ORDER BY
@@ -124,19 +170,21 @@ type GetOauth2ClientsParams struct {
 	OrderDirection interface{} `json:"order_direction"`
 	Offset         int32       `json:"offset"`
 	Limit          int32       `json:"limit"`
+	WorkspaceUUID  pgtype.UUID `json:"workspace_uuid"`
 	Name           interface{} `json:"name"`
 	Provider       interface{} `json:"provider"`
 }
 
 type GetOauth2ClientsRow struct {
-	UUID       uuid.UUID          `json:"uuid"`
-	Name       string             `json:"name"`
-	Provider   string             `json:"provider"`
-	ClientID   string             `json:"client_id"`
-	Secret     string             `json:"secret"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	TotalCount int64              `json:"total_count"`
+	UUID          uuid.UUID          `json:"uuid"`
+	WorkspaceUUID *uuid.UUID         `json:"workspace_uuid"`
+	Name          string             `json:"name"`
+	Provider      string             `json:"provider"`
+	ClientID      string             `json:"client_id"`
+	Secret        string             `json:"secret"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	TotalCount    int64              `json:"total_count"`
 }
 
 func (q *Queries) GetOauth2Clients(ctx context.Context, arg GetOauth2ClientsParams) ([]GetOauth2ClientsRow, error) {
@@ -145,6 +193,7 @@ func (q *Queries) GetOauth2Clients(ctx context.Context, arg GetOauth2ClientsPara
 		arg.OrderDirection,
 		arg.Offset,
 		arg.Limit,
+		arg.WorkspaceUUID,
 		arg.Name,
 		arg.Provider,
 	)
@@ -157,6 +206,7 @@ func (q *Queries) GetOauth2Clients(ctx context.Context, arg GetOauth2ClientsPara
 		var i GetOauth2ClientsRow
 		if err := rows.Scan(
 			&i.UUID,
+			&i.WorkspaceUUID,
 			&i.Name,
 			&i.Provider,
 			&i.ClientID,
@@ -175,35 +225,38 @@ func (q *Queries) GetOauth2Clients(ctx context.Context, arg GetOauth2ClientsPara
 	return items, nil
 }
 
-const listOauth2Clients = `-- name: ListOauth2Clients :many
+const listOauth2ClientsByWorkspace = `-- name: ListOauth2ClientsByWorkspace :many
 SELECT
-    oauth2_client.uuid, oauth2_client.name, oauth2_client.provider, oauth2_client.client_id, oauth2_client.secret, oauth2_client.created_at, oauth2_client.updated_at
+    oauth2_client.uuid, oauth2_client.workspace_uuid, oauth2_client.name, oauth2_client.provider, oauth2_client.client_id, oauth2_client.secret, oauth2_client.created_at, oauth2_client.updated_at
 FROM oauth2_client
+WHERE workspace_uuid = $1::uuid
 ORDER BY created_at DESC
-LIMIT NULLIF($2::int, 0)
-    OFFSET $1::int
+LIMIT NULLIF($3::int, 0)
+    OFFSET $2::int
 `
 
-type ListOauth2ClientsParams struct {
-	Offset int32 `json:"offset"`
-	Limit  int32 `json:"limit"`
+type ListOauth2ClientsByWorkspaceParams struct {
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+	Offset        int32       `json:"offset"`
+	Limit         int32       `json:"limit"`
 }
 
-type ListOauth2ClientsRow struct {
+type ListOauth2ClientsByWorkspaceRow struct {
 	Oauth2Client Oauth2Client `json:"oauth2_client"`
 }
 
-func (q *Queries) ListOauth2Clients(ctx context.Context, arg ListOauth2ClientsParams) ([]ListOauth2ClientsRow, error) {
-	rows, err := q.db.Query(ctx, listOauth2Clients, arg.Offset, arg.Limit)
+func (q *Queries) ListOauth2ClientsByWorkspace(ctx context.Context, arg ListOauth2ClientsByWorkspaceParams) ([]ListOauth2ClientsByWorkspaceRow, error) {
+	rows, err := q.db.Query(ctx, listOauth2ClientsByWorkspace, arg.WorkspaceUUID, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListOauth2ClientsRow
+	var items []ListOauth2ClientsByWorkspaceRow
 	for rows.Next() {
-		var i ListOauth2ClientsRow
+		var i ListOauth2ClientsByWorkspaceRow
 		if err := rows.Scan(
 			&i.Oauth2Client.UUID,
+			&i.Oauth2Client.WorkspaceUUID,
 			&i.Oauth2Client.Name,
 			&i.Oauth2Client.Provider,
 			&i.Oauth2Client.ClientID,
@@ -229,14 +282,16 @@ UPDATE oauth2_client SET
                          secret = $4,
                          updated_at = NOW()
 WHERE uuid = $5::uuid
+  AND workspace_uuid = $6::uuid
 `
 
 type UpdateOauth2ClientParams struct {
-	Name     string      `json:"name"`
-	Provider string      `json:"provider"`
-	ClientID string      `json:"client_id"`
-	Secret   string      `json:"secret"`
-	UUID     pgtype.UUID `json:"uuid"`
+	Name          string      `json:"name"`
+	Provider      string      `json:"provider"`
+	ClientID      string      `json:"client_id"`
+	Secret        string      `json:"secret"`
+	UUID          pgtype.UUID `json:"uuid"`
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
 }
 
 func (q *Queries) UpdateOauth2Client(ctx context.Context, arg UpdateOauth2ClientParams) error {
@@ -246,6 +301,7 @@ func (q *Queries) UpdateOauth2Client(ctx context.Context, arg UpdateOauth2Client
 		arg.ClientID,
 		arg.Secret,
 		arg.UUID,
+		arg.WorkspaceUUID,
 	)
 	return err
 }

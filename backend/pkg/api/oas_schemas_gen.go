@@ -5326,6 +5326,8 @@ func (*NatsMessagesPurgeResponse) natsMessagesPurgeRes() {}
 type OAuth2Client struct {
 	// Internal unique ID for the client.
 	UUID OptString `json:"uuid"`
+	// Workspace this client belongs to.
+	WorkspaceUUID OptUUID `json:"workspace_uuid"`
 	// Friendly name for the admin UI.
 	Name string `json:"name"`
 	// Name of the OAuth2 provider (e.g., 'github', 'google').
@@ -5343,6 +5345,11 @@ type OAuth2Client struct {
 // GetUUID returns the value of UUID.
 func (s *OAuth2Client) GetUUID() OptString {
 	return s.UUID
+}
+
+// GetWorkspaceUUID returns the value of WorkspaceUUID.
+func (s *OAuth2Client) GetWorkspaceUUID() OptUUID {
+	return s.WorkspaceUUID
 }
 
 // GetName returns the value of Name.
@@ -5378,6 +5385,11 @@ func (s *OAuth2Client) GetUpdatedAt() OptDateTime {
 // SetUUID sets the value of UUID.
 func (s *OAuth2Client) SetUUID(val OptString) {
 	s.UUID = val
+}
+
+// SetWorkspaceUUID sets the value of WorkspaceUUID.
+func (s *OAuth2Client) SetWorkspaceUUID(val OptUUID) {
+	s.WorkspaceUUID = val
 }
 
 // SetName sets the value of Name.

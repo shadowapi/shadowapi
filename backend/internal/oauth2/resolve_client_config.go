@@ -22,7 +22,7 @@ func GetClientConfig(ctx context.Context, dbp *pgxpool.Pool, clientID string) (*
 		return nil, fmt.Errorf("invalid client id")
 	}
 
-	row, err := tx.GetOauth2Client(ctx, pgID)
+	row, err := tx.GetOauth2ClientByUUID(ctx, pgID)
 	if err != nil {
 		slog.Error("query oauth2 client", "error", err)
 		return nil, fmt.Errorf("failed to query oauth2 client")

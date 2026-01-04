@@ -11507,6 +11507,12 @@ func (s *OAuth2Client) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.WorkspaceUUID.Set {
+			e.FieldStart("workspace_uuid")
+			s.WorkspaceUUID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
@@ -11536,14 +11542,15 @@ func (s *OAuth2Client) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOAuth2Client = [7]string{
+var jsonFieldsNameOfOAuth2Client = [8]string{
 	0: "uuid",
-	1: "name",
-	2: "provider",
-	3: "client_id",
-	4: "secret",
-	5: "created_at",
-	6: "updated_at",
+	1: "workspace_uuid",
+	2: "name",
+	3: "provider",
+	4: "client_id",
+	5: "secret",
+	6: "created_at",
+	7: "updated_at",
 }
 
 // Decode decodes OAuth2Client from json.
@@ -11565,8 +11572,18 @@ func (s *OAuth2Client) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"uuid\"")
 			}
+		case "workspace_uuid":
+			if err := func() error {
+				s.WorkspaceUUID.Reset()
+				if err := s.WorkspaceUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"workspace_uuid\"")
+			}
 		case "name":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -11578,7 +11595,7 @@ func (s *OAuth2Client) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Provider = string(v)
@@ -11590,7 +11607,7 @@ func (s *OAuth2Client) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"provider\"")
 			}
 		case "client_id":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.ClientID = string(v)
@@ -11602,7 +11619,7 @@ func (s *OAuth2Client) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"client_id\"")
 			}
 		case "secret":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.Secret = string(v)
@@ -11643,7 +11660,7 @@ func (s *OAuth2Client) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011110,
+		0b00111100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

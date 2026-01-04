@@ -4,6 +4,12 @@ properties:
   uuid:
     type: string
     description: "Internal unique ID for the client."
+    readOnly: true
+  workspace_uuid:
+    type: string
+    format: uuid
+    description: "Workspace this client belongs to."
+    readOnly: true
   name:
     type: string
     description: "Friendly name for the admin UI."
@@ -20,10 +26,12 @@ properties:
     type: string
     format: date-time
     description: "Timestamp when the client was registered."
+    readOnly: true
   updated_at:
     type: string
     format: date-time
     description: "Timestamp when the client was last updated."
+    readOnly: true
 required:
   - name
   - provider

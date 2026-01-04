@@ -1,6 +1,7 @@
 -- name: CreateOauth2Client :one
 INSERT INTO oauth2_client (
     uuid,
+    workspace_uuid,
     name,
     provider,
     client_id,
@@ -9,6 +10,7 @@ INSERT INTO oauth2_client (
     updated_at
 ) VALUES (
              sqlc.arg('uuid')::uuid,
+             sqlc.arg('workspace_uuid')::uuid,
              sqlc.arg('name'),
              sqlc.arg('provider'),
              sqlc.arg('client_id'),
@@ -21,12 +23,14 @@ INSERT INTO oauth2_client (
 SELECT
     sqlc.embed(oauth2_client)
 FROM oauth2_client
-WHERE uuid = sqlc.arg('uuid')::uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
 
--- name: ListOauth2Clients :many
+-- name: ListOauth2ClientsByWorkspace :many
 SELECT
     sqlc.embed(oauth2_client)
 FROM oauth2_client
+WHERE workspace_uuid = sqlc.arg('workspace_uuid')::uuid
 ORDER BY created_at DESC
 LIMIT NULLIF(sqlc.arg('limit')::int, 0)
     OFFSET sqlc.arg('offset')::int;
@@ -35,8 +39,8 @@ LIMIT NULLIF(sqlc.arg('limit')::int, 0)
 WITH filtered_oauth2_clients AS (
     SELECT oc.*
     FROM oauth2_client oc
-    WHERE
-        (NULLIF(sqlc.arg('name'), '') IS NULL OR oc.name = sqlc.arg('name'))
+    WHERE workspace_uuid = sqlc.arg('workspace_uuid')::uuid
+      AND (NULLIF(sqlc.arg('name'), '') IS NULL OR oc.name = sqlc.arg('name'))
       AND (NULLIF(sqlc.arg('provider'), '') IS NULL OR oc.provider = sqlc.arg('provider'))
 )
 SELECT
@@ -59,8 +63,17 @@ UPDATE oauth2_client SET
                          client_id = sqlc.arg('client_id'),
                          secret = sqlc.arg('secret'),
                          updated_at = NOW()
-WHERE uuid = sqlc.arg('uuid')::uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
 
 -- name: DeleteOauth2Client :exec
 DELETE FROM oauth2_client
+WHERE uuid = sqlc.arg('uuid')::uuid
+  AND workspace_uuid = sqlc.arg('workspace_uuid')::uuid;
+
+-- name: GetOauth2ClientByUUID :one
+-- Used internally when we need to look up a client without workspace context (e.g., token operations)
+SELECT
+    sqlc.embed(oauth2_client)
+FROM oauth2_client
 WHERE uuid = sqlc.arg('uuid')::uuid;

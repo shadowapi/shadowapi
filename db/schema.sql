@@ -48,14 +48,18 @@ CREATE INDEX idx_workspace_member_workspace ON workspace_member(workspace_uuid);
 
 CREATE TABLE oauth2_client (
   uuid UUID PRIMARY KEY, -- Internal unique ID for the client
+  workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE, -- Workspace this client belongs to
   name VARCHAR NOT NULL, -- Friendly name for admin UI
   provider VARCHAR NOT NULL, -- e.g. "github", "google"
-  client_id VARCHAR NOT NULL UNIQUE, -- OAuth2 client ID
+  client_id VARCHAR NOT NULL, -- OAuth2 client ID (unique per workspace)
   secret VARCHAR NOT NULL, -- OAuth2 client secret (store encrypted in production)
 
   created_at TIMESTAMP WITH TIME ZONE  DEFAULT NOW(), -- When the client was registered
   updated_at TIMESTAMP WITH TIME ZONE  -- Last time client config was updated
 );
+
+CREATE INDEX idx_oauth2_client_workspace ON oauth2_client(workspace_uuid);
+CREATE UNIQUE INDEX idx_oauth2_client_workspace_client_id ON oauth2_client(workspace_uuid, client_id);
 
 -- Stores issued tokens (access + refresh) per client and optionally user
 CREATE TABLE oauth2_token (
