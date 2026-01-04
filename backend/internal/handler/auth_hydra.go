@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -72,19 +73,17 @@ func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitR
 	// Get subject (user UUID)
 	subject := user.UUID.Value
 
-	// Determine remember settings
-	remember := req.Remember.Or(false)
-	rememberFor := 0
-	if remember {
-		rememberFor = 3600 // 1 hour
-	}
+	// Always remember the login session for at least 1 hour (matches access token TTL).
+	// This enables workspace switching without re-login.
+	// The "Remember me" checkbox could extend this to a longer duration in the future.
+	rememberFor := 3600 // 1 hour - matches access token TTL
 
 	// Accept login request with Hydra
 	redirectURL, err := h.oauth2Svc.hydraClient.AcceptLoginRequest(
 		ctx,
 		req.LoginChallenge,
 		subject,
-		remember,
+		true, // always remember session to enable workspace switching
 		rememberFor,
 	)
 	if err != nil {
@@ -106,6 +105,7 @@ func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitR
 // AuthConsent handles the Hydra consent redirect.
 // GET /api/v1/auth/consent?consent_challenge=xxx
 // Auto-approves consent and redirects back to Hydra.
+// If the OAuth2 flow was initiated via workspace switch, includes workspace claims in the access token.
 func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams) (api.AuthConsentRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
@@ -118,17 +118,41 @@ func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams)
 		return nil, ErrWithCode(http.StatusBadRequest, fmt.Errorf("invalid consent challenge"))
 	}
 
+	// Try to extract workspace info from the OAuth2 state
+	// The state parameter is in the original authorization request URL
+	var accessTokenExtras map[string]interface{}
+	if consentReq.RequestURL != "" {
+		if parsedURL, err := url.Parse(consentReq.RequestURL); err == nil {
+			if state := parsedURL.Query().Get("state"); state != "" {
+				// Look up state in our store (peek, don't delete - callback will delete)
+				h.oauth2Svc.stateMu.RLock()
+				stateData := h.oauth2Svc.stateStore[state]
+				h.oauth2Svc.stateMu.RUnlock()
+
+				if stateData != nil && stateData.WorkspaceUUID != "" {
+					accessTokenExtras = map[string]interface{}{
+						"workspace_id":   stateData.WorkspaceUUID,
+						"workspace_slug": stateData.WorkspaceSlug,
+					}
+					h.log.Debug("including workspace claims in access token",
+						"workspace_uuid", stateData.WorkspaceUUID,
+						"workspace_slug", stateData.WorkspaceSlug,
+					)
+				}
+			}
+		}
+	}
+
 	// Auto-approve: Accept all requested scopes and audiences
-	// No tenant info needed in workspace-based architecture
 	redirectURL, err := h.oauth2Svc.hydraClient.AcceptConsentRequest(
 		ctx,
 		params.ConsentChallenge,
 		consentReq.RequestedScope,
 		consentReq.RequestedAccessTokenAudience,
 		consentReq.Subject,
-		true,  // remember consent
-		3600,  // remember for 1 hour
-		nil,   // no extra access token claims needed
+		true,             // remember consent
+		3600,             // remember for 1 hour
+		accessTokenExtras, // workspace claims if switching workspace
 	)
 	if err != nil {
 		h.log.Error("failed to accept consent request", "error", err)
@@ -138,6 +162,7 @@ func (h *Handler) AuthConsent(ctx context.Context, params api.AuthConsentParams)
 	h.log.Debug("consent auto-approved",
 		"subject", consentReq.Subject,
 		"scopes", consentReq.RequestedScope,
+		"has_workspace", accessTokenExtras != nil,
 	)
 
 	return &api.AuthConsentFound{

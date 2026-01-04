@@ -68,6 +68,13 @@ type Handler interface {
 	//
 	// GET /auth/oauth2/session
 	AuthOAuth2Session(ctx context.Context) (AuthOAuth2SessionRes, error)
+	// AuthWorkspaceSwitch implements auth-workspace-switch operation.
+	//
+	// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
+	// the workspace in the new JWT.
+	//
+	// POST /auth/workspace/switch
+	AuthWorkspaceSwitch(ctx context.Context, req *AuthWorkspaceSwitchReq) (AuthWorkspaceSwitchRes, error)
 	// CheckPermission implements checkPermission operation.
 	//
 	// Check if a user has permission.

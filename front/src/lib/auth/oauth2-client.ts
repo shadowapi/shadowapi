@@ -25,6 +25,10 @@ export interface OAuth2LogoutResponse {
   success: boolean;
 }
 
+export interface WorkspaceSwitchResponse {
+  authorization_url: string;
+}
+
 export class OAuth2Error extends Error {
   status?: number;
   details?: unknown;
@@ -175,4 +179,48 @@ export function clearCallbackParams(): void {
   url.searchParams.delete('oauth2_success');
   url.searchParams.delete('oauth2_error');
   window.history.replaceState({}, '', url.toString());
+}
+
+/**
+ * Switch to a different workspace.
+ * This initiates a new OAuth2 flow with workspace info that will be embedded in the new JWT.
+ * The user will be redirected through Hydra, which will auto-skip login (user has session),
+ * and then back to the workspace dashboard with new tokens.
+ */
+export async function switchWorkspace(
+  workspaceSlug: string
+): Promise<WorkspaceSwitchResponse> {
+  const response = await fetch(`${API_BASE_URL}/auth/workspace/switch`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      workspace_slug: workspaceSlug,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new OAuth2Error(
+      error.detail || 'Failed to switch workspace',
+      response.status,
+      error
+    );
+  }
+
+  return response.json();
+}
+
+/**
+ * Switch to a workspace and redirect to complete the OAuth2 flow.
+ * This is the main entry point for workspace switching from the UI.
+ */
+export async function switchWorkspaceAndRedirect(
+  workspaceSlug: string
+): Promise<void> {
+  const result = await switchWorkspace(workspaceSlug);
+  window.location.href = result.authorization_url;
 }

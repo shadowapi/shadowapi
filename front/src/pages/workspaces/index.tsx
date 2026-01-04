@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Typography, Card, Button, Spin, Empty, Flex } from 'antd';
+import { Typography, Card, Button, Spin, Empty, Flex, message } from 'antd';
 import { FolderOutlined, PlusOutlined, LogoutOutlined } from '@ant-design/icons';
 import client from '../../api/client';
 import { uiColors } from '../../theme';
 import { useAuth } from '../../lib/auth';
+import { switchWorkspaceAndRedirect, OAuth2Error } from '../../lib/auth/oauth2-client';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -21,6 +22,7 @@ function WorkspaceSelectionPage() {
   const { logout, user } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [switchingWorkspace, setSwitchingWorkspace] = useState<string | null>(null);
 
   // Check if we just returned from OAuth2 callback
   const isOAuth2Callback = searchParams.get('oauth2_success') === 'true';
@@ -40,9 +42,14 @@ function WorkspaceSelectionPage() {
       } else if (response.data) {
         setWorkspaces(response.data);
 
-        // If user has exactly one workspace, auto-redirect
+        // If user has exactly one workspace, auto-redirect using workspace switch
         if (response.data.length === 1) {
-          navigate(`/w/${response.data[0].slug}`);
+          try {
+            await switchWorkspaceAndRedirect(response.data[0].slug);
+          } catch {
+            // If switch fails, still show the workspace list
+            console.error('Auto-switch failed, showing workspace list');
+          }
         }
         return true;
       }
@@ -75,9 +82,28 @@ function WorkspaceSelectionPage() {
     navigate('/');
   };
 
-  // Navigate to a workspace
-  const handleWorkspaceSelect = (slug: string) => {
-    navigate(`/w/${slug}`);
+  // Switch to a workspace (initiates OAuth2 flow to get workspace-scoped JWT)
+  const handleWorkspaceSelect = async (slug: string) => {
+    setSwitchingWorkspace(slug);
+    try {
+      // This will redirect through the OAuth2 flow
+      // The user will be redirected back to /w/{slug} after getting new tokens
+      await switchWorkspaceAndRedirect(slug);
+      // Note: Page will redirect, so this code won't execute
+    } catch (err) {
+      setSwitchingWorkspace(null);
+      if (err instanceof OAuth2Error) {
+        if (err.status === 403) {
+          message.error('You are not a member of this workspace');
+        } else if (err.status === 404) {
+          message.error('Workspace not found');
+        } else {
+          message.error(err.message || 'Failed to switch workspace');
+        }
+      } else {
+        message.error('Failed to switch workspace');
+      }
+    }
   };
 
   if (loading) {
@@ -119,7 +145,8 @@ function WorkspaceSelectionPage() {
               size="large"
               onClick={() => handleWorkspaceSelect(workspace.slug)}
               style={{ textAlign: 'left', height: 'auto', padding: '16px 20px' }}
-              disabled={!workspace.is_enabled}
+              disabled={!workspace.is_enabled || switchingWorkspace !== null}
+              loading={switchingWorkspace === workspace.slug}
             >
               <div>
                 <Text strong style={{ fontSize: 16 }}>{workspace.display_name}</Text>

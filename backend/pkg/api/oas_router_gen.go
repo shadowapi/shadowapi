@@ -237,6 +237,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					elem = origElem
+				case 'w': // Prefix: "workspace/switch"
+					origElem := elem
+					if l := len("workspace/switch"); len(elem) >= l && elem[0:l] == "workspace/switch" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleAuthWorkspaceSwitchRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
 				}
 
 				elem = origElem
@@ -2968,6 +2989,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
+					}
+
+					elem = origElem
+				case 'w': // Prefix: "workspace/switch"
+					origElem := elem
+					if l := len("workspace/switch"); len(elem) >= l && elem[0:l] == "workspace/switch" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = AuthWorkspaceSwitchOperation
+							r.summary = ""
+							r.operationID = "auth-workspace-switch"
+							r.pathPattern = "/auth/workspace/switch"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
 
 					elem = origElem

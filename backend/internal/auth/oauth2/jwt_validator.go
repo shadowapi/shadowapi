@@ -10,13 +10,14 @@ import (
 )
 
 // Claims represents the JWT claims we care about
-// With workspace-based architecture, we don't need tenant claims in JWT
-// Workspace context is derived from URL path, not JWT
+// Workspace context is stored in JWT claims and set during workspace switch
 type Claims struct {
 	jwt.RegisteredClaims
-	Scope     string `json:"scope,omitempty"`
-	ClientID  string `json:"client_id,omitempty"`
-	SessionID string `json:"sid,omitempty"`
+	Scope         string `json:"scope,omitempty"`
+	ClientID      string `json:"client_id,omitempty"`
+	SessionID     string `json:"sid,omitempty"`
+	WorkspaceID   string `json:"workspace_id,omitempty"`
+	WorkspaceSlug string `json:"workspace_slug,omitempty"`
 }
 
 // JWTValidator validates JWT tokens using JWKS
@@ -76,6 +77,8 @@ func (v *JWTValidator) Validate(ctx context.Context, tokenString string) (*Claim
 	v.log.Debug("JWT validated successfully",
 		"subject", claims.Subject,
 		"client_id", claims.ClientID,
+		"workspace_id", claims.WorkspaceID,
+		"workspace_slug", claims.WorkspaceSlug,
 		"expires_at", claims.ExpiresAt,
 	)
 

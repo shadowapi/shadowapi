@@ -885,6 +885,274 @@ func (s *AuthOAuth2SessionOK) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes AuthWorkspaceSwitchForbidden as json.
+func (s *AuthWorkspaceSwitchForbidden) Encode(e *jx.Encoder) {
+	unwrapped := (*Error)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes AuthWorkspaceSwitchForbidden from json.
+func (s *AuthWorkspaceSwitchForbidden) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AuthWorkspaceSwitchForbidden to nil")
+	}
+	var unwrapped Error
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = AuthWorkspaceSwitchForbidden(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AuthWorkspaceSwitchForbidden) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AuthWorkspaceSwitchForbidden) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes AuthWorkspaceSwitchNotFound as json.
+func (s *AuthWorkspaceSwitchNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*Error)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes AuthWorkspaceSwitchNotFound from json.
+func (s *AuthWorkspaceSwitchNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AuthWorkspaceSwitchNotFound to nil")
+	}
+	var unwrapped Error
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = AuthWorkspaceSwitchNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AuthWorkspaceSwitchNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AuthWorkspaceSwitchNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *AuthWorkspaceSwitchOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AuthWorkspaceSwitchOK) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("authorization_url")
+		e.Str(s.AuthorizationURL)
+	}
+}
+
+var jsonFieldsNameOfAuthWorkspaceSwitchOK = [1]string{
+	0: "authorization_url",
+}
+
+// Decode decodes AuthWorkspaceSwitchOK from json.
+func (s *AuthWorkspaceSwitchOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AuthWorkspaceSwitchOK to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "authorization_url":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.AuthorizationURL = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"authorization_url\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AuthWorkspaceSwitchOK")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAuthWorkspaceSwitchOK) {
+					name = jsonFieldsNameOfAuthWorkspaceSwitchOK[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AuthWorkspaceSwitchOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AuthWorkspaceSwitchOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *AuthWorkspaceSwitchReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AuthWorkspaceSwitchReq) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("workspace_slug")
+		e.Str(s.WorkspaceSlug)
+	}
+}
+
+var jsonFieldsNameOfAuthWorkspaceSwitchReq = [1]string{
+	0: "workspace_slug",
+}
+
+// Decode decodes AuthWorkspaceSwitchReq from json.
+func (s *AuthWorkspaceSwitchReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AuthWorkspaceSwitchReq to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "workspace_slug":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.WorkspaceSlug = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"workspace_slug\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AuthWorkspaceSwitchReq")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAuthWorkspaceSwitchReq) {
+					name = jsonFieldsNameOfAuthWorkspaceSwitchReq[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AuthWorkspaceSwitchReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AuthWorkspaceSwitchReq) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *CheckPermissionOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -13919,6 +14187,39 @@ func (s *OptUploadPresignedUrlRequestStorageType) UnmarshalJSON(data []byte) err
 	return s.Decode(d)
 }
 
+// Encode encodes UserCurrentWorkspace as json.
+func (o OptUserCurrentWorkspace) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes UserCurrentWorkspace from json.
+func (o *OptUserCurrentWorkspace) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUserCurrentWorkspace to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUserCurrentWorkspace) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUserCurrentWorkspace) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes UserMeta as json.
 func (o OptUserMeta) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -22363,6 +22664,12 @@ func (s *User) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.CurrentWorkspace.Set {
+			e.FieldStart("current_workspace")
+			s.CurrentWorkspace.Encode(e)
+		}
+	}
+	{
 		if s.Meta.Set {
 			e.FieldStart("meta")
 			s.Meta.Encode(e)
@@ -22382,17 +22689,18 @@ func (s *User) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUser = [10]string{
-	0: "uuid",
-	1: "email",
-	2: "password",
-	3: "first_name",
-	4: "last_name",
-	5: "is_enabled",
-	6: "roles",
-	7: "meta",
-	8: "created_at",
-	9: "updated_at",
+var jsonFieldsNameOfUser = [11]string{
+	0:  "uuid",
+	1:  "email",
+	2:  "password",
+	3:  "first_name",
+	4:  "last_name",
+	5:  "is_enabled",
+	6:  "roles",
+	7:  "current_workspace",
+	8:  "meta",
+	9:  "created_at",
+	10: "updated_at",
 }
 
 // Decode decodes User from json.
@@ -22489,6 +22797,16 @@ func (s *User) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"roles\"")
 			}
+		case "current_workspace":
+			if err := func() error {
+				s.CurrentWorkspace.Reset()
+				if err := s.CurrentWorkspace.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"current_workspace\"")
+			}
 		case "meta":
 			if err := func() error {
 				s.Meta.Reset()
@@ -22572,6 +22890,86 @@ func (s *User) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *User) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UserCurrentWorkspace) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UserCurrentWorkspace) encodeFields(e *jx.Encoder) {
+	{
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
+	}
+	{
+		if s.Slug.Set {
+			e.FieldStart("slug")
+			s.Slug.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUserCurrentWorkspace = [2]string{
+	0: "uuid",
+	1: "slug",
+}
+
+// Decode decodes UserCurrentWorkspace from json.
+func (s *UserCurrentWorkspace) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UserCurrentWorkspace to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			if err := func() error {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "slug":
+			if err := func() error {
+				s.Slug.Reset()
+				if err := s.Slug.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"slug\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UserCurrentWorkspace")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UserCurrentWorkspace) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UserCurrentWorkspace) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

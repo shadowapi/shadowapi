@@ -1209,6 +1209,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/workspace/switch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes the workspace in the new JWT. */
+        post: operations["auth-workspace-switch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/workspace": {
         parameters: {
             query?: never;
@@ -2620,6 +2637,13 @@ export interface components {
                 /** @description Domain (workspace slug or 'global') */
                 domain?: string;
             }[];
+            /** @description Currently active workspace from JWT claims (only set after workspace switch) */
+            readonly current_workspace?: {
+                /** @description Workspace UUID */
+                uuid?: string;
+                /** @description Workspace slug */
+                slug?: string;
+            };
             /** @description Arbitrary key-value metadata about the user */
             meta?: {
                 [key: string]: unknown;
@@ -6906,6 +6930,63 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    "auth-workspace-switch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The slug of the workspace to switch to */
+                    workspace_slug: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Workspace switch initiated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The URL to redirect to for completing the workspace switch */
+                        authorization_url: string;
+                    };
+                };
+            };
+            /** @description User is not a member of the workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Workspace not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
             };
             /** @description Error */
             default: {

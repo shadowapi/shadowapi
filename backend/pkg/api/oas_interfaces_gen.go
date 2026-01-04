@@ -41,6 +41,10 @@ type AuthOAuth2SessionRes interface {
 	authOAuth2SessionRes()
 }
 
+type AuthWorkspaceSwitchRes interface {
+	authWorkspaceSwitchRes()
+}
+
 type CheckPermissionRes interface {
 	checkPermissionRes()
 }

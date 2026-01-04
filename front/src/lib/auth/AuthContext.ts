@@ -6,6 +6,12 @@ export interface UserRole {
   domain: string;
 }
 
+// CurrentWorkspace represents the workspace the JWT is scoped to
+export interface CurrentWorkspace {
+  uuid: string;
+  slug: string;
+}
+
 // User type based on backend API response
 export interface User {
   uuid: string;
@@ -13,6 +19,7 @@ export interface User {
   first_name: string;
   last_name: string;
   roles: UserRole[];
+  current_workspace?: CurrentWorkspace;
 }
 
 // Helper function to check if user has admin privileges (super_admin role in global domain)

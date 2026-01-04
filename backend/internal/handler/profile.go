@@ -42,6 +42,14 @@ func (h *Handler) GetProfile(ctx context.Context) (api.GetProfileRes, error) {
 	// Convert roles map to API format
 	user.Roles = convertRolesToAPI(rolesMap)
 
+	// Add current workspace info from JWT claims if present
+	if claims.WorkspaceID != "" && claims.WorkspaceSlug != "" {
+		user.CurrentWorkspace = api.NewOptUserCurrentWorkspace(api.UserCurrentWorkspace{
+			UUID: api.NewOptString(claims.WorkspaceID),
+			Slug: api.NewOptString(claims.WorkspaceSlug),
+		})
+	}
+
 	return user, nil
 }
 

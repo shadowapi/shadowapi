@@ -11,9 +11,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // OAuth2Service provides OAuth2 functionality for the handlers
@@ -31,9 +34,11 @@ type OAuth2Service struct {
 }
 
 type oauth2AuthState struct {
-	CodeVerifier string
-	RedirectURI  string
-	CreatedAt    time.Time
+	CodeVerifier  string
+	RedirectURI   string
+	CreatedAt     time.Time
+	WorkspaceUUID string // Set during workspace switch
+	WorkspaceSlug string // Set during workspace switch
 }
 
 // NewOAuth2Service creates a new OAuth2 service
@@ -386,4 +391,106 @@ func buildClearCookieHeaders(cfg oauth2.CookieConfig) []string {
 	)
 
 	return []string{accessCookie, refreshCookie}
+}
+
+// AuthWorkspaceSwitch initiates a workspace switch by starting a new OAuth2 flow
+// with workspace information embedded in the state. The user's existing session
+// will cause Hydra to skip the login step, and the consent handler will include
+// the workspace claims in the new access token.
+func (h *Handler) AuthWorkspaceSwitch(ctx context.Context, req *api.AuthWorkspaceSwitchReq) (api.AuthWorkspaceSwitchRes, error) {
+	if h.oauth2Svc == nil {
+		return nil, fmt.Errorf("OAuth2 service not configured")
+	}
+
+	// Get current user from JWT claims
+	userUUID, err := getUserUUIDFromContext(ctx)
+	if err != nil {
+		return nil, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("not authenticated"))
+	}
+
+	// Look up the workspace by slug
+	q := query.New(h.dbp)
+	workspace, err := q.GetWorkspaceBySlug(ctx, req.WorkspaceSlug)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return &api.AuthWorkspaceSwitchNotFound{
+				Status: api.NewOptInt64(http.StatusNotFound),
+				Detail: api.NewOptString("workspace not found"),
+			}, nil
+		}
+		h.log.Error("failed to get workspace", "error", err, "slug", req.WorkspaceSlug)
+		return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("failed to get workspace"))
+	}
+
+	// Check if workspace is enabled
+	if !workspace.IsEnabled {
+		return &api.AuthWorkspaceSwitchNotFound{
+			Status: api.NewOptInt64(http.StatusNotFound),
+			Detail: api.NewOptString("workspace not found"),
+		}, nil
+	}
+
+	// Check if user is a member of the workspace
+	userUUIDParsed, err := uuid.FromString(userUUID)
+	if err != nil {
+		return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("invalid user UUID"))
+	}
+
+	_, err = q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
+		WorkspaceUUID: &workspace.UUID,
+		UserUUID:      &userUUIDParsed,
+	})
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return &api.AuthWorkspaceSwitchForbidden{
+				Status: api.NewOptInt64(http.StatusForbidden),
+				Detail: api.NewOptString("not a member of this workspace"),
+			}, nil
+		}
+		h.log.Error("failed to check workspace membership", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("failed to check membership"))
+	}
+
+	// Generate state and PKCE for the new OAuth2 flow
+	state, err := generateState()
+	if err != nil {
+		return nil, fmt.Errorf("generate state: %w", err)
+	}
+
+	verifier, challenge, err := generatePKCE()
+	if err != nil {
+		return nil, fmt.Errorf("generate PKCE: %w", err)
+	}
+
+	// Store state with workspace info
+	h.oauth2Svc.stateMu.Lock()
+	h.oauth2Svc.stateStore[state] = &oauth2AuthState{
+		CodeVerifier:  verifier,
+		RedirectURI:   h.oauth2Svc.baseURL + "/w/" + workspace.Slug,
+		CreatedAt:     time.Now(),
+		WorkspaceUUID: workspace.UUID.String(),
+		WorkspaceSlug: workspace.Slug,
+	}
+	h.oauth2Svc.stateMu.Unlock()
+
+	// Build authorization URL - since user has a remembered session,
+	// Hydra will skip the login step and go directly to consent
+	authURL := h.oauth2Svc.hydraClient.BuildAuthorizationURL(
+		h.oauth2Svc.clientID,
+		h.oauth2Svc.redirectURI,
+		state,
+		challenge,
+		"openid offline_access profile email",
+	)
+
+	h.log.Debug("workspace switch initiated",
+		"workspace_slug", workspace.Slug,
+		"workspace_uuid", workspace.UUID.String(),
+		"user_uuid", userUUID,
+		"state", state[:8]+"...",
+	)
+
+	return &api.AuthWorkspaceSwitchOK{
+		AuthorizationURL: authURL,
+	}, nil
 }

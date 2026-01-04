@@ -16,6 +16,7 @@ const (
 	AuthOAuth2LogoutOperation                OperationName = "AuthOAuth2Logout"
 	AuthOAuth2RefreshOperation               OperationName = "AuthOAuth2Refresh"
 	AuthOAuth2SessionOperation               OperationName = "AuthOAuth2Session"
+	AuthWorkspaceSwitchOperation             OperationName = "AuthWorkspaceSwitch"
 	CheckPermissionOperation                 OperationName = "CheckPermission"
 	CheckWorkspaceExistsOperation            OperationName = "CheckWorkspaceExists"
 	CreateContactOperation                   OperationName = "CreateContact"

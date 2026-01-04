@@ -36,6 +36,17 @@ properties:
         domain:
           type: string
           description: Domain (workspace slug or 'global')
+  current_workspace:
+    type: object
+    description: Currently active workspace from JWT claims (only set after workspace switch)
+    readOnly: true
+    properties:
+      uuid:
+        type: string
+        description: Workspace UUID
+      slug:
+        type: string
+        description: Workspace slug
   meta:
     type: object
     additionalProperties: true

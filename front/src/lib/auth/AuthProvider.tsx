@@ -65,6 +65,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           role: r.role ?? '',
           domain: r.domain ?? '',
         })),
+        current_workspace: data.current_workspace ? {
+          uuid: data.current_workspace.uuid ?? '',
+          slug: data.current_workspace.slug ?? '',
+        } : undefined,
       };
     } catch (err) {
       console.error('Failed to fetch user profile:', err);

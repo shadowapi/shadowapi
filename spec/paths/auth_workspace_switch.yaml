@@ -1,0 +1,50 @@
+post:
+  description: Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes the workspace in the new JWT.
+  operationId: auth-workspace-switch
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            workspace_slug:
+              type: string
+              description: The slug of the workspace to switch to
+          required:
+            - workspace_slug
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              authorization_url:
+                type: string
+                description: The URL to redirect to for completing the workspace switch
+            required:
+              - authorization_url
+      description: Workspace switch initiated successfully
+    "403":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: User is not a member of the workspace
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Workspace not found
+    default:
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+      description: Error
+  tags:
+    - auth

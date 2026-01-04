@@ -332,6 +332,46 @@ func (s *AuthOAuth2SessionOK) SetExpiresIn(val OptInt) {
 
 func (*AuthOAuth2SessionOK) authOAuth2SessionRes() {}
 
+type AuthWorkspaceSwitchForbidden Error
+
+func (*AuthWorkspaceSwitchForbidden) authWorkspaceSwitchRes() {}
+
+type AuthWorkspaceSwitchNotFound Error
+
+func (*AuthWorkspaceSwitchNotFound) authWorkspaceSwitchRes() {}
+
+type AuthWorkspaceSwitchOK struct {
+	// The URL to redirect to for completing the workspace switch.
+	AuthorizationURL string `json:"authorization_url"`
+}
+
+// GetAuthorizationURL returns the value of AuthorizationURL.
+func (s *AuthWorkspaceSwitchOK) GetAuthorizationURL() string {
+	return s.AuthorizationURL
+}
+
+// SetAuthorizationURL sets the value of AuthorizationURL.
+func (s *AuthWorkspaceSwitchOK) SetAuthorizationURL(val string) {
+	s.AuthorizationURL = val
+}
+
+func (*AuthWorkspaceSwitchOK) authWorkspaceSwitchRes() {}
+
+type AuthWorkspaceSwitchReq struct {
+	// The slug of the workspace to switch to.
+	WorkspaceSlug string `json:"workspace_slug"`
+}
+
+// GetWorkspaceSlug returns the value of WorkspaceSlug.
+func (s *AuthWorkspaceSwitchReq) GetWorkspaceSlug() string {
+	return s.WorkspaceSlug
+}
+
+// SetWorkspaceSlug sets the value of WorkspaceSlug.
+func (s *AuthWorkspaceSwitchReq) SetWorkspaceSlug(val string) {
+	s.WorkspaceSlug = val
+}
+
 type BearerAuth struct {
 	Token string
 }
@@ -2941,6 +2981,7 @@ func (*ErrorStatusCode) authOAuth2CallbackRes()              {}
 func (*ErrorStatusCode) authOAuth2LogoutRes()                {}
 func (*ErrorStatusCode) authOAuth2RefreshRes()               {}
 func (*ErrorStatusCode) authOAuth2SessionRes()               {}
+func (*ErrorStatusCode) authWorkspaceSwitchRes()             {}
 func (*ErrorStatusCode) checkPermissionRes()                 {}
 func (*ErrorStatusCode) checkWorkspaceExistsRes()            {}
 func (*ErrorStatusCode) createContactRes()                   {}
@@ -8051,6 +8092,52 @@ func (o OptUploadPresignedUrlRequestStorageType) Or(d UploadPresignedUrlRequestS
 	return d
 }
 
+// NewOptUserCurrentWorkspace returns new OptUserCurrentWorkspace with value set to v.
+func NewOptUserCurrentWorkspace(v UserCurrentWorkspace) OptUserCurrentWorkspace {
+	return OptUserCurrentWorkspace{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUserCurrentWorkspace is optional UserCurrentWorkspace.
+type OptUserCurrentWorkspace struct {
+	Value UserCurrentWorkspace
+	Set   bool
+}
+
+// IsSet returns true if OptUserCurrentWorkspace was set.
+func (o OptUserCurrentWorkspace) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUserCurrentWorkspace) Reset() {
+	var v UserCurrentWorkspace
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUserCurrentWorkspace) SetTo(v UserCurrentWorkspace) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUserCurrentWorkspace) Get() (v UserCurrentWorkspace, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUserCurrentWorkspace) Or(d UserCurrentWorkspace) UserCurrentWorkspace {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptUserMeta returns new OptUserMeta with value set to v.
 func NewOptUserMeta(v UserMeta) OptUserMeta {
 	return OptUserMeta{
@@ -12133,6 +12220,8 @@ type User struct {
 	IsEnabled OptBool `json:"is_enabled"`
 	// User's assigned roles with domain information.
 	Roles []UserRolesItem `json:"roles"`
+	// Currently active workspace from JWT claims (only set after workspace switch).
+	CurrentWorkspace OptUserCurrentWorkspace `json:"current_workspace"`
 	// Arbitrary key-value metadata about the user.
 	Meta OptUserMeta `json:"meta"`
 	// Timestamp of user creation.
@@ -12174,6 +12263,11 @@ func (s *User) GetIsEnabled() OptBool {
 // GetRoles returns the value of Roles.
 func (s *User) GetRoles() []UserRolesItem {
 	return s.Roles
+}
+
+// GetCurrentWorkspace returns the value of CurrentWorkspace.
+func (s *User) GetCurrentWorkspace() OptUserCurrentWorkspace {
+	return s.CurrentWorkspace
 }
 
 // GetMeta returns the value of Meta.
@@ -12226,6 +12320,11 @@ func (s *User) SetRoles(val []UserRolesItem) {
 	s.Roles = val
 }
 
+// SetCurrentWorkspace sets the value of CurrentWorkspace.
+func (s *User) SetCurrentWorkspace(val OptUserCurrentWorkspace) {
+	s.CurrentWorkspace = val
+}
+
 // SetMeta sets the value of Meta.
 func (s *User) SetMeta(val OptUserMeta) {
 	s.Meta = val
@@ -12246,6 +12345,34 @@ func (*User) getProfileRes()    {}
 func (*User) getUserRes()       {}
 func (*User) updateProfileRes() {}
 func (*User) updateUserRes()    {}
+
+// Currently active workspace from JWT claims (only set after workspace switch).
+type UserCurrentWorkspace struct {
+	// Workspace UUID.
+	UUID OptString `json:"uuid"`
+	// Workspace slug.
+	Slug OptString `json:"slug"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *UserCurrentWorkspace) GetUUID() OptString {
+	return s.UUID
+}
+
+// GetSlug returns the value of Slug.
+func (s *UserCurrentWorkspace) GetSlug() OptString {
+	return s.Slug
+}
+
+// SetUUID sets the value of UUID.
+func (s *UserCurrentWorkspace) SetUUID(val OptString) {
+	s.UUID = val
+}
+
+// SetSlug sets the value of Slug.
+func (s *UserCurrentWorkspace) SetSlug(val OptString) {
+	s.Slug = val
+}
 
 // Arbitrary key-value metadata about the user.
 type UserMeta map[string]jx.Raw

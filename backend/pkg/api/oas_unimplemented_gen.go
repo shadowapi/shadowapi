@@ -103,6 +103,16 @@ func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r AuthOAuth2
 	return r, ht.ErrNotImplemented
 }
 
+// AuthWorkspaceSwitch implements auth-workspace-switch operation.
+//
+// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
+// the workspace in the new JWT.
+//
+// POST /auth/workspace/switch
+func (UnimplementedHandler) AuthWorkspaceSwitch(ctx context.Context, req *AuthWorkspaceSwitchReq) (r AuthWorkspaceSwitchRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CheckPermission implements checkPermission operation.
 //
 // Check if a user has permission.
