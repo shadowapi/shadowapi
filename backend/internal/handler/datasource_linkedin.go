@@ -3,20 +3,28 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.DatasourceLinkedin) (api.DatasourceLinkedinCreateRes, error) {
 	log := h.log.With("handler", "DatasourceLinkedinCreate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
 
 	// Get user UUID from authenticated session
 	userUUIDStr, err := getUserUUIDFromContext(ctx)
@@ -38,13 +46,14 @@ func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.Datasou
 	}
 	isEnabled := req.IsEnabled.Or(false)
 	ds, err := query.New(h.dbp).CreateDatasource(ctx, query.CreateDatasourceParams{
-		UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
-		UserUUID:  pgUserUUID,
-		Name:      req.Name,
-		IsEnabled: isEnabled,
-		Provider:  string(req.Provider),
-		Settings:  settings,
-		Type:      "linkedin",
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+		UserUUID:      pgUserUUID,
+		Name:          req.Name,
+		IsEnabled:     isEnabled,
+		Provider:      string(req.Provider),
+		Settings:      settings,
+		Type:          "linkedin",
 	})
 	if err != nil {
 		log.Error("failed to create datasource", "error", err)
@@ -58,12 +67,23 @@ func (h *Handler) DatasourceLinkedinCreate(ctx context.Context, req *api.Datasou
 
 func (h *Handler) DatasourceLinkedinDelete(ctx context.Context, params api.DatasourceLinkedinDeleteParams) (api.DatasourceLinkedinDeleteRes, error) {
 	log := h.log.With("handler", "DatasourceLinkedinDelete")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	if err := query.New(h.dbp).DeleteDatasource(ctx, pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true}); err != nil {
+	if err := query.New(h.dbp).DeleteDatasourceByWorkspace(ctx, query.DeleteDatasourceByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	}); err != nil {
 		log.Error("failed to delete datasource", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete datasource"))
 	}
@@ -72,28 +92,50 @@ func (h *Handler) DatasourceLinkedinDelete(ctx context.Context, params api.Datas
 
 func (h *Handler) DatasourceLinkedinGet(ctx context.Context, params api.DatasourceLinkedinGetParams) (api.DatasourceLinkedinGetRes, error) {
 	log := h.log.With("handler", "DatasourceLinkedinGet")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
-	dse, err := query.New(h.dbp).GetDatasource(ctx, pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true})
+	dse, err := query.New(h.dbp).GetDatasourceByWorkspace(ctx, query.GetDatasourceByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	})
 	if err != nil {
 		log.Error("failed to get datasource", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
 	}
-	return QToDatasourceLinkedinRow(dse)
+	return QToDatasourceLinkedinRowByWorkspace(dse)
 }
 
 func (h *Handler) DatasourceLinkedinUpdate(ctx context.Context, req *api.DatasourceLinkedin, params api.DatasourceLinkedinUpdateParams) (api.DatasourceLinkedinUpdateRes, error) {
 	log := h.log.With("handler", "DatasourceLinkedinUpdate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	dsUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse datasource uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource UUID"))
 	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.DatasourceLinkedinUpdateRes, error) {
-		dse, err := query.New(tx).GetDatasource(ctx, pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true})
+		dse, err := query.New(tx).GetDatasourceByWorkspace(ctx, query.GetDatasourceByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: [16]byte(dsUUID.Bytes()), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
@@ -105,18 +147,19 @@ func (h *Handler) DatasourceLinkedinUpdate(ctx context.Context, req *api.Datasou
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
 		// Preserve the existing user_uuid from the database record
-		if err := query.New(tx).UpdateDatasource(ctx, query.UpdateDatasourceParams{
-			UUID:      pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
-			UserUUID:  converter.UuidPtrToPgUUID(dse.Datasource.UserUUID),
-			Name:      req.Name,
-			IsEnabled: isEnabled,
-			Provider:  string(req.Provider),
-			Settings:  newSettings,
-			Type:      "linkedin",
+		if err := query.New(tx).UpdateDatasourceByWorkspace(ctx, query.UpdateDatasourceByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: converter.UToBytes(dsUUID), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+			UserUUID:      converter.UuidPtrToPgUUID(dse.Datasource.UserUUID),
+			Name:          req.Name,
+			IsEnabled:     isEnabled,
+			Provider:      string(req.Provider),
+			Settings:      newSettings,
+			Type:          "linkedin",
 		}); err != nil {
 			log.Error("failed to update datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update datasource"))
 		}
-		return QToDatasourceLinkedinRow(dse)
+		return QToDatasourceLinkedinRowByWorkspace(dse)
 	})
 }

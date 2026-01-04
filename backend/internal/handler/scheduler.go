@@ -2,13 +2,15 @@ package handler
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shadowapi/shadowapi/backend/internal/converter"
-	"net/http"
 
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
@@ -18,6 +20,14 @@ import (
 // POST /scheduler
 func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (api.SchedulerCreateRes, error) {
 	log := h.log.With("handler", "SchedulerCreate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.SchedulerCreateRes, error) {
 		// Generate a new UUID for the scheduler
 		schedulerUUID := uuid.Must(uuid.NewV7())
@@ -26,8 +36,11 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (api.
 			log.Error("failed to convert scheduler uuid", "error", err)
 			return nil, ErrWithCode(http.StatusBadRequest, E("invalid datasource uuid"))
 		}
-		// Verify that the pipeline exists
-		pipe, err := query.New(tx).GetPipeline(ctx, pgPipelineUUID)
+		// Verify that the pipeline exists and belongs to the workspace
+		pipe, err := query.New(tx).GetPipelineByWorkspace(ctx, query.GetPipelineByWorkspaceParams{
+			UUID:          pgPipelineUUID,
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get pipeline", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get pipeline"))
@@ -70,12 +83,23 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (api.
 // DELETE /scheduler/{uuid}
 func (h *Handler) SchedulerDelete(ctx context.Context, params api.SchedulerDeleteParams) (api.SchedulerDeleteRes, error) {
 	log := h.log.With("handler", "SchedulerDelete")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
 	}
-	err = query.New(h.dbp).DeleteScheduler(ctx, schUUID)
+	err = query.New(h.dbp).DeleteSchedulerByWorkspace(ctx, query.DeleteSchedulerByWorkspaceParams{
+		UUID:          schUUID,
+		WorkspaceUUID: workspaceUUID,
+	})
 	if err != nil {
 		log.Error("failed to delete scheduler", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete scheduler"))
@@ -88,17 +112,28 @@ func (h *Handler) SchedulerDelete(ctx context.Context, params api.SchedulerDelet
 // GET /scheduler/{uuid}
 func (h *Handler) SchedulerGet(ctx context.Context, params api.SchedulerGetParams) (api.SchedulerGetRes, error) {
 	log := h.log.With("handler", "SchedulerGet")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
 	}
-	sch, err := query.New(h.dbp).GetScheduler(ctx, schUUID)
+	sch, err := query.New(h.dbp).GetSchedulerByWorkspace(ctx, query.GetSchedulerByWorkspaceParams{
+		UUID:          schUUID,
+		WorkspaceUUID: workspaceUUID,
+	})
 	if err != nil {
 		log.Error("failed to get scheduler", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get scheduler"))
 	}
-	out, err := qToApiSchedulerRow(sch)
+	out, err := qToApiSchedulerByWorkspaceRow(sch)
 	if err != nil {
 		log.Error("failed to map scheduler", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map scheduler"))
@@ -111,6 +146,14 @@ func (h *Handler) SchedulerGet(ctx context.Context, params api.SchedulerGetParam
 // GET /scheduler
 func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListParams) (api.SchedulerListRes, error) {
 	log := h.log.With("handler", "SchedulerList")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	limit := int32(50)
 	offset := int32(0)
 	if params.Limit.IsSet() {
@@ -121,7 +164,8 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 	}
 
 	// Build filter parameters (if provided)
-	qParams := query.GetSchedulersParams{
+	qParams := query.GetSchedulersWithWorkspaceParams{
+		WorkspaceUUID:  workspaceUUID,
 		OrderBy:        nil,
 		OrderDirection: "desc",
 		Offset:         offset,
@@ -136,11 +180,7 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 		qParams.PipelineUuid = params.PipelineUUID.Value.String()
 	}
 
-	schRows, err := query.New(h.dbp).GetSchedulers(ctx, qParams)
-	//schRows, err := query.New(h.dbp).ListSchedulers(ctx, query.ListSchedulersParams{
-	//	Offset: int32(0),
-	//	Limit:  int32(50),
-	//})
+	schRows, err := query.New(h.dbp).GetSchedulersWithWorkspace(ctx, qParams)
 	if err != nil {
 		log.Error("failed to list schedulers", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list schedulers"))
@@ -148,8 +188,7 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 
 	out := make([]api.Scheduler, 0, len(schRows))
 	for _, row := range schRows {
-		apiItem, err := qToApiSchedulersRow(row)
-		//apiItem, err := qToApiListSchedulersRow(row)
+		apiItem, err := qToApiSchedulersWithWorkspaceRow(row)
 		if err != nil {
 			log.Error("failed to map scheduler row", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map scheduler row"))
@@ -165,13 +204,24 @@ func (h *Handler) SchedulerList(ctx context.Context, params api.SchedulerListPar
 // PUT /scheduler/{uuid}
 func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, params api.SchedulerUpdateParams) (api.SchedulerUpdateRes, error) {
 	log := h.log.With("handler", "SchedulerUpdate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	schUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid scheduler uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid scheduler uuid"))
 	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.SchedulerUpdateRes, error) {
-		scheduler, err := query.New(tx).GetScheduler(ctx, schUUID)
+		scheduler, err := query.New(tx).GetSchedulerByWorkspace(ctx, query.GetSchedulerByWorkspaceParams{
+			UUID:          schUUID,
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get scheduler", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get scheduler"))
@@ -197,7 +247,7 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 			isPaused = scheduler.Scheduler.IsPaused
 		}
 
-		uParams := query.UpdateSchedulerParams{
+		uParams := query.UpdateSchedulerByWorkspaceParams{
 			CronExpression: converter.ConvertOptNilStringToPgText(req.CronExpression),
 			RunAt:          converter.NullTimestamptz(),
 			Timezone:       req.Timezone.Or("UTC"),
@@ -208,18 +258,22 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 			IsPaused:       isPaused,
 			BatchSize:      batchSize,
 			UUID:           schUUID,
+			WorkspaceUUID:  workspaceUUID,
 		}
-		err = query.New(tx).UpdateScheduler(ctx, uParams)
+		err = query.New(tx).UpdateSchedulerByWorkspace(ctx, uParams)
 		if err != nil {
 			log.Error("failed to update scheduler", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update scheduler"))
 		}
-		outRows, err := query.New(tx).GetScheduler(ctx, schUUID)
+		outRows, err := query.New(tx).GetSchedulerByWorkspace(ctx, query.GetSchedulerByWorkspaceParams{
+			UUID:          schUUID,
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get updated scheduler", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated scheduler"))
 		}
-		final, err := qToApiSchedulerRow(outRows)
+		final, err := qToApiSchedulerByWorkspaceRow(outRows)
 		if err != nil {
 			log.Error("failed to map scheduler row after update", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to map scheduler row"))
@@ -306,6 +360,46 @@ func qToApiListSchedulersRow(s query.ListSchedulersRow) (api.Scheduler, error) {
 		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
 		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
 		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
+	}
+	return out, nil
+}
+
+// qToApiSchedulerByWorkspaceRow maps a workspace-filtered row to an api.Scheduler.
+func qToApiSchedulerByWorkspaceRow(s query.GetSchedulerByWorkspaceRow) (api.Scheduler, error) {
+	out := api.Scheduler{
+		UUID:           api.NewOptString(s.Scheduler.UUID.String()),
+		PipelineUUID:   s.Scheduler.PipelineUuid.String(),
+		ScheduleType:   s.Scheduler.ScheduleType,
+		CronExpression: api.NewOptNilString(s.Scheduler.CronExpression.String),
+		RunAt:          api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
+		Timezone:       api.NewOptString(s.Scheduler.Timezone),
+		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
+		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
+		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
+		IsPaused:       api.NewOptBool(s.Scheduler.IsPaused),
+		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
+		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
+		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
+	}
+	return out, nil
+}
+
+// qToApiSchedulersWithWorkspaceRow maps a workspace-filtered schedulers row to an api.Scheduler.
+func qToApiSchedulersWithWorkspaceRow(s query.GetSchedulersWithWorkspaceRow) (api.Scheduler, error) {
+	out := api.Scheduler{
+		UUID:           api.NewOptString(s.UUID.String()),
+		PipelineUUID:   s.PipelineUuid.String(),
+		ScheduleType:   s.ScheduleType,
+		CronExpression: api.NewOptNilString(s.CronExpression.String),
+		RunAt:          api.NewOptNilDateTime(s.RunAt.Time),
+		Timezone:       api.NewOptString(s.Timezone),
+		NextRun:        api.NewOptDateTime(s.NextRun.Time),
+		LastRun:        api.NewOptDateTime(s.LastRun.Time),
+		IsEnabled:      api.NewOptBool(s.IsEnabled),
+		IsPaused:       api.NewOptBool(s.IsPaused),
+		BatchSize:      api.NewOptInt(int(s.BatchSize)),
+		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
+		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
 	}
 	return out, nil
 }

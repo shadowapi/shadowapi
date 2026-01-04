@@ -3,20 +3,29 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"net/http"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (api.PipelineCreateRes, error) {
 	log := h.log.With("handler", "PipelineCreate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.PipelineCreateRes, error) {
 		pipelineUUID := uuid.Must(uuid.NewV7())
 		pgDatasourceUUID, err := converter.ConvertStringToPgUUID(req.DatasourceUUID)
@@ -40,7 +49,12 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (api.Pi
 			// Default to empty JSON object for JSONB NOT NULL constraint
 			flowData = []byte("{}")
 		}
-		ds, err := query.New(tx).GetDatasource(ctx, pgDatasourceUUID)
+
+		// Validate datasource belongs to workspace
+		ds, err := query.New(tx).GetDatasourceByWorkspace(ctx, query.GetDatasourceByWorkspaceParams{
+			UUID:          pgDatasourceUUID,
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get datasource", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get datasource"))
@@ -58,6 +72,7 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (api.Pi
 
 		qParams := query.CreatePipelineParams{
 			UUID:           pgtype.UUID{Bytes: converter.UToBytes(pipelineUUID), Valid: true},
+			WorkspaceUUID:  workspaceUUID,
 			DatasourceUUID: pgDatasourceUUID,
 			StorageUuid:    pgStorageUUID,
 			WorkerUUID:     pgWorkerUUID,
@@ -82,12 +97,23 @@ func (h *Handler) PipelineCreate(ctx context.Context, req *api.Pipeline) (api.Pi
 
 func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams) (api.PipelineGetRes, error) {
 	log := h.log.With("handler", "PipelineGet")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
 	}
-	row, err := query.New(h.dbp).GetPipeline(ctx, pipelineUUID)
+	row, err := query.New(h.dbp).GetPipelineByWorkspace(ctx, query.GetPipelineByWorkspaceParams{
+		UUID:          pipelineUUID,
+		WorkspaceUUID: workspaceUUID,
+	})
 	if err != nil {
 		log.Error("failed to get pipeline", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get pipeline"))
@@ -102,6 +128,14 @@ func (h *Handler) PipelineGet(ctx context.Context, params api.PipelineGetParams)
 
 func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParams) (api.PipelineListRes, error) {
 	log := h.log.With("handler", "PipelineList")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	limit := int32(50)
 	offset := int32(0)
 	if params.Limit.IsSet() {
@@ -110,11 +144,12 @@ func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParam
 	if params.Offset.IsSet() {
 		offset = params.Offset.Value
 	}
-	qParams := query.ListPipelinesParams{
-		Offset: offset,
-		Limit:  limit,
+	qParams := query.ListPipelinesByWorkspaceParams{
+		WorkspaceUUID: workspaceUUID,
+		Offset:        offset,
+		Limit:         limit,
 	}
-	rows, err := query.New(h.dbp).ListPipelines(ctx, qParams)
+	rows, err := query.New(h.dbp).ListPipelinesByWorkspace(ctx, qParams)
 	if err != nil {
 		log.Error("failed to list pipelines", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list pipelines"))
@@ -133,13 +168,24 @@ func (h *Handler) PipelineList(ctx context.Context, params api.PipelineListParam
 
 func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params api.PipelineUpdateParams) (api.PipelineUpdateRes, error) {
 	log := h.log.With("handler", "PipelineUpdate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
 	}
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.PipelineUpdateRes, error) {
-		existingRow, err := query.New(tx).GetPipeline(ctx, pipelineUUID)
+		existingRow, err := query.New(tx).GetPipelineByWorkspace(ctx, query.GetPipelineByWorkspaceParams{
+			UUID:          pipelineUUID,
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get existing pipeline", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get existing pipeline"))
@@ -180,7 +226,7 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 			}
 		}
 
-		uParams := query.UpdatePipelineParams{
+		uParams := query.UpdatePipelineByWorkspaceParams{
 			Name:           req.Name,
 			Type:           newType,
 			DatasourceUUID: pgDatasourceUUID,
@@ -189,13 +235,17 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 			IsEnabled:      req.IsEnabled.Or(false),
 			Flow:           flowData,
 			UUID:           pipelineUUID,
+			WorkspaceUUID:  workspaceUUID,
 		}
-		err = query.New(tx).UpdatePipeline(ctx, uParams)
+		err = query.New(tx).UpdatePipelineByWorkspace(ctx, uParams)
 		if err != nil {
 			log.Error("failed to update pipeline", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update pipeline"))
 		}
-		row, err := query.New(tx).GetPipeline(ctx, pipelineUUID)
+		row, err := query.New(tx).GetPipelineByWorkspace(ctx, query.GetPipelineByWorkspaceParams{
+			UUID:          pipelineUUID,
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get updated pipeline", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated pipeline"))
@@ -211,12 +261,23 @@ func (h *Handler) PipelineUpdate(ctx context.Context, req *api.Pipeline, params 
 
 func (h *Handler) PipelineDelete(ctx context.Context, params api.PipelineDeleteParams) (api.PipelineDeleteRes, error) {
 	log := h.log.With("handler", "PipelineDelete")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	pipelineUUID, err := converter.ConvertStringToPgUUID(params.UUID.String())
 	if err != nil {
 		log.Error("invalid pipeline uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid pipeline uuid"))
 	}
-	err = query.New(h.dbp).DeletePipeline(ctx, pipelineUUID)
+	err = query.New(h.dbp).DeletePipelineByWorkspace(ctx, query.DeletePipelineByWorkspaceParams{
+		UUID:          pipelineUUID,
+		WorkspaceUUID: workspaceUUID,
+	})
 	if err != nil {
 		log.Error("failed to delete pipeline", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete pipeline"))

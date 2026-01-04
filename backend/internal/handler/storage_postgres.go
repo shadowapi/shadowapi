@@ -14,12 +14,20 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePostgres) (api.StoragePostgresCreateRes, error) {
 	log := h.log.With("handler", "StoragePostgresCreate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
 
 	// Validate table definitions
 	if err := validatePostgresTables(req.Tables); err != nil {
@@ -42,11 +50,12 @@ func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePos
 	}
 
 	storage, err := query.New(h.dbp).CreateStorage(ctx, query.CreateStorageParams{
-		UUID:      pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
-		Name:      req.Name,
-		Type:      "postgres",
-		IsEnabled: isEnabled,
-		Settings:  settings,
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+		Name:          req.Name,
+		Type:          "postgres",
+		IsEnabled:     isEnabled,
+		Settings:      settings,
 	})
 	if err != nil {
 		log.Error("failed to create storage", "error", err)
@@ -62,13 +71,23 @@ func (h *Handler) StoragePostgresCreate(ctx context.Context, req *api.StoragePos
 func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StoragePostgresDeleteParams) (api.StoragePostgresDeleteRes, error) {
 	log := h.log.With("handler", "StoragePostgresDelete")
 
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	storageUUID, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse storage uuid", "error", err)
 		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
 	}
 
-	if err := query.New(h.dbp).DeleteStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true}); err != nil {
+	if err := query.New(h.dbp).DeleteStorageByWorkspace(ctx, query.DeleteStorageByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	}); err != nil {
 		log.Error("failed to delete storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete storage"))
 	}
@@ -79,6 +98,13 @@ func (h *Handler) StoragePostgresDelete(ctx context.Context, params api.StorageP
 func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePostgresGetParams) (api.StoragePostgresGetRes, error) {
 	log := h.log.With("handler", "StoragePostgresGet")
 
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	id, err := uuid.FromString(params.UUID)
 	if err != nil {
 		log.Error("failed to parse storage uuid", "error", err)
@@ -86,17 +112,27 @@ func (h *Handler) StoragePostgresGet(ctx context.Context, params api.StoragePost
 	}
 	fmt.Println("id", id)
 
-	storages, err := query.New(h.dbp).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(id), Valid: true})
+	storages, err := query.New(h.dbp).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(id), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	})
 	if err != nil {
 		log.Error("failed to get storage", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
 	}
 
-	return QToStoragePostgres(storages)
+	return QToStoragePostgresByWorkspace(storages)
 }
 
 func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePostgres, params api.StoragePostgresUpdateParams) (api.StoragePostgresUpdateRes, error) {
 	log := h.log.With("handler", "StoragePostgresUpdate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
 
 	// Validate table definitions
 	if err := validatePostgresTables(req.Tables); err != nil {
@@ -110,7 +146,10 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 	}
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StoragePostgresUpdateRes, error) {
-		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
+		storage, err := query.New(tx).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get storage"))
@@ -130,40 +169,59 @@ func (h *Handler) StoragePostgresUpdate(ctx context.Context, req *api.StoragePos
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to marshal settings"))
 		}
 
-		if err := query.New(h.dbp).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
-			Type:      "postgres",
-			Name:      req.Name,
-			IsEnabled: isEnabled,
-			Settings:  newSettings,
+		if err := query.New(tx).UpdateStorageByWorkspace(ctx, query.UpdateStorageByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+			Type:          "postgres",
+			Name:          req.Name,
+			IsEnabled:     isEnabled,
+			Settings:      newSettings,
 		}); err != nil {
 			log.Error("failed to update storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update storage"))
 		}
 
 		// Re-fetch and return the updated storage
-		updatedStorage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
+		updatedStorage, err := query.New(tx).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			log.Error("failed to get updated storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get updated storage"))
 		}
-		return QToStoragePostgres(updatedStorage)
+		return QToStoragePostgresByWorkspace(updatedStorage)
 	})
 }
 
 func QToStoragePostgres(row query.GetStorageRow) (*api.StoragePostgres, error) {
-	var s api.StoragePostgres
-	if err := json.Unmarshal(row.Storage.Settings, &s); err != nil {
+	return storageToPostgres(row.Storage)
+}
+
+func QToStoragePostgresByWorkspace(row query.GetStorageByWorkspaceRow) (*api.StoragePostgres, error) {
+	return storageToPostgres(row.Storage)
+}
+
+func storageToPostgres(s query.Storage) (*api.StoragePostgres, error) {
+	var out api.StoragePostgres
+	if err := json.Unmarshal(s.Settings, &out); err != nil {
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to unmarshal postgres settings: %w", err))
 	}
-	s.UUID = api.NewOptString(row.Storage.UUID.String())
-	s.Name = row.Storage.Name
-	s.IsEnabled = api.NewOptBool(row.Storage.IsEnabled)
-	return &s, nil
+	out.UUID = api.NewOptString(s.UUID.String())
+	out.Name = s.Name
+	out.IsEnabled = api.NewOptBool(s.IsEnabled)
+	return &out, nil
 }
 
 func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.StoragePostgresTable, params api.StoragePostgresTablesReplaceParams) (api.StoragePostgresTablesReplaceRes, error) {
 	log := h.log.With("handler", "StoragePostgresTablesReplace")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
 
 	// Validate table definitions
 	if err := validatePostgresTables(req); err != nil {
@@ -178,7 +236,10 @@ func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.St
 
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StoragePostgresTablesReplaceRes, error) {
 		// Get existing storage
-		storage, err := query.New(tx).GetStorage(ctx, pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true})
+		storage, err := query.New(tx).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+		})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
@@ -215,12 +276,13 @@ func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.St
 		}
 
 		// Update storage with new settings (preserve all other fields)
-		if err := query.New(tx).UpdateStorage(ctx, query.UpdateStorageParams{
-			UUID:      pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
-			Type:      storage.Storage.Type,
-			Name:      storage.Storage.Name,
-			IsEnabled: storage.Storage.IsEnabled,
-			Settings:  newSettings,
+		if err := query.New(tx).UpdateStorageByWorkspace(ctx, query.UpdateStorageByWorkspaceParams{
+			UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUID), Valid: true},
+			WorkspaceUUID: workspaceUUID,
+			Type:          storage.Storage.Type,
+			Name:          storage.Storage.Name,
+			IsEnabled:     storage.Storage.IsEnabled,
+			Settings:      newSettings,
 		}); err != nil {
 			log.Error("failed to update storage", "error", err)
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update storage"))
@@ -234,6 +296,28 @@ func (h *Handler) StoragePostgresTablesReplace(ctx context.Context, req []api.St
 // StoragePostgresIntrospectTables lists all tables in the connected PostgreSQL database.
 func (h *Handler) StoragePostgresIntrospectTables(ctx context.Context, params api.StoragePostgresIntrospectTablesParams) (api.StoragePostgresIntrospectTablesRes, error) {
 	log := h.log.With("handler", "StoragePostgresIntrospectTables")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
+	// Validate storage belongs to workspace before introspection
+	storageUUIDParsed, err := uuid.FromString(params.UUID)
+	if err != nil {
+		log.Error("failed to parse storage uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
+	}
+	_, err = query.New(h.dbp).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUIDParsed), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	})
+	if err != nil {
+		log.Error("failed to get storage", "error", err)
+		return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
+	}
 
 	tables, err := h.storageManager.ListTables(ctx, params.UUID)
 	if err != nil {
@@ -258,6 +342,28 @@ func (h *Handler) StoragePostgresIntrospectTables(ctx context.Context, params ap
 // StoragePostgresIntrospectTable returns the schema information for a specific table.
 func (h *Handler) StoragePostgresIntrospectTable(ctx context.Context, params api.StoragePostgresIntrospectTableParams) (api.StoragePostgresIntrospectTableRes, error) {
 	log := h.log.With("handler", "StoragePostgresIntrospectTable")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
+	// Validate storage belongs to workspace before introspection
+	storageUUIDParsed, err := uuid.FromString(params.UUID)
+	if err != nil {
+		log.Error("failed to parse storage uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
+	}
+	_, err = query.New(h.dbp).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUIDParsed), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	})
+	if err != nil {
+		log.Error("failed to get storage", "error", err)
+		return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
+	}
 
 	schema, err := h.storageManager.GetTableFields(ctx, params.UUID, params.TableName)
 	if err != nil {
@@ -288,6 +394,28 @@ func (h *Handler) StoragePostgresIntrospectTable(ctx context.Context, params api
 // StoragePostgresTablesCreate creates a new table in the PostgreSQL database.
 func (h *Handler) StoragePostgresTablesCreate(ctx context.Context, req *api.StoragePostgresTableCreateRequest, params api.StoragePostgresTablesCreateParams) (api.StoragePostgresTablesCreateRes, error) {
 	log := h.log.With("handler", "StoragePostgresTablesCreate")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
+	// Validate storage belongs to workspace before creating table
+	storageUUIDParsed, err := uuid.FromString(params.UUID)
+	if err != nil {
+		log.Error("failed to parse storage uuid", "error", err)
+		return nil, ErrWithCode(http.StatusBadRequest, E("invalid storage UUID"))
+	}
+	_, err = query.New(h.dbp).GetStorageByWorkspace(ctx, query.GetStorageByWorkspaceParams{
+		UUID:          pgtype.UUID{Bytes: converter.UToBytes(storageUUIDParsed), Valid: true},
+		WorkspaceUUID: workspaceUUID,
+	})
+	if err != nil {
+		log.Error("failed to get storage", "error", err)
+		return nil, ErrWithCode(http.StatusNotFound, E("storage not found"))
+	}
 
 	dropIfExists := false
 	if req.DropIfExists.IsSet() {

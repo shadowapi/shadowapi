@@ -9,15 +9,23 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims represents the JWT claims we care about
-// Workspace context is stored in JWT claims and set during workspace switch
-type Claims struct {
-	jwt.RegisteredClaims
-	Scope         string `json:"scope,omitempty"`
-	ClientID      string `json:"client_id,omitempty"`
-	SessionID     string `json:"sid,omitempty"`
+// ExtClaims holds custom claims placed in the "ext" field by Hydra
+type ExtClaims struct {
 	WorkspaceID   string `json:"workspace_id,omitempty"`
 	WorkspaceSlug string `json:"workspace_slug,omitempty"`
+}
+
+// Claims represents the JWT claims we care about
+// Workspace context is stored in JWT claims and set during workspace switch.
+// Hydra v2.x puts session.access_token claims under the "ext" field.
+type Claims struct {
+	jwt.RegisteredClaims
+	Scope         string    `json:"scope,omitempty"`
+	ClientID      string    `json:"client_id,omitempty"`
+	SessionID     string    `json:"sid,omitempty"`
+	Ext           ExtClaims `json:"ext,omitempty"` // Hydra stores custom claims here
+	WorkspaceID   string    `json:"-"`             // Populated from Ext after parsing
+	WorkspaceSlug string    `json:"-"`             // Populated from Ext after parsing
 }
 
 // JWTValidator validates JWT tokens using JWKS
@@ -63,6 +71,10 @@ func (v *JWTValidator) Validate(ctx context.Context, tokenString string) (*Claim
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("invalid token claims")
 	}
+
+	// Copy workspace claims from Ext to top-level fields for easier access
+	claims.WorkspaceID = claims.Ext.WorkspaceID
+	claims.WorkspaceSlug = claims.Ext.WorkspaceSlug
 
 	// Validate issuer
 	if v.issuer != "" && claims.Issuer != v.issuer {

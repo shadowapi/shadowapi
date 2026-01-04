@@ -2,10 +2,12 @@ package handler
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
 	"net/http"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
@@ -14,9 +16,15 @@ func (h *Handler) DatasourceList(
 	ctx context.Context,
 	params api.DatasourceListParams, // Has Offset, Limit only
 ) (api.DatasourceListRes, error) {
-	// Because ogen only defines offset/limit in DatasourceListParams,
-	// we can unify them into a single function.
 	log := h.log.With("handler", "DatasourceList")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.DatasourceListRes, error) {
 		var offset, limit int32
 		if params.Offset.IsSet() {
@@ -26,12 +34,13 @@ func (h *Handler) DatasourceList(
 			limit = params.Limit.Value
 		}
 
-		// Call the query that includes OAuth authentication status
-		listArgs := query.ListDatasourcesWithOAuthStatusParams{
-			Offset: offset,
-			Limit:  limit,
+		// Call the workspace-filtered query that includes OAuth authentication status
+		listArgs := query.ListDatasourcesWithOAuthStatusByWorkspaceParams{
+			WorkspaceUUID: workspaceUUID,
+			Offset:        offset,
+			Limit:         limit,
 		}
-		rows, err := query.New(h.dbp).ListDatasourcesWithOAuthStatus(ctx, listArgs)
+		rows, err := query.New(h.dbp).ListDatasourcesWithOAuthStatusByWorkspace(ctx, listArgs)
 		if err != nil {
 			log.Error("failed to list datasources", "error", err.Error())
 			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list datasources"))

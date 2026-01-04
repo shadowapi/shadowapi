@@ -3,16 +3,27 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgtype"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams) (api.StorageListRes, error) {
+	log := h.log.With("handler", "StorageList")
+
+	// Extract workspace UUID from context - required for workspace-scoped access
+	workspaceUUID, err := workspace.RequireWorkspaceUUID(ctx)
+	if err != nil {
+		log.Error("workspace context required", "error", err)
+		return nil, ErrWithCode(http.StatusUnauthorized, E("workspace context required"))
+	}
+
 	return db.InTx(ctx, h.dbp, func(tx pgx.Tx) (api.StorageListRes, error) {
 		// Build GetStoragesParams with default values.
 		arg := query.GetStoragesParams{
@@ -24,6 +35,7 @@ func (h *Handler) StorageList(ctx context.Context, params api.StorageListParams)
 			UUID:           pgtype.UUID{}, // Will be treated as NULL if not set.
 			IsEnabled:      -1,            // -1 = unset, 0 = false, 1 = true
 			Name:           "",
+			WorkspaceUUID:  workspaceUUID,
 		}
 		if params.Limit.IsSet() {
 			fmt.Println("Limit is set")

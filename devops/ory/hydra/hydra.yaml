@@ -44,7 +44,7 @@ oidc:
       - pairwise
       - public
     pairwise:
-      salt: suuhvWDPiGHtVUzV
+      salt: xcF8QqDyp0uYvYap
   dynamic_client_registration:
     enabled: false
 

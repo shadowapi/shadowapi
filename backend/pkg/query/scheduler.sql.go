@@ -105,6 +105,25 @@ func (q *Queries) DeleteScheduler(ctx context.Context, argUuid pgtype.UUID) erro
 	return err
 }
 
+const deleteSchedulerByWorkspace = `-- name: DeleteSchedulerByWorkspace :exec
+DELETE FROM scheduler
+WHERE uuid = $1::uuid
+  AND pipeline_uuid IN (
+    SELECT p.uuid FROM pipeline p WHERE p.workspace_uuid = $2::uuid
+  )
+`
+
+type DeleteSchedulerByWorkspaceParams struct {
+	UUID          pgtype.UUID `json:"uuid"`
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+}
+
+// Delete a scheduler, ensuring it belongs to the workspace (via pipeline)
+func (q *Queries) DeleteSchedulerByWorkspace(ctx context.Context, arg DeleteSchedulerByWorkspaceParams) error {
+	_, err := q.db.Exec(ctx, deleteSchedulerByWorkspace, arg.UUID, arg.WorkspaceUUID)
+	return err
+}
+
 const getScheduler = `-- name: GetScheduler :one
 SELECT
     scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
@@ -119,6 +138,51 @@ type GetSchedulerRow struct {
 func (q *Queries) GetScheduler(ctx context.Context, argUuid pgtype.UUID) (GetSchedulerRow, error) {
 	row := q.db.QueryRow(ctx, getScheduler, argUuid)
 	var i GetSchedulerRow
+	err := row.Scan(
+		&i.Scheduler.UUID,
+		&i.Scheduler.PipelineUuid,
+		&i.Scheduler.ScheduleType,
+		&i.Scheduler.CronExpression,
+		&i.Scheduler.RunAt,
+		&i.Scheduler.Timezone,
+		&i.Scheduler.NextRun,
+		&i.Scheduler.LastRun,
+		&i.Scheduler.LastUid,
+		&i.Scheduler.IsEnabled,
+		&i.Scheduler.IsPaused,
+		&i.Scheduler.BatchSize,
+		&i.Scheduler.CreatedAt,
+		&i.Scheduler.UpdatedAt,
+	)
+	return i, err
+}
+
+const getSchedulerByWorkspace = `-- name: GetSchedulerByWorkspace :one
+
+SELECT
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
+FROM scheduler
+INNER JOIN pipeline p ON scheduler.pipeline_uuid = p.uuid
+WHERE scheduler.uuid = $1::uuid
+  AND p.workspace_uuid = $2::uuid
+`
+
+type GetSchedulerByWorkspaceParams struct {
+	UUID          pgtype.UUID `json:"uuid"`
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+}
+
+type GetSchedulerByWorkspaceRow struct {
+	Scheduler Scheduler `json:"scheduler"`
+}
+
+// ============================================================================
+// Workspace-filtered scheduler queries
+// ============================================================================
+// Get a scheduler by UUID, filtered by workspace (via pipeline join)
+func (q *Queries) GetSchedulerByWorkspace(ctx context.Context, arg GetSchedulerByWorkspaceParams) (GetSchedulerByWorkspaceRow, error) {
+	row := q.db.QueryRow(ctx, getSchedulerByWorkspace, arg.UUID, arg.WorkspaceUUID)
+	var i GetSchedulerByWorkspaceRow
 	err := row.Scan(
 		&i.Scheduler.UUID,
 		&i.Scheduler.PipelineUuid,
@@ -233,6 +297,106 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 	return items, nil
 }
 
+const getSchedulersWithWorkspace = `-- name: GetSchedulersWithWorkspace :many
+WITH filtered_schedulers AS (
+    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.last_uid, s.is_enabled, s.is_paused, s.batch_size, s.created_at, s.updated_at
+    FROM scheduler s
+    INNER JOIN pipeline p ON s.pipeline_uuid = p.uuid
+    WHERE
+        p.workspace_uuid = $5::uuid AND
+        (NULLIF($6, '') IS NULL OR s.pipeline_uuid = $6::uuid) AND
+        (NULLIF($7::int, -1) IS NULL OR s.is_enabled = $7::boolean) AND
+        (NULLIF($8::int, -1) IS NULL OR s.is_paused = $8::boolean)
+)
+SELECT
+    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, created_at, updated_at,
+    (SELECT count(*) FROM filtered_schedulers) as total_count
+FROM filtered_schedulers
+ORDER BY
+    CASE WHEN $1 = 'created_at' AND $2 = 'asc' THEN created_at END ASC,
+    CASE WHEN $1 = 'created_at' AND $2 = 'desc' THEN created_at END DESC,
+    CASE WHEN $1 = 'updated_at' AND $2 = 'asc' THEN updated_at END ASC,
+    CASE WHEN $1 = 'updated_at' AND $2 = 'desc' THEN updated_at END DESC,
+    created_at DESC
+LIMIT NULLIF($4::int, 0)
+    OFFSET $3::int
+`
+
+type GetSchedulersWithWorkspaceParams struct {
+	OrderBy        interface{} `json:"order_by"`
+	OrderDirection interface{} `json:"order_direction"`
+	Offset         int32       `json:"offset"`
+	Limit          int32       `json:"limit"`
+	WorkspaceUUID  pgtype.UUID `json:"workspace_uuid"`
+	PipelineUuid   interface{} `json:"pipeline_uuid"`
+	IsEnabled      int32       `json:"is_enabled"`
+	IsPaused       int32       `json:"is_paused"`
+}
+
+type GetSchedulersWithWorkspaceRow struct {
+	UUID           uuid.UUID          `json:"uuid"`
+	PipelineUuid   *uuid.UUID         `json:"pipeline_uuid"`
+	ScheduleType   string             `json:"schedule_type"`
+	CronExpression pgtype.Text        `json:"cron_expression"`
+	RunAt          pgtype.Timestamptz `json:"run_at"`
+	Timezone       string             `json:"timezone"`
+	NextRun        pgtype.Timestamptz `json:"next_run"`
+	LastRun        pgtype.Timestamptz `json:"last_run"`
+	LastUid        int64              `json:"last_uid"`
+	IsEnabled      bool               `json:"is_enabled"`
+	IsPaused       bool               `json:"is_paused"`
+	BatchSize      int32              `json:"batch_size"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	TotalCount     int64              `json:"total_count"`
+}
+
+// Get schedulers with filters, scoped to a workspace
+func (q *Queries) GetSchedulersWithWorkspace(ctx context.Context, arg GetSchedulersWithWorkspaceParams) ([]GetSchedulersWithWorkspaceRow, error) {
+	rows, err := q.db.Query(ctx, getSchedulersWithWorkspace,
+		arg.OrderBy,
+		arg.OrderDirection,
+		arg.Offset,
+		arg.Limit,
+		arg.WorkspaceUUID,
+		arg.PipelineUuid,
+		arg.IsEnabled,
+		arg.IsPaused,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSchedulersWithWorkspaceRow
+	for rows.Next() {
+		var i GetSchedulersWithWorkspaceRow
+		if err := rows.Scan(
+			&i.UUID,
+			&i.PipelineUuid,
+			&i.ScheduleType,
+			&i.CronExpression,
+			&i.RunAt,
+			&i.Timezone,
+			&i.NextRun,
+			&i.LastRun,
+			&i.LastUid,
+			&i.IsEnabled,
+			&i.IsPaused,
+			&i.BatchSize,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listSchedulers = `-- name: ListSchedulers :many
 SELECT
     scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
@@ -260,6 +424,63 @@ func (q *Queries) ListSchedulers(ctx context.Context, arg ListSchedulersParams) 
 	var items []ListSchedulersRow
 	for rows.Next() {
 		var i ListSchedulersRow
+		if err := rows.Scan(
+			&i.Scheduler.UUID,
+			&i.Scheduler.PipelineUuid,
+			&i.Scheduler.ScheduleType,
+			&i.Scheduler.CronExpression,
+			&i.Scheduler.RunAt,
+			&i.Scheduler.Timezone,
+			&i.Scheduler.NextRun,
+			&i.Scheduler.LastRun,
+			&i.Scheduler.LastUid,
+			&i.Scheduler.IsEnabled,
+			&i.Scheduler.IsPaused,
+			&i.Scheduler.BatchSize,
+			&i.Scheduler.CreatedAt,
+			&i.Scheduler.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSchedulersByWorkspace = `-- name: ListSchedulersByWorkspace :many
+SELECT
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
+FROM scheduler
+INNER JOIN pipeline p ON scheduler.pipeline_uuid = p.uuid
+WHERE p.workspace_uuid = $1::uuid
+ORDER BY scheduler.created_at DESC
+LIMIT NULLIF($3::int, 0)
+    OFFSET $2
+`
+
+type ListSchedulersByWorkspaceParams struct {
+	WorkspaceUUID pgtype.UUID `json:"workspace_uuid"`
+	Offset        int32       `json:"offset"`
+	Limit         int32       `json:"limit"`
+}
+
+type ListSchedulersByWorkspaceRow struct {
+	Scheduler Scheduler `json:"scheduler"`
+}
+
+// List all schedulers for a workspace
+func (q *Queries) ListSchedulersByWorkspace(ctx context.Context, arg ListSchedulersByWorkspaceParams) ([]ListSchedulersByWorkspaceRow, error) {
+	rows, err := q.db.Query(ctx, listSchedulersByWorkspace, arg.WorkspaceUUID, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListSchedulersByWorkspaceRow
+	for rows.Next() {
+		var i ListSchedulersByWorkspaceRow
 		if err := rows.Scan(
 			&i.Scheduler.UUID,
 			&i.Scheduler.PipelineUuid,
@@ -326,6 +547,56 @@ func (q *Queries) UpdateScheduler(ctx context.Context, arg UpdateSchedulerParams
 		arg.IsPaused,
 		arg.BatchSize,
 		arg.UUID,
+	)
+	return err
+}
+
+const updateSchedulerByWorkspace = `-- name: UpdateSchedulerByWorkspace :exec
+UPDATE scheduler SET
+    cron_expression = $1,
+    run_at = $2,
+    timezone = $3,
+    next_run = $4,
+    last_run = $5,
+    last_uid = COALESCE($6::bigint, last_uid),
+    is_enabled = $7::boolean,
+    is_paused = $8::boolean,
+    batch_size = $9::int,
+    updated_at = NOW()
+WHERE uuid = $10::uuid
+  AND pipeline_uuid IN (
+    SELECT p.uuid FROM pipeline p WHERE p.workspace_uuid = $11::uuid
+  )
+`
+
+type UpdateSchedulerByWorkspaceParams struct {
+	CronExpression pgtype.Text        `json:"cron_expression"`
+	RunAt          pgtype.Timestamptz `json:"run_at"`
+	Timezone       string             `json:"timezone"`
+	NextRun        pgtype.Timestamptz `json:"next_run"`
+	LastRun        pgtype.Timestamptz `json:"last_run"`
+	LastUid        int64              `json:"last_uid"`
+	IsEnabled      bool               `json:"is_enabled"`
+	IsPaused       bool               `json:"is_paused"`
+	BatchSize      int32              `json:"batch_size"`
+	UUID           pgtype.UUID        `json:"uuid"`
+	WorkspaceUUID  pgtype.UUID        `json:"workspace_uuid"`
+}
+
+// Update a scheduler, ensuring it belongs to the workspace (via pipeline)
+func (q *Queries) UpdateSchedulerByWorkspace(ctx context.Context, arg UpdateSchedulerByWorkspaceParams) error {
+	_, err := q.db.Exec(ctx, updateSchedulerByWorkspace,
+		arg.CronExpression,
+		arg.RunAt,
+		arg.Timezone,
+		arg.NextRun,
+		arg.LastRun,
+		arg.LastUid,
+		arg.IsEnabled,
+		arg.IsPaused,
+		arg.BatchSize,
+		arg.UUID,
+		arg.WorkspaceUUID,
 	)
 	return err
 }
