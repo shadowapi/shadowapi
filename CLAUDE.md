@@ -1,524 +1,142 @@
 # CLAUDE.md
 
-This document guides Claude Code (claude.ai/code) when working inside the ShadowAPI repository. Follow it before you change or create files.
+Guide for Claude Code working in the MeshPump (ShadowAPI) repository.
 
-## Snapshot
+## Quick Start
 
-- ShadowAPI is a unified messaging platform that normalises Gmail, Telegram, WhatsApp, and LinkedIn into a single REST + MCP surface.
-- Backend: Go 1.24 service using Cobra CLI, samber/do dependency injection, ogen-generated handlers, SQLC + PostgreSQL 16, NATS JetStream, S3/host/local storage abstractions.
-- Infrastructure: Docker Compose stack with Traefik, backend, Postgres, and NATS; orchestrated by Make (`Makefile`).
-
-## Repository map
-
-- `backend/` – Go service:
-  - `cmd/shadowapi` – Main CLI binary (`serve`, `loader`, `reset-password`)
-  - `cmd/worker` – Distributed worker binary (`enroll`, `connect`)
-  - `internal/` – Domain packages (auth, handler, worker, grpc, storages, queue, metrics, config)
-  - `proto/` – Protobuf definitions for gRPC services (use `make proto-gen` to regenerate)
-  - `pkg/api` – ogen-generated HTTP server (do not edit manually)
-  - `pkg/query` – SQLC-generated database accessors (do not edit)
-  - `pkg/proto` – buf-generated gRPC/protobuf code (do not edit)
-  - `sdk-go/` – Generated client example
-- `spec/` – OpenAPI definition (`openapi.yaml`) plus ogen configuration and shared pieces under `components/` (including RBAC schemas) and `paths/` (including RBAC endpoints).
-- `db/` – Canonical SQL schema in `schema.sql` with Telegram-specific relations in `tg.sql`. Worker tables (`registered_worker`, `worker_workspace`, `worker_enrollment_token`) and RBAC queries in `sql/`. Atlas migrations are applied from schema files; no separate migration files exist.
-- `devops/` – Dockerfiles, Atlas configs, sqlc builder image, helper scripts, and Ory configuration files used by Compose/Make.
-- `devops/ory/` – Ory Hydra configuration files (`hydra/hydra.yaml`).
-- `devops/compose/auth/` – Docker Compose for Hydra OAuth2/OIDC service.
-- `devops/docker/worker/` – Dockerfile for distributed worker container.
-- `docs/` – Product documentation and screenshots referenced by the README.
-- `templates/`, `start/`, `k8s/`, `secrets/` – Supporting assets (UI templates, bootstrap scripts, Kubernetes manifests, local keys). Leave anything under `secrets/` untouched.
-- `Makefile` – Source of all make targets; prefer calling `make <target>` over shelling out to `docker compose` directly.
-
-## Backend
-
-### Stack & runtime
-
-- Go 1.24 with modules pinned in `backend/go.mod`.
-- Dependency injection via `github.com/samber/do/v2`; resolve services through the container rather than new-ing them manually.
-- HTTP surface is generated from the OpenAPI spec by `ogen`, wired through `backend/internal/server`.
-- Long-running jobs and pipelines live under `backend/internal/worker` and communicate through NATS (`backend/internal/queue`).
-- Observability uses `log/slog`, OpenTelemetry (`go.opentelemetry.io/otel`), and Prometheus metrics (`backend/internal/metrics`).
-
-### Key packages
-
-- `internal/handler` – Implements ogen handlers for messages, contacts, pipelines, storages, auth callbacks, workspaces, RBAC, etc.
-- `internal/auth` – Authentication middleware and token validation.
-- `internal/auth/dbauth` – Database-based user manager implementation with global user authentication.
-- `internal/rbac` – Role-Based Access Control with Casbin enforcer, middleware, and predefined policies.
-- `internal/workspace` – Workspace context utilities and middleware for path-based workspace extraction.
-- `internal/storages` – Pluggable storage backends (Postgres, S3, host filesystem).
-- `internal/worker` – Pipelines, extractors, filters, schedulers, job registry, and cancellation logic (NATS-based internal worker).
-- `internal/grpc` – gRPC server for distributed workers. Handles worker enrollment and bidirectional streaming for job dispatch.
-- `internal/imap`, `internal/whatsapp`, `internal/tg`, `internal/oauth2` – External channel integrations (IMAP/SMTP Gmail, WhatsApp via whatsmeow, Telegram via gotd, LinkedIn helpers).
-- `pkg/api` – Generated server; never edit by hand. Regenerate with `make api-gen-backend`.
-- `pkg/query` – SQLC-generated database accessors; regenerate with `sqlc generate` in the backend directory.
-- `pkg/proto` – Generated gRPC/protobuf code; regenerate with `make proto-gen`.
-
-### Distributed Worker System
-
-The backend supports distributed workers that connect via gRPC for job processing. This is separate from the NATS-based internal worker.
-
-**Architecture:**
-- Backend runs gRPC server on port 9090 (configurable via `BE_GRPC_HOST` and `BE_GRPC_PORT`)
-- Workers are standalone binaries (`cmd/worker`) that connect as gRPC clients
-- Pull-based pattern: workers connect and receive jobs via bidirectional streaming
-
-**Worker Binary (`cmd/worker`):**
-- `worker enroll --token=<token> --name=<name>` - Exchange enrollment token for credentials
-- `worker connect` - Connect to backend and start receiving jobs
-
-**TLS Support:**
-Workers can connect over TLS for secure external connections. Set `WORKER_TLS=true` when connecting to production endpoints (e.g., `rpc.meshpump.com:443`). Internal workers within the same network can use plain connections (`WORKER_TLS=false`, default).
-
-**Enrollment Flow:**
-1. Admin creates enrollment token (stored hashed in `worker_enrollment_token` table)
-2. Worker operator runs `worker enroll` with token
-3. Backend validates token, creates worker record, returns worker_id and secret
-4. Worker uses credentials for all future connections
-
-**Database Tables:**
-- `registered_worker` - Worker metadata, status, allowed workspaces
-- `worker_workspace` - Many-to-many worker-to-workspace assignments
-- `worker_enrollment_token` - One-time enrollment tokens
-
-**Key Files:**
-- `backend/internal/grpc/server.go` - gRPC server setup
-- `backend/internal/grpc/worker_service.go` - Enroll() and Connect() implementations
-- `backend/internal/grpc/manager.go` - Connected worker tracking
-- `backend/proto/worker/v1/worker.proto` - Protocol definition
-
-### Config & secrets
-
-- Default configuration lives in `backend/config.example.yaml`; copy to `backend/config.yaml` for local overrides.
-- Environment variables are BE-prefixed (see `backend/internal/config/config.go`). Important ones include `BE_DB_URI`, `BE_QUEUE_URL`, and `TG_APP_ID`/`TG_APP_HASH`.
-- Sensitive keys are read from `secrets/`; the repo should never gain new secrets in git history.
-
-### Generation & migrations
-
-- Run `make api-gen` after editing `spec/`. This updates both the Go server (`backend/pkg/api/`) and TypeScript API types (`front/src/api/v1.d.ts`).
-- Run `make proto-gen` after editing `backend/proto/`. This regenerates gRPC code in `backend/pkg/proto/`.
-- Run `make sqlc-gen` (or `cd db && sqlc generate`) after updating the SQL schema. SQL lives in `db/schema.sql` + `db/tg.sql`.
-- `make sync-db` concatenates schema files and applies them via Atlas to the running Postgres instance.
-
-### Command-line entrypoints
-
-**Main API server:**
-- `go build -o ./bin/shadowapi ./cmd/shadowapi` builds the binary locally.
-- `shadowapi serve` starts HTTP (port 8080) and gRPC (port 9090) servers.
-
-**Distributed worker:**
-- `go build -o ./bin/worker ./cmd/worker` builds the worker binary.
-- `worker enroll --server=<host:port> --token=<token> --name=<name>` enrolls a new worker.
-- `worker connect` connects to backend and starts receiving jobs.
-
-## Frontend
-
-### Stack
-
-- Vite and React 19 with TypeScript.
-- Ant Design component library (v6).
-- React Router v7 for client-side routing.
-- Use LLMs.txt for Ant Design best practices and guidelines from this URL https://ant.design/llms.txt
-
-### Subdomain Architecture
-
-The application uses a subdomain-based architecture for service separation:
-
-| Subdomain | Service | Port | Description |
-|-----------|---------|------|-------------|
-| `{domain}` | SSR | 3000 | Server-rendered public pages |
-| `app.{domain}` | Frontend | 5173 | React SPA (CSR, protected) |
-| `api.{domain}` | Backend | 8080 | REST API |
-| `rpc.{domain}` | Backend | 9090 | gRPC for distributed workers |
-| `oidc.{domain}` | Hydra | 4444 | OAuth2/OIDC |
-
-**Two containers, one codebase:**
-- **SSR container** (port 3000): Express + Vite middleware for SSR routes on root domain
-- **Frontend container** (port 5173): Vite dev server for CSR routes on app subdomain
-- Both containers use the same `front/` directory
-
-**Routing behavior:**
-- Direct URL access to `{domain}/start` → SSR container renders full HTML, then client hydrates
-- SPA navigation within `{domain}/*` → React Router (no page reload)
-- Navigation from `{domain}/*` to `app.{domain}/*` → Full page reload (crosses subdomain)
-- Direct URL access to `app.{domain}/` → Frontend container serves index.html, client renders
-
-**Cross-origin considerations:**
-- Frontend on `app.{domain}` makes API calls to `api.{domain}`
-- CORS middleware on backend allows requests from `{domain}` and `app.{domain}`
-- Cookies use `.{domain}` domain for cross-subdomain sharing
-
-### Key frontend files
-
-- `front/server.ts` – Express SSR server with Vite middleware for root domain
-- `front/.env.development` – Environment variables for local development (API URLs, subdomain URLs)
-- `front/src/entry-client.tsx` – Client entry point; uses `hydrateRoot` for SSR pages, `createRoot` for CSR
-- `front/src/entry-server.tsx` – SSR render function with Ant Design CSS-in-JS extraction
-- `front/src/routes.tsx` – Centralized route configuration with `ssr` and `protected` flags per route
-- `front/src/api/client.ts` – API client using `openapi-fetch` for type-safe HTTP requests
-- `front/src/api/v1.d.ts` – Generated TypeScript types from OpenAPI spec (do not edit manually, regenerate with `make api-gen`)
-- `front/src/app/WorkspaceRouter.tsx` – Router for workspace-scoped pages under `/w/:slug/*`
-- `front/src/app/oauth2/` – OAuth2 Credentials management pages (list, create, edit)
-- `front/src/app/rbac/` – RBAC management pages (Roles list, RoleEdit with permission picker)
-- `front/src/app/users/` – User management pages with integrated role assignment
-- `front/src/lib/SmartLink.tsx` – Navigation component that decides between SPA navigation and full reload
-- `front/src/lib/ssr-context.tsx` – SSR data provider for passing server-fetched data to client
-- `front/src/lib/data-fetching.ts` – Route-based data loaders for SSR
-- `front/src/lib/auth/` – Authentication module (OAuth2 client, context, hooks, protected route)
-- `front/src/lib/workspace/` – Workspace context and provider for workspace-scoped pages
-- `front/src/layouts/` – Layout components (BaseLayout for shared, AppLayout for CSR, PageLayout for SSR, AuthLayout for login)
-- `front/src/pages/auth/` – Authentication pages (LoginPage)
-- `front/src/pages/workspaces/` – Workspace selection page
-- `front/src/theme.ts` – Centralized theme configuration with color palette and Ant Design theme tokens
-
-### Theme System
-
-The frontend uses a centralized theme configuration based on the color palette from [Coolors](https://coolors.co/palette/000000-14213d-fca311-e5e5e5-ffffff).
-
-**Color palette:**
-- `#000000` - Black (header border, logo text)
-- `#14213d` - Oxford Blue (header background, footer text)
-- `#fca311` - Orange (primary accent, logo background, buttons, links)
-- `#e5e5e5` - Light Gray (footer background, layout background)
-- `#ffffff` - White (content background)
-
-**Key file:** `front/src/theme.ts`
-- `colors` – Base color palette constants
-- `uiColors` – Semantic color mappings for UI elements (header, footer, menu, etc.)
-- `theme` – Ant Design `ThemeConfig` object applied via `ConfigProvider`
-
-**Usage:**
-- Theme is applied globally in `entry-client.tsx` and `entry-server.tsx` via `ConfigProvider`
-- Import `colors` or `uiColors` from `theme.ts` for custom styling
-- Ant Design components automatically use the theme tokens (primary color, border radius, etc.)
-
-**Modifying the theme:**
-1. Update color values in `front/src/theme.ts`
-2. Adjust `uiColors` mappings if semantic usage changes
-3. Modify Ant Design component tokens in the `theme.components` section as needed
-
-### Development scripts
-
-- `npm run dev` – Start Vite dev server (CSR only, used by frontend container)
-- `npm run dev:ssr` – Start Express SSR server with Vite middleware (used by SSR container)
-- `npm run build` – Build both client and server bundles for production
-- `npm run generate-api-client` – Generate TypeScript types from OpenAPI spec (called by `make api-gen`)
-
-### Adding new pages
-
-**For SSR pages (public/SEO on root domain):**
-1. Create the page component in `front/src/pages/`
-2. Add route to `front/src/routes.tsx` with `ssr: true` and `layout: 'page'` (use path without `/page` prefix, e.g., `/about`)
-3. Update `SSR_PATHS` array in `front/src/lib/SmartLink.tsx` if needed
-4. If the page needs server-side data, add a loader in `front/src/lib/data-fetching.ts`
-
-**For CSR app pages (protected, on app subdomain):**
-1. Create the page component in `front/src/app/` (e.g., `front/src/app/oauth2/MyPage.tsx`)
-2. Add route to `front/src/app/WorkspaceRouter.tsx`
-3. Use the API client from `front/src/api/client.ts` for data fetching:
-   ```typescript
-   import client from '../../api/client';
-   const { data, error } = await client.GET('/oauth2/client');
-   ```
-4. Access workspace context via `useWorkspace()` hook from `front/src/lib/workspace/WorkspaceContext.tsx`
-5. If adding a new menu item, update `front/src/layouts/AppLayout.tsx`
-
-### Frontend Authentication
-
-The frontend uses OAuth2/OIDC with Ory Hydra for authentication. Login is handled by the backend with credentials stored in the database (bcrypt hashed).
-
-**Key files:**
-- `front/src/lib/auth/oauth2-client.ts` – OAuth2 client (initiate flow, refresh token, logout)
-- `front/src/lib/auth/AuthProvider.tsx` – React context provider managing auth state
-- `front/src/lib/auth/useAuth.ts` – Hook to access auth state and functions
-- `front/src/lib/auth/ProtectedRoute.tsx` – Route wrapper that redirects to `/login` if unauthenticated
-- `front/src/pages/auth/LoginPage.tsx` – Login form component
-
-**Authentication flow:**
-1. On app load, `AuthProvider` checks for existing session by attempting token refresh
-2. Protected routes redirect unauthenticated users to `/login`
-3. Visiting `/login` without `login_challenge` auto-initiates OAuth2 flow (shows loading spinner)
-4. Hydra redirects to `/api/v1/auth/login` → Backend redirects to `/login?login_challenge=xxx`
-5. Login form appears with challenge → User enters credentials
-6. Backend validates credentials against database, accepts Hydra login → redirects to consent
-7. Backend auto-approves consent → Hydra issues tokens → Backend sets HTTP-only cookies
-8. Tokens stored in `shadowapi_access_token` and `shadowapi_refresh_token` cookies
-9. Logout revokes tokens and clears cookies
-
-**Using auth in components:**
-```typescript
-import { useAuth } from '../lib/auth';
-
-function MyComponent() {
-  const { user, isAuthenticated, login, logout } = useAuth();
-  // user?.email, user?.first_name, etc.
-}
-```
-
-**Adding new protected routes:**
-Routes with `layout: 'app'` are protected by default. To make a route public, set `protected: false`.
-
-### Workspace Architecture
-
-The application uses path-based workspaces on a single domain:
-
-**How it works:**
-- All requests go to a single domain (`localtest.me`)
-- Workspace context is derived from URL path (`/w/{slug}/*`) and JWT claims
-- Users are global (one user, one email across all workspaces)
-- Users can be members of multiple workspaces with different roles (owner, admin, member)
-- Workspace membership is checked by middleware before accessing workspace-scoped resources
-
-**URL structure:**
-
-*Root domain (`{domain}`) - SSR pages:*
-- `/start` → Landing page (SSR, auth layout - centered, no menu)
-- `/about` → About page (SSR)
-- `/documentation/*` → Documentation pages (SSR)
-
-*App subdomain (`app.{domain}`) - CSR pages:*
-- `/` → Root redirect (authenticated → `/workspaces`, unauthenticated → `/login`)
-- `/login` → Login page
-- `/workspaces` → Workspace selection (CSR, protected, auth layout)
-- `/w/{slug}/` → Workspace dashboard
-- `/w/{slug}/oauth2/credentials` → OAuth2 credentials in workspace
-- `/w/{slug}/users` → User management (admin only)
-- `/w/{slug}/rbac/roles` → RBAC roles management (admin only)
-
-*API subdomain (`api.{domain}`):*
-- `/api/v1/*` → REST API endpoints
-
-*OIDC subdomain (`oidc.{domain}`):*
-- `/.well-known/openid-configuration` → OIDC discovery
-- `/oauth2/*` → OAuth2 endpoints
-
-**Key components:**
-- `backend/internal/workspace/` – Workspace context and middleware (path-based extraction)
-- `db/schema.sql` – `workspace` and `workspace_member` tables
-- `db/sql/workspace.sql`, `db/sql/workspace_member.sql` – SQLC queries
-- `front/src/lib/workspace/WorkspaceContext.tsx` – React context for workspace state
-- `front/src/app/WorkspaceRouter.tsx` – Router wrapper for `/w/:slug/*` routes
-- `front/src/pages/workspaces/` – Workspace selection page
-
-**Workspace roles:**
-- `owner` – Full control, can delete workspace
-- `admin` – Can manage members and settings
-- `member` – Can access workspace resources
-
-**Default workspaces:**
-- `internal` and `demo` workspaces are created automatically on first startup
-- Admin user is added as owner to both workspaces using `BE_INIT_ADMIN_EMAIL`/`BE_INIT_ADMIN_PASSWORD`
-
-**Workspace-scoped JWT tokens:**
-
-JWT access tokens contain workspace context in the `ext` field:
-```json
-{
-  "sub": "user-uuid",
-  "ext": {
-    "workspace_id": "workspace-uuid",
-    "workspace_slug": "internal"
-  }
-}
-```
-
-This enables stateless authorization without per-request database lookups for workspace UUID.
-
-**Workspace context extraction (priority order):**
-1. JWT claims (`ext.workspace_id`, `ext.workspace_slug`) - checked first
-2. URL path (`/w/{slug}/...`) - fallback when JWT has no workspace claims
-
-**Workspace switching flow:**
-1. User calls `POST /api/v1/auth/workspace/switch` with target workspace slug
-2. Backend validates user is member of target workspace
-3. Backend returns OAuth2 authorization URL with workspace in state
-4. Frontend redirects to Hydra (session is remembered, no login required)
-5. Consent handler extracts workspace from state, embeds in new JWT
-6. New tokens issued with workspace claims → user redirected to `/w/{slug}`
-
-**Trade-offs:**
-- Requires OAuth2 flow to switch workspaces (not instant navigation)
-- Token is bound to single workspace per session
-
-### RBAC (Role-Based Access Control)
-
-The application uses Casbin for fine-grained permission enforcement with domain-based (workspace-scoped) policies.
-
-**Architecture:**
-- Casbin enforcer with PostgreSQL adapter (`casbin_rule` table)
-- Ogen middleware intercepts requests and checks permissions before handlers execute
-- Policies are automatically initialized on startup with predefined roles
-
-**Key files:**
-- `backend/internal/rbac/rbac.go` – Casbin enforcer wrapper with DI provider
-- `backend/internal/rbac/middleware.go` – Ogen middleware with operation-to-permission mapping
-- `backend/internal/rbac/policies.go` – Predefined roles and permissions initialization
-- `backend/internal/rbac/types.go` – Resource, Action, Scope type definitions
-- `backend/internal/rbac/model.conf` – Casbin RBAC model configuration
-- `backend/internal/handler/rbac.go` – API handlers for role/permission management
-- `db/sql/rbac.sql` – SQLC queries for roles, permissions, role_assignments tables
-
-**Predefined roles:**
-| Role | Scope | Description |
-|------|-------|-------------|
-| `super_admin` | global | Full system access including user management and all workspaces |
-| `workspace_owner` | workspace | Full control over workspace including member management |
-| `workspace_admin` | workspace | Can manage workspace resources but not members |
-| `workspace_member` | workspace | Read-only access to workspace resources |
-
-**Resource types:**
-- **Global:** `user`, `workspace`, `role`, `rbac`
-- **Workspace-scoped:** `datasource`, `pipeline`, `storage`, `contact`, `message`, `scheduler`, `member`
-
-**Actions:** `read`, `write`, `create`, `delete`, `admin`
-
-**How enforcement works:**
-1. `OperationPermissionMap` in middleware.go maps API operation names to required `{Resource, Action}` pairs
-2. Middleware extracts user UUID from JWT claims and workspace slug from URL path
-3. Casbin checks if user has the required permission in the domain (workspace or "global")
-4. Operations not in the map are allowed by default (e.g., auth endpoints)
-
-**API endpoints:**
-- `GET /rbac/roles` – List all roles
-- `POST /rbac/roles` – Create custom role
-- `GET/PUT/DELETE /rbac/roles/{uuid}` – Manage specific role
-- `GET /rbac/permissions` – List all permissions
-- `GET /rbac/users/{uuid}/roles` – Get user's roles across all domains
-- `POST /rbac/users/{uuid}/roles` – Assign role to user in domain
-- `DELETE /rbac/users/{uuid}/roles/{role}` – Remove role from user
-- `POST /rbac/check` – Check if user has specific permission
-
-**Adding new protected operations:**
-1. Add operation to `OperationPermissionMap` in `backend/internal/rbac/middleware.go`
-2. Specify the required `Resource` and `Action`
-3. For new resources, add constants to `types.go` and update `GlobalResources` if needed
-
-**Frontend RBAC UI:**
-- `front/src/app/rbac/Roles.tsx` – List all roles with scope filter, system role badges, and CRUD actions
-- `front/src/app/rbac/RoleEdit.tsx` – Create/edit roles with permission picker (checkboxes grouped by resource)
-- Role assignment is integrated into `front/src/app/users/UserEdit.tsx` with modal for assigning roles to users
-- Access Control menu item in sidebar (requires admin privileges)
-- System roles are read-only (cannot be edited or deleted)
-
-## Specs & data model
-
-- Primary API definition: `spec/openapi.yaml` with supporting fragments in `spec/components/` and `spec/paths/`.
-- Backend contract is enforced through ogen. Keep the spec authoritative; update it before changing handlers.
-- SQL schema consolidated in `db/schema.sql` plus Telegram-specific SQL in `db/tg.sql`. Run `make sync-db` after edits to apply them against containers.
-- Atlas is used in-place; there are no separate migration files. Ensure schema changes are reflected in both SQL files and code.
-- Workers operate over a queue prefix defined by `BE_QUEUE_PREFIX` (default `shadowapi`) with NATS JetStream enabled.
-
-## Local development & tooling
-
-### Getting started
-
-1. Run `make up` first to bootstrap the project (generates secrets, starts db, runs migrations, creates OAuth client and test user).
-2. Start the development environment with `docker compose watch`.
-   - Backend runs in the container via `air` auto-rebuild.
-   - Test login: `admin@example.com` / `Admin123!`
-3. Always ask user predefined objects before creating it (datasources, OAuth2 clients, pipelines, etc.).
-
-### Make targets
-
-Run `make help` to see all available targets. Key ones:
-
-- `make up` – Bootstrap and start the full stack (generates secrets, creates OAuth client, test user). **Run this first before starting development.**
-- `make init` – Reset containers and reinitialize database (destructive).
-- `make sync-db` – Apply schema to the running Postgres (uses Atlas).
-- `make api-gen`, `make api-gen-backend` – Sync code with the OpenAPI spec.
-
-### Compose topology
-
-Traefik v3 routes requests based on subdomain:
-
-| Subdomain | Service | Port |
-|-----------|---------|------|
-| `localtest.me` | SSR | 3000 |
-| `app.localtest.me` | Frontend (CSR) | 5173 |
-| `api.localtest.me` | Backend (HTTP) | 8080 |
-| `rpc.localtest.me` | Backend (gRPC) | 9090 |
-| `oidc.localtest.me` | Hydra | 4444 |
-
-- Access public pages at `http://localtest.me/start`
-- Access the app at `http://app.localtest.me`
-- Default workspaces: `http://app.localtest.me/w/internal` and `http://app.localtest.me/w/demo`
-- OIDC discovery: `http://oidc.localtest.me/.well-known/openid-configuration`
-- API base: `http://api.localtest.me/api/v1`
-- Postgres, NATS, and supporting containers share the `shadowapi` network; Atlas (`db-migrate`) runs on startup to sync schema.
-
-### Authentication Stack
-
-The project uses Ory Hydra for OAuth2/OIDC token issuance, with user authentication handled by the backend:
-
-**Services:**
-- **hydra** (v2.2.0) – OAuth2/OIDC provider for token issuance
-- **backend** – Handles login/consent flows, user authentication against database
-
-**Configuration files:**
-- `devops/ory/hydra/hydra.yaml` – Hydra OAuth2/OIDC configuration
-
-**Databases:**
-- Hydra uses `hydra` database (created by `devops/compose/infra/db-init.sh`)
-- Users are stored in the main `shadowapi` database (managed by backend)
-
-**Environment variables (in `.env`):**
-- `HYDRA_DSN`, `HYDRA_SECRETS_SYSTEM`, `OIDC_PAIRWISE_SALT` – Hydra database and secrets
-- `HYDRA_URLS_LOGIN`, `HYDRA_URLS_CONSENT`, `HYDRA_URLS_LOGOUT` – URLs pointing to backend handlers
-- `BE_INIT_ADMIN_EMAIL`, `BE_INIT_ADMIN_PASSWORD` – Initial admin user credentials
-
-**Testing the setup:**
 ```bash
-# Check Hydra OIDC discovery
-curl http://oidc.localtest.me/.well-known/openid-configuration
-
-# Create a test OAuth2 client
-docker compose exec hydra hydra create client \
-  --endpoint http://localhost:4445 \
-  --grant-type authorization_code,refresh_token \
-  --response-type code \
-  --scope openid,offline_access \
-  --redirect-uri http://api.localtest.me/api/v1/auth/oauth2/callback \
-  --name "Test Client" \
-  --token-endpoint-auth-method none \
-  --format json
+make up                    # Bootstrap: secrets, db, migrations, OAuth client, test user
+docker compose watch       # Start dev environment with hot reload
 ```
 
-**Frontend login page:** `http://app.localtest.me/login`
+- **Login:** `admin@example.com` / `Admin123!`
+- **App:** `http://app.localtest.me`
+- **API:** `http://api.localtest.me/api/v1`
 
-## Testing & QA expectations
+## What Is This
 
-- **Go:** Prefer running `go test ./...` in the backend directory. Add focused tests under `*_test.go` when fixing bugs or adding features.
-- **SQL:** After schema edits, run `sqlc vet` in the backend directory to ensure queries remain valid.
-- **Integration:** When modifying auth or message pipelines, verify the running stack (`docker compose watch`) and exercise flows through the API.
-- Never leave generated files stale—regenerate them in the same change set.
+MeshPump is a unified messaging platform (Gmail, Telegram, WhatsApp, LinkedIn) with REST + MCP surface.
 
-## Coding standards & gotchas
+| Component | Stack |
+|-----------|-------|
+| Backend | Go 1.24, ogen, SQLC, NATS JetStream, samber/do DI |
+| Frontend | React 19, Vite, Ant Design v6, React Router v7 |
+| Auth | Ory Hydra (OAuth2/OIDC), backend handles login/consent |
+| Database | PostgreSQL 16, Atlas migrations |
 
-- Keep code self-documenting; only add comments for intent or non-obvious reasoning.
-- Run `gofmt`/`goimports` on Go files.
-- Do not edit generated directories (`backend/pkg/api`, `backend/pkg/query`) manually.
-- Wire new services through the DI container (`samber/do`) so they can be mocked and tested.
-- Reuse existing logging helpers (`backend/internal/log`) and metric emitters rather than introducing new logging styles.
-- Respect existing channel abstractions (`internal/tg`, `internal/whatsapp`, etc.) when adding integrations—keep protocols isolated from handler code.
-- Keep secrets and credentials out of source control. Use `.env`, `backend/config.yaml`, or `secrets/` volumes instead.
+## Code Generation (Critical)
 
-## Known issues
+**Never edit generated files manually.** Regenerate after changing sources:
 
-None currently tracked.
+| Change | Command |
+|--------|---------|
+| `spec/*.yaml` (OpenAPI) | `make api-gen` |
+| `backend/proto/*.proto` | `make proto-gen` |
+| `db/schema.sql` or `db/tg.sql` | `make sqlc-gen && make sync-db` |
 
-## Contribution workflow
+Generated directories (do not edit):
+- `backend/pkg/api/` - ogen HTTP server
+- `backend/pkg/query/` - SQLC database accessors
+- `backend/pkg/proto/` - buf gRPC code
+- `front/src/api/v1.d.ts` - TypeScript API types
 
-1. Plan the change: update the OpenAPI spec or SQL schema first if the contract changes.
-2. Update backend code, regenerate artifacts (`make api-gen`, `sqlc generate`) as needed, and ensure DI wiring stays consistent.
-3. Run the relevant test and lint commands from the sections above.
-4. Update documentation (README, docs, or inline help) when behaviour changes.
-5. Use conventional commit prefixes (`feat:`, `fix:`, `docs:`, etc.). Do not mention Claude or other assistants in commit messages.
+## Architecture
 
-## Working style for Claude Code
+### Subdomains (Traefik routing)
 
-- Always read the surrounding files (`README.md`, related packages) before editing; prefer `rg` for searching within the repo.
-- Keep diffs tight and deliberate; do not refactor broadly unless explicitly asked.
-- Ask the user when scope is unclear or when destructive changes (schema rewrites, data deletion) are required.
-- Avoid running commands that need interactive input or elevated privileges unless instructed. Use the provided `make` targets whenever possible.
-- If a change touches unfamiliar areas (auth, worker pipelines, storage), leave breadcrumbs in the PR description or docs instead of code comments.
-- When in doubt, stop and request guidance rather than guessing.
+| Subdomain | Service | Purpose |
+|-----------|---------|---------|
+| `localtest.me` | SSR (3000) | Public pages (landing, docs) |
+| `app.localtest.me` | Frontend (5173) | React SPA |
+| `api.localtest.me` | Backend (8080) | REST API |
+| `rpc.localtest.me` | Backend (9090) | gRPC for workers |
+| `oidc.localtest.me` | Hydra (4444) | OAuth2/OIDC |
+
+### Workspaces
+
+Path-based multi-tenancy: `/w/{slug}/*`
+
+- JWT tokens contain `workspace_id` and `workspace_slug` in `ext` field
+- Switching workspaces requires OAuth2 flow (`POST /api/v1/auth/workspace/switch`)
+- Roles: `owner`, `admin`, `member`
+- Default workspaces: `internal`, `demo`
+
+### RBAC
+
+Casbin-based with workspace-scoped policies. Middleware maps API operations to permissions.
+
+- Key file: `backend/internal/rbac/middleware.go` (OperationPermissionMap)
+- Predefined roles: `super_admin`, `workspace_owner`, `workspace_admin`, `workspace_member`
+
+## Repository Layout
+
+```
+backend/
+  cmd/shadowapi/     # Main server binary
+  cmd/worker/        # Distributed worker binary
+  internal/          # Domain packages (handler, auth, rbac, worker, grpc, storages)
+  pkg/               # Generated code (api, query, proto)
+  proto/             # Protobuf definitions
+spec/                # OpenAPI definition
+db/
+  schema.sql         # Main schema
+  tg.sql             # Telegram-specific
+  sql/               # SQLC query files
+front/
+  src/app/           # CSR pages (workspace-scoped)
+  src/pages/         # SSR pages (public)
+  src/lib/           # Shared utilities (auth, workspace, SmartLink)
+  src/layouts/       # Layout components
+  src/theme.ts       # Ant Design theme config
+devops/              # Docker, compose files, Ory config
+```
+
+## Adding Features
+
+### New API Endpoint
+
+1. Add to `spec/paths/` and reference in `spec/openapi.yaml`
+2. Run `make api-gen`
+3. Implement handler in `backend/internal/handler/`
+4. Add to RBAC `OperationPermissionMap` if protected
+
+### New Database Table
+
+1. Add to `db/schema.sql`
+2. Add queries in `db/sql/*.sql`
+3. Run `make sqlc-gen && make sync-db`
+
+### New Frontend Page
+
+**CSR (app pages):**
+1. Create in `front/src/app/`
+2. Add route to `front/src/app/WorkspaceRouter.tsx`
+3. Add menu item to `front/src/layouts/AppLayout.tsx`
+
+**SSR (public pages):**
+1. Create in `front/src/pages/`
+2. Add route to `front/src/routes.tsx` with `ssr: true`
+
+### Ant Design
+
+Use LLMs.txt for best practices: https://ant.design/llms.txt
+
+## Key Commands
+
+```bash
+make help              # All available targets
+make up                # Bootstrap everything
+make init              # Reset and reinitialize (destructive)
+make sync-db           # Apply schema changes
+make api-gen           # Regenerate from OpenAPI
+go test ./...          # Run Go tests (from backend/)
+```
+
+## Guidelines
+
+- **Ask first** before creating predefined objects (datasources, OAuth2 clients, pipelines)
+- **Spec first**: Update OpenAPI/SQL schema before implementing
+- **DI**: Wire services through `samber/do`, don't instantiate directly
+- **Secrets**: Never commit to git; use `.env`, `config.yaml`, or `secrets/`
+- Keep diffs tight; don't refactor beyond scope
+- Use conventional commits: `feat:`, `fix:`, `docs:`, etc.
