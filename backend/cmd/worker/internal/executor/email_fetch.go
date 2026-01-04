@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
@@ -424,6 +425,30 @@ func (e *Executor) imapToSourceData(msg *imap.Message, section *imap.BodySection
 	return data
 }
 
+// sanitizeUTF8 removes invalid UTF-8 byte sequences from a string.
+// This is necessary because email content may have mixed encodings or
+// corrupted data that PostgreSQL will reject.
+func sanitizeUTF8(s string) string {
+	if utf8.ValidString(s) {
+		return s
+	}
+	// Build a new string with only valid UTF-8 runes
+	var b strings.Builder
+	b.Grow(len(s))
+	for i := 0; i < len(s); {
+		r, size := utf8.DecodeRuneInString(s[i:])
+		if r == utf8.RuneError && size == 1 {
+			// Invalid byte, replace with replacement character
+			b.WriteRune('\uFFFD')
+			i++
+		} else {
+			b.WriteRune(r)
+			i += size
+		}
+	}
+	return b.String()
+}
+
 // insertEmailRow inserts a row into the target PostgreSQL table
 func (e *Executor) insertEmailRow(ctx context.Context, pool *pgxpool.Pool, tableName string, fields map[string]any) error {
 	if len(fields) == 0 {
@@ -437,6 +462,10 @@ func (e *Executor) insertEmailRow(ctx context.Context, pool *pgxpool.Pool, table
 	for col, val := range fields {
 		columns = append(columns, fmt.Sprintf(`"%s"`, col))
 		placeholders = append(placeholders, fmt.Sprintf("$%d", i))
+		// Sanitize string values to ensure valid UTF-8
+		if s, ok := val.(string); ok {
+			val = sanitizeUTF8(s)
+		}
 		values = append(values, val)
 		i++
 	}
