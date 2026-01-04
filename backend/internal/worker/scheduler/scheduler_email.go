@@ -225,8 +225,29 @@ func (s *MultiEmailScheduler) buildEmailFetchJobArgs(
 		return nil, "", fmt.Errorf("failed to extract mapper config: %w", err)
 	}
 
-	// Get last processed UID for incremental fetch
+	// Get last processed UID for incremental fetch (DEPRECATED)
 	lastUID := uint32(sched.LastUid)
+
+	// Extract sync state fields
+	syncState := "initial"
+	if sched.SyncState.Valid && sched.SyncState.String != "" {
+		syncState = sched.SyncState.String
+	}
+
+	var lastSyncTimestamp, oldestSyncTimestamp, cutoffDate time.Time
+	if sched.LastSyncTimestamp.Valid {
+		lastSyncTimestamp = sched.LastSyncTimestamp.Time
+	}
+	if sched.OldestSyncTimestamp.Valid {
+		oldestSyncTimestamp = sched.OldestSyncTimestamp.Time
+	}
+	if sched.CutoffDate.Valid {
+		cutoffDate = sched.CutoffDate.Time
+	}
+
+	// Extract target table name from mapper config
+	targetTableName := extractTargetTableName(mapperConfig)
+	timestampColumn := "created_at" // Default column name
 
 	// Resolve IMAP server
 	imapHost, imapPort := resolveIMAPServer(pipelineDetails.DatasourceProvider, "", 0)
@@ -257,6 +278,14 @@ func (s *MultiEmailScheduler) buildEmailFetchJobArgs(
 		BatchSize:   batchSize,
 		MailboxName: mailboxName,
 
+		// Timestamp-based sync tracking
+		SyncState:           syncState,
+		LastSyncTimestamp:   lastSyncTimestamp,
+		OldestSyncTimestamp: oldestSyncTimestamp,
+		CutoffDate:          cutoffDate,
+		TargetTableName:     targetTableName,
+		TimestampColumn:     timestampColumn,
+
 		MapperConfig: *mapperConfig,
 
 		StorageHost:     storageSettings.Host,
@@ -266,6 +295,20 @@ func (s *MultiEmailScheduler) buildEmailFetchJobArgs(
 		StorageDatabase: storageSettings.Database,
 		StorageOptions:  storageSettings.Options,
 	}, pipelineDetails.WorkspaceSlug, nil
+}
+
+// extractTargetTableName extracts the first target table name from mapper config
+func extractTargetTableName(config *jobs.MapperConfigData) string {
+	if config == nil || len(config.Mappings) == 0 {
+		return ""
+	}
+	// Return the first target table found
+	for _, m := range config.Mappings {
+		if m.TargetTable != "" {
+			return m.TargetTable
+		}
+	}
+	return ""
 }
 
 // extractMapperConfig extracts mapper configuration from pipeline flow JSON
@@ -399,6 +442,7 @@ func (s *MultiEmailScheduler) updateSchedulerRun(ctx context.Context, queries *q
 		IsPaused:       false,
 		UUID:           id,
 		BatchSize:      100,
+		CutoffDate:     pgtype.Timestamptz{Valid: false}, // Preserve existing value
 	})
 	if err != nil {
 		s.log.Error("Failed to update scheduler run times", "error", err)
@@ -426,6 +470,7 @@ func (s *MultiEmailScheduler) updateNextRun(ctx context.Context, queries *query.
 		IsPaused:       false,
 		UUID:           id,
 		BatchSize:      100,
+		CutoffDate:     pgtype.Timestamptz{Valid: false}, // Preserve existing value
 	})
 	if err != nil {
 		s.log.Error("Failed to update scheduler next run", "error", err)

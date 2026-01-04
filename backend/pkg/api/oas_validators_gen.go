@@ -1747,6 +1747,24 @@ func (s *Scheduler) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if value, ok := s.SyncState.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "sync_state",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -1776,6 +1794,21 @@ func (s SchedulerListOKApplicationJSON) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s SchedulerSyncState) Validate() error {
+	switch s {
+	case "initial":
+		return nil
+	case "sync_recent":
+		return nil
+	case "sync_historical":
+		return nil
+	case "sync_complete":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *SourceFieldDefinition) Validate() error {

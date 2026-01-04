@@ -12,6 +12,10 @@ INSERT INTO scheduler (
     is_enabled,
     is_paused,
     batch_size,
+    sync_state,
+    last_sync_timestamp,
+    oldest_sync_timestamp,
+    cutoff_date,
     created_at,
     updated_at
 ) VALUES (
@@ -27,6 +31,10 @@ INSERT INTO scheduler (
              sqlc.arg('is_enabled')::boolean,
              sqlc.arg('is_paused')::boolean,
              sqlc.arg('batch_size')::int,
+             COALESCE(sqlc.arg('sync_state'), 'initial'),
+             sqlc.arg('last_sync_timestamp'),
+             sqlc.arg('oldest_sync_timestamp'),
+             sqlc.arg('cutoff_date'),
              NOW(),
              NOW()
          ) RETURNING *;
@@ -78,6 +86,7 @@ UPDATE scheduler SET
                      is_enabled = sqlc.arg('is_enabled')::boolean,
                      is_paused = sqlc.arg('is_paused')::boolean,
                      batch_size = sqlc.arg('batch_size')::int,
+                     cutoff_date = sqlc.arg('cutoff_date'),
                      updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
 
@@ -93,8 +102,19 @@ WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: UpdateSchedulerFetchProgress :exec
 -- Update the scheduler's fetch progress (last_uid for incremental IMAP fetch)
+-- DEPRECATED: Use UpdateSchedulerSyncProgress for new timestamp-based tracking
 UPDATE scheduler SET
     last_uid = sqlc.arg('last_uid')::bigint,
+    last_run = sqlc.arg('last_run'),
+    updated_at = NOW()
+WHERE uuid = sqlc.arg('uuid')::uuid;
+
+-- name: UpdateSchedulerSyncProgress :exec
+-- Update the scheduler's sync progress with timestamp-based tracking
+UPDATE scheduler SET
+    sync_state = COALESCE(sqlc.arg('sync_state'), sync_state),
+    last_sync_timestamp = COALESCE(sqlc.arg('last_sync_timestamp'), last_sync_timestamp),
+    oldest_sync_timestamp = COALESCE(sqlc.arg('oldest_sync_timestamp'), oldest_sync_timestamp),
     last_run = sqlc.arg('last_run'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;
@@ -168,6 +188,7 @@ UPDATE scheduler SET
     is_enabled = sqlc.arg('is_enabled')::boolean,
     is_paused = sqlc.arg('is_paused')::boolean,
     batch_size = sqlc.arg('batch_size')::int,
+    cutoff_date = sqlc.arg('cutoff_date'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid
   AND pipeline_uuid IN (

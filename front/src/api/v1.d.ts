@@ -1856,6 +1856,27 @@ export interface components {
              * @default 100
              */
             batch_size: number;
+            /**
+             * @description Current sync state for bi-directional fetch
+             * @default initial
+             * @enum {string}
+             */
+            sync_state: "initial" | "sync_recent" | "sync_historical" | "sync_complete";
+            /**
+             * Format: date-time
+             * @description Most recent message timestamp synced
+             */
+            last_sync_timestamp?: string | null;
+            /**
+             * Format: date-time
+             * @description Oldest message timestamp synced (for historical backfill)
+             */
+            oldest_sync_timestamp?: string | null;
+            /**
+             * Format: date-time
+             * @description Stop historical sync before this date
+             */
+            cutoff_date?: string | null;
             /** Format: date-time */
             created_at?: string;
             /** Format: date-time */

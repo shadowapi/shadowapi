@@ -168,6 +168,13 @@ func collectRequiredFields(config jobs.MapperConfigData) map[string]bool {
 	return required
 }
 
+// timestampBounds holds the min/max timestamps from external storage
+type timestampBounds struct {
+	MaxCreatedAt time.Time
+	MinCreatedAt time.Time
+	RowCount     int64
+}
+
 // handleEmailFetch fetches emails via IMAP and stores them in external PostgreSQL
 func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, error) {
 	var args jobs.EmailFetchJobArgs
@@ -180,7 +187,7 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 		"pipeline_uuid", args.PipelineUUID,
 		"email", args.Email,
 		"batch_size", args.BatchSize,
-		"last_uid", args.LastUID,
+		"sync_state", args.SyncState,
 	)
 
 	start := time.Now()
@@ -189,6 +196,35 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 		SchedulerUUID: args.SchedulerUUID,
 		PipelineUUID:  args.PipelineUUID,
 		StartedAt:     start,
+		NewSyncState:  args.SyncState, // Default to current state
+	}
+
+	// Connect to external PostgreSQL first to query timestamp bounds
+	pool, err := e.connectEmailPostgres(ctx, args)
+	if err != nil {
+		result.Success = false
+		result.Error = fmt.Sprintf("PostgreSQL connection failed: %v", err)
+		result.CompletedAt = time.Now()
+		result.DurationMs = time.Since(start).Milliseconds()
+		e.log.Error("PostgreSQL connection failed", "error", err)
+		return json.Marshal(result)
+	}
+	defer pool.Close()
+
+	// Query external storage for timestamp bounds
+	var storageBounds *timestampBounds
+	if args.TargetTableName != "" && args.TimestampColumn != "" {
+		storageBounds, err = e.queryStorageTimestampBounds(ctx, pool, args.TargetTableName, args.TimestampColumn)
+		if err != nil {
+			e.log.Warn("failed to query storage bounds, proceeding without", "error", err)
+			storageBounds = nil
+		} else {
+			e.log.Debug("storage timestamp bounds",
+				"max_created_at", storageBounds.MaxCreatedAt,
+				"min_created_at", storageBounds.MinCreatedAt,
+				"row_count", storageBounds.RowCount,
+			)
+		}
 	}
 
 	// Connect to IMAP
@@ -216,55 +252,44 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 
 	e.log.Debug("mailbox selected", "mailbox", args.MailboxName, "messages", mbox.Messages)
 
-	// Get all message UIDs and filter to those > LastUID
-	uids, err := imapClient.UidSearch(imap.NewSearchCriteria())
+	// Build search criteria based on sync state and storage bounds
+	searchCriteria := e.buildSearchCriteria(args, storageBounds)
+
+	// Search for messages matching criteria
+	uids, err := imapClient.UidSearch(searchCriteria)
 	if err != nil {
 		result.Success = false
-		result.Error = fmt.Sprintf("IMAP UID search failed: %v", err)
+		result.Error = fmt.Sprintf("IMAP search failed: %v", err)
 		result.CompletedAt = time.Now()
 		result.DurationMs = time.Since(start).Milliseconds()
-		e.log.Error("IMAP UID search failed", "error", err)
+		e.log.Error("IMAP search failed", "error", err)
 		return json.Marshal(result)
 	}
 
-	// Filter UIDs to only those > LastUID
-	var filteredUIDs []uint32
-	for _, uid := range uids {
-		if uid > args.LastUID {
-			filteredUIDs = append(filteredUIDs, uid)
-		}
-	}
-
-	if len(filteredUIDs) == 0 {
-		e.log.Info("no new messages found", "job_uuid", args.JobUUID, "last_uid", args.LastUID)
+	if len(uids) == 0 {
+		e.log.Info("no messages found matching criteria", "job_uuid", args.JobUUID, "sync_state", args.SyncState)
 		result.Success = true
 		result.MessagesFetched = 0
 		result.MessagesStored = 0
-		result.LastUID = args.LastUID // Keep the same UID
+		// Determine new sync state when no messages found
+		result.NewSyncState = e.determineNewSyncState(args, storageBounds, time.Time{}, true)
 		result.CompletedAt = time.Now()
 		result.DurationMs = time.Since(start).Milliseconds()
 		return json.Marshal(result)
 	}
 
-	e.log.Info("found new messages to fetch", "count", len(filteredUIDs), "batch_size", args.BatchSize, "first_uid", filteredUIDs[0])
+	e.log.Info("found messages to fetch", "count", len(uids), "batch_size", args.BatchSize, "sync_state", args.SyncState)
+
+	// Sort UIDs based on sync direction
+	// For recent sync: fetch newest first (descending)
+	// For historical sync: fetch oldest first (ascending, then reverse to go back in time)
+	sortedUIDs := e.sortUIDsForSyncDirection(uids, args.SyncState)
 
 	// Limit to batch size
-	if args.BatchSize > 0 && len(filteredUIDs) > args.BatchSize {
-		filteredUIDs = filteredUIDs[:args.BatchSize]
+	if args.BatchSize > 0 && len(sortedUIDs) > args.BatchSize {
+		sortedUIDs = sortedUIDs[:args.BatchSize]
 	}
-	result.MessagesFetched = len(filteredUIDs)
-
-	// Connect to external PostgreSQL
-	pool, err := e.connectEmailPostgres(ctx, args)
-	if err != nil {
-		result.Success = false
-		result.Error = fmt.Sprintf("PostgreSQL connection failed: %v", err)
-		result.CompletedAt = time.Now()
-		result.DurationMs = time.Since(start).Milliseconds()
-		e.log.Error("PostgreSQL connection failed", "error", err)
-		return json.Marshal(result)
-	}
-	defer pool.Close()
+	result.MessagesFetched = len(sortedUIDs)
 
 	// Pre-compute required fields from mapper config (lazy extraction optimization)
 	requiredFields := collectRequiredFields(args.MapperConfig)
@@ -274,7 +299,7 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 
 	// Fetch and process messages using UID FETCH
 	fetchSeqSet := new(imap.SeqSet)
-	fetchSeqSet.AddNum(filteredUIDs...)
+	fetchSeqSet.AddNum(sortedUIDs...)
 
 	section := &imap.BodySectionName{}
 	items := []imap.FetchItem{section.FetchItem(), imap.FetchEnvelope, imap.FetchFlags, imap.FetchUid}
@@ -285,11 +310,24 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 		done <- imapClient.UidFetch(fetchSeqSet, items, messages)
 	}()
 
+	var newestTimestamp, oldestTimestamp time.Time
 	var highestUID uint32 = args.LastUID
+
 	for msg := range messages {
-		// Track highest UID processed
+		// Track highest UID processed (for backward compatibility)
 		if msg.Uid > highestUID {
 			highestUID = msg.Uid
+		}
+
+		// Track timestamps for sync progress
+		if msg.Envelope != nil && !msg.Envelope.Date.IsZero() {
+			msgTime := msg.Envelope.Date
+			if newestTimestamp.IsZero() || msgTime.After(newestTimestamp) {
+				newestTimestamp = msgTime
+			}
+			if oldestTimestamp.IsZero() || msgTime.Before(oldestTimestamp) {
+				oldestTimestamp = msgTime
+			}
 		}
 
 		// Convert IMAP message to source data map (only extracts required fields)
@@ -329,6 +367,9 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 
 	result.Success = result.ErrorCount < result.MessagesFetched
 	result.LastUID = highestUID
+	result.NewestTimestamp = newestTimestamp
+	result.OldestTimestamp = oldestTimestamp
+	result.NewSyncState = e.determineNewSyncState(args, storageBounds, oldestTimestamp, false)
 	result.CompletedAt = time.Now()
 	result.DurationMs = time.Since(start).Milliseconds()
 
@@ -337,11 +378,135 @@ func (e *Executor) handleEmailFetch(ctx context.Context, data []byte) ([]byte, e
 		"fetched", result.MessagesFetched,
 		"stored", result.MessagesStored,
 		"errors", result.ErrorCount,
-		"last_uid", result.LastUID,
+		"newest_timestamp", result.NewestTimestamp,
+		"oldest_timestamp", result.OldestTimestamp,
+		"new_sync_state", result.NewSyncState,
 		"duration_ms", result.DurationMs,
 	)
 
 	return json.Marshal(result)
+}
+
+// queryStorageTimestampBounds queries the external storage for min/max timestamps
+func (e *Executor) queryStorageTimestampBounds(ctx context.Context, pool *pgxpool.Pool, tableName, timestampColumn string) (*timestampBounds, error) {
+	query := fmt.Sprintf(`
+		SELECT
+			COALESCE(MAX("%s"), '1970-01-01'::timestamptz) as max_ts,
+			COALESCE(MIN("%s"), '1970-01-01'::timestamptz) as min_ts,
+			COUNT(*) as row_count
+		FROM "%s"
+	`, timestampColumn, timestampColumn, tableName)
+
+	var bounds timestampBounds
+	err := pool.QueryRow(ctx, query).Scan(&bounds.MaxCreatedAt, &bounds.MinCreatedAt, &bounds.RowCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query timestamp bounds: %w", err)
+	}
+
+	// If row_count is 0, reset timestamps to zero values
+	if bounds.RowCount == 0 {
+		bounds.MaxCreatedAt = time.Time{}
+		bounds.MinCreatedAt = time.Time{}
+	}
+
+	return &bounds, nil
+}
+
+// buildSearchCriteria builds IMAP search criteria based on sync state
+func (e *Executor) buildSearchCriteria(args jobs.EmailFetchJobArgs, bounds *timestampBounds) *imap.SearchCriteria {
+	criteria := imap.NewSearchCriteria()
+
+	switch args.SyncState {
+	case "initial", "sync_recent", "":
+		// Fetch recent messages: those newer than what we have in storage
+		if bounds != nil && !bounds.MaxCreatedAt.IsZero() {
+			// Add 1 second to avoid re-fetching the exact same timestamp
+			criteria.Since = bounds.MaxCreatedAt.Add(time.Second)
+		}
+		// If bounds is nil or MaxCreatedAt is zero, fetch all (no date filter)
+
+	case "sync_historical":
+		// Fetch older messages: those older than what we have in storage
+		if bounds != nil && !bounds.MinCreatedAt.IsZero() {
+			// Subtract 1 second to avoid re-fetching the exact same timestamp
+			criteria.Before = bounds.MinCreatedAt.Add(-time.Second)
+		}
+		// Apply cutoff date if set
+		if !args.CutoffDate.IsZero() {
+			criteria.Since = args.CutoffDate
+		}
+
+	case "sync_complete":
+		// In sync_complete state, only check for new messages (same as sync_recent)
+		if bounds != nil && !bounds.MaxCreatedAt.IsZero() {
+			criteria.Since = bounds.MaxCreatedAt.Add(time.Second)
+		}
+	}
+
+	return criteria
+}
+
+// sortUIDsForSyncDirection sorts UIDs based on sync direction
+func (e *Executor) sortUIDsForSyncDirection(uids []uint32, syncState string) []uint32 {
+	sorted := make([]uint32, len(uids))
+	copy(sorted, uids)
+
+	switch syncState {
+	case "sync_historical":
+		// For historical sync, we want oldest first (which means highest UIDs first typically)
+		// But since we're going backwards, we want the oldest messages we haven't synced yet
+		// UIDs are generally ascending with time, so we sort descending to get newest first
+		// then process to go back in time
+		for i, j := 0, len(sorted)-1; i < j; i, j = i+1, j-1 {
+			sorted[i], sorted[j] = sorted[j], sorted[i]
+		}
+	default:
+		// For recent sync, sort descending to get newest first
+		for i, j := 0, len(sorted)-1; i < j; i, j = i+1, j-1 {
+			sorted[i], sorted[j] = sorted[j], sorted[i]
+		}
+	}
+
+	return sorted
+}
+
+// determineNewSyncState determines the next sync state based on results
+func (e *Executor) determineNewSyncState(args jobs.EmailFetchJobArgs, bounds *timestampBounds, oldestFetched time.Time, noMessages bool) string {
+	switch args.SyncState {
+	case "initial", "":
+		// From initial, move to sync_recent
+		if noMessages {
+			// No messages at all, go to historical
+			return "sync_historical"
+		}
+		return "sync_recent"
+
+	case "sync_recent":
+		if noMessages {
+			// No new messages, move to historical sync
+			return "sync_historical"
+		}
+		// Stay in sync_recent while there are new messages
+		return "sync_recent"
+
+	case "sync_historical":
+		if noMessages {
+			// No more historical messages, sync is complete
+			return "sync_complete"
+		}
+		// Check if we've reached the cutoff date
+		if !args.CutoffDate.IsZero() && !oldestFetched.IsZero() && oldestFetched.Before(args.CutoffDate) {
+			return "sync_complete"
+		}
+		// Continue historical sync
+		return "sync_historical"
+
+	case "sync_complete":
+		// Stay in sync_complete (periodic checks will find new messages if any)
+		return "sync_complete"
+	}
+
+	return args.SyncState
 }
 
 // connectEmailIMAP establishes IMAP connection with XOAUTH2

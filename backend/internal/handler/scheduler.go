@@ -49,18 +49,22 @@ func (h *Handler) SchedulerCreate(ctx context.Context, req *api.Scheduler) (api.
 
 		// Build query parameters for the new scheduler.
 		qParams := query.CreateSchedulerParams{
-			UUID:           pgtype.UUID{Bytes: converter.UToBytes(schedulerUUID), Valid: true},
-			PipelineUuid:   pgPipelineUUID,
-			ScheduleType:   req.ScheduleType, // 'cron' or 'one_time'
-			CronExpression: converter.ConvertOptNilStringToPgText(req.CronExpression),
-			RunAt:          converter.NullTimestamptz(),
-			Timezone:       req.Timezone.Or("UTC"),
-			NextRun:        converter.NullTimestamptz(),
-			LastRun:        converter.NullTimestamptz(),
-			LastUid:        0, // Start from beginning
-			IsEnabled:      req.IsEnabled.Or(false),
-			IsPaused:       req.IsPaused.Or(false),
-			BatchSize:      int32(req.BatchSize.Or(100)),
+			UUID:                pgtype.UUID{Bytes: converter.UToBytes(schedulerUUID), Valid: true},
+			PipelineUuid:        pgPipelineUUID,
+			ScheduleType:        req.ScheduleType, // 'cron' or 'one_time'
+			CronExpression:      converter.ConvertOptNilStringToPgText(req.CronExpression),
+			RunAt:               converter.NullTimestamptz(),
+			Timezone:            req.Timezone.Or("UTC"),
+			NextRun:             converter.NullTimestamptz(),
+			LastRun:             converter.NullTimestamptz(),
+			LastUid:             0, // Start from beginning (deprecated)
+			IsEnabled:           req.IsEnabled.Or(false),
+			IsPaused:            req.IsPaused.Or(false),
+			BatchSize:           int32(req.BatchSize.Or(100)),
+			SyncState:           pgtype.Text{String: "initial", Valid: true},
+			LastSyncTimestamp:   converter.NullTimestamptz(),
+			OldestSyncTimestamp: converter.NullTimestamptz(),
+			CutoffDate:          converter.ConvertOptNilDateTimeToPgTimestamptz(req.CutoffDate),
 		}
 
 		sch, err := query.New(tx).CreateScheduler(ctx, qParams)
@@ -257,6 +261,7 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 			IsEnabled:      isEnabled,
 			IsPaused:       isPaused,
 			BatchSize:      batchSize,
+			CutoffDate:     converter.ConvertOptNilDateTimeToPgTimestamptz(req.CutoffDate),
 			UUID:           schUUID,
 			WorkspaceUUID:  workspaceUUID,
 		}
@@ -286,40 +291,67 @@ func (h *Handler) SchedulerUpdate(ctx context.Context, req *api.Scheduler, param
 func qToApiScheduler(s query.Scheduler) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		UUID:           api.NewOptString(s.UUID.String()),
-		PipelineUUID:   s.PipelineUuid.String(),
-		ScheduleType:   s.ScheduleType,
-		CronExpression: api.NewOptNilString(s.CronExpression.String),
-		RunAt:          api.NewOptNilDateTime(s.RunAt.Time),
-		Timezone:       api.NewOptString(s.Timezone),
-		NextRun:        api.NewOptDateTime(s.NextRun.Time),
-		LastRun:        api.NewOptDateTime(s.LastRun.Time),
-		IsEnabled:      api.NewOptBool(s.IsEnabled),
-		IsPaused:       api.NewOptBool(s.IsPaused),
-		BatchSize:      api.NewOptInt(int(s.BatchSize)),
-		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
-		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
+		UUID:                api.NewOptString(s.UUID.String()),
+		PipelineUUID:        s.PipelineUuid.String(),
+		ScheduleType:        s.ScheduleType,
+		CronExpression:      api.NewOptNilString(s.CronExpression.String),
+		RunAt:               api.NewOptNilDateTime(s.RunAt.Time),
+		Timezone:            api.NewOptString(s.Timezone),
+		NextRun:             api.NewOptDateTime(s.NextRun.Time),
+		LastRun:             api.NewOptDateTime(s.LastRun.Time),
+		IsEnabled:           api.NewOptBool(s.IsEnabled),
+		IsPaused:            api.NewOptBool(s.IsPaused),
+		BatchSize:           api.NewOptInt(int(s.BatchSize)),
+		SyncState:           schedulerSyncStateToAPI(s.SyncState),
+		LastSyncTimestamp:   api.NewOptNilDateTime(s.LastSyncTimestamp.Time),
+		OldestSyncTimestamp: api.NewOptNilDateTime(s.OldestSyncTimestamp.Time),
+		CutoffDate:          api.NewOptNilDateTime(s.CutoffDate.Time),
+		CreatedAt:           api.NewOptDateTime(s.CreatedAt.Time),
+		UpdatedAt:           api.NewOptDateTime(s.UpdatedAt.Time),
 	}
 	return out, nil
+}
+
+// schedulerSyncStateToAPI converts a pg sync_state to API enum
+func schedulerSyncStateToAPI(state pgtype.Text) api.OptSchedulerSyncState {
+	if !state.Valid || state.String == "" {
+		return api.NewOptSchedulerSyncState(api.SchedulerSyncStateInitial)
+	}
+	switch state.String {
+	case "initial":
+		return api.NewOptSchedulerSyncState(api.SchedulerSyncStateInitial)
+	case "sync_recent":
+		return api.NewOptSchedulerSyncState(api.SchedulerSyncStateSyncRecent)
+	case "sync_historical":
+		return api.NewOptSchedulerSyncState(api.SchedulerSyncStateSyncHistorical)
+	case "sync_complete":
+		return api.NewOptSchedulerSyncState(api.SchedulerSyncStateSyncComplete)
+	default:
+		return api.NewOptSchedulerSyncState(api.SchedulerSyncStateInitial)
+	}
 }
 
 // qToApiSchedulerRow maps a row from GetSchedulers to an api.Scheduler.
 func qToApiSchedulerRow(s query.GetSchedulerRow) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		UUID:           api.NewOptString(s.Scheduler.UUID.String()),
-		PipelineUUID:   s.Scheduler.PipelineUuid.String(),
-		ScheduleType:   s.Scheduler.ScheduleType,
-		CronExpression: api.NewOptNilString(s.Scheduler.CronExpression.String),
-		RunAt:          api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
-		Timezone:       api.NewOptString(s.Scheduler.Timezone),
-		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
-		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
-		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
-		IsPaused:       api.NewOptBool(s.Scheduler.IsPaused),
-		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
-		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
-		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
+		UUID:                api.NewOptString(s.Scheduler.UUID.String()),
+		PipelineUUID:        s.Scheduler.PipelineUuid.String(),
+		ScheduleType:        s.Scheduler.ScheduleType,
+		CronExpression:      api.NewOptNilString(s.Scheduler.CronExpression.String),
+		RunAt:               api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
+		Timezone:            api.NewOptString(s.Scheduler.Timezone),
+		NextRun:             api.NewOptDateTime(s.Scheduler.NextRun.Time),
+		LastRun:             api.NewOptDateTime(s.Scheduler.LastRun.Time),
+		IsEnabled:           api.NewOptBool(s.Scheduler.IsEnabled),
+		IsPaused:            api.NewOptBool(s.Scheduler.IsPaused),
+		BatchSize:           api.NewOptInt(int(s.Scheduler.BatchSize)),
+		SyncState:           schedulerSyncStateToAPI(s.Scheduler.SyncState),
+		LastSyncTimestamp:   api.NewOptNilDateTime(s.Scheduler.LastSyncTimestamp.Time),
+		OldestSyncTimestamp: api.NewOptNilDateTime(s.Scheduler.OldestSyncTimestamp.Time),
+		CutoffDate:          api.NewOptNilDateTime(s.Scheduler.CutoffDate.Time),
+		CreatedAt:           api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
+		UpdatedAt:           api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
 	}
 	return out, nil
 }
@@ -327,19 +359,23 @@ func qToApiSchedulerRow(s query.GetSchedulerRow) (api.Scheduler, error) {
 func qToApiSchedulersRow(s query.GetSchedulersRow) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		UUID:           api.NewOptString(s.UUID.String()),
-		PipelineUUID:   s.PipelineUuid.String(),
-		ScheduleType:   s.ScheduleType,
-		CronExpression: api.NewOptNilString(s.CronExpression.String),
-		RunAt:          api.NewOptNilDateTime(s.RunAt.Time),
-		Timezone:       api.NewOptString(s.Timezone),
-		NextRun:        api.NewOptDateTime(s.NextRun.Time),
-		LastRun:        api.NewOptDateTime(s.LastRun.Time),
-		IsEnabled:      api.NewOptBool(s.IsEnabled),
-		IsPaused:       api.NewOptBool(s.IsPaused),
-		BatchSize:      api.NewOptInt(int(s.BatchSize)),
-		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
-		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
+		UUID:                api.NewOptString(s.UUID.String()),
+		PipelineUUID:        s.PipelineUuid.String(),
+		ScheduleType:        s.ScheduleType,
+		CronExpression:      api.NewOptNilString(s.CronExpression.String),
+		RunAt:               api.NewOptNilDateTime(s.RunAt.Time),
+		Timezone:            api.NewOptString(s.Timezone),
+		NextRun:             api.NewOptDateTime(s.NextRun.Time),
+		LastRun:             api.NewOptDateTime(s.LastRun.Time),
+		IsEnabled:           api.NewOptBool(s.IsEnabled),
+		IsPaused:            api.NewOptBool(s.IsPaused),
+		BatchSize:           api.NewOptInt(int(s.BatchSize)),
+		SyncState:           schedulerSyncStateToAPI(s.SyncState),
+		LastSyncTimestamp:   api.NewOptNilDateTime(s.LastSyncTimestamp.Time),
+		OldestSyncTimestamp: api.NewOptNilDateTime(s.OldestSyncTimestamp.Time),
+		CutoffDate:          api.NewOptNilDateTime(s.CutoffDate.Time),
+		CreatedAt:           api.NewOptDateTime(s.CreatedAt.Time),
+		UpdatedAt:           api.NewOptDateTime(s.UpdatedAt.Time),
 	}
 	return out, nil
 }
@@ -347,19 +383,23 @@ func qToApiSchedulersRow(s query.GetSchedulersRow) (api.Scheduler, error) {
 func qToApiListSchedulersRow(s query.ListSchedulersRow) (api.Scheduler, error) {
 	// Map fields from the query type to your API type.
 	out := api.Scheduler{
-		UUID:           api.NewOptString(s.Scheduler.UUID.String()),
-		PipelineUUID:   s.Scheduler.PipelineUuid.String(),
-		ScheduleType:   s.Scheduler.ScheduleType,
-		CronExpression: api.NewOptNilString(s.Scheduler.CronExpression.String),
-		RunAt:          api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
-		Timezone:       api.NewOptString(s.Scheduler.Timezone),
-		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
-		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
-		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
-		IsPaused:       api.NewOptBool(s.Scheduler.IsPaused),
-		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
-		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
-		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
+		UUID:                api.NewOptString(s.Scheduler.UUID.String()),
+		PipelineUUID:        s.Scheduler.PipelineUuid.String(),
+		ScheduleType:        s.Scheduler.ScheduleType,
+		CronExpression:      api.NewOptNilString(s.Scheduler.CronExpression.String),
+		RunAt:               api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
+		Timezone:            api.NewOptString(s.Scheduler.Timezone),
+		NextRun:             api.NewOptDateTime(s.Scheduler.NextRun.Time),
+		LastRun:             api.NewOptDateTime(s.Scheduler.LastRun.Time),
+		IsEnabled:           api.NewOptBool(s.Scheduler.IsEnabled),
+		IsPaused:            api.NewOptBool(s.Scheduler.IsPaused),
+		BatchSize:           api.NewOptInt(int(s.Scheduler.BatchSize)),
+		SyncState:           schedulerSyncStateToAPI(s.Scheduler.SyncState),
+		LastSyncTimestamp:   api.NewOptNilDateTime(s.Scheduler.LastSyncTimestamp.Time),
+		OldestSyncTimestamp: api.NewOptNilDateTime(s.Scheduler.OldestSyncTimestamp.Time),
+		CutoffDate:          api.NewOptNilDateTime(s.Scheduler.CutoffDate.Time),
+		CreatedAt:           api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
+		UpdatedAt:           api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
 	}
 	return out, nil
 }
@@ -367,19 +407,23 @@ func qToApiListSchedulersRow(s query.ListSchedulersRow) (api.Scheduler, error) {
 // qToApiSchedulerByWorkspaceRow maps a workspace-filtered row to an api.Scheduler.
 func qToApiSchedulerByWorkspaceRow(s query.GetSchedulerByWorkspaceRow) (api.Scheduler, error) {
 	out := api.Scheduler{
-		UUID:           api.NewOptString(s.Scheduler.UUID.String()),
-		PipelineUUID:   s.Scheduler.PipelineUuid.String(),
-		ScheduleType:   s.Scheduler.ScheduleType,
-		CronExpression: api.NewOptNilString(s.Scheduler.CronExpression.String),
-		RunAt:          api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
-		Timezone:       api.NewOptString(s.Scheduler.Timezone),
-		NextRun:        api.NewOptDateTime(s.Scheduler.NextRun.Time),
-		LastRun:        api.NewOptDateTime(s.Scheduler.LastRun.Time),
-		IsEnabled:      api.NewOptBool(s.Scheduler.IsEnabled),
-		IsPaused:       api.NewOptBool(s.Scheduler.IsPaused),
-		BatchSize:      api.NewOptInt(int(s.Scheduler.BatchSize)),
-		CreatedAt:      api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
-		UpdatedAt:      api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
+		UUID:                api.NewOptString(s.Scheduler.UUID.String()),
+		PipelineUUID:        s.Scheduler.PipelineUuid.String(),
+		ScheduleType:        s.Scheduler.ScheduleType,
+		CronExpression:      api.NewOptNilString(s.Scheduler.CronExpression.String),
+		RunAt:               api.NewOptNilDateTime(s.Scheduler.RunAt.Time),
+		Timezone:            api.NewOptString(s.Scheduler.Timezone),
+		NextRun:             api.NewOptDateTime(s.Scheduler.NextRun.Time),
+		LastRun:             api.NewOptDateTime(s.Scheduler.LastRun.Time),
+		IsEnabled:           api.NewOptBool(s.Scheduler.IsEnabled),
+		IsPaused:            api.NewOptBool(s.Scheduler.IsPaused),
+		BatchSize:           api.NewOptInt(int(s.Scheduler.BatchSize)),
+		SyncState:           schedulerSyncStateToAPI(s.Scheduler.SyncState),
+		LastSyncTimestamp:   api.NewOptNilDateTime(s.Scheduler.LastSyncTimestamp.Time),
+		OldestSyncTimestamp: api.NewOptNilDateTime(s.Scheduler.OldestSyncTimestamp.Time),
+		CutoffDate:          api.NewOptNilDateTime(s.Scheduler.CutoffDate.Time),
+		CreatedAt:           api.NewOptDateTime(s.Scheduler.CreatedAt.Time),
+		UpdatedAt:           api.NewOptDateTime(s.Scheduler.UpdatedAt.Time),
 	}
 	return out, nil
 }
@@ -387,19 +431,23 @@ func qToApiSchedulerByWorkspaceRow(s query.GetSchedulerByWorkspaceRow) (api.Sche
 // qToApiSchedulersWithWorkspaceRow maps a workspace-filtered schedulers row to an api.Scheduler.
 func qToApiSchedulersWithWorkspaceRow(s query.GetSchedulersWithWorkspaceRow) (api.Scheduler, error) {
 	out := api.Scheduler{
-		UUID:           api.NewOptString(s.UUID.String()),
-		PipelineUUID:   s.PipelineUuid.String(),
-		ScheduleType:   s.ScheduleType,
-		CronExpression: api.NewOptNilString(s.CronExpression.String),
-		RunAt:          api.NewOptNilDateTime(s.RunAt.Time),
-		Timezone:       api.NewOptString(s.Timezone),
-		NextRun:        api.NewOptDateTime(s.NextRun.Time),
-		LastRun:        api.NewOptDateTime(s.LastRun.Time),
-		IsEnabled:      api.NewOptBool(s.IsEnabled),
-		IsPaused:       api.NewOptBool(s.IsPaused),
-		BatchSize:      api.NewOptInt(int(s.BatchSize)),
-		CreatedAt:      api.NewOptDateTime(s.CreatedAt.Time),
-		UpdatedAt:      api.NewOptDateTime(s.UpdatedAt.Time),
+		UUID:                api.NewOptString(s.UUID.String()),
+		PipelineUUID:        s.PipelineUuid.String(),
+		ScheduleType:        s.ScheduleType,
+		CronExpression:      api.NewOptNilString(s.CronExpression.String),
+		RunAt:               api.NewOptNilDateTime(s.RunAt.Time),
+		Timezone:            api.NewOptString(s.Timezone),
+		NextRun:             api.NewOptDateTime(s.NextRun.Time),
+		LastRun:             api.NewOptDateTime(s.LastRun.Time),
+		IsEnabled:           api.NewOptBool(s.IsEnabled),
+		IsPaused:            api.NewOptBool(s.IsPaused),
+		BatchSize:           api.NewOptInt(int(s.BatchSize)),
+		SyncState:           schedulerSyncStateToAPI(s.SyncState),
+		LastSyncTimestamp:   api.NewOptNilDateTime(s.LastSyncTimestamp.Time),
+		OldestSyncTimestamp: api.NewOptNilDateTime(s.OldestSyncTimestamp.Time),
+		CutoffDate:          api.NewOptNilDateTime(s.CutoffDate.Time),
+		CreatedAt:           api.NewOptDateTime(s.CreatedAt.Time),
+		UpdatedAt:           api.NewOptDateTime(s.UpdatedAt.Time),
 	}
 	return out, nil
 }

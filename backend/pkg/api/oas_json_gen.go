@@ -13832,6 +13832,39 @@ func (s *OptRegisteredWorkerStatus) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes SchedulerSyncState as json.
+func (o OptSchedulerSyncState) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes SchedulerSyncState from json.
+func (o *OptSchedulerSyncState) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptSchedulerSyncState to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptSchedulerSyncState) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptSchedulerSyncState) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes StoragePostgresMessagesQueryReq as json.
 func (o OptStoragePostgresMessagesQueryReq) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -16593,6 +16626,30 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.SyncState.Set {
+			e.FieldStart("sync_state")
+			s.SyncState.Encode(e)
+		}
+	}
+	{
+		if s.LastSyncTimestamp.Set {
+			e.FieldStart("last_sync_timestamp")
+			s.LastSyncTimestamp.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.OldestSyncTimestamp.Set {
+			e.FieldStart("oldest_sync_timestamp")
+			s.OldestSyncTimestamp.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.CutoffDate.Set {
+			e.FieldStart("cutoff_date")
+			s.CutoffDate.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -16606,7 +16663,7 @@ func (s *Scheduler) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfScheduler = [13]string{
+var jsonFieldsNameOfScheduler = [17]string{
 	0:  "uuid",
 	1:  "pipeline_uuid",
 	2:  "schedule_type",
@@ -16618,8 +16675,12 @@ var jsonFieldsNameOfScheduler = [13]string{
 	8:  "is_enabled",
 	9:  "is_paused",
 	10: "batch_size",
-	11: "created_at",
-	12: "updated_at",
+	11: "sync_state",
+	12: "last_sync_timestamp",
+	13: "oldest_sync_timestamp",
+	14: "cutoff_date",
+	15: "created_at",
+	16: "updated_at",
 }
 
 // Decode decodes Scheduler from json.
@@ -16627,7 +16688,7 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Scheduler to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -16746,6 +16807,46 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"batch_size\"")
 			}
+		case "sync_state":
+			if err := func() error {
+				s.SyncState.Reset()
+				if err := s.SyncState.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sync_state\"")
+			}
+		case "last_sync_timestamp":
+			if err := func() error {
+				s.LastSyncTimestamp.Reset()
+				if err := s.LastSyncTimestamp.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_sync_timestamp\"")
+			}
+		case "oldest_sync_timestamp":
+			if err := func() error {
+				s.OldestSyncTimestamp.Reset()
+				if err := s.OldestSyncTimestamp.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"oldest_sync_timestamp\"")
+			}
+		case "cutoff_date":
+			if err := func() error {
+				s.CutoffDate.Reset()
+				if err := s.CutoffDate.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cutoff_date\"")
+			}
 		case "created_at":
 			if err := func() error {
 				s.CreatedAt.Reset()
@@ -16775,8 +16876,9 @@ func (s *Scheduler) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [3]uint8{
 		0b00000110,
+		0b00000000,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -16869,6 +16971,50 @@ func (s SchedulerListOKApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SchedulerListOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes SchedulerSyncState as json.
+func (s SchedulerSyncState) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes SchedulerSyncState from json.
+func (s *SchedulerSyncState) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SchedulerSyncState to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch SchedulerSyncState(v) {
+	case SchedulerSyncStateInitial:
+		*s = SchedulerSyncStateInitial
+	case SchedulerSyncStateSyncRecent:
+		*s = SchedulerSyncStateSyncRecent
+	case SchedulerSyncStateSyncHistorical:
+		*s = SchedulerSyncStateSyncHistorical
+	case SchedulerSyncStateSyncComplete:
+		*s = SchedulerSyncStateSyncComplete
+	default:
+		*s = SchedulerSyncState(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s SchedulerSyncState) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SchedulerSyncState) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

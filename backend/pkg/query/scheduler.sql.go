@@ -26,6 +26,10 @@ INSERT INTO scheduler (
     is_enabled,
     is_paused,
     batch_size,
+    sync_state,
+    last_sync_timestamp,
+    oldest_sync_timestamp,
+    cutoff_date,
     created_at,
     updated_at
 ) VALUES (
@@ -41,24 +45,32 @@ INSERT INTO scheduler (
              $10::boolean,
              $11::boolean,
              $12::int,
+             COALESCE($13, 'initial'),
+             $14,
+             $15,
+             $16,
              NOW(),
              NOW()
-         ) RETURNING uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, created_at, updated_at
+         ) RETURNING uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, sync_state, last_sync_timestamp, oldest_sync_timestamp, cutoff_date, created_at, updated_at
 `
 
 type CreateSchedulerParams struct {
-	UUID           pgtype.UUID        `json:"uuid"`
-	PipelineUuid   pgtype.UUID        `json:"pipeline_uuid"`
-	ScheduleType   string             `json:"schedule_type"`
-	CronExpression pgtype.Text        `json:"cron_expression"`
-	RunAt          pgtype.Timestamptz `json:"run_at"`
-	Timezone       string             `json:"timezone"`
-	NextRun        pgtype.Timestamptz `json:"next_run"`
-	LastRun        pgtype.Timestamptz `json:"last_run"`
-	LastUid        int64              `json:"last_uid"`
-	IsEnabled      bool               `json:"is_enabled"`
-	IsPaused       bool               `json:"is_paused"`
-	BatchSize      int32              `json:"batch_size"`
+	UUID                pgtype.UUID        `json:"uuid"`
+	PipelineUuid        pgtype.UUID        `json:"pipeline_uuid"`
+	ScheduleType        string             `json:"schedule_type"`
+	CronExpression      pgtype.Text        `json:"cron_expression"`
+	RunAt               pgtype.Timestamptz `json:"run_at"`
+	Timezone            string             `json:"timezone"`
+	NextRun             pgtype.Timestamptz `json:"next_run"`
+	LastRun             pgtype.Timestamptz `json:"last_run"`
+	LastUid             int64              `json:"last_uid"`
+	IsEnabled           bool               `json:"is_enabled"`
+	IsPaused            bool               `json:"is_paused"`
+	BatchSize           int32              `json:"batch_size"`
+	SyncState           interface{}        `json:"sync_state"`
+	LastSyncTimestamp   pgtype.Timestamptz `json:"last_sync_timestamp"`
+	OldestSyncTimestamp pgtype.Timestamptz `json:"oldest_sync_timestamp"`
+	CutoffDate          pgtype.Timestamptz `json:"cutoff_date"`
 }
 
 func (q *Queries) CreateScheduler(ctx context.Context, arg CreateSchedulerParams) (Scheduler, error) {
@@ -75,6 +87,10 @@ func (q *Queries) CreateScheduler(ctx context.Context, arg CreateSchedulerParams
 		arg.IsEnabled,
 		arg.IsPaused,
 		arg.BatchSize,
+		arg.SyncState,
+		arg.LastSyncTimestamp,
+		arg.OldestSyncTimestamp,
+		arg.CutoffDate,
 	)
 	var i Scheduler
 	err := row.Scan(
@@ -90,6 +106,10 @@ func (q *Queries) CreateScheduler(ctx context.Context, arg CreateSchedulerParams
 		&i.IsEnabled,
 		&i.IsPaused,
 		&i.BatchSize,
+		&i.SyncState,
+		&i.LastSyncTimestamp,
+		&i.OldestSyncTimestamp,
+		&i.CutoffDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -126,7 +146,7 @@ func (q *Queries) DeleteSchedulerByWorkspace(ctx context.Context, arg DeleteSche
 
 const getScheduler = `-- name: GetScheduler :one
 SELECT
-    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.sync_state, scheduler.last_sync_timestamp, scheduler.oldest_sync_timestamp, scheduler.cutoff_date, scheduler.created_at, scheduler.updated_at
 FROM scheduler
 WHERE uuid = $1::uuid
 `
@@ -151,6 +171,10 @@ func (q *Queries) GetScheduler(ctx context.Context, argUuid pgtype.UUID) (GetSch
 		&i.Scheduler.IsEnabled,
 		&i.Scheduler.IsPaused,
 		&i.Scheduler.BatchSize,
+		&i.Scheduler.SyncState,
+		&i.Scheduler.LastSyncTimestamp,
+		&i.Scheduler.OldestSyncTimestamp,
+		&i.Scheduler.CutoffDate,
 		&i.Scheduler.CreatedAt,
 		&i.Scheduler.UpdatedAt,
 	)
@@ -160,7 +184,7 @@ func (q *Queries) GetScheduler(ctx context.Context, argUuid pgtype.UUID) (GetSch
 const getSchedulerByWorkspace = `-- name: GetSchedulerByWorkspace :one
 
 SELECT
-    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.sync_state, scheduler.last_sync_timestamp, scheduler.oldest_sync_timestamp, scheduler.cutoff_date, scheduler.created_at, scheduler.updated_at
 FROM scheduler
 INNER JOIN pipeline p ON scheduler.pipeline_uuid = p.uuid
 WHERE scheduler.uuid = $1::uuid
@@ -196,6 +220,10 @@ func (q *Queries) GetSchedulerByWorkspace(ctx context.Context, arg GetSchedulerB
 		&i.Scheduler.IsEnabled,
 		&i.Scheduler.IsPaused,
 		&i.Scheduler.BatchSize,
+		&i.Scheduler.SyncState,
+		&i.Scheduler.LastSyncTimestamp,
+		&i.Scheduler.OldestSyncTimestamp,
+		&i.Scheduler.CutoffDate,
 		&i.Scheduler.CreatedAt,
 		&i.Scheduler.UpdatedAt,
 	)
@@ -204,7 +232,7 @@ func (q *Queries) GetSchedulerByWorkspace(ctx context.Context, arg GetSchedulerB
 
 const getSchedulers = `-- name: GetSchedulers :many
 WITH filtered_schedulers AS (
-    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.last_uid, s.is_enabled, s.is_paused, s.batch_size, s.created_at, s.updated_at
+    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.last_uid, s.is_enabled, s.is_paused, s.batch_size, s.sync_state, s.last_sync_timestamp, s.oldest_sync_timestamp, s.cutoff_date, s.created_at, s.updated_at
     FROM scheduler s
     WHERE
         (NULLIF($5, '') IS NULL OR s.pipeline_uuid = $5::uuid) AND
@@ -212,7 +240,7 @@ WITH filtered_schedulers AS (
         (NULLIF($7::int, -1) IS NULL OR s.is_paused = $7::boolean)
 )
 SELECT
-    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, created_at, updated_at,
+    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, sync_state, last_sync_timestamp, oldest_sync_timestamp, cutoff_date, created_at, updated_at,
     (SELECT count(*) FROM filtered_schedulers) as total_count
 FROM filtered_schedulers
 ORDER BY
@@ -236,21 +264,25 @@ type GetSchedulersParams struct {
 }
 
 type GetSchedulersRow struct {
-	UUID           uuid.UUID          `json:"uuid"`
-	PipelineUuid   *uuid.UUID         `json:"pipeline_uuid"`
-	ScheduleType   string             `json:"schedule_type"`
-	CronExpression pgtype.Text        `json:"cron_expression"`
-	RunAt          pgtype.Timestamptz `json:"run_at"`
-	Timezone       string             `json:"timezone"`
-	NextRun        pgtype.Timestamptz `json:"next_run"`
-	LastRun        pgtype.Timestamptz `json:"last_run"`
-	LastUid        int64              `json:"last_uid"`
-	IsEnabled      bool               `json:"is_enabled"`
-	IsPaused       bool               `json:"is_paused"`
-	BatchSize      int32              `json:"batch_size"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	TotalCount     int64              `json:"total_count"`
+	UUID                uuid.UUID          `json:"uuid"`
+	PipelineUuid        *uuid.UUID         `json:"pipeline_uuid"`
+	ScheduleType        string             `json:"schedule_type"`
+	CronExpression      pgtype.Text        `json:"cron_expression"`
+	RunAt               pgtype.Timestamptz `json:"run_at"`
+	Timezone            string             `json:"timezone"`
+	NextRun             pgtype.Timestamptz `json:"next_run"`
+	LastRun             pgtype.Timestamptz `json:"last_run"`
+	LastUid             int64              `json:"last_uid"`
+	IsEnabled           bool               `json:"is_enabled"`
+	IsPaused            bool               `json:"is_paused"`
+	BatchSize           int32              `json:"batch_size"`
+	SyncState           pgtype.Text        `json:"sync_state"`
+	LastSyncTimestamp   pgtype.Timestamptz `json:"last_sync_timestamp"`
+	OldestSyncTimestamp pgtype.Timestamptz `json:"oldest_sync_timestamp"`
+	CutoffDate          pgtype.Timestamptz `json:"cutoff_date"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	TotalCount          int64              `json:"total_count"`
 }
 
 func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([]GetSchedulersRow, error) {
@@ -283,6 +315,10 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 			&i.IsEnabled,
 			&i.IsPaused,
 			&i.BatchSize,
+			&i.SyncState,
+			&i.LastSyncTimestamp,
+			&i.OldestSyncTimestamp,
+			&i.CutoffDate,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.TotalCount,
@@ -299,7 +335,7 @@ func (q *Queries) GetSchedulers(ctx context.Context, arg GetSchedulersParams) ([
 
 const getSchedulersWithWorkspace = `-- name: GetSchedulersWithWorkspace :many
 WITH filtered_schedulers AS (
-    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.last_uid, s.is_enabled, s.is_paused, s.batch_size, s.created_at, s.updated_at
+    SELECT s.uuid, s.pipeline_uuid, s.schedule_type, s.cron_expression, s.run_at, s.timezone, s.next_run, s.last_run, s.last_uid, s.is_enabled, s.is_paused, s.batch_size, s.sync_state, s.last_sync_timestamp, s.oldest_sync_timestamp, s.cutoff_date, s.created_at, s.updated_at
     FROM scheduler s
     INNER JOIN pipeline p ON s.pipeline_uuid = p.uuid
     WHERE
@@ -309,7 +345,7 @@ WITH filtered_schedulers AS (
         (NULLIF($8::int, -1) IS NULL OR s.is_paused = $8::boolean)
 )
 SELECT
-    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, created_at, updated_at,
+    uuid, pipeline_uuid, schedule_type, cron_expression, run_at, timezone, next_run, last_run, last_uid, is_enabled, is_paused, batch_size, sync_state, last_sync_timestamp, oldest_sync_timestamp, cutoff_date, created_at, updated_at,
     (SELECT count(*) FROM filtered_schedulers) as total_count
 FROM filtered_schedulers
 ORDER BY
@@ -334,21 +370,25 @@ type GetSchedulersWithWorkspaceParams struct {
 }
 
 type GetSchedulersWithWorkspaceRow struct {
-	UUID           uuid.UUID          `json:"uuid"`
-	PipelineUuid   *uuid.UUID         `json:"pipeline_uuid"`
-	ScheduleType   string             `json:"schedule_type"`
-	CronExpression pgtype.Text        `json:"cron_expression"`
-	RunAt          pgtype.Timestamptz `json:"run_at"`
-	Timezone       string             `json:"timezone"`
-	NextRun        pgtype.Timestamptz `json:"next_run"`
-	LastRun        pgtype.Timestamptz `json:"last_run"`
-	LastUid        int64              `json:"last_uid"`
-	IsEnabled      bool               `json:"is_enabled"`
-	IsPaused       bool               `json:"is_paused"`
-	BatchSize      int32              `json:"batch_size"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	TotalCount     int64              `json:"total_count"`
+	UUID                uuid.UUID          `json:"uuid"`
+	PipelineUuid        *uuid.UUID         `json:"pipeline_uuid"`
+	ScheduleType        string             `json:"schedule_type"`
+	CronExpression      pgtype.Text        `json:"cron_expression"`
+	RunAt               pgtype.Timestamptz `json:"run_at"`
+	Timezone            string             `json:"timezone"`
+	NextRun             pgtype.Timestamptz `json:"next_run"`
+	LastRun             pgtype.Timestamptz `json:"last_run"`
+	LastUid             int64              `json:"last_uid"`
+	IsEnabled           bool               `json:"is_enabled"`
+	IsPaused            bool               `json:"is_paused"`
+	BatchSize           int32              `json:"batch_size"`
+	SyncState           pgtype.Text        `json:"sync_state"`
+	LastSyncTimestamp   pgtype.Timestamptz `json:"last_sync_timestamp"`
+	OldestSyncTimestamp pgtype.Timestamptz `json:"oldest_sync_timestamp"`
+	CutoffDate          pgtype.Timestamptz `json:"cutoff_date"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	TotalCount          int64              `json:"total_count"`
 }
 
 // Get schedulers with filters, scoped to a workspace
@@ -383,6 +423,10 @@ func (q *Queries) GetSchedulersWithWorkspace(ctx context.Context, arg GetSchedul
 			&i.IsEnabled,
 			&i.IsPaused,
 			&i.BatchSize,
+			&i.SyncState,
+			&i.LastSyncTimestamp,
+			&i.OldestSyncTimestamp,
+			&i.CutoffDate,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.TotalCount,
@@ -399,7 +443,7 @@ func (q *Queries) GetSchedulersWithWorkspace(ctx context.Context, arg GetSchedul
 
 const listSchedulers = `-- name: ListSchedulers :many
 SELECT
-    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.sync_state, scheduler.last_sync_timestamp, scheduler.oldest_sync_timestamp, scheduler.cutoff_date, scheduler.created_at, scheduler.updated_at
 FROM scheduler
 ORDER BY created_at DESC
 LIMIT NULLIF($2::int, 0)
@@ -437,6 +481,10 @@ func (q *Queries) ListSchedulers(ctx context.Context, arg ListSchedulersParams) 
 			&i.Scheduler.IsEnabled,
 			&i.Scheduler.IsPaused,
 			&i.Scheduler.BatchSize,
+			&i.Scheduler.SyncState,
+			&i.Scheduler.LastSyncTimestamp,
+			&i.Scheduler.OldestSyncTimestamp,
+			&i.Scheduler.CutoffDate,
 			&i.Scheduler.CreatedAt,
 			&i.Scheduler.UpdatedAt,
 		); err != nil {
@@ -452,7 +500,7 @@ func (q *Queries) ListSchedulers(ctx context.Context, arg ListSchedulersParams) 
 
 const listSchedulersByWorkspace = `-- name: ListSchedulersByWorkspace :many
 SELECT
-    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.created_at, scheduler.updated_at
+    scheduler.uuid, scheduler.pipeline_uuid, scheduler.schedule_type, scheduler.cron_expression, scheduler.run_at, scheduler.timezone, scheduler.next_run, scheduler.last_run, scheduler.last_uid, scheduler.is_enabled, scheduler.is_paused, scheduler.batch_size, scheduler.sync_state, scheduler.last_sync_timestamp, scheduler.oldest_sync_timestamp, scheduler.cutoff_date, scheduler.created_at, scheduler.updated_at
 FROM scheduler
 INNER JOIN pipeline p ON scheduler.pipeline_uuid = p.uuid
 WHERE p.workspace_uuid = $1::uuid
@@ -494,6 +542,10 @@ func (q *Queries) ListSchedulersByWorkspace(ctx context.Context, arg ListSchedul
 			&i.Scheduler.IsEnabled,
 			&i.Scheduler.IsPaused,
 			&i.Scheduler.BatchSize,
+			&i.Scheduler.SyncState,
+			&i.Scheduler.LastSyncTimestamp,
+			&i.Scheduler.OldestSyncTimestamp,
+			&i.Scheduler.CutoffDate,
 			&i.Scheduler.CreatedAt,
 			&i.Scheduler.UpdatedAt,
 		); err != nil {
@@ -518,8 +570,9 @@ UPDATE scheduler SET
                      is_enabled = $7::boolean,
                      is_paused = $8::boolean,
                      batch_size = $9::int,
+                     cutoff_date = $10,
                      updated_at = NOW()
-WHERE uuid = $10::uuid
+WHERE uuid = $11::uuid
 `
 
 type UpdateSchedulerParams struct {
@@ -532,6 +585,7 @@ type UpdateSchedulerParams struct {
 	IsEnabled      bool               `json:"is_enabled"`
 	IsPaused       bool               `json:"is_paused"`
 	BatchSize      int32              `json:"batch_size"`
+	CutoffDate     pgtype.Timestamptz `json:"cutoff_date"`
 	UUID           pgtype.UUID        `json:"uuid"`
 }
 
@@ -546,6 +600,7 @@ func (q *Queries) UpdateScheduler(ctx context.Context, arg UpdateSchedulerParams
 		arg.IsEnabled,
 		arg.IsPaused,
 		arg.BatchSize,
+		arg.CutoffDate,
 		arg.UUID,
 	)
 	return err
@@ -562,10 +617,11 @@ UPDATE scheduler SET
     is_enabled = $7::boolean,
     is_paused = $8::boolean,
     batch_size = $9::int,
+    cutoff_date = $10,
     updated_at = NOW()
-WHERE uuid = $10::uuid
+WHERE uuid = $11::uuid
   AND pipeline_uuid IN (
-    SELECT p.uuid FROM pipeline p WHERE p.workspace_uuid = $11::uuid
+    SELECT p.uuid FROM pipeline p WHERE p.workspace_uuid = $12::uuid
   )
 `
 
@@ -579,6 +635,7 @@ type UpdateSchedulerByWorkspaceParams struct {
 	IsEnabled      bool               `json:"is_enabled"`
 	IsPaused       bool               `json:"is_paused"`
 	BatchSize      int32              `json:"batch_size"`
+	CutoffDate     pgtype.Timestamptz `json:"cutoff_date"`
 	UUID           pgtype.UUID        `json:"uuid"`
 	WorkspaceUUID  pgtype.UUID        `json:"workspace_uuid"`
 }
@@ -595,6 +652,7 @@ func (q *Queries) UpdateSchedulerByWorkspace(ctx context.Context, arg UpdateSche
 		arg.IsEnabled,
 		arg.IsPaused,
 		arg.BatchSize,
+		arg.CutoffDate,
 		arg.UUID,
 		arg.WorkspaceUUID,
 	)
@@ -616,6 +674,7 @@ type UpdateSchedulerFetchProgressParams struct {
 }
 
 // Update the scheduler's fetch progress (last_uid for incremental IMAP fetch)
+// DEPRECATED: Use UpdateSchedulerSyncProgress for new timestamp-based tracking
 func (q *Queries) UpdateSchedulerFetchProgress(ctx context.Context, arg UpdateSchedulerFetchProgressParams) error {
 	_, err := q.db.Exec(ctx, updateSchedulerFetchProgress, arg.LastUid, arg.LastRun, arg.UUID)
 	return err
@@ -636,5 +695,35 @@ type UpdateSchedulerLastRunParams struct {
 // Update the scheduler's last successful fetch timestamp
 func (q *Queries) UpdateSchedulerLastRun(ctx context.Context, arg UpdateSchedulerLastRunParams) error {
 	_, err := q.db.Exec(ctx, updateSchedulerLastRun, arg.LastRun, arg.UUID)
+	return err
+}
+
+const updateSchedulerSyncProgress = `-- name: UpdateSchedulerSyncProgress :exec
+UPDATE scheduler SET
+    sync_state = COALESCE($1, sync_state),
+    last_sync_timestamp = COALESCE($2, last_sync_timestamp),
+    oldest_sync_timestamp = COALESCE($3, oldest_sync_timestamp),
+    last_run = $4,
+    updated_at = NOW()
+WHERE uuid = $5::uuid
+`
+
+type UpdateSchedulerSyncProgressParams struct {
+	SyncState           pgtype.Text        `json:"sync_state"`
+	LastSyncTimestamp   pgtype.Timestamptz `json:"last_sync_timestamp"`
+	OldestSyncTimestamp pgtype.Timestamptz `json:"oldest_sync_timestamp"`
+	LastRun             pgtype.Timestamptz `json:"last_run"`
+	UUID                pgtype.UUID        `json:"uuid"`
+}
+
+// Update the scheduler's sync progress with timestamp-based tracking
+func (q *Queries) UpdateSchedulerSyncProgress(ctx context.Context, arg UpdateSchedulerSyncProgressParams) error {
+	_, err := q.db.Exec(ctx, updateSchedulerSyncProgress,
+		arg.SyncState,
+		arg.LastSyncTimestamp,
+		arg.OldestSyncTimestamp,
+		arg.LastRun,
+		arg.UUID,
+	)
 	return err
 }

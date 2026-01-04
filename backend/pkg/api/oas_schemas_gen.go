@@ -7460,6 +7460,52 @@ func (o OptRegisteredWorkerStatus) Or(d RegisteredWorkerStatus) RegisteredWorker
 	return d
 }
 
+// NewOptSchedulerSyncState returns new OptSchedulerSyncState with value set to v.
+func NewOptSchedulerSyncState(v SchedulerSyncState) OptSchedulerSyncState {
+	return OptSchedulerSyncState{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSchedulerSyncState is optional SchedulerSyncState.
+type OptSchedulerSyncState struct {
+	Value SchedulerSyncState
+	Set   bool
+}
+
+// IsSet returns true if OptSchedulerSyncState was set.
+func (o OptSchedulerSyncState) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSchedulerSyncState) Reset() {
+	var v SchedulerSyncState
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSchedulerSyncState) SetTo(v SchedulerSyncState) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSchedulerSyncState) Get() (v SchedulerSyncState, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSchedulerSyncState) Or(d SchedulerSyncState) SchedulerSyncState {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptStorageListOrderBy returns new OptStorageListOrderBy with value set to v.
 func NewOptStorageListOrderBy(v StorageListOrderBy) OptStorageListOrderBy {
 	return OptStorageListOrderBy{
@@ -9355,9 +9401,17 @@ type Scheduler struct {
 	IsEnabled      OptBool        `json:"is_enabled"`
 	IsPaused       OptBool        `json:"is_paused"`
 	// Number of items to process per scheduled execution.
-	BatchSize OptInt      `json:"batch_size"`
-	CreatedAt OptDateTime `json:"created_at"`
-	UpdatedAt OptDateTime `json:"updated_at"`
+	BatchSize OptInt `json:"batch_size"`
+	// Current sync state for bi-directional fetch.
+	SyncState OptSchedulerSyncState `json:"sync_state"`
+	// Most recent message timestamp synced.
+	LastSyncTimestamp OptNilDateTime `json:"last_sync_timestamp"`
+	// Oldest message timestamp synced (for historical backfill).
+	OldestSyncTimestamp OptNilDateTime `json:"oldest_sync_timestamp"`
+	// Stop historical sync before this date.
+	CutoffDate OptNilDateTime `json:"cutoff_date"`
+	CreatedAt  OptDateTime    `json:"created_at"`
+	UpdatedAt  OptDateTime    `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -9413,6 +9467,26 @@ func (s *Scheduler) GetIsPaused() OptBool {
 // GetBatchSize returns the value of BatchSize.
 func (s *Scheduler) GetBatchSize() OptInt {
 	return s.BatchSize
+}
+
+// GetSyncState returns the value of SyncState.
+func (s *Scheduler) GetSyncState() OptSchedulerSyncState {
+	return s.SyncState
+}
+
+// GetLastSyncTimestamp returns the value of LastSyncTimestamp.
+func (s *Scheduler) GetLastSyncTimestamp() OptNilDateTime {
+	return s.LastSyncTimestamp
+}
+
+// GetOldestSyncTimestamp returns the value of OldestSyncTimestamp.
+func (s *Scheduler) GetOldestSyncTimestamp() OptNilDateTime {
+	return s.OldestSyncTimestamp
+}
+
+// GetCutoffDate returns the value of CutoffDate.
+func (s *Scheduler) GetCutoffDate() OptNilDateTime {
+	return s.CutoffDate
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -9480,6 +9554,26 @@ func (s *Scheduler) SetBatchSize(val OptInt) {
 	s.BatchSize = val
 }
 
+// SetSyncState sets the value of SyncState.
+func (s *Scheduler) SetSyncState(val OptSchedulerSyncState) {
+	s.SyncState = val
+}
+
+// SetLastSyncTimestamp sets the value of LastSyncTimestamp.
+func (s *Scheduler) SetLastSyncTimestamp(val OptNilDateTime) {
+	s.LastSyncTimestamp = val
+}
+
+// SetOldestSyncTimestamp sets the value of OldestSyncTimestamp.
+func (s *Scheduler) SetOldestSyncTimestamp(val OptNilDateTime) {
+	s.OldestSyncTimestamp = val
+}
+
+// SetCutoffDate sets the value of CutoffDate.
+func (s *Scheduler) SetCutoffDate(val OptNilDateTime) {
+	s.CutoffDate = val
+}
+
 // SetCreatedAt sets the value of CreatedAt.
 func (s *Scheduler) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
@@ -9502,6 +9596,62 @@ func (*SchedulerDeleteOK) schedulerDeleteRes() {}
 type SchedulerListOKApplicationJSON []Scheduler
 
 func (*SchedulerListOKApplicationJSON) schedulerListRes() {}
+
+// Current sync state for bi-directional fetch.
+type SchedulerSyncState string
+
+const (
+	SchedulerSyncStateInitial        SchedulerSyncState = "initial"
+	SchedulerSyncStateSyncRecent     SchedulerSyncState = "sync_recent"
+	SchedulerSyncStateSyncHistorical SchedulerSyncState = "sync_historical"
+	SchedulerSyncStateSyncComplete   SchedulerSyncState = "sync_complete"
+)
+
+// AllValues returns all SchedulerSyncState values.
+func (SchedulerSyncState) AllValues() []SchedulerSyncState {
+	return []SchedulerSyncState{
+		SchedulerSyncStateInitial,
+		SchedulerSyncStateSyncRecent,
+		SchedulerSyncStateSyncHistorical,
+		SchedulerSyncStateSyncComplete,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SchedulerSyncState) MarshalText() ([]byte, error) {
+	switch s {
+	case SchedulerSyncStateInitial:
+		return []byte(s), nil
+	case SchedulerSyncStateSyncRecent:
+		return []byte(s), nil
+	case SchedulerSyncStateSyncHistorical:
+		return []byte(s), nil
+	case SchedulerSyncStateSyncComplete:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SchedulerSyncState) UnmarshalText(data []byte) error {
+	switch SchedulerSyncState(data) {
+	case SchedulerSyncStateInitial:
+		*s = SchedulerSyncStateInitial
+		return nil
+	case SchedulerSyncStateSyncRecent:
+		*s = SchedulerSyncStateSyncRecent
+		return nil
+	case SchedulerSyncStateSyncHistorical:
+		*s = SchedulerSyncStateSyncHistorical
+		return nil
+	case SchedulerSyncStateSyncComplete:
+		*s = SchedulerSyncStateSyncComplete
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Definition of a source field available for mapping.
 // Ref: #

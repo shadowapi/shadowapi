@@ -381,6 +381,12 @@ CREATE TABLE "scheduler" (
                              is_paused         BOOLEAN NOT NULL DEFAULT FALSE,
                              batch_size         INTEGER NOT NULL DEFAULT 100, -- number of items to process per execution
 
+                             -- Timestamp-based sync tracking (replaces last_uid)
+                             sync_state              VARCHAR(50) DEFAULT 'initial', -- 'initial', 'sync_recent', 'sync_historical', 'sync_complete'
+                             last_sync_timestamp     TIMESTAMP WITH TIME ZONE,      -- most recent message timestamp synced
+                             oldest_sync_timestamp   TIMESTAMP WITH TIME ZONE,      -- oldest message timestamp synced (for historical backfill)
+                             cutoff_date             TIMESTAMP WITH TIME ZONE,      -- stop historical sync before this date
+
                              created_at         TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                              updated_at         TIMESTAMP WITH TIME ZONE,
 

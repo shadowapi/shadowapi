@@ -22,10 +22,18 @@ type EmailFetchJobArgs struct {
 	IMAPHost string `json:"imap_host"` // e.g., "imap.gmail.com"
 	IMAPPort int    `json:"imap_port"` // e.g., 993
 
-	// Fetch parameters
-	LastUID     uint32 `json:"last_uid"`      // Last processed IMAP UID (fetch UIDs > this value)
+	// Fetch parameters (DEPRECATED: LastUID)
+	LastUID     uint32 `json:"last_uid"`      // DEPRECATED: Last processed IMAP UID
 	BatchSize   int    `json:"batch_size"`    // Max emails per job (from scheduler.batch_size)
 	MailboxName string `json:"mailbox_name"`  // e.g., "INBOX", "[Gmail]/All Mail"
+
+	// Timestamp-based sync tracking (replaces LastUID)
+	SyncState             string    `json:"sync_state"`               // 'initial', 'sync_recent', 'sync_historical', 'sync_complete'
+	LastSyncTimestamp     time.Time `json:"last_sync_timestamp"`      // Most recent message timestamp synced
+	OldestSyncTimestamp   time.Time `json:"oldest_sync_timestamp"`    // Oldest message timestamp synced (for historical backfill)
+	CutoffDate            time.Time `json:"cutoff_date"`              // Stop historical sync before this date
+	TargetTableName       string    `json:"target_table_name"`        // Target table for timestamp bounds query
+	TimestampColumn       string    `json:"timestamp_column"`         // Column name for timestamps (usually "created_at")
 
 	// Mapper configuration (extracted from pipeline.flow)
 	MapperConfig MapperConfigData `json:"mapper_config"`
@@ -75,7 +83,12 @@ type EmailFetchResult struct {
 	MessagesFetched int    `json:"messages_fetched"`
 	MessagesStored  int    `json:"messages_stored"`
 	ErrorCount      int    `json:"error_count"`
-	LastUID         uint32 `json:"last_uid"` // Highest processed IMAP UID for incremental fetch
+	LastUID         uint32 `json:"last_uid"` // DEPRECATED: Highest processed IMAP UID
+
+	// Timestamp-based sync tracking results
+	NewestTimestamp time.Time `json:"newest_timestamp"` // Most recent message timestamp fetched
+	OldestTimestamp time.Time `json:"oldest_timestamp"` // Oldest message timestamp fetched
+	NewSyncState    string    `json:"new_sync_state"`   // New sync state after this job
 
 	// Duration
 	DurationMs  int64     `json:"duration_ms"`

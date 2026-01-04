@@ -412,10 +412,13 @@ func (h *Handler) handleEmailFetchResultDirect(ctx context.Context, fetchResult 
 	// Build result data JSON with statistics
 	var resultData []byte
 	resultJSON := map[string]any{
-		"messages_fetched": fetchResult.MessagesFetched,
-		"messages_stored":  fetchResult.MessagesStored,
-		"error_count":      fetchResult.ErrorCount,
-		"duration_ms":      fetchResult.DurationMs,
+		"messages_fetched":  fetchResult.MessagesFetched,
+		"messages_stored":   fetchResult.MessagesStored,
+		"error_count":       fetchResult.ErrorCount,
+		"duration_ms":       fetchResult.DurationMs,
+		"newest_timestamp":  fetchResult.NewestTimestamp,
+		"oldest_timestamp":  fetchResult.OldestTimestamp,
+		"new_sync_state":    fetchResult.NewSyncState,
 	}
 	if fetchResult.Error != "" {
 		resultJSON["error"] = fetchResult.Error
@@ -436,27 +439,50 @@ func (h *Handler) handleEmailFetchResultDirect(ctx context.Context, fetchResult 
 		)
 	}
 
-	// If successful, update the scheduler's fetch progress (last_uid)
-	if fetchResult.Success && fetchResult.LastUID > 0 && fetchResult.SchedulerUUID != "" {
+	// Update scheduler's sync progress with new timestamp-based tracking
+	if fetchResult.Success && fetchResult.SchedulerUUID != "" {
 		schedUUID, err := uuid.FromString(fetchResult.SchedulerUUID)
 		if err != nil {
 			h.log.Error("invalid scheduler UUID", "scheduler_uuid", fetchResult.SchedulerUUID, "error", err)
 		} else {
-			err = q.UpdateSchedulerFetchProgress(ctx, query.UpdateSchedulerFetchProgressParams{
-				UUID:    converter.UuidToPgUUID(schedUUID),
-				LastUid: int64(fetchResult.LastUID),
-				LastRun: pgtype.Timestamptz{Time: fetchResult.CompletedAt, Valid: true},
+			// Build timestamp parameters
+			var lastSyncTs, oldestSyncTs pgtype.Timestamptz
+			if !fetchResult.NewestTimestamp.IsZero() {
+				lastSyncTs = pgtype.Timestamptz{Time: fetchResult.NewestTimestamp, Valid: true}
+			}
+			if !fetchResult.OldestTimestamp.IsZero() {
+				oldestSyncTs = pgtype.Timestamptz{Time: fetchResult.OldestTimestamp, Valid: true}
+			}
+
+			// Use new sync progress update
+			err = q.UpdateSchedulerSyncProgress(ctx, query.UpdateSchedulerSyncProgressParams{
+				UUID:                converter.UuidToPgUUID(schedUUID),
+				SyncState:           pgtype.Text{String: fetchResult.NewSyncState, Valid: fetchResult.NewSyncState != ""},
+				LastSyncTimestamp:   lastSyncTs,
+				OldestSyncTimestamp: oldestSyncTs,
+				LastRun:             pgtype.Timestamptz{Time: fetchResult.CompletedAt, Valid: true},
 			})
 			if err != nil {
-				h.log.Warn("failed to update scheduler fetch progress",
+				h.log.Warn("failed to update scheduler sync progress",
 					"scheduler_uuid", fetchResult.SchedulerUUID,
 					"error", err,
 				)
 			} else {
-				h.log.Debug("updated scheduler fetch progress",
+				h.log.Debug("updated scheduler sync progress",
 					"scheduler_uuid", fetchResult.SchedulerUUID,
-					"last_uid", fetchResult.LastUID,
+					"sync_state", fetchResult.NewSyncState,
+					"newest_timestamp", fetchResult.NewestTimestamp,
+					"oldest_timestamp", fetchResult.OldestTimestamp,
 				)
+			}
+
+			// Also update last_uid for backward compatibility (deprecated)
+			if fetchResult.LastUID > 0 {
+				_ = q.UpdateSchedulerFetchProgress(ctx, query.UpdateSchedulerFetchProgressParams{
+					UUID:    converter.UuidToPgUUID(schedUUID),
+					LastUid: int64(fetchResult.LastUID),
+					LastRun: pgtype.Timestamptz{Time: fetchResult.CompletedAt, Valid: true},
+				})
 			}
 		}
 	}
@@ -468,6 +494,7 @@ func (h *Handler) handleEmailFetchResultDirect(ctx context.Context, fetchResult 
 		"messages_fetched", fetchResult.MessagesFetched,
 		"messages_stored", fetchResult.MessagesStored,
 		"error_count", fetchResult.ErrorCount,
+		"sync_state", fetchResult.NewSyncState,
 	)
 }
 

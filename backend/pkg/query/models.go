@@ -295,20 +295,24 @@ type RegisteredWorker struct {
 }
 
 type Scheduler struct {
-	UUID           uuid.UUID          `json:"uuid"`
-	PipelineUuid   *uuid.UUID         `json:"pipeline_uuid"`
-	ScheduleType   string             `json:"schedule_type"`
-	CronExpression pgtype.Text        `json:"cron_expression"`
-	RunAt          pgtype.Timestamptz `json:"run_at"`
-	Timezone       string             `json:"timezone"`
-	NextRun        pgtype.Timestamptz `json:"next_run"`
-	LastRun        pgtype.Timestamptz `json:"last_run"`
-	LastUid        int64              `json:"last_uid"`
-	IsEnabled      bool               `json:"is_enabled"`
-	IsPaused       bool               `json:"is_paused"`
-	BatchSize      int32              `json:"batch_size"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	UUID                uuid.UUID          `json:"uuid"`
+	PipelineUuid        *uuid.UUID         `json:"pipeline_uuid"`
+	ScheduleType        string             `json:"schedule_type"`
+	CronExpression      pgtype.Text        `json:"cron_expression"`
+	RunAt               pgtype.Timestamptz `json:"run_at"`
+	Timezone            string             `json:"timezone"`
+	NextRun             pgtype.Timestamptz `json:"next_run"`
+	LastRun             pgtype.Timestamptz `json:"last_run"`
+	LastUid             int64              `json:"last_uid"`
+	IsEnabled           bool               `json:"is_enabled"`
+	IsPaused            bool               `json:"is_paused"`
+	BatchSize           int32              `json:"batch_size"`
+	SyncState           pgtype.Text        `json:"sync_state"`
+	LastSyncTimestamp   pgtype.Timestamptz `json:"last_sync_timestamp"`
+	OldestSyncTimestamp pgtype.Timestamptz `json:"oldest_sync_timestamp"`
+	CutoffDate          pgtype.Timestamptz `json:"cutoff_date"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Storage struct {

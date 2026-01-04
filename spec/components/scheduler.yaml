@@ -32,6 +32,30 @@ properties:
     default: 100
     minimum: 1
     maximum: 10000
+  sync_state:
+    type: string
+    description: Current sync state for bi-directional fetch
+    enum:
+      - initial
+      - sync_recent
+      - sync_historical
+      - sync_complete
+    default: initial
+  last_sync_timestamp:
+    type: string
+    format: date-time
+    nullable: true
+    description: Most recent message timestamp synced
+  oldest_sync_timestamp:
+    type: string
+    format: date-time
+    nullable: true
+    description: Oldest message timestamp synced (for historical backfill)
+  cutoff_date:
+    type: string
+    format: date-time
+    nullable: true
+    description: Stop historical sync before this date
   created_at:
     type: string
     format: date-time

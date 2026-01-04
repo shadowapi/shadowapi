@@ -32,6 +32,10 @@ func (s *Scheduler) setDefaults() {
 		val := int(100)
 		s.BatchSize.SetTo(val)
 	}
+	{
+		val := SchedulerSyncState("initial")
+		s.SyncState.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.
