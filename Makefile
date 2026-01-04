@@ -14,7 +14,7 @@ help: ## Display this help
 ##@ Setup
 
 up: ## Bootstrap and start the full stack (first-time setup)
-	./devops/bootstrap.sh
+	python3 ./devops/bootstrap.py
 
 init: ## Initialize the project (reset containers, copy env, start db, migrate)
 	docker compose down -v
