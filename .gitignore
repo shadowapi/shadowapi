@@ -39,7 +39,6 @@ node_modules/
 templates/**/*.txt
 package-lock.json
 yarn.lock
-backend/config.yaml
 ./config.yaml
 /localtest.me.crt
 /localtest.me.key
@@ -50,3 +49,8 @@ front/dist/
 front/playwright-report/
 TODO.md
 test-results/
+
+backend/config.yaml
+backend/grpc2nats
+backend/shadowapi
+backend/worker
