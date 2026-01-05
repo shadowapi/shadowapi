@@ -110,3 +110,54 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
+
+  # gRPC to NATS bridge for distributed workers (internal service)
+  mp-grpc2nats:
+    platform: linux/amd64
+    build:
+      context: ../..
+      dockerfile: devops/docker/grpc2nats/Dockerfile
+    environment:
+      - G2N_DB_URI=${BE_DB_URI}
+      - G2N_NATS_URL=${BE_QUEUE_URL}
+      - G2N_NATS_PREFIX=${BE_QUEUE_PREFIX}
+      - G2N_GRPC_HOST=0.0.0.0
+      - G2N_GRPC_PORT=9090
+      - G2N_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+    restart: always
+
+  # Worker on olymp machine
+  mp-worker-olymp:
+    platform: linux/amd64
+    build:
+      context: ../..
+      dockerfile: devops/docker/worker/Dockerfile
+    x-node: olymp
+    environment:
+      - WORKER_SERVER=mp-grpc2nats.internal:9090
+      - WORKER_TLS=false
+      - WORKER_NAME=olymp
+      - ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN_OLYMP}
+      - WORKER_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+    depends_on:
+      mp-grpc2nats:
+        condition: service_started
+    restart: unless-stopped
+
+  # Worker on shkhara machine
+  mp-worker-shkhara:
+    platform: linux/amd64
+    build:
+      context: ../..
+      dockerfile: devops/docker/worker/Dockerfile
+    x-node: shkhara
+    environment:
+      - WORKER_SERVER=mp-grpc2nats.internal:9090
+      - WORKER_TLS=false
+      - WORKER_NAME=shkhara
+      - ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN_SHKHARA}
+      - WORKER_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+    depends_on:
+      mp-grpc2nats:
+        condition: service_started
+    restart: unless-stopped

@@ -10,6 +10,9 @@ This directory contains the configuration for deploying MeshPump to [uncloud.run
 | `mp-ssr`      | `meshpump.com`      | SSR Express server    |
 | `mp-backend`  | `api.meshpump.com`  | Go API server         |
 | `mp-hydra`    | `oidc.meshpump.com` | Ory Hydra OAuth2/OIDC |
+| `mp-grpc2nats` | (internal)        | gRPC to NATS bridge   |
+| `mp-worker-olymp` | (internal, x-node: olymp) | Distributed worker |
+| `mp-worker-shkhara` | (internal, x-node: shkhara) | Distributed worker |
 
 ## Prerequisites
 
