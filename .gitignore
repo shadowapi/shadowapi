@@ -41,6 +41,8 @@ ui/yarn.lock
 
 # Unencrypted production secrets (NEVER commit)
 devops/uncloud/.env
+devops/ory/hydra/hydra.yaml
+
 /localtest.me.crt
 /localtest.me.key
 TODO.md
