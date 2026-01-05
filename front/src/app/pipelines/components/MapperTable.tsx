@@ -171,7 +171,7 @@ function MapperTable({ storageUuid, datasourceType, mappings, onChange }: Mapper
           options={transformOptions}
           onChange={(type: string) => {
             updateMapping(index, {
-              transform: { type: type as MapperFieldMapping['transform']['type'] },
+              transform: { type: type as NonNullable<MapperFieldMapping['transform']>['type'] },
             });
           }}
           style={{ width: '100%' }}

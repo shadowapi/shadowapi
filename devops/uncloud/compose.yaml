@@ -48,6 +48,9 @@ services:
     x-ports:
       - api.meshpump.com:8080/https
       - rpc.meshpump.com:9090/https
+    depends_on:
+      mp-hydra:
+        condition: service_healthy
     environment:
       - BE_HOST=0.0.0.0
       - BE_PORT=8080
@@ -73,6 +76,12 @@ services:
       - BE_CSR_BASE_URL=https://app.meshpump.com
       - BE_API_BASE_URL=https://api.meshpump.com
       - BE_CORS_ALLOWED_ORIGINS=https://meshpump.com,https://app.meshpump.com
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: always
 
   # Hydra OAuth2/OIDC Server
@@ -89,6 +98,7 @@ services:
       - DSN=${HYDRA_DSN}
       - SECRETS_SYSTEM=${HYDRA_SECRETS_SYSTEM}
       - LOG_LEVEL=${HYDRA_LOG_LEVEL:-info}
+      - OIDC_PAIRWISE_SALT=${OIDC_PAIRWISE_SALT}
     configs:
       - source: hydra_config
         target: /hydra.yaml

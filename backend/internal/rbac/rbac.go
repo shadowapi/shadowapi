@@ -34,9 +34,12 @@ func Provide(i do.Injector) (*Enforcer, error) {
 
 	log.Info("initializing RBAC enforcer")
 
-	// Create PostgreSQL adapter using the existing connection pool
+	// Create PostgreSQL adapter
+	// Use the same database name as in the connection string to avoid creating a new one
+	// The adapter may still try to verify the database exists by connecting to postgres DB
 	adapter, err := pgxadapter.NewAdapter(
 		cfg.DB.URI,
+		pgxadapter.WithDatabase("meshpump"),
 		pgxadapter.WithTableName("casbin_rule"),
 	)
 	if err != nil {

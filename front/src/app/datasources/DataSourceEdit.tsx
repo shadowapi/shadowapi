@@ -15,7 +15,6 @@ import {
   Row,
   Col,
   Divider,
-  Tag,
   Alert,
 } from 'antd';
 import { DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, LoginOutlined, StopOutlined } from '@ant-design/icons';
@@ -183,6 +182,7 @@ function DataSourceEdit() {
           fullData = {
             ...data,
             type: 'email',
+            is_enabled: data.is_enabled ?? true,
           };
         }
         break;
@@ -195,6 +195,7 @@ function DataSourceEdit() {
           fullData = {
             ...data,
             type: 'email_oauth',
+            is_enabled: data.is_enabled ?? true,
           };
           // Check OAuth authentication status
           checkOAuthStatus(uuid!);
@@ -209,6 +210,8 @@ function DataSourceEdit() {
           fullData = {
             ...data,
             type: 'telegram',
+            is_enabled: data.is_enabled ?? true,
+            api_id: data.api_id ? Number(data.api_id) : undefined,
           };
         }
         break;
@@ -221,6 +224,7 @@ function DataSourceEdit() {
           fullData = {
             ...data,
             type: 'whatsapp',
+            is_enabled: data.is_enabled ?? true,
           };
         }
         break;
@@ -233,6 +237,7 @@ function DataSourceEdit() {
           fullData = {
             ...data,
             type: 'linkedin',
+            is_enabled: data.is_enabled ?? true,
           };
         }
         break;
@@ -313,7 +318,7 @@ function DataSourceEdit() {
                 is_enabled: values.is_enabled,
                 phone_number: values.phone_number || '',
                 provider: values.provider || 'telegram',
-                api_id: values.api_id || 0,
+                api_id: String(values.api_id || 0),
                 api_hash: values.api_hash || '',
                 password: values.password,
               },
@@ -391,7 +396,7 @@ function DataSourceEdit() {
                 is_enabled: values.is_enabled,
                 phone_number: values.phone_number || '',
                 provider: values.provider || 'telegram',
-                api_id: values.api_id || 0,
+                api_id: String(values.api_id || 0),
                 api_hash: values.api_hash || '',
                 password: values.password,
               },

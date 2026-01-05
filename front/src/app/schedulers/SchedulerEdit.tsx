@@ -143,7 +143,7 @@ function SchedulerEdit() {
   const handleSubmit = async (values: FormValues) => {
     setSaving(true);
 
-    const body: Scheduler = {
+    const body = {
       pipeline_uuid: values.pipeline_uuid,
       schedule_type: values.schedule_type,
       cron_expression: values.schedule_type === 'cron' ? values.cron_expression : null,
@@ -152,6 +152,7 @@ function SchedulerEdit() {
       is_enabled: values.is_enabled,
       is_paused: values.is_paused,
       batch_size: values.batch_size,
+      sync_state: 'initial' as const,
     };
 
     try {

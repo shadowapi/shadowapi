@@ -1,15 +1,15 @@
-# ShadowAPI Uncloud Deployment
+# MeshPump Uncloud Deployment
 
-This directory contains the configuration for deploying ShadowAPI to [uncloud.run](https://uncloud.run).
+This directory contains the configuration for deploying MeshPump to [uncloud.run](https://uncloud.run).
 
 ## Architecture
 
-| Service | Domain | Description |
-|---------|--------|-------------|
-| `mp-frontend` | `meshpump.com` | React SPA (Vite) |
-| `mp-ssr` | `www.meshpump.com` | SSR Express server |
-| `mp-backend` | `api.meshpump.com` | Go API server |
-| `mp-hydra` | `oidc.meshpump.com` | Ory Hydra OAuth2/OIDC |
+| Service     | Domain            | Description           |
+|-------------|-------------------|-----------------------|
+| `mp-frontend` | `app.meshpump.com`  | React SPA (Vite)      |
+| `mp-ssr`      | `meshpump.com`      | SSR Express server    |
+| `mp-backend`  | `api.meshpump.com`  | Go API server         |
+| `mp-hydra`    | `oidc.meshpump.com` | Ory Hydra OAuth2/OIDC |
 
 ## Prerequisites
 
@@ -32,40 +32,49 @@ cp .env.example .env
 
 #### PostgreSQL
 Create two databases on your managed PostgreSQL:
-- `shadowapi` - Main application database
-- `hydra` - Ory Hydra OAuth2 database
-
-Run the schema migration against the `shadowapi` database:
-```bash
-# From repository root
-atlas schema apply \
-  --url "YOUR_POSTGRES_URI" \
-  --to file://db/schema.sql \
-  --auto-approve
-```
+- `meshpump` - Main application database
+- `meshpump_dev` - Dev database for Atlas migrations
+- `meshpump_hydra` - Ory Hydra OAuth2 database
 
 #### NATS
 Ensure your NATS instance has JetStream enabled.
 
-### 3. Deploy to Uncloud
+### 3. Run Database Migrations
 
 ```bash
 # From devops/uncloud directory
-uncloud deploy -f compose.yaml
+./migrate.py
 ```
 
-### 4. Create OAuth2 Client
+This script:
+- Establishes SSH tunnel to the remote database via `devinlab.com`
+- Runs Atlas schema apply interactively (shows diff before applying)
+- Automatically cleans up the tunnel on exit
+
+### 4. Deploy to Uncloud
+
+```bash
+# From devops/uncloud directory
+./deploy.py
+```
+
+Or manually:
+```bash
+uc deploy -f compose.yaml --yes
+```
+
+### 5. Create OAuth2 Client
 
 After Hydra is running, create the SPA OAuth2 client:
 
 ```bash
-uncloud exec mp-hydra -- hydra create client \
+uc exec mp-hydra -- hydra create client \
   --endpoint http://localhost:4445 \
   --grant-type authorization_code,refresh_token \
   --response-type code \
   --scope openid,offline_access \
   --redirect-uri https://api.meshpump.com/api/v1/auth/oauth2/callback \
-  --name "ShadowAPI SPA" \
+  --name "MeshPump SPA" \
   --token-endpoint-auth-method none \
   --format json
 ```
@@ -77,14 +86,14 @@ BE_OAUTH2_SPA_CLIENT_ID=<client_id>
 
 Then redeploy to apply the change:
 ```bash
-uncloud deploy -f compose.yaml
+./deploy.py
 ```
 
-### 5. Verify Deployment
+### 6. Verify Deployment
 
 ```bash
 # Check service health
-uncloud ps
+uc ps
 
 # Check OIDC discovery
 curl https://oidc.meshpump.com/.well-known/openid-configuration
@@ -100,7 +109,7 @@ Add the following DNS records pointing to your uncloud cluster:
 | Type | Name | Value |
 |------|------|-------|
 | A | `meshpump.com` | `<uncloud-ip>` |
-| A | `www.meshpump.com` | `<uncloud-ip>` |
+| A | `app.meshpump.com` | `<uncloud-ip>` |
 | A | `api.meshpump.com` | `<uncloud-ip>` |
 | A | `oidc.meshpump.com` | `<uncloud-ip>` |
 
@@ -124,32 +133,35 @@ Services communicate internally using uncloud's `.internal` DNS:
 # Pull latest code
 git pull
 
-# Redeploy
+# Run migrations (if schema changed)
 cd devops/uncloud
-uncloud deploy -f compose.yaml
+./migrate.py
+
+# Redeploy
+./deploy.py
 ```
 
 ## Logs and Debugging
 
 ```bash
 # View logs for a service
-uncloud logs mp-backend
+uc logs mp-backend
 
 # Follow logs
-uncloud logs -f mp-backend
+uc logs -f mp-backend
 
 # Execute command in container
-uncloud exec mp-backend -- /bin/sh
+uc exec mp-backend -- /bin/sh
 ```
 
 ## Rollback
 
 ```bash
 # List deployment history
-uncloud history
+uc history
 
 # Rollback to previous version
-uncloud rollback <deployment-id>
+uc rollback <deployment-id>
 ```
 
 ## Files
@@ -157,6 +169,8 @@ uncloud rollback <deployment-id>
 | File | Description |
 |------|-------------|
 | `compose.yaml` | Main uncloud compose file |
-| `hydra.yaml` | Ory Hydra OAuth2/OIDC configuration |
+| `deploy.py` | Deployment script (validates, deploys, verifies) |
+| `migrate.py` | Database migration script (SSH tunnel + Atlas) |
 | `.env.example` | Environment variable template |
+| `.env.enc` | SOPS-encrypted production secrets |
 | `DEPLOYMENT.md` | This documentation |
