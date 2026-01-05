@@ -35,6 +35,12 @@ ui/yarn.lock
 ./config.yaml
 .env
 .env.gen
+
+# Encrypted secrets (these SHOULD be committed)
+!devops/uncloud/.env.enc
+
+# Unencrypted production secrets (NEVER commit)
+devops/uncloud/.env
 /localtest.me.crt
 /localtest.me.key
 TODO.md

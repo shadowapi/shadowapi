@@ -69,6 +69,28 @@ worker-enroll: ## Enroll a new worker (requires TOKEN and NAME)
 worker-logs: ## View distributed worker logs
 	docker compose logs -f grpc-worker
 
+##@ Secrets Management
+
+# Age key file location (default: ~/.config/sops/age/keys.txt)
+SOPS_AGE_KEY_FILE ?= $(HOME)/.config/sops/age/keys.txt
+export SOPS_AGE_KEY_FILE
+
+secrets-decrypt: ## Decrypt production .env.enc -> .env
+	@sops --decrypt --input-type dotenv --output-type dotenv \
+		devops/uncloud/.env.enc > devops/uncloud/.env
+	@echo "Decrypted to devops/uncloud/.env"
+
+secrets-encrypt: ## Encrypt production .env -> .env.enc
+	@sops --encrypt --input-type dotenv --output-type dotenv \
+		devops/uncloud/.env > devops/uncloud/.env.enc
+	@echo "Encrypted to devops/uncloud/.env.enc"
+
+secrets-edit: ## Edit encrypted secrets in-place
+	@sops devops/uncloud/.env.enc
+
+secrets-rotate: ## Re-encrypt after adding/removing team members in .sops.yaml
+	@sops updatekeys devops/uncloud/.env.enc
+
 ##@ Deployment
 
 deploy: ## Deploy to Uncloud (production)

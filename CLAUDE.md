@@ -132,11 +132,82 @@ make api-gen           # Regenerate from OpenAPI
 go test ./...          # Run Go tests (from backend/)
 ```
 
+## Secrets Management
+
+Production secrets are encrypted with [SOPS](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age).
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `.sops.yaml` | SOPS config with team age public keys |
+| `devops/uncloud/.env.enc` | Encrypted production secrets (committed) |
+| `devops/uncloud/.env` | Decrypted secrets (gitignored) |
+| `~/.config/sops/age/keys.txt` | Your private key (never share!) |
+
+### Commands
+
+```bash
+make secrets-decrypt   # Decrypt .env.enc → .env
+make secrets-encrypt   # Encrypt .env → .env.enc
+make secrets-edit      # Edit secrets in-place (auto re-encrypts)
+make secrets-rotate    # Re-encrypt after adding/removing team members
+```
+
+### Setup (New Team Member)
+
+1. Install tools:
+   ```bash
+   brew install sops age   # macOS
+   ```
+
+2. Generate your age key:
+   ```bash
+   age-keygen -o ~/.config/sops/age/keys.txt
+   ```
+
+3. Share your **public key** (starts with `age1...`) with the team
+
+4. An existing member adds your key to `.sops.yaml` and runs:
+   ```bash
+   make secrets-rotate
+   ```
+
+5. Pull the updated `.sops.yaml` and `.env.enc`, then:
+   ```bash
+   make secrets-decrypt
+   ```
+
+### Adding a Team Member
+
+1. Get their age public key (starts with `age1...`)
+
+2. Edit `.sops.yaml`, append their key (comma-separated):
+   ```yaml
+   age: >-
+     age1existing...,
+     age1newmember...
+   ```
+
+3. Re-encrypt secrets:
+   ```bash
+   make secrets-rotate
+   ```
+
+4. Commit both `.sops.yaml` and `devops/uncloud/.env.enc`
+
+### Removing a Team Member
+
+1. Remove their key from `.sops.yaml`
+2. Run `make secrets-rotate`
+3. **Rotate all secrets** (they had access to plaintext values)
+4. Commit changes
+
 ## Guidelines
 
 - **Ask first** before creating predefined objects (datasources, OAuth2 clients, pipelines)
 - **Spec first**: Update OpenAPI/SQL schema before implementing
 - **DI**: Wire services through `samber/do`, don't instantiate directly
-- **Secrets**: Never commit to git; use `.env`, `config.yaml`, or `secrets/`
+- **Secrets**: Use SOPS encryption (see above); never commit plaintext secrets
 - Keep diffs tight; don't refactor beyond scope
 - Use conventional commits: `feat:`, `fix:`, `docs:`, etc.

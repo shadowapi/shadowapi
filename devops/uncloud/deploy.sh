@@ -45,10 +45,29 @@ validate_prerequisites() {
         exit 1
     fi
 
+    # Check sops CLI (required for secrets decryption)
+    if ! command -v sops &> /dev/null; then
+        log_error "sops not found. Install with: brew install sops"
+        exit 1
+    fi
+
+    # Auto-decrypt .env.enc if .env doesn't exist
+    if [ -f "$SCRIPT_DIR/.env.enc" ] && [ ! -f "$SCRIPT_DIR/.env" ]; then
+        log_info "Decrypting secrets from .env.enc..."
+        export SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
+        if sops --decrypt --input-type dotenv --output-type dotenv \
+            "$SCRIPT_DIR/.env.enc" > "$SCRIPT_DIR/.env" 2>/dev/null; then
+            log_success "Secrets decrypted"
+        else
+            log_error "Failed to decrypt .env.enc. Check your age key at $SOPS_AGE_KEY_FILE"
+            exit 1
+        fi
+    fi
+
     # Check .env file exists
     if [ ! -f "$SCRIPT_DIR/.env" ]; then
         log_error ".env file not found at $SCRIPT_DIR/.env"
-        log_error "Copy .env.example to .env and configure it before deploying"
+        log_error "Either decrypt .env.enc or copy .env.example and configure it"
         exit 1
     fi
 
