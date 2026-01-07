@@ -24,12 +24,14 @@ import {
   RobotOutlined,
   ThunderboltOutlined,
   KeyOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
 import { useAuth } from '../lib/auth';
 import { useResponsive } from '../lib/useResponsive';
 import { SmartLink } from '../lib/SmartLink';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 
 const { Header, Sider, Content, Footer } = Layout;
 
@@ -323,6 +325,7 @@ function AppLayout({ children }: AppLayoutProps) {
   const { user, logout } = useAuth();
   const { isMobile } = useResponsive();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -374,6 +377,12 @@ function AppLayout({ children }: AppLayoutProps) {
       disabled: true,
     },
     { type: 'divider' },
+    {
+      key: 'change-password',
+      icon: <LockOutlined />,
+      label: 'Change Password',
+      onClick: () => setPasswordModalOpen(true),
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -521,6 +530,12 @@ function AppLayout({ children }: AppLayoutProps) {
       >
         {sidebarMenu}
       </Drawer>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        open={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+      />
 
       {/* Footer */}
       <Footer

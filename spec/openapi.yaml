@@ -89,6 +89,8 @@ components:
       $ref: "components/worker_jobs.yaml"
     UserProfile:
       $ref: "components/user_profile.yaml"
+    PasswordChange:
+      $ref: "components/password_change.yaml"
     Workspace:
       $ref: "components/workspace.yaml"
     WorkspaceMember:
@@ -264,6 +266,8 @@ paths:
     $ref: "paths/user_session.yaml"
   /profile:
     $ref: "paths/profile.yaml"
+  /profile/password:
+    $ref: "paths/profile_password.yaml"
   /workerjobs:
     $ref: "paths/worker_jobs.yaml"
   /workerjobs/{uuid}:

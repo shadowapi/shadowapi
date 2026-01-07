@@ -1034,6 +1034,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/profile/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change current user password
+         * @description Allows the authenticated user to change their own password by providing the current password for verification.
+         */
+        put: operations["changePassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/workerjobs": {
         parameters: {
             query?: never;
@@ -1737,6 +1757,7 @@ export interface components {
         UserSessionToken: components["schemas"]["user_session_token"];
         WorkerJobs: components["schemas"]["worker_jobs"];
         UserProfile: components["schemas"]["user_profile"];
+        PasswordChange: components["schemas"]["password_change"];
         Workspace: components["schemas"]["workspace"];
         WorkspaceMember: components["schemas"]["workspace_member"];
         WorkspaceCheck: components["schemas"]["workspace_check"];
@@ -2698,6 +2719,12 @@ export interface components {
             first_name: string;
             /** @description User's last name */
             last_name: string;
+        };
+        password_change: {
+            /** @description The user's current password for verification */
+            current_password: string;
+            /** @description The new password to set */
+            new_password: string;
         };
         worker_jobs: {
             /** @description Unique identifier */
@@ -6536,6 +6563,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["user"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["password_change"];
+            };
+        };
+        responses: {
+            /** @description Password changed successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error (password too short, etc.) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Current password is incorrect or not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
                 };
             };
             /** @description Error */

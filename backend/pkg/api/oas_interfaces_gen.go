@@ -45,6 +45,10 @@ type AuthWorkspaceSwitchRes interface {
 	authWorkspaceSwitchRes()
 }
 
+type ChangePasswordRes interface {
+	changePasswordRes()
+}
+
 type CheckPermissionRes interface {
 	checkPermissionRes()
 }

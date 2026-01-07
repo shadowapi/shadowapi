@@ -113,6 +113,16 @@ func (UnimplementedHandler) AuthWorkspaceSwitch(ctx context.Context, req *AuthWo
 	return r, ht.ErrNotImplemented
 }
 
+// ChangePassword implements changePassword operation.
+//
+// Allows the authenticated user to change their own password by providing the current password for
+// verification.
+//
+// PUT /profile/password
+func (UnimplementedHandler) ChangePassword(ctx context.Context, req *PasswordChange) (r ChangePasswordRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CheckPermission implements checkPermission operation.
 //
 // Check if a user has permission.

@@ -147,6 +147,13 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 			}
 			if cookie, err := req.Raw.Cookie(oauth2.AccessTokenCookie); err == nil {
 				ctx = context.WithValue(ctx, AccessTokenContextKey, cookie.Value)
+				// For logout endpoint, also extract user claims so we can revoke Hydra login session
+				if req.Raw.URL.Path == "/api/v1/auth/oauth2/logout" && a.jwtValidator != nil {
+					if claims, err := a.jwtValidator.Validate(req.Context, cookie.Value); err == nil {
+						ctx = context.WithValue(ctx, UserClaimsContextKey, claims)
+					}
+					// If validation fails, continue anyway - we'll still clear cookies
+				}
 			}
 			req.SetContext(ctx)
 		}

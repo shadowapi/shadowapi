@@ -386,6 +386,19 @@ func (s *BearerAuth) SetToken(val string) {
 	s.Token = val
 }
 
+type ChangePasswordBadRequest Error
+
+func (*ChangePasswordBadRequest) changePasswordRes() {}
+
+// ChangePasswordNoContent is response for ChangePassword operation.
+type ChangePasswordNoContent struct{}
+
+func (*ChangePasswordNoContent) changePasswordRes() {}
+
+type ChangePasswordUnauthorized Error
+
+func (*ChangePasswordUnauthorized) changePasswordRes() {}
+
 type CheckPermissionOK struct {
 	// Whether the action is allowed.
 	Allowed OptBool `json:"allowed"`
@@ -2982,6 +2995,7 @@ func (*ErrorStatusCode) authOAuth2LogoutRes()                {}
 func (*ErrorStatusCode) authOAuth2RefreshRes()               {}
 func (*ErrorStatusCode) authOAuth2SessionRes()               {}
 func (*ErrorStatusCode) authWorkspaceSwitchRes()             {}
+func (*ErrorStatusCode) changePasswordRes()                  {}
 func (*ErrorStatusCode) checkPermissionRes()                 {}
 func (*ErrorStatusCode) checkWorkspaceExistsRes()            {}
 func (*ErrorStatusCode) createContactRes()                   {}
@@ -8332,6 +8346,34 @@ func (o OptWorkspaceSettings) Or(d WorkspaceSettings) WorkspaceSettings {
 		return v
 	}
 	return d
+}
+
+// Ref: #
+type PasswordChange struct {
+	// The user's current password for verification.
+	CurrentPassword string `json:"current_password"`
+	// The new password to set.
+	NewPassword string `json:"new_password"`
+}
+
+// GetCurrentPassword returns the value of CurrentPassword.
+func (s *PasswordChange) GetCurrentPassword() string {
+	return s.CurrentPassword
+}
+
+// GetNewPassword returns the value of NewPassword.
+func (s *PasswordChange) GetNewPassword() string {
+	return s.NewPassword
+}
+
+// SetCurrentPassword sets the value of CurrentPassword.
+func (s *PasswordChange) SetCurrentPassword(val string) {
+	s.CurrentPassword = val
+}
+
+// SetNewPassword sets the value of NewPassword.
+func (s *PasswordChange) SetNewPassword(val string) {
+	s.NewPassword = val
 }
 
 // Ref: #

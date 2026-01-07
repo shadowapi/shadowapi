@@ -37,6 +37,15 @@ func (h *Handler) AuthLogin(ctx context.Context, params api.AuthLoginParams) (ap
 		)
 		if err != nil {
 			h.log.Error("failed to accept skipped login", "error", err)
+			// Check if the login challenge has expired
+			if errors.Is(err, oauth2.ErrLoginChallengeExpired) {
+				// Redirect to login page without challenge - frontend will auto-initiate fresh OAuth2 flow
+				loginPageURL := fmt.Sprintf("%s/login", h.oauth2Svc.baseURL)
+				h.log.Info("login challenge expired (skip), redirecting to fresh login", "redirect", loginPageURL)
+				return &api.AuthLoginFound{
+					Location: api.NewOptString(loginPageURL),
+				}, nil
+			}
 			return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("login acceptance failed"))
 		}
 
@@ -90,7 +99,12 @@ func (h *Handler) AuthLoginSubmit(ctx context.Context, req *api.AuthLoginSubmitR
 		h.log.Error("failed to accept login request", "error", err, "subject", subject)
 		// Check if the login challenge has expired
 		if errors.Is(err, oauth2.ErrLoginChallengeExpired) {
-			return nil, ErrWithCode(http.StatusBadRequest, fmt.Errorf("login session expired, please try again"))
+			// Redirect to login page without challenge - frontend will auto-initiate fresh OAuth2 flow
+			loginPageURL := fmt.Sprintf("%s/login", h.oauth2Svc.baseURL)
+			h.log.Info("login challenge expired, redirecting to fresh login", "redirect", loginPageURL)
+			return &api.AuthLoginSubmitOK{
+				RedirectTo: loginPageURL,
+			}, nil
 		}
 		return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("login acceptance failed"))
 	}

@@ -75,6 +75,13 @@ type Handler interface {
 	//
 	// POST /auth/workspace/switch
 	AuthWorkspaceSwitch(ctx context.Context, req *AuthWorkspaceSwitchReq) (AuthWorkspaceSwitchRes, error)
+	// ChangePassword implements changePassword operation.
+	//
+	// Allows the authenticated user to change their own password by providing the current password for
+	// verification.
+	//
+	// PUT /profile/password
+	ChangePassword(ctx context.Context, req *PasswordChange) (ChangePasswordRes, error)
 	// CheckPermission implements checkPermission operation.
 	//
 	// Check if a user has permission.

@@ -1290,7 +1290,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
 						case "GET":
 							s.handleGetProfileRequest([0]string{}, elemIsEscaped, w, r)
@@ -1301,6 +1300,29 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/password"
+						origElem := elem
+						if l := len("/password"); len(elem) >= l && elem[0:l] == "/password" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "PUT":
+								s.handleChangePasswordRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -4290,7 +4312,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch method {
 						case "GET":
 							r.name = GetProfileOperation
@@ -4311,6 +4332,33 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						default:
 							return
 						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/password"
+						origElem := elem
+						if l := len("/password"); len(elem) >= l && elem[0:l] == "/password" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "PUT":
+								r.name = ChangePasswordOperation
+								r.summary = "Change current user password"
+								r.operationID = "changePassword"
+								r.pathPattern = "/profile/password"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
