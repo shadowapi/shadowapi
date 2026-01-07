@@ -19,7 +19,10 @@ FROM --platform=linux/amd64 alpine:3.19
 
 WORKDIR /app
 
-RUN apk add --no-cache ca-certificates bash
+RUN apk add --no-cache ca-certificates bash jq
+
+# Create data directory for credential persistence
+RUN mkdir -p /data && chmod 700 /data
 
 # Copy the binary from builder
 COPY --from=builder /bin/worker /bin/worker

@@ -125,6 +125,8 @@ services:
     build:
       context: .
       dockerfile: devops/docker/worker/Dockerfile
+    volumes:
+      - worker_data:/data
     environment:
       - WORKER_SERVER=grpc2nats:9090
       - WORKER_ID=${WORKER_ID:-}

@@ -88,3 +88,5 @@ volumes:
     driver: local
   test_storage_data:
     driver: local
+  worker_data:
+    driver: local

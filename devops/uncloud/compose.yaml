@@ -140,6 +140,8 @@ services:
       context: ../..
       dockerfile: devops/docker/worker/Dockerfile
     x-node: olymp
+    volumes:
+      - worker_olymp_data:/data
     environment:
       - WORKER_SERVER=mp-grpc2nats.internal:9090
       - WORKER_TLS=false
@@ -158,6 +160,8 @@ services:
       context: ../..
       dockerfile: devops/docker/worker/Dockerfile
     x-node: shkhara
+    volumes:
+      - worker_shkhara_data:/data
     environment:
       - WORKER_SERVER=mp-grpc2nats.internal:9090
       - WORKER_TLS=false
@@ -168,3 +172,9 @@ services:
       mp-grpc2nats:
         condition: service_started
     restart: unless-stopped
+
+volumes:
+  worker_olymp_data:
+    driver: local
+  worker_shkhara_data:
+    driver: local
