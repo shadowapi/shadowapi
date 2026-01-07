@@ -94,4 +94,4 @@ secrets-rotate: ## Re-encrypt after adding/removing team members in .sops.yaml
 ##@ Deployment
 
 deploy: ## Deploy to Uncloud (production)
-	./devops/uncloud/deploy.sh
+	./devops/uncloud/deploy.py

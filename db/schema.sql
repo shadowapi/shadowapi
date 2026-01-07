@@ -409,10 +409,10 @@ CREATE TABLE IF NOT EXISTS worker_jobs (
 -- ============================================================================
 
 -- Casbin policy storage (standard adapter schema)
--- Used by github.com/casbin/casbin-pg-adapter
+-- Used by github.com/pckhoi/casbin-pgx-adapter
 CREATE TABLE IF NOT EXISTS casbin_rule (
     id SERIAL PRIMARY KEY,
-    ptype VARCHAR(100) NOT NULL,
+    p_type VARCHAR(100) NOT NULL,
     v0 VARCHAR(100),
     v1 VARCHAR(100),
     v2 VARCHAR(100),
@@ -421,7 +421,7 @@ CREATE TABLE IF NOT EXISTS casbin_rule (
     v5 VARCHAR(100)
 );
 
-CREATE INDEX IF NOT EXISTS idx_casbin_rule_ptype ON casbin_rule(ptype);
+CREATE INDEX IF NOT EXISTS idx_casbin_rule_p_type ON casbin_rule(p_type);
 CREATE INDEX IF NOT EXISTS idx_casbin_rule_v0 ON casbin_rule(v0);
 CREATE INDEX IF NOT EXISTS idx_casbin_rule_v1 ON casbin_rule(v1);
 

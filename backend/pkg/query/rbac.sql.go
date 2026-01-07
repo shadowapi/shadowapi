@@ -276,7 +276,7 @@ func (q *Queries) GetRoleByUUID(ctx context.Context, uuid pgtype.UUID) (RbacRole
 
 const listCasbinRules = `-- name: ListCasbinRules :many
 
-SELECT id, ptype, v0, v1, v2, v3, v4, v5 FROM casbin_rule
+SELECT id, p_type, v0, v1, v2, v3, v4, v5 FROM casbin_rule
 ORDER BY id
 `
 
@@ -294,7 +294,7 @@ func (q *Queries) ListCasbinRules(ctx context.Context) ([]CasbinRule, error) {
 		var i CasbinRule
 		if err := rows.Scan(
 			&i.ID,
-			&i.Ptype,
+			&i.PType,
 			&i.V0,
 			&i.V1,
 			&i.V2,
@@ -313,13 +313,13 @@ func (q *Queries) ListCasbinRules(ctx context.Context) ([]CasbinRule, error) {
 }
 
 const listCasbinRulesByPtype = `-- name: ListCasbinRulesByPtype :many
-SELECT id, ptype, v0, v1, v2, v3, v4, v5 FROM casbin_rule
-WHERE ptype = $1
+SELECT id, p_type, v0, v1, v2, v3, v4, v5 FROM casbin_rule
+WHERE p_type = $1
 ORDER BY id
 `
 
-func (q *Queries) ListCasbinRulesByPtype(ctx context.Context, ptype string) ([]CasbinRule, error) {
-	rows, err := q.db.Query(ctx, listCasbinRulesByPtype, ptype)
+func (q *Queries) ListCasbinRulesByPtype(ctx context.Context, pType string) ([]CasbinRule, error) {
+	rows, err := q.db.Query(ctx, listCasbinRulesByPtype, pType)
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +329,7 @@ func (q *Queries) ListCasbinRulesByPtype(ctx context.Context, ptype string) ([]C
 		var i CasbinRule
 		if err := rows.Scan(
 			&i.ID,
-			&i.Ptype,
+			&i.PType,
 			&i.V0,
 			&i.V1,
 			&i.V2,

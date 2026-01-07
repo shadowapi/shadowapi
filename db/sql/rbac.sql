@@ -133,7 +133,7 @@ ORDER BY id;
 
 -- name: ListCasbinRulesByPtype :many
 SELECT * FROM casbin_rule
-WHERE ptype = sqlc.arg('ptype')
+WHERE p_type = sqlc.arg('p_type')
 ORDER BY id;
 
 -- name: CountCasbinRules :one

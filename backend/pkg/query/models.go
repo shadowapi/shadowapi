@@ -11,7 +11,7 @@ import (
 
 type CasbinRule struct {
 	ID    int32       `json:"id"`
-	Ptype string      `json:"ptype"`
+	PType string      `json:"p_type"`
 	V0    pgtype.Text `json:"v0"`
 	V1    pgtype.Text `json:"v1"`
 	V2    pgtype.Text `json:"v2"`

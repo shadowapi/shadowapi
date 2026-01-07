@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS builder
+FROM --platform=linux/amd64 golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -12,14 +12,14 @@ RUN go mod download
 # Copy source code
 COPY backend/ ./
 
-# Build the worker binary
-RUN go build -o /bin/worker ./cmd/worker
+# Build the worker binary for linux/amd64
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/worker ./cmd/worker
 
-FROM golang:1.24-alpine
+FROM --platform=linux/amd64 alpine:3.19
 
 WORKDIR /app
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache ca-certificates bash
 
 # Copy the binary from builder
 COPY --from=builder /bin/worker /bin/worker

@@ -64,15 +64,15 @@ function EnrollmentTokens() {
     setLoading(false);
   }, []);
 
-  const handleRevokeToken = async (uuid: string) => {
+  const handleDeleteToken = async (uuid: string) => {
     const { error } = await client.DELETE('/workers/enrollment-tokens/{uuid}', {
       params: { path: { uuid } },
     });
     if (error) {
-      message.error('Failed to revoke token');
+      message.error('Failed to delete token');
       return;
     }
-    message.success('Token revoked');
+    message.success('Token deleted');
     loadTokens();
   };
 
@@ -177,20 +177,17 @@ function EnrollmentTokens() {
       title: '',
       key: 'actions',
       width: 60,
-      render: (_, record) => {
-        const { status } = getTokenStatus(record);
-        return status === 'available' ? (
-          <Popconfirm
-            title="Revoke this token?"
-            description="The token will no longer be usable for enrollment."
-            onConfirm={() => handleRevokeToken(record.uuid!)}
-            okText="Revoke"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} title="Revoke" />
-          </Popconfirm>
-        ) : null;
-      },
+      render: (_, record) => (
+        <Popconfirm
+          title="Delete this token?"
+          description="This token will be permanently deleted."
+          onConfirm={() => handleDeleteToken(record.uuid!)}
+          okText="Delete"
+          okButtonProps={{ danger: true }}
+        >
+          <Button type="text" danger icon={<DeleteOutlined />} title="Delete" />
+        </Popconfirm>
+      ),
     },
   ];
 
