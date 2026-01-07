@@ -76,6 +76,13 @@ services:
       - BE_CSR_BASE_URL=https://app.meshpump.com
       - BE_API_BASE_URL=https://api.meshpump.com
       - BE_CORS_ALLOWED_ORIGINS=https://meshpump.com,https://app.meshpump.com
+      # SMTP / Amazon SES
+      - BE_SMTP_HOST=${BE_SMTP_HOST}
+      - BE_SMTP_PORT=${BE_SMTP_PORT}
+      - BE_SMTP_USERNAME=${BE_SMTP_USERNAME}
+      - BE_SMTP_PASSWORD=${BE_SMTP_PASSWORD}
+      - BE_SMTP_FROM=${BE_SMTP_FROM}
+      - BE_SMTP_FROM_NAME=${BE_SMTP_FROM_NAME}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/v1/health"]
       interval: 10s
