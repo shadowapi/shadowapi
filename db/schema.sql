@@ -541,7 +541,7 @@ CREATE TABLE IF NOT EXISTS worker_enrollment_token (
     workspace_uuids UUID[] DEFAULT '{}',  -- workspaces to assign on enrollment
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     used_at TIMESTAMP WITH TIME ZONE,
-    used_by_worker_uuid UUID REFERENCES registered_worker(uuid),
+    used_by_worker_uuid UUID REFERENCES registered_worker(uuid) ON DELETE SET NULL,
     created_by_user_uuid UUID REFERENCES "user"(uuid),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
