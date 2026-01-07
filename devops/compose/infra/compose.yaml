@@ -29,6 +29,7 @@ services:
           - oidc.localtest.me
           - api.localtest.me
           - app.localtest.me
+          - mail.localtest.me
 
   db:
     image: postgres:16-alpine
@@ -71,6 +72,15 @@ services:
       timeout: 30s
       retries: 5
       start_period: 20s
+    restart: always
+
+  mailpit:
+    image: axllent/mailpit:latest
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shadowapi-mailpit.rule=Host(`${BE_MAILPIT_SUBDOMAIN}.${BE_DOMAIN}`)
+      - traefik.http.routers.shadowapi-mailpit.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.shadowapi-mailpit.loadbalancer.server.port=8025
     restart: always
 
 volumes:

@@ -51,6 +51,7 @@ Generated directories (do not edit):
 | `api.localtest.me` | Backend (8080) | REST API |
 | `rpc.localtest.me` | Backend (9090) | gRPC for workers |
 | `oidc.localtest.me` | Hydra (4444) | OAuth2/OIDC |
+| `mail.localtest.me` | Mailpit (8025) | Email testing UI |
 
 ### Workspaces
 
@@ -67,6 +68,16 @@ Casbin-based with workspace-scoped policies. Middleware maps API operations to p
 
 - Key file: `backend/internal/rbac/middleware.go` (OperationPermissionMap)
 - Predefined roles: `super_admin`, `workspace_owner`, `workspace_admin`, `workspace_member`
+
+### Email
+
+| Environment | Service | Configuration |
+|-------------|---------|---------------|
+| Development | Mailpit | `mailpit:1025` (SMTP), `mail.localtest.me` (Web UI) |
+| Production | Amazon SES | Configure via `BE_SMTP_*` environment variables |
+
+- **Dev:** All emails are captured by Mailpit and viewable at `http://mail.localtest.me`
+- **Prod:** Must use Amazon SES. Never use Mailpit in production.
 
 ## Repository Layout
 
