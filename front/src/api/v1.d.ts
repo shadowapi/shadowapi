@@ -1319,6 +1319,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/workspace/{uuid}/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List workspace invites */
+        get: operations["listWorkspaceInvites"];
+        put?: never;
+        /** Create workspace invite */
+        post: operations["createWorkspaceInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workspace/{uuid}/invites/{invite_uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel/delete an invite */
+        delete: operations["deleteWorkspaceInvite"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/workspace/check": {
         parameters: {
             query?: never;
@@ -1639,6 +1674,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/invite/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get invite details by token (public) */
+        get: operations["getInviteByToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invite/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept invite and create account */
+        post: operations["acceptInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1842,6 +1911,9 @@ export interface components {
         NatsMessage: components["schemas"]["nats_message"];
         NatsMessagesList: components["schemas"]["nats_messages_list"];
         NatsMessagesPurgeResponse: components["schemas"]["nats_messages_purge_response"];
+        UserInvite: components["schemas"]["user_invite"];
+        UserInviteAccept: components["schemas"]["user_invite_accept"];
+        UserInviteInfo: components["schemas"]["user_invite_info"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -2817,6 +2889,47 @@ export interface components {
              */
             readonly updated_at?: string;
         };
+        user_invite: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the invite
+             */
+            readonly uuid?: string;
+            /**
+             * Format: uuid
+             * @description UUID of the workspace
+             */
+            readonly workspace_uuid?: string;
+            /**
+             * Format: email
+             * @description Email address of the invitee
+             */
+            email: string;
+            /**
+             * @description Role to assign when invite is accepted
+             * @enum {string}
+             */
+            role: "admin" | "member";
+            /** @description Email of the user who sent the invite */
+            readonly invited_by_email?: string;
+            /** @description Name of the user who sent the invite */
+            readonly invited_by_name?: string;
+            /**
+             * Format: date-time
+             * @description When the invite expires
+             */
+            readonly expires_at?: string;
+            /**
+             * Format: date-time
+             * @description When the invite was accepted (null if pending)
+             */
+            readonly accepted_at?: string;
+            /**
+             * Format: date-time
+             * @description When the invite was created
+             */
+            readonly created_at?: string;
+        };
         workspace_check: {
             /** @description Whether the workspace exists */
             exists: boolean;
@@ -3133,6 +3246,37 @@ export interface components {
         nats_messages_purge_response: {
             /** @description Number of messages purged from the stream */
             purged: number;
+        };
+        /** @description Public info for displaying the invite accept page */
+        user_invite_info: {
+            /** @description Email address the invite was sent to */
+            email: string;
+            /** @description Display name of the workspace */
+            workspace_name: string;
+            /** @description Slug of the workspace */
+            workspace_slug: string;
+            /**
+             * @description Role that will be assigned
+             * @enum {string}
+             */
+            role: "admin" | "member";
+            /**
+             * Format: date-time
+             * @description When the invite expires
+             */
+            expires_at: string;
+            /** @description Name of the person who sent the invite */
+            inviter_name?: string;
+        };
+        user_invite_accept: {
+            /** @description The invite token from the email link */
+            token: string;
+            /** @description Password for the new account */
+            password: string;
+            /** @description User's first name */
+            first_name: string;
+            /** @description User's last name */
+            last_name: string;
         };
         email_label: {
             /** Format: int64 */
@@ -7405,6 +7549,115 @@ export interface operations {
             };
         };
     };
+    listWorkspaceInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of pending invites */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_invite"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createWorkspaceInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["user_invite"];
+            };
+        };
+        responses: {
+            /** @description Invite created and email sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_invite"];
+                };
+            };
+            /** @description Active invite already exists for this email */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteWorkspaceInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace UUID */
+                uuid: string;
+                /** @description Invite UUID */
+                invite_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invite deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
     checkWorkspaceExists: {
         parameters: {
             query: {
@@ -8303,6 +8556,110 @@ export interface operations {
             };
             /** @description Internal server error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getInviteByToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Invite token from email link */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invite details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_invite_info"];
+                };
+            };
+            /** @description Invite not found or expired */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    acceptInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["user_invite_accept"];
+            };
+        };
+        responses: {
+            /** @description Account created and added to workspace */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description URL to redirect user to login */
+                        redirect_url?: string;
+                    };
+                };
+            };
+            /** @description Invalid request (weak password, etc.) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Invite not found or expired */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Email already registered */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Error */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };

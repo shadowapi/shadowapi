@@ -1,0 +1,45 @@
+post:
+  summary: Accept invite and create account
+  operationId: acceptInvite
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UserInviteAccept"
+  responses:
+    "200":
+      description: Account created and added to workspace
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              redirect_url:
+                type: string
+                description: URL to redirect user to login
+    "400":
+      description: Invalid request (weak password, etc.)
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    "404":
+      description: Invite not found or expired
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    "409":
+      description: Email already registered
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

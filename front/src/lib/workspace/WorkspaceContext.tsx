@@ -104,6 +104,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
 
       // JWT matches URL workspace - proceed
       setWorkspace({
+        uuid: profile?.current_workspace?.uuid,
         slug,
         display_name: checkData.display_name || slug,
       });

@@ -1,0 +1,30 @@
+type: object
+additionalProperties: false
+description: Public info for displaying the invite accept page
+properties:
+  email:
+    type: string
+    description: Email address the invite was sent to
+  workspace_name:
+    type: string
+    description: Display name of the workspace
+  workspace_slug:
+    type: string
+    description: Slug of the workspace
+  role:
+    type: string
+    enum: [admin, member]
+    description: Role that will be assigned
+  expires_at:
+    type: string
+    format: date-time
+    description: When the invite expires
+  inviter_name:
+    type: string
+    description: Name of the person who sent the invite
+required:
+  - email
+  - workspace_name
+  - workspace_slug
+  - role
+  - expires_at

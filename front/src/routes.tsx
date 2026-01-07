@@ -13,6 +13,7 @@ import TelegramDocumentation from './pages/documentation/datasource/telegram';
 const WorkspaceRouter = lazy(() => import('./app/WorkspaceRouter'));
 const WorkspaceSelectionPage = lazy(() => import('./pages/workspaces'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const AcceptInvitePage = lazy(() => import('./pages/auth/AcceptInvitePage'));
 const RootRedirect = lazy(() => import('./pages/RootRedirect'));
 
 // Loading fallback for lazy components
@@ -47,6 +48,13 @@ export const routes: RouteConfig[] = [
   {
     path: '/login',
     element: withSuspense(LoginPage),
+    layout: 'auth',
+    ssr: false,
+    protected: false
+  },
+  {
+    path: '/invite/:token',
+    element: withSuspense(AcceptInvitePage),
     layout: 'auth',
     ssr: false,
     protected: false

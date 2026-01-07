@@ -14,6 +14,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth/dbauth"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
+	"github.com/shadowapi/shadowapi/backend/internal/email"
 	"github.com/shadowapi/shadowapi/backend/internal/handler"
 	"github.com/shadowapi/shadowapi/backend/internal/jobstore"
 	"github.com/shadowapi/shadowapi/backend/internal/log"
@@ -76,6 +77,9 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 
 		// Register UserManager implementation (database-based)
 		do.Provide(injector, dbauth.Provide)
+
+		// Email service for sending invite emails
+		do.Provide(injector, email.Provide)
 
 		do.Provide(injector, handler.Provide)
 		do.Provide(injector, server.Provide)

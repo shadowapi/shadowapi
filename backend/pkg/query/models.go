@@ -426,6 +426,18 @@ type User struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type UserInvite struct {
+	UUID              uuid.UUID          `json:"uuid"`
+	WorkspaceUUID     *uuid.UUID         `json:"workspace_uuid"`
+	Email             string             `json:"email"`
+	Role              string             `json:"role"`
+	TokenHash         string             `json:"token_hash"`
+	InvitedByUserUuid *uuid.UUID         `json:"invited_by_user_uuid"`
+	ExpiresAt         pgtype.Timestamptz `json:"expires_at"`
+	AcceptedAt        pgtype.Timestamptz `json:"accepted_at"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+}
+
 type WorkerEnrollmentToken struct {
 	UUID              uuid.UUID          `json:"uuid"`
 	TokenHash         string             `json:"token_hash"`

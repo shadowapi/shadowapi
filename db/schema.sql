@@ -46,6 +46,26 @@ CREATE TABLE workspace_member (
 CREATE INDEX idx_workspace_member_user ON workspace_member(user_uuid);
 CREATE INDEX idx_workspace_member_workspace ON workspace_member(workspace_uuid);
 
+-- User invitations to workspaces
+CREATE TABLE user_invite (
+    uuid UUID PRIMARY KEY,
+    workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE,
+    email VARCHAR NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'member',  -- admin, member (not owner)
+    token_hash VARCHAR(64) NOT NULL,  -- SHA256 hex of invite token (for lookup)
+    invited_by_user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    accepted_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    CONSTRAINT uq_user_invite_email UNIQUE(email),  -- One active pending invite per email globally
+    CONSTRAINT chk_invite_role CHECK (role IN ('admin', 'member'))
+);
+
+CREATE INDEX idx_user_invite_token_hash ON user_invite(token_hash);
+CREATE INDEX idx_user_invite_workspace ON user_invite(workspace_uuid);
+CREATE INDEX idx_user_invite_expires ON user_invite(expires_at);
+
 CREATE TABLE oauth2_client (
   uuid UUID PRIMARY KEY, -- Internal unique ID for the client
   workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE, -- Workspace this client belongs to

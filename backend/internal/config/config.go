@@ -117,6 +117,16 @@ type Config struct {
 		CookieSecure bool `yaml:"cookie_secure" json:"cookie_secure" env:"BE_OAUTH2_COOKIE_SECURE" envDefault:"false"`
 	} `yaml:"oauth2" json:"oauth2"`
 
+	// SMTP settings for sending emails
+	SMTP struct {
+		Host     string `yaml:"host" json:"host" env:"BE_SMTP_HOST" envDefault:"mailpit"`
+		Port     int    `yaml:"port" json:"port" env:"BE_SMTP_PORT" envDefault:"1025"`
+		Username string `yaml:"username" json:"username" env:"BE_SMTP_USERNAME"`
+		Password string `yaml:"password" json:"password" env:"BE_SMTP_PASSWORD"`
+		From     string `yaml:"from" json:"from" env:"BE_SMTP_FROM" envDefault:"noreply@meshpump.com"`
+		FromName string `yaml:"from_name" json:"from_name" env:"BE_SMTP_FROM_NAME" envDefault:"MeshPump"`
+	} `yaml:"smtp" json:"smtp"`
+
 	configPath string
 	ext        string
 }

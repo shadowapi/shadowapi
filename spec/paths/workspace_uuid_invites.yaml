@@ -1,0 +1,63 @@
+get:
+  summary: List workspace invites
+  operationId: listWorkspaceInvites
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  responses:
+    "200":
+      description: List of pending invites
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/UserInvite"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+
+post:
+  summary: Create workspace invite
+  operationId: createWorkspaceInvite
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UserInvite"
+  responses:
+    "201":
+      description: Invite created and email sent
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UserInvite"
+    "409":
+      description: Active invite already exists for this email
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

@@ -11,6 +11,20 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeAcceptInviteRequest(
+	req *UserInviteAccept,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeAddWorkspaceMemberRequest(
 	req *WorkspaceMember,
 	r *http.Request,
@@ -167,6 +181,20 @@ func encodeCreateWorkerEnrollmentTokenRequest(
 
 func encodeCreateWorkspaceRequest(
 	req *Workspace,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateWorkspaceInviteRequest(
+	req *UserInvite,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

@@ -783,6 +783,60 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
+			case 'i': // Prefix: "invite/"
+				origElem := elem
+				if l := len("invite/"); len(elem) >= l && elem[0:l] == "invite/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'a': // Prefix: "accept"
+					origElem := elem
+					if l := len("accept"); len(elem) >= l && elem[0:l] == "accept" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleAcceptInviteRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+					elem = origElem
+				}
+				// Param: "token"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetInviteByTokenRequest([1]string{
+							args[0],
+						}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
+				elem = origElem
 			case 'm': // Prefix: "m"
 				origElem := elem
 				if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
@@ -2638,62 +2692,134 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/members"
+						case '/': // Prefix: "/"
 							origElem := elem
-							if l := len("/members"); len(elem) >= l && elem[0:l] == "/members" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								switch r.Method {
-								case "GET":
-									s.handleListWorkspaceMembersRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "POST":
-									s.handleAddWorkspaceMemberRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET,POST")
-								}
-
-								return
+								break
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/"
+							case 'i': // Prefix: "invites"
 								origElem := elem
-								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								if l := len("invites"); len(elem) >= l && elem[0:l] == "invites" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
-								// Param: "user_uuid"
-								// Leaf parameter
-								args[1] = elem
-								elem = ""
-
 								if len(elem) == 0 {
-									// Leaf node.
 									switch r.Method {
-									case "DELETE":
-										s.handleRemoveWorkspaceMemberRequest([2]string{
+									case "GET":
+										s.handleListWorkspaceInvitesRequest([1]string{
 											args[0],
-											args[1],
 										}, elemIsEscaped, w, r)
-									case "PUT":
-										s.handleUpdateWorkspaceMemberRoleRequest([2]string{
+									case "POST":
+										s.handleCreateWorkspaceInviteRequest([1]string{
 											args[0],
-											args[1],
 										}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "DELETE,PUT")
+										s.notAllowed(w, r, "GET,POST")
 									}
 
 									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "invite_uuid"
+									// Leaf parameter
+									args[1] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "DELETE":
+											s.handleDeleteWorkspaceInviteRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "DELETE")
+										}
+
+										return
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							case 'm': // Prefix: "members"
+								origElem := elem
+								if l := len("members"); len(elem) >= l && elem[0:l] == "members" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleListWorkspaceMembersRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleAddWorkspaceMemberRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET,POST")
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "user_uuid"
+									// Leaf parameter
+									args[1] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "DELETE":
+											s.handleRemoveWorkspaceMemberRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										case "PUT":
+											s.handleUpdateWorkspaceMemberRoleRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "DELETE,PUT")
+										}
+
+										return
+									}
+
+									elem = origElem
 								}
 
 								elem = origElem
@@ -3709,6 +3835,66 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
+				}
+
+				elem = origElem
+			case 'i': // Prefix: "invite/"
+				origElem := elem
+				if l := len("invite/"); len(elem) >= l && elem[0:l] == "invite/" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					break
+				}
+				switch elem[0] {
+				case 'a': // Prefix: "accept"
+					origElem := elem
+					if l := len("accept"); len(elem) >= l && elem[0:l] == "accept" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = AcceptInviteOperation
+							r.summary = "Accept invite and create account"
+							r.operationID = "acceptInvite"
+							r.pathPattern = "/invite/accept"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				}
+				// Param: "token"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = GetInviteByTokenOperation
+						r.summary = "Get invite details by token (public)"
+						r.operationID = "getInviteByToken"
+						r.pathPattern = "/invite/{token}"
+						r.args = args
+						r.count = 1
+						return r, true
+					default:
+						return
+					}
 				}
 
 				elem = origElem
@@ -5926,72 +6112,151 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/members"
+						case '/': // Prefix: "/"
 							origElem := elem
-							if l := len("/members"); len(elem) >= l && elem[0:l] == "/members" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									r.name = ListWorkspaceMembersOperation
-									r.summary = "List workspace members"
-									r.operationID = "listWorkspaceMembers"
-									r.pathPattern = "/workspace/{uuid}/members"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "POST":
-									r.name = AddWorkspaceMemberOperation
-									r.summary = "Add member to workspace"
-									r.operationID = "addWorkspaceMember"
-									r.pathPattern = "/workspace/{uuid}/members"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
+								break
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/"
+							case 'i': // Prefix: "invites"
 								origElem := elem
-								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								if l := len("invites"); len(elem) >= l && elem[0:l] == "invites" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
-								// Param: "user_uuid"
-								// Leaf parameter
-								args[1] = elem
-								elem = ""
-
 								if len(elem) == 0 {
-									// Leaf node.
 									switch method {
-									case "DELETE":
-										r.name = RemoveWorkspaceMemberOperation
-										r.summary = "Remove member from workspace"
-										r.operationID = "removeWorkspaceMember"
-										r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
+									case "GET":
+										r.name = ListWorkspaceInvitesOperation
+										r.summary = "List workspace invites"
+										r.operationID = "listWorkspaceInvites"
+										r.pathPattern = "/workspace/{uuid}/invites"
 										r.args = args
-										r.count = 2
+										r.count = 1
 										return r, true
-									case "PUT":
-										r.name = UpdateWorkspaceMemberRoleOperation
-										r.summary = "Update member role"
-										r.operationID = "updateWorkspaceMemberRole"
-										r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
+									case "POST":
+										r.name = CreateWorkspaceInviteOperation
+										r.summary = "Create workspace invite"
+										r.operationID = "createWorkspaceInvite"
+										r.pathPattern = "/workspace/{uuid}/invites"
 										r.args = args
-										r.count = 2
+										r.count = 1
 										return r, true
 									default:
 										return
 									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "invite_uuid"
+									// Leaf parameter
+									args[1] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "DELETE":
+											r.name = DeleteWorkspaceInviteOperation
+											r.summary = "Cancel/delete an invite"
+											r.operationID = "deleteWorkspaceInvite"
+											r.pathPattern = "/workspace/{uuid}/invites/{invite_uuid}"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							case 'm': // Prefix: "members"
+								origElem := elem
+								if l := len("members"); len(elem) >= l && elem[0:l] == "members" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = ListWorkspaceMembersOperation
+										r.summary = "List workspace members"
+										r.operationID = "listWorkspaceMembers"
+										r.pathPattern = "/workspace/{uuid}/members"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "POST":
+										r.name = AddWorkspaceMemberOperation
+										r.summary = "Add member to workspace"
+										r.operationID = "addWorkspaceMember"
+										r.pathPattern = "/workspace/{uuid}/members"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "user_uuid"
+									// Leaf parameter
+									args[1] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "DELETE":
+											r.name = RemoveWorkspaceMemberOperation
+											r.summary = "Remove member from workspace"
+											r.operationID = "removeWorkspaceMember"
+											r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
+											r.args = args
+											r.count = 2
+											return r, true
+										case "PUT":
+											r.name = UpdateWorkspaceMemberRoleOperation
+											r.summary = "Update member role"
+											r.operationID = "updateWorkspaceMemberRole"
+											r.pathPattern = "/workspace/{uuid}/members/{user_uuid}"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
 								}
 
 								elem = origElem

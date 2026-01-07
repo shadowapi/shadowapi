@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AcceptInvite implements acceptInvite operation.
+//
+// Accept invite and create account.
+//
+// POST /invite/accept
+func (UnimplementedHandler) AcceptInvite(ctx context.Context, req *UserInviteAccept) (r AcceptInviteRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // AddWorkspaceMember implements addWorkspaceMember operation.
 //
 // Add member to workspace.
@@ -192,6 +201,15 @@ func (UnimplementedHandler) CreateWorkerEnrollmentToken(ctx context.Context, req
 //
 // POST /workspace
 func (UnimplementedHandler) CreateWorkspace(ctx context.Context, req *Workspace) (r CreateWorkspaceRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateWorkspaceInvite implements createWorkspaceInvite operation.
+//
+// Create workspace invite.
+//
+// POST /workspace/{uuid}/invites
+func (UnimplementedHandler) CreateWorkspaceInvite(ctx context.Context, req *UserInvite, params CreateWorkspaceInviteParams) (r CreateWorkspaceInviteRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -502,6 +520,15 @@ func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWo
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteWorkspaceInvite implements deleteWorkspaceInvite operation.
+//
+// Cancel/delete an invite.
+//
+// DELETE /workspace/{uuid}/invites/{invite_uuid}
+func (UnimplementedHandler) DeleteWorkspaceInvite(ctx context.Context, params DeleteWorkspaceInviteParams) (r DeleteWorkspaceInviteRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // FileCreate implements file-create operation.
 //
 // Upload a new file and create its record.
@@ -571,6 +598,15 @@ func (UnimplementedHandler) GeneratePresignedUploadUrl(ctx context.Context, req 
 //
 // GET /contact/{uuid}
 func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactParams) (r GetContactRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetInviteByToken implements getInviteByToken operation.
+//
+// Get invite details by token (public).
+//
+// GET /invite/{token}
+func (UnimplementedHandler) GetInviteByToken(ctx context.Context, params GetInviteByTokenParams) (r GetInviteByTokenRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -688,6 +724,15 @@ func (UnimplementedHandler) ListUsers(ctx context.Context) (r ListUsersRes, _ er
 //
 // GET /workers/enrollment-tokens
 func (UnimplementedHandler) ListWorkerEnrollmentTokens(ctx context.Context) (r ListWorkerEnrollmentTokensRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWorkspaceInvites implements listWorkspaceInvites operation.
+//
+// List workspace invites.
+//
+// GET /workspace/{uuid}/invites
+func (UnimplementedHandler) ListWorkspaceInvites(ctx context.Context, params ListWorkspaceInvitesParams) (r ListWorkspaceInvitesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

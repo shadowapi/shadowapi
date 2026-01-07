@@ -145,6 +145,12 @@ components:
       $ref: "components/nats_messages_list.yaml"
     NatsMessagesPurgeResponse:
       $ref: "components/nats_messages_purge_response.yaml"
+    UserInvite:
+      $ref: "components/user_invite.yaml"
+    UserInviteAccept:
+      $ref: "components/user_invite_accept.yaml"
+    UserInviteInfo:
+      $ref: "components/user_invite_info.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -298,6 +304,10 @@ paths:
     $ref: "paths/workspace_uuid_members.yaml"
   /workspace/{uuid}/members/{user_uuid}:
     $ref: "paths/workspace_uuid_members_user_uuid.yaml"
+  /workspace/{uuid}/invites:
+    $ref: "paths/workspace_uuid_invites.yaml"
+  /workspace/{uuid}/invites/{invite_uuid}:
+    $ref: "paths/workspace_uuid_invites_uuid.yaml"
   /workspace/check:
     $ref: "paths/workspace_check.yaml"
   /rbac/role:
@@ -332,6 +342,10 @@ paths:
     $ref: "paths/storage_postgres_uuid_messages_query.yaml"
   /nats/messages:
     $ref: "paths/nats_messages.yaml"
+  /invite/{token}:
+    $ref: "paths/invite_token.yaml"
+  /invite/accept:
+    $ref: "paths/invite_accept.yaml"
 
 servers:
   - description: Local development server

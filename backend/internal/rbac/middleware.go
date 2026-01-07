@@ -41,6 +41,12 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"updateWorkspaceMemberRole": {ResourceMember, ActionWrite},
 	"removeWorkspaceMember":     {ResourceMember, ActionDelete},
 
+	// Workspace invite operations
+	"listWorkspaceInvites":  {ResourceMember, ActionRead},
+	"createWorkspaceInvite": {ResourceMember, ActionCreate},
+	"deleteWorkspaceInvite": {ResourceMember, ActionDelete},
+	// Note: getInviteByToken and acceptInvite are public (no auth required)
+
 	// Datasource operations
 	"datasourceList":                {ResourceDatasource, ActionRead},
 	"datasourceEmailCreate":         {ResourceDatasource, ActionCreate},

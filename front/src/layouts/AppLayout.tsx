@@ -141,6 +141,11 @@ function getMenuItems(basePath: string): MenuItem[] {
           label: <Link to={`${basePath}/users`}>Users</Link>,
         },
         {
+          key: '/invites',
+          icon: <MailOutlined />,
+          label: <Link to={`${basePath}/invites`}>Invites</Link>,
+        },
+        {
           key: '/rbac/roles',
           icon: <CrownOutlined />,
           label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
@@ -194,6 +199,7 @@ const routeConfig: Record<string, RouteConfig> = {
   '/files': { title: 'Files', parent: '/messages' },
   '/users': { title: 'Users' },
   '/users/new': { title: 'Add', parent: '/users' },
+  '/invites': { title: 'Invites' },
   '/rbac/roles': { title: 'Roles' },
   '/rbac/roles/new': { title: 'Create', parent: '/rbac/roles' },
   '/datasources': { title: 'Data Sources' },
@@ -222,6 +228,7 @@ const menuParentMap: Record<string, string> = {
   '/storages': '/storages-menu',
   '/storages/messages': '/storages-menu',
   '/users': '/rbac',
+  '/invites': '/rbac',
   '/rbac/roles': '/rbac',
   '/pipelines': '/automation-menu',
   '/schedulers': '/automation-menu',

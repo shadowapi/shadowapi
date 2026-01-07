@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AcceptInvite implements acceptInvite operation.
+	//
+	// Accept invite and create account.
+	//
+	// POST /invite/accept
+	AcceptInvite(ctx context.Context, req *UserInviteAccept) (AcceptInviteRes, error)
 	// AddWorkspaceMember implements addWorkspaceMember operation.
 	//
 	// Add member to workspace.
@@ -130,6 +136,12 @@ type Handler interface {
 	//
 	// POST /workspace
 	CreateWorkspace(ctx context.Context, req *Workspace) (CreateWorkspaceRes, error)
+	// CreateWorkspaceInvite implements createWorkspaceInvite operation.
+	//
+	// Create workspace invite.
+	//
+	// POST /workspace/{uuid}/invites
+	CreateWorkspaceInvite(ctx context.Context, req *UserInvite, params CreateWorkspaceInviteParams) (CreateWorkspaceInviteRes, error)
 	// DatasourceEmailCreate implements datasource-email-create operation.
 	//
 	// Create a new email datasource.
@@ -335,6 +347,12 @@ type Handler interface {
 	//
 	// DELETE /workspace/{uuid}
 	DeleteWorkspace(ctx context.Context, params DeleteWorkspaceParams) (DeleteWorkspaceRes, error)
+	// DeleteWorkspaceInvite implements deleteWorkspaceInvite operation.
+	//
+	// Cancel/delete an invite.
+	//
+	// DELETE /workspace/{uuid}/invites/{invite_uuid}
+	DeleteWorkspaceInvite(ctx context.Context, params DeleteWorkspaceInviteParams) (DeleteWorkspaceInviteRes, error)
 	// FileCreate implements file-create operation.
 	//
 	// Upload a new file and create its record.
@@ -383,6 +401,12 @@ type Handler interface {
 	//
 	// GET /contact/{uuid}
 	GetContact(ctx context.Context, params GetContactParams) (GetContactRes, error)
+	// GetInviteByToken implements getInviteByToken operation.
+	//
+	// Get invite details by token (public).
+	//
+	// GET /invite/{token}
+	GetInviteByToken(ctx context.Context, params GetInviteByTokenParams) (GetInviteByTokenRes, error)
 	// GetProfile implements getProfile operation.
 	//
 	// Get current user profile.
@@ -461,6 +485,12 @@ type Handler interface {
 	//
 	// GET /workers/enrollment-tokens
 	ListWorkerEnrollmentTokens(ctx context.Context) (ListWorkerEnrollmentTokensRes, error)
+	// ListWorkspaceInvites implements listWorkspaceInvites operation.
+	//
+	// List workspace invites.
+	//
+	// GET /workspace/{uuid}/invites
+	ListWorkspaceInvites(ctx context.Context, params ListWorkspaceInvitesParams) (ListWorkspaceInvitesRes, error)
 	// ListWorkspaceMembers implements listWorkspaceMembers operation.
 	//
 	// List workspace members.

@@ -1,0 +1,47 @@
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the invite
+    readOnly: true
+  workspace_uuid:
+    type: string
+    format: uuid
+    description: UUID of the workspace
+    readOnly: true
+  email:
+    type: string
+    format: email
+    description: Email address of the invitee
+  role:
+    type: string
+    enum: [admin, member]
+    description: Role to assign when invite is accepted
+  invited_by_email:
+    type: string
+    description: Email of the user who sent the invite
+    readOnly: true
+  invited_by_name:
+    type: string
+    description: Name of the user who sent the invite
+    readOnly: true
+  expires_at:
+    type: string
+    format: date-time
+    description: When the invite expires
+    readOnly: true
+  accepted_at:
+    type: string
+    format: date-time
+    description: When the invite was accepted (null if pending)
+    readOnly: true
+  created_at:
+    type: string
+    format: date-time
+    description: When the invite was created
+    readOnly: true
+required:
+  - email
+  - role

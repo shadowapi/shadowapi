@@ -1,0 +1,21 @@
+type: object
+additionalProperties: false
+properties:
+  token:
+    type: string
+    description: The invite token from the email link
+  password:
+    type: string
+    minLength: 8
+    description: Password for the new account
+  first_name:
+    type: string
+    description: User's first name
+  last_name:
+    type: string
+    description: User's last name
+required:
+  - token
+  - password
+  - first_name
+  - last_name

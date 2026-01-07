@@ -6,6 +6,7 @@ package api
 type OperationName = string
 
 const (
+	AcceptInviteOperation                    OperationName = "AcceptInvite"
 	AddWorkspaceMemberOperation              OperationName = "AddWorkspaceMember"
 	AssignRoleToUserOperation                OperationName = "AssignRoleToUser"
 	AuthConsentOperation                     OperationName = "AuthConsent"
@@ -26,6 +27,7 @@ const (
 	CreateUserSessionOperation               OperationName = "CreateUserSession"
 	CreateWorkerEnrollmentTokenOperation     OperationName = "CreateWorkerEnrollmentToken"
 	CreateWorkspaceOperation                 OperationName = "CreateWorkspace"
+	CreateWorkspaceInviteOperation           OperationName = "CreateWorkspaceInvite"
 	DatasourceEmailCreateOperation           OperationName = "DatasourceEmailCreate"
 	DatasourceEmailDeleteOperation           OperationName = "DatasourceEmailDelete"
 	DatasourceEmailGetOperation              OperationName = "DatasourceEmailGet"
@@ -60,6 +62,7 @@ const (
 	DeleteUserOperation                      OperationName = "DeleteUser"
 	DeleteWorkerEnrollmentTokenOperation     OperationName = "DeleteWorkerEnrollmentToken"
 	DeleteWorkspaceOperation                 OperationName = "DeleteWorkspace"
+	DeleteWorkspaceInviteOperation           OperationName = "DeleteWorkspaceInvite"
 	FileCreateOperation                      OperationName = "FileCreate"
 	FileDeleteOperation                      OperationName = "FileDelete"
 	FileGetOperation                         OperationName = "FileGet"
@@ -68,6 +71,7 @@ const (
 	GenerateDownloadLinkOperation            OperationName = "GenerateDownloadLink"
 	GeneratePresignedUploadUrlOperation      OperationName = "GeneratePresignedUploadUrl"
 	GetContactOperation                      OperationName = "GetContact"
+	GetInviteByTokenOperation                OperationName = "GetInviteByToken"
 	GetProfileOperation                      OperationName = "GetProfile"
 	GetRegisteredWorkerOperation             OperationName = "GetRegisteredWorker"
 	GetRoleOperation                         OperationName = "GetRole"
@@ -81,6 +85,7 @@ const (
 	ListRolesOperation                       OperationName = "ListRoles"
 	ListUsersOperation                       OperationName = "ListUsers"
 	ListWorkerEnrollmentTokensOperation      OperationName = "ListWorkerEnrollmentTokens"
+	ListWorkspaceInvitesOperation            OperationName = "ListWorkspaceInvites"
 	ListWorkspaceMembersOperation            OperationName = "ListWorkspaceMembers"
 	ListWorkspacesOperation                  OperationName = "ListWorkspaces"
 	MapperSourceFieldsListOperation          OperationName = "MapperSourceFieldsList"

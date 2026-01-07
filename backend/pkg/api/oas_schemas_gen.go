@@ -11,6 +11,35 @@ import (
 	"github.com/google/uuid"
 )
 
+type AcceptInviteBadRequest Error
+
+func (*AcceptInviteBadRequest) acceptInviteRes() {}
+
+type AcceptInviteConflict Error
+
+func (*AcceptInviteConflict) acceptInviteRes() {}
+
+type AcceptInviteNotFound Error
+
+func (*AcceptInviteNotFound) acceptInviteRes() {}
+
+type AcceptInviteOK struct {
+	// URL to redirect user to login.
+	RedirectURL OptString `json:"redirect_url"`
+}
+
+// GetRedirectURL returns the value of RedirectURL.
+func (s *AcceptInviteOK) GetRedirectURL() OptString {
+	return s.RedirectURL
+}
+
+// SetRedirectURL sets the value of RedirectURL.
+func (s *AcceptInviteOK) SetRedirectURL(val OptString) {
+	s.RedirectURL = val
+}
+
+func (*AcceptInviteOK) acceptInviteRes() {}
+
 // AssignRoleToUserCreated is response for AssignRoleToUser operation.
 type AssignRoleToUserCreated struct{}
 
@@ -2871,6 +2900,11 @@ type DeleteWorkerEnrollmentTokenOK struct{}
 
 func (*DeleteWorkerEnrollmentTokenOK) deleteWorkerEnrollmentTokenRes() {}
 
+// DeleteWorkspaceInviteNoContent is response for DeleteWorkspaceInvite operation.
+type DeleteWorkspaceInviteNoContent struct{}
+
+func (*DeleteWorkspaceInviteNoContent) deleteWorkspaceInviteRes() {}
+
 // DeleteWorkspaceNoContent is response for DeleteWorkspace operation.
 type DeleteWorkspaceNoContent struct{}
 
@@ -2916,8 +2950,10 @@ func (s *Error) SetStatus(val OptInt64) {
 	s.Status = val
 }
 
-func (*Error) natsMessagesListRes()  {}
-func (*Error) natsMessagesPurgeRes() {}
+func (*Error) createWorkspaceInviteRes() {}
+func (*Error) getInviteByTokenRes()      {}
+func (*Error) natsMessagesListRes()      {}
+func (*Error) natsMessagesPurgeRes()     {}
 
 type ErrorErrorsItem struct {
 	// Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'.
@@ -2984,6 +3020,7 @@ func (s *ErrorStatusCode) SetResponse(val Error) {
 	s.Response = val
 }
 
+func (*ErrorStatusCode) acceptInviteRes()                    {}
 func (*ErrorStatusCode) addWorkspaceMemberRes()              {}
 func (*ErrorStatusCode) assignRoleToUserRes()                {}
 func (*ErrorStatusCode) authConsentRes()                     {}
@@ -3003,6 +3040,7 @@ func (*ErrorStatusCode) createRoleRes()                      {}
 func (*ErrorStatusCode) createUserRes()                      {}
 func (*ErrorStatusCode) createUserSessionRes()               {}
 func (*ErrorStatusCode) createWorkerEnrollmentTokenRes()     {}
+func (*ErrorStatusCode) createWorkspaceInviteRes()           {}
 func (*ErrorStatusCode) createWorkspaceRes()                 {}
 func (*ErrorStatusCode) datasourceEmailCreateRes()           {}
 func (*ErrorStatusCode) datasourceEmailDeleteRes()           {}
@@ -3037,6 +3075,7 @@ func (*ErrorStatusCode) deleteRegisteredWorkerRes()          {}
 func (*ErrorStatusCode) deleteRoleRes()                      {}
 func (*ErrorStatusCode) deleteUserRes()                      {}
 func (*ErrorStatusCode) deleteWorkerEnrollmentTokenRes()     {}
+func (*ErrorStatusCode) deleteWorkspaceInviteRes()           {}
 func (*ErrorStatusCode) deleteWorkspaceRes()                 {}
 func (*ErrorStatusCode) fileCreateRes()                      {}
 func (*ErrorStatusCode) fileDeleteRes()                      {}
@@ -3046,6 +3085,7 @@ func (*ErrorStatusCode) fileUpdateRes()                      {}
 func (*ErrorStatusCode) generateDownloadLinkRes()            {}
 func (*ErrorStatusCode) generatePresignedUploadUrlRes()      {}
 func (*ErrorStatusCode) getContactRes()                      {}
+func (*ErrorStatusCode) getInviteByTokenRes()                {}
 func (*ErrorStatusCode) getProfileRes()                      {}
 func (*ErrorStatusCode) getRegisteredWorkerRes()             {}
 func (*ErrorStatusCode) getRoleRes()                         {}
@@ -3059,6 +3099,7 @@ func (*ErrorStatusCode) listRegisteredWorkersRes()           {}
 func (*ErrorStatusCode) listRolesRes()                       {}
 func (*ErrorStatusCode) listUsersRes()                       {}
 func (*ErrorStatusCode) listWorkerEnrollmentTokensRes()      {}
+func (*ErrorStatusCode) listWorkspaceInvitesRes()            {}
 func (*ErrorStatusCode) listWorkspaceMembersRes()            {}
 func (*ErrorStatusCode) listWorkspacesRes()                  {}
 func (*ErrorStatusCode) mapperSourceFieldsListRes()          {}
@@ -3510,6 +3551,10 @@ func (*ListUsersOKApplicationJSON) listUsersRes() {}
 type ListWorkerEnrollmentTokensOKApplicationJSON []WorkerEnrollmentToken
 
 func (*ListWorkerEnrollmentTokensOKApplicationJSON) listWorkerEnrollmentTokensRes() {}
+
+type ListWorkspaceInvitesOKApplicationJSON []UserInvite
+
+func (*ListWorkspaceInvitesOKApplicationJSON) listWorkspaceInvitesRes() {}
 
 type ListWorkspaceMembersOKApplicationJSON []WorkspaceMember
 
@@ -12576,6 +12621,335 @@ func (s *UserCurrentWorkspace) SetUUID(val OptString) {
 // SetSlug sets the value of Slug.
 func (s *UserCurrentWorkspace) SetSlug(val OptString) {
 	s.Slug = val
+}
+
+// Ref: #
+type UserInvite struct {
+	// Unique identifier for the invite.
+	UUID OptUUID `json:"uuid"`
+	// UUID of the workspace.
+	WorkspaceUUID OptUUID `json:"workspace_uuid"`
+	// Email address of the invitee.
+	Email string `json:"email"`
+	// Role to assign when invite is accepted.
+	Role UserInviteRole `json:"role"`
+	// Email of the user who sent the invite.
+	InvitedByEmail OptString `json:"invited_by_email"`
+	// Name of the user who sent the invite.
+	InvitedByName OptString `json:"invited_by_name"`
+	// When the invite expires.
+	ExpiresAt OptDateTime `json:"expires_at"`
+	// When the invite was accepted (null if pending).
+	AcceptedAt OptDateTime `json:"accepted_at"`
+	// When the invite was created.
+	CreatedAt OptDateTime `json:"created_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *UserInvite) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetWorkspaceUUID returns the value of WorkspaceUUID.
+func (s *UserInvite) GetWorkspaceUUID() OptUUID {
+	return s.WorkspaceUUID
+}
+
+// GetEmail returns the value of Email.
+func (s *UserInvite) GetEmail() string {
+	return s.Email
+}
+
+// GetRole returns the value of Role.
+func (s *UserInvite) GetRole() UserInviteRole {
+	return s.Role
+}
+
+// GetInvitedByEmail returns the value of InvitedByEmail.
+func (s *UserInvite) GetInvitedByEmail() OptString {
+	return s.InvitedByEmail
+}
+
+// GetInvitedByName returns the value of InvitedByName.
+func (s *UserInvite) GetInvitedByName() OptString {
+	return s.InvitedByName
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *UserInvite) GetExpiresAt() OptDateTime {
+	return s.ExpiresAt
+}
+
+// GetAcceptedAt returns the value of AcceptedAt.
+func (s *UserInvite) GetAcceptedAt() OptDateTime {
+	return s.AcceptedAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *UserInvite) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *UserInvite) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetWorkspaceUUID sets the value of WorkspaceUUID.
+func (s *UserInvite) SetWorkspaceUUID(val OptUUID) {
+	s.WorkspaceUUID = val
+}
+
+// SetEmail sets the value of Email.
+func (s *UserInvite) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetRole sets the value of Role.
+func (s *UserInvite) SetRole(val UserInviteRole) {
+	s.Role = val
+}
+
+// SetInvitedByEmail sets the value of InvitedByEmail.
+func (s *UserInvite) SetInvitedByEmail(val OptString) {
+	s.InvitedByEmail = val
+}
+
+// SetInvitedByName sets the value of InvitedByName.
+func (s *UserInvite) SetInvitedByName(val OptString) {
+	s.InvitedByName = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *UserInvite) SetExpiresAt(val OptDateTime) {
+	s.ExpiresAt = val
+}
+
+// SetAcceptedAt sets the value of AcceptedAt.
+func (s *UserInvite) SetAcceptedAt(val OptDateTime) {
+	s.AcceptedAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *UserInvite) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+func (*UserInvite) createWorkspaceInviteRes() {}
+
+// Ref: #
+type UserInviteAccept struct {
+	// The invite token from the email link.
+	Token string `json:"token"`
+	// Password for the new account.
+	Password string `json:"password"`
+	// User's first name.
+	FirstName string `json:"first_name"`
+	// User's last name.
+	LastName string `json:"last_name"`
+}
+
+// GetToken returns the value of Token.
+func (s *UserInviteAccept) GetToken() string {
+	return s.Token
+}
+
+// GetPassword returns the value of Password.
+func (s *UserInviteAccept) GetPassword() string {
+	return s.Password
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *UserInviteAccept) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *UserInviteAccept) GetLastName() string {
+	return s.LastName
+}
+
+// SetToken sets the value of Token.
+func (s *UserInviteAccept) SetToken(val string) {
+	s.Token = val
+}
+
+// SetPassword sets the value of Password.
+func (s *UserInviteAccept) SetPassword(val string) {
+	s.Password = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *UserInviteAccept) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *UserInviteAccept) SetLastName(val string) {
+	s.LastName = val
+}
+
+// Public info for displaying the invite accept page.
+// Ref: #
+type UserInviteInfo struct {
+	// Email address the invite was sent to.
+	Email string `json:"email"`
+	// Display name of the workspace.
+	WorkspaceName string `json:"workspace_name"`
+	// Slug of the workspace.
+	WorkspaceSlug string `json:"workspace_slug"`
+	// Role that will be assigned.
+	Role UserInviteInfoRole `json:"role"`
+	// When the invite expires.
+	ExpiresAt time.Time `json:"expires_at"`
+	// Name of the person who sent the invite.
+	InviterName OptString `json:"inviter_name"`
+}
+
+// GetEmail returns the value of Email.
+func (s *UserInviteInfo) GetEmail() string {
+	return s.Email
+}
+
+// GetWorkspaceName returns the value of WorkspaceName.
+func (s *UserInviteInfo) GetWorkspaceName() string {
+	return s.WorkspaceName
+}
+
+// GetWorkspaceSlug returns the value of WorkspaceSlug.
+func (s *UserInviteInfo) GetWorkspaceSlug() string {
+	return s.WorkspaceSlug
+}
+
+// GetRole returns the value of Role.
+func (s *UserInviteInfo) GetRole() UserInviteInfoRole {
+	return s.Role
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *UserInviteInfo) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
+// GetInviterName returns the value of InviterName.
+func (s *UserInviteInfo) GetInviterName() OptString {
+	return s.InviterName
+}
+
+// SetEmail sets the value of Email.
+func (s *UserInviteInfo) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetWorkspaceName sets the value of WorkspaceName.
+func (s *UserInviteInfo) SetWorkspaceName(val string) {
+	s.WorkspaceName = val
+}
+
+// SetWorkspaceSlug sets the value of WorkspaceSlug.
+func (s *UserInviteInfo) SetWorkspaceSlug(val string) {
+	s.WorkspaceSlug = val
+}
+
+// SetRole sets the value of Role.
+func (s *UserInviteInfo) SetRole(val UserInviteInfoRole) {
+	s.Role = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *UserInviteInfo) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
+// SetInviterName sets the value of InviterName.
+func (s *UserInviteInfo) SetInviterName(val OptString) {
+	s.InviterName = val
+}
+
+func (*UserInviteInfo) getInviteByTokenRes() {}
+
+// Role that will be assigned.
+type UserInviteInfoRole string
+
+const (
+	UserInviteInfoRoleAdmin  UserInviteInfoRole = "admin"
+	UserInviteInfoRoleMember UserInviteInfoRole = "member"
+)
+
+// AllValues returns all UserInviteInfoRole values.
+func (UserInviteInfoRole) AllValues() []UserInviteInfoRole {
+	return []UserInviteInfoRole{
+		UserInviteInfoRoleAdmin,
+		UserInviteInfoRoleMember,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UserInviteInfoRole) MarshalText() ([]byte, error) {
+	switch s {
+	case UserInviteInfoRoleAdmin:
+		return []byte(s), nil
+	case UserInviteInfoRoleMember:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UserInviteInfoRole) UnmarshalText(data []byte) error {
+	switch UserInviteInfoRole(data) {
+	case UserInviteInfoRoleAdmin:
+		*s = UserInviteInfoRoleAdmin
+		return nil
+	case UserInviteInfoRoleMember:
+		*s = UserInviteInfoRoleMember
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Role to assign when invite is accepted.
+type UserInviteRole string
+
+const (
+	UserInviteRoleAdmin  UserInviteRole = "admin"
+	UserInviteRoleMember UserInviteRole = "member"
+)
+
+// AllValues returns all UserInviteRole values.
+func (UserInviteRole) AllValues() []UserInviteRole {
+	return []UserInviteRole{
+		UserInviteRoleAdmin,
+		UserInviteRoleMember,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UserInviteRole) MarshalText() ([]byte, error) {
+	switch s {
+	case UserInviteRoleAdmin:
+		return []byte(s), nil
+	case UserInviteRoleMember:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UserInviteRole) UnmarshalText(data []byte) error {
+	switch UserInviteRole(data) {
+	case UserInviteRoleAdmin:
+		*s = UserInviteRoleAdmin
+		return nil
+	case UserInviteRoleMember:
+		*s = UserInviteRoleMember
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Arbitrary key-value metadata about the user.

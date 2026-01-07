@@ -12,6 +12,7 @@ import OAuth2Credentials from './oauth2/OAuth2Credentials';
 import OAuth2CredentialEdit from './oauth2/OAuth2CredentialEdit';
 import Users from './users/Users';
 import UserEdit from './users/UserEdit';
+import Invites from './invites/Invites';
 import Roles from './rbac/Roles';
 import RoleEdit from './rbac/RoleEdit';
 import Pipelines from './pipelines/Pipelines';
@@ -56,6 +57,7 @@ function WorkspaceRouter() {
         <Route path="users" element={<Users />} />
         <Route path="users/new" element={<UserEdit />} />
         <Route path="users/:uuid" element={<UserEdit />} />
+        <Route path="invites" element={<Invites />} />
         <Route path="rbac/roles" element={<Roles />} />
         <Route path="rbac/roles/new" element={<RoleEdit />} />
         <Route path="rbac/roles/:uuid" element={<RoleEdit />} />

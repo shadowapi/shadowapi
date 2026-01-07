@@ -1,0 +1,30 @@
+get:
+  summary: Get invite details by token (public)
+  operationId: getInviteByToken
+  security: []
+  parameters:
+    - in: path
+      name: token
+      required: true
+      schema:
+        type: string
+      description: Invite token from email link
+  responses:
+    "200":
+      description: Invite details
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UserInviteInfo"
+    "404":
+      description: Invite not found or expired
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

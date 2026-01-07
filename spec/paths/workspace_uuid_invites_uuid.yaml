@@ -1,0 +1,27 @@
+delete:
+  summary: Cancel/delete an invite
+  operationId: deleteWorkspaceInvite
+  parameters:
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Workspace UUID
+    - in: path
+      name: invite_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Invite UUID
+  responses:
+    "204":
+      description: Invite deleted
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
