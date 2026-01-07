@@ -66,6 +66,20 @@ CREATE INDEX idx_user_invite_token_hash ON user_invite(token_hash);
 CREATE INDEX idx_user_invite_workspace ON user_invite(workspace_uuid);
 CREATE INDEX idx_user_invite_expires ON user_invite(expires_at);
 
+-- Password reset tokens
+CREATE TABLE password_reset (
+    uuid UUID PRIMARY KEY,
+    user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
+    email VARCHAR NOT NULL,
+    token_hash VARCHAR(64) NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    used_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_password_reset_token_hash ON password_reset(token_hash);
+CREATE INDEX idx_password_reset_email ON password_reset(email);
+
 CREATE TABLE oauth2_client (
   uuid UUID PRIMARY KEY, -- Internal unique ID for the client
   workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE, -- Workspace this client belongs to

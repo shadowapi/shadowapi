@@ -150,6 +150,15 @@ func (UnimplementedHandler) CheckWorkspaceExists(ctx context.Context, params Che
 	return r, ht.ErrNotImplemented
 }
 
+// ConfirmPasswordReset implements confirmPasswordReset operation.
+//
+// Confirm password reset with new password (public).
+//
+// POST /password/reset/confirm
+func (UnimplementedHandler) ConfirmPasswordReset(ctx context.Context, req *PasswordResetConfirm) (r ConfirmPasswordResetRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateContact implements createContact operation.
 //
 // Create a new contact record.
@@ -610,6 +619,15 @@ func (UnimplementedHandler) GetInviteByToken(ctx context.Context, params GetInvi
 	return r, ht.ErrNotImplemented
 }
 
+// GetPasswordResetByToken implements getPasswordResetByToken operation.
+//
+// Validate password reset token (public).
+//
+// GET /password/reset/{token}
+func (UnimplementedHandler) GetPasswordResetByToken(ctx context.Context, params GetPasswordResetByTokenParams) (r GetPasswordResetByTokenRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetProfile implements getProfile operation.
 //
 // Get current user profile.
@@ -988,6 +1006,15 @@ func (UnimplementedHandler) RemoveRoleFromUser(ctx context.Context, params Remov
 //
 // DELETE /workspace/{uuid}/members/{user_uuid}
 func (UnimplementedHandler) RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) (r RemoveWorkspaceMemberRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RequestPasswordReset implements requestPasswordReset operation.
+//
+// Request password reset email (public).
+//
+// POST /password/reset
+func (UnimplementedHandler) RequestPasswordReset(ctx context.Context, req *PasswordResetRequest) (r RequestPasswordResetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

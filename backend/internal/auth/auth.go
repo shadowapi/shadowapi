@@ -55,21 +55,24 @@ func Provide(i do.Injector) (*Auth, error) {
 		},
 		IgnoreHttpsError: cfg.Auth.IgnoreHttpsError,
 		allow: map[string]string{
-			"/health":                       http.MethodGet,
-			"/ready":                        http.MethodGet,
-			"/api/v1/user":                  http.MethodPost,
-			"/api/v1/user/session":          http.MethodPost,
-			"/api/v1/auth/login":            "*", // Allow both GET and POST for OAuth2 login flow
-			"/api/v1/auth/consent":          http.MethodGet,
-			"/api/v1/auth/callback":         http.MethodGet,
-			"/api/v1/auth/logout":           http.MethodPost,
-			"/auth/callback":                http.MethodGet,
-			"/api/v1/auth/oauth2/authorize": http.MethodPost,
-			"/api/v1/auth/oauth2/callback":  http.MethodGet,
-			"/api/v1/auth/oauth2/refresh":   http.MethodPost,
-			"/api/v1/auth/oauth2/logout":    http.MethodPost,
-			"/api/v1/auth/oauth2/session":   http.MethodGet,
-			"/api/v1/workspace/check":       http.MethodGet, // Public: check if workspace exists
+			"/health":                         http.MethodGet,
+			"/ready":                          http.MethodGet,
+			"/api/v1/user":                    http.MethodPost,
+			"/api/v1/user/session":            http.MethodPost,
+			"/api/v1/auth/login":              "*", // Allow both GET and POST for OAuth2 login flow
+			"/api/v1/auth/consent":            http.MethodGet,
+			"/api/v1/auth/callback":           http.MethodGet,
+			"/api/v1/auth/logout":             http.MethodPost,
+			"/auth/callback":                  http.MethodGet,
+			"/api/v1/auth/oauth2/authorize":   http.MethodPost,
+			"/api/v1/auth/oauth2/callback":    http.MethodGet,
+			"/api/v1/auth/oauth2/refresh":     http.MethodPost,
+			"/api/v1/auth/oauth2/logout":      http.MethodPost,
+			"/api/v1/auth/oauth2/session":     http.MethodGet,
+			"/api/v1/workspace/check":         http.MethodGet,  // Public: check if workspace exists
+			"/api/v1/invite/accept":           http.MethodPost, // Public: accept workspace invite
+			"/api/v1/password/reset":          http.MethodPost, // Public: request password reset
+			"/api/v1/password/reset/confirm":  http.MethodPost, // Public: confirm password reset
 		},
 	}
 
@@ -158,6 +161,20 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 			req.SetContext(ctx)
 		}
 		return next(req)
+	}
+
+	// Check prefix-based allow list for paths with parameters (e.g., /invite/{token})
+	allowPrefixes := map[string]string{
+		"/api/v1/invite/":         http.MethodGet, // GET /invite/{token}
+		"/api/v1/password/reset/": http.MethodGet, // GET /password/reset/{token}
+	}
+	for prefix, method := range allowPrefixes {
+		if strings.HasPrefix(req.Raw.URL.Path, prefix) && req.Raw.Method == method {
+			// Exclude exact matches that are handled by other rules (e.g., /password/reset/confirm)
+			if req.Raw.URL.Path != "/api/v1/password/reset/confirm" {
+				return next(req)
+			}
+		}
 	}
 
 	// Try to get token from Authorization header first

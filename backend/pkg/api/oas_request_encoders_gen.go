@@ -123,6 +123,20 @@ func encodeCheckPermissionRequest(
 	return nil
 }
 
+func encodeConfirmPasswordResetRequest(
+	req *PasswordResetConfirm,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateContactRequest(
 	req *Contact,
 	r *http.Request,
@@ -559,6 +573,20 @@ func encodePipelineCreateRequest(
 
 func encodePipelineUpdateRequest(
 	req *Pipeline,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeRequestPasswordResetRequest(
+	req *PasswordResetRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

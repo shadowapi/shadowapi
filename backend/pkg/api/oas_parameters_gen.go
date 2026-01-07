@@ -3273,6 +3273,72 @@ func decodeGetInviteByTokenParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// GetPasswordResetByTokenParams is parameters of getPasswordResetByToken operation.
+type GetPasswordResetByTokenParams struct {
+	// Password reset token from email link.
+	Token string
+}
+
+func unpackGetPasswordResetByTokenParams(packed middleware.Parameters) (params GetPasswordResetByTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "token",
+			In:   "path",
+		}
+		params.Token = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetPasswordResetByTokenParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPasswordResetByTokenParams, _ error) {
+	// Decode path: token.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "token",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Token = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "token",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetRegisteredWorkerParams is parameters of getRegisteredWorker operation.
 type GetRegisteredWorkerParams struct {
 	UUID string

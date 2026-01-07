@@ -1708,6 +1708,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request password reset email (public) */
+        post: operations["requestPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/password/reset/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Validate password reset token (public) */
+        get: operations["getPasswordResetByToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/password/reset/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm password reset with new password (public) */
+        post: operations["confirmPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1914,6 +1965,9 @@ export interface components {
         UserInvite: components["schemas"]["user_invite"];
         UserInviteAccept: components["schemas"]["user_invite_accept"];
         UserInviteInfo: components["schemas"]["user_invite_info"];
+        PasswordResetRequest: components["schemas"]["password_reset_request"];
+        PasswordResetInfo: components["schemas"]["password_reset_info"];
+        PasswordResetConfirm: components["schemas"]["password_reset_confirm"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.
@@ -3277,6 +3331,31 @@ export interface components {
             first_name: string;
             /** @description User's last name */
             last_name: string;
+        };
+        /** @description Request to initiate password reset */
+        password_reset_request: {
+            /**
+             * Format: email
+             * @description Email address of the account
+             */
+            email: string;
+        };
+        /** @description Info for displaying the password reset page */
+        password_reset_info: {
+            /** @description Email address (masked for privacy) */
+            email: string;
+            /**
+             * Format: date-time
+             * @description When the reset link expires
+             */
+            expires_at: string;
+        };
+        /** @description Confirm password reset with new password */
+        password_reset_confirm: {
+            /** @description The reset token from the email link */
+            token: string;
+            /** @description New password for the account */
+            new_password: string;
         };
         email_label: {
             /** Format: int64 */
@@ -8651,6 +8730,146 @@ export interface operations {
             };
             /** @description Email already registered */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["password_reset_request"];
+            };
+        };
+        responses: {
+            /** @description Reset email sent (always returns success for security) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Generic success message */
+                        message?: string;
+                    };
+                };
+            };
+            /** @description Rate limited - please wait before requesting again */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getPasswordResetByToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Password reset token from email link */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token is valid */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["password_reset_info"];
+                };
+            };
+            /** @description Token not found or expired */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    confirmPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["password_reset_confirm"];
+            };
+        };
+        responses: {
+            /** @description Password successfully reset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description URL to redirect user to login */
+                        redirect_url?: string;
+                    };
+                };
+            };
+            /** @description Invalid request (weak password, etc.) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Token not found or expired */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

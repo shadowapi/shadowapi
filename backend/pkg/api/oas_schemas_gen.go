@@ -496,6 +496,31 @@ func (s *CheckPermissionReq) SetAction(val string) {
 	s.Action = val
 }
 
+type ConfirmPasswordResetBadRequest Error
+
+func (*ConfirmPasswordResetBadRequest) confirmPasswordResetRes() {}
+
+type ConfirmPasswordResetNotFound Error
+
+func (*ConfirmPasswordResetNotFound) confirmPasswordResetRes() {}
+
+type ConfirmPasswordResetOK struct {
+	// URL to redirect user to login.
+	RedirectURL OptString `json:"redirect_url"`
+}
+
+// GetRedirectURL returns the value of RedirectURL.
+func (s *ConfirmPasswordResetOK) GetRedirectURL() OptString {
+	return s.RedirectURL
+}
+
+// SetRedirectURL sets the value of RedirectURL.
+func (s *ConfirmPasswordResetOK) SetRedirectURL(val OptString) {
+	s.RedirectURL = val
+}
+
+func (*ConfirmPasswordResetOK) confirmPasswordResetRes() {}
+
 // Ref: #
 type Contact struct {
 	UUID                    OptString             `json:"uuid"`
@@ -2950,10 +2975,12 @@ func (s *Error) SetStatus(val OptInt64) {
 	s.Status = val
 }
 
-func (*Error) createWorkspaceInviteRes() {}
-func (*Error) getInviteByTokenRes()      {}
-func (*Error) natsMessagesListRes()      {}
-func (*Error) natsMessagesPurgeRes()     {}
+func (*Error) createWorkspaceInviteRes()   {}
+func (*Error) getInviteByTokenRes()        {}
+func (*Error) getPasswordResetByTokenRes() {}
+func (*Error) natsMessagesListRes()        {}
+func (*Error) natsMessagesPurgeRes()       {}
+func (*Error) requestPasswordResetRes()    {}
 
 type ErrorErrorsItem struct {
 	// Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'.
@@ -3035,6 +3062,7 @@ func (*ErrorStatusCode) authWorkspaceSwitchRes()             {}
 func (*ErrorStatusCode) changePasswordRes()                  {}
 func (*ErrorStatusCode) checkPermissionRes()                 {}
 func (*ErrorStatusCode) checkWorkspaceExistsRes()            {}
+func (*ErrorStatusCode) confirmPasswordResetRes()            {}
 func (*ErrorStatusCode) createContactRes()                   {}
 func (*ErrorStatusCode) createRoleRes()                      {}
 func (*ErrorStatusCode) createUserRes()                      {}
@@ -3086,6 +3114,7 @@ func (*ErrorStatusCode) generateDownloadLinkRes()            {}
 func (*ErrorStatusCode) generatePresignedUploadUrlRes()      {}
 func (*ErrorStatusCode) getContactRes()                      {}
 func (*ErrorStatusCode) getInviteByTokenRes()                {}
+func (*ErrorStatusCode) getPasswordResetByTokenRes()         {}
 func (*ErrorStatusCode) getProfileRes()                      {}
 func (*ErrorStatusCode) getRegisteredWorkerRes()             {}
 func (*ErrorStatusCode) getRoleRes()                         {}
@@ -3126,6 +3155,7 @@ func (*ErrorStatusCode) pipelineListRes()                    {}
 func (*ErrorStatusCode) pipelineUpdateRes()                  {}
 func (*ErrorStatusCode) removeRoleFromUserRes()              {}
 func (*ErrorStatusCode) removeWorkspaceMemberRes()           {}
+func (*ErrorStatusCode) requestPasswordResetRes()            {}
 func (*ErrorStatusCode) schedulerCreateRes()                 {}
 func (*ErrorStatusCode) schedulerDeleteRes()                 {}
 func (*ErrorStatusCode) schedulerGetRes()                    {}
@@ -8421,6 +8451,83 @@ func (s *PasswordChange) SetNewPassword(val string) {
 	s.NewPassword = val
 }
 
+// Confirm password reset with new password.
+// Ref: #
+type PasswordResetConfirm struct {
+	// The reset token from the email link.
+	Token string `json:"token"`
+	// New password for the account.
+	NewPassword string `json:"new_password"`
+}
+
+// GetToken returns the value of Token.
+func (s *PasswordResetConfirm) GetToken() string {
+	return s.Token
+}
+
+// GetNewPassword returns the value of NewPassword.
+func (s *PasswordResetConfirm) GetNewPassword() string {
+	return s.NewPassword
+}
+
+// SetToken sets the value of Token.
+func (s *PasswordResetConfirm) SetToken(val string) {
+	s.Token = val
+}
+
+// SetNewPassword sets the value of NewPassword.
+func (s *PasswordResetConfirm) SetNewPassword(val string) {
+	s.NewPassword = val
+}
+
+// Info for displaying the password reset page.
+// Ref: #
+type PasswordResetInfo struct {
+	// Email address (masked for privacy).
+	Email string `json:"email"`
+	// When the reset link expires.
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+// GetEmail returns the value of Email.
+func (s *PasswordResetInfo) GetEmail() string {
+	return s.Email
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *PasswordResetInfo) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
+// SetEmail sets the value of Email.
+func (s *PasswordResetInfo) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *PasswordResetInfo) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
+func (*PasswordResetInfo) getPasswordResetByTokenRes() {}
+
+// Request to initiate password reset.
+// Ref: #
+type PasswordResetRequest struct {
+	// Email address of the account.
+	Email string `json:"email"`
+}
+
+// GetEmail returns the value of Email.
+func (s *PasswordResetRequest) GetEmail() string {
+	return s.Email
+}
+
+// SetEmail sets the value of Email.
+func (s *PasswordResetRequest) SetEmail(val string) {
+	s.Email = val
+}
+
 // Ref: #
 type Pipeline struct {
 	// Unique identifier.
@@ -9473,6 +9580,23 @@ func (*RemoveRoleFromUserNoContent) removeRoleFromUserRes() {}
 type RemoveWorkspaceMemberNoContent struct{}
 
 func (*RemoveWorkspaceMemberNoContent) removeWorkspaceMemberRes() {}
+
+type RequestPasswordResetOK struct {
+	// Generic success message.
+	Message OptString `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *RequestPasswordResetOK) GetMessage() OptString {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *RequestPasswordResetOK) SetMessage(val OptString) {
+	s.Message = val
+}
+
+func (*RequestPasswordResetOK) requestPasswordResetRes() {}
 
 // Ref: #
 type Scheduler struct {

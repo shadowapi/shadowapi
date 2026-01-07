@@ -61,6 +61,10 @@ type CheckWorkspaceExistsRes interface {
 	checkWorkspaceExistsRes()
 }
 
+type ConfirmPasswordResetRes interface {
+	confirmPasswordResetRes()
+}
+
 type CreateContactRes interface {
 	createContactRes()
 }
@@ -265,6 +269,10 @@ type GetInviteByTokenRes interface {
 	getInviteByTokenRes()
 }
 
+type GetPasswordResetByTokenRes interface {
+	getPasswordResetByTokenRes()
+}
+
 type GetProfileRes interface {
 	getProfileRes()
 }
@@ -431,6 +439,10 @@ type RemoveRoleFromUserRes interface {
 
 type RemoveWorkspaceMemberRes interface {
 	removeWorkspaceMemberRes()
+}
+
+type RequestPasswordResetRes interface {
+	requestPasswordResetRes()
 }
 
 type SchedulerCreateRes interface {

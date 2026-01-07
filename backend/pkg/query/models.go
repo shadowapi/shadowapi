@@ -242,6 +242,16 @@ type Oauth2Token struct {
 	Name       pgtype.Text        `json:"name"`
 }
 
+type PasswordReset struct {
+	UUID      uuid.UUID          `json:"uuid"`
+	UserUUID  *uuid.UUID         `json:"user_uuid"`
+	Email     string             `json:"email"`
+	TokenHash string             `json:"token_hash"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	UsedAt    pgtype.Timestamptz `json:"used_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type Pipeline struct {
 	UUID           uuid.UUID          `json:"uuid"`
 	WorkspaceUUID  *uuid.UUID         `json:"workspace_uuid"`

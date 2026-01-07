@@ -14,6 +14,8 @@ const WorkspaceRouter = lazy(() => import('./app/WorkspaceRouter'));
 const WorkspaceSelectionPage = lazy(() => import('./pages/workspaces'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const AcceptInvitePage = lazy(() => import('./pages/auth/AcceptInvitePage'));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const RootRedirect = lazy(() => import('./pages/RootRedirect'));
 
 // Loading fallback for lazy components
@@ -55,6 +57,20 @@ export const routes: RouteConfig[] = [
   {
     path: '/invite/:token',
     element: withSuspense(AcceptInvitePage),
+    layout: 'auth',
+    ssr: false,
+    protected: false
+  },
+  {
+    path: '/forgot-password',
+    element: withSuspense(ForgotPasswordPage),
+    layout: 'auth',
+    ssr: false,
+    protected: false
+  },
+  {
+    path: '/reset-password/:token',
+    element: withSuspense(ResetPasswordPage),
     layout: 'auth',
     ssr: false,
     protected: false

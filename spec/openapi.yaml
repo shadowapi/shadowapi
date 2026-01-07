@@ -151,6 +151,12 @@ components:
       $ref: "components/user_invite_accept.yaml"
     UserInviteInfo:
       $ref: "components/user_invite_info.yaml"
+    PasswordResetRequest:
+      $ref: "components/password_reset_request.yaml"
+    PasswordResetInfo:
+      $ref: "components/password_reset_info.yaml"
+    PasswordResetConfirm:
+      $ref: "components/password_reset_confirm.yaml"
 
   securitySchemes:
     # Bearer token-based auth
@@ -346,6 +352,12 @@ paths:
     $ref: "paths/invite_token.yaml"
   /invite/accept:
     $ref: "paths/invite_accept.yaml"
+  /password/reset:
+    $ref: "paths/password_reset_request.yaml"
+  /password/reset/{token}:
+    $ref: "paths/password_reset_token.yaml"
+  /password/reset/confirm:
+    $ref: "paths/password_reset_confirm.yaml"
 
 servers:
   - description: Local development server

@@ -121,6 +121,12 @@ type Invoker interface {
 	//
 	// GET /workspace/check
 	CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (CheckWorkspaceExistsRes, error)
+	// ConfirmPasswordReset invokes confirmPasswordReset operation.
+	//
+	// Confirm password reset with new password (public).
+	//
+	// POST /password/reset/confirm
+	ConfirmPasswordReset(ctx context.Context, request *PasswordResetConfirm) (ConfirmPasswordResetRes, error)
 	// CreateContact invokes createContact operation.
 	//
 	// Create a new contact record.
@@ -428,6 +434,12 @@ type Invoker interface {
 	//
 	// GET /invite/{token}
 	GetInviteByToken(ctx context.Context, params GetInviteByTokenParams) (GetInviteByTokenRes, error)
+	// GetPasswordResetByToken invokes getPasswordResetByToken operation.
+	//
+	// Validate password reset token (public).
+	//
+	// GET /password/reset/{token}
+	GetPasswordResetByToken(ctx context.Context, params GetPasswordResetByTokenParams) (GetPasswordResetByTokenRes, error)
 	// GetProfile invokes getProfile operation.
 	//
 	// Get current user profile.
@@ -683,6 +695,12 @@ type Invoker interface {
 	//
 	// DELETE /workspace/{uuid}/members/{user_uuid}
 	RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) (RemoveWorkspaceMemberRes, error)
+	// RequestPasswordReset invokes requestPasswordReset operation.
+	//
+	// Request password reset email (public).
+	//
+	// POST /password/reset
+	RequestPasswordReset(ctx context.Context, request *PasswordResetRequest) (RequestPasswordResetRes, error)
 	// SchedulerCreate invokes scheduler-create operation.
 	//
 	// Create scheduler.
@@ -2432,6 +2450,81 @@ func (c *Client) sendCheckWorkspaceExists(ctx context.Context, params CheckWorks
 
 	stage = "DecodeResponse"
 	result, err := decodeCheckWorkspaceExistsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ConfirmPasswordReset invokes confirmPasswordReset operation.
+//
+// Confirm password reset with new password (public).
+//
+// POST /password/reset/confirm
+func (c *Client) ConfirmPasswordReset(ctx context.Context, request *PasswordResetConfirm) (ConfirmPasswordResetRes, error) {
+	res, err := c.sendConfirmPasswordReset(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendConfirmPasswordReset(ctx context.Context, request *PasswordResetConfirm) (res ConfirmPasswordResetRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("confirmPasswordReset"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/password/reset/confirm"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ConfirmPasswordResetOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/password/reset/confirm"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeConfirmPasswordResetRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeConfirmPasswordResetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -8587,6 +8680,96 @@ func (c *Client) sendGetInviteByToken(ctx context.Context, params GetInviteByTok
 	return result, nil
 }
 
+// GetPasswordResetByToken invokes getPasswordResetByToken operation.
+//
+// Validate password reset token (public).
+//
+// GET /password/reset/{token}
+func (c *Client) GetPasswordResetByToken(ctx context.Context, params GetPasswordResetByTokenParams) (GetPasswordResetByTokenRes, error) {
+	res, err := c.sendGetPasswordResetByToken(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetPasswordResetByToken(ctx context.Context, params GetPasswordResetByTokenParams) (res GetPasswordResetByTokenRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getPasswordResetByToken"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/password/reset/{token}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetPasswordResetByTokenOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/password/reset/"
+	{
+		// Encode "token" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "token",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Token))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetPasswordResetByTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetProfile invokes getProfile operation.
 //
 // Get current user profile.
@@ -13589,6 +13772,81 @@ func (c *Client) sendRemoveWorkspaceMember(ctx context.Context, params RemoveWor
 
 	stage = "DecodeResponse"
 	result, err := decodeRemoveWorkspaceMemberResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RequestPasswordReset invokes requestPasswordReset operation.
+//
+// Request password reset email (public).
+//
+// POST /password/reset
+func (c *Client) RequestPasswordReset(ctx context.Context, request *PasswordResetRequest) (RequestPasswordResetRes, error) {
+	res, err := c.sendRequestPasswordReset(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendRequestPasswordReset(ctx context.Context, request *PasswordResetRequest) (res RequestPasswordResetRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("requestPasswordReset"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/password/reset"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RequestPasswordResetOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/password/reset"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRequestPasswordResetRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeRequestPasswordResetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

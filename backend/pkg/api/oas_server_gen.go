@@ -100,6 +100,12 @@ type Handler interface {
 	//
 	// GET /workspace/check
 	CheckWorkspaceExists(ctx context.Context, params CheckWorkspaceExistsParams) (CheckWorkspaceExistsRes, error)
+	// ConfirmPasswordReset implements confirmPasswordReset operation.
+	//
+	// Confirm password reset with new password (public).
+	//
+	// POST /password/reset/confirm
+	ConfirmPasswordReset(ctx context.Context, req *PasswordResetConfirm) (ConfirmPasswordResetRes, error)
 	// CreateContact implements createContact operation.
 	//
 	// Create a new contact record.
@@ -407,6 +413,12 @@ type Handler interface {
 	//
 	// GET /invite/{token}
 	GetInviteByToken(ctx context.Context, params GetInviteByTokenParams) (GetInviteByTokenRes, error)
+	// GetPasswordResetByToken implements getPasswordResetByToken operation.
+	//
+	// Validate password reset token (public).
+	//
+	// GET /password/reset/{token}
+	GetPasswordResetByToken(ctx context.Context, params GetPasswordResetByTokenParams) (GetPasswordResetByTokenRes, error)
 	// GetProfile implements getProfile operation.
 	//
 	// Get current user profile.
@@ -662,6 +674,12 @@ type Handler interface {
 	//
 	// DELETE /workspace/{uuid}/members/{user_uuid}
 	RemoveWorkspaceMember(ctx context.Context, params RemoveWorkspaceMemberParams) (RemoveWorkspaceMemberRes, error)
+	// RequestPasswordReset implements requestPasswordReset operation.
+	//
+	// Request password reset email (public).
+	//
+	// POST /password/reset
+	RequestPasswordReset(ctx context.Context, req *PasswordResetRequest) (RequestPasswordResetRes, error)
 	// SchedulerCreate implements scheduler-create operation.
 	//
 	// Create scheduler.

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router';
 import { Card, Form, Input, Button, Alert, Typography, Spin } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../../lib/auth';
@@ -133,7 +133,7 @@ function LoginPage() {
           />
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0 }}>
+        <Form.Item style={{ marginBottom: 16 }}>
           <Button
             type="primary"
             htmlType="submit"
@@ -144,6 +144,10 @@ function LoginPage() {
             Sign in
           </Button>
         </Form.Item>
+
+        <div style={{ textAlign: 'center' }}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </div>
       </Form>
     </Card>
   );
