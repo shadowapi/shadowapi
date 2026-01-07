@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
+	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
@@ -22,7 +23,26 @@ import (
 func (h *Handler) ListWorkspaces(ctx context.Context) (api.ListWorkspacesRes, error) {
 	q := query.New(h.dbp)
 
-	workspaces, err := q.ListWorkspaces(ctx)
+	// Get authenticated user UUID
+	userUUID, err := getUserUUIDFromContext(ctx)
+	if err != nil {
+		return nil, ErrWithCode(http.StatusUnauthorized, E("authentication required"))
+	}
+
+	var workspaces []query.Workspace
+
+	// Super admins see all workspaces
+	if h.enforcer.HasRoleForUserInDomain(userUUID, rbac.RoleSuperAdmin, "global") {
+		workspaces, err = q.ListWorkspaces(ctx)
+	} else {
+		// Regular users see only their workspaces
+		userUUIDParsed, parseErr := uuid.FromString(userUUID)
+		if parseErr != nil {
+			return nil, ErrWithCode(http.StatusInternalServerError, E("invalid user UUID"))
+		}
+		workspaces, err = q.ListWorkspacesByUser(ctx, &userUUIDParsed)
+	}
+
 	if err != nil {
 		h.log.Error("failed to list workspaces", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list workspaces"))

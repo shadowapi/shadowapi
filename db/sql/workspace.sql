@@ -21,6 +21,12 @@ RETURNING *;
 SELECT * FROM workspace
 ORDER BY created_at DESC;
 
+-- name: ListWorkspacesByUser :many
+SELECT w.* FROM workspace w
+INNER JOIN workspace_member wm ON w.uuid = wm.workspace_uuid
+WHERE wm.user_uuid = $1
+ORDER BY w.created_at DESC;
+
 -- name: DeleteWorkspace :exec
 DELETE FROM workspace
 WHERE uuid = $1;

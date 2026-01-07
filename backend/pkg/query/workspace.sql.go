@@ -129,6 +129,41 @@ func (q *Queries) ListWorkspaces(ctx context.Context) ([]Workspace, error) {
 	return items, nil
 }
 
+const listWorkspacesByUser = `-- name: ListWorkspacesByUser :many
+SELECT w.uuid, w.slug, w.display_name, w.is_enabled, w.settings, w.created_at, w.updated_at FROM workspace w
+INNER JOIN workspace_member wm ON w.uuid = wm.workspace_uuid
+WHERE wm.user_uuid = $1
+ORDER BY w.created_at DESC
+`
+
+func (q *Queries) ListWorkspacesByUser(ctx context.Context, userUuid *uuid.UUID) ([]Workspace, error) {
+	rows, err := q.db.Query(ctx, listWorkspacesByUser, userUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Workspace
+	for rows.Next() {
+		var i Workspace
+		if err := rows.Scan(
+			&i.UUID,
+			&i.Slug,
+			&i.DisplayName,
+			&i.IsEnabled,
+			&i.Settings,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateWorkspace = `-- name: UpdateWorkspace :one
 UPDATE workspace
 SET display_name = $2, is_enabled = $3, settings = $4, updated_at = NOW()
