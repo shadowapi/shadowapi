@@ -2,13 +2,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <!-- Important: rapi-doc uses utf8 characters -->
-    <script
-      type="module"
-      src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"
-    ></script>
+    <title>ShadowAPI Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
   </head>
   <body>
-    <rapi-doc spec-url="openapi.yaml" theme="dark"> </rapi-doc>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+      window.onload = function() {
+        SwaggerUIBundle({
+          url: "openapi.yaml",
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          layout: "StandaloneLayout"
+        });
+      };
+    </script>
   </body>
 </html>
