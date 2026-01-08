@@ -1,7 +1,0 @@
-services:
-  backend:
-    environment:
-      - SA_CONFIG_PATH=/app/config.yaml
-    volumes:
-      - ./backend:/app/
-      - ./spec:/spec/

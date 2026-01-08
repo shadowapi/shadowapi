@@ -1,1 +1,0 @@
-export { shortenUuid } from './tools'
