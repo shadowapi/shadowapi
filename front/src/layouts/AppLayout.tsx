@@ -32,6 +32,7 @@ import { useAuth } from '../lib/auth';
 import { useResponsive } from '../lib/useResponsive';
 import { SmartLink } from '../lib/SmartLink';
 import ChangePasswordModal from '../components/ChangePasswordModal';
+import WorkspaceSwitcher from '../components/WorkspaceSwitcher';
 
 const { Header, Sider, Content, Footer } = Layout;
 
@@ -499,6 +500,11 @@ function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
 
         {/* Spacer */}
         <div style={{ flex: 1 }} />
+
+        {/* Workspace Switcher - only when authenticated */}
+        {!isLoading && isAuthenticated && (
+          <WorkspaceSwitcher />
+        )}
 
         {/* User dropdown or Login button */}
         {!isLoading && isAuthenticated ? (
