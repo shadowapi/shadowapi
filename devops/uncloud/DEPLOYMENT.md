@@ -6,13 +6,16 @@ This directory contains the configuration for deploying MeshPump to [uncloud.run
 
 | Service     | Domain            | Description           |
 |-------------|-------------------|-----------------------|
-| `mp-frontend` | `app.meshpump.com`  | React SPA (Vite)      |
-| `mp-ssr`      | `meshpump.com`      | SSR Express server    |
+| `mp-ssr`      | `meshpump.com`      | Unified frontend (SSR + CSR) |
 | `mp-backend`  | `api.meshpump.com`  | Go API server         |
 | `mp-hydra`    | `oidc.meshpump.com` | Ory Hydra OAuth2/OIDC |
 | `mp-grpc2nats` | (internal)        | gRPC to NATS bridge   |
 | `mp-worker-olymp` | (internal, x-node: olymp) | Distributed worker |
 | `mp-worker-shkhara` | (internal, x-node: shkhara) | Distributed worker |
+
+The frontend uses a unified architecture where all routes are served by the SSR server:
+- Public pages (landing, docs) are server-rendered for SEO
+- App pages (`/w/{slug}/*`) hydrate as a client-side SPA
 
 ## Prerequisites
 
@@ -112,7 +115,6 @@ Add the following DNS records pointing to your uncloud cluster:
 | Type | Name | Value |
 |------|------|-------|
 | A | `meshpump.com` | `<uncloud-ip>` |
-| A | `app.meshpump.com` | `<uncloud-ip>` |
 | A | `api.meshpump.com` | `<uncloud-ip>` |
 | A | `oidc.meshpump.com` | `<uncloud-ip>` |
 

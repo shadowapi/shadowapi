@@ -163,6 +163,12 @@ def verify_deployment() -> None:
     # Try to reach the health endpoints
     log_info("Checking service health...")
 
+    # Check Frontend (unified SSR/CSR)
+    if check_url("https://meshpump.com"):
+        log_success("Frontend is healthy")
+    else:
+        log_warning("Frontend health check failed (may still be starting)")
+
     # Check API health
     if check_url("https://api.meshpump.com/api/v1/health"):
         log_success("API is healthy")
@@ -206,8 +212,7 @@ def main() -> None:
     print(f"{GREEN}============================================{NC}")
     print()
     print("Services:")
-    print("  - Frontend: https://app.meshpump.com")
-    print("  - SSR:      https://meshpump.com")
+    print("  - Frontend: https://meshpump.com")
     print("  - API:      https://api.meshpump.com")
     print("  - OIDC:     https://oidc.meshpump.com")
     print()
