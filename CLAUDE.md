@@ -214,6 +214,17 @@ make secrets-rotate    # Re-encrypt after adding/removing team members
 3. **Rotate all secrets** (they had access to plaintext values)
 4. Commit changes
 
+## Production Deployment
+Production deployment uses Uncloud platform (https://uncloud.run/docs/).
+We use separate compose file for it: `devops/uncloud/compose.yaml`.
+The secrets are loaded from decrypted `.env` file in `devops/uncloud/`.
+To do full deploy (with migrations), run:
+```bash
+make uncloud-deploy
+```
+
+Check `devops/uncloud/DEPLOYMENT.md` for full instructions.
+
 ## Guidelines
 
 - **Ask first** before creating predefined objects (datasources, OAuth2 clients, pipelines)

@@ -1,7 +1,7 @@
 # ShadowAPI Makefile
 # Run `make help` to see available targets
 
-.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen deploy
+.PHONY: help up init db-shell sync-db api-gen-backend api-gen-frontend api-gen deploy-uncloud
 
 # Default target
 .DEFAULT_GOAL := help
@@ -91,7 +91,7 @@ secrets-edit: ## Edit encrypted secrets in-place
 secrets-rotate: ## Re-encrypt after adding/removing team members in .sops.yaml
 	@sops updatekeys devops/uncloud/.env.enc
 
-##@ Deployment
-
-deploy: ## Deploy to Uncloud (production)
+##@ Deployment to Uncloud
+uncloud-deploy: ## Deploy to Uncloud (production, with migrations)
+	./devops/uncloud/migrate.py
 	./devops/uncloud/deploy.py
