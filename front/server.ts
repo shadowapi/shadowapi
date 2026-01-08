@@ -7,6 +7,9 @@ import { fetchDataForRoute } from './src/lib/data-fetching.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Routes that should be purely client-side rendered (no SSR)
+const csrOnlyPaths = ['/login', '/invite', '/forgot-password', '/reset-password', '/workspaces', '/w/'];
+
 async function createServer() {
   const app = express();
 
@@ -38,6 +41,21 @@ async function createServer() {
 
       // Apply Vite HTML transforms (injects HMR client, etc.)
       template = await vite.transformIndexHtml(url, template);
+
+      // Check if this is a CSR-only route
+      const pathname = url.split('?')[0];
+      const isCSROnly = csrOnlyPaths.some(p => pathname === p || pathname.startsWith(p));
+
+      if (isCSROnly) {
+        // For CSR-only routes, return template without SSR content
+        const html = template
+          .replace('<!--ssr-styles-->', '')
+          .replace('<!--ssr-outlet-->', '')
+          .replace('<!--ssr-data-->', '');
+
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+        return;
+      }
 
       // Load the server entry module
       const { render } = await vite.ssrLoadModule('/src/entry-server.tsx');

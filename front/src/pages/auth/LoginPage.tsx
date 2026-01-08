@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams, Link } from 'react-router';
-import { Card, Form, Input, Button, Alert, Typography, Spin } from 'antd';
+import { Card, Form, Input, Button, Alert, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../../lib/auth';
 
@@ -54,32 +54,23 @@ function LoginPage() {
     }
   };
 
-  // Show loading state when no login_challenge (redirecting to OAuth2 flow)
+  // Render nothing when no login_challenge (redirecting to OAuth2 flow)
+  // Only show error if OAuth2 initiation fails
   if (!loginChallenge) {
-    return (
-      <Card style={{ width: 400, maxWidth: '100%' }}>
-        <div style={{ textAlign: 'center', padding: 24 }}>
-          <Spin size="large" />
-          <Typography.Text style={{ display: 'block', marginTop: 16 }}>
-            Redirecting to login...
-          </Typography.Text>
-          {error && (
-            <Alert
-              message={error}
-              type="error"
-              showIcon
-              style={{ marginTop: 16 }}
-            />
-          )}
-        </div>
-      </Card>
-    );
+    if (error) {
+      return (
+        <Card style={{ width: 400, maxWidth: '100%' }}>
+          <Alert message={error} type="error" showIcon />
+        </Card>
+      );
+    }
+    return null;
   }
 
   return (
     <Card style={{ width: 400, maxWidth: '100%' }}>
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <Link to="/">
+        <Link to="/start">
           <img src="/logo.svg" alt="MeshPump logo" style={{ height: 64, marginBottom: 16 }} />
         </Link>
         <Title level={3} style={{ margin: 0 }}>
