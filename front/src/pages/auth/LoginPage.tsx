@@ -79,7 +79,9 @@ function LoginPage() {
   return (
     <Card style={{ width: 400, maxWidth: '100%' }}>
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <img src="/logo.svg" alt="MeshPump logo" style={{ height: 64, marginBottom: 16 }} />
+        <Link to="/">
+          <img src="/logo.svg" alt="MeshPump logo" style={{ height: 64, marginBottom: 16 }} />
+        </Link>
         <Title level={3} style={{ margin: 0 }}>
           MeshPump
         </Title>

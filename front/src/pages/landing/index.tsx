@@ -54,6 +54,11 @@ function LandingPage() {
         }}
       >
         <div style={{ maxWidth: 800 }}>
+          <img
+            src="/logo.svg"
+            alt="MeshPump Logo"
+            style={{ width: 120, height: 120, marginBottom: 24 }}
+          />
           <Title
             level={1}
             style={{

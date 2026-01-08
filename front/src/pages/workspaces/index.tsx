@@ -16,6 +16,15 @@ interface Workspace {
   is_enabled?: boolean;
 }
 
+const workspaceButtonStyles = `
+  .workspace-btn {
+    background-color: rgba(252, 163, 17, 0.1) !important;
+  }
+  .workspace-btn:not(:disabled):hover {
+    background-color: rgba(252, 163, 17, 0.25) !important;
+  }
+`;
+
 function WorkspaceSelectionPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,7 +124,9 @@ function WorkspaceSelectionPage() {
   }
 
   return (
-    <Card style={{ width: '100%', maxWidth: 500, position: 'relative' }}>
+    <>
+      <style>{workspaceButtonStyles}</style>
+      <Card style={{ width: '100%', maxWidth: 500, position: 'relative' }}>
       <div style={{ position: 'absolute', top: 16, right: 16 }}>
         <Button
           type="text"
@@ -144,7 +155,12 @@ function WorkspaceSelectionPage() {
               block
               size="large"
               onClick={() => handleWorkspaceSelect(workspace.slug)}
-              style={{ textAlign: 'left', height: 'auto', padding: '16px 20px' }}
+              className="workspace-btn"
+              style={{
+                textAlign: 'left',
+                height: 'auto',
+                padding: '16px 20px',
+              }}
               disabled={!workspace.is_enabled || switchingWorkspace !== null}
               loading={switchingWorkspace === workspace.slug}
             >
@@ -174,6 +190,7 @@ function WorkspaceSelectionPage() {
         </div>
       )}
     </Card>
+    </>
   );
 }
 
