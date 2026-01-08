@@ -30,11 +30,11 @@ function PageLayout({ children }: PageLayoutProps) {
   const routeConfig = getRouteConfig(location.pathname);
   const showBreadcrumb = routeConfig?.showBreadcrumb !== false;
 
-  const pathSnippets = location.pathname.split('/').filter((i) => i && i !== 'page');
+  const pathSnippets = location.pathname.split('/').filter((i) => i && i !== 'page' && i !== 'start');
 
   const breadcrumbItems = [
     {
-      title: <SmartLink to="/">Dashboard</SmartLink>,
+      title: <SmartLink to="/">Home</SmartLink>,
     },
     ...pathSnippets.map((_, index) => {
       const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;

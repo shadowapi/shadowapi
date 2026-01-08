@@ -9,11 +9,11 @@ interface AuthLayoutProps {
 
 function AuthLayout({ children }: AuthLayoutProps) {
   const {
-    token: { colorBgContainer },
+    token: { colorBgLayout },
   } = theme.useToken();
 
   return (
-    <Layout style={{ minHeight: '100vh', background: colorBgContainer }}>
+    <Layout style={{ minHeight: '100vh', background: colorBgLayout }}>
       <Content
         style={{
           display: 'flex',

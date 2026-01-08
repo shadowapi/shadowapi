@@ -5,6 +5,7 @@ import { routes } from './routes';
 import AppLayout from './layouts/AppLayout';
 import PageLayout from './layouts/PageLayout';
 import AuthLayout from './layouts/AuthLayout';
+import LandingLayout from './layouts/LandingLayout';
 
 interface AppProps {
   ssrData?: Record<string, unknown>;
@@ -25,6 +26,8 @@ function App({ ssrData }: AppProps) {
               element = <PageLayout>{element}</PageLayout>;
             } else if (route.layout === 'auth') {
               element = <AuthLayout>{element}</AuthLayout>;
+            } else if (route.layout === 'landing') {
+              element = <LandingLayout>{element}</LandingLayout>;
             }
 
             // Wrap protected routes (explicit protection via route.protected)

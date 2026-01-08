@@ -30,7 +30,7 @@ function LoadingFallback() {
 export interface RouteConfig {
   path: string;
   element: ReactNode;
-  layout: 'page' | 'app' | 'auth';
+  layout: 'page' | 'app' | 'auth' | 'landing';
   ssr: boolean;
   protected?: boolean;
   showBreadcrumb?: boolean;
@@ -108,7 +108,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/start',
     element: <LandingPage />,
-    layout: 'auth',
+    layout: 'landing',
     ssr: true
   },
   {
