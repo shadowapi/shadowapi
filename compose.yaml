@@ -4,27 +4,8 @@ include:
   - devops/compose/tools/compose.yaml
 
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: devops/docker/frontend/dev.Dockerfile
-    develop:
-      watch:
-        - action: sync
-          path: ./front
-          target: /app
-          ignore:
-            - node_modules
-        - action: rebuild
-          path: ./front/package.json
-    labels:
-      - traefik.enable=true
-      # App subdomain - frontend SPA (CSR)
-      - traefik.http.routers.shadowapi-front.rule=Host(`${BE_APP_SUBDOMAIN}.${BE_DOMAIN}`)
-      - traefik.http.routers.shadowapi-front.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
-      - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
-    restart: always
-
+  # SSR server handles all frontend routes (both SSR and CSR)
+  # SSR pages get server-rendered, CSR pages hydrate on client
   ssr:
     build:
       context: .
@@ -71,7 +52,7 @@ services:
       - BE_INIT_ADMIN_PASSWORD=${BE_INIT_ADMIN_PASSWORD}
       - BE_BASE_URL=http://${BE_DOMAIN}
       - BE_API_BASE_URL=http://${BE_API_SUBDOMAIN}.${BE_DOMAIN}
-      - BE_CSR_BASE_URL=http://${BE_APP_SUBDOMAIN}.${BE_DOMAIN}
+      - BE_CSR_BASE_URL=http://${BE_DOMAIN}
       - BE_CORS_ALLOWED_ORIGINS=${BE_CORS_ALLOWED_ORIGINS}
       - BE_OAUTH2_COOKIE_DOMAIN=${BE_OAUTH2_COOKIE_DOMAIN}
     develop:

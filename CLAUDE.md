@@ -10,7 +10,7 @@ docker compose watch       # Start dev environment with hot reload
 ```
 
 - **Login:** `admin@example.com` / `Admin123!`
-- **App:** `http://app.localtest.me`
+- **App:** `http://localtest.me`
 - **API:** `http://api.localtest.me/api/v1`
 - **API Docs:** `http://spec.localtest.me`
 
@@ -47,8 +47,7 @@ Generated directories (do not edit):
 
 | Subdomain | Service | Purpose |
 |-----------|---------|---------|
-| `localtest.me` | SSR (3000) | Public pages (landing, docs) |
-| `app.localtest.me` | Frontend (5173) | React SPA |
+| `localtest.me` | Frontend (3000) | All pages (SSR + CSR unified) |
 | `api.localtest.me` | Backend (8080) | REST API |
 | `rpc.localtest.me` | Backend (9090) | gRPC for workers |
 | `oidc.localtest.me` | Hydra (4444) | OAuth2/OIDC |
@@ -99,7 +98,7 @@ front/
   src/app/           # CSR pages (workspace-scoped)
   src/pages/         # SSR pages (public)
   src/lib/           # Shared utilities (auth, workspace, SmartLink)
-  src/layouts/       # Layout components
+  src/layouts/       # Layout components (AppLayout, AuthLayout, LandingLayout)
   src/theme.ts       # Ant Design theme config
 devops/              # Docker, compose files, Ory config
 ```
@@ -121,14 +120,16 @@ devops/              # Docker, compose files, Ory config
 
 ### New Frontend Page
 
-**CSR (app pages):**
+**CSR (app pages with sidebar):**
 1. Create in `front/src/app/`
 2. Add route to `front/src/app/WorkspaceRouter.tsx`
 3. Add menu item to `front/src/layouts/AppLayout.tsx`
 
-**SSR (public pages):**
+**SSR (public pages without sidebar):**
 1. Create in `front/src/pages/`
-2. Add route to `front/src/routes.tsx` with `ssr: true`
+2. Add route to `front/src/routes.tsx` with `ssr: true`, `layout: 'app'`, `showSidebar: false`
+
+All pages use `AppLayout` - use `showSidebar: false` to hide the sidebar for public/documentation pages.
 
 ### Ant Design
 

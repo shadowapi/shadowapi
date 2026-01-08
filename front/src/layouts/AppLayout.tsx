@@ -185,6 +185,7 @@ function getMenuItems(basePath: string): MenuItem[] {
 
 interface AppLayoutProps {
   children: ReactNode;
+  showSidebar?: boolean;
 }
 
 // Route configuration for breadcrumbs and menu state
@@ -218,6 +219,15 @@ const routeConfig: Record<string, RouteConfig> = {
   '/schedulers': { title: 'Schedules' },
   '/schedulers/new': { title: 'Add', parent: '/schedulers' },
   '/logs': { title: 'Logs' },
+};
+
+// Breadcrumb map for non-workspace pages (documentation, about, etc.)
+const publicBreadcrumbMap: Record<string, string> = {
+  '/documentation': 'Documentation',
+  '/documentation/datasource': 'Datasources',
+  '/documentation/datasource/gmail': 'Gmail',
+  '/documentation/datasource/telegram': 'Telegram',
+  '/about': 'About',
 };
 
 // Map of routes to their menu parent keys (for expanding submenus)
@@ -326,10 +336,32 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   return items;
 }
 
-function AppLayout({ children }: AppLayoutProps) {
+// Generate breadcrumb items for public pages (non-workspace)
+function getPublicBreadcrumbItems(pathname: string): { title: React.ReactNode; key: string }[] {
+  const items: { title: React.ReactNode; key: string }[] = [
+    { title: <SmartLink to="/">Home</SmartLink>, key: 'home' },
+  ];
+
+  const pathSnippets = pathname.split('/').filter((i) => i);
+
+  pathSnippets.forEach((_, index) => {
+    const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
+    const isLast = index === pathSnippets.length - 1;
+    const name = publicBreadcrumbMap[url] || pathSnippets[index];
+
+    items.push({
+      title: isLast ? name : <Link to={url}>{name}</Link>,
+      key: url,
+    });
+  });
+
+  return items;
+}
+
+function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const { isMobile } = useResponsive();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -432,8 +464,8 @@ function AppLayout({ children }: AppLayoutProps) {
           padding: '0 16px',
         }}
       >
-        {/* Hamburger button - mobile only */}
-        {isMobile && (
+        {/* Hamburger button - mobile only, when sidebar is enabled */}
+        {isMobile && showSidebar && (
           <Button
             type="text"
             icon={<MenuOutlined />}
@@ -468,22 +500,32 @@ function AppLayout({ children }: AppLayoutProps) {
         {/* Spacer */}
         <div style={{ flex: 1 }} />
 
-        {/* User dropdown */}
-        <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-          <Button type="text" style={{ color: '#fff' }}>
-            <Space>
-              <UserOutlined />
-              {user?.first_name || user?.email?.split('@')[0] || 'User'}
-              <DownOutlined />
-            </Space>
+        {/* User dropdown or Login button */}
+        {!isLoading && isAuthenticated ? (
+          <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+            <Button type="text" style={{ color: '#fff' }}>
+              <Space>
+                <UserOutlined />
+                {user?.first_name || user?.email?.split('@')[0] || 'User'}
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+        ) : !isLoading ? (
+          <Button
+            type="primary"
+            icon={<LoginOutlined />}
+            onClick={() => navigate('/login')}
+          >
+            Login
           </Button>
-        </Dropdown>
+        ) : null}
       </Header>
 
       {/* Main content area with sidebar */}
       <Layout hasSider>
-        {/* Desktop Sider - hidden on mobile */}
-        {!isMobile && (
+        {/* Desktop Sider - hidden on mobile or when showSidebar is false */}
+        {!isMobile && showSidebar && (
           <Sider
             width={250}
             style={{
@@ -510,7 +552,7 @@ function AppLayout({ children }: AppLayoutProps) {
               margin: '16px 0',
             }}
           >
-            <Breadcrumb items={getBreadcrumbItems(relativePath, basePath)} />
+            <Breadcrumb items={basePath ? getBreadcrumbItems(relativePath, basePath) : getPublicBreadcrumbItems(location.pathname)} />
           </div>
 
           {/* Main content */}
@@ -527,16 +569,18 @@ function AppLayout({ children }: AppLayoutProps) {
         </Layout>
       </Layout>
 
-      {/* Mobile Drawer */}
-      <Drawer
-        title="Navigation"
-        placement="left"
-        onClose={() => setDrawerOpen(false)}
-        open={drawerOpen}
-        styles={{ body: { padding: 0 }, wrapper: { width: 280 } }}
-      >
-        {sidebarMenu}
-      </Drawer>
+      {/* Mobile Drawer - only when sidebar is enabled */}
+      {showSidebar && (
+        <Drawer
+          title="Navigation"
+          placement="left"
+          onClose={() => setDrawerOpen(false)}
+          open={drawerOpen}
+          styles={{ body: { padding: 0 }, wrapper: { width: 280 } }}
+        >
+          {sidebarMenu}
+        </Drawer>
+      )}
 
       {/* Change Password Modal */}
       <ChangePasswordModal

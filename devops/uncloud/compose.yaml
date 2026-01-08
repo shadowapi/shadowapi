@@ -9,22 +9,8 @@ configs:
     file: ./hydra.yaml
 
 services:
-  # Frontend SPA (Vite React) - on app subdomain
-  mp-frontend:
-    platform: linux/amd64
-    build:
-      context: ../..
-      dockerfile: devops/docker/frontend/prod.Dockerfile
-      args:
-        - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
-        - VITE_OIDC_URL=https://oidc.meshpump.com
-        - VITE_ROOT_URL=https://meshpump.com
-        - VITE_APP_URL=https://app.meshpump.com
-    x-ports:
-      - app.meshpump.com:5173/https
-    restart: always
-
-  # SSR Server (Express + Vite) - on root domain
+  # SSR Server handles all frontend routes (both SSR and CSR)
+  # SSR pages get server-rendered for SEO, CSR pages hydrate on client
   mp-ssr:
     platform: linux/amd64
     build:
@@ -34,7 +20,7 @@ services:
         - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
         - VITE_OIDC_URL=https://oidc.meshpump.com
         - VITE_ROOT_URL=https://meshpump.com
-        - VITE_APP_URL=https://app.meshpump.com
+        - VITE_APP_URL=https://meshpump.com
     x-ports:
       - meshpump.com:3000/https
     restart: always
@@ -73,9 +59,9 @@ services:
       - BE_INIT_ADMIN_PASSWORD=${BE_INIT_ADMIN_PASSWORD}
       # URLs
       - BE_BASE_URL=https://meshpump.com
-      - BE_CSR_BASE_URL=https://app.meshpump.com
+      - BE_CSR_BASE_URL=https://meshpump.com
       - BE_API_BASE_URL=https://api.meshpump.com
-      - BE_CORS_ALLOWED_ORIGINS=https://meshpump.com,https://app.meshpump.com
+      - BE_CORS_ALLOWED_ORIGINS=https://meshpump.com
       # SMTP / Amazon SES
       - BE_SMTP_HOST=${BE_SMTP_HOST}
       - BE_SMTP_PORT=${BE_SMTP_PORT}

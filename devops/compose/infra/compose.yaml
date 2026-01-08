@@ -18,7 +18,6 @@ services:
       - 80:80
       - 8800:8080
     depends_on:
-      - frontend
       - ssr
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -28,7 +27,6 @@ services:
           - localtest.me
           - oidc.localtest.me
           - api.localtest.me
-          - app.localtest.me
           - mail.localtest.me
           - spec.localtest.me
 

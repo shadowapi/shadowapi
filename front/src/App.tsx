@@ -3,7 +3,6 @@ import { SSRProvider } from './lib/ssr-context';
 import { AuthProvider, ProtectedRoute } from './lib/auth';
 import { routes } from './routes';
 import AppLayout from './layouts/AppLayout';
-import PageLayout from './layouts/PageLayout';
 import AuthLayout from './layouts/AuthLayout';
 import LandingLayout from './layouts/LandingLayout';
 
@@ -21,9 +20,7 @@ function App({ ssrData }: AppProps) {
 
             // Wrap in appropriate layout
             if (route.layout === 'app') {
-              element = <AppLayout>{element}</AppLayout>;
-            } else if (route.layout === 'page') {
-              element = <PageLayout>{element}</PageLayout>;
+              element = <AppLayout showSidebar={route.showSidebar !== false}>{element}</AppLayout>;
             } else if (route.layout === 'auth') {
               element = <AuthLayout>{element}</AuthLayout>;
             } else if (route.layout === 'landing') {

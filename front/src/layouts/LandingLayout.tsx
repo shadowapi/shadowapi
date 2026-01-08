@@ -1,11 +1,10 @@
-import { type ReactNode, useCallback } from 'react';
+import { type ReactNode } from 'react';
 import { Layout, Button } from 'antd';
+import { useNavigate } from 'react-router';
 import { LoginOutlined } from '@ant-design/icons';
 import { uiColors } from '../theme';
 import { useAuth } from '../lib/auth';
 import { SmartLink } from '../lib/SmartLink';
-
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://app.localtest.me';
 
 const { Header, Footer } = Layout;
 
@@ -14,11 +13,8 @@ interface LandingLayoutProps {
 }
 
 function LandingLayout({ children }: LandingLayoutProps) {
+  const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
-
-  const handleLogin = useCallback(() => {
-    window.location.href = `${APP_URL}/login`;
-  }, []);
 
   return (
     <Layout style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -56,7 +52,7 @@ function LandingLayout({ children }: LandingLayoutProps) {
           <Button
             type="primary"
             icon={<LoginOutlined />}
-            onClick={handleLogin}
+            onClick={() => navigate('/login')}
           >
             Login
           </Button>

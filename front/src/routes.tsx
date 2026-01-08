@@ -30,10 +30,11 @@ function LoadingFallback() {
 export interface RouteConfig {
   path: string;
   element: ReactNode;
-  layout: 'page' | 'app' | 'auth' | 'landing';
+  layout: 'app' | 'auth' | 'landing';
   ssr: boolean;
   protected?: boolean;
   showBreadcrumb?: boolean;
+  showSidebar?: boolean;
 }
 
 // Wrap lazy components with Suspense
@@ -114,32 +115,37 @@ export const routes: RouteConfig[] = [
   {
     path: '/about',
     element: <AboutPage />,
-    layout: 'page',
-    ssr: true
+    layout: 'app',
+    ssr: true,
+    showSidebar: false,
   },
   {
     path: '/documentation',
     element: <DocumentationIndex />,
-    layout: 'page',
-    ssr: true
+    layout: 'app',
+    ssr: true,
+    showSidebar: false,
   },
   {
     path: '/documentation/datasource',
     element: <DatasourceIndex />,
-    layout: 'page',
-    ssr: true
+    layout: 'app',
+    ssr: true,
+    showSidebar: false,
   },
   {
     path: '/documentation/datasource/gmail',
     element: <GmailDocumentation />,
-    layout: 'page',
-    ssr: true
+    layout: 'app',
+    ssr: true,
+    showSidebar: false,
   },
   {
     path: '/documentation/datasource/telegram',
     element: <TelegramDocumentation />,
-    layout: 'page',
-    ssr: true
+    layout: 'app',
+    ssr: true,
+    showSidebar: false,
   }
 ];
 

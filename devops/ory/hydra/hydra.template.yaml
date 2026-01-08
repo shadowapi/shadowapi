@@ -11,7 +11,6 @@ serve:
       enabled: true
       allowed_origins:
         - ${BE_PROTOCOL}://${BE_DOMAIN}
-        - ${BE_PROTOCOL}://${BE_APP_SUBDOMAIN}.${BE_DOMAIN}
       allowed_methods:
         - POST
         - GET
