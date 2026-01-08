@@ -30,6 +30,7 @@ services:
           - api.localtest.me
           - app.localtest.me
           - mail.localtest.me
+          - spec.localtest.me
 
   db:
     image: postgres:16-alpine

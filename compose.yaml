@@ -118,6 +118,19 @@ services:
       - traefik.http.services.shadowapi-rpc.loadbalancer.server.scheme=h2c
     restart: always
 
+  # API Spec documentation (RapiDoc)
+  spec:
+    image: nginx:alpine
+    volumes:
+      - ./spec:/usr/share/nginx/html:ro
+      - ./devops/docker/spec/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shadowapi-spec.rule=Host(`${BE_SPEC_SUBDOMAIN}.${BE_DOMAIN}`)
+      - traefik.http.routers.shadowapi-spec.entrypoints=${BE_TRAEFIK_ENTRYPOINT}
+      - traefik.http.services.shadowapi-spec.loadbalancer.server.port=80
+    restart: always
+
   # Distributed gRPC worker
   # Enrollment is handled automatically by bootstrap.sh
   # Worker will wait for credentials if WORKER_ID is empty

@@ -12,6 +12,7 @@ docker compose watch       # Start dev environment with hot reload
 - **Login:** `admin@example.com` / `Admin123!`
 - **App:** `http://app.localtest.me`
 - **API:** `http://api.localtest.me/api/v1`
+- **API Docs:** `http://spec.localtest.me`
 
 ## What Is This
 
@@ -52,6 +53,7 @@ Generated directories (do not edit):
 | `rpc.localtest.me` | Backend (9090) | gRPC for workers |
 | `oidc.localtest.me` | Hydra (4444) | OAuth2/OIDC |
 | `mail.localtest.me` | Mailpit (8025) | Email testing UI |
+| `spec.localtest.me` | Nginx (80) | API documentation (RapiDoc) |
 
 ### Workspaces
 
