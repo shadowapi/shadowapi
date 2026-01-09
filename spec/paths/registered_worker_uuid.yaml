@@ -1,6 +1,8 @@
 get:
   summary: Get registered worker details
   operationId: getRegisteredWorker
+  tags:
+    - workers
   parameters:
     - in: path
       name: uuid
@@ -23,6 +25,8 @@ get:
 put:
   summary: Update registered worker
   operationId: updateRegisteredWorker
+  tags:
+    - workers
   parameters:
     - in: path
       name: uuid
@@ -51,6 +55,8 @@ put:
 delete:
   summary: Delete registered worker
   operationId: deleteRegisteredWorker
+  tags:
+    - workers
   parameters:
     - in: path
       name: uuid

@@ -1,6 +1,8 @@
 put:
   summary: Update member role
   operationId: updateWorkspaceMemberRole
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid
@@ -45,6 +47,8 @@ put:
 delete:
   summary: Remove member from workspace
   operationId: removeWorkspaceMember
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid

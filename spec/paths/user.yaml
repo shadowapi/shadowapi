@@ -16,6 +16,8 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - users
 post:
   summary: Create a new user
   operationId: createUser
@@ -39,3 +41,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - users

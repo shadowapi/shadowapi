@@ -2,6 +2,8 @@ post:
   summary: Accept invite and create account
   operationId: acceptInvite
   security: []
+  tags:
+    - auth
   requestBody:
     required: true
     content:

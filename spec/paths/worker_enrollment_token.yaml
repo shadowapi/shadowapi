@@ -1,6 +1,8 @@
 get:
   summary: List worker enrollment tokens
   operationId: listWorkerEnrollmentTokens
+  tags:
+    - workers
   responses:
     "200":
       description: List of enrollment tokens
@@ -19,6 +21,8 @@ get:
 post:
   summary: Create worker enrollment token
   operationId: createWorkerEnrollmentToken
+  tags:
+    - workers
   requestBody:
     required: true
     content:

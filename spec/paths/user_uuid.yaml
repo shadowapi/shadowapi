@@ -20,6 +20,8 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - users
 put:
   summary: Update user details
   operationId: updateUser
@@ -48,6 +50,8 @@ put:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - users
 delete:
   summary: Delete user
   operationId: deleteUser
@@ -66,3 +70,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - users

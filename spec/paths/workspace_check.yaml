@@ -1,6 +1,8 @@
 get:
   summary: Check if workspace exists
   operationId: checkWorkspaceExists
+  tags:
+    - workspace
   parameters:
     - in: query
       name: slug

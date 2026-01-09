@@ -1,6 +1,8 @@
 get:
   summary: List all workspaces
   operationId: listWorkspaces
+  tags:
+    - workspace
   responses:
     "200":
       description: List of workspaces
@@ -19,6 +21,8 @@ get:
 post:
   summary: Create a new workspace
   operationId: createWorkspace
+  tags:
+    - workspace
   requestBody:
     required: true
     content:

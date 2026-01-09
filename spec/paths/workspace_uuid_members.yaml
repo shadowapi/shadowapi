@@ -1,6 +1,8 @@
 get:
   summary: List workspace members
   operationId: listWorkspaceMembers
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid
@@ -27,6 +29,8 @@ get:
 post:
   summary: Add member to workspace
   operationId: addWorkspaceMember
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid

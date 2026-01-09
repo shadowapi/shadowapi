@@ -1,6 +1,8 @@
 delete:
   summary: Cancel/delete an invite
   operationId: deleteWorkspaceInvite
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid

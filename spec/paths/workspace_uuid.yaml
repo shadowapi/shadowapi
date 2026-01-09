@@ -1,6 +1,8 @@
 get:
   summary: Get workspace details
   operationId: getWorkspace
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid
@@ -25,6 +27,8 @@ get:
 put:
   summary: Update workspace
   operationId: updateWorkspace
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid
@@ -55,6 +59,8 @@ put:
 delete:
   summary: Delete workspace
   operationId: deleteWorkspace
+  tags:
+    - workspace
   parameters:
     - in: path
       name: uuid

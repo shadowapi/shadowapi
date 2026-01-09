@@ -2,6 +2,8 @@ get:
   summary: Get invite details by token (public)
   operationId: getInviteByToken
   security: []
+  tags:
+    - auth
   parameters:
     - in: path
       name: token

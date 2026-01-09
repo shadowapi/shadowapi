@@ -6,8 +6,6 @@ post:
     Triggers a job to query messages from a PostgreSQL storage.
     Individual message records are streamed to NATS on the specified subject.
     Subscribe to the nats_subject in the response to receive records.
-  tags:
-    - storage
   parameters:
     - name: uuid
       in: path
@@ -47,3 +45,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - storage

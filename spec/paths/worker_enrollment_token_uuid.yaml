@@ -1,6 +1,8 @@
 get:
   summary: Get worker enrollment token details
   operationId: getWorkerEnrollmentToken
+  tags:
+    - workers
   parameters:
     - in: path
       name: uuid
@@ -23,6 +25,8 @@ get:
 delete:
   summary: Delete worker enrollment token
   operationId: deleteWorkerEnrollmentToken
+  tags:
+    - workers
   parameters:
     - in: path
       name: uuid

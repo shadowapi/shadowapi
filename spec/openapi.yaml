@@ -42,6 +42,10 @@ tags:
     description: OAuth2 token management for datasource authentication.
   - name: worker-jobs
     description: Background job monitoring and management.
+  - name: workers
+    description: Worker node registration and enrollment token management.
+  - name: workspace
+    description: Workspace creation, configuration, and member management.
 
 components:
   schemas:
