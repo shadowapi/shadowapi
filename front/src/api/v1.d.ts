@@ -494,6 +494,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage/postgres/{uuid}/messages/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Query messages from PostgreSQL storage
+         * @description Triggers a job to query messages from a PostgreSQL storage.
+         *     Individual message records are streamed to NATS on the specified subject.
+         *     Subscribe to the nats_subject in the response to receive records.
+         */
+        post: operations["storage-postgres-messages-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/storage/s3": {
         parameters: {
             query?: never;
@@ -657,6 +679,78 @@ export interface paths {
         put: operations["changePassword"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List registered workers */
+        get: operations["listRegisteredWorkers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get registered worker details */
+        get: operations["getRegisteredWorker"];
+        /** Update registered worker */
+        put: operations["updateRegisteredWorker"];
+        post?: never;
+        /** Delete registered worker */
+        delete: operations["deleteRegisteredWorker"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers/enrollment-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List worker enrollment tokens */
+        get: operations["listWorkerEnrollmentTokens"];
+        put?: never;
+        /** Create worker enrollment token */
+        post: operations["createWorkerEnrollmentToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workers/enrollment-tokens/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get worker enrollment token details */
+        get: operations["getWorkerEnrollmentToken"];
+        put?: never;
+        post?: never;
+        /** Delete worker enrollment token */
+        delete: operations["deleteWorkerEnrollmentToken"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1085,78 +1179,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/workers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List registered workers */
-        get: operations["listRegisteredWorkers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/workers/{uuid}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get registered worker details */
-        get: operations["getRegisteredWorker"];
-        /** Update registered worker */
-        put: operations["updateRegisteredWorker"];
-        post?: never;
-        /** Delete registered worker */
-        delete: operations["deleteRegisteredWorker"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/workers/enrollment-tokens": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List worker enrollment tokens */
-        get: operations["listWorkerEnrollmentTokens"];
-        put?: never;
-        /** Create worker enrollment token */
-        post: operations["createWorkerEnrollmentToken"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/workers/enrollment-tokens/{uuid}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get worker enrollment token details */
-        get: operations["getWorkerEnrollmentToken"];
-        put?: never;
-        post?: never;
-        /** Delete worker enrollment token */
-        delete: operations["deleteWorkerEnrollmentToken"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/mapper/source-fields": {
         parameters: {
             query?: never;
@@ -1228,28 +1250,6 @@ export interface paths {
         get: operations["test-connection-job-get"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/storage/postgres/{uuid}/messages/query": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Query messages from PostgreSQL storage
-         * @description Triggers a job to query messages from a PostgreSQL storage.
-         *     Individual message records are streamed to NATS on the specified subject.
-         *     Subscribe to the nats_subject in the response to receive records.
-         */
-        post: operations["storage-postgres-messages-query"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1376,12 +1376,8 @@ export interface components {
         DatasourceEmail: components["schemas"]["datasource_email"];
         DatasourceEmailOauth: components["schemas"]["datasource_email_oauth"];
         Error: components["schemas"]["error"];
-        MailLabel: components["schemas"]["email_label"];
         Oauth2Client: components["schemas"]["oauth2_client"];
         Oauth2ClientToken: components["schemas"]["oauth2_client_token"];
-        Oauth2ClientTokenObj: components["schemas"]["oauth2_client_token_obj"];
-        Oauth2State: components["schemas"]["oauth2_state"];
-        Oauth2Subject: components["schemas"]["oauth2_subject"];
         Pipeline: components["schemas"]["pipeline"];
         PipelineEdge: components["schemas"]["pipeline_edge"];
         PipelineNode: components["schemas"]["pipeline_node"];
@@ -1390,7 +1386,6 @@ export interface components {
         StoragePostgresTable: components["schemas"]["storage_postgres_table"];
         StoragePostgresField: components["schemas"]["storage_postgres_field"];
         StorageS3: components["schemas"]["storage_s3"];
-        EmailLabel: components["schemas"]["email_label"];
         SyncPolicy: components["schemas"]["sync_policy"];
         User: components["schemas"]["user"];
         UserSessionToken: components["schemas"]["user_session_token"];
@@ -1860,6 +1855,49 @@ export interface components {
             /** @description Additional connection options in URL query format. */
             options?: string;
         };
+        /** @description Request to query messages from PostgreSQL storage. Fetches data from all configured tables and combines fields as JSON. */
+        storage_postgres_messages_query_req: {
+            /** @description Maximum number of messages to query per table (default 100) */
+            limit?: number;
+            /** @description Offset for pagination per table (default 0) */
+            offset?: number;
+        };
+        /** @description A message query job that streams results to NATS */
+        message_query_job: {
+            /** @description The unique identifier of the query job */
+            readonly uuid: string;
+            /** @description UUID of the storage being queried */
+            storage_uuid: string;
+            /**
+             * @description Current job status
+             * @enum {string}
+             */
+            status: "pending" | "running" | "completed" | "failed";
+            /** @description NATS subject where individual message records will be published */
+            readonly nats_subject: string;
+            /** @description Maximum number of messages per table */
+            limit?: number;
+            /** @description Offset for pagination per table */
+            offset?: number;
+            /** @description Names of tables that were queried */
+            readonly tables_queried?: string[];
+            /** @description Number of messages queried (available after completion) */
+            readonly messages_queried?: number;
+            /** @description Number of messages published to NATS (available after completion) */
+            readonly messages_published?: number;
+            /** @description Number of errors during processing (available after completion) */
+            readonly error_count?: number;
+            /**
+             * Format: date-time
+             * @description When the job was created
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description When the job completed (if finished)
+             */
+            readonly completed_at?: string;
+        };
         storage_s3: {
             readonly uuid?: string;
             /** @description The descriptive name for this storage entry. */
@@ -1973,6 +2011,84 @@ export interface components {
             current_password: string;
             /** @description The new password to set */
             new_password: string;
+        };
+        registered_worker: {
+            /** @description Unique identifier for the worker */
+            readonly uuid?: string;
+            /** @description Display name for the worker */
+            name: string;
+            /**
+             * @description Current connection status of the worker
+             * @enum {string}
+             */
+            readonly status?: "online" | "offline" | "draining";
+            /** @description If true, worker can process jobs for all workspaces */
+            is_global?: boolean;
+            /** @description Worker software version */
+            readonly version?: string;
+            /** @description Arbitrary key-value metadata labels */
+            labels?: {
+                [key: string]: unknown;
+            };
+            /** @description List of workspace UUIDs the worker is allowed to access (if not global) */
+            workspace_uuids?: string[];
+            /**
+             * Format: date-time
+             * @description Timestamp of last heartbeat received
+             */
+            readonly last_heartbeat?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of when the worker last connected
+             */
+            readonly last_connected_at?: string;
+            /** @description IP address or hostname the worker connected from */
+            readonly connected_from?: string;
+            /** @description Number of jobs currently being processed by this worker */
+            readonly active_jobs?: number;
+            /** @description Maximum number of concurrent jobs this worker can handle */
+            readonly capacity?: number;
+            /**
+             * Format: date-time
+             * @description Timestamp of worker registration
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        worker_enrollment_token: {
+            /** @description Unique identifier for the token */
+            readonly uuid?: string;
+            /** @description The actual enrollment token (only returned on creation) */
+            readonly token?: string;
+            /** @description Display name for the worker that will be enrolled with this token */
+            name: string;
+            /** @description If true, the enrolled worker will have access to all workspaces */
+            is_global?: boolean;
+            /** @description List of workspace UUIDs the enrolled worker will be allowed to access */
+            workspace_uuids?: string[];
+            /**
+             * Format: date-time
+             * @description When the token expires
+             */
+            expires_at?: string;
+            /**
+             * Format: date-time
+             * @description When the token was used (if used)
+             */
+            readonly used_at?: string;
+            /** @description UUID of the worker that used this token (if used) */
+            readonly used_by_worker_uuid?: string;
+            /** @description UUID of the user who created the token */
+            readonly created_by_user_uuid?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of token creation
+             */
+            readonly created_at?: string;
         };
         worker_jobs: {
             /** @description Unique identifier */
@@ -2189,84 +2305,6 @@ export interface components {
              */
             readonly assigned_at?: string;
         };
-        registered_worker: {
-            /** @description Unique identifier for the worker */
-            readonly uuid?: string;
-            /** @description Display name for the worker */
-            name: string;
-            /**
-             * @description Current connection status of the worker
-             * @enum {string}
-             */
-            readonly status?: "online" | "offline" | "draining";
-            /** @description If true, worker can process jobs for all workspaces */
-            is_global?: boolean;
-            /** @description Worker software version */
-            readonly version?: string;
-            /** @description Arbitrary key-value metadata labels */
-            labels?: {
-                [key: string]: unknown;
-            };
-            /** @description List of workspace UUIDs the worker is allowed to access (if not global) */
-            workspace_uuids?: string[];
-            /**
-             * Format: date-time
-             * @description Timestamp of last heartbeat received
-             */
-            readonly last_heartbeat?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp of when the worker last connected
-             */
-            readonly last_connected_at?: string;
-            /** @description IP address or hostname the worker connected from */
-            readonly connected_from?: string;
-            /** @description Number of jobs currently being processed by this worker */
-            readonly active_jobs?: number;
-            /** @description Maximum number of concurrent jobs this worker can handle */
-            readonly capacity?: number;
-            /**
-             * Format: date-time
-             * @description Timestamp of worker registration
-             */
-            readonly created_at?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp of last update
-             */
-            readonly updated_at?: string;
-        };
-        worker_enrollment_token: {
-            /** @description Unique identifier for the token */
-            readonly uuid?: string;
-            /** @description The actual enrollment token (only returned on creation) */
-            readonly token?: string;
-            /** @description Display name for the worker that will be enrolled with this token */
-            name: string;
-            /** @description If true, the enrolled worker will have access to all workspaces */
-            is_global?: boolean;
-            /** @description List of workspace UUIDs the enrolled worker will be allowed to access */
-            workspace_uuids?: string[];
-            /**
-             * Format: date-time
-             * @description When the token expires
-             */
-            expires_at?: string;
-            /**
-             * Format: date-time
-             * @description When the token was used (if used)
-             */
-            readonly used_at?: string;
-            /** @description UUID of the worker that used this token (if used) */
-            readonly used_by_worker_uuid?: string;
-            /** @description UUID of the user who created the token */
-            readonly created_by_user_uuid?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp of token creation
-             */
-            readonly created_at?: string;
-        };
         /** @description Definition of a source field available for mapping */
         source_field_definition: {
             /** @description Field name as it appears in the source entity */
@@ -2355,49 +2393,6 @@ export interface components {
             /** @description List of field mappings from source to target */
             mappings: components["schemas"]["mapper_field_mapping"][];
         };
-        /** @description Request to query messages from PostgreSQL storage. Fetches data from all configured tables and combines fields as JSON. */
-        storage_postgres_messages_query_req: {
-            /** @description Maximum number of messages to query per table (default 100) */
-            limit?: number;
-            /** @description Offset for pagination per table (default 0) */
-            offset?: number;
-        };
-        /** @description A message query job that streams results to NATS */
-        message_query_job: {
-            /** @description The unique identifier of the query job */
-            readonly uuid: string;
-            /** @description UUID of the storage being queried */
-            storage_uuid: string;
-            /**
-             * @description Current job status
-             * @enum {string}
-             */
-            status: "pending" | "running" | "completed" | "failed";
-            /** @description NATS subject where individual message records will be published */
-            readonly nats_subject: string;
-            /** @description Maximum number of messages per table */
-            limit?: number;
-            /** @description Offset for pagination per table */
-            offset?: number;
-            /** @description Names of tables that were queried */
-            readonly tables_queried?: string[];
-            /** @description Number of messages queried (available after completion) */
-            readonly messages_queried?: number;
-            /** @description Number of messages published to NATS (available after completion) */
-            readonly messages_published?: number;
-            /** @description Number of errors during processing (available after completion) */
-            readonly error_count?: number;
-            /**
-             * Format: date-time
-             * @description When the job was created
-             */
-            readonly created_at?: string;
-            /**
-             * Format: date-time
-             * @description When the job completed (if finished)
-             */
-            readonly completed_at?: string;
-        };
         /** @description A message record from NATS stream */
         nats_message: {
             /** @description Stream sequence number */
@@ -2478,73 +2473,6 @@ export interface components {
             token: string;
             /** @description New password for the account */
             new_password: string;
-        };
-        email_label: {
-            /** Format: int64 */
-            HTTPStatusCode: number;
-            Header: {
-                [key: string]: string[];
-            };
-            id?: string;
-            color?: {
-                backgroundColor?: string;
-                textColor?: string;
-            };
-            labelListVisibility?: string;
-            messageListVisibility?: string;
-            /** Format: int64 */
-            messagesTotal?: number;
-            /** Format: int64 */
-            messagesUnread?: number;
-            name?: string;
-            /** Format: int64 */
-            threadsTotal?: number;
-            /** Format: int64 */
-            threadsUnread?: number;
-            type?: string;
-        };
-        oauth2_state: {
-            /** @description Internal unique ID for the state record. */
-            uuid?: string;
-            /** @description UUID of the OAuth2 client associated with this state. */
-            client_uuid: string;
-            /** @description The state value (may include nonce, redirect_uri, etc.) used to prevent CSRF. */
-            state: {
-                [key: string]: unknown;
-            };
-            /**
-             * Format: date-time
-             * @description Timestamp when the state was created.
-             */
-            created_at?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the state was last updated.
-             */
-            updated_at?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the state should be invalidated.
-             */
-            expired_at: string;
-        };
-        oauth2_subject: {
-            /** @description Internal unique ID for the subject record. */
-            uuid?: string;
-            /** @description UUID of the user in the system. */
-            user_uuid: string;
-            /** @description UUID of the associated OAuth2 token record. */
-            token_uuid: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the subject record was created.
-             */
-            created_at?: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the subject record was last updated.
-             */
-            updated_at?: string;
         };
     };
     responses: never;
@@ -4026,6 +3954,60 @@ export interface operations {
             };
         };
     };
+    "storage-postgres-messages-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description PostgreSQL storage UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["storage_postgres_messages_query_req"];
+            };
+        };
+        responses: {
+            /** @description Message query job created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["message_query_job"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Storage not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
     "storage-s3-create": {
         parameters: {
             query?: never;
@@ -4611,6 +4593,252 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["error"];
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listRegisteredWorkers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of registered workers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["registered_worker"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getRegisteredWorker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker details retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["registered_worker"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateRegisteredWorker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["registered_worker"];
+            };
+        };
+        responses: {
+            /** @description Worker updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["registered_worker"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteRegisteredWorker: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listWorkerEnrollmentTokens: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of enrollment tokens */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_enrollment_token"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createWorkerEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["worker_enrollment_token"];
+            };
+        };
+        responses: {
+            /** @description Enrollment token created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_enrollment_token"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getWorkerEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token details retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_enrollment_token"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteWorkerEnrollmentToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {
@@ -5902,252 +6130,6 @@ export interface operations {
             };
         };
     };
-    listRegisteredWorkers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of registered workers */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["registered_worker"][];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    getRegisteredWorker: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Worker details retrieved successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["registered_worker"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    updateRegisteredWorker: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["registered_worker"];
-            };
-        };
-        responses: {
-            /** @description Worker updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["registered_worker"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    deleteRegisteredWorker: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Worker deleted successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    listWorkerEnrollmentTokens: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of enrollment tokens */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["worker_enrollment_token"][];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    createWorkerEnrollmentToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["worker_enrollment_token"];
-            };
-        };
-        responses: {
-            /** @description Enrollment token created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["worker_enrollment_token"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    getWorkerEnrollmentToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Token details retrieved successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["worker_enrollment_token"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    deleteWorkerEnrollmentToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Token deleted successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
     MapperSourceFieldsList: {
         parameters: {
             query?: {
@@ -6295,60 +6277,6 @@ export interface operations {
             };
             /** @description An error occurred while retrieving the job. */
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "storage-postgres-messages-query": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description PostgreSQL storage UUID */
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["storage_postgres_messages_query_req"];
-            };
-        };
-        responses: {
-            /** @description Message query job created */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["message_query_job"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-            /** @description Storage not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
                 headers: {
                     [name: string]: unknown;
                 };

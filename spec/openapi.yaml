@@ -20,18 +20,11 @@ components:
     Error:
       $ref: "components/error.yaml"
 
-    MailLabel:
-      $ref: "components/email_label.yaml"
     Oauth2Client:
       $ref: "components/oauth2_client.yaml"
     Oauth2ClientToken:
       $ref: "components/oauth2_client_token.yaml"
-    Oauth2ClientTokenObj:
-      $ref: "components/oauth2_client_token_obj.yaml"
-    Oauth2State:
-      $ref: "components/oauth2_state.yaml"
-    Oauth2Subject:
-      $ref: "components/oauth2_subject.yaml"
+
     Pipeline:
       $ref: "components/pipeline.yaml"
     PipelineEdge:
@@ -48,8 +41,7 @@ components:
       $ref: "components/storage_postgres_field.yaml"
     StorageS3:
       $ref: "components/storage_s3.yaml"
-    EmailLabel:
-      $ref: "components/email_label.yaml"
+
     SyncPolicy:
       $ref: "components/sync_policy.yaml"
     User:
