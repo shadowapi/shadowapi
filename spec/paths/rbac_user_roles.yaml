@@ -1,8 +1,6 @@
 get:
   summary: Get roles for a user
   operationId: getUserRoles
-  tags:
-    - RBAC
   parameters:
     - in: path
       name: user_uuid
@@ -37,11 +35,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac
+
 post:
   summary: Assign a role to a user
   operationId: assignRoleToUser
-  tags:
-    - RBAC
   parameters:
     - in: path
       name: user_uuid
@@ -75,3 +74,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac

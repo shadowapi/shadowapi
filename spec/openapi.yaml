@@ -16,7 +16,7 @@ tags:
     description: Email datasource configuration using OAuth2 authentication.
   - name: mapper
     description: Field mapping and data transformation configuration.
-  - name: NATS
+  - name: nats
     description: NATS messaging queue operations for viewing and managing messages.
   - name: oauth2
     description: OAuth2 client and token management for external service authentication.
@@ -26,7 +26,7 @@ tags:
     description: Data processing pipeline configuration and management.
   - name: profile
     description: Current user profile management and password updates.
-  - name: RBAC
+  - name: rbac
     description: Role-based access control for managing roles and permissions.
   - name: scheduler
     description: Job scheduling for automated pipeline execution.

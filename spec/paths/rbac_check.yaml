@@ -1,8 +1,6 @@
 post:
   summary: Check if a user has permission
   operationId: checkPermission
-  tags:
-    - RBAC
   requestBody:
     required: true
     content:
@@ -45,3 +43,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac

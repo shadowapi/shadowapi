@@ -43,6 +43,7 @@ get:
       description: Error
   tags:
     - oauth2-auth
+
 post:
   description: Create OAuth2 client
   operationId: oauth2-client-create

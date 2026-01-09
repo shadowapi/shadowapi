@@ -1,8 +1,6 @@
 get:
   summary: List all workspaces
   operationId: listWorkspaces
-  tags:
-    - workspace
   responses:
     "200":
       description: List of workspaces
@@ -18,11 +16,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace
+
 post:
   summary: Create a new workspace
   operationId: createWorkspace
-  tags:
-    - workspace
   requestBody:
     required: true
     content:
@@ -42,3 +41,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace

@@ -1,8 +1,6 @@
 delete:
   summary: Cancel/delete an invite
   operationId: deleteWorkspaceInvite
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -27,3 +25,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace

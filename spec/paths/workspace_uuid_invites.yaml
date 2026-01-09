@@ -1,8 +1,6 @@
 get:
   summary: List workspace invites
   operationId: listWorkspaceInvites
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -26,12 +24,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace
 
 post:
   summary: Create workspace invite
   operationId: createWorkspaceInvite
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -65,3 +63,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace

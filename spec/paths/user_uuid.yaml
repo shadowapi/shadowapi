@@ -22,6 +22,7 @@ get:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - users
+
 put:
   summary: Update user details
   operationId: updateUser
@@ -52,6 +53,7 @@ put:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
     - users
+
 delete:
   summary: Delete user
   operationId: deleteUser

@@ -1,12 +1,9 @@
-# spec/paths/nats_messages.yaml
 get:
   operationId: nats-messages-list
   summary: Get last messages from NATS stream
   description: |
     Retrieves the last N messages from the NATS data stream for the current workspace.
     These are message records that were published during message query jobs.
-  tags:
-    - NATS
   parameters:
     - name: limit
       in: query
@@ -29,6 +26,8 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - nats
 
 delete:
   operationId: nats-messages-purge
@@ -36,8 +35,6 @@ delete:
   description: |
     Purges (deletes) all messages from the NATS data stream for the current workspace.
     This is a destructive operation and cannot be undone.
-  tags:
-    - NATS
   responses:
     "200":
       description: Messages purged successfully
@@ -51,3 +48,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - nats

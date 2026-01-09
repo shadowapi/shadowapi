@@ -2,8 +2,6 @@ get:
   summary: Get invite details by token (public)
   operationId: getInviteByToken
   security: []
-  tags:
-    - auth
   parameters:
     - in: path
       name: token
@@ -30,3 +28,5 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - auth

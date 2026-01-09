@@ -1,8 +1,6 @@
 get:
   summary: Get role details
   operationId: getRole
-  tags:
-    - RBAC
   parameters:
     - in: path
       name: uuid
@@ -24,11 +22,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac
+
 put:
   summary: Update a role
   operationId: updateRole
-  tags:
-    - RBAC
   parameters:
     - in: path
       name: uuid
@@ -56,11 +55,12 @@ put:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac
+
 delete:
   summary: Delete a role
   operationId: deleteRole
-  tags:
-    - RBAC
   parameters:
     - in: path
       name: uuid
@@ -78,3 +78,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac

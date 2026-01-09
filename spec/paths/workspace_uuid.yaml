@@ -1,8 +1,6 @@
 get:
   summary: Get workspace details
   operationId: getWorkspace
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -24,11 +22,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace
+
 put:
   summary: Update workspace
   operationId: updateWorkspace
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -56,11 +55,12 @@ put:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace
+
 delete:
   summary: Delete workspace
   operationId: deleteWorkspace
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -78,3 +78,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace

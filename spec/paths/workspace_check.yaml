@@ -1,8 +1,6 @@
 get:
   summary: Check if workspace exists
   operationId: checkWorkspaceExists
-  tags:
-    - workspace
   parameters:
     - in: query
       name: slug
@@ -23,3 +21,5 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace

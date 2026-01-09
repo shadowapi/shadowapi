@@ -1,8 +1,6 @@
 get:
   summary: Get registered worker details
   operationId: getRegisteredWorker
-  tags:
-    - workers
   parameters:
     - in: path
       name: uuid
@@ -22,11 +20,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workers
+
 put:
   summary: Update registered worker
   operationId: updateRegisteredWorker
-  tags:
-    - workers
   parameters:
     - in: path
       name: uuid
@@ -52,11 +51,12 @@ put:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workers
+
 delete:
   summary: Delete registered worker
   operationId: deleteRegisteredWorker
-  tags:
-    - workers
   parameters:
     - in: path
       name: uuid
@@ -72,3 +72,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workers

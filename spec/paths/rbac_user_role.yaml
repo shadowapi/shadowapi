@@ -1,8 +1,6 @@
 delete:
   summary: Remove a role from a user
   operationId: removeRoleFromUser
-  tags:
-    - RBAC
   parameters:
     - in: path
       name: user_uuid
@@ -32,3 +30,5 @@ delete:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac

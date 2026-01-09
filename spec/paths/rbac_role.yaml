@@ -1,8 +1,6 @@
 get:
   summary: List all roles
   operationId: listRoles
-  tags:
-    - RBAC
   parameters:
     - in: query
       name: scope
@@ -49,3 +47,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac

@@ -1,8 +1,6 @@
 get:
   summary: List workspace members
   operationId: listWorkspaceMembers
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -26,11 +24,12 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace
+
 post:
   summary: Add member to workspace
   operationId: addWorkspaceMember
-  tags:
-    - workspace
   parameters:
     - in: path
       name: uuid
@@ -58,3 +57,5 @@ post:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - workspace

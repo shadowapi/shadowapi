@@ -1,8 +1,6 @@
 get:
   summary: List all permissions
   operationId: listPermissions
-  tags:
-    - RBAC
   parameters:
     - in: query
       name: scope
@@ -30,3 +28,5 @@ get:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+  tags:
+    - rbac

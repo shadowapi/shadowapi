@@ -1,5 +1,3 @@
-# spec/paths/worker_jobs_uuid.yaml
-
 get:
   description: Retrieve a specific worker job by uuid.
   operationId: worker-jobs-get
