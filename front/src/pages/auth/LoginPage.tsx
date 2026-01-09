@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { useNavigate, useLocation, useSearchParams, Link } from 'react-router';
-import { Card, Form, Input, Button, Alert, Typography } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useAuth } from '../../lib/auth';
+import { useEffect, useRef } from "react";
+import { useNavigate, useLocation, useSearchParams, Link } from "react-router";
+import { Card, Form, Input, Button, Alert, Typography, Spin } from "antd";
+import { UserOutlined, LockOutlined, LoadingOutlined } from "@ant-design/icons";
+import { useAuth } from "../../lib/auth";
 
 const { Title } = Typography;
 
@@ -20,10 +20,11 @@ function LoginPage() {
   const redirectInitiated = useRef(false);
 
   // Get login_challenge from URL if present (OAuth2 flow from Hydra)
-  const loginChallenge = searchParams.get('login_challenge');
+  const loginChallenge = searchParams.get("login_challenge");
 
-  const from = (location.state as { from?: { pathname: string } })?.from
-    ?.pathname || '/workspaces';
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    "/workspaces";
 
   useEffect(() => {
     // Only redirect if authenticated AND there's no login_challenge
@@ -35,10 +36,15 @@ function LoginPage() {
 
   // Auto-initiate OAuth2 flow when no login_challenge is present
   useEffect(() => {
-    if (!loginChallenge && !isAuthenticated && !isLoading && !redirectInitiated.current) {
+    if (
+      !loginChallenge &&
+      !isAuthenticated &&
+      !isLoading &&
+      !redirectInitiated.current
+    ) {
       redirectInitiated.current = true;
       // Calling login with empty credentials initiates the OAuth2 flow
-      login('', '', undefined).catch(() => {
+      login("", "", undefined).catch(() => {
         // Reset flag if redirect fails so user can retry
         redirectInitiated.current = false;
       });
@@ -54,24 +60,39 @@ function LoginPage() {
     }
   };
 
-  // Render nothing when no login_challenge (redirecting to OAuth2 flow)
+  // Show spinner when no login_challenge (redirecting to OAuth2 flow)
   // Only show error if OAuth2 initiation fails
   if (!loginChallenge) {
     if (error) {
       return (
-        <Card style={{ width: 400, maxWidth: '100%' }}>
+        <Card style={{ width: 400, maxWidth: "100%" }}>
           <Alert message={error} type="error" showIcon />
         </Card>
       );
     }
-    return null;
+    return (
+      <Card style={{ width: 400, maxWidth: "100%" }}>
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 32 }} spin />} />
+          <div style={{ marginTop: 16 }}>
+            <Typography.Text type="secondary">
+              Redirecting to login...
+            </Typography.Text>
+          </div>
+        </div>
+      </Card>
+    );
   }
 
   return (
-    <Card style={{ width: 400, maxWidth: '100%' }}>
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+    <Card style={{ width: 400, maxWidth: "100%" }}>
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
         <Link to="/start">
-          <img src="/logo.svg" alt="MeshPump logo" style={{ height: 64, marginBottom: 16 }} />
+          <img
+            src="/logo.svg"
+            alt="MeshPump logo"
+            style={{ height: 64, marginBottom: 16 }}
+          />
         </Link>
         <Title level={3} style={{ margin: 0 }}>
           MeshPump
@@ -102,8 +123,8 @@ function LoginPage() {
         <Form.Item
           name="email"
           rules={[
-            { required: true, message: 'Please enter your email' },
-            { type: 'email', message: 'Please enter a valid email' },
+            { required: true, message: "Please enter your email" },
+            { type: "email", message: "Please enter a valid email" },
           ]}
         >
           <Input
@@ -116,7 +137,7 @@ function LoginPage() {
 
         <Form.Item
           name="password"
-          rules={[{ required: true, message: 'Please enter your password' }]}
+          rules={[{ required: true, message: "Please enter your password" }]}
         >
           <Input.Password
             prefix={<LockOutlined />}
@@ -138,7 +159,7 @@ function LoginPage() {
           </Button>
         </Form.Item>
 
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: "center" }}>
           <Link to="/forgot-password">Forgot password?</Link>
         </div>
       </Form>
