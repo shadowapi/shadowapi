@@ -24,6 +24,8 @@ tags:
     description: OAuth2 authentication flow endpoints for datasource authorization.
   - name: pipeline
     description: Data processing pipeline configuration and management.
+  - name: profile
+    description: Current user profile management and password updates.
   - name: RBAC
     description: Role-based access control for managing roles and permissions.
   - name: scheduler
@@ -40,6 +42,8 @@ tags:
     description: Connection testing for validating storage and datasource configurations.
   - name: token
     description: OAuth2 token management for datasource authentication.
+  - name: users
+    description: User account administration and session management.
   - name: worker-jobs
     description: Background job monitoring and management.
   - name: workers
