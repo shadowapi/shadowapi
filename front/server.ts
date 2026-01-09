@@ -47,10 +47,11 @@ async function createServer() {
       const isCSROnly = csrOnlyPaths.some(p => pathname === p || pathname.startsWith(p));
 
       if (isCSROnly) {
-        // For CSR-only routes, return template without SSR content
+        // For CSR-only routes, inject pre-React loader (replaced when React mounts)
+        const loaderHtml = '<div class="pre-react-loader"><div class="pre-react-spinner"></div></div>';
         const html = template
           .replace('<!--ssr-styles-->', '')
-          .replace('<!--ssr-outlet-->', '')
+          .replace('<!--ssr-outlet-->', loaderHtml)
           .replace('<!--ssr-data-->', '');
 
         res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
