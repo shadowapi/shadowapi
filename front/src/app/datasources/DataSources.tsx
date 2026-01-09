@@ -11,14 +11,11 @@ const { Title } = Typography;
 
 type Datasource = components['schemas']['datasource'];
 
-type DatasourceTypeKey = 'email' | 'email_oauth' | 'telegram' | 'whatsapp' | 'linkedin';
+type DatasourceTypeKey = 'email' | 'email_oauth';
 
 const typeLabels: Record<DatasourceTypeKey, { label: string; color: string }> = {
   email: { label: 'Email IMAP', color: 'blue' },
   email_oauth: { label: 'Email OAuth', color: 'cyan' },
-  telegram: { label: 'Telegram', color: 'geekblue' },
-  whatsapp: { label: 'WhatsApp', color: 'green' },
-  linkedin: { label: 'LinkedIn', color: 'purple' },
 };
 
 function DataSources() {
@@ -50,12 +47,6 @@ function DataSources() {
         return '/datasource/email/{uuid}' as const;
       case 'email_oauth':
         return '/datasource/email_oauth/{uuid}' as const;
-      case 'telegram':
-        return '/datasource/telegram/{uuid}' as const;
-      case 'whatsapp':
-        return '/datasource/whatsapp/{uuid}' as const;
-      case 'linkedin':
-        return '/datasource/linkedin/{uuid}' as const;
       default:
         return '/datasource/email/{uuid}' as const;
     }

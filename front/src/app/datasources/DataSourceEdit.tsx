@@ -24,7 +24,7 @@ import type { components } from '../../api/v1';
 
 const { Title, Paragraph } = Typography;
 
-type DatasourceType = 'email' | 'email_oauth' | 'telegram' | 'whatsapp' | 'linkedin';
+type DatasourceType = 'email' | 'email_oauth';
 
 type OAuth2Client = components['schemas']['oauth2_client'];
 
@@ -41,22 +41,11 @@ interface FormValues {
   password?: string;
   // Email OAuth fields
   oauth2_client_uuid?: string;
-  // Telegram fields
-  phone_number?: string;
-  api_id?: number;
-  api_hash?: string;
-  // WhatsApp fields
-  device_name?: string;
-  // LinkedIn fields
-  username?: string;
 }
 
 const typeOptions = [
   { value: 'email', label: 'Email IMAP' },
   { value: 'email_oauth', label: 'Email OAuth' },
-  { value: 'telegram', label: 'Telegram' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'linkedin', label: 'LinkedIn' },
 ];
 
 function DataSourceEdit() {
@@ -202,46 +191,6 @@ function DataSourceEdit() {
         }
         break;
       }
-      case 'telegram': {
-        const { data } = await client.GET('/datasource/telegram/{uuid}', {
-          params: { path: { uuid: uuid! } },
-        });
-        if (data) {
-          fullData = {
-            ...data,
-            type: 'telegram',
-            is_enabled: data.is_enabled ?? true,
-            api_id: data.api_id ? Number(data.api_id) : undefined,
-          };
-        }
-        break;
-      }
-      case 'whatsapp': {
-        const { data } = await client.GET('/datasource/whatsapp/{uuid}', {
-          params: { path: { uuid: uuid! } },
-        });
-        if (data) {
-          fullData = {
-            ...data,
-            type: 'whatsapp',
-            is_enabled: data.is_enabled ?? true,
-          };
-        }
-        break;
-      }
-      case 'linkedin': {
-        const { data } = await client.GET('/datasource/linkedin/{uuid}', {
-          params: { path: { uuid: uuid! } },
-        });
-        if (data) {
-          fullData = {
-            ...data,
-            type: 'linkedin',
-            is_enabled: data.is_enabled ?? true,
-          };
-        }
-        break;
-      }
     }
 
     // Store loaded data in state - form values will be set after re-render
@@ -311,47 +260,6 @@ function DataSourceEdit() {
             if (error) throw new Error(error.detail);
             break;
           }
-          case 'telegram': {
-            const { error } = await client.POST('/datasource/telegram', {
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                phone_number: values.phone_number || '',
-                provider: values.provider || 'telegram',
-                api_id: String(values.api_id || 0),
-                api_hash: values.api_hash || '',
-                password: values.password,
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
-          case 'whatsapp': {
-            const { error } = await client.POST('/datasource/whatsapp', {
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                phone_number: values.phone_number || '',
-                provider: values.provider || 'whatsapp',
-                device_name: values.device_name || '',
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
-          case 'linkedin': {
-            const { error } = await client.POST('/datasource/linkedin', {
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                username: values.username || '',
-                password: values.password || '',
-                provider: values.provider || 'linkedin',
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
         }
         message.success('Data source created');
       } else {
@@ -388,50 +296,6 @@ function DataSourceEdit() {
             if (error) throw new Error(error.detail);
             break;
           }
-          case 'telegram': {
-            const { error } = await client.PUT('/datasource/telegram/{uuid}', {
-              params: { path: { uuid: uuid! } },
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                phone_number: values.phone_number || '',
-                provider: values.provider || 'telegram',
-                api_id: String(values.api_id || 0),
-                api_hash: values.api_hash || '',
-                password: values.password,
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
-          case 'whatsapp': {
-            const { error } = await client.PUT('/datasource/whatsapp/{uuid}', {
-              params: { path: { uuid: uuid! } },
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                phone_number: values.phone_number || '',
-                provider: values.provider || 'whatsapp',
-                device_name: values.device_name || '',
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
-          case 'linkedin': {
-            const { error } = await client.PUT('/datasource/linkedin/{uuid}', {
-              params: { path: { uuid: uuid! } },
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                username: values.username || '',
-                password: values.password || '',
-                provider: values.provider || 'linkedin',
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
         }
         message.success('Data source updated');
       }
@@ -447,7 +311,7 @@ function DataSourceEdit() {
   const handleDelete = async () => {
     if (isNew) return;
 
-    let endpoint: string;
+    let endpoint: '/datasource/email/{uuid}' | '/datasource/email_oauth/{uuid}';
     switch (datasourceType) {
       case 'email':
         endpoint = '/datasource/email/{uuid}';
@@ -455,18 +319,9 @@ function DataSourceEdit() {
       case 'email_oauth':
         endpoint = '/datasource/email_oauth/{uuid}';
         break;
-      case 'telegram':
-        endpoint = '/datasource/telegram/{uuid}';
-        break;
-      case 'whatsapp':
-        endpoint = '/datasource/whatsapp/{uuid}';
-        break;
-      case 'linkedin':
-        endpoint = '/datasource/linkedin/{uuid}';
-        break;
     }
 
-    const { error } = await client.DELETE(endpoint as '/datasource/email/{uuid}', {
+    const { error } = await client.DELETE(endpoint, {
       params: { path: { uuid: uuid! } },
     });
 
@@ -639,57 +494,6 @@ function DataSourceEdit() {
             </>
           )}
 
-          {/* Telegram fields */}
-          {selectedType === 'telegram' && (
-            <>
-              <Form.Item name="phone_number" label="Phone Number">
-                <Input placeholder="+1234567890" />
-              </Form.Item>
-              <Form.Item name="provider" label="Provider">
-                <Input placeholder="telegram" />
-              </Form.Item>
-              <Form.Item name="api_id" label="API ID">
-                <Input type="number" placeholder="12345678" />
-              </Form.Item>
-              <Form.Item name="api_hash" label="API Hash">
-                <Input placeholder="abcdef1234567890" />
-              </Form.Item>
-              <Form.Item name="password" label="2FA Password (optional)">
-                <Input.Password placeholder="Two-factor authentication password" />
-              </Form.Item>
-            </>
-          )}
-
-          {/* WhatsApp fields */}
-          {selectedType === 'whatsapp' && (
-            <>
-              <Form.Item name="phone_number" label="Phone Number">
-                <Input placeholder="+1234567890" />
-              </Form.Item>
-              <Form.Item name="provider" label="Provider">
-                <Input placeholder="whatsapp" />
-              </Form.Item>
-              <Form.Item name="device_name" label="Device Name">
-                <Input placeholder="My Phone" />
-              </Form.Item>
-            </>
-          )}
-
-          {/* LinkedIn fields */}
-          {selectedType === 'linkedin' && (
-            <>
-              <Form.Item name="username" label="Username">
-                <Input placeholder="linkedin_username" />
-              </Form.Item>
-              <Form.Item name="password" label="Password">
-                <Input.Password placeholder="Account password" />
-              </Form.Item>
-              <Form.Item name="provider" label="Provider">
-                <Input placeholder="linkedin" />
-              </Form.Item>
-            </>
-          )}
-
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" loading={saving}>
@@ -729,22 +533,6 @@ function DataSourceEdit() {
           <Paragraph type="secondary">
             Secure email access using OAuth2. Requires an OAuth2 client configured in OAuth2
             Credentials.
-          </Paragraph>
-          <Title level={5}>Telegram</Title>
-          <Paragraph type="secondary">
-            Telegram access using the MTProto API. Requires API ID and Hash from{' '}
-            <a href="https://my.telegram.org" target="_blank" rel="noopener noreferrer">
-              my.telegram.org
-            </a>
-            .
-          </Paragraph>
-          <Title level={5}>WhatsApp</Title>
-          <Paragraph type="secondary">
-            WhatsApp access via web pairing. Device pairing is required after creation.
-          </Paragraph>
-          <Title level={5}>LinkedIn</Title>
-          <Paragraph type="secondary">
-            LinkedIn access using account credentials.
           </Paragraph>
         </Card>
       </Col>

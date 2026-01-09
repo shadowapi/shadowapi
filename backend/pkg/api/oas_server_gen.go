@@ -106,12 +106,6 @@ type Handler interface {
 	//
 	// POST /password/reset/confirm
 	ConfirmPasswordReset(ctx context.Context, req *PasswordResetConfirm) (ConfirmPasswordResetRes, error)
-	// CreateContact implements createContact operation.
-	//
-	// Create a new contact record.
-	//
-	// POST /contact
-	CreateContact(ctx context.Context, req *Contact) (CreateContactRes, error)
 	// CreateRole implements createRole operation.
 	//
 	// Create a new role.
@@ -215,36 +209,6 @@ type Handler interface {
 	//
 	// PUT /datasource/email/{uuid}
 	DatasourceEmailUpdate(ctx context.Context, req *DatasourceEmail, params DatasourceEmailUpdateParams) (DatasourceEmailUpdateRes, error)
-	// DatasourceLinkedinCreate implements datasource-linkedin-create operation.
-	//
-	// Create a new LinkedIn datasource.
-	//
-	// POST /datasource/linkedin
-	DatasourceLinkedinCreate(ctx context.Context, req *DatasourceLinkedin) (DatasourceLinkedinCreateRes, error)
-	// DatasourceLinkedinDelete implements datasource-linkedin-delete operation.
-	//
-	// Delete a LinkedIn datasource.
-	//
-	// DELETE /datasource/linkedin/{uuid}
-	DatasourceLinkedinDelete(ctx context.Context, params DatasourceLinkedinDeleteParams) (DatasourceLinkedinDeleteRes, error)
-	// DatasourceLinkedinGet implements datasource-linkedin-get operation.
-	//
-	// Get a LinkedIn datasource.
-	//
-	// GET /datasource/linkedin/{uuid}
-	DatasourceLinkedinGet(ctx context.Context, params DatasourceLinkedinGetParams) (DatasourceLinkedinGetRes, error)
-	// DatasourceLinkedinList implements datasource-linkedin-list operation.
-	//
-	// List all LinkedIn datasources.
-	//
-	// GET /datasource/linkedin
-	DatasourceLinkedinList(ctx context.Context, params DatasourceLinkedinListParams) (DatasourceLinkedinListRes, error)
-	// DatasourceLinkedinUpdate implements datasource-linkedin-update operation.
-	//
-	// Update a LinkedIn datasource.
-	//
-	// PUT /datasource/linkedin/{uuid}
-	DatasourceLinkedinUpdate(ctx context.Context, req *DatasourceLinkedin, params DatasourceLinkedinUpdateParams) (DatasourceLinkedinUpdateRes, error)
 	// DatasourceList implements datasource-list operation.
 	//
 	// Retrieve a list of datasource objects.
@@ -257,72 +221,6 @@ type Handler interface {
 	//
 	// PUT /datasource/{uuid}/oauth2/client
 	DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (DatasourceSetOAuth2ClientRes, error)
-	// DatasourceTelegramCreate implements datasource-telegram-create operation.
-	//
-	// Create a new Telegram datasource.
-	//
-	// POST /datasource/telegram
-	DatasourceTelegramCreate(ctx context.Context, req *DatasourceTelegram) (DatasourceTelegramCreateRes, error)
-	// DatasourceTelegramDelete implements datasource-telegram-delete operation.
-	//
-	// Delete a Telegram datasource.
-	//
-	// DELETE /datasource/telegram/{uuid}
-	DatasourceTelegramDelete(ctx context.Context, params DatasourceTelegramDeleteParams) (DatasourceTelegramDeleteRes, error)
-	// DatasourceTelegramGet implements datasource-telegram-get operation.
-	//
-	// Get a Telegram datasource.
-	//
-	// GET /datasource/telegram/{uuid}
-	DatasourceTelegramGet(ctx context.Context, params DatasourceTelegramGetParams) (DatasourceTelegramGetRes, error)
-	// DatasourceTelegramList implements datasource-telegram-list operation.
-	//
-	// List all Telegram datasources.
-	//
-	// GET /datasource/telegram
-	DatasourceTelegramList(ctx context.Context, params DatasourceTelegramListParams) (DatasourceTelegramListRes, error)
-	// DatasourceTelegramUpdate implements datasource-telegram-update operation.
-	//
-	// Update a Telegram datasource.
-	//
-	// PUT /datasource/telegram/{uuid}
-	DatasourceTelegramUpdate(ctx context.Context, req *DatasourceTelegram, params DatasourceTelegramUpdateParams) (DatasourceTelegramUpdateRes, error)
-	// DatasourceWhatsappCreate implements datasource-whatsapp-create operation.
-	//
-	// Create a new WhatsApp datasource.
-	//
-	// POST /datasource/whatsapp
-	DatasourceWhatsappCreate(ctx context.Context, req *DatasourceWhatsapp) (DatasourceWhatsappCreateRes, error)
-	// DatasourceWhatsappDelete implements datasource-whatsapp-delete operation.
-	//
-	// Delete a WhatsApp datasource.
-	//
-	// DELETE /datasource/whatsapp/{uuid}
-	DatasourceWhatsappDelete(ctx context.Context, params DatasourceWhatsappDeleteParams) (DatasourceWhatsappDeleteRes, error)
-	// DatasourceWhatsappGet implements datasource-whatsapp-get operation.
-	//
-	// Get a WhatsApp datasource.
-	//
-	// GET /datasource/whatsapp/{uuid}
-	DatasourceWhatsappGet(ctx context.Context, params DatasourceWhatsappGetParams) (DatasourceWhatsappGetRes, error)
-	// DatasourceWhatsappList implements datasource-whatsapp-list operation.
-	//
-	// List all WhatsApp datasources.
-	//
-	// GET /datasource/whatsapp
-	DatasourceWhatsappList(ctx context.Context, params DatasourceWhatsappListParams) (DatasourceWhatsappListRes, error)
-	// DatasourceWhatsappUpdate implements datasource-whatsapp-update operation.
-	//
-	// Update a WhatsApp datasource.
-	//
-	// PUT /datasource/whatsapp/{uuid}
-	DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (DatasourceWhatsappUpdateRes, error)
-	// DeleteContact implements deleteContact operation.
-	//
-	// Delete a contact record.
-	//
-	// DELETE /contact/{uuid}
-	DeleteContact(ctx context.Context, params DeleteContactParams) (DeleteContactRes, error)
 	// DeleteRegisteredWorker implements deleteRegisteredWorker operation.
 	//
 	// Delete registered worker.
@@ -359,54 +257,6 @@ type Handler interface {
 	//
 	// DELETE /workspace/{uuid}/invites/{invite_uuid}
 	DeleteWorkspaceInvite(ctx context.Context, params DeleteWorkspaceInviteParams) (DeleteWorkspaceInviteRes, error)
-	// FileCreate implements file-create operation.
-	//
-	// Upload a new file and create its record.
-	//
-	// POST /file
-	FileCreate(ctx context.Context, req *UploadFileRequest) (FileCreateRes, error)
-	// FileDelete implements file-delete operation.
-	//
-	// Delete a stored file.
-	//
-	// DELETE /file/{uuid}
-	FileDelete(ctx context.Context, params FileDeleteParams) (FileDeleteRes, error)
-	// FileGet implements file-get operation.
-	//
-	// Retrieve details of a stored file.
-	//
-	// GET /file/{uuid}
-	FileGet(ctx context.Context, params FileGetParams) (FileGetRes, error)
-	// FileList implements file-list operation.
-	//
-	// Retrieve a list of stored files.
-	//
-	// GET /file
-	FileList(ctx context.Context, params FileListParams) (FileListRes, error)
-	// FileUpdate implements file-update operation.
-	//
-	// Update metadata of a stored file.
-	//
-	// PUT /file/{uuid}
-	FileUpdate(ctx context.Context, req *FileUpdateReq, params FileUpdateParams) (FileUpdateRes, error)
-	// GenerateDownloadLink implements generateDownloadLink operation.
-	//
-	// Generate a download link for a stored file.
-	//
-	// POST /storage/file-link
-	GenerateDownloadLink(ctx context.Context, req *GenerateDownloadLinkRequest) (GenerateDownloadLinkRes, error)
-	// GeneratePresignedUploadUrl implements generatePresignedUploadUrl operation.
-	//
-	// Generate a pre-signed URL for file upload.
-	//
-	// POST /storage/upload-url
-	GeneratePresignedUploadUrl(ctx context.Context, req *UploadPresignedUrlRequest) (GeneratePresignedUploadUrlRes, error)
-	// GetContact implements getContact operation.
-	//
-	// Get contact details.
-	//
-	// GET /contact/{uuid}
-	GetContact(ctx context.Context, params GetContactParams) (GetContactRes, error)
 	// GetInviteByToken implements getInviteByToken operation.
 	//
 	// Get invite details by token (public).
@@ -461,12 +311,6 @@ type Handler interface {
 	//
 	// GET /workspace/{uuid}
 	GetWorkspace(ctx context.Context, params GetWorkspaceParams) (GetWorkspaceRes, error)
-	// ListContacts implements listContacts operation.
-	//
-	// List all contacts.
-	//
-	// GET /contact
-	ListContacts(ctx context.Context) (ListContactsRes, error)
 	// ListPermissions implements listPermissions operation.
 	//
 	// List all permissions.
@@ -534,36 +378,6 @@ type Handler interface {
 	//
 	// POST /mapper/validate
 	MapperValidate(ctx context.Context, req *MapperValidateReq) (MapperValidateRes, error)
-	// MessageEmailQuery implements messageEmailQuery operation.
-	//
-	// Execute a search query on email messages.
-	//
-	// POST /message/email/query
-	MessageEmailQuery(ctx context.Context, req *MessageQuery) (MessageEmailQueryRes, error)
-	// MessageLinkedinQuery implements messageLinkedinQuery operation.
-	//
-	// Execute a search query on LinkedIn messages.
-	//
-	// POST /message/linkedin/query
-	MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (MessageLinkedinQueryRes, error)
-	// MessageQuery implements messageQuery operation.
-	//
-	// Execute a search query on unified messages.
-	//
-	// POST /message/query
-	MessageQuery(ctx context.Context, req *MessageQuery) (MessageQueryRes, error)
-	// MessageTelegramQuery implements messageTelegramQuery operation.
-	//
-	// Execute a search query on Telegram messages.
-	//
-	// POST /message/telegram/query
-	MessageTelegramQuery(ctx context.Context, req *MessageQuery) (MessageTelegramQueryRes, error)
-	// MessageWhatsappQuery implements messageWhatsappQuery operation.
-	//
-	// Execute a search query on WhatsApp messages.
-	//
-	// POST /message/whatsapp/query
-	MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (MessageWhatsappQueryRes, error)
 	// NatsMessagesList implements nats-messages-list operation.
 	//
 	// Retrieves the last N messages from the NATS data stream for the current workspace.
@@ -710,30 +524,6 @@ type Handler interface {
 	//
 	// PUT /scheduler/{uuid}
 	SchedulerUpdate(ctx context.Context, req *Scheduler, params SchedulerUpdateParams) (SchedulerUpdateRes, error)
-	// StorageHostfilesCreate implements storage-hostfiles-create operation.
-	//
-	// Create a new Host Files storage instance.
-	//
-	// POST /storage/hostfiles
-	StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (StorageHostfilesCreateRes, error)
-	// StorageHostfilesDelete implements storage-hostfiles-delete operation.
-	//
-	// Delete a specific Host Files storage instance by UUID.
-	//
-	// DELETE /storage/hostfiles/{uuid}
-	StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (StorageHostfilesDeleteRes, error)
-	// StorageHostfilesGet implements storage-hostfiles-get operation.
-	//
-	// Retrieve details of a specific Host Files storage instance by UUID.
-	//
-	// GET /storage/hostfiles/{uuid}
-	StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (StorageHostfilesGetRes, error)
-	// StorageHostfilesUpdate implements storage-hostfiles-update operation.
-	//
-	// Update details of a specific Host Files storage instance by UUID.
-	//
-	// PUT /storage/hostfiles/{uuid}
-	StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (StorageHostfilesUpdateRes, error)
 	// StorageList implements storage-list operation.
 	//
 	// Retrieve a list of data storage objects.
@@ -871,30 +661,6 @@ type Handler interface {
 	//
 	// GET /test-connection-job/{uuid}
 	TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (TestConnectionJobGetRes, error)
-	// TgSessionCreate implements tg-session-create operation.
-	//
-	// Create a new Telegram session.
-	//
-	// POST /telegram
-	TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (TgSessionCreateRes, error)
-	// TgSessionList implements tg-session-list operation.
-	//
-	// List all Telegram sessions for the authenticated user.
-	//
-	// GET /telegram
-	TgSessionList(ctx context.Context) (TgSessionListRes, error)
-	// TgSessionVerify implements tg-session-verify operation.
-	//
-	// Complete the session creation process by verifying the code.
-	//
-	// PUT /telegram/{id}
-	TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (TgSessionVerifyRes, error)
-	// UpdateContact implements updateContact operation.
-	//
-	// Update contact details.
-	//
-	// PUT /contact/{uuid}
-	UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (UpdateContactRes, error)
 	// UpdateProfile implements updateProfile operation.
 	//
 	// Update current user profile.
@@ -931,12 +697,6 @@ type Handler interface {
 	//
 	// PUT /workspace/{uuid}/members/{user_uuid}
 	UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (UpdateWorkspaceMemberRoleRes, error)
-	// UploadFile implements uploadFile operation.
-	//
-	// Upload a file.
-	//
-	// POST /storage/upload
-	UploadFile(ctx context.Context, req *UploadFileRequest) (UploadFileRes, error)
 	// WorkerJobsCancel implements worker-jobs-cancel operation.
 	//
 	// Signal cancellation for a running job; returns 204 if accepted.

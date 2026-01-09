@@ -19,7 +19,6 @@ import {
   DatabaseOutlined,
   NodeIndexOutlined,
   CloudServerOutlined,
-  UserOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
@@ -36,7 +35,6 @@ const { Title, Text } = Typography;
 type Datasource = components['schemas']['datasource'];
 type Pipeline = components['schemas']['pipeline'];
 type Storage = components['schemas']['storage'];
-type Contact = components['schemas']['contact'];
 type Scheduler = components['schemas']['scheduler'];
 type WorkerJob = components['schemas']['worker_jobs'];
 
@@ -80,7 +78,6 @@ function Dashboard() {
   const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [storages, setStorages] = useState<Storage[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [schedulers, setSchedulers] = useState<Scheduler[]>([]);
   const [recentJobs, setRecentJobs] = useState<WorkerJob[]>([]);
 
@@ -93,14 +90,12 @@ function Dashboard() {
         datasourcesRes,
         pipelinesRes,
         storagesRes,
-        contactsRes,
         schedulersRes,
         workerJobsRes,
       ] = await Promise.all([
         client.GET('/datasource'),
         client.GET('/pipeline'),
         client.GET('/storage'),
-        client.GET('/contact'),
         client.GET('/scheduler'),
         client.GET('/workerjobs', { params: { query: { limit: 10 } } }),
       ]);
@@ -109,7 +104,6 @@ function Dashboard() {
       setDatasources(datasourcesRes.data || []);
       setPipelines(pipelinesRes.data?.pipelines || []);
       setStorages(storagesRes.data || []);
-      setContacts(contactsRes.data || []);
       setSchedulers(schedulersRes.data || []);
       setRecentJobs(workerJobsRes.data?.jobs || []);
 
@@ -167,12 +161,11 @@ function Dashboard() {
       enabledPipelines,
       storagesCount: storages.length,
       storagesByType,
-      contactsCount: contacts.length,
       failedJobs,
       upcomingSchedules,
       hasAuthIssues: authenticatedCount < oauthDatasources.length,
     };
-  }, [datasources, pipelines, storages, contacts, schedulers, recentJobs]);
+  }, [datasources, pipelines, storages, schedulers, recentJobs]);
 
   // Create pipeline lookup for scheduler display
   const pipelineMap = useMemo(() => {
@@ -252,19 +245,6 @@ function Dashboard() {
           </Card>
         </Col>
 
-        <Col xs={24} sm={12} lg={4}>
-          <Card
-            hoverable
-            onClick={() => navigate(`/w/${slug}/contacts`)}
-            size="small"
-          >
-            <Statistic
-              title="Contacts"
-              value={stats.contactsCount}
-              prefix={<UserOutlined />}
-            />
-          </Card>
-        </Col>
       </Row>
 
       {/* Activity and Health Row */}

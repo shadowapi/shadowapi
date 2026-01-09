@@ -25,7 +25,7 @@ import StorageTestModal from './components/StorageTestModal';
 
 const { Title, Paragraph } = Typography;
 
-type StorageType = 's3' | 'postgres' | 'hostfiles';
+type StorageType = 's3' | 'postgres';
 
 interface FormValues {
   name: string;
@@ -45,8 +45,6 @@ interface FormValues {
   port?: string;
   database?: string;
   options?: string;
-  // Host Files fields
-  path?: string;
 }
 
 // PostgreSQL connection string utilities
@@ -118,7 +116,6 @@ function buildPostgresUrl(params: PostgresConnectionParams): string {
 const typeOptions = [
   { value: 's3', label: 'S3' },
   { value: 'postgres', label: 'PostgreSQL' },
-  { value: 'hostfiles', label: 'Host Files' },
 ];
 
 function StorageEdit() {
@@ -245,19 +242,6 @@ function StorageEdit() {
         }
         break;
       }
-      case 'hostfiles': {
-        const { data } = await client.GET('/storage/hostfiles/{uuid}', {
-          params: { path: { uuid: uuid! } },
-        });
-        if (data) {
-          fullData = {
-            ...data,
-            type: 'hostfiles',
-            is_enabled: data.is_enabled ?? true,
-          };
-        }
-        break;
-      }
     }
 
     // Store loaded data in state - form values will be set after re-render
@@ -333,17 +317,6 @@ function StorageEdit() {
             }
             break;
           }
-          case 'hostfiles': {
-            const { error } = await client.POST('/storage/hostfiles', {
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                path: values.path || '',
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
         }
         message.success('Storage created');
       } else {
@@ -383,18 +356,6 @@ function StorageEdit() {
                 database: values.database,
                 options: values.options,
                 tables: existingData?.tables || [],
-              },
-            });
-            if (error) throw new Error(error.detail);
-            break;
-          }
-          case 'hostfiles': {
-            const { error } = await client.PUT('/storage/hostfiles/{uuid}', {
-              params: { path: { uuid: uuid! } },
-              body: {
-                name: values.name,
-                is_enabled: values.is_enabled,
-                path: values.path || '',
               },
             });
             if (error) throw new Error(error.detail);
@@ -492,16 +453,13 @@ function StorageEdit() {
   const handleDelete = async () => {
     if (isNew) return;
 
-    let endpoint: '/storage/s3/{uuid}' | '/storage/postgres/{uuid}' | '/storage/hostfiles/{uuid}';
+    let endpoint: '/storage/s3/{uuid}' | '/storage/postgres/{uuid}';
     switch (storageType) {
       case 's3':
         endpoint = '/storage/s3/{uuid}';
         break;
       case 'postgres':
         endpoint = '/storage/postgres/{uuid}';
-        break;
-      case 'hostfiles':
-        endpoint = '/storage/hostfiles/{uuid}';
         break;
     }
 
@@ -679,20 +637,6 @@ function StorageEdit() {
             </>
           )}
 
-          {/* Host Files fields */}
-          {selectedType === 'hostfiles' && (
-            <>
-              <Form.Item
-                name="path"
-                label="Path"
-                rules={[{ required: true, message: 'Path is required' }]}
-                extra="Absolute or relative filesystem path for file storage"
-              >
-                <Input placeholder="/var/data/files" />
-              </Form.Item>
-            </>
-          )}
-
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" loading={saving}>
@@ -740,11 +684,6 @@ function StorageEdit() {
           <Paragraph type="secondary">
             Store data directly in a PostgreSQL database. Connect to any PostgreSQL instance
             to store structured data.
-          </Paragraph>
-          <Title level={5}>Host Files</Title>
-          <Paragraph type="secondary">
-            Store files directly on the host filesystem. Simple setup but requires local storage
-            access.
           </Paragraph>
         </Card>
       </Col>

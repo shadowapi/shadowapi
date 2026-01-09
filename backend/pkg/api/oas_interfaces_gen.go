@@ -65,10 +65,6 @@ type ConfirmPasswordResetRes interface {
 	confirmPasswordResetRes()
 }
 
-type CreateContactRes interface {
-	createContactRes()
-}
-
 type CreateRoleRes interface {
 	createRoleRes()
 }
@@ -137,76 +133,12 @@ type DatasourceEmailUpdateRes interface {
 	datasourceEmailUpdateRes()
 }
 
-type DatasourceLinkedinCreateRes interface {
-	datasourceLinkedinCreateRes()
-}
-
-type DatasourceLinkedinDeleteRes interface {
-	datasourceLinkedinDeleteRes()
-}
-
-type DatasourceLinkedinGetRes interface {
-	datasourceLinkedinGetRes()
-}
-
-type DatasourceLinkedinListRes interface {
-	datasourceLinkedinListRes()
-}
-
-type DatasourceLinkedinUpdateRes interface {
-	datasourceLinkedinUpdateRes()
-}
-
 type DatasourceListRes interface {
 	datasourceListRes()
 }
 
 type DatasourceSetOAuth2ClientRes interface {
 	datasourceSetOAuth2ClientRes()
-}
-
-type DatasourceTelegramCreateRes interface {
-	datasourceTelegramCreateRes()
-}
-
-type DatasourceTelegramDeleteRes interface {
-	datasourceTelegramDeleteRes()
-}
-
-type DatasourceTelegramGetRes interface {
-	datasourceTelegramGetRes()
-}
-
-type DatasourceTelegramListRes interface {
-	datasourceTelegramListRes()
-}
-
-type DatasourceTelegramUpdateRes interface {
-	datasourceTelegramUpdateRes()
-}
-
-type DatasourceWhatsappCreateRes interface {
-	datasourceWhatsappCreateRes()
-}
-
-type DatasourceWhatsappDeleteRes interface {
-	datasourceWhatsappDeleteRes()
-}
-
-type DatasourceWhatsappGetRes interface {
-	datasourceWhatsappGetRes()
-}
-
-type DatasourceWhatsappListRes interface {
-	datasourceWhatsappListRes()
-}
-
-type DatasourceWhatsappUpdateRes interface {
-	datasourceWhatsappUpdateRes()
-}
-
-type DeleteContactRes interface {
-	deleteContactRes()
 }
 
 type DeleteRegisteredWorkerRes interface {
@@ -231,38 +163,6 @@ type DeleteWorkspaceInviteRes interface {
 
 type DeleteWorkspaceRes interface {
 	deleteWorkspaceRes()
-}
-
-type FileCreateRes interface {
-	fileCreateRes()
-}
-
-type FileDeleteRes interface {
-	fileDeleteRes()
-}
-
-type FileGetRes interface {
-	fileGetRes()
-}
-
-type FileListRes interface {
-	fileListRes()
-}
-
-type FileUpdateRes interface {
-	fileUpdateRes()
-}
-
-type GenerateDownloadLinkRes interface {
-	generateDownloadLinkRes()
-}
-
-type GeneratePresignedUploadUrlRes interface {
-	generatePresignedUploadUrlRes()
-}
-
-type GetContactRes interface {
-	getContactRes()
 }
 
 type GetInviteByTokenRes interface {
@@ -299,10 +199,6 @@ type GetWorkerEnrollmentTokenRes interface {
 
 type GetWorkspaceRes interface {
 	getWorkspaceRes()
-}
-
-type ListContactsRes interface {
-	listContactsRes()
 }
 
 type ListPermissionsRes interface {
@@ -347,26 +243,6 @@ type MapperTransformsListRes interface {
 
 type MapperValidateRes interface {
 	mapperValidateRes()
-}
-
-type MessageEmailQueryRes interface {
-	messageEmailQueryRes()
-}
-
-type MessageLinkedinQueryRes interface {
-	messageLinkedinQueryRes()
-}
-
-type MessageQueryRes interface {
-	messageQueryRes()
-}
-
-type MessageTelegramQueryRes interface {
-	messageTelegramQueryRes()
-}
-
-type MessageWhatsappQueryRes interface {
-	messageWhatsappQueryRes()
 }
 
 type NatsMessagesListRes interface {
@@ -465,22 +341,6 @@ type SchedulerUpdateRes interface {
 	schedulerUpdateRes()
 }
 
-type StorageHostfilesCreateRes interface {
-	storageHostfilesCreateRes()
-}
-
-type StorageHostfilesDeleteRes interface {
-	storageHostfilesDeleteRes()
-}
-
-type StorageHostfilesGetRes interface {
-	storageHostfilesGetRes()
-}
-
-type StorageHostfilesUpdateRes interface {
-	storageHostfilesUpdateRes()
-}
-
 type StorageListRes interface {
 	storageListRes()
 }
@@ -569,22 +429,6 @@ type TestConnectionJobGetRes interface {
 	testConnectionJobGetRes()
 }
 
-type TgSessionCreateRes interface {
-	tgSessionCreateRes()
-}
-
-type TgSessionListRes interface {
-	tgSessionListRes()
-}
-
-type TgSessionVerifyRes interface {
-	tgSessionVerifyRes()
-}
-
-type UpdateContactRes interface {
-	updateContactRes()
-}
-
 type UpdateProfileRes interface {
 	updateProfileRes()
 }
@@ -607,10 +451,6 @@ type UpdateWorkspaceMemberRoleRes interface {
 
 type UpdateWorkspaceRes interface {
 	updateWorkspaceRes()
-}
-
-type UploadFileRes interface {
-	uploadFileRes()
 }
 
 type WorkerJobsCancelRes interface {

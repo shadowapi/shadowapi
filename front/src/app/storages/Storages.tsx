@@ -11,12 +11,11 @@ const { Title } = Typography;
 
 type Storage = components['schemas']['storage'];
 
-type StorageTypeKey = 's3' | 'postgres' | 'hostfiles';
+type StorageTypeKey = 's3' | 'postgres';
 
 const typeLabels: Record<StorageTypeKey, { label: string; color: string }> = {
   s3: { label: 'S3', color: 'blue' },
   postgres: { label: 'PostgreSQL', color: 'green' },
-  hostfiles: { label: 'Host Files', color: 'orange' },
 };
 
 function Storages() {
@@ -47,8 +46,6 @@ function Storages() {
         return '/storage/s3/{uuid}' as const;
       case 'postgres':
         return '/storage/postgres/{uuid}' as const;
-      case 'hostfiles':
-        return '/storage/hostfiles/{uuid}' as const;
       default:
         return '/storage/s3/{uuid}' as const;
     }

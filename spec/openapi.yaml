@@ -9,20 +9,17 @@ components:
   schemas:
     Scheduler:
       $ref: "components/scheduler.yaml"
+
     Datasource:
       $ref: "components/datasource.yaml"
     DatasourceEmail:
       $ref: "components/datasource_email.yaml"
     DatasourceEmailOauth:
       $ref: "components/datasource_email_oauth.yaml"
-    DatasourceTelegram:
-      $ref: "components/datasource_telegram.yaml"
-    DatasourceWhatsapp:
-      $ref: "components/datasource_whatsapp.yaml"
-    DatasourceLinkedin:
-      $ref: "components/datasource_linkedin.yaml"
+
     Error:
       $ref: "components/error.yaml"
+
     MailLabel:
       $ref: "components/email_label.yaml"
     Oauth2Client:
@@ -51,34 +48,8 @@ components:
       $ref: "components/storage_postgres_field.yaml"
     StorageS3:
       $ref: "components/storage_s3.yaml"
-    StorageHostFiles:
-      $ref: "components/storage_hostfiles.yaml"
     EmailLabel:
       $ref: "components/email_label.yaml"
-    Contact:
-      $ref: "components/contact.yaml"
-    Message:
-      $ref: "components/message.yaml"
-    MessageMeta:
-      $ref: "components/message_meta.yaml"
-    MessageBodyParsed:
-      $ref: "components/message_body_parsed.yaml"
-    MessageQuery:
-      $ref: "components/message_query.yaml"
-    FileObject:
-      $ref: "components/file.yaml#/FileObject"
-    UploadFileRequest:
-      $ref: "components/file.yaml#/UploadFileRequest"
-    UploadFileResponse:
-      $ref: "components/file.yaml#/UploadFileResponse"
-    UploadPresignedUrlRequest:
-      $ref: "components/file.yaml#/UploadPresignedUrlRequest"
-    UploadPresignedUrlResponse:
-      $ref: "components/file.yaml#/UploadPresignedUrlResponse"
-    GenerateDownloadLinkRequest:
-      $ref: "components/file.yaml#/GenerateDownloadLinkRequest"
-    GenerateDownloadLinkResponse:
-      $ref: "components/file.yaml#/GenerateDownloadLinkResponse"
     SyncPolicy:
       $ref: "components/sync_policy.yaml"
     User:
@@ -170,6 +141,7 @@ paths:
     $ref: "paths/scheduler.yaml"
   /scheduler/{uuid}:
     $ref: "paths/scheduler_uuid.yaml"
+
   /datasource:
     $ref: "paths/datasource.yaml"
   /datasource/email:
@@ -184,18 +156,7 @@ paths:
     $ref: "paths/datasource_email_oauth_uuid_test.yaml"
   /datasource/{uuid}/oauth2/client:
     $ref: "paths/datasource_uuid_oauth2_client.yaml"
-  /datasource/telegram:
-    $ref: "paths/datasource_telegram.yaml"
-  /datasource/telegram/{uuid}:
-    $ref: "paths/datasource_telegram_uuid.yaml"
-  /datasource/whatsapp:
-    $ref: "paths/datasource_whatsapp.yaml"
-  /datasource/whatsapp/{uuid}:
-    $ref: "paths/datasource_whatsapp_uuid.yaml"
-  /datasource/linkedin:
-    $ref: "paths/datasource_linkedin.yaml"
-  /datasource/linkedin/{uuid}:
-    $ref: "paths/datasource_linkedin_uuid.yaml"
+
   /oauth2/callback:
     $ref: "paths/oauth2_callback.yaml"
   /oauth2/client:
@@ -208,14 +169,12 @@ paths:
     $ref: "paths/oauth2_client_datasource_uuid_token_uuid.yaml"
   /oauth2/login:
     $ref: "paths/oauth2_login.yaml"
+
   /pipeline:
     $ref: "paths/pipeline.yaml"
   /pipeline/{uuid}:
     $ref: "paths/pipeline_uuid.yaml"
-  /file:
-    $ref: "paths/file.yaml"
-  /file/{uuid}:
-    $ref: "paths/file_uuid.yaml"
+
   /storage:
     $ref: "paths/storage.yaml"
   /storage/postgres:
@@ -234,58 +193,46 @@ paths:
     $ref: "paths/storage_postgres_uuid_introspect_tables.yaml"
   /storage/postgres/{uuid}/introspect/tables/{table_name}:
     $ref: "paths/storage_postgres_uuid_introspect_table.yaml"
+  /storage/postgres/{uuid}/messages/query:
+    $ref: "paths/storage_postgres_uuid_messages_query.yaml"
   /storage/s3:
     $ref: "paths/storage_s3.yaml"
   /storage/s3/{uuid}:
     $ref: "paths/storage_s3_uuid.yaml"
-  /storage/hostfiles:
-    $ref: "paths/storage_hostfiles.yaml"
-  /storage/hostfiles/{uuid}:
-    $ref: "paths/storage_hostfiles_uuid.yaml"
-  /telegram:
-    $ref: "paths/telegram.yaml#/telegram"
-  /telegram/{id}:
-    $ref: "paths/telegram.yaml#/telegramId"
-  /message/query:
-    $ref: "paths/message_query.yaml"
-  /message/email/query:
-    $ref: "paths/message_email_query.yaml"
-  /message/whatsapp/query:
-    $ref: "paths/message_whatsapp_query.yaml"
-  /message/telegram/query:
-    $ref: "paths/message_telegram_query.yaml"
-  /message/linkedin/query:
-    $ref: "paths/message_linkedin_query.yaml"
-  /storage/upload:
-    $ref: "paths/storage_upload.yaml"
-  /storage/upload-url:
-    $ref: "paths/storage_upload_url.yaml"
-  /storage/file-link:
-    $ref: "paths/storage_file_link.yaml"
+
   /syncpolicy:
     $ref: "paths/sync_policy.yaml"
   /syncpolicy/{uuid}:
     $ref: "paths/sync_policy_by_uuid.yaml"
-  /contact:
-    $ref: "paths/contact.yaml"
-  /contact/{uuid}:
-    $ref: "paths/contact_uuid.yaml"
+
   /user:
     $ref: "paths/user.yaml"
   /user/{uuid}:
     $ref: "paths/user_uuid.yaml"
   /user/session:
     $ref: "paths/user_session.yaml"
+
   /profile:
     $ref: "paths/profile.yaml"
   /profile/password:
     $ref: "paths/profile_password.yaml"
+
+  /workers:
+    $ref: "paths/registered_worker.yaml"
+  /workers/{uuid}:
+    $ref: "paths/registered_worker_uuid.yaml"
+  /workers/enrollment-tokens:
+    $ref: "paths/worker_enrollment_token.yaml"
+  /workers/enrollment-tokens/{uuid}:
+    $ref: "paths/worker_enrollment_token_uuid.yaml"
+
   /workerjobs:
     $ref: "paths/worker_jobs.yaml"
   /workerjobs/{uuid}:
     $ref: "paths/worker_jobs_uuid.yaml"
   /workerjobs/{uuid}/cancel:
     $ref: "paths/worker_jobs_cancel.yaml"
+
   /auth/oauth2/authorize:
     $ref: "paths/auth_oauth2_authorize.yaml"
   /auth/oauth2/callback:
@@ -302,6 +249,7 @@ paths:
     $ref: "paths/auth_consent.yaml"
   /auth/workspace/switch:
     $ref: "paths/auth_workspace_switch.yaml"
+
   /workspace:
     $ref: "paths/workspace.yaml"
   /workspace/{uuid}:
@@ -316,6 +264,7 @@ paths:
     $ref: "paths/workspace_uuid_invites_uuid.yaml"
   /workspace/check:
     $ref: "paths/workspace_check.yaml"
+
   /rbac/role:
     $ref: "paths/rbac_role.yaml"
   /rbac/role/{uuid}:
@@ -328,30 +277,25 @@ paths:
     $ref: "paths/rbac_user_role.yaml"
   /rbac/check:
     $ref: "paths/rbac_check.yaml"
-  /workers:
-    $ref: "paths/registered_worker.yaml"
-  /workers/{uuid}:
-    $ref: "paths/registered_worker_uuid.yaml"
-  /workers/enrollment-tokens:
-    $ref: "paths/worker_enrollment_token.yaml"
-  /workers/enrollment-tokens/{uuid}:
-    $ref: "paths/worker_enrollment_token_uuid.yaml"
+
   /mapper/source-fields:
     $ref: "paths/mapper_source_fields.yaml"
   /mapper/transforms:
     $ref: "paths/mapper_transforms.yaml"
   /mapper/validate:
     $ref: "paths/mapper_validate.yaml"
+
   /test-connection-job/{uuid}:
     $ref: "paths/test_connection_job_uuid.yaml"
-  /storage/postgres/{uuid}/messages/query:
-    $ref: "paths/storage_postgres_uuid_messages_query.yaml"
+
   /nats/messages:
     $ref: "paths/nats_messages.yaml"
+
   /invite/{token}:
     $ref: "paths/invite_token.yaml"
   /invite/accept:
     $ref: "paths/invite_accept.yaml"
+
   /password/reset:
     $ref: "paths/password_reset_request.yaml"
   /password/reset/{token}:

@@ -261,66 +261,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'c': // Prefix: "contact"
-				origElem := elem
-				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleListContactsRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleCreateContactRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "DELETE":
-							s.handleDeleteContactRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						case "GET":
-							s.handleGetContactRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						case "PUT":
-							s.handleUpdateContactRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "DELETE,GET,PUT")
-						}
-
-						return
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
 			case 'd': // Prefix: "datasource"
 				origElem := elem
 				if l := len("datasource"); len(elem) >= l && elem[0:l] == "datasource" {
@@ -500,186 +440,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						elem = origElem
-					case 'l': // Prefix: "linkedin"
-						origElem := elem
-						if l := len("linkedin"); len(elem) >= l && elem[0:l] == "linkedin" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handleDatasourceLinkedinListRequest([0]string{}, elemIsEscaped, w, r)
-							case "POST":
-								s.handleDatasourceLinkedinCreateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET,POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleDatasourceLinkedinDeleteRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handleDatasourceLinkedinGetRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handleDatasourceLinkedinUpdateRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 't': // Prefix: "telegram"
-						origElem := elem
-						if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handleDatasourceTelegramListRequest([0]string{}, elemIsEscaped, w, r)
-							case "POST":
-								s.handleDatasourceTelegramCreateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET,POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleDatasourceTelegramDeleteRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handleDatasourceTelegramGetRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handleDatasourceTelegramUpdateRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 'w': // Prefix: "whatsapp"
-						origElem := elem
-						if l := len("whatsapp"); len(elem) >= l && elem[0:l] == "whatsapp" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handleDatasourceWhatsappListRequest([0]string{}, elemIsEscaped, w, r)
-							case "POST":
-								s.handleDatasourceWhatsappCreateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET,POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleDatasourceWhatsappDeleteRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "GET":
-									s.handleDatasourceWhatsappGetRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								case "PUT":
-									s.handleDatasourceWhatsappUpdateRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE,GET,PUT")
-								}
-
-								return
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
 					}
 					// Param: "uuid"
 					// Match until "/"
@@ -717,66 +477,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						elem = origElem
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
-			case 'f': // Prefix: "file"
-				origElem := elem
-				if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleFileListRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleFileCreateRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "DELETE":
-							s.handleFileDeleteRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						case "GET":
-							s.handleFileGetRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						case "PUT":
-							s.handleFileUpdateRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "DELETE,GET,PUT")
-						}
-
-						return
 					}
 
 					elem = origElem
@@ -837,9 +537,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'm': // Prefix: "m"
+			case 'm': // Prefix: "mapper/"
 				origElem := elem
-				if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
+				if l := len("mapper/"); len(elem) >= l && elem[0:l] == "mapper/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -849,201 +549,66 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "apper/"
+				case 's': // Prefix: "source-fields"
 					origElem := elem
-					if l := len("apper/"); len(elem) >= l && elem[0:l] == "apper/" {
+					if l := len("source-fields"); len(elem) >= l && elem[0:l] == "source-fields" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 's': // Prefix: "source-fields"
-						origElem := elem
-						if l := len("source-fields"); len(elem) >= l && elem[0:l] == "source-fields" {
-							elem = elem[l:]
-						} else {
-							break
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleMapperSourceFieldsListRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
 						}
 
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleMapperSourceFieldsListRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 't': // Prefix: "transforms"
-						origElem := elem
-						if l := len("transforms"); len(elem) >= l && elem[0:l] == "transforms" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleMapperTransformsListRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 'v': // Prefix: "validate"
-						origElem := elem
-						if l := len("validate"); len(elem) >= l && elem[0:l] == "validate" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleMapperValidateRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
+						return
 					}
 
 					elem = origElem
-				case 'e': // Prefix: "essage/"
+				case 't': // Prefix: "transforms"
 					origElem := elem
-					if l := len("essage/"); len(elem) >= l && elem[0:l] == "essage/" {
+					if l := len("transforms"); len(elem) >= l && elem[0:l] == "transforms" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleMapperTransformsListRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+					elem = origElem
+				case 'v': // Prefix: "validate"
+					origElem := elem
+					if l := len("validate"); len(elem) >= l && elem[0:l] == "validate" {
+						elem = elem[l:]
+					} else {
 						break
 					}
-					switch elem[0] {
-					case 'e': // Prefix: "email/query"
-						origElem := elem
-						if l := len("email/query"); len(elem) >= l && elem[0:l] == "email/query" {
-							elem = elem[l:]
-						} else {
-							break
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleMapperValidateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
 						}
 
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleMessageEmailQueryRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 'l': // Prefix: "linkedin/query"
-						origElem := elem
-						if l := len("linkedin/query"); len(elem) >= l && elem[0:l] == "linkedin/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleMessageLinkedinQueryRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 'q': // Prefix: "query"
-						origElem := elem
-						if l := len("query"); len(elem) >= l && elem[0:l] == "query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleMessageQueryRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 't': // Prefix: "telegram/query"
-						origElem := elem
-						if l := len("telegram/query"); len(elem) >= l && elem[0:l] == "telegram/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleMessageTelegramQueryRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
-					case 'w': // Prefix: "whatsapp/query"
-						origElem := elem
-						if l := len("whatsapp/query"); len(elem) >= l && elem[0:l] == "whatsapp/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleMessageWhatsappQueryRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
-						}
-
-						elem = origElem
+						return
 					}
 
 					elem = origElem
@@ -1760,85 +1325,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case 'f': // Prefix: "file-link"
-							origElem := elem
-							if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "POST":
-									s.handleGenerateDownloadLinkRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "POST")
-								}
-
-								return
-							}
-
-							elem = origElem
-						case 'h': // Prefix: "hostfiles"
-							origElem := elem
-							if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch r.Method {
-								case "POST":
-									s.handleStorageHostfilesCreateRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "POST")
-								}
-
-								return
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/"
-								origElem := elem
-								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								// Param: "uuid"
-								// Leaf parameter
-								args[0] = elem
-								elem = ""
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "DELETE":
-										s.handleStorageHostfilesDeleteRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									case "GET":
-										s.handleStorageHostfilesGetRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									case "PUT":
-										s.handleStorageHostfilesUpdateRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "DELETE,GET,PUT")
-									}
-
-									return
-								}
-
-								elem = origElem
-							}
-
-							elem = origElem
 						case 'p': // Prefix: "postgres"
 							origElem := elem
 							if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
@@ -2162,49 +1648,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							elem = origElem
-						case 'u': // Prefix: "upload"
-							origElem := elem
-							if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch r.Method {
-								case "POST":
-									s.handleUploadFileRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "POST")
-								}
-
-								return
-							}
-							switch elem[0] {
-							case '-': // Prefix: "-url"
-								origElem := elem
-								if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "POST":
-										s.handleGeneratePresignedUploadUrlRequest([0]string{}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "POST")
-									}
-
-									return
-								}
-
-								elem = origElem
-							}
-
-							elem = origElem
 						}
 
 						elem = origElem
@@ -2274,98 +1717,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "te"
+			case 't': // Prefix: "test-connection-job/"
 				origElem := elem
-				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
+				if l := len("test-connection-job/"); len(elem) >= l && elem[0:l] == "test-connection-job/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
+				// Param: "uuid"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
 				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'l': // Prefix: "legram"
-					origElem := elem
-					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
-						elem = elem[l:]
-					} else {
-						break
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleTestConnectionJobGetRequest([1]string{
+							args[0],
+						}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
 					}
 
-					if len(elem) == 0 {
-						switch r.Method {
-						case "GET":
-							s.handleTgSessionListRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleTgSessionCreateRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,POST")
-						}
-
-						return
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "PUT":
-								s.handleTgSessionVerifyRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "PUT")
-							}
-
-							return
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				case 's': // Prefix: "st-connection-job/"
-					origElem := elem
-					if l := len("st-connection-job/"); len(elem) >= l && elem[0:l] == "st-connection-job/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleTestConnectionJobGetRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-					elem = origElem
+					return
 				}
 
 				elem = origElem
@@ -3244,86 +2620,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'c': // Prefix: "contact"
-				origElem := elem
-				if l := len("contact"); len(elem) >= l && elem[0:l] == "contact" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = ListContactsOperation
-						r.summary = "List all contacts"
-						r.operationID = "listContacts"
-						r.pathPattern = "/contact"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = CreateContactOperation
-						r.summary = "Create a new contact record"
-						r.operationID = "createContact"
-						r.pathPattern = "/contact"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "DELETE":
-							r.name = DeleteContactOperation
-							r.summary = "Delete a contact record"
-							r.operationID = "deleteContact"
-							r.pathPattern = "/contact/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						case "GET":
-							r.name = GetContactOperation
-							r.summary = "Get contact details"
-							r.operationID = "getContact"
-							r.pathPattern = "/contact/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						case "PUT":
-							r.name = UpdateContactOperation
-							r.summary = "Update contact details"
-							r.operationID = "updateContact"
-							r.pathPattern = "/contact/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
 			case 'd': // Prefix: "datasource"
 				origElem := elem
 				if l := len("datasource"); len(elem) >= l && elem[0:l] == "datasource" {
@@ -3549,246 +2845,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
-					case 'l': // Prefix: "linkedin"
-						origElem := elem
-						if l := len("linkedin"); len(elem) >= l && elem[0:l] == "linkedin" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								r.name = DatasourceLinkedinListOperation
-								r.summary = ""
-								r.operationID = "datasource-linkedin-list"
-								r.pathPattern = "/datasource/linkedin"
-								r.args = args
-								r.count = 0
-								return r, true
-							case "POST":
-								r.name = DatasourceLinkedinCreateOperation
-								r.summary = ""
-								r.operationID = "datasource-linkedin-create"
-								r.pathPattern = "/datasource/linkedin"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = DatasourceLinkedinDeleteOperation
-									r.summary = ""
-									r.operationID = "datasource-linkedin-delete"
-									r.pathPattern = "/datasource/linkedin/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "GET":
-									r.name = DatasourceLinkedinGetOperation
-									r.summary = ""
-									r.operationID = "datasource-linkedin-get"
-									r.pathPattern = "/datasource/linkedin/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "PUT":
-									r.name = DatasourceLinkedinUpdateOperation
-									r.summary = ""
-									r.operationID = "datasource-linkedin-update"
-									r.pathPattern = "/datasource/linkedin/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 't': // Prefix: "telegram"
-						origElem := elem
-						if l := len("telegram"); len(elem) >= l && elem[0:l] == "telegram" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								r.name = DatasourceTelegramListOperation
-								r.summary = ""
-								r.operationID = "datasource-telegram-list"
-								r.pathPattern = "/datasource/telegram"
-								r.args = args
-								r.count = 0
-								return r, true
-							case "POST":
-								r.name = DatasourceTelegramCreateOperation
-								r.summary = ""
-								r.operationID = "datasource-telegram-create"
-								r.pathPattern = "/datasource/telegram"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = DatasourceTelegramDeleteOperation
-									r.summary = ""
-									r.operationID = "datasource-telegram-delete"
-									r.pathPattern = "/datasource/telegram/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "GET":
-									r.name = DatasourceTelegramGetOperation
-									r.summary = ""
-									r.operationID = "datasource-telegram-get"
-									r.pathPattern = "/datasource/telegram/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "PUT":
-									r.name = DatasourceTelegramUpdateOperation
-									r.summary = ""
-									r.operationID = "datasource-telegram-update"
-									r.pathPattern = "/datasource/telegram/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
-					case 'w': // Prefix: "whatsapp"
-						origElem := elem
-						if l := len("whatsapp"); len(elem) >= l && elem[0:l] == "whatsapp" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								r.name = DatasourceWhatsappListOperation
-								r.summary = ""
-								r.operationID = "datasource-whatsapp-list"
-								r.pathPattern = "/datasource/whatsapp"
-								r.args = args
-								r.count = 0
-								return r, true
-							case "POST":
-								r.name = DatasourceWhatsappCreateOperation
-								r.summary = ""
-								r.operationID = "datasource-whatsapp-create"
-								r.pathPattern = "/datasource/whatsapp"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "uuid"
-							// Leaf parameter
-							args[0] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = DatasourceWhatsappDeleteOperation
-									r.summary = ""
-									r.operationID = "datasource-whatsapp-delete"
-									r.pathPattern = "/datasource/whatsapp/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "GET":
-									r.name = DatasourceWhatsappGetOperation
-									r.summary = ""
-									r.operationID = "datasource-whatsapp-get"
-									r.pathPattern = "/datasource/whatsapp/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								case "PUT":
-									r.name = DatasourceWhatsappUpdateOperation
-									r.summary = ""
-									r.operationID = "datasource-whatsapp-update"
-									r.pathPattern = "/datasource/whatsapp/{uuid}"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						}
-
-						elem = origElem
 					}
 					// Param: "uuid"
 					// Match until "/"
@@ -3828,86 +2884,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
-			case 'f': // Prefix: "file"
-				origElem := elem
-				if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = FileListOperation
-						r.summary = ""
-						r.operationID = "file-list"
-						r.pathPattern = "/file"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = FileCreateOperation
-						r.summary = ""
-						r.operationID = "file-create"
-						r.pathPattern = "/file"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-					origElem := elem
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "DELETE":
-							r.name = FileDeleteOperation
-							r.summary = ""
-							r.operationID = "file-delete"
-							r.pathPattern = "/file/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						case "GET":
-							r.name = FileGetOperation
-							r.summary = ""
-							r.operationID = "file-get"
-							r.pathPattern = "/file/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						case "PUT":
-							r.name = FileUpdateOperation
-							r.summary = ""
-							r.operationID = "file-update"
-							r.pathPattern = "/file/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
-						}
 					}
 
 					elem = origElem
@@ -3974,9 +2950,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'm': // Prefix: "m"
+			case 'm': // Prefix: "mapper/"
 				origElem := elem
-				if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
+				if l := len("mapper/"); len(elem) >= l && elem[0:l] == "mapper/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -3986,233 +2962,78 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "apper/"
+				case 's': // Prefix: "source-fields"
 					origElem := elem
-					if l := len("apper/"); len(elem) >= l && elem[0:l] == "apper/" {
+					if l := len("source-fields"); len(elem) >= l && elem[0:l] == "source-fields" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 's': // Prefix: "source-fields"
-						origElem := elem
-						if l := len("source-fields"); len(elem) >= l && elem[0:l] == "source-fields" {
-							elem = elem[l:]
-						} else {
-							break
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = MapperSourceFieldsListOperation
+							r.summary = "List available source fields for mapping"
+							r.operationID = "MapperSourceFieldsList"
+							r.pathPattern = "/mapper/source-fields"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
 						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = MapperSourceFieldsListOperation
-								r.summary = "List available source fields for mapping"
-								r.operationID = "MapperSourceFieldsList"
-								r.pathPattern = "/mapper/source-fields"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 't': // Prefix: "transforms"
-						origElem := elem
-						if l := len("transforms"); len(elem) >= l && elem[0:l] == "transforms" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = MapperTransformsListOperation
-								r.summary = "List available transform functions"
-								r.operationID = "MapperTransformsList"
-								r.pathPattern = "/mapper/transforms"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 'v': // Prefix: "validate"
-						origElem := elem
-						if l := len("validate"); len(elem) >= l && elem[0:l] == "validate" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = MapperValidateOperation
-								r.summary = "Validate a mapper configuration"
-								r.operationID = "MapperValidate"
-								r.pathPattern = "/mapper/validate"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
-				case 'e': // Prefix: "essage/"
+				case 't': // Prefix: "transforms"
 					origElem := elem
-					if l := len("essage/"); len(elem) >= l && elem[0:l] == "essage/" {
+					if l := len("transforms"); len(elem) >= l && elem[0:l] == "transforms" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = MapperTransformsListOperation
+							r.summary = "List available transform functions"
+							r.operationID = "MapperTransformsList"
+							r.pathPattern = "/mapper/transforms"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+					elem = origElem
+				case 'v': // Prefix: "validate"
+					origElem := elem
+					if l := len("validate"); len(elem) >= l && elem[0:l] == "validate" {
+						elem = elem[l:]
+					} else {
 						break
 					}
-					switch elem[0] {
-					case 'e': // Prefix: "email/query"
-						origElem := elem
-						if l := len("email/query"); len(elem) >= l && elem[0:l] == "email/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
 
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = MessageEmailQueryOperation
-								r.summary = ""
-								r.operationID = "messageEmailQuery"
-								r.pathPattern = "/message/email/query"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = MapperValidateOperation
+							r.summary = "Validate a mapper configuration"
+							r.operationID = "MapperValidate"
+							r.pathPattern = "/mapper/validate"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
 						}
-
-						elem = origElem
-					case 'l': // Prefix: "linkedin/query"
-						origElem := elem
-						if l := len("linkedin/query"); len(elem) >= l && elem[0:l] == "linkedin/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = MessageLinkedinQueryOperation
-								r.summary = ""
-								r.operationID = "messageLinkedinQuery"
-								r.pathPattern = "/message/linkedin/query"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 'q': // Prefix: "query"
-						origElem := elem
-						if l := len("query"); len(elem) >= l && elem[0:l] == "query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = MessageQueryOperation
-								r.summary = ""
-								r.operationID = "messageQuery"
-								r.pathPattern = "/message/query"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 't': // Prefix: "telegram/query"
-						origElem := elem
-						if l := len("telegram/query"); len(elem) >= l && elem[0:l] == "telegram/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = MessageTelegramQueryOperation
-								r.summary = ""
-								r.operationID = "messageTelegramQuery"
-								r.pathPattern = "/message/telegram/query"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					case 'w': // Prefix: "whatsapp/query"
-						origElem := elem
-						if l := len("whatsapp/query"); len(elem) >= l && elem[0:l] == "whatsapp/query" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = MessageWhatsappQueryOperation
-								r.summary = ""
-								r.operationID = "messageWhatsappQuery"
-								r.pathPattern = "/message/whatsapp/query"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
 					}
 
 					elem = origElem
@@ -5073,103 +3894,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case 'f': // Prefix: "file-link"
-							origElem := elem
-							if l := len("file-link"); len(elem) >= l && elem[0:l] == "file-link" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "POST":
-									r.name = GenerateDownloadLinkOperation
-									r.summary = "Generate a download link for a stored file"
-									r.operationID = "generateDownloadLink"
-									r.pathPattern = "/storage/file-link"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
-						case 'h': // Prefix: "hostfiles"
-							origElem := elem
-							if l := len("hostfiles"); len(elem) >= l && elem[0:l] == "hostfiles" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "POST":
-									r.name = StorageHostfilesCreateOperation
-									r.summary = ""
-									r.operationID = "storage-hostfiles-create"
-									r.pathPattern = "/storage/hostfiles"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/"
-								origElem := elem
-								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								// Param: "uuid"
-								// Leaf parameter
-								args[0] = elem
-								elem = ""
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "DELETE":
-										r.name = StorageHostfilesDeleteOperation
-										r.summary = ""
-										r.operationID = "storage-hostfiles-delete"
-										r.pathPattern = "/storage/hostfiles/{uuid}"
-										r.args = args
-										r.count = 1
-										return r, true
-									case "GET":
-										r.name = StorageHostfilesGetOperation
-										r.summary = ""
-										r.operationID = "storage-hostfiles-get"
-										r.pathPattern = "/storage/hostfiles/{uuid}"
-										r.args = args
-										r.count = 1
-										return r, true
-									case "PUT":
-										r.name = StorageHostfilesUpdateOperation
-										r.summary = ""
-										r.operationID = "storage-hostfiles-update"
-										r.pathPattern = "/storage/hostfiles/{uuid}"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
-
-								elem = origElem
-							}
-
-							elem = origElem
 						case 'p': // Prefix: "postgres"
 							origElem := elem
 							if l := len("postgres"); len(elem) >= l && elem[0:l] == "postgres" {
@@ -5536,57 +4260,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 
 							elem = origElem
-						case 'u': // Prefix: "upload"
-							origElem := elem
-							if l := len("upload"); len(elem) >= l && elem[0:l] == "upload" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "POST":
-									r.name = UploadFileOperation
-									r.summary = "Upload a file"
-									r.operationID = "uploadFile"
-									r.pathPattern = "/storage/upload"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-							switch elem[0] {
-							case '-': // Prefix: "-url"
-								origElem := elem
-								if l := len("-url"); len(elem) >= l && elem[0:l] == "-url" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "POST":
-										r.name = GeneratePresignedUploadUrlOperation
-										r.summary = "Generate a pre-signed URL for file upload"
-										r.operationID = "generatePresignedUploadUrl"
-										r.pathPattern = "/storage/upload-url"
-										r.args = args
-										r.count = 0
-										return r, true
-									default:
-										return
-									}
-								}
-
-								elem = origElem
-							}
-
-							elem = origElem
 						}
 
 						elem = origElem
@@ -5676,112 +4349,33 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 't': // Prefix: "te"
+			case 't': // Prefix: "test-connection-job/"
 				origElem := elem
-				if l := len("te"); len(elem) >= l && elem[0:l] == "te" {
+				if l := len("test-connection-job/"); len(elem) >= l && elem[0:l] == "test-connection-job/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
+				// Param: "uuid"
+				// Leaf parameter
+				args[0] = elem
+				elem = ""
+
 				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'l': // Prefix: "legram"
-					origElem := elem
-					if l := len("legram"); len(elem) >= l && elem[0:l] == "legram" {
-						elem = elem[l:]
-					} else {
-						break
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = TestConnectionJobGetOperation
+						r.summary = ""
+						r.operationID = "test-connection-job-get"
+						r.pathPattern = "/test-connection-job/{uuid}"
+						r.args = args
+						r.count = 1
+						return r, true
+					default:
+						return
 					}
-
-					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							r.name = TgSessionListOperation
-							r.summary = ""
-							r.operationID = "tg-session-list"
-							r.pathPattern = "/telegram"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = TgSessionCreateOperation
-							r.summary = ""
-							r.operationID = "tg-session-create"
-							r.pathPattern = "/telegram"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "id"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "PUT":
-								r.name = TgSessionVerifyOperation
-								r.summary = ""
-								r.operationID = "tg-session-verify"
-								r.pathPattern = "/telegram/{id}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				case 's': // Prefix: "st-connection-job/"
-					origElem := elem
-					if l := len("st-connection-job/"); len(elem) >= l && elem[0:l] == "st-connection-job/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "uuid"
-					// Leaf parameter
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = TestConnectionJobGetOperation
-							r.summary = ""
-							r.operationID = "test-connection-job-get"
-							r.pathPattern = "/test-connection-job/{uuid}"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
 				}
 
 				elem = origElem

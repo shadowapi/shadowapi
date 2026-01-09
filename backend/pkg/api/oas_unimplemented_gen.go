@@ -159,15 +159,6 @@ func (UnimplementedHandler) ConfirmPasswordReset(ctx context.Context, req *Passw
 	return r, ht.ErrNotImplemented
 }
 
-// CreateContact implements createContact operation.
-//
-// Create a new contact record.
-//
-// POST /contact
-func (UnimplementedHandler) CreateContact(ctx context.Context, req *Contact) (r CreateContactRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // CreateRole implements createRole operation.
 //
 // Create a new role.
@@ -322,51 +313,6 @@ func (UnimplementedHandler) DatasourceEmailUpdate(ctx context.Context, req *Data
 	return r, ht.ErrNotImplemented
 }
 
-// DatasourceLinkedinCreate implements datasource-linkedin-create operation.
-//
-// Create a new LinkedIn datasource.
-//
-// POST /datasource/linkedin
-func (UnimplementedHandler) DatasourceLinkedinCreate(ctx context.Context, req *DatasourceLinkedin) (r DatasourceLinkedinCreateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceLinkedinDelete implements datasource-linkedin-delete operation.
-//
-// Delete a LinkedIn datasource.
-//
-// DELETE /datasource/linkedin/{uuid}
-func (UnimplementedHandler) DatasourceLinkedinDelete(ctx context.Context, params DatasourceLinkedinDeleteParams) (r DatasourceLinkedinDeleteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceLinkedinGet implements datasource-linkedin-get operation.
-//
-// Get a LinkedIn datasource.
-//
-// GET /datasource/linkedin/{uuid}
-func (UnimplementedHandler) DatasourceLinkedinGet(ctx context.Context, params DatasourceLinkedinGetParams) (r DatasourceLinkedinGetRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceLinkedinList implements datasource-linkedin-list operation.
-//
-// List all LinkedIn datasources.
-//
-// GET /datasource/linkedin
-func (UnimplementedHandler) DatasourceLinkedinList(ctx context.Context, params DatasourceLinkedinListParams) (r DatasourceLinkedinListRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceLinkedinUpdate implements datasource-linkedin-update operation.
-//
-// Update a LinkedIn datasource.
-//
-// PUT /datasource/linkedin/{uuid}
-func (UnimplementedHandler) DatasourceLinkedinUpdate(ctx context.Context, req *DatasourceLinkedin, params DatasourceLinkedinUpdateParams) (r DatasourceLinkedinUpdateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // DatasourceList implements datasource-list operation.
 //
 // Retrieve a list of datasource objects.
@@ -382,105 +328,6 @@ func (UnimplementedHandler) DatasourceList(ctx context.Context, params Datasourc
 //
 // PUT /datasource/{uuid}/oauth2/client
 func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (r DatasourceSetOAuth2ClientRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceTelegramCreate implements datasource-telegram-create operation.
-//
-// Create a new Telegram datasource.
-//
-// POST /datasource/telegram
-func (UnimplementedHandler) DatasourceTelegramCreate(ctx context.Context, req *DatasourceTelegram) (r DatasourceTelegramCreateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceTelegramDelete implements datasource-telegram-delete operation.
-//
-// Delete a Telegram datasource.
-//
-// DELETE /datasource/telegram/{uuid}
-func (UnimplementedHandler) DatasourceTelegramDelete(ctx context.Context, params DatasourceTelegramDeleteParams) (r DatasourceTelegramDeleteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceTelegramGet implements datasource-telegram-get operation.
-//
-// Get a Telegram datasource.
-//
-// GET /datasource/telegram/{uuid}
-func (UnimplementedHandler) DatasourceTelegramGet(ctx context.Context, params DatasourceTelegramGetParams) (r DatasourceTelegramGetRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceTelegramList implements datasource-telegram-list operation.
-//
-// List all Telegram datasources.
-//
-// GET /datasource/telegram
-func (UnimplementedHandler) DatasourceTelegramList(ctx context.Context, params DatasourceTelegramListParams) (r DatasourceTelegramListRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceTelegramUpdate implements datasource-telegram-update operation.
-//
-// Update a Telegram datasource.
-//
-// PUT /datasource/telegram/{uuid}
-func (UnimplementedHandler) DatasourceTelegramUpdate(ctx context.Context, req *DatasourceTelegram, params DatasourceTelegramUpdateParams) (r DatasourceTelegramUpdateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceWhatsappCreate implements datasource-whatsapp-create operation.
-//
-// Create a new WhatsApp datasource.
-//
-// POST /datasource/whatsapp
-func (UnimplementedHandler) DatasourceWhatsappCreate(ctx context.Context, req *DatasourceWhatsapp) (r DatasourceWhatsappCreateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceWhatsappDelete implements datasource-whatsapp-delete operation.
-//
-// Delete a WhatsApp datasource.
-//
-// DELETE /datasource/whatsapp/{uuid}
-func (UnimplementedHandler) DatasourceWhatsappDelete(ctx context.Context, params DatasourceWhatsappDeleteParams) (r DatasourceWhatsappDeleteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceWhatsappGet implements datasource-whatsapp-get operation.
-//
-// Get a WhatsApp datasource.
-//
-// GET /datasource/whatsapp/{uuid}
-func (UnimplementedHandler) DatasourceWhatsappGet(ctx context.Context, params DatasourceWhatsappGetParams) (r DatasourceWhatsappGetRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceWhatsappList implements datasource-whatsapp-list operation.
-//
-// List all WhatsApp datasources.
-//
-// GET /datasource/whatsapp
-func (UnimplementedHandler) DatasourceWhatsappList(ctx context.Context, params DatasourceWhatsappListParams) (r DatasourceWhatsappListRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DatasourceWhatsappUpdate implements datasource-whatsapp-update operation.
-//
-// Update a WhatsApp datasource.
-//
-// PUT /datasource/whatsapp/{uuid}
-func (UnimplementedHandler) DatasourceWhatsappUpdate(ctx context.Context, req *DatasourceWhatsapp, params DatasourceWhatsappUpdateParams) (r DatasourceWhatsappUpdateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DeleteContact implements deleteContact operation.
-//
-// Delete a contact record.
-//
-// DELETE /contact/{uuid}
-func (UnimplementedHandler) DeleteContact(ctx context.Context, params DeleteContactParams) (r DeleteContactRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -535,78 +382,6 @@ func (UnimplementedHandler) DeleteWorkspace(ctx context.Context, params DeleteWo
 //
 // DELETE /workspace/{uuid}/invites/{invite_uuid}
 func (UnimplementedHandler) DeleteWorkspaceInvite(ctx context.Context, params DeleteWorkspaceInviteParams) (r DeleteWorkspaceInviteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// FileCreate implements file-create operation.
-//
-// Upload a new file and create its record.
-//
-// POST /file
-func (UnimplementedHandler) FileCreate(ctx context.Context, req *UploadFileRequest) (r FileCreateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// FileDelete implements file-delete operation.
-//
-// Delete a stored file.
-//
-// DELETE /file/{uuid}
-func (UnimplementedHandler) FileDelete(ctx context.Context, params FileDeleteParams) (r FileDeleteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// FileGet implements file-get operation.
-//
-// Retrieve details of a stored file.
-//
-// GET /file/{uuid}
-func (UnimplementedHandler) FileGet(ctx context.Context, params FileGetParams) (r FileGetRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// FileList implements file-list operation.
-//
-// Retrieve a list of stored files.
-//
-// GET /file
-func (UnimplementedHandler) FileList(ctx context.Context, params FileListParams) (r FileListRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// FileUpdate implements file-update operation.
-//
-// Update metadata of a stored file.
-//
-// PUT /file/{uuid}
-func (UnimplementedHandler) FileUpdate(ctx context.Context, req *FileUpdateReq, params FileUpdateParams) (r FileUpdateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GenerateDownloadLink implements generateDownloadLink operation.
-//
-// Generate a download link for a stored file.
-//
-// POST /storage/file-link
-func (UnimplementedHandler) GenerateDownloadLink(ctx context.Context, req *GenerateDownloadLinkRequest) (r GenerateDownloadLinkRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GeneratePresignedUploadUrl implements generatePresignedUploadUrl operation.
-//
-// Generate a pre-signed URL for file upload.
-//
-// POST /storage/upload-url
-func (UnimplementedHandler) GeneratePresignedUploadUrl(ctx context.Context, req *UploadPresignedUrlRequest) (r GeneratePresignedUploadUrlRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetContact implements getContact operation.
-//
-// Get contact details.
-//
-// GET /contact/{uuid}
-func (UnimplementedHandler) GetContact(ctx context.Context, params GetContactParams) (r GetContactRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -688,15 +463,6 @@ func (UnimplementedHandler) GetWorkerEnrollmentToken(ctx context.Context, params
 //
 // GET /workspace/{uuid}
 func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspaceParams) (r GetWorkspaceRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListContacts implements listContacts operation.
-//
-// List all contacts.
-//
-// GET /contact
-func (UnimplementedHandler) ListContacts(ctx context.Context) (r ListContactsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -797,51 +563,6 @@ func (UnimplementedHandler) MapperTransformsList(ctx context.Context, params Map
 //
 // POST /mapper/validate
 func (UnimplementedHandler) MapperValidate(ctx context.Context, req *MapperValidateReq) (r MapperValidateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// MessageEmailQuery implements messageEmailQuery operation.
-//
-// Execute a search query on email messages.
-//
-// POST /message/email/query
-func (UnimplementedHandler) MessageEmailQuery(ctx context.Context, req *MessageQuery) (r MessageEmailQueryRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// MessageLinkedinQuery implements messageLinkedinQuery operation.
-//
-// Execute a search query on LinkedIn messages.
-//
-// POST /message/linkedin/query
-func (UnimplementedHandler) MessageLinkedinQuery(ctx context.Context, req *MessageQuery) (r MessageLinkedinQueryRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// MessageQuery implements messageQuery operation.
-//
-// Execute a search query on unified messages.
-//
-// POST /message/query
-func (UnimplementedHandler) MessageQuery(ctx context.Context, req *MessageQuery) (r MessageQueryRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// MessageTelegramQuery implements messageTelegramQuery operation.
-//
-// Execute a search query on Telegram messages.
-//
-// POST /message/telegram/query
-func (UnimplementedHandler) MessageTelegramQuery(ctx context.Context, req *MessageQuery) (r MessageTelegramQueryRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// MessageWhatsappQuery implements messageWhatsappQuery operation.
-//
-// Execute a search query on WhatsApp messages.
-//
-// POST /message/whatsapp/query
-func (UnimplementedHandler) MessageWhatsappQuery(ctx context.Context, req *MessageQuery) (r MessageWhatsappQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1063,42 +784,6 @@ func (UnimplementedHandler) SchedulerUpdate(ctx context.Context, req *Scheduler,
 	return r, ht.ErrNotImplemented
 }
 
-// StorageHostfilesCreate implements storage-hostfiles-create operation.
-//
-// Create a new Host Files storage instance.
-//
-// POST /storage/hostfiles
-func (UnimplementedHandler) StorageHostfilesCreate(ctx context.Context, req *StorageHostfiles) (r StorageHostfilesCreateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// StorageHostfilesDelete implements storage-hostfiles-delete operation.
-//
-// Delete a specific Host Files storage instance by UUID.
-//
-// DELETE /storage/hostfiles/{uuid}
-func (UnimplementedHandler) StorageHostfilesDelete(ctx context.Context, params StorageHostfilesDeleteParams) (r StorageHostfilesDeleteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// StorageHostfilesGet implements storage-hostfiles-get operation.
-//
-// Retrieve details of a specific Host Files storage instance by UUID.
-//
-// GET /storage/hostfiles/{uuid}
-func (UnimplementedHandler) StorageHostfilesGet(ctx context.Context, params StorageHostfilesGetParams) (r StorageHostfilesGetRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// StorageHostfilesUpdate implements storage-hostfiles-update operation.
-//
-// Update details of a specific Host Files storage instance by UUID.
-//
-// PUT /storage/hostfiles/{uuid}
-func (UnimplementedHandler) StorageHostfilesUpdate(ctx context.Context, req *StorageHostfiles, params StorageHostfilesUpdateParams) (r StorageHostfilesUpdateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // StorageList implements storage-list operation.
 //
 // Retrieve a list of data storage objects.
@@ -1302,42 +987,6 @@ func (UnimplementedHandler) TestConnectionJobGet(ctx context.Context, params Tes
 	return r, ht.ErrNotImplemented
 }
 
-// TgSessionCreate implements tg-session-create operation.
-//
-// Create a new Telegram session.
-//
-// POST /telegram
-func (UnimplementedHandler) TgSessionCreate(ctx context.Context, req *TgSessionCreateReq) (r TgSessionCreateRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// TgSessionList implements tg-session-list operation.
-//
-// List all Telegram sessions for the authenticated user.
-//
-// GET /telegram
-func (UnimplementedHandler) TgSessionList(ctx context.Context) (r TgSessionListRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// TgSessionVerify implements tg-session-verify operation.
-//
-// Complete the session creation process by verifying the code.
-//
-// PUT /telegram/{id}
-func (UnimplementedHandler) TgSessionVerify(ctx context.Context, req *TgSessionVerifyReq, params TgSessionVerifyParams) (r TgSessionVerifyRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// UpdateContact implements updateContact operation.
-//
-// Update contact details.
-//
-// PUT /contact/{uuid}
-func (UnimplementedHandler) UpdateContact(ctx context.Context, req *Contact, params UpdateContactParams) (r UpdateContactRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // UpdateProfile implements updateProfile operation.
 //
 // Update current user profile.
@@ -1389,15 +1038,6 @@ func (UnimplementedHandler) UpdateWorkspace(ctx context.Context, req *Workspace,
 //
 // PUT /workspace/{uuid}/members/{user_uuid}
 func (UnimplementedHandler) UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleReq, params UpdateWorkspaceMemberRoleParams) (r UpdateWorkspaceMemberRoleRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// UploadFile implements uploadFile operation.
-//
-// Upload a file.
-//
-// POST /storage/upload
-func (UnimplementedHandler) UploadFile(ctx context.Context, req *UploadFileRequest) (r UploadFileRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
