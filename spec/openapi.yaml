@@ -7,41 +7,41 @@ info:
 
 tags:
   - name: auth
-    description: ""
+    description: Authentication and authorization endpoints for user login and session management.
   - name: datasource
-    description: ""
+    description: Generic datasource operations for listing and managing data sources.
   - name: datasource-email
-    description: ""
+    description: Email datasource configuration using IMAP/SMTP credentials.
   - name: datasource-email-oauth
-    description: ""
+    description: Email datasource configuration using OAuth2 authentication.
   - name: mapper
-    description: ""
+    description: Field mapping and data transformation configuration.
   - name: NATS
-    description: ""
+    description: NATS messaging queue operations for viewing and managing messages.
   - name: oauth2
-    description: ""
+    description: OAuth2 client and token management for external service authentication.
   - name: oauth2-auth
-    description: ""
+    description: OAuth2 authentication flow endpoints for datasource authorization.
   - name: pipeline
-    description: ""
+    description: Data processing pipeline configuration and management.
   - name: RBAC
-    description: ""
+    description: Role-based access control for managing roles and permissions.
   - name: scheduler
-    description: ""
+    description: Job scheduling for automated pipeline execution.
   - name: storage
-    description: ""
+    description: Generic storage operations for listing and managing storage backends.
   - name: storage-postgres
-    description: ""
+    description: PostgreSQL storage backend configuration and table management.
   - name: storage-s3
-    description: ""
+    description: S3-compatible object storage backend configuration.
   - name: syncpolicy
-    description: ""
+    description: Synchronization policy configuration for data source sync rules.
   - name: test-connection
-    description: ""
+    description: Connection testing for validating storage and datasource configurations.
   - name: token
-    description: ""
+    description: OAuth2 token management for datasource authentication.
   - name: worker-jobs
-    description: ""
+    description: Background job monitoring and management.
 
 components:
   schemas:
