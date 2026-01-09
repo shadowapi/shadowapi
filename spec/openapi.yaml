@@ -5,6 +5,44 @@ info:
   version: 0.0.2
   description: ShadowAPI server
 
+tags:
+  - name: auth
+    description: ""
+  - name: datasource
+    description: ""
+  - name: datasource-email
+    description: ""
+  - name: datasource-email-oauth
+    description: ""
+  - name: mapper
+    description: ""
+  - name: NATS
+    description: ""
+  - name: oauth2
+    description: ""
+  - name: oauth2-auth
+    description: ""
+  - name: pipeline
+    description: ""
+  - name: RBAC
+    description: ""
+  - name: scheduler
+    description: ""
+  - name: storage
+    description: ""
+  - name: storage-postgres
+    description: ""
+  - name: storage-s3
+    description: ""
+  - name: syncpolicy
+    description: ""
+  - name: test-connection
+    description: ""
+  - name: token
+    description: ""
+  - name: worker-jobs
+    description: ""
+
 components:
   schemas:
     Scheduler:
@@ -44,32 +82,48 @@ components:
 
     SyncPolicy:
       $ref: "components/sync_policy.yaml"
+
     User:
       $ref: "components/user.yaml"
     UserSessionToken:
       $ref: "components/user_session_token.yaml"
-    WorkerJobs:
-      $ref: "components/worker_jobs.yaml"
     UserProfile:
       $ref: "components/user_profile.yaml"
+    UserInvite:
+      $ref: "components/user_invite.yaml"
+    UserInviteAccept:
+      $ref: "components/user_invite_accept.yaml"
+    UserInviteInfo:
+      $ref: "components/user_invite_info.yaml"
     PasswordChange:
       $ref: "components/password_change.yaml"
+    PasswordResetRequest:
+      $ref: "components/password_reset_request.yaml"
+    PasswordResetInfo:
+      $ref: "components/password_reset_info.yaml"
+    PasswordResetConfirm:
+      $ref: "components/password_reset_confirm.yaml"
+
+    WorkerJobs:
+      $ref: "components/worker_jobs.yaml"
     Workspace:
       $ref: "components/workspace.yaml"
     WorkspaceMember:
       $ref: "components/workspace_member.yaml"
     WorkspaceCheck:
       $ref: "components/workspace_check.yaml"
+    RegisteredWorker:
+      $ref: "components/registered_worker.yaml"
+    WorkerEnrollmentToken:
+      $ref: "components/worker_enrollment_token.yaml"
+
     RBACRole:
       $ref: "components/rbac_role.yaml"
     RBACPermission:
       $ref: "components/rbac_permission.yaml"
     RBACRoleAssignment:
       $ref: "components/rbac_role_assignment.yaml"
-    RegisteredWorker:
-      $ref: "components/registered_worker.yaml"
-    WorkerEnrollmentToken:
-      $ref: "components/worker_enrollment_token.yaml"
+
     MapperConfig:
       $ref: "components/mapper_config.yaml"
     MapperFieldMapping:
@@ -80,10 +134,12 @@ components:
       $ref: "components/source_field_definition.yaml"
     TransformDefinition:
       $ref: "components/transform_definition.yaml"
+
     TestConnectionResult:
       $ref: "components/test_connection_result.yaml"
     TestConnectionJob:
       $ref: "components/test_connection_job.yaml"
+
     StoragePostgresTestRequest:
       $ref: "components/storage_postgres_test_request.yaml"
     StoragePostgresIntrospectTable:
@@ -98,28 +154,17 @@ components:
       $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateRequest"
     StoragePostgresTableCreateResponse:
       $ref: "components/storage_postgres_introspect.yaml#/StoragePostgresTableCreateResponse"
-    MessageQueryJob:
-      $ref: "components/message_query_job.yaml"
     StoragePostgresMessagesQueryReq:
       $ref: "components/storage_postgres_messages_query_req.yaml"
+
+    MessageQueryJob:
+      $ref: "components/message_query_job.yaml"
     NatsMessage:
       $ref: "components/nats_message.yaml"
     NatsMessagesList:
       $ref: "components/nats_messages_list.yaml"
     NatsMessagesPurgeResponse:
       $ref: "components/nats_messages_purge_response.yaml"
-    UserInvite:
-      $ref: "components/user_invite.yaml"
-    UserInviteAccept:
-      $ref: "components/user_invite_accept.yaml"
-    UserInviteInfo:
-      $ref: "components/user_invite_info.yaml"
-    PasswordResetRequest:
-      $ref: "components/password_reset_request.yaml"
-    PasswordResetInfo:
-      $ref: "components/password_reset_info.yaml"
-    PasswordResetConfirm:
-      $ref: "components/password_reset_confirm.yaml"
 
   securitySchemes:
     # Bearer token-based auth

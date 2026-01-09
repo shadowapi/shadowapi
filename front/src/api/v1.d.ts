@@ -1389,17 +1389,23 @@ export interface components {
         SyncPolicy: components["schemas"]["sync_policy"];
         User: components["schemas"]["user"];
         UserSessionToken: components["schemas"]["user_session_token"];
-        WorkerJobs: components["schemas"]["worker_jobs"];
         UserProfile: components["schemas"]["user_profile"];
+        UserInvite: components["schemas"]["user_invite"];
+        UserInviteAccept: components["schemas"]["user_invite_accept"];
+        UserInviteInfo: components["schemas"]["user_invite_info"];
         PasswordChange: components["schemas"]["password_change"];
+        PasswordResetRequest: components["schemas"]["password_reset_request"];
+        PasswordResetInfo: components["schemas"]["password_reset_info"];
+        PasswordResetConfirm: components["schemas"]["password_reset_confirm"];
+        WorkerJobs: components["schemas"]["worker_jobs"];
         Workspace: components["schemas"]["workspace"];
         WorkspaceMember: components["schemas"]["workspace_member"];
         WorkspaceCheck: components["schemas"]["workspace_check"];
+        RegisteredWorker: components["schemas"]["registered_worker"];
+        WorkerEnrollmentToken: components["schemas"]["worker_enrollment_token"];
         RBACRole: components["schemas"]["rbac_role"];
         RBACPermission: components["schemas"]["rbac_permission"];
         RBACRoleAssignment: components["schemas"]["rbac_role_assignment"];
-        RegisteredWorker: components["schemas"]["registered_worker"];
-        WorkerEnrollmentToken: components["schemas"]["worker_enrollment_token"];
         MapperConfig: components["schemas"]["mapper_config"];
         MapperFieldMapping: components["schemas"]["mapper_field_mapping"];
         MapperTransform: components["schemas"]["mapper_transform"];
@@ -1471,17 +1477,11 @@ export interface components {
             /** @description Error message if creation failed */
             error?: string;
         };
-        MessageQueryJob: components["schemas"]["message_query_job"];
         StoragePostgresMessagesQueryReq: components["schemas"]["storage_postgres_messages_query_req"];
+        MessageQueryJob: components["schemas"]["message_query_job"];
         NatsMessage: components["schemas"]["nats_message"];
         NatsMessagesList: components["schemas"]["nats_messages_list"];
         NatsMessagesPurgeResponse: components["schemas"]["nats_messages_purge_response"];
-        UserInvite: components["schemas"]["user_invite"];
-        UserInviteAccept: components["schemas"]["user_invite_accept"];
-        UserInviteInfo: components["schemas"]["user_invite_info"];
-        PasswordResetRequest: components["schemas"]["password_reset_request"];
-        PasswordResetInfo: components["schemas"]["password_reset_info"];
-        PasswordResetConfirm: components["schemas"]["password_reset_confirm"];
         error: {
             /**
              * @description A human-readable explanation specific to this occurrence of the problem.

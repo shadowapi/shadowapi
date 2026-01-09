@@ -7,7 +7,7 @@ post:
     Individual message records are streamed to NATS on the specified subject.
     Subscribe to the nats_subject in the response to receive records.
   tags:
-    - Storage
+    - storage
   parameters:
     - name: uuid
       in: path
