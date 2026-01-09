@@ -20,7 +20,6 @@ import {
   NodeIndexOutlined,
   CloudServerOutlined,
   UserOutlined,
-  MessageOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
@@ -264,23 +263,6 @@ function Dashboard() {
               value={stats.contactsCount}
               prefix={<UserOutlined />}
             />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} lg={4}>
-          <Card
-            hoverable
-            onClick={() => navigate(`/w/${slug}/messages`)}
-            size="small"
-          >
-            <Statistic
-              title="Messages"
-              value="-"
-              prefix={<MessageOutlined />}
-            />
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              View all messages
-            </Text>
           </Card>
         </Col>
       </Row>

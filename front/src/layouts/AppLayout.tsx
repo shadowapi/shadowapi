@@ -5,16 +5,13 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import {
   DashboardOutlined,
   MessageOutlined,
-  FileOutlined,
   UserOutlined,
   MailOutlined,
   LoginOutlined,
   DatabaseOutlined,
-  ClockCircleOutlined,
   NodeIndexOutlined,
   SettingOutlined,
   ScheduleOutlined,
-  UnorderedListOutlined,
   LogoutOutlined,
   DownOutlined,
   MenuOutlined,
@@ -153,28 +150,6 @@ function getMenuItems(basePath: string): MenuItem[] {
         },
       ],
     },
-    {
-      key: '/messages',
-      icon: <MessageOutlined />,
-      label: <Link to={`${basePath}/messages`}>Messages</Link>,
-      children: [
-        {
-          key: '/files',
-          icon: <FileOutlined />,
-          label: <Link to={`${basePath}/files`}>Files</Link>,
-        },
-      ],
-    },
-    {
-      key: '/syncpolicies',
-      icon: <ClockCircleOutlined />,
-      label: <Link to={`${basePath}/syncpolicies`}>Sync Policies</Link>,
-    },
-    {
-      key: '/logs',
-      icon: <UnorderedListOutlined />,
-      label: <Link to={`${basePath}/logs`}>Logs</Link>,
-    },
     { type: 'divider' },
     {
       key: '/documentation',
@@ -197,8 +172,6 @@ interface RouteConfig {
 
 const routeConfig: Record<string, RouteConfig> = {
   '/': { title: 'Dashboard' },
-  '/messages': { title: 'Messages' },
-  '/files': { title: 'Files', parent: '/messages' },
   '/users': { title: 'Users' },
   '/users/new': { title: 'Add', parent: '/users' },
   '/invites': { title: 'Invites' },
@@ -211,7 +184,6 @@ const routeConfig: Record<string, RouteConfig> = {
   '/storages': { title: 'Storages' },
   '/storages/new': { title: 'Add', parent: '/storages' },
   '/storages/messages': { title: 'Last Messages' },
-  '/syncpolicies': { title: 'Sync Policies' },
   '/pipelines': { title: 'Pipelines' },
   '/pipelines/new': { title: 'Add', parent: '/pipelines' },
   '/workers': { title: 'Registered Workers' },
@@ -219,7 +191,6 @@ const routeConfig: Record<string, RouteConfig> = {
   '/workers/tokens': { title: 'Enrollment Tokens' },
   '/schedulers': { title: 'Schedules' },
   '/schedulers/new': { title: 'Add', parent: '/schedulers' },
-  '/logs': { title: 'Logs' },
 };
 
 // Breadcrumb map for non-workspace pages (documentation, about, etc.)
@@ -233,7 +204,6 @@ const publicBreadcrumbMap: Record<string, string> = {
 
 // Map of routes to their menu parent keys (for expanding submenus)
 const menuParentMap: Record<string, string> = {
-  '/files': '/messages',
   '/datasources': '/datasources-menu',
   '/oauth2/credentials': '/datasources-menu',
   '/storages': '/storages-menu',
