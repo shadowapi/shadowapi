@@ -27,7 +27,13 @@ import {
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
-import { useAuth } from '../lib/auth';
+import {
+  useAuth,
+  isSuperAdmin,
+  isWorkspaceOwnerOrAbove,
+  isWorkspaceAdminOrAbove,
+  type User,
+} from '../lib/auth';
 import { useResponsive } from '../lib/useResponsive';
 import { SmartLink } from '../lib/SmartLink';
 import ChangePasswordModal from '../components/ChangePasswordModal';
@@ -49,9 +55,9 @@ function getWorkspaceInfo(pathname: string): { basePath: string; relativePath: s
   return { basePath: '', relativePath: pathname };
 }
 
-// Generate menu items with workspace-aware paths
-function getMenuItems(basePath: string): MenuItem[] {
-  return [
+// Generate menu items with workspace-aware paths and permission filtering
+function getMenuItems(basePath: string, user: User | null, workspaceSlug: string): MenuItem[] {
+  const items: MenuItem[] = [
     {
       key: '/',
       icon: <DashboardOutlined />,
@@ -108,7 +114,11 @@ function getMenuItems(basePath: string): MenuItem[] {
         },
       ],
     },
-    {
+  ];
+
+  // Workers menu - super_admin only (global resource)
+  if (isSuperAdmin(user)) {
+    items.push({
       key: '/workers-menu',
       icon: <SettingOutlined />,
       label: 'Workers',
@@ -129,56 +139,89 @@ function getMenuItems(basePath: string): MenuItem[] {
           label: <Link to={`${basePath}/workers/tokens`}>Enrollment Tokens</Link>,
         },
       ],
-    },
-    {
+    });
+  }
+
+  // Access Control menu - filter children based on permissions
+  const accessControlChildren: MenuItem[] = [];
+
+  // Users - super_admin only
+  if (isSuperAdmin(user)) {
+    accessControlChildren.push({
+      key: '/users',
+      icon: <UserOutlined />,
+      label: <Link to={`${basePath}/users`}>Users</Link>,
+    });
+  }
+
+  // Invites - workspace_owner or super_admin
+  if (isWorkspaceOwnerOrAbove(user, workspaceSlug)) {
+    accessControlChildren.push({
+      key: '/invites',
+      icon: <MailOutlined />,
+      label: <Link to={`${basePath}/invites`}>Invites</Link>,
+    });
+  }
+
+  // Policy Sets - super_admin only
+  if (isSuperAdmin(user)) {
+    accessControlChildren.push({
+      key: '/access/policy-sets',
+      icon: <CrownOutlined />,
+      label: <Link to={`${basePath}/access/policy-sets`}>Policy Sets</Link>,
+    });
+  }
+
+  // Usage Overview - workspace_admin or above
+  if (isWorkspaceAdminOrAbove(user, workspaceSlug)) {
+    accessControlChildren.push({
+      key: '/access/usage-overview',
+      icon: <BarChartOutlined />,
+      label: <Link to={`${basePath}/access/usage-overview`}>Usage Overview</Link>,
+    });
+  }
+
+  // Usage Limits, User Overrides, Worker Limits - super_admin only
+  if (isSuperAdmin(user)) {
+    accessControlChildren.push(
+      {
+        key: '/access/usage-limits',
+        icon: <PercentageOutlined />,
+        label: <Link to={`${basePath}/access/usage-limits`}>Usage Limits</Link>,
+      },
+      {
+        key: '/access/user-usage-limits',
+        icon: <UserOutlined />,
+        label: <Link to={`${basePath}/access/user-usage-limits`}>User Overrides</Link>,
+      },
+      {
+        key: '/access/worker-usage-limits',
+        icon: <RobotOutlined />,
+        label: <Link to={`${basePath}/access/worker-usage-limits`}>Worker Limits</Link>,
+      }
+    );
+  }
+
+  // Only add Access Control menu if there are visible children
+  if (accessControlChildren.length > 0) {
+    items.push({
       key: '/access',
       icon: <SafetyOutlined />,
       label: 'Access Control',
-      children: [
-        {
-          key: '/users',
-          icon: <UserOutlined />,
-          label: <Link to={`${basePath}/users`}>Users</Link>,
-        },
-        {
-          key: '/invites',
-          icon: <MailOutlined />,
-          label: <Link to={`${basePath}/invites`}>Invites</Link>,
-        },
-        {
-          key: '/access/policy-sets',
-          icon: <CrownOutlined />,
-          label: <Link to={`${basePath}/access/policy-sets`}>Policy Sets</Link>,
-        },
-        {
-          key: '/access/usage-overview',
-          icon: <BarChartOutlined />,
-          label: <Link to={`${basePath}/access/usage-overview`}>Usage Overview</Link>,
-        },
-        {
-          key: '/access/usage-limits',
-          icon: <PercentageOutlined />,
-          label: <Link to={`${basePath}/access/usage-limits`}>Usage Limits</Link>,
-        },
-        {
-          key: '/access/user-usage-limits',
-          icon: <UserOutlined />,
-          label: <Link to={`${basePath}/access/user-usage-limits`}>User Overrides</Link>,
-        },
-        {
-          key: '/access/worker-usage-limits',
-          icon: <RobotOutlined />,
-          label: <Link to={`${basePath}/access/worker-usage-limits`}>Worker Limits</Link>,
-        },
-      ],
-    },
+      children: accessControlChildren,
+    });
+  }
+
+  items.push(
     { type: 'divider' },
     {
       key: '/documentation',
       icon: <BookOutlined />,
       label: <SmartLink to="/documentation">Documentation</SmartLink>,
-    },
-  ];
+    }
+  );
+
+  return items;
 }
 
 interface AppLayoutProps {
@@ -428,7 +471,8 @@ function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
   }
   const selectedKeys = [menuSelectedPath];
   const defaultOpenKeys = getOpenKeys(relativePath);
-  const menuItems = getMenuItems(basePath);
+  const workspaceSlug = basePath.replace('/w/', '');
+  const menuItems = getMenuItems(basePath, user, workspaceSlug);
 
   const userMenuItems: MenuProps['items'] = [
     {
