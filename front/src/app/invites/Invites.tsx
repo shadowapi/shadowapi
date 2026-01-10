@@ -1,5 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Button, Space, Typography, message, Tag, Modal, Form, Input, Select, Popconfirm } from 'antd';
+import {
+  Table,
+  Button,
+  Space,
+  Typography,
+  message,
+  Tag,
+  Modal,
+  Form,
+  Input,
+  Select,
+  Popconfirm,
+} from 'antd';
 import { PlusOutlined, DeleteOutlined, MailOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import client from '../../api/client';
@@ -38,7 +50,10 @@ function Invites() {
     loadInvites();
   }, [loadInvites]);
 
-  const handleCreate = async (values: { email: string; role: 'admin' | 'member' }) => {
+  const handleCreate = async (values: {
+    email: string;
+    policy_set_name: 'workspace_admin' | 'workspace_member';
+  }) => {
     if (!workspaceUUID) return;
     setSubmitting(true);
     const { error } = await client.POST('/workspace/{uuid}/invites', {
@@ -75,6 +90,18 @@ function Invites() {
     loadInvites();
   };
 
+  // Helper to get display name for policy set
+  const getPolicySetDisplayName = (policySetName: string) => {
+    switch (policySetName) {
+      case 'workspace_admin':
+        return 'Admin';
+      case 'workspace_member':
+        return 'Member';
+      default:
+        return policySetName;
+    }
+  };
+
   const columns: ColumnsType<UserInvite> = [
     {
       title: 'Email',
@@ -89,11 +116,11 @@ function Invites() {
     },
     {
       title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role: string) => (
-        <Tag color={role === 'admin' ? 'blue' : 'default'}>
-          {role}
+      dataIndex: 'policy_set_name',
+      key: 'policy_set_name',
+      render: (policySetName: string) => (
+        <Tag color={policySetName === 'workspace_admin' ? 'blue' : 'default'}>
+          {getPolicySetDisplayName(policySetName)}
         </Tag>
       ),
     },
@@ -137,7 +164,9 @@ function Invites() {
   return (
     <>
       <Space style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-        <Title level={4} style={{ margin: 0 }}>Pending Invites</Title>
+        <Title level={4} style={{ margin: 0 }}>
+          Pending Invites
+        </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
           Invite User
         </Button>
@@ -172,14 +201,14 @@ function Invites() {
           </Form.Item>
 
           <Form.Item
-            name="role"
+            name="policy_set_name"
             label="Role"
-            initialValue="member"
+            initialValue="workspace_member"
             rules={[{ required: true }]}
           >
             <Select>
-              <Select.Option value="member">Member</Select.Option>
-              <Select.Option value="admin">Admin</Select.Option>
+              <Select.Option value="workspace_member">Member</Select.Option>
+              <Select.Option value="workspace_admin">Admin</Select.Option>
             </Select>
           </Form.Item>
 

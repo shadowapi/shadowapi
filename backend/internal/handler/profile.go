@@ -35,16 +35,16 @@ func (h *Handler) GetProfile(ctx context.Context) (api.GetProfileRes, error) {
 		return nil, err
 	}
 
-	// Fetch user's roles from RBAC enforcer
-	rolesMap, err := h.enforcer.GetAllRolesForUser(userUUID)
+	// Fetch user's policy sets from RBAC enforcer
+	policySetsMap, err := h.enforcer.GetAllPolicySetsForUser(userUUID)
 	if err != nil {
-		h.log.Warn("failed to get user roles", "uuid", userUUID, "error", err)
-		// Don't fail the request, just return empty roles
-		rolesMap = make(map[string][]string)
+		h.log.Warn("failed to get user policy sets", "uuid", userUUID, "error", err)
+		// Don't fail the request, just return empty policy sets
+		policySetsMap = make(map[string][]string)
 	}
 
-	// Convert roles map to API format
-	user.Roles = convertRolesToAPI(rolesMap)
+	// Convert policy sets map to API format (still uses "roles" field in API for compatibility)
+	user.Roles = convertPolicySetsToAPI(policySetsMap)
 
 	// Add current workspace info from JWT claims if present
 	if claims.WorkspaceID != "" && claims.WorkspaceSlug != "" {
@@ -57,18 +57,19 @@ func (h *Handler) GetProfile(ctx context.Context) (api.GetProfileRes, error) {
 	return user, nil
 }
 
-// convertRolesToAPI converts a map of domain->roles to API format.
-func convertRolesToAPI(rolesMap map[string][]string) []api.UserRolesItem {
-	var roles []api.UserRolesItem
-	for domain, roleNames := range rolesMap {
-		for _, roleName := range roleNames {
-			roles = append(roles, api.UserRolesItem{
-				Role:   api.NewOptString(roleName),
+// convertPolicySetsToAPI converts a map of domain->policy_sets to API format.
+// Note: Uses "roles" field in API for backward compatibility until API is updated.
+func convertPolicySetsToAPI(policySetsMap map[string][]string) []api.UserRolesItem {
+	var items []api.UserRolesItem
+	for domain, policySetNames := range policySetsMap {
+		for _, policySetName := range policySetNames {
+			items = append(items, api.UserRolesItem{
+				Role:   api.NewOptString(policySetName),
 				Domain: api.NewOptString(domain),
 			})
 		}
 	}
-	return roles
+	return items
 }
 
 // UpdateProfile implements updateProfile operation.

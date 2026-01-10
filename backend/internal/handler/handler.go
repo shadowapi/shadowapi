@@ -91,13 +91,13 @@ func (h *Handler) ensureInitWorkspaceAndAdmin(ctx context.Context) error {
 		userUUID = pgtype.UUID{Bytes: user.UUID, Valid: true}
 	}
 
-	// Step 2: Assign super_admin role (global scope)
+	// Step 2: Assign super_admin policy set (global scope)
 	userUUIDStr := uuid.UUID(userUUID.Bytes).String()
-	if !h.enforcer.HasRoleForUserInDomain(userUUIDStr, rbac.RoleSuperAdmin, "global") {
-		if err := h.enforcer.AddRoleForUserInDomain(userUUIDStr, rbac.RoleSuperAdmin, "global"); err != nil {
-			h.log.Warn("failed to assign super_admin role", "email", h.cfg.InitAdmin.Email, "error", err)
+	if !h.enforcer.HasPolicySet(userUUIDStr, rbac.PolicySetSuperAdmin, "global") {
+		if err := h.enforcer.AssignPolicySetToUser(userUUIDStr, rbac.PolicySetSuperAdmin, "global"); err != nil {
+			h.log.Warn("failed to assign super_admin policy set", "email", h.cfg.InitAdmin.Email, "error", err)
 		} else {
-			h.log.Info("assigned super_admin role to admin user", "email", h.cfg.InitAdmin.Email)
+			h.log.Info("assigned super_admin policy set to admin user", "email", h.cfg.InitAdmin.Email)
 		}
 	}
 
@@ -142,16 +142,19 @@ func (h *Handler) ensureWorkspaceWithOwner(ctx context.Context, q *query.Queries
 			}
 			h.log.Info("created workspace", "slug", slug)
 
-			// Add user as owner
+			// Add user as owner (membership only - permissions via policy set)
 			memberUUID := uuid.Must(uuid.NewV7())
 			_, err = q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
 				UUID:          memberUUID,
 				WorkspaceUUID: &workspaceUUID,
 				UserUUID:      &userUUIDVal,
-				Role:          "owner",
 			})
 			if err != nil {
 				return errors.New("failed to add workspace owner: " + err.Error())
+			}
+			// Assign workspace_owner policy set
+			if err := h.enforcer.AssignPolicySetToUser(userUUIDVal.String(), rbac.PolicySetWorkspaceOwner, slug); err != nil {
+				h.log.Warn("failed to assign workspace_owner policy set", "workspace", slug, "error", err)
 			}
 			h.log.Info("added user as workspace owner", "workspace", slug)
 		} else {
@@ -165,17 +168,20 @@ func (h *Handler) ensureWorkspaceWithOwner(ctx context.Context, q *query.Queries
 			UserUUID:      &userUUIDVal,
 		})
 		if err == pgx.ErrNoRows {
-			// Add user as owner
+			// Add user as owner (membership only - permissions via policy set)
 			memberUUID := uuid.Must(uuid.NewV7())
 			_, err = q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
 				UUID:          memberUUID,
 				WorkspaceUUID: &workspaceUUID,
 				UserUUID:      &userUUIDVal,
-				Role:          "owner",
 			})
 			if err != nil {
 				h.log.Warn("failed to add workspace member", "workspace", slug, "error", err)
 			} else {
+				// Assign workspace_owner policy set
+				if err := h.enforcer.AssignPolicySetToUser(userUUIDVal.String(), rbac.PolicySetWorkspaceOwner, slug); err != nil {
+					h.log.Warn("failed to assign workspace_owner policy set", "workspace", slug, "error", err)
+				}
 				h.log.Info("added user as workspace owner", "workspace", slug)
 			}
 		}

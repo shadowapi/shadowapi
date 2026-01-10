@@ -61,8 +61,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         email: data.email ?? '',
         first_name: data.first_name ?? '',
         last_name: data.last_name ?? '',
-        roles: (data.roles ?? []).map(r => ({
-          role: r.role ?? '',
+        policy_sets: (data.roles ?? []).map(r => ({
+          policy_set: r.role ?? '',
           domain: r.domain ?? '',
         })),
         current_workspace: data.current_workspace ? {
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (session.authenticated) {
         setIsAuthenticated(true);
         setTokenExpiresIn(session.expires_in ?? null);
-        // Fetch user profile to get user details including roles
+        // Fetch user profile to get user details including policy sets
         const userProfile = await fetchUserProfile();
         if (userProfile === 'unauthorized') {
           // Session cookie expired - clear state and redirect to login

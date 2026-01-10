@@ -31,12 +31,12 @@ func (UnimplementedHandler) AddWorkspaceMember(ctx context.Context, req *Workspa
 	return r, ht.ErrNotImplemented
 }
 
-// AssignRoleToUser implements assignRoleToUser operation.
+// AssignPolicySetToUser implements assignPolicySetToUser operation.
 //
-// Assign a role to a user.
+// Assign a policy set to a user.
 //
-// POST /rbac/user/{user_uuid}/roles
-func (UnimplementedHandler) AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq, params AssignRoleToUserParams) (r AssignRoleToUserRes, _ error) {
+// POST /access/user/{user_uuid}/policy-sets
+func (UnimplementedHandler) AssignPolicySetToUser(ctx context.Context, req *AssignPolicySetToUserReq, params AssignPolicySetToUserParams) (r AssignPolicySetToUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -136,7 +136,7 @@ func (UnimplementedHandler) ChangePassword(ctx context.Context, req *PasswordCha
 //
 // Check if a user has permission.
 //
-// POST /rbac/check
+// POST /access/check
 func (UnimplementedHandler) CheckPermission(ctx context.Context, req *CheckPermissionReq) (r CheckPermissionRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -159,12 +159,12 @@ func (UnimplementedHandler) ConfirmPasswordReset(ctx context.Context, req *Passw
 	return r, ht.ErrNotImplemented
 }
 
-// CreateRole implements createRole operation.
+// CreatePolicySet implements createPolicySet operation.
 //
-// Create a new role.
+// Create a new policy set.
 //
-// POST /rbac/role
-func (UnimplementedHandler) CreateRole(ctx context.Context, req *RbacRole) (r CreateRoleRes, _ error) {
+// POST /access/policy-set
+func (UnimplementedHandler) CreatePolicySet(ctx context.Context, req *PolicySet) (r CreatePolicySetRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -331,21 +331,21 @@ func (UnimplementedHandler) DatasourceSetOAuth2Client(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
+// DeletePolicySet implements deletePolicySet operation.
+//
+// Delete a policy set.
+//
+// DELETE /access/policy-set/{uuid}
+func (UnimplementedHandler) DeletePolicySet(ctx context.Context, params DeletePolicySetParams) (r DeletePolicySetRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteRegisteredWorker implements deleteRegisteredWorker operation.
 //
 // Delete registered worker.
 //
 // DELETE /workers/{uuid}
 func (UnimplementedHandler) DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) (r DeleteRegisteredWorkerRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// DeleteRole implements deleteRole operation.
-//
-// Delete a role.
-//
-// DELETE /rbac/role/{uuid}
-func (UnimplementedHandler) DeleteRole(ctx context.Context, params DeleteRoleParams) (r DeleteRoleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -403,6 +403,15 @@ func (UnimplementedHandler) GetPasswordResetByToken(ctx context.Context, params 
 	return r, ht.ErrNotImplemented
 }
 
+// GetPolicySet implements getPolicySet operation.
+//
+// Get policy set details.
+//
+// GET /access/policy-set/{uuid}
+func (UnimplementedHandler) GetPolicySet(ctx context.Context, params GetPolicySetParams) (r GetPolicySetRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetProfile implements getProfile operation.
 //
 // Get current user profile.
@@ -421,15 +430,6 @@ func (UnimplementedHandler) GetRegisteredWorker(ctx context.Context, params GetR
 	return r, ht.ErrNotImplemented
 }
 
-// GetRole implements getRole operation.
-//
-// Get role details.
-//
-// GET /rbac/role/{uuid}
-func (UnimplementedHandler) GetRole(ctx context.Context, params GetRoleParams) (r GetRoleRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetUser implements getUser operation.
 //
 // Get user details.
@@ -439,12 +439,12 @@ func (UnimplementedHandler) GetUser(ctx context.Context, params GetUserParams) (
 	return r, ht.ErrNotImplemented
 }
 
-// GetUserRoles implements getUserRoles operation.
+// GetUserPolicySets implements getUserPolicySets operation.
 //
-// Get roles for a user.
+// Get policy sets for a user.
 //
-// GET /rbac/user/{user_uuid}/roles
-func (UnimplementedHandler) GetUserRoles(ctx context.Context, params GetUserRolesParams) (r GetUserRolesRes, _ error) {
+// GET /access/user/{user_uuid}/policy-sets
+func (UnimplementedHandler) GetUserPolicySets(ctx context.Context, params GetUserPolicySetsParams) (r GetUserPolicySetsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -470,8 +470,17 @@ func (UnimplementedHandler) GetWorkspace(ctx context.Context, params GetWorkspac
 //
 // List all permissions.
 //
-// GET /rbac/permission
+// GET /access/permission
 func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPermissionsParams) (r ListPermissionsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListPolicySets implements listPolicySets operation.
+//
+// List all policy sets.
+//
+// GET /access/policy-set
+func (UnimplementedHandler) ListPolicySets(ctx context.Context, params ListPolicySetsParams) (r ListPolicySetsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -481,15 +490,6 @@ func (UnimplementedHandler) ListPermissions(ctx context.Context, params ListPerm
 //
 // GET /workers
 func (UnimplementedHandler) ListRegisteredWorkers(ctx context.Context) (r ListRegisteredWorkersRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListRoles implements listRoles operation.
-//
-// List all roles.
-//
-// GET /rbac/role
-func (UnimplementedHandler) ListRoles(ctx context.Context, params ListRolesParams) (r ListRolesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -712,12 +712,12 @@ func (UnimplementedHandler) PipelineUpdate(ctx context.Context, req *Pipeline, p
 	return r, ht.ErrNotImplemented
 }
 
-// RemoveRoleFromUser implements removeRoleFromUser operation.
+// RemovePolicySetFromUser implements removePolicySetFromUser operation.
 //
-// Remove a role from a user.
+// Remove a policy set from a user.
 //
-// DELETE /rbac/user/{user_uuid}/roles/{role_name}
-func (UnimplementedHandler) RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) (r RemoveRoleFromUserRes, _ error) {
+// DELETE /access/user/{user_uuid}/policy-sets/{policy_set_name}
+func (UnimplementedHandler) RemovePolicySetFromUser(ctx context.Context, params RemovePolicySetFromUserParams) (r RemovePolicySetFromUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -987,6 +987,15 @@ func (UnimplementedHandler) TestConnectionJobGet(ctx context.Context, params Tes
 	return r, ht.ErrNotImplemented
 }
 
+// UpdatePolicySet implements updatePolicySet operation.
+//
+// Update a policy set.
+//
+// PUT /access/policy-set/{uuid}
+func (UnimplementedHandler) UpdatePolicySet(ctx context.Context, req *PolicySet, params UpdatePolicySetParams) (r UpdatePolicySetRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateProfile implements updateProfile operation.
 //
 // Update current user profile.
@@ -1002,15 +1011,6 @@ func (UnimplementedHandler) UpdateProfile(ctx context.Context, req *UserProfile)
 //
 // PUT /workers/{uuid}
 func (UnimplementedHandler) UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (r UpdateRegisteredWorkerRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// UpdateRole implements updateRole operation.
-//
-// Update a role.
-//
-// PUT /rbac/role/{uuid}
-func (UnimplementedHandler) UpdateRole(ctx context.Context, req *RbacRole, params UpdateRoleParams) (r UpdateRoleRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

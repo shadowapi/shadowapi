@@ -15,10 +15,10 @@ properties:
     type: string
     format: email
     description: Email address of the invitee
-  role:
+  policy_set_name:
     type: string
-    enum: [admin, member]
-    description: Role to assign when invite is accepted
+    enum: [workspace_admin, workspace_member]
+    description: Policy set to assign when invite is accepted
   invited_by_email:
     type: string
     description: Email of the user who sent the invite
@@ -44,4 +44,4 @@ properties:
     readOnly: true
 required:
   - email
-  - role
+  - policy_set_name

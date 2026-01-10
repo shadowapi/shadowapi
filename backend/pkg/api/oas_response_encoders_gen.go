@@ -144,9 +144,9 @@ func encodeAddWorkspaceMemberResponse(response AddWorkspaceMemberRes, w http.Res
 	}
 }
 
-func encodeAssignRoleToUserResponse(response AssignRoleToUserRes, w http.ResponseWriter, span trace.Span) error {
+func encodeAssignPolicySetToUserResponse(response AssignPolicySetToUserRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *AssignRoleToUserCreated:
+	case *AssignPolicySetToUserCreated:
 		w.WriteHeader(201)
 		span.SetStatus(codes.Ok, http.StatusText(201))
 
@@ -954,9 +954,9 @@ func encodeConfirmPasswordResetResponse(response ConfirmPasswordResetRes, w http
 	}
 }
 
-func encodeCreateRoleResponse(response CreateRoleRes, w http.ResponseWriter, span trace.Span) error {
+func encodeCreatePolicySetResponse(response CreatePolicySetRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *RbacRole:
+	case *PolicySet:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(201)
 		span.SetStatus(codes.Ok, http.StatusText(201))
@@ -1801,11 +1801,11 @@ func encodeDatasourceSetOAuth2ClientResponse(response DatasourceSetOAuth2ClientR
 	}
 }
 
-func encodeDeleteRegisteredWorkerResponse(response DeleteRegisteredWorkerRes, w http.ResponseWriter, span trace.Span) error {
+func encodeDeletePolicySetResponse(response DeletePolicySetRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *DeleteRegisteredWorkerOK:
-		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
+	case *DeletePolicySetNoContent:
+		w.WriteHeader(204)
+		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
@@ -1839,11 +1839,11 @@ func encodeDeleteRegisteredWorkerResponse(response DeleteRegisteredWorkerRes, w 
 	}
 }
 
-func encodeDeleteRoleResponse(response DeleteRoleRes, w http.ResponseWriter, span trace.Span) error {
+func encodeDeleteRegisteredWorkerResponse(response DeleteRegisteredWorkerRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *DeleteRoleNoContent:
-		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
+	case *DeleteRegisteredWorkerOK:
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		return nil
 
@@ -2145,6 +2145,51 @@ func encodeGetPasswordResetByTokenResponse(response GetPasswordResetByTokenRes, 
 	}
 }
 
+func encodeGetPolicySetResponse(response GetPolicySetRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PolicySet:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ErrorStatusCode:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		code := response.StatusCode
+		if code == 0 {
+			// Set default status code.
+			code = http.StatusOK
+		}
+		w.WriteHeader(code)
+		if st := http.StatusText(code); code >= http.StatusBadRequest {
+			span.SetStatus(codes.Error, st)
+		} else {
+			span.SetStatus(codes.Ok, st)
+		}
+
+		e := new(jx.Encoder)
+		response.Response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		if code >= http.StatusInternalServerError {
+			return errors.Wrapf(ht.ErrInternalServerErrorResponse, "code: %d, message: %s", code, http.StatusText(code))
+		}
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeGetProfileResponse(response GetProfileRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *User:
@@ -2235,51 +2280,6 @@ func encodeGetRegisteredWorkerResponse(response GetRegisteredWorkerRes, w http.R
 	}
 }
 
-func encodeGetRoleResponse(response GetRoleRes, w http.ResponseWriter, span trace.Span) error {
-	switch response := response.(type) {
-	case *RbacRole:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
-
-		e := new(jx.Encoder)
-		response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		return nil
-
-	case *ErrorStatusCode:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		code := response.StatusCode
-		if code == 0 {
-			// Set default status code.
-			code = http.StatusOK
-		}
-		w.WriteHeader(code)
-		if st := http.StatusText(code); code >= http.StatusBadRequest {
-			span.SetStatus(codes.Error, st)
-		} else {
-			span.SetStatus(codes.Ok, st)
-		}
-
-		e := new(jx.Encoder)
-		response.Response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		if code >= http.StatusInternalServerError {
-			return errors.Wrapf(ht.ErrInternalServerErrorResponse, "code: %d, message: %s", code, http.StatusText(code))
-		}
-		return nil
-
-	default:
-		return errors.Errorf("unexpected response type: %T", response)
-	}
-}
-
 func encodeGetUserResponse(response GetUserRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *User:
@@ -2325,9 +2325,9 @@ func encodeGetUserResponse(response GetUserRes, w http.ResponseWriter, span trac
 	}
 }
 
-func encodeGetUserRolesResponse(response GetUserRolesRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetUserPolicySetsResponse(response GetUserPolicySetsRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *GetUserRolesOK:
+	case *GetUserPolicySetsOK:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -2505,9 +2505,9 @@ func encodeListPermissionsResponse(response ListPermissionsRes, w http.ResponseW
 	}
 }
 
-func encodeListRegisteredWorkersResponse(response ListRegisteredWorkersRes, w http.ResponseWriter, span trace.Span) error {
+func encodeListPolicySetsResponse(response ListPolicySetsRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *ListRegisteredWorkersOKApplicationJSON:
+	case *ListPolicySetsOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -2550,9 +2550,9 @@ func encodeListRegisteredWorkersResponse(response ListRegisteredWorkersRes, w ht
 	}
 }
 
-func encodeListRolesResponse(response ListRolesRes, w http.ResponseWriter, span trace.Span) error {
+func encodeListRegisteredWorkersResponse(response ListRegisteredWorkersRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *ListRolesOKApplicationJSON:
+	case *ListRegisteredWorkersOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -3642,9 +3642,9 @@ func encodePipelineUpdateResponse(response PipelineUpdateRes, w http.ResponseWri
 	}
 }
 
-func encodeRemoveRoleFromUserResponse(response RemoveRoleFromUserRes, w http.ResponseWriter, span trace.Span) error {
+func encodeRemovePolicySetFromUserResponse(response RemovePolicySetFromUserRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *RemoveRoleFromUserNoContent:
+	case *RemovePolicySetFromUserNoContent:
 		w.WriteHeader(204)
 		span.SetStatus(codes.Ok, http.StatusText(204))
 
@@ -4977,6 +4977,51 @@ func encodeTestConnectionJobGetResponse(response TestConnectionJobGetRes, w http
 	}
 }
 
+func encodeUpdatePolicySetResponse(response UpdatePolicySetRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PolicySet:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ErrorStatusCode:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		code := response.StatusCode
+		if code == 0 {
+			// Set default status code.
+			code = http.StatusOK
+		}
+		w.WriteHeader(code)
+		if st := http.StatusText(code); code >= http.StatusBadRequest {
+			span.SetStatus(codes.Error, st)
+		} else {
+			span.SetStatus(codes.Ok, st)
+		}
+
+		e := new(jx.Encoder)
+		response.Response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		if code >= http.StatusInternalServerError {
+			return errors.Wrapf(ht.ErrInternalServerErrorResponse, "code: %d, message: %s", code, http.StatusText(code))
+		}
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeUpdateProfileResponse(response UpdateProfileRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *User:
@@ -5025,51 +5070,6 @@ func encodeUpdateProfileResponse(response UpdateProfileRes, w http.ResponseWrite
 func encodeUpdateRegisteredWorkerResponse(response UpdateRegisteredWorkerRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *RegisteredWorker:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
-
-		e := new(jx.Encoder)
-		response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		return nil
-
-	case *ErrorStatusCode:
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		code := response.StatusCode
-		if code == 0 {
-			// Set default status code.
-			code = http.StatusOK
-		}
-		w.WriteHeader(code)
-		if st := http.StatusText(code); code >= http.StatusBadRequest {
-			span.SetStatus(codes.Error, st)
-		} else {
-			span.SetStatus(codes.Ok, st)
-		}
-
-		e := new(jx.Encoder)
-		response.Response.Encode(e)
-		if _, err := e.WriteTo(w); err != nil {
-			return errors.Wrap(err, "write")
-		}
-
-		if code >= http.StatusInternalServerError {
-			return errors.Wrapf(ht.ErrInternalServerErrorResponse, "code: %d, message: %s", code, http.StatusText(code))
-		}
-		return nil
-
-	default:
-		return errors.Errorf("unexpected response type: %T", response)
-	}
-}
-
-func encodeUpdateRoleResponse(response UpdateRoleRes, w http.ResponseWriter, span trace.Span) error {
-	switch response := response.(type) {
-	case *RbacRole:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

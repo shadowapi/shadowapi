@@ -12,31 +12,24 @@ import (
 )
 
 const createWorkspaceMember = `-- name: CreateWorkspaceMember :one
-INSERT INTO workspace_member (uuid, workspace_uuid, user_uuid, role)
-VALUES ($1, $2, $3, $4)
-RETURNING uuid, workspace_uuid, user_uuid, role, created_at, updated_at
+INSERT INTO workspace_member (uuid, workspace_uuid, user_uuid)
+VALUES ($1, $2, $3)
+RETURNING uuid, workspace_uuid, user_uuid, created_at, updated_at
 `
 
 type CreateWorkspaceMemberParams struct {
 	UUID          uuid.UUID  `json:"uuid"`
 	WorkspaceUUID *uuid.UUID `json:"workspace_uuid"`
 	UserUUID      *uuid.UUID `json:"user_uuid"`
-	Role          string     `json:"role"`
 }
 
 func (q *Queries) CreateWorkspaceMember(ctx context.Context, arg CreateWorkspaceMemberParams) (WorkspaceMember, error) {
-	row := q.db.QueryRow(ctx, createWorkspaceMember,
-		arg.UUID,
-		arg.WorkspaceUUID,
-		arg.UserUUID,
-		arg.Role,
-	)
+	row := q.db.QueryRow(ctx, createWorkspaceMember, arg.UUID, arg.WorkspaceUUID, arg.UserUUID)
 	var i WorkspaceMember
 	err := row.Scan(
 		&i.UUID,
 		&i.WorkspaceUUID,
 		&i.UserUUID,
-		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -59,7 +52,7 @@ func (q *Queries) DeleteWorkspaceMember(ctx context.Context, arg DeleteWorkspace
 }
 
 const getWorkspaceMember = `-- name: GetWorkspaceMember :one
-SELECT uuid, workspace_uuid, user_uuid, role, created_at, updated_at FROM workspace_member
+SELECT uuid, workspace_uuid, user_uuid, created_at, updated_at FROM workspace_member
 WHERE workspace_uuid = $1 AND user_uuid = $2
 `
 
@@ -75,7 +68,6 @@ func (q *Queries) GetWorkspaceMember(ctx context.Context, arg GetWorkspaceMember
 		&i.UUID,
 		&i.WorkspaceUUID,
 		&i.UserUUID,
-		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -83,7 +75,7 @@ func (q *Queries) GetWorkspaceMember(ctx context.Context, arg GetWorkspaceMember
 }
 
 const listWorkspaceMembersByUser = `-- name: ListWorkspaceMembersByUser :many
-SELECT uuid, workspace_uuid, user_uuid, role, created_at, updated_at FROM workspace_member
+SELECT uuid, workspace_uuid, user_uuid, created_at, updated_at FROM workspace_member
 WHERE user_uuid = $1
 ORDER BY created_at
 `
@@ -101,7 +93,6 @@ func (q *Queries) ListWorkspaceMembersByUser(ctx context.Context, userUuid *uuid
 			&i.UUID,
 			&i.WorkspaceUUID,
 			&i.UserUUID,
-			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -116,7 +107,7 @@ func (q *Queries) ListWorkspaceMembersByUser(ctx context.Context, userUuid *uuid
 }
 
 const listWorkspaceMembersByWorkspace = `-- name: ListWorkspaceMembersByWorkspace :many
-SELECT uuid, workspace_uuid, user_uuid, role, created_at, updated_at FROM workspace_member
+SELECT uuid, workspace_uuid, user_uuid, created_at, updated_at FROM workspace_member
 WHERE workspace_uuid = $1
 ORDER BY created_at
 `
@@ -134,7 +125,6 @@ func (q *Queries) ListWorkspaceMembersByWorkspace(ctx context.Context, workspace
 			&i.UUID,
 			&i.WorkspaceUUID,
 			&i.UserUUID,
-			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -146,31 +136,4 @@ func (q *Queries) ListWorkspaceMembersByWorkspace(ctx context.Context, workspace
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateWorkspaceMemberRole = `-- name: UpdateWorkspaceMemberRole :one
-UPDATE workspace_member
-SET role = $3, updated_at = NOW()
-WHERE workspace_uuid = $1 AND user_uuid = $2
-RETURNING uuid, workspace_uuid, user_uuid, role, created_at, updated_at
-`
-
-type UpdateWorkspaceMemberRoleParams struct {
-	WorkspaceUUID *uuid.UUID `json:"workspace_uuid"`
-	UserUUID      *uuid.UUID `json:"user_uuid"`
-	Role          string     `json:"role"`
-}
-
-func (q *Queries) UpdateWorkspaceMemberRole(ctx context.Context, arg UpdateWorkspaceMemberRoleParams) (WorkspaceMember, error) {
-	row := q.db.QueryRow(ctx, updateWorkspaceMemberRole, arg.WorkspaceUUID, arg.UserUUID, arg.Role)
-	var i WorkspaceMember
-	err := row.Scan(
-		&i.UUID,
-		&i.WorkspaceUUID,
-		&i.UserUUID,
-		&i.Role,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }

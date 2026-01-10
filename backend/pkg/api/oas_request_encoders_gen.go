@@ -39,8 +39,8 @@ func encodeAddWorkspaceMemberRequest(
 	return nil
 }
 
-func encodeAssignRoleToUserRequest(
-	req *AssignRoleToUserReq,
+func encodeAssignPolicySetToUserRequest(
+	req *AssignPolicySetToUserReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -137,8 +137,8 @@ func encodeConfirmPasswordResetRequest(
 	return nil
 }
 
-func encodeCreateRoleRequest(
-	req *RbacRole,
+func encodeCreatePolicySetRequest(
+	req *PolicySet,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -553,6 +553,20 @@ func encodeSyncpolicyUpdateRequest(
 	return nil
 }
 
+func encodeUpdatePolicySetRequest(
+	req *PolicySet,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateProfileRequest(
 	req *UserProfile,
 	r *http.Request,
@@ -569,20 +583,6 @@ func encodeUpdateProfileRequest(
 
 func encodeUpdateRegisteredWorkerRequest(
 	req *RegisteredWorker,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
-func encodeUpdateRoleRequest(
-	req *RbacRole,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

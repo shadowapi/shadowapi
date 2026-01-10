@@ -16,8 +16,10 @@
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.23.0",
+    "@types/js-yaml": "^4.0.9",
     "antd": "^6.0.0",
     "express": "^4.21.0",
+    "js-yaml": "^4.1.1",
     "openapi-fetch": "^0.15.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

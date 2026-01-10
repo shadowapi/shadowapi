@@ -11,19 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countCasbinRules = `-- name: CountCasbinRules :one
-SELECT COUNT(*) FROM casbin_rule
+const countLadonPolicies = `-- name: CountLadonPolicies :one
+SELECT COUNT(*) FROM ladon_policy
 `
 
-func (q *Queries) CountCasbinRules(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countCasbinRules)
+func (q *Queries) CountLadonPolicies(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countLadonPolicies)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const countPermissions = `-- name: CountPermissions :one
-SELECT COUNT(*) FROM rbac_permission
+SELECT COUNT(*) FROM permission
 `
 
 func (q *Queries) CountPermissions(ctx context.Context) (int64, error) {
@@ -33,19 +33,129 @@ func (q *Queries) CountPermissions(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const countRoles = `-- name: CountRoles :one
-SELECT COUNT(*) FROM rbac_role
+const countPolicySets = `-- name: CountPolicySets :one
+SELECT COUNT(*) FROM policy_set
 `
 
-func (q *Queries) CountRoles(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countRoles)
+func (q *Queries) CountPolicySets(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countPolicySets)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
+const countUserPolicySetAssignments = `-- name: CountUserPolicySetAssignments :one
+SELECT COUNT(*) FROM user_policy_set
+`
+
+func (q *Queries) CountUserPolicySetAssignments(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countUserPolicySetAssignments)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createLadonPolicy = `-- name: CreateLadonPolicy :one
+
+INSERT INTO ladon_policy (id, description, effect, conditions, meta, created_at)
+VALUES ($1, $2, $3, $4, $5, NOW())
+RETURNING id, description, effect, conditions, meta, created_at, updated_at
+`
+
+type CreateLadonPolicyParams struct {
+	ID          string      `json:"id"`
+	Description pgtype.Text `json:"description"`
+	Effect      string      `json:"effect"`
+	Conditions  []byte      `json:"conditions"`
+	Meta        []byte      `json:"meta"`
+}
+
+// ============================================================================
+// Ladon Policy Queries
+// ============================================================================
+func (q *Queries) CreateLadonPolicy(ctx context.Context, arg CreateLadonPolicyParams) (LadonPolicy, error) {
+	row := q.db.QueryRow(ctx, createLadonPolicy,
+		arg.ID,
+		arg.Description,
+		arg.Effect,
+		arg.Conditions,
+		arg.Meta,
+	)
+	var i LadonPolicy
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.Effect,
+		&i.Conditions,
+		&i.Meta,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createLadonPolicyAction = `-- name: CreateLadonPolicyAction :exec
+
+INSERT INTO ladon_policy_action (policy_id, action)
+VALUES ($1, $2)
+ON CONFLICT (policy_id, action) DO NOTHING
+`
+
+type CreateLadonPolicyActionParams struct {
+	PolicyID string `json:"policy_id"`
+	Action   string `json:"action"`
+}
+
+// ============================================================================
+// Ladon Policy Action Queries
+// ============================================================================
+func (q *Queries) CreateLadonPolicyAction(ctx context.Context, arg CreateLadonPolicyActionParams) error {
+	_, err := q.db.Exec(ctx, createLadonPolicyAction, arg.PolicyID, arg.Action)
+	return err
+}
+
+const createLadonPolicyResource = `-- name: CreateLadonPolicyResource :exec
+
+INSERT INTO ladon_policy_resource (policy_id, resource)
+VALUES ($1, $2)
+ON CONFLICT (policy_id, resource) DO NOTHING
+`
+
+type CreateLadonPolicyResourceParams struct {
+	PolicyID string `json:"policy_id"`
+	Resource string `json:"resource"`
+}
+
+// ============================================================================
+// Ladon Policy Resource Queries
+// ============================================================================
+func (q *Queries) CreateLadonPolicyResource(ctx context.Context, arg CreateLadonPolicyResourceParams) error {
+	_, err := q.db.Exec(ctx, createLadonPolicyResource, arg.PolicyID, arg.Resource)
+	return err
+}
+
+const createLadonPolicySubject = `-- name: CreateLadonPolicySubject :exec
+
+INSERT INTO ladon_policy_subject (policy_id, subject)
+VALUES ($1, $2)
+ON CONFLICT (policy_id, subject) DO NOTHING
+`
+
+type CreateLadonPolicySubjectParams struct {
+	PolicyID string `json:"policy_id"`
+	Subject  string `json:"subject"`
+}
+
+// ============================================================================
+// Ladon Policy Subject Queries
+// ============================================================================
+func (q *Queries) CreateLadonPolicySubject(ctx context.Context, arg CreateLadonPolicySubjectParams) error {
+	_, err := q.db.Exec(ctx, createLadonPolicySubject, arg.PolicyID, arg.Subject)
+	return err
+}
+
 const createPermission = `-- name: CreatePermission :one
-INSERT INTO rbac_permission (
+INSERT INTO permission (
     uuid,
     name,
     display_name,
@@ -76,7 +186,7 @@ type CreatePermissionParams struct {
 	Scope       string      `json:"scope"`
 }
 
-func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) (RbacPermission, error) {
+func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error) {
 	row := q.db.QueryRow(ctx, createPermission,
 		arg.UUID,
 		arg.Name,
@@ -86,7 +196,7 @@ func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionPara
 		arg.Action,
 		arg.Scope,
 	)
-	var i RbacPermission
+	var i Permission
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,
@@ -100,8 +210,8 @@ func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionPara
 	return i, err
 }
 
-const createRole = `-- name: CreateRole :one
-INSERT INTO rbac_role (
+const createPolicySet = `-- name: CreatePolicySet :one
+INSERT INTO policy_set (
     uuid,
     name,
     display_name,
@@ -124,7 +234,7 @@ INSERT INTO rbac_role (
 ) RETURNING uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at
 `
 
-type CreateRoleParams struct {
+type CreatePolicySetParams struct {
 	UUID        pgtype.UUID `json:"uuid"`
 	Name        string      `json:"name"`
 	DisplayName string      `json:"display_name"`
@@ -134,8 +244,8 @@ type CreateRoleParams struct {
 	Permissions []byte      `json:"permissions"`
 }
 
-func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (RbacRole, error) {
-	row := q.db.QueryRow(ctx, createRole,
+func (q *Queries) CreatePolicySet(ctx context.Context, arg CreatePolicySetParams) (PolicySet, error) {
+	row := q.db.QueryRow(ctx, createPolicySet,
 		arg.UUID,
 		arg.Name,
 		arg.DisplayName,
@@ -144,7 +254,7 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (RbacRol
 		arg.IsSystem,
 		arg.Permissions,
 	)
-	var i RbacRole
+	var i PolicySet
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,
@@ -159,17 +269,81 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (RbacRol
 	return i, err
 }
 
-const deleteAllCasbinRules = `-- name: DeleteAllCasbinRules :exec
-DELETE FROM casbin_rule
+const createUserPolicySetAssignment = `-- name: CreateUserPolicySetAssignment :exec
+
+INSERT INTO user_policy_set (user_uuid, policy_set_name, workspace_slug)
+VALUES ($1::uuid, $2, $3)
+ON CONFLICT (user_uuid, policy_set_name, workspace_slug) DO NOTHING
 `
 
-func (q *Queries) DeleteAllCasbinRules(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, deleteAllCasbinRules)
+type CreateUserPolicySetAssignmentParams struct {
+	UserUUID      pgtype.UUID `json:"user_uuid"`
+	PolicySetName string      `json:"policy_set_name"`
+	WorkspaceSlug pgtype.Text `json:"workspace_slug"`
+}
+
+// ============================================================================
+// User Policy Set Assignment Queries
+// ============================================================================
+func (q *Queries) CreateUserPolicySetAssignment(ctx context.Context, arg CreateUserPolicySetAssignmentParams) error {
+	_, err := q.db.Exec(ctx, createUserPolicySetAssignment, arg.UserUUID, arg.PolicySetName, arg.WorkspaceSlug)
+	return err
+}
+
+const deleteAllUserPolicySetAssignmentsInWorkspace = `-- name: DeleteAllUserPolicySetAssignmentsInWorkspace :exec
+DELETE FROM user_policy_set
+WHERE user_uuid = $1::uuid
+  AND workspace_slug = $2
+`
+
+type DeleteAllUserPolicySetAssignmentsInWorkspaceParams struct {
+	UserUUID      pgtype.UUID `json:"user_uuid"`
+	WorkspaceSlug pgtype.Text `json:"workspace_slug"`
+}
+
+func (q *Queries) DeleteAllUserPolicySetAssignmentsInWorkspace(ctx context.Context, arg DeleteAllUserPolicySetAssignmentsInWorkspaceParams) error {
+	_, err := q.db.Exec(ctx, deleteAllUserPolicySetAssignmentsInWorkspace, arg.UserUUID, arg.WorkspaceSlug)
+	return err
+}
+
+const deleteLadonPolicy = `-- name: DeleteLadonPolicy :exec
+DELETE FROM ladon_policy WHERE id = $1
+`
+
+func (q *Queries) DeleteLadonPolicy(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteLadonPolicy, id)
+	return err
+}
+
+const deleteLadonPolicyActions = `-- name: DeleteLadonPolicyActions :exec
+DELETE FROM ladon_policy_action WHERE policy_id = $1
+`
+
+func (q *Queries) DeleteLadonPolicyActions(ctx context.Context, policyID string) error {
+	_, err := q.db.Exec(ctx, deleteLadonPolicyActions, policyID)
+	return err
+}
+
+const deleteLadonPolicyResources = `-- name: DeleteLadonPolicyResources :exec
+DELETE FROM ladon_policy_resource WHERE policy_id = $1
+`
+
+func (q *Queries) DeleteLadonPolicyResources(ctx context.Context, policyID string) error {
+	_, err := q.db.Exec(ctx, deleteLadonPolicyResources, policyID)
+	return err
+}
+
+const deleteLadonPolicySubjects = `-- name: DeleteLadonPolicySubjects :exec
+DELETE FROM ladon_policy_subject WHERE policy_id = $1
+`
+
+func (q *Queries) DeleteLadonPolicySubjects(ctx context.Context, policyID string) error {
+	_, err := q.db.Exec(ctx, deleteLadonPolicySubjects, policyID)
 	return err
 }
 
 const deletePermission = `-- name: DeletePermission :exec
-DELETE FROM rbac_permission
+DELETE FROM permission
 WHERE uuid = $1::uuid
 `
 
@@ -178,24 +352,133 @@ func (q *Queries) DeletePermission(ctx context.Context, uuid pgtype.UUID) error 
 	return err
 }
 
-const deleteRole = `-- name: DeleteRole :exec
-DELETE FROM rbac_role
+const deletePolicySet = `-- name: DeletePolicySet :exec
+DELETE FROM policy_set
 WHERE uuid = $1::uuid AND is_system = FALSE
 `
 
-func (q *Queries) DeleteRole(ctx context.Context, uuid pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, deleteRole, uuid)
+func (q *Queries) DeletePolicySet(ctx context.Context, uuid pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deletePolicySet, uuid)
 	return err
 }
 
+const deleteUserPolicySetAssignment = `-- name: DeleteUserPolicySetAssignment :exec
+DELETE FROM user_policy_set
+WHERE user_uuid = $1::uuid
+  AND policy_set_name = $2
+  AND (workspace_slug = $3 OR ($3 IS NULL AND workspace_slug IS NULL))
+`
+
+type DeleteUserPolicySetAssignmentParams struct {
+	UserUUID      pgtype.UUID `json:"user_uuid"`
+	PolicySetName string      `json:"policy_set_name"`
+	WorkspaceSlug pgtype.Text `json:"workspace_slug"`
+}
+
+func (q *Queries) DeleteUserPolicySetAssignment(ctx context.Context, arg DeleteUserPolicySetAssignmentParams) error {
+	_, err := q.db.Exec(ctx, deleteUserPolicySetAssignment, arg.UserUUID, arg.PolicySetName, arg.WorkspaceSlug)
+	return err
+}
+
+const findPoliciesByResource = `-- name: FindPoliciesByResource :many
+SELECT DISTINCT policy_id FROM ladon_policy_resource WHERE resource = $1
+`
+
+func (q *Queries) FindPoliciesByResource(ctx context.Context, resource string) ([]string, error) {
+	rows, err := q.db.Query(ctx, findPoliciesByResource, resource)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var policy_id string
+		if err := rows.Scan(&policy_id); err != nil {
+			return nil, err
+		}
+		items = append(items, policy_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findPoliciesBySubject = `-- name: FindPoliciesBySubject :many
+SELECT DISTINCT policy_id FROM ladon_policy_subject WHERE subject = $1
+`
+
+func (q *Queries) FindPoliciesBySubject(ctx context.Context, subject string) ([]string, error) {
+	rows, err := q.db.Query(ctx, findPoliciesBySubject, subject)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var policy_id string
+		if err := rows.Scan(&policy_id); err != nil {
+			return nil, err
+		}
+		items = append(items, policy_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findPoliciesBySubjects = `-- name: FindPoliciesBySubjects :many
+SELECT DISTINCT policy_id FROM ladon_policy_subject WHERE subject = ANY($1::text[])
+`
+
+func (q *Queries) FindPoliciesBySubjects(ctx context.Context, subjects []string) ([]string, error) {
+	rows, err := q.db.Query(ctx, findPoliciesBySubjects, subjects)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var policy_id string
+		if err := rows.Scan(&policy_id); err != nil {
+			return nil, err
+		}
+		items = append(items, policy_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLadonPolicy = `-- name: GetLadonPolicy :one
+SELECT id, description, effect, conditions, meta, created_at, updated_at FROM ladon_policy WHERE id = $1
+`
+
+func (q *Queries) GetLadonPolicy(ctx context.Context, id string) (LadonPolicy, error) {
+	row := q.db.QueryRow(ctx, getLadonPolicy, id)
+	var i LadonPolicy
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.Effect,
+		&i.Conditions,
+		&i.Meta,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getPermissionByName = `-- name: GetPermissionByName :one
-SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM rbac_permission
+SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM permission
 WHERE name = $1
 `
 
-func (q *Queries) GetPermissionByName(ctx context.Context, name string) (RbacPermission, error) {
+func (q *Queries) GetPermissionByName(ctx context.Context, name string) (Permission, error) {
 	row := q.db.QueryRow(ctx, getPermissionByName, name)
-	var i RbacPermission
+	var i Permission
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,
@@ -210,13 +493,13 @@ func (q *Queries) GetPermissionByName(ctx context.Context, name string) (RbacPer
 }
 
 const getPermissionByUUID = `-- name: GetPermissionByUUID :one
-SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM rbac_permission
+SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM permission
 WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetPermissionByUUID(ctx context.Context, uuid pgtype.UUID) (RbacPermission, error) {
+func (q *Queries) GetPermissionByUUID(ctx context.Context, uuid pgtype.UUID) (Permission, error) {
 	row := q.db.QueryRow(ctx, getPermissionByUUID, uuid)
-	var i RbacPermission
+	var i Permission
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,
@@ -230,14 +513,14 @@ func (q *Queries) GetPermissionByUUID(ctx context.Context, uuid pgtype.UUID) (Rb
 	return i, err
 }
 
-const getRoleByName = `-- name: GetRoleByName :one
-SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM rbac_role
+const getPolicySetByName = `-- name: GetPolicySetByName :one
+SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM policy_set
 WHERE name = $1
 `
 
-func (q *Queries) GetRoleByName(ctx context.Context, name string) (RbacRole, error) {
-	row := q.db.QueryRow(ctx, getRoleByName, name)
-	var i RbacRole
+func (q *Queries) GetPolicySetByName(ctx context.Context, name string) (PolicySet, error) {
+	row := q.db.QueryRow(ctx, getPolicySetByName, name)
+	var i PolicySet
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,
@@ -252,14 +535,14 @@ func (q *Queries) GetRoleByName(ctx context.Context, name string) (RbacRole, err
 	return i, err
 }
 
-const getRoleByUUID = `-- name: GetRoleByUUID :one
-SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM rbac_role
+const getPolicySetByUUID = `-- name: GetPolicySetByUUID :one
+SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM policy_set
 WHERE uuid = $1::uuid
 `
 
-func (q *Queries) GetRoleByUUID(ctx context.Context, uuid pgtype.UUID) (RbacRole, error) {
-	row := q.db.QueryRow(ctx, getRoleByUUID, uuid)
-	var i RbacRole
+func (q *Queries) GetPolicySetByUUID(ctx context.Context, uuid pgtype.UUID) (PolicySet, error) {
+	row := q.db.QueryRow(ctx, getPolicySetByUUID, uuid)
+	var i PolicySet
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,
@@ -274,33 +557,59 @@ func (q *Queries) GetRoleByUUID(ctx context.Context, uuid pgtype.UUID) (RbacRole
 	return i, err
 }
 
-const listCasbinRules = `-- name: ListCasbinRules :many
-
-SELECT id, p_type, v0, v1, v2, v3, v4, v5 FROM casbin_rule
-ORDER BY id
+const hasUserPolicySetAssignment = `-- name: HasUserPolicySetAssignment :one
+SELECT EXISTS (
+    SELECT 1 FROM user_policy_set
+    WHERE user_uuid = $1::uuid
+      AND policy_set_name = $2
+      AND (workspace_slug = $3 OR ($3 IS NULL AND workspace_slug IS NULL))
+) AS exists
 `
 
-// ============================================================================
-// Casbin Rule Queries (for direct manipulation if needed)
-// ============================================================================
-func (q *Queries) ListCasbinRules(ctx context.Context) ([]CasbinRule, error) {
-	rows, err := q.db.Query(ctx, listCasbinRules)
+type HasUserPolicySetAssignmentParams struct {
+	UserUUID      pgtype.UUID `json:"user_uuid"`
+	PolicySetName string      `json:"policy_set_name"`
+	WorkspaceSlug pgtype.Text `json:"workspace_slug"`
+}
+
+func (q *Queries) HasUserPolicySetAssignment(ctx context.Context, arg HasUserPolicySetAssignmentParams) (bool, error) {
+	row := q.db.QueryRow(ctx, hasUserPolicySetAssignment, arg.UserUUID, arg.PolicySetName, arg.WorkspaceSlug)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const ladonPolicyExists = `-- name: LadonPolicyExists :one
+SELECT EXISTS (SELECT 1 FROM ladon_policy WHERE id = $1) AS exists
+`
+
+func (q *Queries) LadonPolicyExists(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRow(ctx, ladonPolicyExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const listGlobalPolicySetAssignmentsByUser = `-- name: ListGlobalPolicySetAssignmentsByUser :many
+SELECT uuid, user_uuid, policy_set_name, workspace_slug, created_at FROM user_policy_set
+WHERE user_uuid = $1::uuid AND workspace_slug IS NULL
+`
+
+func (q *Queries) ListGlobalPolicySetAssignmentsByUser(ctx context.Context, userUuid pgtype.UUID) ([]UserPolicySet, error) {
+	rows, err := q.db.Query(ctx, listGlobalPolicySetAssignmentsByUser, userUuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CasbinRule
+	var items []UserPolicySet
 	for rows.Next() {
-		var i CasbinRule
+		var i UserPolicySet
 		if err := rows.Scan(
-			&i.ID,
-			&i.PType,
-			&i.V0,
-			&i.V1,
-			&i.V2,
-			&i.V3,
-			&i.V4,
-			&i.V5,
+			&i.UUID,
+			&i.UserUUID,
+			&i.PolicySetName,
+			&i.WorkspaceSlug,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -312,34 +621,108 @@ func (q *Queries) ListCasbinRules(ctx context.Context) ([]CasbinRule, error) {
 	return items, nil
 }
 
-const listCasbinRulesByPtype = `-- name: ListCasbinRulesByPtype :many
-SELECT id, p_type, v0, v1, v2, v3, v4, v5 FROM casbin_rule
-WHERE p_type = $1
-ORDER BY id
+const listLadonPolicies = `-- name: ListLadonPolicies :many
+SELECT id, description, effect, conditions, meta, created_at, updated_at FROM ladon_policy ORDER BY id LIMIT $2 OFFSET $1
 `
 
-func (q *Queries) ListCasbinRulesByPtype(ctx context.Context, pType string) ([]CasbinRule, error) {
-	rows, err := q.db.Query(ctx, listCasbinRulesByPtype, pType)
+type ListLadonPoliciesParams struct {
+	OffsetVal int32 `json:"offset_val"`
+	LimitVal  int32 `json:"limit_val"`
+}
+
+func (q *Queries) ListLadonPolicies(ctx context.Context, arg ListLadonPoliciesParams) ([]LadonPolicy, error) {
+	rows, err := q.db.Query(ctx, listLadonPolicies, arg.OffsetVal, arg.LimitVal)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CasbinRule
+	var items []LadonPolicy
 	for rows.Next() {
-		var i CasbinRule
+		var i LadonPolicy
 		if err := rows.Scan(
 			&i.ID,
-			&i.PType,
-			&i.V0,
-			&i.V1,
-			&i.V2,
-			&i.V3,
-			&i.V4,
-			&i.V5,
+			&i.Description,
+			&i.Effect,
+			&i.Conditions,
+			&i.Meta,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listLadonPolicyActions = `-- name: ListLadonPolicyActions :many
+SELECT action FROM ladon_policy_action WHERE policy_id = $1
+`
+
+func (q *Queries) ListLadonPolicyActions(ctx context.Context, policyID string) ([]string, error) {
+	rows, err := q.db.Query(ctx, listLadonPolicyActions, policyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var action string
+		if err := rows.Scan(&action); err != nil {
+			return nil, err
+		}
+		items = append(items, action)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listLadonPolicyResources = `-- name: ListLadonPolicyResources :many
+SELECT resource FROM ladon_policy_resource WHERE policy_id = $1
+`
+
+func (q *Queries) ListLadonPolicyResources(ctx context.Context, policyID string) ([]string, error) {
+	rows, err := q.db.Query(ctx, listLadonPolicyResources, policyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var resource string
+		if err := rows.Scan(&resource); err != nil {
+			return nil, err
+		}
+		items = append(items, resource)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listLadonPolicySubjects = `-- name: ListLadonPolicySubjects :many
+SELECT subject FROM ladon_policy_subject WHERE policy_id = $1
+`
+
+func (q *Queries) ListLadonPolicySubjects(ctx context.Context, policyID string) ([]string, error) {
+	rows, err := q.db.Query(ctx, listLadonPolicySubjects, policyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var subject string
+		if err := rows.Scan(&subject); err != nil {
+			return nil, err
+		}
+		items = append(items, subject)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -349,22 +732,22 @@ func (q *Queries) ListCasbinRulesByPtype(ctx context.Context, pType string) ([]C
 
 const listPermissions = `-- name: ListPermissions :many
 
-SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM rbac_permission
+SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM permission
 ORDER BY resource, action
 `
 
 // ============================================================================
-// RBAC Permission Queries
+// Permission Queries
 // ============================================================================
-func (q *Queries) ListPermissions(ctx context.Context) ([]RbacPermission, error) {
+func (q *Queries) ListPermissions(ctx context.Context) ([]Permission, error) {
 	rows, err := q.db.Query(ctx, listPermissions)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RbacPermission
+	var items []Permission
 	for rows.Next() {
-		var i RbacPermission
+		var i Permission
 		if err := rows.Scan(
 			&i.UUID,
 			&i.Name,
@@ -386,20 +769,20 @@ func (q *Queries) ListPermissions(ctx context.Context) ([]RbacPermission, error)
 }
 
 const listPermissionsByResource = `-- name: ListPermissionsByResource :many
-SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM rbac_permission
+SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM permission
 WHERE resource = $1
 ORDER BY action
 `
 
-func (q *Queries) ListPermissionsByResource(ctx context.Context, resource string) ([]RbacPermission, error) {
+func (q *Queries) ListPermissionsByResource(ctx context.Context, resource string) ([]Permission, error) {
 	rows, err := q.db.Query(ctx, listPermissionsByResource, resource)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RbacPermission
+	var items []Permission
 	for rows.Next() {
-		var i RbacPermission
+		var i Permission
 		if err := rows.Scan(
 			&i.UUID,
 			&i.Name,
@@ -421,20 +804,20 @@ func (q *Queries) ListPermissionsByResource(ctx context.Context, resource string
 }
 
 const listPermissionsByScope = `-- name: ListPermissionsByScope :many
-SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM rbac_permission
+SELECT uuid, name, display_name, description, resource, action, scope, created_at FROM permission
 WHERE scope = $1
 ORDER BY resource, action
 `
 
-func (q *Queries) ListPermissionsByScope(ctx context.Context, scope string) ([]RbacPermission, error) {
+func (q *Queries) ListPermissionsByScope(ctx context.Context, scope string) ([]Permission, error) {
 	rows, err := q.db.Query(ctx, listPermissionsByScope, scope)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RbacPermission
+	var items []Permission
 	for rows.Next() {
-		var i RbacPermission
+		var i Permission
 		if err := rows.Scan(
 			&i.UUID,
 			&i.Name,
@@ -455,24 +838,24 @@ func (q *Queries) ListPermissionsByScope(ctx context.Context, scope string) ([]R
 	return items, nil
 }
 
-const listRoles = `-- name: ListRoles :many
+const listPolicySets = `-- name: ListPolicySets :many
 
-SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM rbac_role
+SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM policy_set
 ORDER BY scope, name
 `
 
 // ============================================================================
-// RBAC Role Queries
+// Policy Set Queries
 // ============================================================================
-func (q *Queries) ListRoles(ctx context.Context) ([]RbacRole, error) {
-	rows, err := q.db.Query(ctx, listRoles)
+func (q *Queries) ListPolicySets(ctx context.Context) ([]PolicySet, error) {
+	rows, err := q.db.Query(ctx, listPolicySets)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RbacRole
+	var items []PolicySet
 	for rows.Next() {
-		var i RbacRole
+		var i PolicySet
 		if err := rows.Scan(
 			&i.UUID,
 			&i.Name,
@@ -494,21 +877,21 @@ func (q *Queries) ListRoles(ctx context.Context) ([]RbacRole, error) {
 	return items, nil
 }
 
-const listRolesByScope = `-- name: ListRolesByScope :many
-SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM rbac_role
+const listPolicySetsByScope = `-- name: ListPolicySetsByScope :many
+SELECT uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at FROM policy_set
 WHERE scope = $1
 ORDER BY name
 `
 
-func (q *Queries) ListRolesByScope(ctx context.Context, scope string) ([]RbacRole, error) {
-	rows, err := q.db.Query(ctx, listRolesByScope, scope)
+func (q *Queries) ListPolicySetsByScope(ctx context.Context, scope string) ([]PolicySet, error) {
+	rows, err := q.db.Query(ctx, listPolicySetsByScope, scope)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RbacRole
+	var items []PolicySet
 	for rows.Next() {
-		var i RbacRole
+		var i PolicySet
 		if err := rows.Scan(
 			&i.UUID,
 			&i.Name,
@@ -519,6 +902,73 @@ func (q *Queries) ListRolesByScope(ctx context.Context, scope string) ([]RbacRol
 			&i.Permissions,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserPolicySetAssignmentsByUser = `-- name: ListUserPolicySetAssignmentsByUser :many
+SELECT uuid, user_uuid, policy_set_name, workspace_slug, created_at FROM user_policy_set WHERE user_uuid = $1::uuid
+`
+
+func (q *Queries) ListUserPolicySetAssignmentsByUser(ctx context.Context, userUuid pgtype.UUID) ([]UserPolicySet, error) {
+	rows, err := q.db.Query(ctx, listUserPolicySetAssignmentsByUser, userUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserPolicySet
+	for rows.Next() {
+		var i UserPolicySet
+		if err := rows.Scan(
+			&i.UUID,
+			&i.UserUUID,
+			&i.PolicySetName,
+			&i.WorkspaceSlug,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserPolicySetAssignmentsByUserAndWorkspace = `-- name: ListUserPolicySetAssignmentsByUserAndWorkspace :many
+SELECT uuid, user_uuid, policy_set_name, workspace_slug, created_at FROM user_policy_set
+WHERE user_uuid = $1::uuid
+  AND (workspace_slug = $2 OR workspace_slug IS NULL)
+`
+
+type ListUserPolicySetAssignmentsByUserAndWorkspaceParams struct {
+	UserUUID      pgtype.UUID `json:"user_uuid"`
+	WorkspaceSlug pgtype.Text `json:"workspace_slug"`
+}
+
+func (q *Queries) ListUserPolicySetAssignmentsByUserAndWorkspace(ctx context.Context, arg ListUserPolicySetAssignmentsByUserAndWorkspaceParams) ([]UserPolicySet, error) {
+	rows, err := q.db.Query(ctx, listUserPolicySetAssignmentsByUserAndWorkspace, arg.UserUUID, arg.WorkspaceSlug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserPolicySet
+	for rows.Next() {
+		var i UserPolicySet
+		if err := rows.Scan(
+			&i.UUID,
+			&i.UserUUID,
+			&i.PolicySetName,
+			&i.WorkspaceSlug,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -532,7 +982,7 @@ func (q *Queries) ListRolesByScope(ctx context.Context, scope string) ([]RbacRol
 
 const permissionExists = `-- name: PermissionExists :one
 SELECT EXISTS (
-    SELECT 1 FROM rbac_permission WHERE name = $1
+    SELECT 1 FROM permission WHERE name = $1
 ) AS exists
 `
 
@@ -543,21 +993,61 @@ func (q *Queries) PermissionExists(ctx context.Context, name string) (bool, erro
 	return exists, err
 }
 
-const roleExists = `-- name: RoleExists :one
+const policySetExists = `-- name: PolicySetExists :one
 SELECT EXISTS (
-    SELECT 1 FROM rbac_role WHERE name = $1
+    SELECT 1 FROM policy_set WHERE name = $1
 ) AS exists
 `
 
-func (q *Queries) RoleExists(ctx context.Context, name string) (bool, error) {
-	row := q.db.QueryRow(ctx, roleExists, name)
+func (q *Queries) PolicySetExists(ctx context.Context, name string) (bool, error) {
+	row := q.db.QueryRow(ctx, policySetExists, name)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
 }
 
-const updateRole = `-- name: UpdateRole :one
-UPDATE rbac_role
+const updateLadonPolicy = `-- name: UpdateLadonPolicy :one
+UPDATE ladon_policy
+SET description = $1,
+    effect = $2,
+    conditions = $3,
+    meta = $4,
+    updated_at = NOW()
+WHERE id = $5
+RETURNING id, description, effect, conditions, meta, created_at, updated_at
+`
+
+type UpdateLadonPolicyParams struct {
+	Description pgtype.Text `json:"description"`
+	Effect      string      `json:"effect"`
+	Conditions  []byte      `json:"conditions"`
+	Meta        []byte      `json:"meta"`
+	ID          string      `json:"id"`
+}
+
+func (q *Queries) UpdateLadonPolicy(ctx context.Context, arg UpdateLadonPolicyParams) (LadonPolicy, error) {
+	row := q.db.QueryRow(ctx, updateLadonPolicy,
+		arg.Description,
+		arg.Effect,
+		arg.Conditions,
+		arg.Meta,
+		arg.ID,
+	)
+	var i LadonPolicy
+	err := row.Scan(
+		&i.ID,
+		&i.Description,
+		&i.Effect,
+		&i.Conditions,
+		&i.Meta,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updatePolicySet = `-- name: UpdatePolicySet :one
+UPDATE policy_set
 SET
     display_name = $1,
     description = $2,
@@ -567,21 +1057,21 @@ WHERE uuid = $4::uuid AND is_system = FALSE
 RETURNING uuid, name, display_name, description, scope, is_system, permissions, created_at, updated_at
 `
 
-type UpdateRoleParams struct {
+type UpdatePolicySetParams struct {
 	DisplayName string      `json:"display_name"`
 	Description pgtype.Text `json:"description"`
 	Permissions []byte      `json:"permissions"`
 	UUID        pgtype.UUID `json:"uuid"`
 }
 
-func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (RbacRole, error) {
-	row := q.db.QueryRow(ctx, updateRole,
+func (q *Queries) UpdatePolicySet(ctx context.Context, arg UpdatePolicySetParams) (PolicySet, error) {
+	row := q.db.QueryRow(ctx, updatePolicySet,
 		arg.DisplayName,
 		arg.Description,
 		arg.Permissions,
 		arg.UUID,
 	)
-	var i RbacRole
+	var i PolicySet
 	err := row.Scan(
 		&i.UUID,
 		&i.Name,

@@ -2,28 +2,23 @@ package rbac
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"log/slog"
 	"sync"
 
-	"github.com/casbin/casbin/v2"
-	"github.com/casbin/casbin/v2/model"
 	"github.com/jackc/pgx/v5/pgxpool"
-	pgxadapter "github.com/pckhoi/casbin-pgx-adapter/v2"
+	"github.com/ory/ladon"
 	"github.com/samber/do/v2"
 
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 )
 
-//go:embed model.conf
-var modelConf string
-
-// Enforcer wraps the Casbin enforcer and provides convenience methods.
+// Enforcer wraps Ory Ladon warden for access control decisions.
 type Enforcer struct {
-	casbin *casbin.Enforcer
-	log    *slog.Logger
-	mu     sync.RWMutex
+	warden  *ladon.Ladon
+	manager *PostgresManager
+	log     *slog.Logger
+	mu      sync.RWMutex
 }
 
 // Provide creates a new Enforcer for the dependency injector.
@@ -32,50 +27,28 @@ func Provide(i do.Injector) (*Enforcer, error) {
 	log := do.MustInvoke[*slog.Logger](i)
 	dbp := do.MustInvoke[*pgxpool.Pool](i)
 
-	log.Info("initializing RBAC enforcer")
+	_ = cfg // Reserved for future configuration options
 
-	// Create PostgreSQL adapter
-	adapter, err := pgxadapter.NewAdapter(
-		cfg.DB.URI,
-		pgxadapter.WithTableName("casbin_rule"),
-	)
-	if err != nil {
-		log.Error("failed to create Casbin adapter", "error", err)
-		return nil, fmt.Errorf("failed to create Casbin adapter: %w", err)
-	}
+	log.Info("initializing Ladon policy-based authorization enforcer")
 
-	// Load model from embedded config
-	m, err := model.NewModelFromString(modelConf)
-	if err != nil {
-		log.Error("failed to load Casbin model", "error", err)
-		return nil, fmt.Errorf("failed to load Casbin model: %w", err)
-	}
-
-	// Create enforcer
-	e, err := casbin.NewEnforcer(m, adapter)
-	if err != nil {
-		log.Error("failed to create Casbin enforcer", "error", err)
-		return nil, fmt.Errorf("failed to create Casbin enforcer: %w", err)
-	}
-
-	// Load policies from database
-	if err := e.LoadPolicy(); err != nil {
-		log.Error("failed to load policies", "error", err)
-		return nil, fmt.Errorf("failed to load policies: %w", err)
+	manager := NewPostgresManager(dbp, log)
+	warden := &ladon.Ladon{
+		Manager: manager,
 	}
 
 	enforcer := &Enforcer{
-		casbin: e,
-		log:    log,
+		warden:  warden,
+		manager: manager,
+		log:     log,
 	}
 
-	// Initialize predefined roles and policies if they don't exist
+	// Initialize predefined policy sets and policies if they don't exist
 	if err := enforcer.initializePredefinedPolicies(context.Background(), dbp); err != nil {
 		log.Warn("failed to initialize predefined policies", "error", err)
 		// Don't fail on this - policies can be added later
 	}
 
-	log.Info("RBAC enforcer initialized successfully")
+	log.Info("Ladon policy-based authorization enforcer initialized successfully")
 	return enforcer, nil
 }
 
@@ -87,7 +60,23 @@ func Provide(i do.Injector) (*Enforcer, error) {
 func (e *Enforcer) Enforce(sub, dom, obj, act string) (bool, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	return e.casbin.Enforce(sub, dom, obj, act)
+
+	req := &ladon.Request{
+		Subject:  sub,
+		Resource: e.buildResourceURN(dom, obj),
+		Action:   act,
+		Context: ladon.Context{
+			"workspace": dom,
+		},
+	}
+
+	err := e.warden.IsAllowed(context.Background(), req)
+	if err != nil {
+		// Ladon returns an error when access is denied
+		// We treat any error as denial for safety
+		return false, nil
+	}
+	return true, nil
 }
 
 // EnforceContext is a convenience method that checks permission using typed parameters.
@@ -95,70 +84,85 @@ func (e *Enforcer) EnforceContext(ctx context.Context, userUUID string, domain s
 	return e.Enforce(userUUID, domain, string(resource), string(action))
 }
 
-// AddRoleForUserInDomain assigns a role to a user in a specific domain.
-// For global roles, use "global" as the domain.
-func (e *Enforcer) AddRoleForUserInDomain(userUUID, role, domain string) error {
+// buildResourceURN converts flat resource to URN format for Ladon.
+// Global resources: shadowapi:global:{resource}:*
+// Workspace resources: shadowapi:workspace:{domain}:{resource}:*
+func (e *Enforcer) buildResourceURN(domain, resource string) string {
+	if domain == "global" {
+		return fmt.Sprintf("shadowapi:global:%s:*", resource)
+	}
+	return fmt.Sprintf("shadowapi:workspace:%s:%s:*", domain, resource)
+}
+
+// AssignPolicySetToUser assigns a policy set to a user in a specific domain.
+// For global policy sets, use "global" as the domain.
+func (e *Enforcer) AssignPolicySetToUser(userUUID, policySet, domain string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-
-	_, err := e.casbin.AddGroupingPolicy(userUUID, role, domain)
-	if err != nil {
-		return fmt.Errorf("failed to add role: %w", err)
-	}
-	return nil
+	return e.manager.AddPolicySetAssignment(context.Background(), userUUID, policySet, domain)
 }
 
-// RemoveRoleForUserInDomain removes a role from a user in a specific domain.
-func (e *Enforcer) RemoveRoleForUserInDomain(userUUID, role, domain string) error {
+// RemovePolicySetFromUser removes a policy set from a user in a specific domain.
+func (e *Enforcer) RemovePolicySetFromUser(userUUID, policySet, domain string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-
-	_, err := e.casbin.RemoveGroupingPolicy(userUUID, role, domain)
-	if err != nil {
-		return fmt.Errorf("failed to remove role: %w", err)
-	}
-	return nil
+	return e.manager.RemovePolicySetAssignment(context.Background(), userUUID, policySet, domain)
 }
 
-// GetRolesForUserInDomain returns all roles a user has in a specific domain.
-func (e *Enforcer) GetRolesForUserInDomain(userUUID, domain string) []string {
+// GetPolicySetsForUser returns all policy sets a user has in a specific domain.
+func (e *Enforcer) GetPolicySetsForUser(userUUID, domain string) []string {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	return e.casbin.GetRolesForUserInDomain(userUUID, domain)
+	policySets, err := e.manager.GetPolicySetsForUser(context.Background(), userUUID, domain)
+	if err != nil {
+		e.log.Debug("failed to get policy sets for user", "user", userUUID, "domain", domain, "error", err)
+		return nil
+	}
+	return policySets
 }
 
-// GetAllRolesForUser returns all roles a user has across all domains.
-func (e *Enforcer) GetAllRolesForUser(userUUID string) (map[string][]string, error) {
+// GetAllPolicySetsForUser returns all policy sets a user has across all domains.
+func (e *Enforcer) GetAllPolicySetsForUser(userUUID string) (map[string][]string, error) {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	return e.manager.GetAllPolicySetsForUser(context.Background(), userUUID)
+}
+
+// GetUsersForPolicySetInDomain returns all users with a specific policy set in a domain.
+// Note: This requires iterating through all policy set assignments, which may be slow for large datasets.
+func (e *Enforcer) GetUsersForPolicySetInDomain(policySet, domain string) []string {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 
-	// Get all grouping policies (role assignments)
-	policies, err := e.casbin.GetGroupingPolicy()
-	if err != nil {
-		return nil, err
+	// Query users with this policy set in the domain
+	var workspaceSlug *string
+	if domain != "global" && domain != "" {
+		workspaceSlug = &domain
 	}
-	result := make(map[string][]string)
 
-	for _, policy := range policies {
-		if len(policy) >= 3 && policy[0] == userUUID {
-			role := policy[1]
-			domain := policy[2]
-			result[domain] = append(result[domain], role)
+	rows, err := e.manager.db.Query(context.Background(), `
+		SELECT user_uuid::text FROM user_policy_set
+		WHERE policy_set_name = $1 AND (workspace_slug = $2 OR ($2 IS NULL AND workspace_slug IS NULL))
+	`, policySet, workspaceSlug)
+	if err != nil {
+		e.log.Debug("failed to get users for policy set", "policy_set", policySet, "domain", domain, "error", err)
+		return nil
+	}
+	defer rows.Close()
+
+	var users []string
+	for rows.Next() {
+		var userUUID string
+		if err := rows.Scan(&userUUID); err != nil {
+			continue
 		}
+		users = append(users, userUUID)
 	}
-
-	return result, nil
+	return users
 }
 
-// GetUsersForRoleInDomain returns all users with a specific role in a domain.
-func (e *Enforcer) GetUsersForRoleInDomain(role, domain string) []string {
-	e.mu.RLock()
-	defer e.mu.RUnlock()
-	return e.casbin.GetUsersForRoleInDomain(role, domain)
-}
-
-// AddPolicy adds a policy rule.
-// sub: subject (role name)
+// AddPolicy adds a policy rule for Ladon.
+// sub: subject (policy set name, will be prefixed with "policy_set:")
 // dom: domain (workspace slug or "global")
 // obj: resource (e.g., "datasource", "pipeline", or "*" for all)
 // act: action (e.g., "read", "write", "*" for all)
@@ -166,11 +170,47 @@ func (e *Enforcer) AddPolicy(sub, dom, obj, act string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	_, err := e.casbin.AddPolicy(sub, dom, obj, act)
-	if err != nil {
-		return fmt.Errorf("failed to add policy: %w", err)
+	policyID := fmt.Sprintf("policy-%s-%s-%s-%s", sub, dom, obj, act)
+
+	// Build resource pattern
+	var resourcePattern string
+	if obj == "*" {
+		if dom == "global" {
+			resourcePattern = "shadowapi:global:<.+>:.*"
+		} else {
+			resourcePattern = "shadowapi:workspace:<.+>:<.+>:.*"
+		}
+	} else {
+		if dom == "global" {
+			resourcePattern = fmt.Sprintf("shadowapi:global:%s:.*", obj)
+		} else {
+			resourcePattern = fmt.Sprintf("shadowapi:workspace:<.+>:%s:.*", obj)
+		}
 	}
-	return nil
+
+	// Build action pattern
+	actionPattern := act
+	if act == "*" {
+		actionPattern = "<.+>"
+	}
+
+	policy := &ladon.DefaultPolicy{
+		ID:          policyID,
+		Description: fmt.Sprintf("Policy for %s on %s in %s", sub, obj, dom),
+		Subjects:    []string{"policy_set:" + sub},
+		Resources:   []string{resourcePattern},
+		Actions:     []string{actionPattern},
+		Effect:      ladon.AllowAccess,
+	}
+
+	// Add workspace condition for workspace-scoped policies
+	if dom != "global" {
+		policy.Conditions = ladon.Conditions{
+			"workspace": &WorkspaceCondition{Workspaces: []string{"*"}},
+		}
+	}
+
+	return e.manager.Create(context.Background(), policy)
 }
 
 // RemovePolicy removes a policy rule.
@@ -178,66 +218,84 @@ func (e *Enforcer) RemovePolicy(sub, dom, obj, act string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	_, err := e.casbin.RemovePolicy(sub, dom, obj, act)
-	if err != nil {
-		return fmt.Errorf("failed to remove policy: %w", err)
-	}
-	return nil
+	policyID := fmt.Sprintf("policy-%s-%s-%s-%s", sub, dom, obj, act)
+	return e.manager.Delete(context.Background(), policyID)
 }
 
 // GetPolicies returns all policy rules.
 func (e *Enforcer) GetPolicies() ([][]string, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	return e.casbin.GetPolicy()
+
+	policies, err := e.manager.GetAll(context.Background(), 10000, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	var result [][]string
+	for _, p := range policies {
+		for _, subj := range p.GetSubjects() {
+			for _, res := range p.GetResources() {
+				for _, act := range p.GetActions() {
+					result = append(result, []string{subj, res, act, p.GetEffect()})
+				}
+			}
+		}
+	}
+	return result, nil
 }
 
-// GetGroupingPolicies returns all role assignments.
+// GetGroupingPolicies returns all policy set assignments.
 func (e *Enforcer) GetGroupingPolicies() ([][]string, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	return e.casbin.GetGroupingPolicy()
+
+	rows, err := e.manager.db.Query(context.Background(), `
+		SELECT user_uuid::text, policy_set_name, COALESCE(workspace_slug, 'global')
+		FROM user_policy_set
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result [][]string
+	for rows.Next() {
+		var userUUID, policySet, domain string
+		if err := rows.Scan(&userUUID, &policySet, &domain); err != nil {
+			continue
+		}
+		result = append(result, []string{userUUID, policySet, domain})
+	}
+	return result, nil
 }
 
-// SavePolicy saves all policies to the database.
+// SavePolicy is a no-op for Ladon as policies are immediately persisted.
 func (e *Enforcer) SavePolicy() error {
-	e.mu.Lock()
-	defer e.mu.Unlock()
-	return e.casbin.SavePolicy()
+	return nil
 }
 
-// LoadPolicy reloads all policies from the database.
+// LoadPolicy is a no-op for Ladon as policies are loaded on demand.
 func (e *Enforcer) LoadPolicy() error {
-	e.mu.Lock()
-	defer e.mu.Unlock()
-	return e.casbin.LoadPolicy()
+	return nil
 }
 
-// HasRoleForUserInDomain checks if a user has a specific role in a domain.
-func (e *Enforcer) HasRoleForUserInDomain(userUUID, role, domain string) bool {
+// HasPolicySet checks if a user has a specific policy set in a domain.
+func (e *Enforcer) HasPolicySet(userUUID, policySet, domain string) bool {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 
-	roles := e.casbin.GetRolesForUserInDomain(userUUID, domain)
-	for _, r := range roles {
-		if r == role {
-			return true
-		}
+	hasPolicySet, err := e.manager.HasPolicySet(context.Background(), userUUID, policySet, domain)
+	if err != nil {
+		e.log.Debug("failed to check policy set", "user", userUUID, "policy_set", policySet, "domain", domain, "error", err)
+		return false
 	}
-	return false
+	return hasPolicySet
 }
 
-// RemoveAllRolesForUserInDomain removes all roles for a user in a specific domain.
-func (e *Enforcer) RemoveAllRolesForUserInDomain(userUUID, domain string) error {
+// RemoveAllPolicySetsFromUser removes all policy sets for a user in a specific domain.
+func (e *Enforcer) RemoveAllPolicySetsFromUser(userUUID, domain string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-
-	// Get current roles
-	roles := e.casbin.GetRolesForUserInDomain(userUUID, domain)
-	for _, role := range roles {
-		if _, err := e.casbin.RemoveGroupingPolicy(userUUID, role, domain); err != nil {
-			return fmt.Errorf("failed to remove role %s: %w", role, err)
-		}
-	}
-	return nil
+	return e.manager.RemoveAllPolicySetsForUserInDomain(context.Background(), userUUID, domain)
 }

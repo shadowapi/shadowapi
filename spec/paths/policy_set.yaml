@@ -1,51 +1,52 @@
 get:
-  summary: List all roles
-  operationId: listRoles
+  summary: List all policy sets
+  operationId: listPolicySets
+  tags:
+    - access
   parameters:
     - in: query
       name: scope
       schema:
         type: string
         enum: [global, workspace]
-      description: Filter roles by scope
+      description: Filter policy sets by scope
   responses:
     "200":
-      description: List of roles
+      description: List of policy sets
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: "../openapi.yaml#/components/schemas/RBACRole"
+              $ref: "../openapi.yaml#/components/schemas/PolicySet"
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
+
 post:
-  summary: Create a new role
-  operationId: createRole
+  summary: Create a new policy set
+  operationId: createPolicySet
   tags:
-    - RBAC
+    - access
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          $ref: "../openapi.yaml#/components/schemas/RBACRole"
+          $ref: "../openapi.yaml#/components/schemas/PolicySet"
   responses:
     "201":
-      description: Role created successfully
+      description: Policy set created successfully
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/RBACRole"
+            $ref: "../openapi.yaml#/components/schemas/PolicySet"
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac

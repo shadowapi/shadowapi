@@ -26,8 +26,8 @@ tags:
     description: Data processing pipeline configuration and management.
   - name: profile
     description: Current user profile management and password updates.
-  - name: rbac
-    description: Role-based access control for managing roles and permissions.
+  - name: access
+    description: Policy-based access control for managing policy sets and permissions.
   - name: scheduler
     description: Job scheduling for automated pipeline execution.
   - name: storage
@@ -125,12 +125,12 @@ components:
     WorkerEnrollmentToken:
       $ref: "components/worker_enrollment_token.yaml"
 
-    RBACRole:
-      $ref: "components/rbac_role.yaml"
-    RBACPermission:
-      $ref: "components/rbac_permission.yaml"
-    RBACRoleAssignment:
-      $ref: "components/rbac_role_assignment.yaml"
+    PolicySet:
+      $ref: "components/policy_set.yaml"
+    Permission:
+      $ref: "components/permission.yaml"
+    UserPolicySetAssignment:
+      $ref: "components/user_policy_set_assignment.yaml"
 
     MapperConfig:
       $ref: "components/mapper_config.yaml"
@@ -310,18 +310,18 @@ paths:
   /workspace/check:
     $ref: "paths/workspace_check.yaml"
 
-  /rbac/role:
-    $ref: "paths/rbac_role.yaml"
-  /rbac/role/{uuid}:
-    $ref: "paths/rbac_role_uuid.yaml"
-  /rbac/permission:
-    $ref: "paths/rbac_permission.yaml"
-  /rbac/user/{user_uuid}/roles:
-    $ref: "paths/rbac_user_roles.yaml"
-  /rbac/user/{user_uuid}/roles/{role_name}:
-    $ref: "paths/rbac_user_role.yaml"
-  /rbac/check:
-    $ref: "paths/rbac_check.yaml"
+  /access/policy-set:
+    $ref: "paths/policy_set.yaml"
+  /access/policy-set/{uuid}:
+    $ref: "paths/policy_set_uuid.yaml"
+  /access/permission:
+    $ref: "paths/permission.yaml"
+  /access/user/{user_uuid}/policy-sets:
+    $ref: "paths/user_policy_sets.yaml"
+  /access/user/{user_uuid}/policy-sets/{policy_set_name}:
+    $ref: "paths/user_policy_set.yaml"
+  /access/check:
+    $ref: "paths/access_check.yaml"
 
   /mapper/source-fields:
     $ref: "paths/mapper_source_fields.yaml"

@@ -129,7 +129,7 @@ function getMenuItems(basePath: string): MenuItem[] {
       ],
     },
     {
-      key: '/rbac',
+      key: '/access',
       icon: <SafetyOutlined />,
       label: 'Access Control',
       children: [
@@ -144,9 +144,9 @@ function getMenuItems(basePath: string): MenuItem[] {
           label: <Link to={`${basePath}/invites`}>Invites</Link>,
         },
         {
-          key: '/rbac/roles',
+          key: '/access/policy-sets',
           icon: <CrownOutlined />,
-          label: <Link to={`${basePath}/rbac/roles`}>Roles</Link>,
+          label: <Link to={`${basePath}/access/policy-sets`}>Policy Sets</Link>,
         },
       ],
     },
@@ -175,8 +175,8 @@ const routeConfig: Record<string, RouteConfig> = {
   '/users': { title: 'Users' },
   '/users/new': { title: 'Add', parent: '/users' },
   '/invites': { title: 'Invites' },
-  '/rbac/roles': { title: 'Roles' },
-  '/rbac/roles/new': { title: 'Create', parent: '/rbac/roles' },
+  '/access/policy-sets': { title: 'Policy Sets' },
+  '/access/policy-sets/new': { title: 'Create', parent: '/access/policy-sets' },
   '/datasources': { title: 'Data Sources' },
   '/datasources/new': { title: 'Add', parent: '/datasources' },
   '/oauth2/credentials': { title: 'OAuth2 Credentials', parent: '/datasources' },
@@ -208,9 +208,9 @@ const menuParentMap: Record<string, string> = {
   '/oauth2/credentials': '/datasources-menu',
   '/storages': '/storages-menu',
   '/storages/messages': '/storages-menu',
-  '/users': '/rbac',
-  '/invites': '/rbac',
-  '/rbac/roles': '/rbac',
+  '/users': '/access',
+  '/invites': '/access',
+  '/access/policy-sets': '/access',
   '/pipelines': '/automation-menu',
   '/schedulers': '/automation-menu',
   '/workers': '/workers-menu',
@@ -228,8 +228,8 @@ function getOpenKeys(relativePath: string): string[] {
     normalizedPath = '/oauth2/credentials';
   } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
     normalizedPath = '/users';
-  } else if (relativePath.match(/^\/rbac\/roles\/[0-9a-f-]+$/i) || relativePath === '/rbac/roles/new') {
-    normalizedPath = '/rbac/roles';
+  } else if (relativePath.match(/^\/access\/policy-sets\/[0-9a-f-]+$/i) || relativePath === '/access/policy-sets/new') {
+    normalizedPath = '/access/policy-sets';
   } else if (relativePath.match(/^\/storages\/[0-9a-f-]+$/i) || relativePath === '/storages/new') {
     normalizedPath = '/storages';
   } else if (relativePath.match(/^\/pipelines\/[0-9a-f-]+$/i) || relativePath === '/pipelines/new') {
@@ -252,11 +252,11 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   const datasourcesUuidMatch = relativePath.match(/^\/datasources\/([0-9a-f-]+)$/i);
   const oauth2UuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
   const usersUuidMatch = relativePath.match(/^\/users\/([0-9a-f-]+)$/i);
-  const rbacRolesUuidMatch = relativePath.match(/^\/rbac\/roles\/([0-9a-f-]+)$/i);
+  const rbacPolicySetsUuidMatch = relativePath.match(/^\/access\/policy-sets\/([0-9a-f-]+)$/i);
   const storagesUuidMatch = relativePath.match(/^\/storages\/([0-9a-f-]+)$/i);
   const pipelinesUuidMatch = relativePath.match(/^\/pipelines\/([0-9a-f-]+)$/i);
   const schedulersUuidMatch = relativePath.match(/^\/schedulers\/([0-9a-f-]+)$/i);
-  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacRolesUuidMatch || storagesUuidMatch || pipelinesUuidMatch || schedulersUuidMatch;
+  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacPolicySetsUuidMatch || storagesUuidMatch || pipelinesUuidMatch || schedulersUuidMatch;
 
   // Determine effective path for breadcrumb chain
   let effectivePath = relativePath;
@@ -266,8 +266,8 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
     effectivePath = '/oauth2/credentials';
   } else if (usersUuidMatch) {
     effectivePath = '/users';
-  } else if (rbacRolesUuidMatch) {
-    effectivePath = '/rbac/roles';
+  } else if (rbacPolicySetsUuidMatch) {
+    effectivePath = '/access/policy-sets';
   } else if (storagesUuidMatch) {
     effectivePath = '/storages';
   } else if (pipelinesUuidMatch) {
@@ -363,8 +363,8 @@ function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
     menuSelectedPath = '/oauth2/credentials';
   } else if (relativePath.match(/^\/users\/[0-9a-f-]+$/i) || relativePath === '/users/new') {
     menuSelectedPath = '/users';
-  } else if (relativePath.match(/^\/rbac\/roles\/[0-9a-f-]+$/i) || relativePath === '/rbac/roles/new') {
-    menuSelectedPath = '/rbac/roles';
+  } else if (relativePath.match(/^\/access\/policy-sets\/[0-9a-f-]+$/i) || relativePath === '/access/policy-sets/new') {
+    menuSelectedPath = '/access/policy-sets';
   } else if (relativePath.match(/^\/storages\/[0-9a-f-]+$/i) || relativePath === '/storages/new') {
     menuSelectedPath = '/storages';
   } else if (relativePath.match(/^\/pipelines\/[0-9a-f-]+$/i) || relativePath === '/pipelines/new') {

@@ -1,6 +1,8 @@
 get:
-  summary: Get roles for a user
-  operationId: getUserRoles
+  summary: Get policy sets for a user
+  operationId: getUserPolicySets
+  tags:
+    - access
   parameters:
     - in: path
       name: user_uuid
@@ -16,7 +18,7 @@ get:
       description: Filter by domain (workspace slug or "global")
   responses:
     "200":
-      description: User roles
+      description: User policy sets
       content:
         application/json:
           schema:
@@ -25,22 +27,22 @@ get:
               user_uuid:
                 type: string
                 format: uuid
-              roles:
+              policy_sets:
                 type: array
                 items:
-                  $ref: "../openapi.yaml#/components/schemas/RBACRoleAssignment"
+                  $ref: "../openapi.yaml#/components/schemas/UserPolicySetAssignment"
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac
 
 post:
-  summary: Assign a role to a user
-  operationId: assignRoleToUser
+  summary: Assign a policy set to a user
+  operationId: assignPolicySetToUser
+  tags:
+    - access
   parameters:
     - in: path
       name: user_uuid
@@ -56,23 +58,21 @@ post:
         schema:
           type: object
           properties:
-            role_name:
+            policy_set_name:
               type: string
-              description: Name of the role to assign
+              description: Name of the policy set to assign
             domain:
               type: string
-              description: Domain for the role (workspace slug or "global")
+              description: Domain for the policy set (workspace slug or "global")
           required:
-            - role_name
+            - policy_set_name
             - domain
   responses:
     "201":
-      description: Role assigned successfully
+      description: Policy set assigned successfully
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac

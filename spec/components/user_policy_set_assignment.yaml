@@ -1,0 +1,28 @@
+# spec/components/user_policy_set_assignment.yaml
+# Defines the schema for a User Policy Set Assignment
+type: object
+additionalProperties: false
+properties:
+  user_uuid:
+    type: string
+    format: uuid
+    description: UUID of the user
+  policy_set:
+    type: string
+    description: Name of the policy set assigned to the user
+    minLength: 1
+    maxLength: 100
+  domain:
+    type: string
+    description: Domain where the policy set is assigned (workspace slug or "global")
+    minLength: 1
+    maxLength: 100
+  assigned_at:
+    type: string
+    format: date-time
+    description: Timestamp when the policy set was assigned
+    readOnly: true
+required:
+  - user_uuid
+  - policy_set
+  - domain

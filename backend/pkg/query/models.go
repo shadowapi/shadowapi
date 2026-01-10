@@ -9,17 +9,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type CasbinRule struct {
-	ID    int32       `json:"id"`
-	PType string      `json:"p_type"`
-	V0    pgtype.Text `json:"v0"`
-	V1    pgtype.Text `json:"v1"`
-	V2    pgtype.Text `json:"v2"`
-	V3    pgtype.Text `json:"v3"`
-	V4    pgtype.Text `json:"v4"`
-	V5    pgtype.Text `json:"v5"`
-}
-
 type Contact struct {
 	UUID                    uuid.UUID          `json:"uuid"`
 	WorkspaceUUID           *uuid.UUID         `json:"workspace_uuid"`
@@ -179,6 +168,34 @@ type File struct {
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
+type LadonPolicy struct {
+	ID          string             `json:"id"`
+	Description pgtype.Text        `json:"description"`
+	Effect      string             `json:"effect"`
+	Conditions  []byte             `json:"conditions"`
+	Meta        []byte             `json:"meta"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type LadonPolicyAction struct {
+	ID       int32  `json:"id"`
+	PolicyID string `json:"policy_id"`
+	Action   string `json:"action"`
+}
+
+type LadonPolicyResource struct {
+	ID       int32  `json:"id"`
+	PolicyID string `json:"policy_id"`
+	Resource string `json:"resource"`
+}
+
+type LadonPolicySubject struct {
+	ID       int32  `json:"id"`
+	PolicyID string `json:"policy_id"`
+	Subject  string `json:"subject"`
+}
+
 type Message struct {
 	UUID                   uuid.UUID          `json:"uuid"`
 	Format                 string             `json:"format"`
@@ -252,6 +269,17 @@ type PasswordReset struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type Permission struct {
+	UUID        uuid.UUID          `json:"uuid"`
+	Name        string             `json:"name"`
+	DisplayName string             `json:"display_name"`
+	Description pgtype.Text        `json:"description"`
+	Resource    string             `json:"resource"`
+	Action      string             `json:"action"`
+	Scope       string             `json:"scope"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type Pipeline struct {
 	UUID           uuid.UUID          `json:"uuid"`
 	WorkspaceUUID  *uuid.UUID         `json:"workspace_uuid"`
@@ -266,18 +294,7 @@ type Pipeline struct {
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
-type RbacPermission struct {
-	UUID        uuid.UUID          `json:"uuid"`
-	Name        string             `json:"name"`
-	DisplayName string             `json:"display_name"`
-	Description pgtype.Text        `json:"description"`
-	Resource    string             `json:"resource"`
-	Action      string             `json:"action"`
-	Scope       string             `json:"scope"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-}
-
-type RbacRole struct {
+type PolicySet struct {
 	UUID        uuid.UUID          `json:"uuid"`
 	Name        string             `json:"name"`
 	DisplayName string             `json:"display_name"`
@@ -440,12 +457,20 @@ type UserInvite struct {
 	UUID              uuid.UUID          `json:"uuid"`
 	WorkspaceUUID     *uuid.UUID         `json:"workspace_uuid"`
 	Email             string             `json:"email"`
-	Role              string             `json:"role"`
+	PolicySetName     string             `json:"policy_set_name"`
 	TokenHash         string             `json:"token_hash"`
 	InvitedByUserUuid *uuid.UUID         `json:"invited_by_user_uuid"`
 	ExpiresAt         pgtype.Timestamptz `json:"expires_at"`
 	AcceptedAt        pgtype.Timestamptz `json:"accepted_at"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+}
+
+type UserPolicySet struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	UserUUID      *uuid.UUID         `json:"user_uuid"`
+	PolicySetName string             `json:"policy_set_name"`
+	WorkspaceSlug pgtype.Text        `json:"workspace_slug"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type WorkerEnrollmentToken struct {
@@ -493,7 +518,6 @@ type WorkspaceMember struct {
 	UUID          uuid.UUID          `json:"uuid"`
 	WorkspaceUUID *uuid.UUID         `json:"workspace_uuid"`
 	UserUUID      *uuid.UUID         `json:"user_uuid"`
-	Role          string             `json:"role"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 }

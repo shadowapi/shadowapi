@@ -1,5 +1,5 @@
-# spec/components/rbac_permission.yaml
-# Defines the schema for an RBAC Permission
+# spec/components/permission.yaml
+# Defines the schema for a Permission
 type: object
 additionalProperties: false
 properties:

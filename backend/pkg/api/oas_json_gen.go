@@ -192,17 +192,17 @@ func (s *AcceptInviteOK) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *AssignRoleToUserReq) Encode(e *jx.Encoder) {
+func (s *AssignPolicySetToUserReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *AssignRoleToUserReq) encodeFields(e *jx.Encoder) {
+func (s *AssignPolicySetToUserReq) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("role_name")
-		e.Str(s.RoleName)
+		e.FieldStart("policy_set_name")
+		e.Str(s.PolicySetName)
 	}
 	{
 		e.FieldStart("domain")
@@ -210,31 +210,31 @@ func (s *AssignRoleToUserReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAssignRoleToUserReq = [2]string{
-	0: "role_name",
+var jsonFieldsNameOfAssignPolicySetToUserReq = [2]string{
+	0: "policy_set_name",
 	1: "domain",
 }
 
-// Decode decodes AssignRoleToUserReq from json.
-func (s *AssignRoleToUserReq) Decode(d *jx.Decoder) error {
+// Decode decodes AssignPolicySetToUserReq from json.
+func (s *AssignPolicySetToUserReq) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode AssignRoleToUserReq to nil")
+		return errors.New("invalid: unable to decode AssignPolicySetToUserReq to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "role_name":
+		case "policy_set_name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.RoleName = string(v)
+				s.PolicySetName = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"role_name\"")
+				return errors.Wrap(err, "decode field \"policy_set_name\"")
 			}
 		case "domain":
 			requiredBitSet[0] |= 1 << 1
@@ -253,7 +253,7 @@ func (s *AssignRoleToUserReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode AssignRoleToUserReq")
+		return errors.Wrap(err, "decode AssignPolicySetToUserReq")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -270,8 +270,8 @@ func (s *AssignRoleToUserReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfAssignRoleToUserReq) {
-					name = jsonFieldsNameOfAssignRoleToUserReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfAssignPolicySetToUserReq) {
+					name = jsonFieldsNameOfAssignPolicySetToUserReq[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -292,14 +292,14 @@ func (s *AssignRoleToUserReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *AssignRoleToUserReq) MarshalJSON() ([]byte, error) {
+func (s *AssignPolicySetToUserReq) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AssignRoleToUserReq) UnmarshalJSON(data []byte) error {
+func (s *AssignPolicySetToUserReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3046,14 +3046,14 @@ func (s *ErrorErrorsItem) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *GetUserRolesOK) Encode(e *jx.Encoder) {
+func (s *GetUserPolicySetsOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *GetUserRolesOK) encodeFields(e *jx.Encoder) {
+func (s *GetUserPolicySetsOK) encodeFields(e *jx.Encoder) {
 	{
 		if s.UserUUID.Set {
 			e.FieldStart("user_uuid")
@@ -3061,10 +3061,10 @@ func (s *GetUserRolesOK) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Roles != nil {
-			e.FieldStart("roles")
+		if s.PolicySets != nil {
+			e.FieldStart("policy_sets")
 			e.ArrStart()
-			for _, elem := range s.Roles {
+			for _, elem := range s.PolicySets {
 				elem.Encode(e)
 			}
 			e.ArrEnd()
@@ -3072,15 +3072,15 @@ func (s *GetUserRolesOK) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetUserRolesOK = [2]string{
+var jsonFieldsNameOfGetUserPolicySetsOK = [2]string{
 	0: "user_uuid",
-	1: "roles",
+	1: "policy_sets",
 }
 
-// Decode decodes GetUserRolesOK from json.
-func (s *GetUserRolesOK) Decode(d *jx.Decoder) error {
+// Decode decodes GetUserPolicySetsOK from json.
+func (s *GetUserPolicySetsOK) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode GetUserRolesOK to nil")
+		return errors.New("invalid: unable to decode GetUserPolicySetsOK to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -3095,50 +3095,50 @@ func (s *GetUserRolesOK) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"user_uuid\"")
 			}
-		case "roles":
+		case "policy_sets":
 			if err := func() error {
-				s.Roles = make([]RbacRoleAssignment, 0)
+				s.PolicySets = make([]UserPolicySetAssignment, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem RbacRoleAssignment
+					var elem UserPolicySetAssignment
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
-					s.Roles = append(s.Roles, elem)
+					s.PolicySets = append(s.PolicySets, elem)
 					return nil
 				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"roles\"")
+				return errors.Wrap(err, "decode field \"policy_sets\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode GetUserRolesOK")
+		return errors.Wrap(err, "decode GetUserPolicySetsOK")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *GetUserRolesOK) MarshalJSON() ([]byte, error) {
+func (s *GetUserPolicySetsOK) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetUserRolesOK) UnmarshalJSON(data []byte) error {
+func (s *GetUserPolicySetsOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode encodes ListPermissionsOKApplicationJSON as json.
 func (s ListPermissionsOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []RbacPermission(s)
+	unwrapped := []Permission(s)
 
 	e.ArrStart()
 	for _, elem := range unwrapped {
@@ -3152,11 +3152,11 @@ func (s *ListPermissionsOKApplicationJSON) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode ListPermissionsOKApplicationJSON to nil")
 	}
-	var unwrapped []RbacPermission
+	var unwrapped []Permission
 	if err := func() error {
-		unwrapped = make([]RbacPermission, 0)
+		unwrapped = make([]Permission, 0)
 		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem RbacPermission
+			var elem Permission
 			if err := elem.Decode(d); err != nil {
 				return err
 			}
@@ -3182,6 +3182,56 @@ func (s ListPermissionsOKApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ListPermissionsOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ListPolicySetsOKApplicationJSON as json.
+func (s ListPolicySetsOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []PolicySet(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes ListPolicySetsOKApplicationJSON from json.
+func (s *ListPolicySetsOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ListPolicySetsOKApplicationJSON to nil")
+	}
+	var unwrapped []PolicySet
+	if err := func() error {
+		unwrapped = make([]PolicySet, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem PolicySet
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ListPolicySetsOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ListPolicySetsOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ListPolicySetsOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3232,56 +3282,6 @@ func (s ListRegisteredWorkersOKApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ListRegisteredWorkersOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes ListRolesOKApplicationJSON as json.
-func (s ListRolesOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []RbacRole(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
-}
-
-// Decode decodes ListRolesOKApplicationJSON from json.
-func (s *ListRolesOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode ListRolesOKApplicationJSON to nil")
-	}
-	var unwrapped []RbacRole
-	if err := func() error {
-		unwrapped = make([]RbacRole, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem RbacRole
-			if err := elem.Decode(d); err != nil {
-				return err
-			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = ListRolesOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s ListRolesOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *ListRolesOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -7275,6 +7275,39 @@ func (s *OptNilString) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes PermissionScope as json.
+func (o OptPermissionScope) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes PermissionScope from json.
+func (o *OptPermissionScope) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPermissionScope to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPermissionScope) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPermissionScope) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes PipelineEdgeType as json.
 func (o OptPipelineEdgeType) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -7371,39 +7404,6 @@ func (s OptPipelineNodeDataConfig) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptPipelineNodeDataConfig) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RbacPermissionScope as json.
-func (o OptRbacPermissionScope) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes RbacPermissionScope from json.
-func (o *OptRbacPermissionScope) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptRbacPermissionScope to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptRbacPermissionScope) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptRbacPermissionScope) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8345,6 +8345,307 @@ func (s *PasswordResetRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *PasswordResetRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *Permission) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *Permission) encodeFields(e *jx.Encoder) {
+	{
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		if s.DisplayName.Set {
+			e.FieldStart("display_name")
+			s.DisplayName.Encode(e)
+		}
+	}
+	{
+		if s.Description.Set {
+			e.FieldStart("description")
+			s.Description.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("resource")
+		e.Str(s.Resource)
+	}
+	{
+		e.FieldStart("action")
+		s.Action.Encode(e)
+	}
+	{
+		if s.Scope.Set {
+			e.FieldStart("scope")
+			s.Scope.Encode(e)
+		}
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfPermission = [8]string{
+	0: "uuid",
+	1: "name",
+	2: "display_name",
+	3: "description",
+	4: "resource",
+	5: "action",
+	6: "scope",
+	7: "created_at",
+}
+
+// Decode decodes Permission from json.
+func (s *Permission) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode Permission to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			if err := func() error {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "display_name":
+			if err := func() error {
+				s.DisplayName.Reset()
+				if err := s.DisplayName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"display_name\"")
+			}
+		case "description":
+			if err := func() error {
+				s.Description.Reset()
+				if err := s.Description.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "resource":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.Resource = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resource\"")
+			}
+		case "action":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.Action.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"action\"")
+			}
+		case "scope":
+			if err := func() error {
+				s.Scope.Reset()
+				if err := s.Scope.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scope\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode Permission")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00110010,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPermission) {
+					name = jsonFieldsNameOfPermission[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *Permission) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *Permission) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PermissionAction as json.
+func (s PermissionAction) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PermissionAction from json.
+func (s *PermissionAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PermissionAction to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PermissionAction(v) {
+	case PermissionAction_read:
+		*s = PermissionAction_read
+	case PermissionAction_write:
+		*s = PermissionAction_write
+	case PermissionAction_create:
+		*s = PermissionAction_create
+	case PermissionAction_delete:
+		*s = PermissionAction_delete
+	case PermissionAction_admin:
+		*s = PermissionAction_admin
+	case PermissionAction_:
+		*s = PermissionAction_
+	default:
+		*s = PermissionAction(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PermissionAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PermissionAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PermissionScope as json.
+func (s PermissionScope) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PermissionScope from json.
+func (s *PermissionScope) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PermissionScope to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PermissionScope(v) {
+	case PermissionScopeGlobal:
+		*s = PermissionScopeGlobal
+	case PermissionScopeWorkspace:
+		*s = PermissionScopeWorkspace
+	default:
+		*s = PermissionScope(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PermissionScope) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PermissionScope) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9373,315 +9674,14 @@ func (s *PipelineNodePosition) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *RbacPermission) Encode(e *jx.Encoder) {
+func (s *PolicySet) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *RbacPermission) encodeFields(e *jx.Encoder) {
-	{
-		if s.UUID.Set {
-			e.FieldStart("uuid")
-			s.UUID.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-		if s.DisplayName.Set {
-			e.FieldStart("display_name")
-			s.DisplayName.Encode(e)
-		}
-	}
-	{
-		if s.Description.Set {
-			e.FieldStart("description")
-			s.Description.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("resource")
-		e.Str(s.Resource)
-	}
-	{
-		e.FieldStart("action")
-		s.Action.Encode(e)
-	}
-	{
-		if s.Scope.Set {
-			e.FieldStart("scope")
-			s.Scope.Encode(e)
-		}
-	}
-	{
-		if s.CreatedAt.Set {
-			e.FieldStart("created_at")
-			s.CreatedAt.Encode(e, json.EncodeDateTime)
-		}
-	}
-}
-
-var jsonFieldsNameOfRbacPermission = [8]string{
-	0: "uuid",
-	1: "name",
-	2: "display_name",
-	3: "description",
-	4: "resource",
-	5: "action",
-	6: "scope",
-	7: "created_at",
-}
-
-// Decode decodes RbacPermission from json.
-func (s *RbacPermission) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RbacPermission to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "uuid":
-			if err := func() error {
-				s.UUID.Reset()
-				if err := s.UUID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"uuid\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "display_name":
-			if err := func() error {
-				s.DisplayName.Reset()
-				if err := s.DisplayName.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"display_name\"")
-			}
-		case "description":
-			if err := func() error {
-				s.Description.Reset()
-				if err := s.Description.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"description\"")
-			}
-		case "resource":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Str()
-				s.Resource = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"resource\"")
-			}
-		case "action":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				if err := s.Action.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"action\"")
-			}
-		case "scope":
-			if err := func() error {
-				s.Scope.Reset()
-				if err := s.Scope.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"scope\"")
-			}
-		case "created_at":
-			if err := func() error {
-				s.CreatedAt.Reset()
-				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"created_at\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode RbacPermission")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00110010,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfRbacPermission) {
-					name = jsonFieldsNameOfRbacPermission[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *RbacPermission) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RbacPermission) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RbacPermissionAction as json.
-func (s RbacPermissionAction) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes RbacPermissionAction from json.
-func (s *RbacPermissionAction) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RbacPermissionAction to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch RbacPermissionAction(v) {
-	case RbacPermissionAction_read:
-		*s = RbacPermissionAction_read
-	case RbacPermissionAction_write:
-		*s = RbacPermissionAction_write
-	case RbacPermissionAction_create:
-		*s = RbacPermissionAction_create
-	case RbacPermissionAction_delete:
-		*s = RbacPermissionAction_delete
-	case RbacPermissionAction_admin:
-		*s = RbacPermissionAction_admin
-	case RbacPermissionAction_:
-		*s = RbacPermissionAction_
-	default:
-		*s = RbacPermissionAction(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s RbacPermissionAction) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RbacPermissionAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RbacPermissionScope as json.
-func (s RbacPermissionScope) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes RbacPermissionScope from json.
-func (s *RbacPermissionScope) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RbacPermissionScope to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch RbacPermissionScope(v) {
-	case RbacPermissionScopeGlobal:
-		*s = RbacPermissionScopeGlobal
-	case RbacPermissionScopeWorkspace:
-		*s = RbacPermissionScopeWorkspace
-	default:
-		*s = RbacPermissionScope(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s RbacPermissionScope) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RbacPermissionScope) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *RbacRole) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *RbacRole) encodeFields(e *jx.Encoder) {
+func (s *PolicySet) encodeFields(e *jx.Encoder) {
 	{
 		if s.UUID.Set {
 			e.FieldStart("uuid")
@@ -9736,7 +9736,7 @@ func (s *RbacRole) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRbacRole = [9]string{
+var jsonFieldsNameOfPolicySet = [9]string{
 	0: "uuid",
 	1: "name",
 	2: "display_name",
@@ -9748,10 +9748,10 @@ var jsonFieldsNameOfRbacRole = [9]string{
 	8: "updated_at",
 }
 
-// Decode decodes RbacRole from json.
-func (s *RbacRole) Decode(d *jx.Decoder) error {
+// Decode decodes PolicySet from json.
+func (s *PolicySet) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode RbacRole to nil")
+		return errors.New("invalid: unable to decode PolicySet to nil")
 	}
 	var requiredBitSet [2]uint8
 
@@ -9823,9 +9823,9 @@ func (s *RbacRole) Decode(d *jx.Decoder) error {
 			}
 		case "permissions":
 			if err := func() error {
-				s.Permissions = make([]RbacPermission, 0)
+				s.Permissions = make([]Permission, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem RbacPermission
+					var elem Permission
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -9863,7 +9863,7 @@ func (s *RbacRole) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode RbacRole")
+		return errors.Wrap(err, "decode PolicySet")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -9881,8 +9881,8 @@ func (s *RbacRole) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfRbacRole) {
-					name = jsonFieldsNameOfRbacRole[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfPolicySet) {
+					name = jsonFieldsNameOfPolicySet[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -9903,199 +9903,54 @@ func (s *RbacRole) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *RbacRole) MarshalJSON() ([]byte, error) {
+func (s *PolicySet) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RbacRole) UnmarshalJSON(data []byte) error {
+func (s *PolicySet) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *RbacRoleAssignment) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *RbacRoleAssignment) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("user_uuid")
-		json.EncodeUUID(e, s.UserUUID)
-	}
-	{
-		e.FieldStart("role")
-		s.Role.Encode(e)
-	}
-	{
-		e.FieldStart("domain")
-		e.Str(s.Domain)
-	}
-	{
-		if s.AssignedAt.Set {
-			e.FieldStart("assigned_at")
-			s.AssignedAt.Encode(e, json.EncodeDateTime)
-		}
-	}
-}
-
-var jsonFieldsNameOfRbacRoleAssignment = [4]string{
-	0: "user_uuid",
-	1: "role",
-	2: "domain",
-	3: "assigned_at",
-}
-
-// Decode decodes RbacRoleAssignment from json.
-func (s *RbacRoleAssignment) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RbacRoleAssignment to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "user_uuid":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.UserUUID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"user_uuid\"")
-			}
-		case "role":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.Role.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"role\"")
-			}
-		case "domain":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Domain = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"domain\"")
-			}
-		case "assigned_at":
-			if err := func() error {
-				s.AssignedAt.Reset()
-				if err := s.AssignedAt.Decode(d, json.DecodeDateTime); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"assigned_at\"")
-			}
-		default:
-			return errors.Errorf("unexpected field %q", k)
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode RbacRoleAssignment")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfRbacRoleAssignment) {
-					name = jsonFieldsNameOfRbacRoleAssignment[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *RbacRoleAssignment) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RbacRoleAssignment) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RbacRoleScope as json.
-func (s RbacRoleScope) Encode(e *jx.Encoder) {
+// Encode encodes PolicySetScope as json.
+func (s PolicySetScope) Encode(e *jx.Encoder) {
 	e.Str(string(s))
 }
 
-// Decode decodes RbacRoleScope from json.
-func (s *RbacRoleScope) Decode(d *jx.Decoder) error {
+// Decode decodes PolicySetScope from json.
+func (s *PolicySetScope) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode RbacRoleScope to nil")
+		return errors.New("invalid: unable to decode PolicySetScope to nil")
 	}
 	v, err := d.StrBytes()
 	if err != nil {
 		return err
 	}
 	// Try to use constant string.
-	switch RbacRoleScope(v) {
-	case RbacRoleScopeGlobal:
-		*s = RbacRoleScopeGlobal
-	case RbacRoleScopeWorkspace:
-		*s = RbacRoleScopeWorkspace
+	switch PolicySetScope(v) {
+	case PolicySetScopeGlobal:
+		*s = PolicySetScopeGlobal
+	case PolicySetScopeWorkspace:
+		*s = PolicySetScopeWorkspace
 	default:
-		*s = RbacRoleScope(v)
+		*s = PolicySetScope(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s RbacRoleScope) MarshalJSON() ([]byte, error) {
+func (s PolicySetScope) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RbacRoleScope) UnmarshalJSON(data []byte) error {
+func (s *PolicySetScope) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -15630,8 +15485,8 @@ func (s *UserInvite) encodeFields(e *jx.Encoder) {
 		e.Str(s.Email)
 	}
 	{
-		e.FieldStart("role")
-		s.Role.Encode(e)
+		e.FieldStart("policy_set_name")
+		s.PolicySetName.Encode(e)
 	}
 	{
 		if s.InvitedByEmail.Set {
@@ -15669,7 +15524,7 @@ var jsonFieldsNameOfUserInvite = [9]string{
 	0: "uuid",
 	1: "workspace_uuid",
 	2: "email",
-	3: "role",
+	3: "policy_set_name",
 	4: "invited_by_email",
 	5: "invited_by_name",
 	6: "expires_at",
@@ -15718,15 +15573,15 @@ func (s *UserInvite) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"email\"")
 			}
-		case "role":
+		case "policy_set_name":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				if err := s.Role.Decode(d); err != nil {
+				if err := s.PolicySetName.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"role\"")
+				return errors.Wrap(err, "decode field \"policy_set_name\"")
 			}
 		case "invited_by_email":
 			if err := func() error {
@@ -16201,42 +16056,42 @@ func (s *UserInviteInfoRole) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes UserInviteRole as json.
-func (s UserInviteRole) Encode(e *jx.Encoder) {
+// Encode encodes UserInvitePolicySetName as json.
+func (s UserInvitePolicySetName) Encode(e *jx.Encoder) {
 	e.Str(string(s))
 }
 
-// Decode decodes UserInviteRole from json.
-func (s *UserInviteRole) Decode(d *jx.Decoder) error {
+// Decode decodes UserInvitePolicySetName from json.
+func (s *UserInvitePolicySetName) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserInviteRole to nil")
+		return errors.New("invalid: unable to decode UserInvitePolicySetName to nil")
 	}
 	v, err := d.StrBytes()
 	if err != nil {
 		return err
 	}
 	// Try to use constant string.
-	switch UserInviteRole(v) {
-	case UserInviteRoleAdmin:
-		*s = UserInviteRoleAdmin
-	case UserInviteRoleMember:
-		*s = UserInviteRoleMember
+	switch UserInvitePolicySetName(v) {
+	case UserInvitePolicySetNameWorkspaceAdmin:
+		*s = UserInvitePolicySetNameWorkspaceAdmin
+	case UserInvitePolicySetNameWorkspaceMember:
+		*s = UserInvitePolicySetNameWorkspaceMember
 	default:
-		*s = UserInviteRole(v)
+		*s = UserInvitePolicySetName(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s UserInviteRole) MarshalJSON() ([]byte, error) {
+func (s UserInvitePolicySetName) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserInviteRole) UnmarshalJSON(data []byte) error {
+func (s *UserInvitePolicySetName) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -16295,6 +16150,153 @@ func (s UserMeta) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UserMeta) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UserPolicySetAssignment) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UserPolicySetAssignment) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("user_uuid")
+		json.EncodeUUID(e, s.UserUUID)
+	}
+	{
+		e.FieldStart("policy_set")
+		e.Str(s.PolicySet)
+	}
+	{
+		e.FieldStart("domain")
+		e.Str(s.Domain)
+	}
+	{
+		if s.AssignedAt.Set {
+			e.FieldStart("assigned_at")
+			s.AssignedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfUserPolicySetAssignment = [4]string{
+	0: "user_uuid",
+	1: "policy_set",
+	2: "domain",
+	3: "assigned_at",
+}
+
+// Decode decodes UserPolicySetAssignment from json.
+func (s *UserPolicySetAssignment) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UserPolicySetAssignment to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "user_uuid":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.UserUUID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_uuid\"")
+			}
+		case "policy_set":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.PolicySet = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"policy_set\"")
+			}
+		case "domain":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Domain = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"domain\"")
+			}
+		case "assigned_at":
+			if err := func() error {
+				s.AssignedAt.Reset()
+				if err := s.AssignedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"assigned_at\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UserPolicySetAssignment")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfUserPolicySetAssignment) {
+					name = jsonFieldsNameOfUserPolicySetAssignment[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UserPolicySetAssignment) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UserPolicySetAssignment) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -61,9 +61,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/"
+			case 'a': // Prefix: "a"
 				origElem := elem
-				if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
+				if l := len("a"); len(elem) >= l && elem[0:l] == "a" {
 					elem = elem[l:]
 				} else {
 					break
@@ -73,53 +73,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'c': // Prefix: "consent"
+				case 'c': // Prefix: "ccess/"
 					origElem := elem
-					if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleAuthConsentRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'l': // Prefix: "login"
-					origElem := elem
-					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleAuthLoginRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleAuthLoginSubmitRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,POST")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'o': // Prefix: "oauth2/"
-					origElem := elem
-					if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
+					if l := len("ccess/"); len(elem) >= l && elem[0:l] == "ccess/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -129,9 +85,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case 'a': // Prefix: "authorize"
+					case 'c': // Prefix: "check"
 						origElem := elem
-						if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+						if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
 							elem = elem[l:]
 						} else {
 							break
@@ -141,7 +97,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "POST":
-								s.handleAuthOAuth2AuthorizeRequest([0]string{}, elemIsEscaped, w, r)
+								s.handleCheckPermissionRequest([0]string{}, elemIsEscaped, w, r)
 							default:
 								s.notAllowed(w, r, "POST")
 							}
@@ -150,111 +106,383 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						elem = origElem
-					case 'c': // Prefix: "callback"
+					case 'p': // Prefix: "p"
 						origElem := elem
-						if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleAuthOAuth2CallbackRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+							break
+						}
+						switch elem[0] {
+						case 'e': // Prefix: "ermission"
+							origElem := elem
+							if l := len("ermission"); len(elem) >= l && elem[0:l] == "ermission" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleListPermissionsRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 'o': // Prefix: "olicy-set"
+							origElem := elem
+							if l := len("olicy-set"); len(elem) >= l && elem[0:l] == "olicy-set" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleListPolicySetsRequest([0]string{}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleCreatePolicySetRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET,POST")
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleDeletePolicySetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleGetPolicySetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleUpdatePolicySetRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE,GET,PUT")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
-					case 'l': // Prefix: "logout"
+					case 'u': // Prefix: "user/"
 						origElem := elem
-						if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+						if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleAuthOAuth2LogoutRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
-							}
-
-							return
+						// Param: "user_uuid"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
 						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
 
-						elem = origElem
-					case 'r': // Prefix: "refresh"
-						origElem := elem
-						if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
-							elem = elem[l:]
-						} else {
+						if len(elem) == 0 {
 							break
 						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "POST":
-								s.handleAuthOAuth2RefreshRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "POST")
+						switch elem[0] {
+						case '/': // Prefix: "/policy-sets"
+							origElem := elem
+							if l := len("/policy-sets"); len(elem) >= l && elem[0:l] == "/policy-sets" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
-						}
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleGetUserPolicySetsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleAssignPolicySetToUserRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET,POST")
+								}
 
-						elem = origElem
-					case 's': // Prefix: "session"
-						origElem := elem
-						if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
-							elem = elem[l:]
-						} else {
-							break
-						}
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
 
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleAuthOAuth2SessionRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
+								// Param: "policy_set_name"
+								// Leaf parameter
+								args[1] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleRemovePolicySetFromUserRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "DELETE")
+									}
+
+									return
+								}
+
+								elem = origElem
 							}
 
-							return
+							elem = origElem
 						}
 
 						elem = origElem
 					}
 
 					elem = origElem
-				case 'w': // Prefix: "workspace/switch"
+				case 'u': // Prefix: "uth/"
 					origElem := elem
-					if l := len("workspace/switch"); len(elem) >= l && elem[0:l] == "workspace/switch" {
+					if l := len("uth/"); len(elem) >= l && elem[0:l] == "uth/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleAuthWorkspaceSwitchRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
+						break
+					}
+					switch elem[0] {
+					case 'c': // Prefix: "consent"
+						origElem := elem
+						if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleAuthConsentRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'l': // Prefix: "login"
+						origElem := elem
+						if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleAuthLoginRequest([0]string{}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleAuthLoginSubmitRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,POST")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'o': // Prefix: "oauth2/"
+						origElem := elem
+						if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "authorize"
+							origElem := elem
+							if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleAuthOAuth2AuthorizeRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 'c': // Prefix: "callback"
+							origElem := elem
+							if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleAuthOAuth2CallbackRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 'l': // Prefix: "logout"
+							origElem := elem
+							if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleAuthOAuth2LogoutRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 'r': // Prefix: "refresh"
+							origElem := elem
+							if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "POST":
+									s.handleAuthOAuth2RefreshRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "POST")
+								}
+
+								return
+							}
+
+							elem = origElem
+						case 's': // Prefix: "session"
+							origElem := elem
+							if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleAuthOAuth2SessionRequest([0]string{}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'w': // Prefix: "workspace/switch"
+						origElem := elem
+						if l := len("workspace/switch"); len(elem) >= l && elem[0:l] == "workspace/switch" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleAuthWorkspaceSwitchRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -1015,204 +1243,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							return
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
-			case 'r': // Prefix: "rbac/"
-				origElem := elem
-				if l := len("rbac/"); len(elem) >= l && elem[0:l] == "rbac/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'c': // Prefix: "check"
-					origElem := elem
-					if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleCheckPermissionRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'p': // Prefix: "permission"
-					origElem := elem
-					if l := len("permission"); len(elem) >= l && elem[0:l] == "permission" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleListPermissionsRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'r': // Prefix: "role"
-					origElem := elem
-					if l := len("role"); len(elem) >= l && elem[0:l] == "role" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch r.Method {
-						case "GET":
-							s.handleListRolesRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleCreateRoleRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,POST")
-						}
-
-						return
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "uuid"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "DELETE":
-								s.handleDeleteRoleRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "GET":
-								s.handleGetRoleRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "PUT":
-								s.handleUpdateRoleRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "DELETE,GET,PUT")
-							}
-
-							return
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				case 'u': // Prefix: "user/"
-					origElem := elem
-					if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "user_uuid"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/roles"
-						origElem := elem
-						if l := len("/roles"); len(elem) >= l && elem[0:l] == "/roles" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handleGetUserRolesRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "POST":
-								s.handleAssignRoleToUserRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET,POST")
-							}
-
-							return
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "role_name"
-							// Leaf parameter
-							args[1] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "DELETE":
-									s.handleRemoveRoleFromUserRequest([2]string{
-										args[0],
-										args[1],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "DELETE")
-								}
-
-								return
-							}
-
-							elem = origElem
 						}
 
 						elem = origElem
@@ -2382,9 +2412,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/"
+			case 'a': // Prefix: "a"
 				origElem := elem
-				if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
+				if l := len("a"); len(elem) >= l && elem[0:l] == "a" {
 					elem = elem[l:]
 				} else {
 					break
@@ -2394,67 +2424,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'c': // Prefix: "consent"
+				case 'c': // Prefix: "ccess/"
 					origElem := elem
-					if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = AuthConsentOperation
-							r.summary = ""
-							r.operationID = "auth-consent"
-							r.pathPattern = "/auth/consent"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'l': // Prefix: "login"
-					origElem := elem
-					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = AuthLoginOperation
-							r.summary = ""
-							r.operationID = "auth-login"
-							r.pathPattern = "/auth/login"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = AuthLoginSubmitOperation
-							r.summary = ""
-							r.operationID = "auth-login-submit"
-							r.pathPattern = "/auth/login"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'o': // Prefix: "oauth2/"
-					origElem := elem
-					if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
+					if l := len("ccess/"); len(elem) >= l && elem[0:l] == "ccess/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -2464,9 +2436,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case 'a': // Prefix: "authorize"
+					case 'c': // Prefix: "check"
 						origElem := elem
-						if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+						if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
 							elem = elem[l:]
 						} else {
 							break
@@ -2476,10 +2448,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							// Leaf node.
 							switch method {
 							case "POST":
-								r.name = AuthOAuth2AuthorizeOperation
-								r.summary = ""
-								r.operationID = "auth-oauth2-authorize"
-								r.pathPattern = "/auth/oauth2/authorize"
+								r.name = CheckPermissionOperation
+								r.summary = "Check if a user has permission"
+								r.operationID = "checkPermission"
+								r.pathPattern = "/access/check"
 								r.args = args
 								r.count = 0
 								return r, true
@@ -2489,131 +2461,452 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
-					case 'c': // Prefix: "callback"
+					case 'p': // Prefix: "p"
 						origElem := elem
-						if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = AuthOAuth2CallbackOperation
-								r.summary = ""
-								r.operationID = "auth-oauth2-callback"
-								r.pathPattern = "/auth/oauth2/callback"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'e': // Prefix: "ermission"
+							origElem := elem
+							if l := len("ermission"); len(elem) >= l && elem[0:l] == "ermission" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = ListPermissionsOperation
+									r.summary = "List all permissions"
+									r.operationID = "listPermissions"
+									r.pathPattern = "/access/permission"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 'o': // Prefix: "olicy-set"
+							origElem := elem
+							if l := len("olicy-set"); len(elem) >= l && elem[0:l] == "olicy-set" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = ListPolicySetsOperation
+									r.summary = "List all policy sets"
+									r.operationID = "listPolicySets"
+									r.pathPattern = "/access/policy-set"
+									r.args = args
+									r.count = 0
+									return r, true
+								case "POST":
+									r.name = CreatePolicySetOperation
+									r.summary = "Create a new policy set"
+									r.operationID = "createPolicySet"
+									r.pathPattern = "/access/policy-set"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "uuid"
+								// Leaf parameter
+								args[0] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = DeletePolicySetOperation
+										r.summary = "Delete a policy set"
+										r.operationID = "deletePolicySet"
+										r.pathPattern = "/access/policy-set/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "GET":
+										r.name = GetPolicySetOperation
+										r.summary = "Get policy set details"
+										r.operationID = "getPolicySet"
+										r.pathPattern = "/access/policy-set/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "PUT":
+										r.name = UpdatePolicySetOperation
+										r.summary = "Update a policy set"
+										r.operationID = "updatePolicySet"
+										r.pathPattern = "/access/policy-set/{uuid}"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
-					case 'l': // Prefix: "logout"
+					case 'u': // Prefix: "user/"
 						origElem := elem
-						if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+						if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = AuthOAuth2LogoutOperation
-								r.summary = ""
-								r.operationID = "auth-oauth2-logout"
-								r.pathPattern = "/auth/oauth2/logout"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
+						// Param: "user_uuid"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
 						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
 
-						elem = origElem
-					case 'r': // Prefix: "refresh"
-						origElem := elem
-						if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
-							elem = elem[l:]
-						} else {
+						if len(elem) == 0 {
 							break
 						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "POST":
-								r.name = AuthOAuth2RefreshOperation
-								r.summary = ""
-								r.operationID = "auth-oauth2-refresh"
-								r.pathPattern = "/auth/oauth2/refresh"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
+						switch elem[0] {
+						case '/': // Prefix: "/policy-sets"
+							origElem := elem
+							if l := len("/policy-sets"); len(elem) >= l && elem[0:l] == "/policy-sets" {
+								elem = elem[l:]
+							} else {
+								break
 							}
-						}
 
-						elem = origElem
-					case 's': // Prefix: "session"
-						origElem := elem
-						if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = AuthOAuth2SessionOperation
-								r.summary = ""
-								r.operationID = "auth-oauth2-session"
-								r.pathPattern = "/auth/oauth2/session"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = GetUserPolicySetsOperation
+									r.summary = "Get policy sets for a user"
+									r.operationID = "getUserPolicySets"
+									r.pathPattern = "/access/user/{user_uuid}/policy-sets"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "POST":
+									r.name = AssignPolicySetToUserOperation
+									r.summary = "Assign a policy set to a user"
+									r.operationID = "assignPolicySetToUser"
+									r.pathPattern = "/access/user/{user_uuid}/policy-sets"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
 							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "policy_set_name"
+								// Leaf parameter
+								args[1] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = RemovePolicySetFromUserOperation
+										r.summary = "Remove a policy set from a user"
+										r.operationID = "removePolicySetFromUser"
+										r.pathPattern = "/access/user/{user_uuid}/policy-sets/{policy_set_name}"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
 					}
 
 					elem = origElem
-				case 'w': // Prefix: "workspace/switch"
+				case 'u': // Prefix: "uth/"
 					origElem := elem
-					if l := len("workspace/switch"); len(elem) >= l && elem[0:l] == "workspace/switch" {
+					if l := len("uth/"); len(elem) >= l && elem[0:l] == "uth/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = AuthWorkspaceSwitchOperation
-							r.summary = ""
-							r.operationID = "auth-workspace-switch"
-							r.pathPattern = "/auth/workspace/switch"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case 'c': // Prefix: "consent"
+						origElem := elem
+						if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
+							elem = elem[l:]
+						} else {
+							break
 						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = AuthConsentOperation
+								r.summary = ""
+								r.operationID = "auth-consent"
+								r.pathPattern = "/auth/consent"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'l': // Prefix: "login"
+						origElem := elem
+						if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = AuthLoginOperation
+								r.summary = ""
+								r.operationID = "auth-login"
+								r.pathPattern = "/auth/login"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "POST":
+								r.name = AuthLoginSubmitOperation
+								r.summary = ""
+								r.operationID = "auth-login-submit"
+								r.pathPattern = "/auth/login"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'o': // Prefix: "oauth2/"
+						origElem := elem
+						if l := len("oauth2/"); len(elem) >= l && elem[0:l] == "oauth2/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "authorize"
+							origElem := elem
+							if l := len("authorize"); len(elem) >= l && elem[0:l] == "authorize" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = AuthOAuth2AuthorizeOperation
+									r.summary = ""
+									r.operationID = "auth-oauth2-authorize"
+									r.pathPattern = "/auth/oauth2/authorize"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 'c': // Prefix: "callback"
+							origElem := elem
+							if l := len("callback"); len(elem) >= l && elem[0:l] == "callback" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = AuthOAuth2CallbackOperation
+									r.summary = ""
+									r.operationID = "auth-oauth2-callback"
+									r.pathPattern = "/auth/oauth2/callback"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 'l': // Prefix: "logout"
+							origElem := elem
+							if l := len("logout"); len(elem) >= l && elem[0:l] == "logout" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = AuthOAuth2LogoutOperation
+									r.summary = ""
+									r.operationID = "auth-oauth2-logout"
+									r.pathPattern = "/auth/oauth2/logout"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 'r': // Prefix: "refresh"
+							origElem := elem
+							if l := len("refresh"); len(elem) >= l && elem[0:l] == "refresh" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "POST":
+									r.name = AuthOAuth2RefreshOperation
+									r.summary = ""
+									r.operationID = "auth-oauth2-refresh"
+									r.pathPattern = "/auth/oauth2/refresh"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						case 's': // Prefix: "session"
+							origElem := elem
+							if l := len("session"); len(elem) >= l && elem[0:l] == "session" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = AuthOAuth2SessionOperation
+									r.summary = ""
+									r.operationID = "auth-oauth2-session"
+									r.pathPattern = "/auth/oauth2/session"
+									r.args = args
+									r.count = 0
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'w': // Prefix: "workspace/switch"
+						origElem := elem
+						if l := len("workspace/switch"); len(elem) >= l && elem[0:l] == "workspace/switch" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = AuthWorkspaceSwitchOperation
+								r.summary = ""
+								r.operationID = "auth-workspace-switch"
+								r.pathPattern = "/auth/workspace/switch"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
 					}
 
 					elem = origElem
@@ -3525,239 +3818,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							default:
 								return
 							}
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				}
-
-				elem = origElem
-			case 'r': // Prefix: "rbac/"
-				origElem := elem
-				if l := len("rbac/"); len(elem) >= l && elem[0:l] == "rbac/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'c': // Prefix: "check"
-					origElem := elem
-					if l := len("check"); len(elem) >= l && elem[0:l] == "check" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = CheckPermissionOperation
-							r.summary = "Check if a user has permission"
-							r.operationID = "checkPermission"
-							r.pathPattern = "/rbac/check"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'p': // Prefix: "permission"
-					origElem := elem
-					if l := len("permission"); len(elem) >= l && elem[0:l] == "permission" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = ListPermissionsOperation
-							r.summary = "List all permissions"
-							r.operationID = "listPermissions"
-							r.pathPattern = "/rbac/permission"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'r': // Prefix: "role"
-					origElem := elem
-					if l := len("role"); len(elem) >= l && elem[0:l] == "role" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							r.name = ListRolesOperation
-							r.summary = "List all roles"
-							r.operationID = "listRoles"
-							r.pathPattern = "/rbac/role"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = CreateRoleOperation
-							r.summary = "Create a new role"
-							r.operationID = "createRole"
-							r.pathPattern = "/rbac/role"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						// Param: "uuid"
-						// Leaf parameter
-						args[0] = elem
-						elem = ""
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "DELETE":
-								r.name = DeleteRoleOperation
-								r.summary = "Delete a role"
-								r.operationID = "deleteRole"
-								r.pathPattern = "/rbac/role/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "GET":
-								r.name = GetRoleOperation
-								r.summary = "Get role details"
-								r.operationID = "getRole"
-								r.pathPattern = "/rbac/role/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "PUT":
-								r.name = UpdateRoleOperation
-								r.summary = "Update a role"
-								r.operationID = "updateRole"
-								r.pathPattern = "/rbac/role/{uuid}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
-					}
-
-					elem = origElem
-				case 'u': // Prefix: "user/"
-					origElem := elem
-					if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "user_uuid"
-					// Match until "/"
-					idx := strings.IndexByte(elem, '/')
-					if idx < 0 {
-						idx = len(elem)
-					}
-					args[0] = elem[:idx]
-					elem = elem[idx:]
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/roles"
-						origElem := elem
-						if l := len("/roles"); len(elem) >= l && elem[0:l] == "/roles" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								r.name = GetUserRolesOperation
-								r.summary = "Get roles for a user"
-								r.operationID = "getUserRoles"
-								r.pathPattern = "/rbac/user/{user_uuid}/roles"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "POST":
-								r.name = AssignRoleToUserOperation
-								r.summary = "Assign a role to a user"
-								r.operationID = "assignRoleToUser"
-								r.pathPattern = "/rbac/user/{user_uuid}/roles"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-						switch elem[0] {
-						case '/': // Prefix: "/"
-							origElem := elem
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							// Param: "role_name"
-							// Leaf parameter
-							args[1] = elem
-							elem = ""
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "DELETE":
-									r.name = RemoveRoleFromUserOperation
-									r.summary = "Remove a role from a user"
-									r.operationID = "removeRoleFromUser"
-									r.pathPattern = "/rbac/user/{user_uuid}/roles/{role_name}"
-									r.args = args
-									r.count = 2
-									return r, true
-								default:
-									return
-								}
-							}
-
-							elem = origElem
 						}
 
 						elem = origElem

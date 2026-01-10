@@ -44,4 +44,4 @@ post:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
   tags:
-    - rbac
+    - access

@@ -107,17 +107,17 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"schedulerUpdate": {ResourceScheduler, ActionWrite},
 	"schedulerDelete": {ResourceScheduler, ActionDelete},
 
-	// RBAC operations (require super_admin)
-	"listRoles":          {ResourceRole, ActionRead},
-	"createRole":         {ResourceRole, ActionWrite},
-	"getRole":            {ResourceRole, ActionRead},
-	"updateRole":         {ResourceRole, ActionWrite},
-	"deleteRole":         {ResourceRole, ActionWrite},
-	"listPermissions":    {ResourceRole, ActionRead},
-	"getUserRoles":       {ResourceRole, ActionRead},
-	"assignRoleToUser":   {ResourceRole, ActionWrite},
-	"removeRoleFromUser": {ResourceRole, ActionWrite},
-	"checkPermission":    {ResourceRole, ActionRead},
+	// Policy set operations (require super_admin)
+	"listPolicySets":            {ResourcePolicySet, ActionRead},
+	"createPolicySet":           {ResourcePolicySet, ActionWrite},
+	"getPolicySet":              {ResourcePolicySet, ActionRead},
+	"updatePolicySet":           {ResourcePolicySet, ActionWrite},
+	"deletePolicySet":           {ResourcePolicySet, ActionWrite},
+	"listPermissions":           {ResourcePolicySet, ActionRead},
+	"getUserPolicySets":         {ResourcePolicySet, ActionRead},
+	"assignPolicySetToUser":     {ResourcePolicySet, ActionWrite},
+	"removePolicySetFromUser":   {ResourcePolicySet, ActionWrite},
+	"checkPermission":           {ResourcePolicySet, ActionRead},
 
 	// Worker operations (global, require admin)
 	"listRegisteredWorkers":        {ResourceWorker, ActionRead},

@@ -1073,44 +1073,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/rbac/role": {
+    "/access/policy-set": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List all roles */
-        get: operations["listRoles"];
+        /** List all policy sets */
+        get: operations["listPolicySets"];
         put?: never;
-        /** Create a new role */
-        post: operations["createRole"];
+        /** Create a new policy set */
+        post: operations["createPolicySet"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/rbac/role/{uuid}": {
+    "/access/policy-set/{uuid}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get role details */
-        get: operations["getRole"];
-        /** Update a role */
-        put: operations["updateRole"];
+        /** Get policy set details */
+        get: operations["getPolicySet"];
+        /** Update a policy set */
+        put: operations["updatePolicySet"];
         post?: never;
-        /** Delete a role */
-        delete: operations["deleteRole"];
+        /** Delete a policy set */
+        delete: operations["deletePolicySet"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/rbac/permission": {
+    "/access/permission": {
         parameters: {
             query?: never;
             header?: never;
@@ -1127,25 +1127,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/rbac/user/{user_uuid}/roles": {
+    "/access/user/{user_uuid}/policy-sets": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get roles for a user */
-        get: operations["getUserRoles"];
+        /** Get policy sets for a user */
+        get: operations["getUserPolicySets"];
         put?: never;
-        /** Assign a role to a user */
-        post: operations["assignRoleToUser"];
+        /** Assign a policy set to a user */
+        post: operations["assignPolicySetToUser"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/rbac/user/{user_uuid}/roles/{role_name}": {
+    "/access/user/{user_uuid}/policy-sets/{policy_set_name}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1155,14 +1155,14 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Remove a role from a user */
-        delete: operations["removeRoleFromUser"];
+        /** Remove a policy set from a user */
+        delete: operations["removePolicySetFromUser"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/rbac/check": {
+    "/access/check": {
         parameters: {
             query?: never;
             header?: never;
@@ -1403,9 +1403,9 @@ export interface components {
         WorkspaceCheck: components["schemas"]["workspace_check"];
         RegisteredWorker: components["schemas"]["registered_worker"];
         WorkerEnrollmentToken: components["schemas"]["worker_enrollment_token"];
-        RBACRole: components["schemas"]["rbac_role"];
-        RBACPermission: components["schemas"]["rbac_permission"];
-        RBACRoleAssignment: components["schemas"]["rbac_role_assignment"];
+        PolicySet: components["schemas"]["policy_set"];
+        Permission: components["schemas"]["permission"];
+        UserPolicySetAssignment: components["schemas"]["user_policy_set_assignment"];
         MapperConfig: components["schemas"]["mapper_config"];
         MapperFieldMapping: components["schemas"]["mapper_field_mapping"];
         MapperTransform: components["schemas"]["mapper_transform"];
@@ -2198,10 +2198,10 @@ export interface components {
              */
             email: string;
             /**
-             * @description Role to assign when invite is accepted
+             * @description Policy set to assign when invite is accepted
              * @enum {string}
              */
-            role: "admin" | "member";
+            policy_set_name: "workspace_admin" | "workspace_member";
             /** @description Email of the user who sent the invite */
             readonly invited_by_email?: string;
             /** @description Name of the user who sent the invite */
@@ -2228,7 +2228,7 @@ export interface components {
             /** @description Human-readable workspace name (if exists) */
             display_name?: string;
         };
-        rbac_permission: {
+        permission: {
             /**
              * Format: uuid
              * @description Unique identifier for the permission
@@ -2258,30 +2258,30 @@ export interface components {
              */
             readonly created_at?: string;
         };
-        rbac_role: {
+        policy_set: {
             /**
              * Format: uuid
-             * @description Unique identifier for the role
+             * @description Unique identifier for the policy set
              */
             readonly uuid?: string;
-            /** @description Unique role identifier (e.g., "super_admin", "workspace_owner") */
+            /** @description Unique policy set identifier (e.g., "super_admin", "workspace_owner") */
             name: string;
-            /** @description Human-readable role name */
+            /** @description Human-readable policy set name */
             display_name: string;
-            /** @description Description of the role's purpose and permissions */
+            /** @description Description of the policy set's purpose and permissions */
             description?: string;
             /**
-             * @description Scope of the role (global for system-wide, workspace for workspace-scoped)
+             * @description Scope of the policy set (global for system-wide, workspace for workspace-scoped)
              * @enum {string}
              */
             scope: "global" | "workspace";
-            /** @description Whether this is a system-defined role (cannot be deleted) */
+            /** @description Whether this is a system-defined policy set (cannot be deleted) */
             readonly is_system?: boolean;
-            /** @description List of permissions granted by this role */
-            permissions?: components["schemas"]["rbac_permission"][];
+            /** @description List of permissions granted by this policy set */
+            permissions?: components["schemas"]["permission"][];
             /**
              * Format: date-time
-             * @description Timestamp of role creation
+             * @description Timestamp of policy set creation
              */
             readonly created_at?: string;
             /**
@@ -2290,18 +2290,19 @@ export interface components {
              */
             readonly updated_at?: string;
         };
-        rbac_role_assignment: {
+        user_policy_set_assignment: {
             /**
              * Format: uuid
              * @description UUID of the user
              */
             user_uuid: string;
-            role: components["schemas"]["rbac_role"];
-            /** @description Domain where the role is assigned (workspace slug or "global") */
+            /** @description Name of the policy set assigned to the user */
+            policy_set: string;
+            /** @description Domain where the policy set is assigned (workspace slug or "global") */
             domain: string;
             /**
              * Format: date-time
-             * @description Timestamp when the role was assigned
+             * @description Timestamp when the policy set was assigned
              */
             readonly assigned_at?: string;
         };
@@ -5772,10 +5773,10 @@ export interface operations {
             };
         };
     };
-    listRoles: {
+    listPolicySets: {
         parameters: {
             query?: {
-                /** @description Filter roles by scope */
+                /** @description Filter policy sets by scope */
                 scope?: "global" | "workspace";
             };
             header?: never;
@@ -5784,13 +5785,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of roles */
+            /** @description List of policy sets */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["rbac_role"][];
+                    "application/json": components["schemas"]["policy_set"][];
                 };
             };
             /** @description Error */
@@ -5804,7 +5805,7 @@ export interface operations {
             };
         };
     };
-    createRole: {
+    createPolicySet: {
         parameters: {
             query?: never;
             header?: never;
@@ -5813,17 +5814,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["rbac_role"];
+                "application/json": components["schemas"]["policy_set"];
             };
         };
         responses: {
-            /** @description Role created successfully */
+            /** @description Policy set created successfully */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["rbac_role"];
+                    "application/json": components["schemas"]["policy_set"];
                 };
             };
             /** @description Error */
@@ -5837,25 +5838,25 @@ export interface operations {
             };
         };
     };
-    getRole: {
+    getPolicySet: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Role UUID */
+                /** @description Policy Set UUID */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Role details */
+            /** @description Policy set details */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["rbac_role"];
+                    "application/json": components["schemas"]["policy_set"];
                 };
             };
             /** @description Error */
@@ -5869,29 +5870,29 @@ export interface operations {
             };
         };
     };
-    updateRole: {
+    updatePolicySet: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Role UUID */
+                /** @description Policy Set UUID */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["rbac_role"];
+                "application/json": components["schemas"]["policy_set"];
             };
         };
         responses: {
-            /** @description Role updated successfully */
+            /** @description Policy set updated successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["rbac_role"];
+                    "application/json": components["schemas"]["policy_set"];
                 };
             };
             /** @description Error */
@@ -5905,19 +5906,19 @@ export interface operations {
             };
         };
     };
-    deleteRole: {
+    deletePolicySet: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Role UUID */
+                /** @description Policy Set UUID */
                 uuid: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Role deleted successfully */
+            /** @description Policy set deleted successfully */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -5955,7 +5956,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["rbac_permission"][];
+                    "application/json": components["schemas"]["permission"][];
                 };
             };
             /** @description Error */
@@ -5969,7 +5970,7 @@ export interface operations {
             };
         };
     };
-    getUserRoles: {
+    getUserPolicySets: {
         parameters: {
             query?: {
                 /** @description Filter by domain (workspace slug or "global") */
@@ -5984,7 +5985,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description User roles */
+            /** @description User policy sets */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -5993,7 +5994,7 @@ export interface operations {
                     "application/json": {
                         /** Format: uuid */
                         user_uuid?: string;
-                        roles?: components["schemas"]["rbac_role_assignment"][];
+                        policy_sets?: components["schemas"]["user_policy_set_assignment"][];
                     };
                 };
             };
@@ -6008,7 +6009,7 @@ export interface operations {
             };
         };
     };
-    assignRoleToUser: {
+    assignPolicySetToUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -6021,15 +6022,15 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description Name of the role to assign */
-                    role_name: string;
-                    /** @description Domain for the role (workspace slug or "global") */
+                    /** @description Name of the policy set to assign */
+                    policy_set_name: string;
+                    /** @description Domain for the policy set (workspace slug or "global") */
                     domain: string;
                 };
             };
         };
         responses: {
-            /** @description Role assigned successfully */
+            /** @description Policy set assigned successfully */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -6047,24 +6048,24 @@ export interface operations {
             };
         };
     };
-    removeRoleFromUser: {
+    removePolicySetFromUser: {
         parameters: {
             query: {
-                /** @description Domain where the role was assigned (workspace slug or "global") */
+                /** @description Domain where the policy set was assigned (workspace slug or "global") */
                 domain: string;
             };
             header?: never;
             path: {
                 /** @description User UUID */
                 user_uuid: string;
-                /** @description Role name to remove */
-                role_name: string;
+                /** @description Policy set name to remove */
+                policy_set_name: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Role removed successfully */
+            /** @description Policy set removed successfully */
             204: {
                 headers: {
                     [name: string]: unknown;

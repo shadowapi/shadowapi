@@ -27,8 +27,8 @@ import type { components } from '../../api/v1';
 const { Title } = Typography;
 
 type User = components['schemas']['user'];
-type RBACRole = components['schemas']['rbac_role'];
-type RBACRoleAssignment = components['schemas']['rbac_role_assignment'];
+type PolicySet = components['schemas']['policy_set'];
+type UserPolicySetAssignment = components['schemas']['user_policy_set_assignment'];
 
 interface UserFormValues {
   email: string;
@@ -49,13 +49,13 @@ function UserEdit() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Role assignment state
-  const [roleAssignments, setRoleAssignments] = useState<RBACRoleAssignment[]>([]);
-  const [rolesLoading, setRolesLoading] = useState(false);
+  // Policy set assignment state
+  const [policySetAssignments, setPolicySetAssignments] = useState<UserPolicySetAssignment[]>([]);
+  const [policySetsLoading, setPolicySetsLoading] = useState(false);
   const [assignModalVisible, setAssignModalVisible] = useState(false);
-  const [availableRoles, setAvailableRoles] = useState<RBACRole[]>([]);
+  const [availablePolicySets, setAvailablePolicySets] = useState<PolicySet[]>([]);
   const [assigning, setAssigning] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string | undefined>();
+  const [selectedPolicySet, setSelectedPolicySet] = useState<string | undefined>();
   const [selectedDomain, setSelectedDomain] = useState<string>('global');
 
   // Load user data
@@ -83,93 +83,89 @@ function UserEdit() {
     }
   }, [uuid, isNew, form, slug, navigate, currentUser]);
 
-  // Load user's role assignments
-  const loadRoleAssignments = useCallback(async () => {
+  // Load user's policy set assignments
+  const loadPolicySetAssignments = useCallback(async () => {
     if (!uuid) return;
-    setRolesLoading(true);
-    const { data, error } = await client.GET('/rbac/user/{user_uuid}/roles', {
+    setPolicySetsLoading(true);
+    const { data, error } = await client.GET('/access/user/{user_uuid}/policy-sets', {
       params: { path: { user_uuid: uuid } },
     });
     if (error) {
-      message.error('Failed to load role assignments');
-      setRolesLoading(false);
+      message.error('Failed to load policy set assignments');
+      setPolicySetsLoading(false);
       return;
     }
-    setRoleAssignments(data?.roles || []);
-    setRolesLoading(false);
+    setPolicySetAssignments(data?.policy_sets || []);
+    setPolicySetsLoading(false);
   }, [uuid]);
 
   useEffect(() => {
     if (!isNew && uuid && isAdmin(currentUser)) {
-      loadRoleAssignments();
+      loadPolicySetAssignments();
     }
-  }, [uuid, isNew, loadRoleAssignments, currentUser]);
+  }, [uuid, isNew, loadPolicySetAssignments, currentUser]);
 
-  // Load available roles for assignment modal
-  const loadAvailableRoles = async () => {
-    const { data, error } = await client.GET('/rbac/role');
+  // Load available policy sets for assignment modal
+  const loadAvailablePolicySets = async () => {
+    const { data, error } = await client.GET('/access/policy-set');
     if (error) {
-      message.error('Failed to load roles');
+      message.error('Failed to load policy sets');
       return;
     }
-    setAvailableRoles(data || []);
+    setAvailablePolicySets(data || []);
   };
 
   const openAssignModal = () => {
-    loadAvailableRoles();
-    setSelectedRole(undefined);
+    loadAvailablePolicySets();
+    setSelectedPolicySet(undefined);
     setSelectedDomain(slug); // Default to current workspace
     setAssignModalVisible(true);
   };
 
-  const handleAssignRole = async () => {
-    if (!uuid || !selectedRole) {
-      message.error('Please select a role');
+  const handleAssignPolicySet = async () => {
+    if (!uuid || !selectedPolicySet) {
+      message.error('Please select a policy set');
       return;
     }
     setAssigning(true);
-    const { error } = await client.POST('/rbac/user/{user_uuid}/roles', {
+    const { error } = await client.POST('/access/user/{user_uuid}/policy-sets', {
       params: { path: { user_uuid: uuid } },
-      body: { role_name: selectedRole, domain: selectedDomain },
+      body: { policy_set_name: selectedPolicySet, domain: selectedDomain },
     });
     if (error) {
-      message.error((error as { detail?: string }).detail || 'Failed to assign role');
+      message.error((error as { detail?: string }).detail || 'Failed to assign policy set');
       setAssigning(false);
       return;
     }
-    message.success('Role assigned successfully');
+    message.success('Policy set assigned successfully');
     setAssignModalVisible(false);
     setAssigning(false);
-    loadRoleAssignments();
+    loadPolicySetAssignments();
   };
 
-  const handleRemoveRole = async (roleName: string, domain: string) => {
+  const handleRemovePolicySet = async (policySetName: string, domain: string) => {
     if (!uuid) return;
-    const { error } = await client.DELETE('/rbac/user/{user_uuid}/roles/{role_name}', {
+    const { error } = await client.DELETE('/access/user/{user_uuid}/policy-sets/{policy_set_name}', {
       params: {
-        path: { user_uuid: uuid, role_name: roleName },
+        path: { user_uuid: uuid, policy_set_name: policySetName },
         query: { domain },
       },
     });
     if (error) {
-      message.error('Failed to remove role');
+      message.error('Failed to remove policy set');
       return;
     }
-    message.success('Role removed');
-    loadRoleAssignments();
+    message.success('Policy set removed');
+    loadPolicySetAssignments();
   };
 
-  // Role assignment table columns
-  const roleAssignmentColumns: ColumnsType<RBACRoleAssignment> = [
+  // Policy set assignment table columns
+  const policySetAssignmentColumns: ColumnsType<UserPolicySetAssignment> = [
     {
-      title: 'Role',
-      key: 'role',
-      render: (_, record) => (
-        <Space>
-          {record.role.display_name}
-          {record.role.is_system && <Tag color="blue">System</Tag>}
-        </Space>
-      ),
+      title: 'Policy Set',
+      dataIndex: 'policy_set',
+      key: 'policy_set',
+      render: (value: string) => <span>{value}</span>,
     },
     {
       title: 'Domain',
@@ -193,9 +189,9 @@ function UserEdit() {
       width: 80,
       render: (_, record) => (
         <Popconfirm
-          title="Remove role"
-          description="Are you sure you want to remove this role from the user?"
-          onConfirm={() => handleRemoveRole(record.role.name, record.domain)}
+          title="Remove policy set"
+          description="Are you sure you want to remove this policy set from the user?"
+          onConfirm={() => handleRemovePolicySet(record.policy_set, record.domain)}
           okButtonProps={{ danger: true }}
           okText="Remove"
         >
@@ -359,7 +355,7 @@ function UserEdit() {
         </Form.Item>
       </Form>
 
-      {/* Role Assignments Section - only shown when editing */}
+      {/* Policy Set Assignments Section - only shown when editing */}
       {!isNew && uuid && (
         <>
           <Divider />
@@ -371,49 +367,47 @@ function UserEdit() {
             }}
           >
             <Title level={5} style={{ margin: 0 }}>
-              Role Assignments
+              Policy Set Assignments
             </Title>
             <Button type="primary" icon={<PlusOutlined />} onClick={openAssignModal}>
-              Assign Role
+              Assign Policy Set
             </Button>
           </Space>
           <Table
-            columns={roleAssignmentColumns}
-            dataSource={roleAssignments}
-            rowKey={(record) => `${record.role.name}-${record.domain}`}
-            loading={rolesLoading}
+            columns={policySetAssignmentColumns}
+            dataSource={policySetAssignments}
+            rowKey={(record) => `${record.policy_set}-${record.domain}`}
+            loading={policySetsLoading}
             pagination={false}
             size="small"
-            locale={{ emptyText: 'No roles assigned' }}
+            locale={{ emptyText: 'No policy sets assigned' }}
           />
 
-          {/* Assign Role Modal */}
+          {/* Assign Policy Set Modal */}
           <Modal
-            title="Assign Role"
+            title="Assign Policy Set"
             open={assignModalVisible}
             onCancel={() => setAssignModalVisible(false)}
-            onOk={handleAssignRole}
+            onOk={handleAssignPolicySet}
             confirmLoading={assigning}
             okText="Assign"
           >
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
               <div>
-                <Typography.Text strong>Role</Typography.Text>
+                <Typography.Text strong>Policy Set</Typography.Text>
                 <Select
-                  placeholder="Select a role"
+                  placeholder="Select a policy set"
                   style={{ width: '100%', marginTop: 8 }}
-                  value={selectedRole}
-                  onChange={setSelectedRole}
-                  options={availableRoles.map((role) => ({
+                  value={selectedPolicySet}
+                  onChange={setSelectedPolicySet}
+                  options={availablePolicySets.map((ps) => ({
                     label: (
                       <Space>
-                        {role.display_name}
-                        <Tag color={role.scope === 'global' ? 'purple' : 'green'}>
-                          {role.scope}
-                        </Tag>
+                        {ps.display_name}
+                        <Tag color={ps.scope === 'global' ? 'purple' : 'green'}>{ps.scope}</Tag>
                       </Space>
                     ),
-                    value: role.name,
+                    value: ps.name,
                   }))}
                 />
               </div>
@@ -429,7 +423,8 @@ function UserEdit() {
                   ]}
                 />
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  Global roles apply system-wide. Workspace roles apply only to the selected workspace.
+                  Global policy sets apply system-wide. Workspace policy sets apply only to the
+                  selected workspace.
                 </Typography.Text>
               </div>
             </Space>

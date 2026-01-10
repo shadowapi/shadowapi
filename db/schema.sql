@@ -30,17 +30,15 @@ CREATE TABLE workspace (
 
 CREATE INDEX idx_workspace_slug ON workspace(slug);
 
--- Workspace membership with roles
+-- Workspace membership (policy sets are assigned via user_policy_set table)
 CREATE TABLE workspace_member (
     uuid UUID PRIMARY KEY,
     workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE,
     user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
-    role VARCHAR(50) NOT NULL DEFAULT 'member',  -- owner, admin, member
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT uq_workspace_member UNIQUE(workspace_uuid, user_uuid),
-    CONSTRAINT chk_role CHECK (role IN ('owner', 'admin', 'member'))
+    CONSTRAINT uq_workspace_member UNIQUE(workspace_uuid, user_uuid)
 );
 
 CREATE INDEX idx_workspace_member_user ON workspace_member(user_uuid);
@@ -51,15 +49,14 @@ CREATE TABLE user_invite (
     uuid UUID PRIMARY KEY,
     workspace_uuid UUID NOT NULL REFERENCES workspace(uuid) ON DELETE CASCADE,
     email VARCHAR NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'member',  -- admin, member (not owner)
+    policy_set_name VARCHAR(100) NOT NULL DEFAULT 'workspace_member',  -- policy set to assign on accept
     token_hash VARCHAR(64) NOT NULL,  -- SHA256 hex of invite token (for lookup)
     invited_by_user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     accepted_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT uq_user_invite_email UNIQUE(email),  -- One active pending invite per email globally
-    CONSTRAINT chk_invite_role CHECK (role IN ('admin', 'member'))
+    CONSTRAINT uq_user_invite_email UNIQUE(email)  -- One active pending invite per email globally
 );
 
 CREATE INDEX idx_user_invite_token_hash ON user_invite(token_hash);
@@ -439,46 +436,89 @@ CREATE TABLE IF NOT EXISTS worker_jobs (
 );
 
 -- ============================================================================
--- RBAC (Role-Based Access Control) Tables
+-- Policy-Based Access Control Tables - Ory Ladon
 -- ============================================================================
 
--- Casbin policy storage (standard adapter schema)
--- Used by github.com/pckhoi/casbin-pgx-adapter
-CREATE TABLE IF NOT EXISTS casbin_rule (
-    id SERIAL PRIMARY KEY,
-    p_type VARCHAR(100) NOT NULL,
-    v0 VARCHAR(100),
-    v1 VARCHAR(100),
-    v2 VARCHAR(100),
-    v3 VARCHAR(100),
-    v4 VARCHAR(100),
-    v5 VARCHAR(100)
+-- Ladon policy storage
+CREATE TABLE IF NOT EXISTS ladon_policy (
+    id VARCHAR(255) PRIMARY KEY,
+    description TEXT,
+    effect VARCHAR(10) NOT NULL CHECK (effect IN ('allow', 'deny')),
+    conditions JSONB DEFAULT '{}'::jsonb,
+    meta JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE
 );
 
-CREATE INDEX IF NOT EXISTS idx_casbin_rule_p_type ON casbin_rule(p_type);
-CREATE INDEX IF NOT EXISTS idx_casbin_rule_v0 ON casbin_rule(v0);
-CREATE INDEX IF NOT EXISTS idx_casbin_rule_v1 ON casbin_rule(v1);
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_effect ON ladon_policy(effect);
 
--- Role definitions for API management
-CREATE TABLE IF NOT EXISTS rbac_role (
+-- Policy subjects (many-to-many)
+CREATE TABLE IF NOT EXISTS ladon_policy_subject (
+    id SERIAL PRIMARY KEY,
+    policy_id VARCHAR(255) NOT NULL REFERENCES ladon_policy(id) ON DELETE CASCADE,
+    subject VARCHAR(255) NOT NULL,
+    CONSTRAINT uq_ladon_policy_subject UNIQUE(policy_id, subject)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_subject_policy ON ladon_policy_subject(policy_id);
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_subject_subject ON ladon_policy_subject(subject);
+
+-- Policy resources (many-to-many)
+CREATE TABLE IF NOT EXISTS ladon_policy_resource (
+    id SERIAL PRIMARY KEY,
+    policy_id VARCHAR(255) NOT NULL REFERENCES ladon_policy(id) ON DELETE CASCADE,
+    resource VARCHAR(512) NOT NULL,
+    CONSTRAINT uq_ladon_policy_resource UNIQUE(policy_id, resource)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_resource_policy ON ladon_policy_resource(policy_id);
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_resource_resource ON ladon_policy_resource(resource);
+
+-- Policy actions (many-to-many)
+CREATE TABLE IF NOT EXISTS ladon_policy_action (
+    id SERIAL PRIMARY KEY,
+    policy_id VARCHAR(255) NOT NULL REFERENCES ladon_policy(id) ON DELETE CASCADE,
+    action VARCHAR(100) NOT NULL,
+    CONSTRAINT uq_ladon_policy_action UNIQUE(policy_id, action)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_action_policy ON ladon_policy_action(policy_id);
+CREATE INDEX IF NOT EXISTS idx_ladon_policy_action_action ON ladon_policy_action(action);
+
+-- User policy set assignments (user-to-policy-set mappings with optional workspace scope)
+CREATE TABLE IF NOT EXISTS user_policy_set (
+    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
+    policy_set_name VARCHAR(100) NOT NULL,
+    workspace_slug VARCHAR(63),  -- NULL for global policy sets
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT uq_user_policy_set UNIQUE(user_uuid, policy_set_name, workspace_slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_policy_set_user ON user_policy_set(user_uuid);
+CREATE INDEX IF NOT EXISTS idx_user_policy_set_policy_set ON user_policy_set(policy_set_name);
+CREATE INDEX IF NOT EXISTS idx_user_policy_set_workspace ON user_policy_set(workspace_slug);
+
+-- Policy set definitions for API management
+CREATE TABLE IF NOT EXISTS policy_set (
     uuid UUID PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     display_name VARCHAR(255) NOT NULL,
     description TEXT,
     scope VARCHAR(50) NOT NULL DEFAULT 'workspace', -- 'global' or 'workspace'
-    is_system BOOLEAN NOT NULL DEFAULT FALSE, -- System roles cannot be deleted
+    is_system BOOLEAN NOT NULL DEFAULT FALSE, -- System policy sets cannot be deleted
     permissions JSONB DEFAULT '[]'::jsonb, -- Cached list of permissions for display
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT chk_rbac_role_scope CHECK (scope IN ('global', 'workspace'))
+    CONSTRAINT chk_policy_set_scope CHECK (scope IN ('global', 'workspace'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_rbac_role_scope ON rbac_role(scope);
-CREATE INDEX IF NOT EXISTS idx_rbac_role_name ON rbac_role(name);
+CREATE INDEX IF NOT EXISTS idx_policy_set_scope ON policy_set(scope);
+CREATE INDEX IF NOT EXISTS idx_policy_set_name ON policy_set(name);
 
 -- Permission definitions (for documentation/UI)
-CREATE TABLE IF NOT EXISTS rbac_permission (
+CREATE TABLE IF NOT EXISTS permission (
     uuid UUID PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE, -- e.g., "datasource:read", "workspace:admin"
     display_name VARCHAR(255) NOT NULL,
@@ -488,12 +528,12 @@ CREATE TABLE IF NOT EXISTS rbac_permission (
     scope VARCHAR(50) NOT NULL DEFAULT 'workspace', -- 'global' or 'workspace'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT chk_rbac_permission_scope CHECK (scope IN ('global', 'workspace'))
+    CONSTRAINT chk_permission_scope CHECK (scope IN ('global', 'workspace'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_rbac_permission_resource ON rbac_permission(resource);
-CREATE INDEX IF NOT EXISTS idx_rbac_permission_scope ON rbac_permission(scope);
-CREATE INDEX IF NOT EXISTS idx_rbac_permission_name ON rbac_permission(name);
+CREATE INDEX IF NOT EXISTS idx_permission_resource ON permission(resource);
+CREATE INDEX IF NOT EXISTS idx_permission_scope ON permission(scope);
+CREATE INDEX IF NOT EXISTS idx_permission_name ON permission(name);
 
 -- ============================================================================
 -- Distributed Worker Tables

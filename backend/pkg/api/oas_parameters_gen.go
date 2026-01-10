@@ -82,13 +82,13 @@ func decodeAddWorkspaceMemberParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
-// AssignRoleToUserParams is parameters of assignRoleToUser operation.
-type AssignRoleToUserParams struct {
+// AssignPolicySetToUserParams is parameters of assignPolicySetToUser operation.
+type AssignPolicySetToUserParams struct {
 	// User UUID.
 	UserUUID uuid.UUID
 }
 
-func unpackAssignRoleToUserParams(packed middleware.Parameters) (params AssignRoleToUserParams) {
+func unpackAssignPolicySetToUserParams(packed middleware.Parameters) (params AssignPolicySetToUserParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "user_uuid",
@@ -99,7 +99,7 @@ func unpackAssignRoleToUserParams(packed middleware.Parameters) (params AssignRo
 	return params
 }
 
-func decodeAssignRoleToUserParams(args [1]string, argsEscaped bool, r *http.Request) (params AssignRoleToUserParams, _ error) {
+func decodeAssignPolicySetToUserParams(args [1]string, argsEscaped bool, r *http.Request) (params AssignPolicySetToUserParams, _ error) {
 	// Decode path: user_uuid.
 	if err := func() error {
 		param := args[0]
@@ -1370,6 +1370,72 @@ func decodeDatasourceSetOAuth2ClientParams(args [1]string, argsEscaped bool, r *
 	return params, nil
 }
 
+// DeletePolicySetParams is parameters of deletePolicySet operation.
+type DeletePolicySetParams struct {
+	// Policy Set UUID.
+	UUID uuid.UUID
+}
+
+func unpackDeletePolicySetParams(packed middleware.Parameters) (params DeletePolicySetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeletePolicySetParams(args [1]string, argsEscaped bool, r *http.Request) (params DeletePolicySetParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteRegisteredWorkerParams is parameters of deleteRegisteredWorker operation.
 type DeleteRegisteredWorkerParams struct {
 	UUID string
@@ -1412,72 +1478,6 @@ func decodeDeleteRegisteredWorkerParams(args [1]string, argsEscaped bool, r *htt
 				}
 
 				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// DeleteRoleParams is parameters of deleteRole operation.
-type DeleteRoleParams struct {
-	// Role UUID.
-	UUID uuid.UUID
-}
-
-func unpackDeleteRoleParams(packed middleware.Parameters) (params DeleteRoleParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeDeleteRoleParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteRoleParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -1949,6 +1949,72 @@ func decodeGetPasswordResetByTokenParams(args [1]string, argsEscaped bool, r *ht
 	return params, nil
 }
 
+// GetPolicySetParams is parameters of getPolicySet operation.
+type GetPolicySetParams struct {
+	// Policy Set UUID.
+	UUID uuid.UUID
+}
+
+func unpackGetPolicySetParams(packed middleware.Parameters) (params GetPolicySetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetPolicySetParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPolicySetParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetRegisteredWorkerParams is parameters of getRegisteredWorker operation.
 type GetRegisteredWorkerParams struct {
 	UUID string
@@ -1991,72 +2057,6 @@ func decodeGetRegisteredWorkerParams(args [1]string, argsEscaped bool, r *http.R
 				}
 
 				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetRoleParams is parameters of getRole operation.
-type GetRoleParams struct {
-	// Role UUID.
-	UUID uuid.UUID
-}
-
-func unpackGetRoleParams(packed middleware.Parameters) (params GetRoleParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeGetRoleParams(args [1]string, argsEscaped bool, r *http.Request) (params GetRoleParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -2145,15 +2145,15 @@ func decodeGetUserParams(args [1]string, argsEscaped bool, r *http.Request) (par
 	return params, nil
 }
 
-// GetUserRolesParams is parameters of getUserRoles operation.
-type GetUserRolesParams struct {
+// GetUserPolicySetsParams is parameters of getUserPolicySets operation.
+type GetUserPolicySetsParams struct {
 	// User UUID.
 	UserUUID uuid.UUID
 	// Filter by domain (workspace slug or "global").
 	Domain OptString
 }
 
-func unpackGetUserRolesParams(packed middleware.Parameters) (params GetUserRolesParams) {
+func unpackGetUserPolicySetsParams(packed middleware.Parameters) (params GetUserPolicySetsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "user_uuid",
@@ -2173,7 +2173,7 @@ func unpackGetUserRolesParams(packed middleware.Parameters) (params GetUserRoles
 	return params
 }
 
-func decodeGetUserRolesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetUserRolesParams, _ error) {
+func decodeGetUserPolicySetsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetUserPolicySetsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: user_uuid.
 	if err := func() error {
@@ -2527,26 +2527,26 @@ func decodeListPermissionsParams(args [0]string, argsEscaped bool, r *http.Reque
 	return params, nil
 }
 
-// ListRolesParams is parameters of listRoles operation.
-type ListRolesParams struct {
-	// Filter roles by scope.
-	Scope OptListRolesScope
+// ListPolicySetsParams is parameters of listPolicySets operation.
+type ListPolicySetsParams struct {
+	// Filter policy sets by scope.
+	Scope OptListPolicySetsScope
 }
 
-func unpackListRolesParams(packed middleware.Parameters) (params ListRolesParams) {
+func unpackListPolicySetsParams(packed middleware.Parameters) (params ListPolicySetsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "scope",
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.Scope = v.(OptListRolesScope)
+			params.Scope = v.(OptListPolicySetsScope)
 		}
 	}
 	return params
 }
 
-func decodeListRolesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListRolesParams, _ error) {
+func decodeListPolicySetsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListPolicySetsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: scope.
 	if err := func() error {
@@ -2558,7 +2558,7 @@ func decodeListRolesParams(args [0]string, argsEscaped bool, r *http.Request) (p
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotScopeVal ListRolesScope
+				var paramsDotScopeVal ListPolicySetsScope
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -2570,7 +2570,7 @@ func decodeListRolesParams(args [0]string, argsEscaped bool, r *http.Request) (p
 						return err
 					}
 
-					paramsDotScopeVal = ListRolesScope(c)
+					paramsDotScopeVal = ListPolicySetsScope(c)
 					return nil
 				}(); err != nil {
 					return err
@@ -4164,17 +4164,17 @@ func decodePipelineUpdateParams(args [1]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
-// RemoveRoleFromUserParams is parameters of removeRoleFromUser operation.
-type RemoveRoleFromUserParams struct {
+// RemovePolicySetFromUserParams is parameters of removePolicySetFromUser operation.
+type RemovePolicySetFromUserParams struct {
 	// User UUID.
 	UserUUID uuid.UUID
-	// Role name to remove.
-	RoleName string
-	// Domain where the role was assigned (workspace slug or "global").
+	// Policy set name to remove.
+	PolicySetName string
+	// Domain where the policy set was assigned (workspace slug or "global").
 	Domain string
 }
 
-func unpackRemoveRoleFromUserParams(packed middleware.Parameters) (params RemoveRoleFromUserParams) {
+func unpackRemovePolicySetFromUserParams(packed middleware.Parameters) (params RemovePolicySetFromUserParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "user_uuid",
@@ -4184,10 +4184,10 @@ func unpackRemoveRoleFromUserParams(packed middleware.Parameters) (params Remove
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "role_name",
+			Name: "policy_set_name",
 			In:   "path",
 		}
-		params.RoleName = packed[key].(string)
+		params.PolicySetName = packed[key].(string)
 	}
 	{
 		key := middleware.ParameterKey{
@@ -4199,7 +4199,7 @@ func unpackRemoveRoleFromUserParams(packed middleware.Parameters) (params Remove
 	return params
 }
 
-func decodeRemoveRoleFromUserParams(args [2]string, argsEscaped bool, r *http.Request) (params RemoveRoleFromUserParams, _ error) {
+func decodeRemovePolicySetFromUserParams(args [2]string, argsEscaped bool, r *http.Request) (params RemovePolicySetFromUserParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: user_uuid.
 	if err := func() error {
@@ -4246,7 +4246,7 @@ func decodeRemoveRoleFromUserParams(args [2]string, argsEscaped bool, r *http.Re
 			Err:  err,
 		}
 	}
-	// Decode path: role_name.
+	// Decode path: policy_set_name.
 	if err := func() error {
 		param := args[1]
 		if argsEscaped {
@@ -4258,7 +4258,7 @@ func decodeRemoveRoleFromUserParams(args [2]string, argsEscaped bool, r *http.Re
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "role_name",
+				Param:   "policy_set_name",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -4275,7 +4275,7 @@ func decodeRemoveRoleFromUserParams(args [2]string, argsEscaped bool, r *http.Re
 					return err
 				}
 
-				params.RoleName = c
+				params.PolicySetName = c
 				return nil
 			}(); err != nil {
 				return err
@@ -4286,7 +4286,7 @@ func decodeRemoveRoleFromUserParams(args [2]string, argsEscaped bool, r *http.Re
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "role_name",
+			Name: "policy_set_name",
 			In:   "path",
 			Err:  err,
 		}
@@ -6448,6 +6448,72 @@ func decodeTestConnectionJobGetParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// UpdatePolicySetParams is parameters of updatePolicySet operation.
+type UpdatePolicySetParams struct {
+	// Policy Set UUID.
+	UUID uuid.UUID
+}
+
+func unpackUpdatePolicySetParams(packed middleware.Parameters) (params UpdatePolicySetParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdatePolicySetParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdatePolicySetParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateRegisteredWorkerParams is parameters of updateRegisteredWorker operation.
 type UpdateRegisteredWorkerParams struct {
 	UUID string
@@ -6490,72 +6556,6 @@ func decodeUpdateRegisteredWorkerParams(args [1]string, argsEscaped bool, r *htt
 				}
 
 				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.UUID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "uuid",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// UpdateRoleParams is parameters of updateRole operation.
-type UpdateRoleParams struct {
-	// Role UUID.
-	UUID uuid.UUID
-}
-
-func unpackUpdateRoleParams(packed middleware.Parameters) (params UpdateRoleParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "uuid",
-			In:   "path",
-		}
-		params.UUID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeUpdateRoleParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateRoleParams, _ error) {
-	// Decode path: uuid.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "uuid",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}

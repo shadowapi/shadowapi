@@ -8,7 +8,7 @@ const (
 	EnforcerContextKey contextKey = "rbac_enforcer"
 )
 
-// Scope represents the scope of a role or permission.
+// Scope represents the scope of a policy set or permission.
 type Scope string
 
 const (
@@ -36,7 +36,7 @@ const (
 	// Global resources
 	ResourceUser      Resource = "user"
 	ResourceWorkspace Resource = "workspace"
-	ResourceRole      Resource = "role"
+	ResourcePolicySet Resource = "policy_set"
 	ResourceRBAC      Resource = "rbac"
 	ResourceWorker    Resource = "worker"
 
@@ -56,8 +56,8 @@ type Permission struct {
 	Action   Action
 }
 
-// PredefinedRole represents a system role with its permissions.
-type PredefinedRole struct {
+// PredefinedPolicySet represents a system policy set with its permissions.
+type PredefinedPolicySet struct {
 	Name        string
 	DisplayName string
 	Description string
@@ -69,7 +69,7 @@ type PredefinedRole struct {
 var GlobalResources = map[Resource]bool{
 	ResourceUser:      true,
 	ResourceWorkspace: true,
-	ResourceRole:      true,
+	ResourcePolicySet: true,
 	ResourceRBAC:      true,
 	ResourceWorker:    true,
 }

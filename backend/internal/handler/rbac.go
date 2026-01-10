@@ -15,47 +15,47 @@ import (
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-// ListRoles implements listRoles operation.
+// ListPolicySets implements listPolicySets operation.
 //
-// List all roles.
+// List all policy sets.
 //
-// GET /rbac/role
-func (h *Handler) ListRoles(ctx context.Context, params api.ListRolesParams) (api.ListRolesRes, error) {
+// GET /rbac/policy-set
+func (h *Handler) ListPolicySets(ctx context.Context, params api.ListPolicySetsParams) (api.ListPolicySetsRes, error) {
 	q := query.New(h.dbp)
 
-	var roles []query.RbacRole
+	var policySets []query.PolicySet
 	var err error
 
 	if params.Scope.IsSet() {
-		roles, err = q.ListRolesByScope(ctx, string(params.Scope.Value))
+		policySets, err = q.ListPolicySetsByScope(ctx, string(params.Scope.Value))
 	} else {
-		roles, err = q.ListRoles(ctx)
+		policySets, err = q.ListPolicySets(ctx)
 	}
 
 	if err != nil {
-		h.log.Error("failed to list roles", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list roles"))
+		h.log.Error("failed to list policy sets", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list policy sets"))
 	}
 
-	result := make([]api.RbacRole, 0, len(roles))
-	for _, r := range roles {
-		result = append(result, qRoleToAPI(r))
+	result := make([]api.PolicySet, 0, len(policySets))
+	for _, ps := range policySets {
+		result = append(result, qPolicySetToAPI(ps))
 	}
 
-	res := api.ListRolesOKApplicationJSON(result)
+	res := api.ListPolicySetsOKApplicationJSON(result)
 	return &res, nil
 }
 
-// CreateRole implements createRole operation.
+// CreatePolicySet implements createPolicySet operation.
 //
-// Create a new role.
+// Create a new policy set.
 //
-// POST /rbac/role
-func (h *Handler) CreateRole(ctx context.Context, req *api.RbacRole) (api.CreateRoleRes, error) {
+// POST /rbac/policy-set
+func (h *Handler) CreatePolicySet(ctx context.Context, req *api.PolicySet) (api.CreatePolicySetRes, error) {
 	q := query.New(h.dbp)
 
 	// Generate UUID
-	roleUUID := uuid.Must(uuid.NewV7())
+	policySetUUID := uuid.Must(uuid.NewV7())
 
 	// Serialize permissions
 	permsJSON := []byte("[]")
@@ -67,80 +67,80 @@ func (h *Handler) CreateRole(ctx context.Context, req *api.RbacRole) (api.Create
 		}
 	}
 
-	// Create role in database
-	role, err := q.CreateRole(ctx, query.CreateRoleParams{
-		UUID:        pgtype.UUID{Bytes: roleUUID, Valid: true},
+	// Create policy set in database
+	policySet, err := q.CreatePolicySet(ctx, query.CreatePolicySetParams{
+		UUID:        pgtype.UUID{Bytes: policySetUUID, Valid: true},
 		Name:        req.Name,
 		DisplayName: req.DisplayName,
 		Description: pgtype.Text{String: req.Description.Value, Valid: req.Description.IsSet()},
 		Scope:       string(req.Scope),
-		IsSystem:    false, // User-created roles are not system roles
+		IsSystem:    false, // User-created policy sets are not system policy sets
 		Permissions: permsJSON,
 	})
 	if err != nil {
-		h.log.Error("failed to create role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create role"))
+		h.log.Error("failed to create policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to create policy set"))
 	}
 
-	// Add Casbin policies for the new role
+	// Add Ladon policies for the new policy set
 	for _, perm := range req.Permissions {
 		domain := "*"
-		if req.Scope == api.RbacRoleScopeGlobal {
+		if req.Scope == api.PolicySetScopeGlobal {
 			domain = "global"
 		}
-		if err := h.enforcer.AddPolicy(role.Name, domain, perm.Resource, string(perm.Action)); err != nil {
-			h.log.Debug("policy may already exist", "role", role.Name)
+		if err := h.enforcer.AddPolicy(policySet.Name, domain, perm.Resource, string(perm.Action)); err != nil {
+			h.log.Debug("policy may already exist", "policy_set", policySet.Name)
 		}
 	}
 
-	result := qRoleToAPI(role)
+	result := qPolicySetToAPI(policySet)
 	return &result, nil
 }
 
-// GetRole implements getRole operation.
+// GetPolicySet implements getPolicySet operation.
 //
-// Get role details.
+// Get policy set details.
 //
-// GET /rbac/role/{uuid}
-func (h *Handler) GetRole(ctx context.Context, params api.GetRoleParams) (api.GetRoleRes, error) {
+// GET /rbac/policy-set/{uuid}
+func (h *Handler) GetPolicySet(ctx context.Context, params api.GetPolicySetParams) (api.GetPolicySetRes, error) {
 	q := query.New(h.dbp)
 
-	roleUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
-	role, err := q.GetRoleByUUID(ctx, roleUUID)
+	policySetUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
+	policySet, err := q.GetPolicySetByUUID(ctx, policySetUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, ErrWithCode(http.StatusNotFound, E("role not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("policy set not found"))
 		}
-		h.log.Error("failed to get role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
+		h.log.Error("failed to get policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get policy set"))
 	}
 
-	result := qRoleToAPI(role)
+	result := qPolicySetToAPI(policySet)
 	return &result, nil
 }
 
-// UpdateRole implements updateRole operation.
+// UpdatePolicySet implements updatePolicySet operation.
 //
-// Update a role.
+// Update a policy set.
 //
-// PUT /rbac/role/{uuid}
-func (h *Handler) UpdateRole(ctx context.Context, req *api.RbacRole, params api.UpdateRoleParams) (api.UpdateRoleRes, error) {
+// PUT /rbac/policy-set/{uuid}
+func (h *Handler) UpdatePolicySet(ctx context.Context, req *api.PolicySet, params api.UpdatePolicySetParams) (api.UpdatePolicySetRes, error) {
 	q := query.New(h.dbp)
 
-	roleUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
+	policySetUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
 
-	// Check if role exists and is not a system role
-	existingRole, err := q.GetRoleByUUID(ctx, roleUUID)
+	// Check if policy set exists and is not a system policy set
+	existingPolicySet, err := q.GetPolicySetByUUID(ctx, policySetUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, ErrWithCode(http.StatusNotFound, E("role not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("policy set not found"))
 		}
-		h.log.Error("failed to get role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
+		h.log.Error("failed to get policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get policy set"))
 	}
 
-	if existingRole.IsSystem {
-		return nil, ErrWithCode(http.StatusForbidden, E("cannot modify system role"))
+	if existingPolicySet.IsSystem {
+		return nil, ErrWithCode(http.StatusForbidden, E("cannot modify system policy set"))
 	}
 
 	// Serialize permissions
@@ -152,51 +152,51 @@ func (h *Handler) UpdateRole(ctx context.Context, req *api.RbacRole, params api.
 		}
 	}
 
-	role, err := q.UpdateRole(ctx, query.UpdateRoleParams{
-		UUID:        roleUUID,
+	policySet, err := q.UpdatePolicySet(ctx, query.UpdatePolicySetParams{
+		UUID:        policySetUUID,
 		DisplayName: req.DisplayName,
 		Description: pgtype.Text{String: req.Description.Value, Valid: req.Description.IsSet()},
 		Permissions: permsJSON,
 	})
 	if err != nil {
-		h.log.Error("failed to update role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update role"))
+		h.log.Error("failed to update policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update policy set"))
 	}
 
-	result := qRoleToAPI(role)
+	result := qPolicySetToAPI(policySet)
 	return &result, nil
 }
 
-// DeleteRole implements deleteRole operation.
+// DeletePolicySet implements deletePolicySet operation.
 //
-// Delete a role.
+// Delete a policy set.
 //
-// DELETE /rbac/role/{uuid}
-func (h *Handler) DeleteRole(ctx context.Context, params api.DeleteRoleParams) (api.DeleteRoleRes, error) {
+// DELETE /rbac/policy-set/{uuid}
+func (h *Handler) DeletePolicySet(ctx context.Context, params api.DeletePolicySetParams) (api.DeletePolicySetRes, error) {
 	q := query.New(h.dbp)
 
-	roleUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
+	policySetUUID := pgtype.UUID{Bytes: params.UUID, Valid: true}
 
-	// Check if role exists and is not a system role
-	role, err := q.GetRoleByUUID(ctx, roleUUID)
+	// Check if policy set exists and is not a system policy set
+	policySet, err := q.GetPolicySetByUUID(ctx, policySetUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, ErrWithCode(http.StatusNotFound, E("role not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("policy set not found"))
 		}
-		h.log.Error("failed to get role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
+		h.log.Error("failed to get policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get policy set"))
 	}
 
-	if role.IsSystem {
-		return nil, ErrWithCode(http.StatusForbidden, E("cannot delete system role"))
+	if policySet.IsSystem {
+		return nil, ErrWithCode(http.StatusForbidden, E("cannot delete system policy set"))
 	}
 
-	if err := q.DeleteRole(ctx, roleUUID); err != nil {
-		h.log.Error("failed to delete role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete role"))
+	if err := q.DeletePolicySet(ctx, policySetUUID); err != nil {
+		h.log.Error("failed to delete policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to delete policy set"))
 	}
 
-	return &api.DeleteRoleNoContent{}, nil
+	return &api.DeletePolicySetNoContent{}, nil
 }
 
 // ListPermissions implements listPermissions operation.
@@ -207,7 +207,7 @@ func (h *Handler) DeleteRole(ctx context.Context, params api.DeleteRoleParams) (
 func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermissionsParams) (api.ListPermissionsRes, error) {
 	q := query.New(h.dbp)
 
-	var perms []query.RbacPermission
+	var perms []query.Permission
 	var err error
 
 	if params.Scope.IsSet() {
@@ -223,7 +223,7 @@ func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermission
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list permissions"))
 	}
 
-	result := make([]api.RbacPermission, 0, len(perms))
+	result := make([]api.Permission, 0, len(perms))
 	for _, p := range perms {
 		result = append(result, qPermissionToAPI(p))
 	}
@@ -232,97 +232,97 @@ func (h *Handler) ListPermissions(ctx context.Context, params api.ListPermission
 	return &res, nil
 }
 
-// GetUserRoles implements getUserRoles operation.
+// GetUserPolicySets implements getUserPolicySets operation.
 //
-// Get roles for a user.
+// Get policy sets for a user.
 //
-// GET /rbac/user/{user_uuid}/roles
-func (h *Handler) GetUserRoles(ctx context.Context, params api.GetUserRolesParams) (api.GetUserRolesRes, error) {
+// GET /rbac/user/{user_uuid}/policy-sets
+func (h *Handler) GetUserPolicySets(ctx context.Context, params api.GetUserPolicySetsParams) (api.GetUserPolicySetsRes, error) {
 	q := query.New(h.dbp)
 
 	userUUID := params.UserUUID.String()
-	var roles map[string][]string
+	var policySetsMap map[string][]string
 	var err error
 
 	if params.Domain.IsSet() {
-		// Get roles for specific domain
-		roleNames := h.enforcer.GetRolesForUserInDomain(userUUID, params.Domain.Value)
-		roles = map[string][]string{params.Domain.Value: roleNames}
+		// Get policy sets for specific domain
+		policySetNames := h.enforcer.GetPolicySetsForUser(userUUID, params.Domain.Value)
+		policySetsMap = map[string][]string{params.Domain.Value: policySetNames}
 	} else {
-		// Get all roles across all domains
-		roles, err = h.enforcer.GetAllRolesForUser(userUUID)
+		// Get all policy sets across all domains
+		policySetsMap, err = h.enforcer.GetAllPolicySetsForUser(userUUID)
 		if err != nil {
-			h.log.Error("failed to get user roles", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get user roles"))
+			h.log.Error("failed to get user policy sets", "error", err)
+			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get user policy sets"))
 		}
 	}
 
 	// Convert to API format
-	var assignments []api.RbacRoleAssignment
-	for domain, roleNames := range roles {
-		for _, roleName := range roleNames {
-			// Get role details from database
-			role, err := q.GetRoleByName(ctx, roleName)
+	var assignments []api.UserPolicySetAssignment
+	for domain, policySetNames := range policySetsMap {
+		for _, policySetName := range policySetNames {
+			// Get policy set details from database
+			_, err := q.GetPolicySetByName(ctx, policySetName)
 			if err != nil {
-				h.log.Debug("role not found in database", "role", roleName, "error", err)
+				h.log.Debug("policy set not found in database", "policy_set", policySetName, "error", err)
 				continue
 			}
 
-			assignments = append(assignments, api.RbacRoleAssignment{
-				UserUUID: params.UserUUID,
-				Role:     qRoleToAPI(role),
-				Domain:   domain,
+			assignments = append(assignments, api.UserPolicySetAssignment{
+				UserUUID:  params.UserUUID,
+				PolicySet: policySetName,
+				Domain:    domain,
 			})
 		}
 	}
 
-	return &api.GetUserRolesOK{
-		UserUUID: api.NewOptUUID(params.UserUUID),
-		Roles:    assignments,
+	return &api.GetUserPolicySetsOK{
+		UserUUID:   api.NewOptUUID(params.UserUUID),
+		PolicySets: assignments,
 	}, nil
 }
 
-// AssignRoleToUser implements assignRoleToUser operation.
+// AssignPolicySetToUser implements assignPolicySetToUser operation.
 //
-// Assign a role to a user.
+// Assign a policy set to a user.
 //
-// POST /rbac/user/{user_uuid}/roles
-func (h *Handler) AssignRoleToUser(ctx context.Context, req *api.AssignRoleToUserReq, params api.AssignRoleToUserParams) (api.AssignRoleToUserRes, error) {
+// POST /rbac/user/{user_uuid}/policy-sets
+func (h *Handler) AssignPolicySetToUser(ctx context.Context, req *api.AssignPolicySetToUserReq, params api.AssignPolicySetToUserParams) (api.AssignPolicySetToUserRes, error) {
 	q := query.New(h.dbp)
 
-	// Verify role exists
-	_, err := q.GetRoleByName(ctx, req.RoleName)
+	// Verify policy set exists
+	_, err := q.GetPolicySetByName(ctx, req.PolicySetName)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, ErrWithCode(http.StatusNotFound, E("role not found"))
+			return nil, ErrWithCode(http.StatusNotFound, E("policy set not found"))
 		}
-		h.log.Error("failed to get role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get role"))
+		h.log.Error("failed to get policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get policy set"))
 	}
 
 	userUUID := params.UserUUID.String()
-	if err := h.enforcer.AddRoleForUserInDomain(userUUID, req.RoleName, req.Domain); err != nil {
-		h.log.Error("failed to assign role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to assign role"))
+	if err := h.enforcer.AssignPolicySetToUser(userUUID, req.PolicySetName, req.Domain); err != nil {
+		h.log.Error("failed to assign policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to assign policy set"))
 	}
 
-	return &api.AssignRoleToUserCreated{}, nil
+	return &api.AssignPolicySetToUserCreated{}, nil
 }
 
-// RemoveRoleFromUser implements removeRoleFromUser operation.
+// RemovePolicySetFromUser implements removePolicySetFromUser operation.
 //
-// Remove a role from a user.
+// Remove a policy set from a user.
 //
-// DELETE /rbac/user/{user_uuid}/roles/{role_name}
-func (h *Handler) RemoveRoleFromUser(ctx context.Context, params api.RemoveRoleFromUserParams) (api.RemoveRoleFromUserRes, error) {
+// DELETE /rbac/user/{user_uuid}/policy-sets/{policy_set_name}
+func (h *Handler) RemovePolicySetFromUser(ctx context.Context, params api.RemovePolicySetFromUserParams) (api.RemovePolicySetFromUserRes, error) {
 	userUUID := params.UserUUID.String()
 
-	if err := h.enforcer.RemoveRoleForUserInDomain(userUUID, params.RoleName, params.Domain); err != nil {
-		h.log.Error("failed to remove role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to remove role"))
+	if err := h.enforcer.RemovePolicySetFromUser(userUUID, params.PolicySetName, params.Domain); err != nil {
+		h.log.Error("failed to remove policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to remove policy set"))
 	}
 
-	return &api.RemoveRoleFromUserNoContent{}, nil
+	return &api.RemovePolicySetFromUserNoContent{}, nil
 }
 
 // CheckPermission implements checkPermission operation.
@@ -349,43 +349,43 @@ func (h *Handler) CheckPermission(ctx context.Context, req *api.CheckPermissionR
 
 // Helper functions
 
-func qRoleToAPI(r query.RbacRole) api.RbacRole {
+func qPolicySetToAPI(ps query.PolicySet) api.PolicySet {
 	// Parse permissions from JSON
-	var perms []api.RbacPermission
-	if len(r.Permissions) > 0 {
-		_ = json.Unmarshal(r.Permissions, &perms)
+	var perms []api.Permission
+	if len(ps.Permissions) > 0 {
+		_ = json.Unmarshal(ps.Permissions, &perms)
 	}
 
-	result := api.RbacRole{
-		UUID:        api.NewOptUUID(googleuuid.UUID(r.UUID)),
-		Name:        r.Name,
-		DisplayName: r.DisplayName,
-		Scope:       api.RbacRoleScope(r.Scope),
-		IsSystem:    api.NewOptBool(r.IsSystem),
+	result := api.PolicySet{
+		UUID:        api.NewOptUUID(googleuuid.UUID(ps.UUID)),
+		Name:        ps.Name,
+		DisplayName: ps.DisplayName,
+		Scope:       api.PolicySetScope(ps.Scope),
+		IsSystem:    api.NewOptBool(ps.IsSystem),
 		Permissions: perms,
 	}
 
-	if r.Description.Valid {
-		result.Description = api.NewOptString(r.Description.String)
+	if ps.Description.Valid {
+		result.Description = api.NewOptString(ps.Description.String)
 	}
-	if r.CreatedAt.Valid {
-		result.CreatedAt = api.NewOptDateTime(r.CreatedAt.Time)
+	if ps.CreatedAt.Valid {
+		result.CreatedAt = api.NewOptDateTime(ps.CreatedAt.Time)
 	}
-	if r.UpdatedAt.Valid {
-		result.UpdatedAt = api.NewOptDateTime(r.UpdatedAt.Time)
+	if ps.UpdatedAt.Valid {
+		result.UpdatedAt = api.NewOptDateTime(ps.UpdatedAt.Time)
 	}
 
 	return result
 }
 
-func qPermissionToAPI(p query.RbacPermission) api.RbacPermission {
-	result := api.RbacPermission{
+func qPermissionToAPI(p query.Permission) api.Permission {
+	result := api.Permission{
 		UUID:        api.NewOptUUID(googleuuid.UUID(p.UUID)),
 		Name:        p.Name,
 		DisplayName: api.NewOptString(p.DisplayName),
 		Resource:    p.Resource,
-		Action:      api.RbacPermissionAction(p.Action),
-		Scope:       api.NewOptRbacPermissionScope(api.RbacPermissionScope(p.Scope)),
+		Action:      api.PermissionAction(p.Action),
+		Scope:       api.NewOptPermissionScope(api.PermissionScope(p.Scope)),
 	}
 
 	if p.Description.Valid {

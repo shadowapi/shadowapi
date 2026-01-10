@@ -1,6 +1,8 @@
 delete:
-  summary: Remove a role from a user
-  operationId: removeRoleFromUser
+  summary: Remove a policy set from a user
+  operationId: removePolicySetFromUser
+  tags:
+    - access
   parameters:
     - in: path
       name: user_uuid
@@ -10,25 +12,23 @@ delete:
         format: uuid
       description: User UUID
     - in: path
-      name: role_name
+      name: policy_set_name
       required: true
       schema:
         type: string
-      description: Role name to remove
+      description: Policy set name to remove
     - in: query
       name: domain
       required: true
       schema:
         type: string
-      description: Domain where the role was assigned (workspace slug or "global")
+      description: Domain where the policy set was assigned (workspace slug or "global")
   responses:
     "204":
-      description: Role removed successfully
+      description: Policy set removed successfully
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac

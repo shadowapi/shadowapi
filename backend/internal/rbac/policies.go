@@ -3,26 +3,28 @@ package rbac
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ory/ladon"
 
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
-// Role names
+// Policy set names
 const (
-	RoleSuperAdmin      = "super_admin"
-	RoleWorkspaceOwner  = "workspace_owner"
-	RoleWorkspaceAdmin  = "workspace_admin"
-	RoleWorkspaceMember = "workspace_member"
+	PolicySetSuperAdmin      = "super_admin"
+	PolicySetWorkspaceOwner  = "workspace_owner"
+	PolicySetWorkspaceAdmin  = "workspace_admin"
+	PolicySetWorkspaceMember = "workspace_member"
 )
 
-// PredefinedRoles contains all system roles that are created on startup.
-var PredefinedRoles = []PredefinedRole{
+// PredefinedPolicySets contains all system policy sets that are created on startup.
+var PredefinedPolicySets = []PredefinedPolicySet{
 	{
-		Name:        RoleSuperAdmin,
+		Name:        PolicySetSuperAdmin,
 		DisplayName: "Super Admin",
 		Description: "Full system access including user management and all workspaces",
 		Scope:       ScopeGlobal,
@@ -31,7 +33,7 @@ var PredefinedRoles = []PredefinedRole{
 		},
 	},
 	{
-		Name:        RoleWorkspaceOwner,
+		Name:        PolicySetWorkspaceOwner,
 		DisplayName: "Workspace Owner",
 		Description: "Full control over the workspace including member management",
 		Scope:       ScopeWorkspace,
@@ -47,7 +49,7 @@ var PredefinedRoles = []PredefinedRole{
 		},
 	},
 	{
-		Name:        RoleWorkspaceAdmin,
+		Name:        PolicySetWorkspaceAdmin,
 		DisplayName: "Workspace Admin",
 		Description: "Can manage workspace resources but not members",
 		Scope:       ScopeWorkspace,
@@ -63,7 +65,7 @@ var PredefinedRoles = []PredefinedRole{
 		},
 	},
 	{
-		Name:        RoleWorkspaceMember,
+		Name:        PolicySetWorkspaceMember,
 		DisplayName: "Workspace Member",
 		Description: "Read-only access to workspace resources",
 		Scope:       ScopeWorkspace,
@@ -95,8 +97,8 @@ var PredefinedPermissions = []struct {
 	{"user:write", "Edit Users", "Edit user details", ResourceUser, ActionWrite, ScopeGlobal},
 	{"user:delete", "Delete Users", "Delete users", ResourceUser, ActionDelete, ScopeGlobal},
 	{"workspace:create", "Create Workspace", "Create new workspaces", ResourceWorkspace, ActionCreate, ScopeGlobal},
-	{"role:read", "View Roles", "View roles and permissions", ResourceRole, ActionRead, ScopeGlobal},
-	{"role:write", "Manage Roles", "Create and modify roles", ResourceRole, ActionWrite, ScopeGlobal},
+	{"policy_set:read", "View Policy Sets", "View policy sets and permissions", ResourcePolicySet, ActionRead, ScopeGlobal},
+	{"policy_set:write", "Manage Policy Sets", "Create and modify policy sets", ResourcePolicySet, ActionWrite, ScopeGlobal},
 	{"rbac:admin", "RBAC Admin", "Full RBAC administration", ResourceRBAC, ActionAdmin, ScopeGlobal},
 
 	// Workspace permissions
@@ -136,7 +138,7 @@ var PredefinedPermissions = []struct {
 
 	{"member:read", "View Members", "View workspace members", ResourceMember, ActionRead, ScopeWorkspace},
 	{"member:create", "Add Members", "Add members to workspace", ResourceMember, ActionCreate, ScopeWorkspace},
-	{"member:write", "Edit Members", "Edit member roles", ResourceMember, ActionWrite, ScopeWorkspace},
+	{"member:write", "Edit Members", "Edit member policy sets", ResourceMember, ActionWrite, ScopeWorkspace},
 	{"member:delete", "Remove Members", "Remove members from workspace", ResourceMember, ActionDelete, ScopeWorkspace},
 
 	// Worker permissions (global)
@@ -146,46 +148,48 @@ var PredefinedPermissions = []struct {
 	{"worker:delete", "Delete Workers", "Delete workers and enrollment tokens", ResourceWorker, ActionDelete, ScopeGlobal},
 }
 
-// initializePredefinedPolicies creates the predefined roles and permissions in the database.
+// initializePredefinedPolicies creates the predefined policy sets and permissions in the database.
+// It creates both the rbac_policy_set/rbac_permission records for API display and the
+// Ladon policies for actual enforcement.
 func (e *Enforcer) initializePredefinedPolicies(ctx context.Context, dbp *pgxpool.Pool) error {
 	q := query.New(dbp)
 
-	// Initialize predefined roles
-	for _, role := range PredefinedRoles {
-		exists, err := q.RoleExists(ctx, role.Name)
+	// Initialize predefined policy sets
+	for _, policySet := range PredefinedPolicySets {
+		exists, err := q.PolicySetExists(ctx, policySet.Name)
 		if err != nil {
-			e.log.Error("failed to check role existence", "role", role.Name, "error", err)
+			e.log.Error("failed to check policy set existence", "policy_set", policySet.Name, "error", err)
 			continue
 		}
 
 		if !exists {
-			permJSON, _ := json.Marshal(role.Permissions)
-			roleUUID := uuid.Must(uuid.NewV7())
+			permJSON, _ := json.Marshal(policySet.Permissions)
+			policySetUUID := uuid.Must(uuid.NewV7())
 
-			_, err := q.CreateRole(ctx, query.CreateRoleParams{
-				UUID:        pgtype.UUID{Bytes: roleUUID, Valid: true},
-				Name:        role.Name,
-				DisplayName: role.DisplayName,
-				Description: pgtype.Text{String: role.Description, Valid: true},
-				Scope:       string(role.Scope),
+			_, err := q.CreatePolicySet(ctx, query.CreatePolicySetParams{
+				UUID:        pgtype.UUID{Bytes: policySetUUID, Valid: true},
+				Name:        policySet.Name,
+				DisplayName: policySet.DisplayName,
+				Description: pgtype.Text{String: policySet.Description, Valid: true},
+				Scope:       string(policySet.Scope),
 				IsSystem:    true,
 				Permissions: permJSON,
 			})
 			if err != nil {
-				e.log.Error("failed to create role", "role", role.Name, "error", err)
+				e.log.Error("failed to create policy set", "policy_set", policySet.Name, "error", err)
 				continue
 			}
-			e.log.Info("created predefined role", "role", role.Name)
+			e.log.Info("created predefined policy set", "policy_set", policySet.Name)
 		}
 
-		// Add Casbin policies for this role
-		for _, perm := range role.Permissions {
-			domain := "*" // Workspace roles use wildcard domain, actual domain is determined at runtime
-			if role.Scope == ScopeGlobal {
+		// Add Ladon policies for this policy set
+		for _, perm := range policySet.Permissions {
+			domain := "*" // Workspace policy sets use wildcard domain, actual domain is determined at runtime
+			if policySet.Scope == ScopeGlobal {
 				domain = "global"
 			}
-			if err := e.AddPolicy(role.Name, domain, string(perm.Resource), string(perm.Action)); err != nil {
-				e.log.Debug("policy may already exist", "role", role.Name, "resource", perm.Resource, "action", perm.Action)
+			if err := e.addPolicyUnlocked(policySet.Name, domain, string(perm.Resource), string(perm.Action)); err != nil {
+				e.log.Debug("policy may already exist", "policy_set", policySet.Name, "resource", perm.Resource, "action", perm.Action)
 			}
 		}
 	}
@@ -221,16 +225,48 @@ func (e *Enforcer) initializePredefinedPolicies(ctx context.Context, dbp *pgxpoo
 	return nil
 }
 
-// MapWorkspaceMemberRoleToCasbinRole maps legacy workspace_member.role to Casbin role names.
-func MapWorkspaceMemberRoleToCasbinRole(legacyRole string) string {
-	switch legacyRole {
-	case "owner":
-		return RoleWorkspaceOwner
-	case "admin":
-		return RoleWorkspaceAdmin
-	case "member":
-		return RoleWorkspaceMember
-	default:
-		return RoleWorkspaceMember
+// addPolicyUnlocked is an internal method that adds a policy without locking.
+// Used during initialization when no concurrent access is possible.
+func (e *Enforcer) addPolicyUnlocked(sub, dom, obj, act string) error {
+	policyID := fmt.Sprintf("policy-%s-%s-%s-%s", sub, dom, obj, act)
+
+	// Build resource pattern
+	var resourcePattern string
+	if obj == "*" {
+		if dom == "global" {
+			resourcePattern = "shadowapi:global:<.+>:.*"
+		} else {
+			resourcePattern = "shadowapi:workspace:<.+>:<.+>:.*"
+		}
+	} else {
+		if dom == "global" {
+			resourcePattern = fmt.Sprintf("shadowapi:global:%s:.*", obj)
+		} else {
+			resourcePattern = fmt.Sprintf("shadowapi:workspace:<.+>:%s:.*", obj)
+		}
 	}
+
+	// Build action pattern
+	actionPattern := act
+	if act == "*" {
+		actionPattern = "<.+>"
+	}
+
+	policy := &ladon.DefaultPolicy{
+		ID:          policyID,
+		Description: fmt.Sprintf("Policy for %s on %s in %s", sub, obj, dom),
+		Subjects:    []string{"policy_set:" + sub},
+		Resources:   []string{resourcePattern},
+		Actions:     []string{actionPattern},
+		Effect:      ladon.AllowAccess,
+	}
+
+	// Add workspace condition for workspace-scoped policies
+	if dom != "global" {
+		policy.Conditions = ladon.Conditions{
+			"workspace": &WorkspaceCondition{Workspaces: []string{"*"}},
+		}
+	}
+
+	return e.manager.Create(context.Background(), policy)
 }

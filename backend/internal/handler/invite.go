@@ -123,11 +123,17 @@ func (h *Handler) CreateWorkspaceInvite(ctx context.Context, req *api.UserInvite
 	inviteUUID := uuid.Must(uuid.NewV7())
 	expiresAt := time.Now().Add(inviteExpiry)
 
+	// Use policy set name directly from request (defaults to workspace_member)
+	policySetName := string(req.PolicySetName)
+	if policySetName == "" {
+		policySetName = rbac.PolicySetWorkspaceMember
+	}
+
 	invite, err := q.CreateUserInvite(ctx, query.CreateUserInviteParams{
 		UUID:              inviteUUID,
 		WorkspaceUUID:     &workspaceUUID,
 		Email:             req.Email,
-		Role:              string(req.Role),
+		PolicySetName:     policySetName,
 		TokenHash:         tokenHash,
 		InvitedByUserUuid: &inviterUUID,
 		ExpiresAt:         pgtype.Timestamptz{Time: expiresAt, Valid: true},
@@ -152,7 +158,7 @@ func (h *Handler) CreateWorkspaceInvite(ctx context.Context, req *api.UserInvite
 		ToEmail:       req.Email,
 		InviterName:   inviterName,
 		WorkspaceName: workspace.DisplayName,
-		Role:          string(req.Role),
+		Role:          policySetName, // Use policy set name
 		InviteLink:    inviteLink,
 		ExpiresIn:     "24 hours",
 	}); err != nil {
@@ -215,7 +221,7 @@ func (h *Handler) GetInviteByToken(ctx context.Context, params api.GetInviteByTo
 		Email:         invite.Email,
 		WorkspaceName: invite.WorkspaceDisplayName,
 		WorkspaceSlug: invite.WorkspaceSlug,
-		Role:          api.UserInviteInfoRole(invite.Role),
+		Role:          api.UserInviteInfoRole(invite.PolicySetName),
 		ExpiresAt:     invite.ExpiresAt.Time,
 		InviterName:   api.NewOptString(inviterName),
 	}, nil
@@ -277,7 +283,6 @@ func (h *Handler) AcceptInvite(ctx context.Context, req *api.UserInviteAccept) (
 		UUID:          memberUUID,
 		WorkspaceUUID: invite.WorkspaceUUID,
 		UserUUID:      &userUUID,
-		Role:          invite.Role,
 	})
 	if err != nil {
 		h.log.Error("failed to add workspace member", "error", err)
@@ -289,13 +294,9 @@ func (h *Handler) AcceptInvite(ctx context.Context, req *api.UserInviteAccept) (
 		h.log.Warn("failed to mark invite accepted", "error", err)
 	}
 
-	// Assign workspace role via RBAC
-	roleName := rbac.RoleWorkspaceMember
-	if invite.Role == "admin" {
-		roleName = rbac.RoleWorkspaceAdmin
-	}
-	if err := h.enforcer.AddRoleForUserInDomain(userUUID.String(), roleName, invite.WorkspaceSlug); err != nil {
-		h.log.Warn("failed to assign workspace role", "error", err)
+	// Assign policy set to user
+	if err := h.enforcer.AssignPolicySetToUser(userUUID.String(), invite.PolicySetName, invite.WorkspaceSlug); err != nil {
+		h.log.Warn("failed to assign policy set", "error", err)
 	}
 
 	return &api.AcceptInviteOK{
@@ -324,7 +325,6 @@ func (h *Handler) addExistingUserToWorkspace(ctx context.Context, q *query.Queri
 		UUID:          memberUUID,
 		WorkspaceUUID: invite.WorkspaceUUID,
 		UserUUID:      &user.UUID,
-		Role:          invite.Role,
 	})
 	if err != nil {
 		h.log.Error("failed to add workspace member", "error", err)
@@ -336,13 +336,9 @@ func (h *Handler) addExistingUserToWorkspace(ctx context.Context, q *query.Queri
 		h.log.Warn("failed to mark invite accepted", "error", err)
 	}
 
-	// Assign workspace role via RBAC
-	roleName := rbac.RoleWorkspaceMember
-	if invite.Role == "admin" {
-		roleName = rbac.RoleWorkspaceAdmin
-	}
-	if err := h.enforcer.AddRoleForUserInDomain(user.UUID.String(), roleName, invite.WorkspaceSlug); err != nil {
-		h.log.Warn("failed to assign workspace role", "error", err)
+	// Assign policy set to user
+	if err := h.enforcer.AssignPolicySetToUser(user.UUID.String(), invite.PolicySetName, invite.WorkspaceSlug); err != nil {
+		h.log.Warn("failed to assign policy set", "error", err)
 	}
 
 	return &api.AcceptInviteOK{
@@ -368,10 +364,10 @@ func hashToken(token string) string {
 // dbInviteToAPI converts a database UserInvite to API UserInvite.
 func dbInviteToAPI(inv query.UserInvite, inviterEmail, inviterFirstName, inviterLastName string) api.UserInvite {
 	result := api.UserInvite{
-		UUID:      api.NewOptUUID(converter.GofrsToGoogleUUID(inv.UUID)),
-		Email:     inv.Email,
-		Role:      api.UserInviteRole(inv.Role),
-		ExpiresAt: api.NewOptDateTime(inv.ExpiresAt.Time),
+		UUID:          api.NewOptUUID(converter.GofrsToGoogleUUID(inv.UUID)),
+		Email:         inv.Email,
+		PolicySetName: api.UserInvitePolicySetName(inv.PolicySetName),
+		ExpiresAt:     api.NewOptDateTime(inv.ExpiresAt.Time),
 	}
 	if inv.WorkspaceUUID != nil {
 		result.WorkspaceUUID = api.NewOptUUID(converter.GofrsToGoogleUUID(*inv.WorkspaceUUID))
@@ -394,10 +390,10 @@ func dbInviteToAPI(inv query.UserInvite, inviterEmail, inviterFirstName, inviter
 // dbInviteRowToAPI converts a ListWorkspaceInvitesRow to API UserInvite.
 func dbInviteRowToAPI(inv query.ListWorkspaceInvitesRow) api.UserInvite {
 	result := api.UserInvite{
-		UUID:      api.NewOptUUID(converter.GofrsToGoogleUUID(inv.UUID)),
-		Email:     inv.Email,
-		Role:      api.UserInviteRole(inv.Role),
-		ExpiresAt: api.NewOptDateTime(inv.ExpiresAt.Time),
+		UUID:          api.NewOptUUID(converter.GofrsToGoogleUUID(inv.UUID)),
+		Email:         inv.Email,
+		PolicySetName: api.UserInvitePolicySetName(inv.PolicySetName),
+		ExpiresAt:     api.NewOptDateTime(inv.ExpiresAt.Time),
 	}
 	if inv.WorkspaceUUID != nil {
 		result.WorkspaceUUID = api.NewOptUUID(converter.GofrsToGoogleUUID(*inv.WorkspaceUUID))

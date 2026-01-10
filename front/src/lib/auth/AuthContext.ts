@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-// UserRole represents a role assignment for a user
-export interface UserRole {
-  role: string;
+// UserPolicySet represents a policy set assignment for a user
+export interface UserPolicySet {
+  policy_set: string;
   domain: string;
 }
 
@@ -18,14 +18,14 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  roles: UserRole[];
+  policy_sets: UserPolicySet[];
   current_workspace?: CurrentWorkspace;
 }
 
-// Helper function to check if user has admin privileges (super_admin role in global domain)
+// Helper function to check if user has admin privileges (super_admin policy set in global domain)
 export function isAdmin(user: User | null): boolean {
   if (!user) return false;
-  return user.roles?.some(r => r.role === 'super_admin' && r.domain === 'global') ?? false;
+  return user.policy_sets?.some(p => p.policy_set === 'super_admin' && p.domain === 'global') ?? false;
 }
 
 export interface AuthContextType {

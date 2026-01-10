@@ -17,21 +17,21 @@ INSERT INTO user_invite (
     uuid,
     workspace_uuid,
     email,
-    role,
+    policy_set_name,
     token_hash,
     invited_by_user_uuid,
     expires_at,
     created_at
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, NOW()
-) RETURNING uuid, workspace_uuid, email, role, token_hash, invited_by_user_uuid, expires_at, accepted_at, created_at
+) RETURNING uuid, workspace_uuid, email, policy_set_name, token_hash, invited_by_user_uuid, expires_at, accepted_at, created_at
 `
 
 type CreateUserInviteParams struct {
 	UUID              uuid.UUID          `json:"uuid"`
 	WorkspaceUUID     *uuid.UUID         `json:"workspace_uuid"`
 	Email             string             `json:"email"`
-	Role              string             `json:"role"`
+	PolicySetName     string             `json:"policy_set_name"`
 	TokenHash         string             `json:"token_hash"`
 	InvitedByUserUuid *uuid.UUID         `json:"invited_by_user_uuid"`
 	ExpiresAt         pgtype.Timestamptz `json:"expires_at"`
@@ -42,7 +42,7 @@ func (q *Queries) CreateUserInvite(ctx context.Context, arg CreateUserInvitePara
 		arg.UUID,
 		arg.WorkspaceUUID,
 		arg.Email,
-		arg.Role,
+		arg.PolicySetName,
 		arg.TokenHash,
 		arg.InvitedByUserUuid,
 		arg.ExpiresAt,
@@ -52,7 +52,7 @@ func (q *Queries) CreateUserInvite(ctx context.Context, arg CreateUserInvitePara
 		&i.UUID,
 		&i.WorkspaceUUID,
 		&i.Email,
-		&i.Role,
+		&i.PolicySetName,
 		&i.TokenHash,
 		&i.InvitedByUserUuid,
 		&i.ExpiresAt,
@@ -82,7 +82,7 @@ func (q *Queries) DeleteUserInvite(ctx context.Context, argUuid uuid.UUID) error
 }
 
 const getUserInvite = `-- name: GetUserInvite :one
-SELECT uuid, workspace_uuid, email, role, token_hash, invited_by_user_uuid, expires_at, accepted_at, created_at FROM user_invite
+SELECT uuid, workspace_uuid, email, policy_set_name, token_hash, invited_by_user_uuid, expires_at, accepted_at, created_at FROM user_invite
 WHERE uuid = $1
 `
 
@@ -93,7 +93,7 @@ func (q *Queries) GetUserInvite(ctx context.Context, argUuid uuid.UUID) (UserInv
 		&i.UUID,
 		&i.WorkspaceUUID,
 		&i.Email,
-		&i.Role,
+		&i.PolicySetName,
 		&i.TokenHash,
 		&i.InvitedByUserUuid,
 		&i.ExpiresAt,
@@ -104,7 +104,7 @@ func (q *Queries) GetUserInvite(ctx context.Context, argUuid uuid.UUID) (UserInv
 }
 
 const getUserInviteByEmail = `-- name: GetUserInviteByEmail :one
-SELECT uuid, workspace_uuid, email, role, token_hash, invited_by_user_uuid, expires_at, accepted_at, created_at FROM user_invite
+SELECT uuid, workspace_uuid, email, policy_set_name, token_hash, invited_by_user_uuid, expires_at, accepted_at, created_at FROM user_invite
 WHERE email = $1
 AND accepted_at IS NULL
 `
@@ -116,7 +116,7 @@ func (q *Queries) GetUserInviteByEmail(ctx context.Context, email string) (UserI
 		&i.UUID,
 		&i.WorkspaceUUID,
 		&i.Email,
-		&i.Role,
+		&i.PolicySetName,
 		&i.TokenHash,
 		&i.InvitedByUserUuid,
 		&i.ExpiresAt,
@@ -128,7 +128,7 @@ func (q *Queries) GetUserInviteByEmail(ctx context.Context, email string) (UserI
 
 const getValidInviteByTokenHash = `-- name: GetValidInviteByTokenHash :one
 SELECT
-    ui.uuid, ui.workspace_uuid, ui.email, ui.role, ui.token_hash, ui.invited_by_user_uuid, ui.expires_at, ui.accepted_at, ui.created_at,
+    ui.uuid, ui.workspace_uuid, ui.email, ui.policy_set_name, ui.token_hash, ui.invited_by_user_uuid, ui.expires_at, ui.accepted_at, ui.created_at,
     w.slug as workspace_slug,
     w.display_name as workspace_display_name,
     u.email as inviter_email,
@@ -146,7 +146,7 @@ type GetValidInviteByTokenHashRow struct {
 	UUID                 uuid.UUID          `json:"uuid"`
 	WorkspaceUUID        *uuid.UUID         `json:"workspace_uuid"`
 	Email                string             `json:"email"`
-	Role                 string             `json:"role"`
+	PolicySetName        string             `json:"policy_set_name"`
 	TokenHash            string             `json:"token_hash"`
 	InvitedByUserUuid    *uuid.UUID         `json:"invited_by_user_uuid"`
 	ExpiresAt            pgtype.Timestamptz `json:"expires_at"`
@@ -166,7 +166,7 @@ func (q *Queries) GetValidInviteByTokenHash(ctx context.Context, tokenHash strin
 		&i.UUID,
 		&i.WorkspaceUUID,
 		&i.Email,
-		&i.Role,
+		&i.PolicySetName,
 		&i.TokenHash,
 		&i.InvitedByUserUuid,
 		&i.ExpiresAt,
@@ -183,7 +183,7 @@ func (q *Queries) GetValidInviteByTokenHash(ctx context.Context, tokenHash strin
 
 const listWorkspaceInvites = `-- name: ListWorkspaceInvites :many
 SELECT
-    ui.uuid, ui.workspace_uuid, ui.email, ui.role, ui.token_hash, ui.invited_by_user_uuid, ui.expires_at, ui.accepted_at, ui.created_at,
+    ui.uuid, ui.workspace_uuid, ui.email, ui.policy_set_name, ui.token_hash, ui.invited_by_user_uuid, ui.expires_at, ui.accepted_at, ui.created_at,
     u.email as inviter_email,
     u.first_name as inviter_first_name,
     u.last_name as inviter_last_name
@@ -198,7 +198,7 @@ type ListWorkspaceInvitesRow struct {
 	UUID              uuid.UUID          `json:"uuid"`
 	WorkspaceUUID     *uuid.UUID         `json:"workspace_uuid"`
 	Email             string             `json:"email"`
-	Role              string             `json:"role"`
+	PolicySetName     string             `json:"policy_set_name"`
 	TokenHash         string             `json:"token_hash"`
 	InvitedByUserUuid *uuid.UUID         `json:"invited_by_user_uuid"`
 	ExpiresAt         pgtype.Timestamptz `json:"expires_at"`
@@ -222,7 +222,7 @@ func (q *Queries) ListWorkspaceInvites(ctx context.Context, workspaceUuid *uuid.
 			&i.UUID,
 			&i.WorkspaceUUID,
 			&i.Email,
-			&i.Role,
+			&i.PolicySetName,
 			&i.TokenHash,
 			&i.InvitedByUserUuid,
 			&i.ExpiresAt,

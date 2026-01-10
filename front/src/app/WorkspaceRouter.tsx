@@ -13,8 +13,8 @@ import OAuth2CredentialEdit from './oauth2/OAuth2CredentialEdit';
 import Users from './users/Users';
 import UserEdit from './users/UserEdit';
 import Invites from './invites/Invites';
-import Roles from './rbac/Roles';
-import RoleEdit from './rbac/RoleEdit';
+import PolicySets from './access/PolicySets';
+import PolicySetEdit from './access/PolicySetEdit';
 import Pipelines from './pipelines/Pipelines';
 import PipelineEdit from './pipelines/PipelineEdit';
 import RegisteredWorkers from './workers/RegisteredWorkers';
@@ -58,9 +58,9 @@ function WorkspaceRouter() {
         <Route path="users/new" element={<UserEdit />} />
         <Route path="users/:uuid" element={<UserEdit />} />
         <Route path="invites" element={<Invites />} />
-        <Route path="rbac/roles" element={<Roles />} />
-        <Route path="rbac/roles/new" element={<RoleEdit />} />
-        <Route path="rbac/roles/:uuid" element={<RoleEdit />} />
+        <Route path="access/policy-sets" element={<PolicySets />} />
+        <Route path="access/policy-sets/new" element={<PolicySetEdit />} />
+        <Route path="access/policy-sets/:uuid" element={<PolicySetEdit />} />
         <Route path="schedulers" element={<Schedulers />} />
         <Route path="schedulers/new" element={<SchedulerEdit />} />
         <Route path="schedulers/:uuid" element={<SchedulerEdit />} />

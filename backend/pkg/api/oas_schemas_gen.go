@@ -40,35 +40,35 @@ func (s *AcceptInviteOK) SetRedirectURL(val OptString) {
 
 func (*AcceptInviteOK) acceptInviteRes() {}
 
-// AssignRoleToUserCreated is response for AssignRoleToUser operation.
-type AssignRoleToUserCreated struct{}
+// AssignPolicySetToUserCreated is response for AssignPolicySetToUser operation.
+type AssignPolicySetToUserCreated struct{}
 
-func (*AssignRoleToUserCreated) assignRoleToUserRes() {}
+func (*AssignPolicySetToUserCreated) assignPolicySetToUserRes() {}
 
-type AssignRoleToUserReq struct {
-	// Name of the role to assign.
-	RoleName string `json:"role_name"`
-	// Domain for the role (workspace slug or "global").
+type AssignPolicySetToUserReq struct {
+	// Name of the policy set to assign.
+	PolicySetName string `json:"policy_set_name"`
+	// Domain for the policy set (workspace slug or "global").
 	Domain string `json:"domain"`
 }
 
-// GetRoleName returns the value of RoleName.
-func (s *AssignRoleToUserReq) GetRoleName() string {
-	return s.RoleName
+// GetPolicySetName returns the value of PolicySetName.
+func (s *AssignPolicySetToUserReq) GetPolicySetName() string {
+	return s.PolicySetName
 }
 
 // GetDomain returns the value of Domain.
-func (s *AssignRoleToUserReq) GetDomain() string {
+func (s *AssignPolicySetToUserReq) GetDomain() string {
 	return s.Domain
 }
 
-// SetRoleName sets the value of RoleName.
-func (s *AssignRoleToUserReq) SetRoleName(val string) {
-	s.RoleName = val
+// SetPolicySetName sets the value of PolicySetName.
+func (s *AssignPolicySetToUserReq) SetPolicySetName(val string) {
+	s.PolicySetName = val
 }
 
 // SetDomain sets the value of Domain.
-func (s *AssignRoleToUserReq) SetDomain(val string) {
+func (s *AssignPolicySetToUserReq) SetDomain(val string) {
 	s.Domain = val
 }
 
@@ -993,15 +993,15 @@ func (s *DatasourceSetOAuth2ClientReq) SetClientID(val string) {
 	s.ClientID = val
 }
 
+// DeletePolicySetNoContent is response for DeletePolicySet operation.
+type DeletePolicySetNoContent struct{}
+
+func (*DeletePolicySetNoContent) deletePolicySetRes() {}
+
 // DeleteRegisteredWorkerOK is response for DeleteRegisteredWorker operation.
 type DeleteRegisteredWorkerOK struct{}
 
 func (*DeleteRegisteredWorkerOK) deleteRegisteredWorkerRes() {}
-
-// DeleteRoleNoContent is response for DeleteRole operation.
-type DeleteRoleNoContent struct{}
-
-func (*DeleteRoleNoContent) deleteRoleRes() {}
 
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
@@ -1137,7 +1137,7 @@ func (s *ErrorStatusCode) SetResponse(val Error) {
 
 func (*ErrorStatusCode) acceptInviteRes()                    {}
 func (*ErrorStatusCode) addWorkspaceMemberRes()              {}
-func (*ErrorStatusCode) assignRoleToUserRes()                {}
+func (*ErrorStatusCode) assignPolicySetToUserRes()           {}
 func (*ErrorStatusCode) authConsentRes()                     {}
 func (*ErrorStatusCode) authLoginRes()                       {}
 func (*ErrorStatusCode) authLoginSubmitRes()                 {}
@@ -1151,7 +1151,7 @@ func (*ErrorStatusCode) changePasswordRes()                  {}
 func (*ErrorStatusCode) checkPermissionRes()                 {}
 func (*ErrorStatusCode) checkWorkspaceExistsRes()            {}
 func (*ErrorStatusCode) confirmPasswordResetRes()            {}
-func (*ErrorStatusCode) createRoleRes()                      {}
+func (*ErrorStatusCode) createPolicySetRes()                 {}
 func (*ErrorStatusCode) createUserRes()                      {}
 func (*ErrorStatusCode) createUserSessionRes()               {}
 func (*ErrorStatusCode) createWorkerEnrollmentTokenRes()     {}
@@ -1170,24 +1170,24 @@ func (*ErrorStatusCode) datasourceEmailOAuthUpdateRes()      {}
 func (*ErrorStatusCode) datasourceEmailUpdateRes()           {}
 func (*ErrorStatusCode) datasourceListRes()                  {}
 func (*ErrorStatusCode) datasourceSetOAuth2ClientRes()       {}
+func (*ErrorStatusCode) deletePolicySetRes()                 {}
 func (*ErrorStatusCode) deleteRegisteredWorkerRes()          {}
-func (*ErrorStatusCode) deleteRoleRes()                      {}
 func (*ErrorStatusCode) deleteUserRes()                      {}
 func (*ErrorStatusCode) deleteWorkerEnrollmentTokenRes()     {}
 func (*ErrorStatusCode) deleteWorkspaceInviteRes()           {}
 func (*ErrorStatusCode) deleteWorkspaceRes()                 {}
 func (*ErrorStatusCode) getInviteByTokenRes()                {}
 func (*ErrorStatusCode) getPasswordResetByTokenRes()         {}
+func (*ErrorStatusCode) getPolicySetRes()                    {}
 func (*ErrorStatusCode) getProfileRes()                      {}
 func (*ErrorStatusCode) getRegisteredWorkerRes()             {}
-func (*ErrorStatusCode) getRoleRes()                         {}
+func (*ErrorStatusCode) getUserPolicySetsRes()               {}
 func (*ErrorStatusCode) getUserRes()                         {}
-func (*ErrorStatusCode) getUserRolesRes()                    {}
 func (*ErrorStatusCode) getWorkerEnrollmentTokenRes()        {}
 func (*ErrorStatusCode) getWorkspaceRes()                    {}
 func (*ErrorStatusCode) listPermissionsRes()                 {}
+func (*ErrorStatusCode) listPolicySetsRes()                  {}
 func (*ErrorStatusCode) listRegisteredWorkersRes()           {}
-func (*ErrorStatusCode) listRolesRes()                       {}
 func (*ErrorStatusCode) listUsersRes()                       {}
 func (*ErrorStatusCode) listWorkerEnrollmentTokensRes()      {}
 func (*ErrorStatusCode) listWorkspaceInvitesRes()            {}
@@ -1210,7 +1210,7 @@ func (*ErrorStatusCode) pipelineDeleteRes()                  {}
 func (*ErrorStatusCode) pipelineGetRes()                     {}
 func (*ErrorStatusCode) pipelineListRes()                    {}
 func (*ErrorStatusCode) pipelineUpdateRes()                  {}
-func (*ErrorStatusCode) removeRoleFromUserRes()              {}
+func (*ErrorStatusCode) removePolicySetFromUserRes()         {}
 func (*ErrorStatusCode) removeWorkspaceMemberRes()           {}
 func (*ErrorStatusCode) requestPasswordResetRes()            {}
 func (*ErrorStatusCode) schedulerCreateRes()                 {}
@@ -1239,9 +1239,9 @@ func (*ErrorStatusCode) syncpolicyGetRes()                   {}
 func (*ErrorStatusCode) syncpolicyListRes()                  {}
 func (*ErrorStatusCode) syncpolicyUpdateRes()                {}
 func (*ErrorStatusCode) testConnectionJobGetRes()            {}
+func (*ErrorStatusCode) updatePolicySetRes()                 {}
 func (*ErrorStatusCode) updateProfileRes()                   {}
 func (*ErrorStatusCode) updateRegisteredWorkerRes()          {}
-func (*ErrorStatusCode) updateRoleRes()                      {}
 func (*ErrorStatusCode) updateUserRes()                      {}
 func (*ErrorStatusCode) updateWorkspaceMemberRoleRes()       {}
 func (*ErrorStatusCode) updateWorkspaceRes()                 {}
@@ -1250,34 +1250,34 @@ func (*ErrorStatusCode) workerJobsDeleteRes()                {}
 func (*ErrorStatusCode) workerJobsGetRes()                   {}
 func (*ErrorStatusCode) workerJobsListRes()                  {}
 
-type GetUserRolesOK struct {
-	UserUUID OptUUID              `json:"user_uuid"`
-	Roles    []RbacRoleAssignment `json:"roles"`
+type GetUserPolicySetsOK struct {
+	UserUUID   OptUUID                   `json:"user_uuid"`
+	PolicySets []UserPolicySetAssignment `json:"policy_sets"`
 }
 
 // GetUserUUID returns the value of UserUUID.
-func (s *GetUserRolesOK) GetUserUUID() OptUUID {
+func (s *GetUserPolicySetsOK) GetUserUUID() OptUUID {
 	return s.UserUUID
 }
 
-// GetRoles returns the value of Roles.
-func (s *GetUserRolesOK) GetRoles() []RbacRoleAssignment {
-	return s.Roles
+// GetPolicySets returns the value of PolicySets.
+func (s *GetUserPolicySetsOK) GetPolicySets() []UserPolicySetAssignment {
+	return s.PolicySets
 }
 
 // SetUserUUID sets the value of UserUUID.
-func (s *GetUserRolesOK) SetUserUUID(val OptUUID) {
+func (s *GetUserPolicySetsOK) SetUserUUID(val OptUUID) {
 	s.UserUUID = val
 }
 
-// SetRoles sets the value of Roles.
-func (s *GetUserRolesOK) SetRoles(val []RbacRoleAssignment) {
-	s.Roles = val
+// SetPolicySets sets the value of PolicySets.
+func (s *GetUserPolicySetsOK) SetPolicySets(val []UserPolicySetAssignment) {
+	s.PolicySets = val
 }
 
-func (*GetUserRolesOK) getUserRolesRes() {}
+func (*GetUserPolicySetsOK) getUserPolicySetsRes() {}
 
-type ListPermissionsOKApplicationJSON []RbacPermission
+type ListPermissionsOKApplicationJSON []Permission
 
 func (*ListPermissionsOKApplicationJSON) listPermissionsRes() {}
 
@@ -1322,35 +1322,31 @@ func (s *ListPermissionsScope) UnmarshalText(data []byte) error {
 	}
 }
 
-type ListRegisteredWorkersOKApplicationJSON []RegisteredWorker
+type ListPolicySetsOKApplicationJSON []PolicySet
 
-func (*ListRegisteredWorkersOKApplicationJSON) listRegisteredWorkersRes() {}
+func (*ListPolicySetsOKApplicationJSON) listPolicySetsRes() {}
 
-type ListRolesOKApplicationJSON []RbacRole
-
-func (*ListRolesOKApplicationJSON) listRolesRes() {}
-
-type ListRolesScope string
+type ListPolicySetsScope string
 
 const (
-	ListRolesScopeGlobal    ListRolesScope = "global"
-	ListRolesScopeWorkspace ListRolesScope = "workspace"
+	ListPolicySetsScopeGlobal    ListPolicySetsScope = "global"
+	ListPolicySetsScopeWorkspace ListPolicySetsScope = "workspace"
 )
 
-// AllValues returns all ListRolesScope values.
-func (ListRolesScope) AllValues() []ListRolesScope {
-	return []ListRolesScope{
-		ListRolesScopeGlobal,
-		ListRolesScopeWorkspace,
+// AllValues returns all ListPolicySetsScope values.
+func (ListPolicySetsScope) AllValues() []ListPolicySetsScope {
+	return []ListPolicySetsScope{
+		ListPolicySetsScopeGlobal,
+		ListPolicySetsScopeWorkspace,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s ListRolesScope) MarshalText() ([]byte, error) {
+func (s ListPolicySetsScope) MarshalText() ([]byte, error) {
 	switch s {
-	case ListRolesScopeGlobal:
+	case ListPolicySetsScopeGlobal:
 		return []byte(s), nil
-	case ListRolesScopeWorkspace:
+	case ListPolicySetsScopeWorkspace:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -1358,18 +1354,22 @@ func (s ListRolesScope) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *ListRolesScope) UnmarshalText(data []byte) error {
-	switch ListRolesScope(data) {
-	case ListRolesScopeGlobal:
-		*s = ListRolesScopeGlobal
+func (s *ListPolicySetsScope) UnmarshalText(data []byte) error {
+	switch ListPolicySetsScope(data) {
+	case ListPolicySetsScopeGlobal:
+		*s = ListPolicySetsScopeGlobal
 		return nil
-	case ListRolesScopeWorkspace:
-		*s = ListRolesScopeWorkspace
+	case ListPolicySetsScopeWorkspace:
+		*s = ListPolicySetsScopeWorkspace
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+type ListRegisteredWorkersOKApplicationJSON []RegisteredWorker
+
+func (*ListRegisteredWorkersOKApplicationJSON) listRegisteredWorkersRes() {}
 
 type ListUsersOKApplicationJSON []User
 
@@ -3200,38 +3200,38 @@ func (o OptListPermissionsScope) Or(d ListPermissionsScope) ListPermissionsScope
 	return d
 }
 
-// NewOptListRolesScope returns new OptListRolesScope with value set to v.
-func NewOptListRolesScope(v ListRolesScope) OptListRolesScope {
-	return OptListRolesScope{
+// NewOptListPolicySetsScope returns new OptListPolicySetsScope with value set to v.
+func NewOptListPolicySetsScope(v ListPolicySetsScope) OptListPolicySetsScope {
+	return OptListPolicySetsScope{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptListRolesScope is optional ListRolesScope.
-type OptListRolesScope struct {
-	Value ListRolesScope
+// OptListPolicySetsScope is optional ListPolicySetsScope.
+type OptListPolicySetsScope struct {
+	Value ListPolicySetsScope
 	Set   bool
 }
 
-// IsSet returns true if OptListRolesScope was set.
-func (o OptListRolesScope) IsSet() bool { return o.Set }
+// IsSet returns true if OptListPolicySetsScope was set.
+func (o OptListPolicySetsScope) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptListRolesScope) Reset() {
-	var v ListRolesScope
+func (o *OptListPolicySetsScope) Reset() {
+	var v ListPolicySetsScope
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptListRolesScope) SetTo(v ListRolesScope) {
+func (o *OptListPolicySetsScope) SetTo(v ListPolicySetsScope) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptListRolesScope) Get() (v ListRolesScope, ok bool) {
+func (o OptListPolicySetsScope) Get() (v ListPolicySetsScope, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -3239,7 +3239,7 @@ func (o OptListRolesScope) Get() (v ListRolesScope, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptListRolesScope) Or(d ListRolesScope) ListRolesScope {
+func (o OptListPolicySetsScope) Or(d ListPolicySetsScope) ListPolicySetsScope {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -3694,6 +3694,52 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
+// NewOptPermissionScope returns new OptPermissionScope with value set to v.
+func NewOptPermissionScope(v PermissionScope) OptPermissionScope {
+	return OptPermissionScope{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPermissionScope is optional PermissionScope.
+type OptPermissionScope struct {
+	Value PermissionScope
+	Set   bool
+}
+
+// IsSet returns true if OptPermissionScope was set.
+func (o OptPermissionScope) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPermissionScope) Reset() {
+	var v PermissionScope
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPermissionScope) SetTo(v PermissionScope) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPermissionScope) Get() (v PermissionScope, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPermissionScope) Or(d PermissionScope) PermissionScope {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPipelineEdgeType returns new OptPipelineEdgeType with value set to v.
 func NewOptPipelineEdgeType(v PipelineEdgeType) OptPipelineEdgeType {
 	return OptPipelineEdgeType{
@@ -3826,52 +3872,6 @@ func (o OptPipelineNodeDataConfig) Get() (v PipelineNodeDataConfig, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptPipelineNodeDataConfig) Or(d PipelineNodeDataConfig) PipelineNodeDataConfig {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptRbacPermissionScope returns new OptRbacPermissionScope with value set to v.
-func NewOptRbacPermissionScope(v RbacPermissionScope) OptRbacPermissionScope {
-	return OptRbacPermissionScope{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptRbacPermissionScope is optional RbacPermissionScope.
-type OptRbacPermissionScope struct {
-	Value RbacPermissionScope
-	Set   bool
-}
-
-// IsSet returns true if OptRbacPermissionScope was set.
-func (o OptRbacPermissionScope) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptRbacPermissionScope) Reset() {
-	var v RbacPermissionScope
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptRbacPermissionScope) SetTo(v RbacPermissionScope) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptRbacPermissionScope) Get() (v RbacPermissionScope, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptRbacPermissionScope) Or(d RbacPermissionScope) RbacPermissionScope {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4812,6 +4812,218 @@ func (s *PasswordResetRequest) SetEmail(val string) {
 }
 
 // Ref: #
+type Permission struct {
+	// Unique identifier for the permission.
+	UUID OptUUID `json:"uuid"`
+	// Permission identifier (e.g., "datasource:read", "workspace:admin").
+	Name string `json:"name"`
+	// Human-readable permission name.
+	DisplayName OptString `json:"display_name"`
+	// Description of what this permission allows.
+	Description OptString `json:"description"`
+	// Resource type (e.g., "datasource", "pipeline", "workspace").
+	Resource string `json:"resource"`
+	// Action allowed on the resource.
+	Action PermissionAction `json:"action"`
+	// Scope of the permission.
+	Scope OptPermissionScope `json:"scope"`
+	// Timestamp of permission creation.
+	CreatedAt OptDateTime `json:"created_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *Permission) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetName returns the value of Name.
+func (s *Permission) GetName() string {
+	return s.Name
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *Permission) GetDisplayName() OptString {
+	return s.DisplayName
+}
+
+// GetDescription returns the value of Description.
+func (s *Permission) GetDescription() OptString {
+	return s.Description
+}
+
+// GetResource returns the value of Resource.
+func (s *Permission) GetResource() string {
+	return s.Resource
+}
+
+// GetAction returns the value of Action.
+func (s *Permission) GetAction() PermissionAction {
+	return s.Action
+}
+
+// GetScope returns the value of Scope.
+func (s *Permission) GetScope() OptPermissionScope {
+	return s.Scope
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Permission) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *Permission) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetName sets the value of Name.
+func (s *Permission) SetName(val string) {
+	s.Name = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *Permission) SetDisplayName(val OptString) {
+	s.DisplayName = val
+}
+
+// SetDescription sets the value of Description.
+func (s *Permission) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetResource sets the value of Resource.
+func (s *Permission) SetResource(val string) {
+	s.Resource = val
+}
+
+// SetAction sets the value of Action.
+func (s *Permission) SetAction(val PermissionAction) {
+	s.Action = val
+}
+
+// SetScope sets the value of Scope.
+func (s *Permission) SetScope(val OptPermissionScope) {
+	s.Scope = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Permission) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// Action allowed on the resource.
+type PermissionAction string
+
+const (
+	PermissionAction_read   PermissionAction = "read"
+	PermissionAction_write  PermissionAction = "write"
+	PermissionAction_create PermissionAction = "create"
+	PermissionAction_delete PermissionAction = "delete"
+	PermissionAction_admin  PermissionAction = "admin"
+	PermissionAction_       PermissionAction = "*"
+)
+
+// AllValues returns all PermissionAction values.
+func (PermissionAction) AllValues() []PermissionAction {
+	return []PermissionAction{
+		PermissionAction_read,
+		PermissionAction_write,
+		PermissionAction_create,
+		PermissionAction_delete,
+		PermissionAction_admin,
+		PermissionAction_,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PermissionAction) MarshalText() ([]byte, error) {
+	switch s {
+	case PermissionAction_read:
+		return []byte(s), nil
+	case PermissionAction_write:
+		return []byte(s), nil
+	case PermissionAction_create:
+		return []byte(s), nil
+	case PermissionAction_delete:
+		return []byte(s), nil
+	case PermissionAction_admin:
+		return []byte(s), nil
+	case PermissionAction_:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PermissionAction) UnmarshalText(data []byte) error {
+	switch PermissionAction(data) {
+	case PermissionAction_read:
+		*s = PermissionAction_read
+		return nil
+	case PermissionAction_write:
+		*s = PermissionAction_write
+		return nil
+	case PermissionAction_create:
+		*s = PermissionAction_create
+		return nil
+	case PermissionAction_delete:
+		*s = PermissionAction_delete
+		return nil
+	case PermissionAction_admin:
+		*s = PermissionAction_admin
+		return nil
+	case PermissionAction_:
+		*s = PermissionAction_
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Scope of the permission.
+type PermissionScope string
+
+const (
+	PermissionScopeGlobal    PermissionScope = "global"
+	PermissionScopeWorkspace PermissionScope = "workspace"
+)
+
+// AllValues returns all PermissionScope values.
+func (PermissionScope) AllValues() []PermissionScope {
+	return []PermissionScope{
+		PermissionScopeGlobal,
+		PermissionScopeWorkspace,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PermissionScope) MarshalText() ([]byte, error) {
+	switch s {
+	case PermissionScopeGlobal:
+		return []byte(s), nil
+	case PermissionScopeWorkspace:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PermissionScope) UnmarshalText(data []byte) error {
+	switch PermissionScope(data) {
+	case PermissionScopeGlobal:
+		*s = PermissionScopeGlobal
+		return nil
+	case PermissionScopeWorkspace:
+		*s = PermissionScopeWorkspace
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #
 type Pipeline struct {
 	// Unique identifier.
 	UUID           OptString `json:"uuid"`
@@ -5198,406 +5410,143 @@ func (s *PipelineNodePosition) SetY(val OptFloat64) {
 }
 
 // Ref: #
-type RbacPermission struct {
-	// Unique identifier for the permission.
+type PolicySet struct {
+	// Unique identifier for the policy set.
 	UUID OptUUID `json:"uuid"`
-	// Permission identifier (e.g., "datasource:read", "workspace:admin").
+	// Unique policy set identifier (e.g., "super_admin", "workspace_owner").
 	Name string `json:"name"`
-	// Human-readable permission name.
-	DisplayName OptString `json:"display_name"`
-	// Description of what this permission allows.
-	Description OptString `json:"description"`
-	// Resource type (e.g., "datasource", "pipeline", "workspace").
-	Resource string `json:"resource"`
-	// Action allowed on the resource.
-	Action RbacPermissionAction `json:"action"`
-	// Scope of the permission.
-	Scope OptRbacPermissionScope `json:"scope"`
-	// Timestamp of permission creation.
-	CreatedAt OptDateTime `json:"created_at"`
-}
-
-// GetUUID returns the value of UUID.
-func (s *RbacPermission) GetUUID() OptUUID {
-	return s.UUID
-}
-
-// GetName returns the value of Name.
-func (s *RbacPermission) GetName() string {
-	return s.Name
-}
-
-// GetDisplayName returns the value of DisplayName.
-func (s *RbacPermission) GetDisplayName() OptString {
-	return s.DisplayName
-}
-
-// GetDescription returns the value of Description.
-func (s *RbacPermission) GetDescription() OptString {
-	return s.Description
-}
-
-// GetResource returns the value of Resource.
-func (s *RbacPermission) GetResource() string {
-	return s.Resource
-}
-
-// GetAction returns the value of Action.
-func (s *RbacPermission) GetAction() RbacPermissionAction {
-	return s.Action
-}
-
-// GetScope returns the value of Scope.
-func (s *RbacPermission) GetScope() OptRbacPermissionScope {
-	return s.Scope
-}
-
-// GetCreatedAt returns the value of CreatedAt.
-func (s *RbacPermission) GetCreatedAt() OptDateTime {
-	return s.CreatedAt
-}
-
-// SetUUID sets the value of UUID.
-func (s *RbacPermission) SetUUID(val OptUUID) {
-	s.UUID = val
-}
-
-// SetName sets the value of Name.
-func (s *RbacPermission) SetName(val string) {
-	s.Name = val
-}
-
-// SetDisplayName sets the value of DisplayName.
-func (s *RbacPermission) SetDisplayName(val OptString) {
-	s.DisplayName = val
-}
-
-// SetDescription sets the value of Description.
-func (s *RbacPermission) SetDescription(val OptString) {
-	s.Description = val
-}
-
-// SetResource sets the value of Resource.
-func (s *RbacPermission) SetResource(val string) {
-	s.Resource = val
-}
-
-// SetAction sets the value of Action.
-func (s *RbacPermission) SetAction(val RbacPermissionAction) {
-	s.Action = val
-}
-
-// SetScope sets the value of Scope.
-func (s *RbacPermission) SetScope(val OptRbacPermissionScope) {
-	s.Scope = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *RbacPermission) SetCreatedAt(val OptDateTime) {
-	s.CreatedAt = val
-}
-
-// Action allowed on the resource.
-type RbacPermissionAction string
-
-const (
-	RbacPermissionAction_read   RbacPermissionAction = "read"
-	RbacPermissionAction_write  RbacPermissionAction = "write"
-	RbacPermissionAction_create RbacPermissionAction = "create"
-	RbacPermissionAction_delete RbacPermissionAction = "delete"
-	RbacPermissionAction_admin  RbacPermissionAction = "admin"
-	RbacPermissionAction_       RbacPermissionAction = "*"
-)
-
-// AllValues returns all RbacPermissionAction values.
-func (RbacPermissionAction) AllValues() []RbacPermissionAction {
-	return []RbacPermissionAction{
-		RbacPermissionAction_read,
-		RbacPermissionAction_write,
-		RbacPermissionAction_create,
-		RbacPermissionAction_delete,
-		RbacPermissionAction_admin,
-		RbacPermissionAction_,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s RbacPermissionAction) MarshalText() ([]byte, error) {
-	switch s {
-	case RbacPermissionAction_read:
-		return []byte(s), nil
-	case RbacPermissionAction_write:
-		return []byte(s), nil
-	case RbacPermissionAction_create:
-		return []byte(s), nil
-	case RbacPermissionAction_delete:
-		return []byte(s), nil
-	case RbacPermissionAction_admin:
-		return []byte(s), nil
-	case RbacPermissionAction_:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *RbacPermissionAction) UnmarshalText(data []byte) error {
-	switch RbacPermissionAction(data) {
-	case RbacPermissionAction_read:
-		*s = RbacPermissionAction_read
-		return nil
-	case RbacPermissionAction_write:
-		*s = RbacPermissionAction_write
-		return nil
-	case RbacPermissionAction_create:
-		*s = RbacPermissionAction_create
-		return nil
-	case RbacPermissionAction_delete:
-		*s = RbacPermissionAction_delete
-		return nil
-	case RbacPermissionAction_admin:
-		*s = RbacPermissionAction_admin
-		return nil
-	case RbacPermissionAction_:
-		*s = RbacPermissionAction_
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-// Scope of the permission.
-type RbacPermissionScope string
-
-const (
-	RbacPermissionScopeGlobal    RbacPermissionScope = "global"
-	RbacPermissionScopeWorkspace RbacPermissionScope = "workspace"
-)
-
-// AllValues returns all RbacPermissionScope values.
-func (RbacPermissionScope) AllValues() []RbacPermissionScope {
-	return []RbacPermissionScope{
-		RbacPermissionScopeGlobal,
-		RbacPermissionScopeWorkspace,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s RbacPermissionScope) MarshalText() ([]byte, error) {
-	switch s {
-	case RbacPermissionScopeGlobal:
-		return []byte(s), nil
-	case RbacPermissionScopeWorkspace:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *RbacPermissionScope) UnmarshalText(data []byte) error {
-	switch RbacPermissionScope(data) {
-	case RbacPermissionScopeGlobal:
-		*s = RbacPermissionScopeGlobal
-		return nil
-	case RbacPermissionScopeWorkspace:
-		*s = RbacPermissionScopeWorkspace
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
-// Ref: #
-type RbacRole struct {
-	// Unique identifier for the role.
-	UUID OptUUID `json:"uuid"`
-	// Unique role identifier (e.g., "super_admin", "workspace_owner").
-	Name string `json:"name"`
-	// Human-readable role name.
+	// Human-readable policy set name.
 	DisplayName string `json:"display_name"`
-	// Description of the role's purpose and permissions.
+	// Description of the policy set's purpose and permissions.
 	Description OptString `json:"description"`
-	// Scope of the role (global for system-wide, workspace for workspace-scoped).
-	Scope RbacRoleScope `json:"scope"`
-	// Whether this is a system-defined role (cannot be deleted).
+	// Scope of the policy set (global for system-wide, workspace for workspace-scoped).
+	Scope PolicySetScope `json:"scope"`
+	// Whether this is a system-defined policy set (cannot be deleted).
 	IsSystem OptBool `json:"is_system"`
-	// List of permissions granted by this role.
-	Permissions []RbacPermission `json:"permissions"`
-	// Timestamp of role creation.
+	// List of permissions granted by this policy set.
+	Permissions []Permission `json:"permissions"`
+	// Timestamp of policy set creation.
 	CreatedAt OptDateTime `json:"created_at"`
 	// Timestamp of last update.
 	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
-func (s *RbacRole) GetUUID() OptUUID {
+func (s *PolicySet) GetUUID() OptUUID {
 	return s.UUID
 }
 
 // GetName returns the value of Name.
-func (s *RbacRole) GetName() string {
+func (s *PolicySet) GetName() string {
 	return s.Name
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *RbacRole) GetDisplayName() string {
+func (s *PolicySet) GetDisplayName() string {
 	return s.DisplayName
 }
 
 // GetDescription returns the value of Description.
-func (s *RbacRole) GetDescription() OptString {
+func (s *PolicySet) GetDescription() OptString {
 	return s.Description
 }
 
 // GetScope returns the value of Scope.
-func (s *RbacRole) GetScope() RbacRoleScope {
+func (s *PolicySet) GetScope() PolicySetScope {
 	return s.Scope
 }
 
 // GetIsSystem returns the value of IsSystem.
-func (s *RbacRole) GetIsSystem() OptBool {
+func (s *PolicySet) GetIsSystem() OptBool {
 	return s.IsSystem
 }
 
 // GetPermissions returns the value of Permissions.
-func (s *RbacRole) GetPermissions() []RbacPermission {
+func (s *PolicySet) GetPermissions() []Permission {
 	return s.Permissions
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *RbacRole) GetCreatedAt() OptDateTime {
+func (s *PolicySet) GetCreatedAt() OptDateTime {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *RbacRole) GetUpdatedAt() OptDateTime {
+func (s *PolicySet) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
 // SetUUID sets the value of UUID.
-func (s *RbacRole) SetUUID(val OptUUID) {
+func (s *PolicySet) SetUUID(val OptUUID) {
 	s.UUID = val
 }
 
 // SetName sets the value of Name.
-func (s *RbacRole) SetName(val string) {
+func (s *PolicySet) SetName(val string) {
 	s.Name = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *RbacRole) SetDisplayName(val string) {
+func (s *PolicySet) SetDisplayName(val string) {
 	s.DisplayName = val
 }
 
 // SetDescription sets the value of Description.
-func (s *RbacRole) SetDescription(val OptString) {
+func (s *PolicySet) SetDescription(val OptString) {
 	s.Description = val
 }
 
 // SetScope sets the value of Scope.
-func (s *RbacRole) SetScope(val RbacRoleScope) {
+func (s *PolicySet) SetScope(val PolicySetScope) {
 	s.Scope = val
 }
 
 // SetIsSystem sets the value of IsSystem.
-func (s *RbacRole) SetIsSystem(val OptBool) {
+func (s *PolicySet) SetIsSystem(val OptBool) {
 	s.IsSystem = val
 }
 
 // SetPermissions sets the value of Permissions.
-func (s *RbacRole) SetPermissions(val []RbacPermission) {
+func (s *PolicySet) SetPermissions(val []Permission) {
 	s.Permissions = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *RbacRole) SetCreatedAt(val OptDateTime) {
+func (s *PolicySet) SetCreatedAt(val OptDateTime) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *RbacRole) SetUpdatedAt(val OptDateTime) {
+func (s *PolicySet) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
-func (*RbacRole) createRoleRes() {}
-func (*RbacRole) getRoleRes()    {}
-func (*RbacRole) updateRoleRes() {}
+func (*PolicySet) createPolicySetRes() {}
+func (*PolicySet) getPolicySetRes()    {}
+func (*PolicySet) updatePolicySetRes() {}
 
-// Ref: #
-type RbacRoleAssignment struct {
-	// UUID of the user.
-	UserUUID uuid.UUID `json:"user_uuid"`
-	Role     RbacRole  `json:"role"`
-	// Domain where the role is assigned (workspace slug or "global").
-	Domain string `json:"domain"`
-	// Timestamp when the role was assigned.
-	AssignedAt OptDateTime `json:"assigned_at"`
-}
-
-// GetUserUUID returns the value of UserUUID.
-func (s *RbacRoleAssignment) GetUserUUID() uuid.UUID {
-	return s.UserUUID
-}
-
-// GetRole returns the value of Role.
-func (s *RbacRoleAssignment) GetRole() RbacRole {
-	return s.Role
-}
-
-// GetDomain returns the value of Domain.
-func (s *RbacRoleAssignment) GetDomain() string {
-	return s.Domain
-}
-
-// GetAssignedAt returns the value of AssignedAt.
-func (s *RbacRoleAssignment) GetAssignedAt() OptDateTime {
-	return s.AssignedAt
-}
-
-// SetUserUUID sets the value of UserUUID.
-func (s *RbacRoleAssignment) SetUserUUID(val uuid.UUID) {
-	s.UserUUID = val
-}
-
-// SetRole sets the value of Role.
-func (s *RbacRoleAssignment) SetRole(val RbacRole) {
-	s.Role = val
-}
-
-// SetDomain sets the value of Domain.
-func (s *RbacRoleAssignment) SetDomain(val string) {
-	s.Domain = val
-}
-
-// SetAssignedAt sets the value of AssignedAt.
-func (s *RbacRoleAssignment) SetAssignedAt(val OptDateTime) {
-	s.AssignedAt = val
-}
-
-// Scope of the role (global for system-wide, workspace for workspace-scoped).
-type RbacRoleScope string
+// Scope of the policy set (global for system-wide, workspace for workspace-scoped).
+type PolicySetScope string
 
 const (
-	RbacRoleScopeGlobal    RbacRoleScope = "global"
-	RbacRoleScopeWorkspace RbacRoleScope = "workspace"
+	PolicySetScopeGlobal    PolicySetScope = "global"
+	PolicySetScopeWorkspace PolicySetScope = "workspace"
 )
 
-// AllValues returns all RbacRoleScope values.
-func (RbacRoleScope) AllValues() []RbacRoleScope {
-	return []RbacRoleScope{
-		RbacRoleScopeGlobal,
-		RbacRoleScopeWorkspace,
+// AllValues returns all PolicySetScope values.
+func (PolicySetScope) AllValues() []PolicySetScope {
+	return []PolicySetScope{
+		PolicySetScopeGlobal,
+		PolicySetScopeWorkspace,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s RbacRoleScope) MarshalText() ([]byte, error) {
+func (s PolicySetScope) MarshalText() ([]byte, error) {
 	switch s {
-	case RbacRoleScopeGlobal:
+	case PolicySetScopeGlobal:
 		return []byte(s), nil
-	case RbacRoleScopeWorkspace:
+	case PolicySetScopeWorkspace:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -5605,13 +5554,13 @@ func (s RbacRoleScope) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *RbacRoleScope) UnmarshalText(data []byte) error {
-	switch RbacRoleScope(data) {
-	case RbacRoleScopeGlobal:
-		*s = RbacRoleScopeGlobal
+func (s *PolicySetScope) UnmarshalText(data []byte) error {
+	switch PolicySetScope(data) {
+	case PolicySetScopeGlobal:
+		*s = PolicySetScopeGlobal
 		return nil
-	case RbacRoleScopeWorkspace:
-		*s = RbacRoleScopeWorkspace
+	case PolicySetScopeWorkspace:
+		*s = PolicySetScopeWorkspace
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -5854,10 +5803,10 @@ func (s *RegisteredWorkerStatus) UnmarshalText(data []byte) error {
 	}
 }
 
-// RemoveRoleFromUserNoContent is response for RemoveRoleFromUser operation.
-type RemoveRoleFromUserNoContent struct{}
+// RemovePolicySetFromUserNoContent is response for RemovePolicySetFromUser operation.
+type RemovePolicySetFromUserNoContent struct{}
 
-func (*RemoveRoleFromUserNoContent) removeRoleFromUserRes() {}
+func (*RemovePolicySetFromUserNoContent) removePolicySetFromUserRes() {}
 
 // RemoveWorkspaceMemberNoContent is response for RemoveWorkspaceMember operation.
 type RemoveWorkspaceMemberNoContent struct{}
@@ -8468,8 +8417,8 @@ type UserInvite struct {
 	WorkspaceUUID OptUUID `json:"workspace_uuid"`
 	// Email address of the invitee.
 	Email string `json:"email"`
-	// Role to assign when invite is accepted.
-	Role UserInviteRole `json:"role"`
+	// Policy set to assign when invite is accepted.
+	PolicySetName UserInvitePolicySetName `json:"policy_set_name"`
 	// Email of the user who sent the invite.
 	InvitedByEmail OptString `json:"invited_by_email"`
 	// Name of the user who sent the invite.
@@ -8497,9 +8446,9 @@ func (s *UserInvite) GetEmail() string {
 	return s.Email
 }
 
-// GetRole returns the value of Role.
-func (s *UserInvite) GetRole() UserInviteRole {
-	return s.Role
+// GetPolicySetName returns the value of PolicySetName.
+func (s *UserInvite) GetPolicySetName() UserInvitePolicySetName {
+	return s.PolicySetName
 }
 
 // GetInvitedByEmail returns the value of InvitedByEmail.
@@ -8542,9 +8491,9 @@ func (s *UserInvite) SetEmail(val string) {
 	s.Email = val
 }
 
-// SetRole sets the value of Role.
-func (s *UserInvite) SetRole(val UserInviteRole) {
-	s.Role = val
+// SetPolicySetName sets the value of PolicySetName.
+func (s *UserInvite) SetPolicySetName(val UserInvitePolicySetName) {
+	s.PolicySetName = val
 }
 
 // SetInvitedByEmail sets the value of InvitedByEmail.
@@ -8747,28 +8696,28 @@ func (s *UserInviteInfoRole) UnmarshalText(data []byte) error {
 	}
 }
 
-// Role to assign when invite is accepted.
-type UserInviteRole string
+// Policy set to assign when invite is accepted.
+type UserInvitePolicySetName string
 
 const (
-	UserInviteRoleAdmin  UserInviteRole = "admin"
-	UserInviteRoleMember UserInviteRole = "member"
+	UserInvitePolicySetNameWorkspaceAdmin  UserInvitePolicySetName = "workspace_admin"
+	UserInvitePolicySetNameWorkspaceMember UserInvitePolicySetName = "workspace_member"
 )
 
-// AllValues returns all UserInviteRole values.
-func (UserInviteRole) AllValues() []UserInviteRole {
-	return []UserInviteRole{
-		UserInviteRoleAdmin,
-		UserInviteRoleMember,
+// AllValues returns all UserInvitePolicySetName values.
+func (UserInvitePolicySetName) AllValues() []UserInvitePolicySetName {
+	return []UserInvitePolicySetName{
+		UserInvitePolicySetNameWorkspaceAdmin,
+		UserInvitePolicySetNameWorkspaceMember,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s UserInviteRole) MarshalText() ([]byte, error) {
+func (s UserInvitePolicySetName) MarshalText() ([]byte, error) {
 	switch s {
-	case UserInviteRoleAdmin:
+	case UserInvitePolicySetNameWorkspaceAdmin:
 		return []byte(s), nil
-	case UserInviteRoleMember:
+	case UserInvitePolicySetNameWorkspaceMember:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -8776,13 +8725,13 @@ func (s UserInviteRole) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *UserInviteRole) UnmarshalText(data []byte) error {
-	switch UserInviteRole(data) {
-	case UserInviteRoleAdmin:
-		*s = UserInviteRoleAdmin
+func (s *UserInvitePolicySetName) UnmarshalText(data []byte) error {
+	switch UserInvitePolicySetName(data) {
+	case UserInvitePolicySetNameWorkspaceAdmin:
+		*s = UserInvitePolicySetNameWorkspaceAdmin
 		return nil
-	case UserInviteRoleMember:
-		*s = UserInviteRoleMember
+	case UserInvitePolicySetNameWorkspaceMember:
+		*s = UserInvitePolicySetNameWorkspaceMember
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -8799,6 +8748,58 @@ func (s *UserMeta) init() UserMeta {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #
+type UserPolicySetAssignment struct {
+	// UUID of the user.
+	UserUUID uuid.UUID `json:"user_uuid"`
+	// Name of the policy set assigned to the user.
+	PolicySet string `json:"policy_set"`
+	// Domain where the policy set is assigned (workspace slug or "global").
+	Domain string `json:"domain"`
+	// Timestamp when the policy set was assigned.
+	AssignedAt OptDateTime `json:"assigned_at"`
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *UserPolicySetAssignment) GetUserUUID() uuid.UUID {
+	return s.UserUUID
+}
+
+// GetPolicySet returns the value of PolicySet.
+func (s *UserPolicySetAssignment) GetPolicySet() string {
+	return s.PolicySet
+}
+
+// GetDomain returns the value of Domain.
+func (s *UserPolicySetAssignment) GetDomain() string {
+	return s.Domain
+}
+
+// GetAssignedAt returns the value of AssignedAt.
+func (s *UserPolicySetAssignment) GetAssignedAt() OptDateTime {
+	return s.AssignedAt
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *UserPolicySetAssignment) SetUserUUID(val uuid.UUID) {
+	s.UserUUID = val
+}
+
+// SetPolicySet sets the value of PolicySet.
+func (s *UserPolicySetAssignment) SetPolicySet(val string) {
+	s.PolicySet = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *UserPolicySetAssignment) SetDomain(val string) {
+	s.Domain = val
+}
+
+// SetAssignedAt sets the value of AssignedAt.
+func (s *UserPolicySetAssignment) SetAssignedAt(val OptDateTime) {
+	s.AssignedAt = val
 }
 
 // Ref: #

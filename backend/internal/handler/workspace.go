@@ -32,7 +32,7 @@ func (h *Handler) ListWorkspaces(ctx context.Context) (api.ListWorkspacesRes, er
 	var workspaces []query.Workspace
 
 	// Super admins see all workspaces
-	if h.enforcer.HasRoleForUserInDomain(userUUID, rbac.RoleSuperAdmin, "global") {
+	if h.enforcer.HasPolicySet(userUUID, rbac.PolicySetSuperAdmin, "global") {
 		workspaces, err = q.ListWorkspaces(ctx)
 	} else {
 		// Regular users see only their workspaces
@@ -243,8 +243,8 @@ func (h *Handler) ListWorkspaceMembers(ctx context.Context, params api.ListWorks
 
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
 
-	// Check if workspace exists
-	_, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
+	// Check if workspace exists and get slug
+	workspace, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, ErrWithCode(http.StatusNotFound, E("workspace not found"))
@@ -261,7 +261,7 @@ func (h *Handler) ListWorkspaceMembers(ctx context.Context, params api.ListWorks
 
 	result := make([]api.WorkspaceMember, 0, len(members))
 	for _, m := range members {
-		apiMember, err := h.qWorkspaceMemberToAPI(ctx, q, m)
+		apiMember, err := h.qWorkspaceMemberToAPI(ctx, q, m, workspace.Slug)
 		if err != nil {
 			h.log.Warn("failed to convert workspace member", "error", err)
 			continue
@@ -284,8 +284,8 @@ func (h *Handler) AddWorkspaceMember(ctx context.Context, req *api.WorkspaceMemb
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
 	userUUID := converter.GoogleToGofrsUUID(req.UserUUID)
 
-	// Check if workspace exists
-	_, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
+	// Check if workspace exists and get slug for policy set assignment
+	workspace, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, ErrWithCode(http.StatusNotFound, E("workspace not found"))
@@ -318,20 +318,30 @@ func (h *Handler) AddWorkspaceMember(ctx context.Context, req *api.WorkspaceMemb
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to check workspace member"))
 	}
 
-	// Create member
+	// Create member (membership only, no role field)
 	memberUUID := uuid.Must(uuid.NewV7())
 	member, err := q.CreateWorkspaceMember(ctx, query.CreateWorkspaceMemberParams{
 		UUID:          memberUUID,
 		WorkspaceUUID: &workspaceUUID,
 		UserUUID:      &userUUID,
-		Role:          string(req.Role),
 	})
 	if err != nil {
 		h.log.Error("failed to add workspace member", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to add workspace member"))
 	}
 
-	apiMember, err := h.qWorkspaceMemberToAPI(ctx, q, member)
+	// Assign policy set based on requested role
+	policySetName := rbac.PolicySetWorkspaceMember
+	if req.Role == api.WorkspaceMemberRoleOwner {
+		policySetName = rbac.PolicySetWorkspaceOwner
+	} else if req.Role == api.WorkspaceMemberRoleAdmin {
+		policySetName = rbac.PolicySetWorkspaceAdmin
+	}
+	if err := h.enforcer.AssignPolicySetToUser(userUUID.String(), policySetName, workspace.Slug); err != nil {
+		h.log.Warn("failed to assign policy set", "error", err)
+	}
+
+	apiMember, err := h.qWorkspaceMemberToAPI(ctx, q, member, workspace.Slug)
 	if err != nil {
 		h.log.Error("failed to convert workspace member", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get member details"))
@@ -351,8 +361,8 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
 	userUUID := converter.GoogleToGofrsUUID(params.UserUUID)
 
-	// Check if workspace exists
-	_, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
+	// Check if workspace exists and get slug
+	workspace, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, ErrWithCode(http.StatusNotFound, E("workspace not found"))
@@ -362,7 +372,7 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 	}
 
 	// Check if member exists
-	member, err := q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
+	_, err = q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
 		WorkspaceUUID: &workspaceUUID,
 		UserUUID:      &userUUID,
 	})
@@ -374,8 +384,11 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get workspace member"))
 	}
 
-	// Prevent removing the last owner
-	if member.Role == "owner" {
+	// Check if user is an owner via policy set
+	userUUIDStr := userUUID.String()
+	isOwner := h.enforcer.HasPolicySet(userUUIDStr, rbac.PolicySetWorkspaceOwner, workspace.Slug)
+	if isOwner {
+		// Count owners by checking policy sets for all members
 		members, err := q.ListWorkspaceMembersByWorkspace(ctx, &workspaceUUID)
 		if err != nil {
 			h.log.Error("failed to list workspace members", "error", err)
@@ -384,13 +397,18 @@ func (h *Handler) RemoveWorkspaceMember(ctx context.Context, params api.RemoveWo
 
 		ownerCount := 0
 		for _, m := range members {
-			if m.Role == "owner" {
+			if m.UserUUID != nil && h.enforcer.HasPolicySet(m.UserUUID.String(), rbac.PolicySetWorkspaceOwner, workspace.Slug) {
 				ownerCount++
 			}
 		}
 		if ownerCount <= 1 {
 			return nil, ErrWithCode(http.StatusBadRequest, E("cannot remove the last owner of a workspace"))
 		}
+	}
+
+	// Remove all policy sets for this user in this workspace
+	if err := h.enforcer.RemoveAllPolicySetsFromUser(userUUIDStr, workspace.Slug); err != nil {
+		h.log.Warn("failed to remove policy sets", "error", err)
 	}
 
 	err = q.DeleteWorkspaceMember(ctx, query.DeleteWorkspaceMemberParams{
@@ -416,8 +434,8 @@ func (h *Handler) UpdateWorkspaceMemberRole(ctx context.Context, req *api.Update
 	workspaceUUID := converter.GoogleToGofrsUUID(params.UUID)
 	userUUID := converter.GoogleToGofrsUUID(params.UserUUID)
 
-	// Check if workspace exists
-	_, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
+	// Check if workspace exists and get slug
+	workspace, err := q.GetWorkspaceByUUID(ctx, workspaceUUID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, ErrWithCode(http.StatusNotFound, E("workspace not found"))
@@ -426,8 +444,8 @@ func (h *Handler) UpdateWorkspaceMemberRole(ctx context.Context, req *api.Update
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get workspace"))
 	}
 
-	// Check if member exists and get current role
-	currentMember, err := q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
+	// Check if member exists
+	member, err := q.GetWorkspaceMember(ctx, query.GetWorkspaceMemberParams{
 		WorkspaceUUID: &workspaceUUID,
 		UserUUID:      &userUUID,
 	})
@@ -439,36 +457,30 @@ func (h *Handler) UpdateWorkspaceMemberRole(ctx context.Context, req *api.Update
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get workspace member"))
 	}
 
-	// Prevent demoting the last owner
-	if currentMember.Role == "owner" && string(req.Role) != "owner" {
-		members, err := q.ListWorkspaceMembersByWorkspace(ctx, &workspaceUUID)
-		if err != nil {
-			h.log.Error("failed to list workspace members", "error", err)
-			return nil, ErrWithCode(http.StatusInternalServerError, E("failed to list workspace members"))
-		}
+	userUUIDStr := userUUID.String()
+	isCurrentlyOwner := h.enforcer.HasPolicySet(userUUIDStr, rbac.PolicySetWorkspaceOwner, workspace.Slug)
 
-		ownerCount := 0
-		for _, m := range members {
-			if m.Role == "owner" {
-				ownerCount++
-			}
-		}
-		if ownerCount <= 1 {
-			return nil, ErrWithCode(http.StatusBadRequest, E("cannot demote the last owner of a workspace"))
-		}
+	// Owners cannot be demoted via this endpoint - they must transfer ownership first
+	if isCurrentlyOwner {
+		return nil, ErrWithCode(http.StatusForbidden, E("cannot change owner role via this endpoint"))
 	}
 
-	member, err := q.UpdateWorkspaceMemberRole(ctx, query.UpdateWorkspaceMemberRoleParams{
-		WorkspaceUUID: &workspaceUUID,
-		UserUUID:      &userUUID,
-		Role:          string(req.Role),
-	})
-	if err != nil {
-		h.log.Error("failed to update workspace member role", "error", err)
-		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update workspace member role"))
+	// Remove existing workspace policy sets and assign the new one
+	if err := h.enforcer.RemoveAllPolicySetsFromUser(userUUIDStr, workspace.Slug); err != nil {
+		h.log.Warn("failed to remove existing policy sets", "error", err)
 	}
 
-	apiMember, err := h.qWorkspaceMemberToAPI(ctx, q, member)
+	// Assign new policy set based on requested role (admin or member only via this endpoint)
+	newPolicySet := rbac.PolicySetWorkspaceMember
+	if req.Role == api.UpdateWorkspaceMemberRoleReqRoleAdmin {
+		newPolicySet = rbac.PolicySetWorkspaceAdmin
+	}
+	if err := h.enforcer.AssignPolicySetToUser(userUUIDStr, newPolicySet, workspace.Slug); err != nil {
+		h.log.Error("failed to assign new policy set", "error", err)
+		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to update member role"))
+	}
+
+	apiMember, err := h.qWorkspaceMemberToAPI(ctx, q, member, workspace.Slug)
 	if err != nil {
 		h.log.Error("failed to convert workspace member", "error", err)
 		return nil, ErrWithCode(http.StatusInternalServerError, E("failed to get member details"))
@@ -505,10 +517,22 @@ func qWorkspaceToAPI(w query.Workspace) api.Workspace {
 }
 
 // Helper function to convert query.WorkspaceMember to api.WorkspaceMember
-func (h *Handler) qWorkspaceMemberToAPI(ctx context.Context, q *query.Queries, m query.WorkspaceMember) (api.WorkspaceMember, error) {
+// The workspaceSlug is needed to determine the user's role via policy set lookup
+func (h *Handler) qWorkspaceMemberToAPI(ctx context.Context, q *query.Queries, m query.WorkspaceMember, workspaceSlug string) (api.WorkspaceMember, error) {
+	// Determine role from policy set
+	role := api.WorkspaceMemberRoleMember
+	if m.UserUUID != nil {
+		userUUIDStr := m.UserUUID.String()
+		if h.enforcer.HasPolicySet(userUUIDStr, rbac.PolicySetWorkspaceOwner, workspaceSlug) {
+			role = api.WorkspaceMemberRoleOwner
+		} else if h.enforcer.HasPolicySet(userUUIDStr, rbac.PolicySetWorkspaceAdmin, workspaceSlug) {
+			role = api.WorkspaceMemberRoleAdmin
+		}
+	}
+
 	result := api.WorkspaceMember{
 		UUID: api.NewOptUUID(converter.GofrsToGoogleUUID(m.UUID)),
-		Role: api.WorkspaceMemberRole(m.Role),
+		Role: role,
 	}
 
 	if m.WorkspaceUUID != nil {

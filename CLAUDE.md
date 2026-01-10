@@ -63,12 +63,17 @@ Path-based multi-tenancy: `/w/{slug}/*`
 - Roles: `owner`, `admin`, `member`
 - Default workspaces: `internal`, `demo`
 
-### RBAC
+### Access Control
 
-Casbin-based with workspace-scoped policies. Middleware maps API operations to permissions.
+Ladon-based policy system with workspace-scoped policies. Middleware maps API operations to permissions.
 
+- API endpoints: `/api/v1/access/*` (policy-set, permission, user policy assignments)
 - Key file: `backend/internal/rbac/middleware.go` (OperationPermissionMap)
-- Predefined roles: `super_admin`, `workspace_owner`, `workspace_admin`, `workspace_member`
+- Database tables: `policy_set`, `permission`, `user_policy_set`
+- Predefined policy sets: `super_admin`, `workspace_owner`, `workspace_admin`, `workspace_member`
+- Policy sets are assigned directly to users via `user_policy_set` table (UUID primary key)
+- Subjects use format `policy_set:<name>` in Ladon policies
+- Frontend: `front/src/app/access/` (PolicySets.tsx, PolicySetEdit.tsx)
 
 ### Email
 

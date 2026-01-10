@@ -3,7 +3,7 @@ INSERT INTO user_invite (
     uuid,
     workspace_uuid,
     email,
-    role,
+    policy_set_name,
     token_hash,
     invited_by_user_uuid,
     expires_at,

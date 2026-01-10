@@ -158,8 +158,8 @@ func (s *Server) decodeAddWorkspaceMemberRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeAssignRoleToUserRequest(r *http.Request) (
-	req *AssignRoleToUserReq,
+func (s *Server) decodeAssignPolicySetToUserRequest(r *http.Request) (
+	req *AssignPolicySetToUserReq,
 	close func() error,
 	rerr error,
 ) {
@@ -198,7 +198,7 @@ func (s *Server) decodeAssignRoleToUserRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request AssignRoleToUserReq
+		var request AssignPolicySetToUserReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -615,8 +615,8 @@ func (s *Server) decodeConfirmPasswordResetRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeCreateRoleRequest(r *http.Request) (
-	req *RbacRole,
+func (s *Server) decodeCreatePolicySetRequest(r *http.Request) (
+	req *PolicySet,
 	close func() error,
 	rerr error,
 ) {
@@ -655,7 +655,7 @@ func (s *Server) decodeCreateRoleRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request RbacRole
+		var request PolicySet
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -2622,6 +2622,77 @@ func (s *Server) decodeSyncpolicyUpdateRequest(r *http.Request) (
 	}
 }
 
+func (s *Server) decodeUpdatePolicySetRequest(r *http.Request) (
+	req *PolicySet,
+	close func() error,
+	rerr error,
+) {
+	var closers []func() error
+	close = func() error {
+		var merr error
+		// Close in reverse order, to match defer behavior.
+		for i := len(closers) - 1; i >= 0; i-- {
+			c := closers[i]
+			merr = multierr.Append(merr, c())
+		}
+		return merr
+	}
+	defer func() {
+		if rerr != nil {
+			rerr = multierr.Append(rerr, close())
+		}
+	}()
+	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if err != nil {
+		return req, close, errors.Wrap(err, "parse media type")
+	}
+	switch {
+	case ct == "application/json":
+		if r.ContentLength == 0 {
+			return req, close, validate.ErrBodyRequired
+		}
+		buf, err := io.ReadAll(r.Body)
+		if err != nil {
+			return req, close, err
+		}
+
+		if len(buf) == 0 {
+			return req, close, validate.ErrBodyRequired
+		}
+
+		d := jx.DecodeBytes(buf)
+
+		var request PolicySet
+		if err := func() error {
+			if err := request.Decode(d); err != nil {
+				return err
+			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
+			return nil
+		}(); err != nil {
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
+		}
+		if err := func() error {
+			if err := request.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return req, close, errors.Wrap(err, "validate")
+		}
+		return &request, close, nil
+	default:
+		return req, close, validate.InvalidContentType(ct)
+	}
+}
+
 func (s *Server) decodeUpdateProfileRequest(r *http.Request) (
 	req *UserProfile,
 	close func() error,
@@ -2726,77 +2797,6 @@ func (s *Server) decodeUpdateRegisteredWorkerRequest(r *http.Request) (
 		d := jx.DecodeBytes(buf)
 
 		var request RegisteredWorker
-		if err := func() error {
-			if err := request.Decode(d); err != nil {
-				return err
-			}
-			if err := d.Skip(); err != io.EOF {
-				return errors.New("unexpected trailing data")
-			}
-			return nil
-		}(); err != nil {
-			err = &ogenerrors.DecodeBodyError{
-				ContentType: ct,
-				Body:        buf,
-				Err:         err,
-			}
-			return req, close, err
-		}
-		if err := func() error {
-			if err := request.Validate(); err != nil {
-				return err
-			}
-			return nil
-		}(); err != nil {
-			return req, close, errors.Wrap(err, "validate")
-		}
-		return &request, close, nil
-	default:
-		return req, close, validate.InvalidContentType(ct)
-	}
-}
-
-func (s *Server) decodeUpdateRoleRequest(r *http.Request) (
-	req *RbacRole,
-	close func() error,
-	rerr error,
-) {
-	var closers []func() error
-	close = func() error {
-		var merr error
-		// Close in reverse order, to match defer behavior.
-		for i := len(closers) - 1; i >= 0; i-- {
-			c := closers[i]
-			merr = multierr.Append(merr, c())
-		}
-		return merr
-	}
-	defer func() {
-		if rerr != nil {
-			rerr = multierr.Append(rerr, close())
-		}
-	}()
-	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if err != nil {
-		return req, close, errors.Wrap(err, "parse media type")
-	}
-	switch {
-	case ct == "application/json":
-		if r.ContentLength == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-		buf, err := io.ReadAll(r.Body)
-		if err != nil {
-			return req, close, err
-		}
-
-		if len(buf) == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-
-		d := jx.DecodeBytes(buf)
-
-		var request RbacRole
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

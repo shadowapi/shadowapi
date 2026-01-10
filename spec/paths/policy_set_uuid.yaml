@@ -1,6 +1,8 @@
 get:
-  summary: Get role details
-  operationId: getRole
+  summary: Get policy set details
+  operationId: getPolicySet
+  tags:
+    - access
   parameters:
     - in: path
       name: uuid
@@ -8,26 +10,26 @@ get:
       schema:
         type: string
         format: uuid
-      description: Role UUID
+      description: Policy Set UUID
   responses:
     "200":
-      description: Role details
+      description: Policy set details
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/RBACRole"
+            $ref: "../openapi.yaml#/components/schemas/PolicySet"
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac
 
 put:
-  summary: Update a role
-  operationId: updateRole
+  summary: Update a policy set
+  operationId: updatePolicySet
+  tags:
+    - access
   parameters:
     - in: path
       name: uuid
@@ -35,32 +37,32 @@ put:
       schema:
         type: string
         format: uuid
-      description: Role UUID
+      description: Policy Set UUID
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          $ref: "../openapi.yaml#/components/schemas/RBACRole"
+          $ref: "../openapi.yaml#/components/schemas/PolicySet"
   responses:
     "200":
-      description: Role updated successfully
+      description: Policy set updated successfully
       content:
         application/json:
           schema:
-            $ref: "../openapi.yaml#/components/schemas/RBACRole"
+            $ref: "../openapi.yaml#/components/schemas/PolicySet"
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac
 
 delete:
-  summary: Delete a role
-  operationId: deleteRole
+  summary: Delete a policy set
+  operationId: deletePolicySet
+  tags:
+    - access
   parameters:
     - in: path
       name: uuid
@@ -68,15 +70,13 @@ delete:
       schema:
         type: string
         format: uuid
-      description: Role UUID
+      description: Policy Set UUID
   responses:
     "204":
-      description: Role deleted successfully
+      description: Policy set deleted successfully
     default:
       description: Error
       content:
         application/json:
           schema:
             $ref: "../openapi.yaml#/components/schemas/Error"
-  tags:
-    - rbac

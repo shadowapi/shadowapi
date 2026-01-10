@@ -20,12 +20,12 @@ type Handler interface {
 	//
 	// POST /workspace/{uuid}/members
 	AddWorkspaceMember(ctx context.Context, req *WorkspaceMember, params AddWorkspaceMemberParams) (AddWorkspaceMemberRes, error)
-	// AssignRoleToUser implements assignRoleToUser operation.
+	// AssignPolicySetToUser implements assignPolicySetToUser operation.
 	//
-	// Assign a role to a user.
+	// Assign a policy set to a user.
 	//
-	// POST /rbac/user/{user_uuid}/roles
-	AssignRoleToUser(ctx context.Context, req *AssignRoleToUserReq, params AssignRoleToUserParams) (AssignRoleToUserRes, error)
+	// POST /access/user/{user_uuid}/policy-sets
+	AssignPolicySetToUser(ctx context.Context, req *AssignPolicySetToUserReq, params AssignPolicySetToUserParams) (AssignPolicySetToUserRes, error)
 	// AuthConsent implements auth-consent operation.
 	//
 	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
@@ -92,7 +92,7 @@ type Handler interface {
 	//
 	// Check if a user has permission.
 	//
-	// POST /rbac/check
+	// POST /access/check
 	CheckPermission(ctx context.Context, req *CheckPermissionReq) (CheckPermissionRes, error)
 	// CheckWorkspaceExists implements checkWorkspaceExists operation.
 	//
@@ -106,12 +106,12 @@ type Handler interface {
 	//
 	// POST /password/reset/confirm
 	ConfirmPasswordReset(ctx context.Context, req *PasswordResetConfirm) (ConfirmPasswordResetRes, error)
-	// CreateRole implements createRole operation.
+	// CreatePolicySet implements createPolicySet operation.
 	//
-	// Create a new role.
+	// Create a new policy set.
 	//
-	// POST /rbac/role
-	CreateRole(ctx context.Context, req *RbacRole) (CreateRoleRes, error)
+	// POST /access/policy-set
+	CreatePolicySet(ctx context.Context, req *PolicySet) (CreatePolicySetRes, error)
 	// CreateUser implements createUser operation.
 	//
 	// Create a new user.
@@ -221,18 +221,18 @@ type Handler interface {
 	//
 	// PUT /datasource/{uuid}/oauth2/client
 	DatasourceSetOAuth2Client(ctx context.Context, req *DatasourceSetOAuth2ClientReq, params DatasourceSetOAuth2ClientParams) (DatasourceSetOAuth2ClientRes, error)
+	// DeletePolicySet implements deletePolicySet operation.
+	//
+	// Delete a policy set.
+	//
+	// DELETE /access/policy-set/{uuid}
+	DeletePolicySet(ctx context.Context, params DeletePolicySetParams) (DeletePolicySetRes, error)
 	// DeleteRegisteredWorker implements deleteRegisteredWorker operation.
 	//
 	// Delete registered worker.
 	//
 	// DELETE /workers/{uuid}
 	DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) (DeleteRegisteredWorkerRes, error)
-	// DeleteRole implements deleteRole operation.
-	//
-	// Delete a role.
-	//
-	// DELETE /rbac/role/{uuid}
-	DeleteRole(ctx context.Context, params DeleteRoleParams) (DeleteRoleRes, error)
 	// DeleteUser implements deleteUser operation.
 	//
 	// Delete user.
@@ -269,6 +269,12 @@ type Handler interface {
 	//
 	// GET /password/reset/{token}
 	GetPasswordResetByToken(ctx context.Context, params GetPasswordResetByTokenParams) (GetPasswordResetByTokenRes, error)
+	// GetPolicySet implements getPolicySet operation.
+	//
+	// Get policy set details.
+	//
+	// GET /access/policy-set/{uuid}
+	GetPolicySet(ctx context.Context, params GetPolicySetParams) (GetPolicySetRes, error)
 	// GetProfile implements getProfile operation.
 	//
 	// Get current user profile.
@@ -281,24 +287,18 @@ type Handler interface {
 	//
 	// GET /workers/{uuid}
 	GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (GetRegisteredWorkerRes, error)
-	// GetRole implements getRole operation.
-	//
-	// Get role details.
-	//
-	// GET /rbac/role/{uuid}
-	GetRole(ctx context.Context, params GetRoleParams) (GetRoleRes, error)
 	// GetUser implements getUser operation.
 	//
 	// Get user details.
 	//
 	// GET /user/{uuid}
 	GetUser(ctx context.Context, params GetUserParams) (GetUserRes, error)
-	// GetUserRoles implements getUserRoles operation.
+	// GetUserPolicySets implements getUserPolicySets operation.
 	//
-	// Get roles for a user.
+	// Get policy sets for a user.
 	//
-	// GET /rbac/user/{user_uuid}/roles
-	GetUserRoles(ctx context.Context, params GetUserRolesParams) (GetUserRolesRes, error)
+	// GET /access/user/{user_uuid}/policy-sets
+	GetUserPolicySets(ctx context.Context, params GetUserPolicySetsParams) (GetUserPolicySetsRes, error)
 	// GetWorkerEnrollmentToken implements getWorkerEnrollmentToken operation.
 	//
 	// Get worker enrollment token details.
@@ -315,20 +315,20 @@ type Handler interface {
 	//
 	// List all permissions.
 	//
-	// GET /rbac/permission
+	// GET /access/permission
 	ListPermissions(ctx context.Context, params ListPermissionsParams) (ListPermissionsRes, error)
+	// ListPolicySets implements listPolicySets operation.
+	//
+	// List all policy sets.
+	//
+	// GET /access/policy-set
+	ListPolicySets(ctx context.Context, params ListPolicySetsParams) (ListPolicySetsRes, error)
 	// ListRegisteredWorkers implements listRegisteredWorkers operation.
 	//
 	// List registered workers.
 	//
 	// GET /workers
 	ListRegisteredWorkers(ctx context.Context) (ListRegisteredWorkersRes, error)
-	// ListRoles implements listRoles operation.
-	//
-	// List all roles.
-	//
-	// GET /rbac/role
-	ListRoles(ctx context.Context, params ListRolesParams) (ListRolesRes, error)
 	// ListUsers implements listUsers operation.
 	//
 	// List all users.
@@ -476,12 +476,12 @@ type Handler interface {
 	//
 	// PUT /pipeline/{uuid}
 	PipelineUpdate(ctx context.Context, req *Pipeline, params PipelineUpdateParams) (PipelineUpdateRes, error)
-	// RemoveRoleFromUser implements removeRoleFromUser operation.
+	// RemovePolicySetFromUser implements removePolicySetFromUser operation.
 	//
-	// Remove a role from a user.
+	// Remove a policy set from a user.
 	//
-	// DELETE /rbac/user/{user_uuid}/roles/{role_name}
-	RemoveRoleFromUser(ctx context.Context, params RemoveRoleFromUserParams) (RemoveRoleFromUserRes, error)
+	// DELETE /access/user/{user_uuid}/policy-sets/{policy_set_name}
+	RemovePolicySetFromUser(ctx context.Context, params RemovePolicySetFromUserParams) (RemovePolicySetFromUserRes, error)
 	// RemoveWorkspaceMember implements removeWorkspaceMember operation.
 	//
 	// Remove member from workspace.
@@ -661,6 +661,12 @@ type Handler interface {
 	//
 	// GET /test-connection-job/{uuid}
 	TestConnectionJobGet(ctx context.Context, params TestConnectionJobGetParams) (TestConnectionJobGetRes, error)
+	// UpdatePolicySet implements updatePolicySet operation.
+	//
+	// Update a policy set.
+	//
+	// PUT /access/policy-set/{uuid}
+	UpdatePolicySet(ctx context.Context, req *PolicySet, params UpdatePolicySetParams) (UpdatePolicySetRes, error)
 	// UpdateProfile implements updateProfile operation.
 	//
 	// Update current user profile.
@@ -673,12 +679,6 @@ type Handler interface {
 	//
 	// PUT /workers/{uuid}
 	UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (UpdateRegisteredWorkerRes, error)
-	// UpdateRole implements updateRole operation.
-	//
-	// Update a role.
-	//
-	// PUT /rbac/role/{uuid}
-	UpdateRole(ctx context.Context, req *RbacRole, params UpdateRoleParams) (UpdateRoleRes, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Update user details.

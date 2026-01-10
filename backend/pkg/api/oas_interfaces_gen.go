@@ -9,8 +9,8 @@ type AddWorkspaceMemberRes interface {
 	addWorkspaceMemberRes()
 }
 
-type AssignRoleToUserRes interface {
-	assignRoleToUserRes()
+type AssignPolicySetToUserRes interface {
+	assignPolicySetToUserRes()
 }
 
 type AuthConsentRes interface {
@@ -65,8 +65,8 @@ type ConfirmPasswordResetRes interface {
 	confirmPasswordResetRes()
 }
 
-type CreateRoleRes interface {
-	createRoleRes()
+type CreatePolicySetRes interface {
+	createPolicySetRes()
 }
 
 type CreateUserRes interface {
@@ -141,12 +141,12 @@ type DatasourceSetOAuth2ClientRes interface {
 	datasourceSetOAuth2ClientRes()
 }
 
-type DeleteRegisteredWorkerRes interface {
-	deleteRegisteredWorkerRes()
+type DeletePolicySetRes interface {
+	deletePolicySetRes()
 }
 
-type DeleteRoleRes interface {
-	deleteRoleRes()
+type DeleteRegisteredWorkerRes interface {
+	deleteRegisteredWorkerRes()
 }
 
 type DeleteUserRes interface {
@@ -173,6 +173,10 @@ type GetPasswordResetByTokenRes interface {
 	getPasswordResetByTokenRes()
 }
 
+type GetPolicySetRes interface {
+	getPolicySetRes()
+}
+
 type GetProfileRes interface {
 	getProfileRes()
 }
@@ -181,16 +185,12 @@ type GetRegisteredWorkerRes interface {
 	getRegisteredWorkerRes()
 }
 
-type GetRoleRes interface {
-	getRoleRes()
+type GetUserPolicySetsRes interface {
+	getUserPolicySetsRes()
 }
 
 type GetUserRes interface {
 	getUserRes()
-}
-
-type GetUserRolesRes interface {
-	getUserRolesRes()
 }
 
 type GetWorkerEnrollmentTokenRes interface {
@@ -205,12 +205,12 @@ type ListPermissionsRes interface {
 	listPermissionsRes()
 }
 
-type ListRegisteredWorkersRes interface {
-	listRegisteredWorkersRes()
+type ListPolicySetsRes interface {
+	listPolicySetsRes()
 }
 
-type ListRolesRes interface {
-	listRolesRes()
+type ListRegisteredWorkersRes interface {
+	listRegisteredWorkersRes()
 }
 
 type ListUsersRes interface {
@@ -309,8 +309,8 @@ type PipelineUpdateRes interface {
 	pipelineUpdateRes()
 }
 
-type RemoveRoleFromUserRes interface {
-	removeRoleFromUserRes()
+type RemovePolicySetFromUserRes interface {
+	removePolicySetFromUserRes()
 }
 
 type RemoveWorkspaceMemberRes interface {
@@ -429,16 +429,16 @@ type TestConnectionJobGetRes interface {
 	testConnectionJobGetRes()
 }
 
+type UpdatePolicySetRes interface {
+	updatePolicySetRes()
+}
+
 type UpdateProfileRes interface {
 	updateProfileRes()
 }
 
 type UpdateRegisteredWorkerRes interface {
 	updateRegisteredWorkerRes()
-}
-
-type UpdateRoleRes interface {
-	updateRoleRes()
 }
 
 type UpdateUserRes interface {

@@ -1,44 +1,44 @@
-# spec/components/rbac_role.yaml
-# Defines the schema for an RBAC Role
+# spec/components/policy_set.yaml
+# Defines the schema for a Policy Set
 type: object
 additionalProperties: false
 properties:
   uuid:
     type: string
     format: uuid
-    description: Unique identifier for the role
+    description: Unique identifier for the policy set
     readOnly: true
   name:
     type: string
-    description: Unique role identifier (e.g., "super_admin", "workspace_owner")
+    description: Unique policy set identifier (e.g., "super_admin", "workspace_owner")
     pattern: "^[a-z][a-z0-9_]*$"
     minLength: 2
     maxLength: 100
   display_name:
     type: string
-    description: Human-readable role name
+    description: Human-readable policy set name
     minLength: 1
     maxLength: 255
   description:
     type: string
-    description: Description of the role's purpose and permissions
+    description: Description of the policy set's purpose and permissions
   scope:
     type: string
     enum: [global, workspace]
-    description: Scope of the role (global for system-wide, workspace for workspace-scoped)
+    description: Scope of the policy set (global for system-wide, workspace for workspace-scoped)
   is_system:
     type: boolean
-    description: Whether this is a system-defined role (cannot be deleted)
+    description: Whether this is a system-defined policy set (cannot be deleted)
     readOnly: true
   permissions:
     type: array
-    description: List of permissions granted by this role
+    description: List of permissions granted by this policy set
     items:
-      $ref: "rbac_permission.yaml"
+      $ref: "permission.yaml"
   created_at:
     type: string
     format: date-time
-    description: Timestamp of role creation
+    description: Timestamp of policy set creation
     readOnly: true
   updated_at:
     type: string

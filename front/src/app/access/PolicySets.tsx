@@ -10,49 +10,49 @@ import type { components } from '../../api/v1';
 
 const { Title } = Typography;
 
-type RBACRole = components['schemas']['rbac_role'];
+type PolicySet = components['schemas']['policy_set'];
 
-function Roles() {
+function PolicySets() {
   const navigate = useNavigate();
   const { slug } = useWorkspace();
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [roles, setRoles] = useState<RBACRole[]>([]);
+  const [policySets, setPolicySets] = useState<PolicySet[]>([]);
   const [scopeFilter, setScopeFilter] = useState<'global' | 'workspace' | undefined>(undefined);
 
-  const loadRoles = useCallback(async () => {
+  const loadPolicySets = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await client.GET('/rbac/role', {
+    const { data, error } = await client.GET('/access/policy-set', {
       params: { query: scopeFilter ? { scope: scopeFilter } : {} },
     });
     if (error) {
-      message.error('Failed to load roles');
+      message.error('Failed to load policy sets');
       setLoading(false);
       return;
     }
-    setRoles(data || []);
+    setPolicySets(data || []);
     setLoading(false);
   }, [scopeFilter]);
 
   useEffect(() => {
     if (isAdmin(currentUser)) {
-      loadRoles();
+      loadPolicySets();
     }
-  }, [loadRoles, currentUser]);
+  }, [loadPolicySets, currentUser]);
 
   const handleDelete = async (uuid: string) => {
-    const { error } = await client.DELETE('/rbac/role/{uuid}', {
+    const { error } = await client.DELETE('/access/policy-set/{uuid}', {
       params: { path: { uuid } },
     });
     if (error) {
-      message.error('Failed to delete role');
+      message.error('Failed to delete policy set');
       return;
     }
-    message.success('Role deleted');
-    loadRoles();
+    message.success('Policy set deleted');
+    loadPolicySets();
   };
 
-  const columns: ColumnsType<RBACRole> = [
+  const columns: ColumnsType<PolicySet> = [
     {
       title: 'Name',
       dataIndex: 'name',
@@ -91,8 +91,8 @@ function Roles() {
       render: (_, record) =>
         record.is_system ? null : (
           <Popconfirm
-            title="Delete role"
-            description="Are you sure you want to delete this role?"
+            title="Delete policy set"
+            description="Are you sure you want to delete this policy set?"
             onConfirm={() => handleDelete(record.uuid!)}
             okButtonProps={{ danger: true }}
             okText="Delete"
@@ -136,7 +136,7 @@ function Roles() {
       >
         <Space>
           <Title level={4} style={{ margin: 0 }}>
-            Roles
+            Policy Sets
           </Title>
           <Select
             placeholder="Filter by scope"
@@ -154,19 +154,19 @@ function Roles() {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => navigate(`/w/${slug}/rbac/roles/new`)}
+          onClick={() => navigate(`/w/${slug}/access/policy-sets/new`)}
         >
-          Create Role
+          Create Policy Set
         </Button>
       </Space>
       <Table
         columns={columns}
-        dataSource={roles}
+        dataSource={policySets}
         rowKey="uuid"
         loading={loading}
         pagination={false}
         onRow={(record) => ({
-          onClick: () => navigate(`/w/${slug}/rbac/roles/${record.uuid}`),
+          onClick: () => navigate(`/w/${slug}/access/policy-sets/${record.uuid}`),
           style: { cursor: 'pointer' },
         })}
       />
@@ -174,4 +174,4 @@ function Roles() {
   );
 }
 
-export default Roles;
+export default PolicySets;
