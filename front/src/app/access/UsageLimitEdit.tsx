@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import {
   Form,
-  Input,
   Button,
   Space,
   Typography,
@@ -26,6 +25,7 @@ import type { components } from '../../api/v1';
 const { Title, Paragraph } = Typography;
 
 type UsageLimit = components['schemas']['usage_limit'];
+type PolicySet = components['schemas']['policy_set'];
 
 const limitTypeOptions = [
   { label: 'Messages Fetch', value: 'messages_fetch' },
@@ -51,6 +51,7 @@ function UsageLimitEdit() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [unlimited, setUnlimited] = useState(false);
+  const [policySets, setPolicySets] = useState<PolicySet[]>([]);
 
   const isNew = !uuid;
 
@@ -75,6 +76,20 @@ function UsageLimitEdit() {
         .finally(() => setLoading(false));
     }
   }, [uuid, isNew, currentUser, form, navigate, slug]);
+
+  useEffect(() => {
+    // Load policy sets for the dropdown
+    client.GET('/access/policy-set').then(({ data }) => {
+      if (data) {
+        setPolicySets(data);
+      }
+    });
+  }, []);
+
+  const policySetOptions = policySets.map((ps) => ({
+    label: ps.display_name || ps.name,
+    value: ps.name,
+  }));
 
   const handleSubmit = async (values: Partial<UsageLimit>) => {
     setSaving(true);
@@ -186,10 +201,17 @@ function UsageLimitEdit() {
             >
               <Form.Item
                 name="policy_set_name"
-                label="Policy Set Name"
-                rules={[{ required: true, message: 'Please enter policy set name' }]}
+                label="Policy Set"
+                rules={[{ required: true, message: 'Please select a policy set' }]}
               >
-                <Input placeholder="e.g., workspace_member" />
+                <Select
+                  options={policySetOptions}
+                  placeholder="Select policy set"
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -250,10 +272,10 @@ function UsageLimitEdit() {
               Usage limits control how many messages can be processed per policy set.
               All users with this policy set will share this default limit.
             </Paragraph>
-            <Title level={5}>Policy Set Name</Title>
+            <Title level={5}>Policy Set</Title>
             <Paragraph type="secondary">
-              The name of the policy set this limit applies to (e.g., workspace_member,
-              workspace_admin). Users assigned to this policy set will inherit this limit.
+              Select the policy set this limit applies to. Users assigned to this
+              policy set will inherit this limit as their default.
             </Paragraph>
             <Title level={5}>Limit Type</Title>
             <Paragraph type="secondary">
