@@ -65,3 +65,35 @@ func (s *StoragePostgresTableCreateRequest) setDefaults() {
 		s.DropIfExists.SetTo(val)
 	}
 }
+
+// setDefaults set default value of fields.
+func (s *UsageLimit) setDefaults() {
+	{
+		val := UsageLimitResetPeriod("monthly")
+		s.ResetPeriod.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.IsEnabled.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *UserUsageLimitOverride) setDefaults() {
+	{
+		val := bool(true)
+		s.IsEnabled.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *WorkerUsageLimit) setDefaults() {
+	{
+		val := WorkerUsageLimitResetPeriod("monthly")
+		s.ResetPeriod.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.IsEnabled.SetTo(val)
+	}
+}

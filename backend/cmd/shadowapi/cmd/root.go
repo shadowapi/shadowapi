@@ -21,6 +21,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/server"
+	"github.com/shadowapi/shadowapi/backend/internal/usagelimits"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/internal/worker/results"
 	"github.com/shadowapi/shadowapi/backend/internal/workerstore"
@@ -74,6 +75,7 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		do.Provide(injector, workspace.Provide) // Workspace middleware
 		do.Provide(injector, rbac.Provide)      // RBAC enforcer
 		do.Provide(injector, rbac.ProvideMiddleware)
+		do.Provide(injector, usagelimits.Provide) // Usage limits manager
 
 		// Register UserManager implementation (database-based)
 		do.Provide(injector, dbauth.Provide)

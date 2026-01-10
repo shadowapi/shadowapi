@@ -151,6 +151,20 @@ func encodeCreatePolicySetRequest(
 	return nil
 }
 
+func encodeCreateUsageLimitRequest(
+	req *UsageLimit,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateUserRequest(
 	req *User,
 	r *http.Request,
@@ -165,8 +179,36 @@ func encodeCreateUserRequest(
 	return nil
 }
 
+func encodeCreateUserUsageLimitOverrideRequest(
+	req *UserUsageLimitOverride,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateWorkerEnrollmentTokenRequest(
 	req *WorkerEnrollmentToken,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateWorkerUsageLimitRequest(
+	req *WorkerUsageLimit,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -595,8 +637,50 @@ func encodeUpdateRegisteredWorkerRequest(
 	return nil
 }
 
+func encodeUpdateUsageLimitRequest(
+	req *UsageLimit,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateUserRequest(
 	req *User,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateUserUsageLimitOverrideRequest(
+	req *UserUsageLimitOverride,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateWorkerUsageLimitRequest(
+	req *WorkerUsageLimit,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

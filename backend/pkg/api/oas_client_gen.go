@@ -133,6 +133,12 @@ type Invoker interface {
 	//
 	// POST /access/policy-set
 	CreatePolicySet(ctx context.Context, request *PolicySet) (CreatePolicySetRes, error)
+	// CreateUsageLimit invokes createUsageLimit operation.
+	//
+	// Create a new usage limit on a policy set.
+	//
+	// POST /access/usage-limits
+	CreateUsageLimit(ctx context.Context, request *UsageLimit) (CreateUsageLimitRes, error)
 	// CreateUser invokes createUser operation.
 	//
 	// Create a new user.
@@ -145,12 +151,24 @@ type Invoker interface {
 	//
 	// POST /user/session
 	CreateUserSession(ctx context.Context) (CreateUserSessionRes, error)
+	// CreateUserUsageLimitOverride invokes createUserUsageLimitOverride operation.
+	//
+	// Create a user usage limit override.
+	//
+	// POST /access/user/{user_uuid}/usage-limits
+	CreateUserUsageLimitOverride(ctx context.Context, request *UserUsageLimitOverride, params CreateUserUsageLimitOverrideParams) (CreateUserUsageLimitOverrideRes, error)
 	// CreateWorkerEnrollmentToken invokes createWorkerEnrollmentToken operation.
 	//
 	// Create worker enrollment token.
 	//
 	// POST /workers/enrollment-tokens
 	CreateWorkerEnrollmentToken(ctx context.Context, request *WorkerEnrollmentToken) (CreateWorkerEnrollmentTokenRes, error)
+	// CreateWorkerUsageLimit invokes createWorkerUsageLimit operation.
+	//
+	// Create a worker usage limit.
+	//
+	// POST /access/worker/{worker_uuid}/usage-limits
+	CreateWorkerUsageLimit(ctx context.Context, request *WorkerUsageLimit, params CreateWorkerUsageLimitParams) (CreateWorkerUsageLimitRes, error)
 	// CreateWorkspace invokes createWorkspace operation.
 	//
 	// Create a new workspace.
@@ -254,18 +272,36 @@ type Invoker interface {
 	//
 	// DELETE /workers/{uuid}
 	DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) (DeleteRegisteredWorkerRes, error)
+	// DeleteUsageLimit invokes deleteUsageLimit operation.
+	//
+	// Delete a usage limit.
+	//
+	// DELETE /access/usage-limits/{uuid}
+	DeleteUsageLimit(ctx context.Context, params DeleteUsageLimitParams) (DeleteUsageLimitRes, error)
 	// DeleteUser invokes deleteUser operation.
 	//
 	// Delete user.
 	//
 	// DELETE /user/{uuid}
 	DeleteUser(ctx context.Context, params DeleteUserParams) (DeleteUserRes, error)
+	// DeleteUserUsageLimitOverride invokes deleteUserUsageLimitOverride operation.
+	//
+	// Delete a user usage limit override.
+	//
+	// DELETE /access/user/{user_uuid}/usage-limits/{uuid}
+	DeleteUserUsageLimitOverride(ctx context.Context, params DeleteUserUsageLimitOverrideParams) (DeleteUserUsageLimitOverrideRes, error)
 	// DeleteWorkerEnrollmentToken invokes deleteWorkerEnrollmentToken operation.
 	//
 	// Delete worker enrollment token.
 	//
 	// DELETE /workers/enrollment-tokens/{uuid}
 	DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) (DeleteWorkerEnrollmentTokenRes, error)
+	// DeleteWorkerUsageLimit invokes deleteWorkerUsageLimit operation.
+	//
+	// Delete a worker usage limit.
+	//
+	// DELETE /access/worker/{worker_uuid}/usage-limits/{uuid}
+	DeleteWorkerUsageLimit(ctx context.Context, params DeleteWorkerUsageLimitParams) (DeleteWorkerUsageLimitRes, error)
 	// DeleteWorkspace invokes deleteWorkspace operation.
 	//
 	// Delete workspace.
@@ -308,6 +344,18 @@ type Invoker interface {
 	//
 	// GET /workers/{uuid}
 	GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (GetRegisteredWorkerRes, error)
+	// GetUsageLimit invokes getUsageLimit operation.
+	//
+	// Get a usage limit by UUID.
+	//
+	// GET /access/usage-limits/{uuid}
+	GetUsageLimit(ctx context.Context, params GetUsageLimitParams) (GetUsageLimitRes, error)
+	// GetUsageStatus invokes getUsageStatus operation.
+	//
+	// Get combined usage status for user and worker.
+	//
+	// GET /access/usage-status
+	GetUsageStatus(ctx context.Context, params GetUsageStatusParams) (GetUsageStatusRes, error)
 	// GetUser invokes getUser operation.
 	//
 	// Get user details.
@@ -350,6 +398,18 @@ type Invoker interface {
 	//
 	// GET /workers
 	ListRegisteredWorkers(ctx context.Context) (ListRegisteredWorkersRes, error)
+	// ListUsageLimits invokes listUsageLimits operation.
+	//
+	// List all usage limits on policy sets.
+	//
+	// GET /access/usage-limits
+	ListUsageLimits(ctx context.Context, params ListUsageLimitsParams) (ListUsageLimitsRes, error)
+	// ListUserUsageLimitOverrides invokes listUserUsageLimitOverrides operation.
+	//
+	// List user's usage limit overrides.
+	//
+	// GET /access/user/{user_uuid}/usage-limits
+	ListUserUsageLimitOverrides(ctx context.Context, params ListUserUsageLimitOverridesParams) (ListUserUsageLimitOverridesRes, error)
 	// ListUsers invokes listUsers operation.
 	//
 	// List all users.
@@ -362,6 +422,12 @@ type Invoker interface {
 	//
 	// GET /workers/enrollment-tokens
 	ListWorkerEnrollmentTokens(ctx context.Context) (ListWorkerEnrollmentTokensRes, error)
+	// ListWorkerUsageLimits invokes listWorkerUsageLimits operation.
+	//
+	// List worker's usage limits.
+	//
+	// GET /access/worker/{worker_uuid}/usage-limits
+	ListWorkerUsageLimits(ctx context.Context, params ListWorkerUsageLimitsParams) (ListWorkerUsageLimitsRes, error)
 	// ListWorkspaceInvites invokes listWorkspaceInvites operation.
 	//
 	// List workspace invites.
@@ -700,12 +766,30 @@ type Invoker interface {
 	//
 	// PUT /workers/{uuid}
 	UpdateRegisteredWorker(ctx context.Context, request *RegisteredWorker, params UpdateRegisteredWorkerParams) (UpdateRegisteredWorkerRes, error)
+	// UpdateUsageLimit invokes updateUsageLimit operation.
+	//
+	// Update a usage limit.
+	//
+	// PUT /access/usage-limits/{uuid}
+	UpdateUsageLimit(ctx context.Context, request *UsageLimit, params UpdateUsageLimitParams) (UpdateUsageLimitRes, error)
 	// UpdateUser invokes updateUser operation.
 	//
 	// Update user details.
 	//
 	// PUT /user/{uuid}
 	UpdateUser(ctx context.Context, request *User, params UpdateUserParams) (UpdateUserRes, error)
+	// UpdateUserUsageLimitOverride invokes updateUserUsageLimitOverride operation.
+	//
+	// Update a user usage limit override.
+	//
+	// PUT /access/user/{user_uuid}/usage-limits/{uuid}
+	UpdateUserUsageLimitOverride(ctx context.Context, request *UserUsageLimitOverride, params UpdateUserUsageLimitOverrideParams) (UpdateUserUsageLimitOverrideRes, error)
+	// UpdateWorkerUsageLimit invokes updateWorkerUsageLimit operation.
+	//
+	// Update a worker usage limit.
+	//
+	// PUT /access/worker/{worker_uuid}/usage-limits/{uuid}
+	UpdateWorkerUsageLimit(ctx context.Context, request *WorkerUsageLimit, params UpdateWorkerUsageLimitParams) (UpdateWorkerUsageLimitRes, error)
 	// UpdateWorkspace invokes updateWorkspace operation.
 	//
 	// Update workspace.
@@ -2400,6 +2484,114 @@ func (c *Client) sendCreatePolicySet(ctx context.Context, request *PolicySet) (r
 	return result, nil
 }
 
+// CreateUsageLimit invokes createUsageLimit operation.
+//
+// Create a new usage limit on a policy set.
+//
+// POST /access/usage-limits
+func (c *Client) CreateUsageLimit(ctx context.Context, request *UsageLimit) (CreateUsageLimitRes, error) {
+	res, err := c.sendCreateUsageLimit(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateUsageLimit(ctx context.Context, request *UsageLimit) (res CreateUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/access/usage-limits"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/access/usage-limits"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateUsageLimitRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateUsageLimitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateUser invokes createUser operation.
 //
 // Create a new user.
@@ -2547,6 +2739,133 @@ func (c *Client) sendCreateUserSession(ctx context.Context) (res CreateUserSessi
 	return result, nil
 }
 
+// CreateUserUsageLimitOverride invokes createUserUsageLimitOverride operation.
+//
+// Create a user usage limit override.
+//
+// POST /access/user/{user_uuid}/usage-limits
+func (c *Client) CreateUserUsageLimitOverride(ctx context.Context, request *UserUsageLimitOverride, params CreateUserUsageLimitOverrideParams) (CreateUserUsageLimitOverrideRes, error) {
+	res, err := c.sendCreateUserUsageLimitOverride(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateUserUsageLimitOverride(ctx context.Context, request *UserUsageLimitOverride, params CreateUserUsageLimitOverrideParams) (res CreateUserUsageLimitOverrideRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createUserUsageLimitOverride"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/access/user/{user_uuid}/usage-limits"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateUserUsageLimitOverrideOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/access/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateUserUsageLimitOverrideRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateUserUsageLimitOverrideOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateUserUsageLimitOverrideResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateWorkerEnrollmentToken invokes createWorkerEnrollmentToken operation.
 //
 // Create worker enrollment token.
@@ -2648,6 +2967,133 @@ func (c *Client) sendCreateWorkerEnrollmentToken(ctx context.Context, request *W
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateWorkerEnrollmentTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateWorkerUsageLimit invokes createWorkerUsageLimit operation.
+//
+// Create a worker usage limit.
+//
+// POST /access/worker/{worker_uuid}/usage-limits
+func (c *Client) CreateWorkerUsageLimit(ctx context.Context, request *WorkerUsageLimit, params CreateWorkerUsageLimitParams) (CreateWorkerUsageLimitRes, error) {
+	res, err := c.sendCreateWorkerUsageLimit(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateWorkerUsageLimit(ctx context.Context, request *WorkerUsageLimit, params CreateWorkerUsageLimitParams) (res CreateWorkerUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createWorkerUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/access/worker/{worker_uuid}/usage-limits"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateWorkerUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/access/worker/"
+	{
+		// Encode "worker_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "worker_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.WorkerUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateWorkerUsageLimitRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateWorkerUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateWorkerUsageLimitResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4777,6 +5223,129 @@ func (c *Client) sendDeleteRegisteredWorker(ctx context.Context, params DeleteRe
 	return result, nil
 }
 
+// DeleteUsageLimit invokes deleteUsageLimit operation.
+//
+// Delete a usage limit.
+//
+// DELETE /access/usage-limits/{uuid}
+func (c *Client) DeleteUsageLimit(ctx context.Context, params DeleteUsageLimitParams) (DeleteUsageLimitRes, error) {
+	res, err := c.sendDeleteUsageLimit(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteUsageLimit(ctx context.Context, params DeleteUsageLimitParams) (res DeleteUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/access/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/access/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteUsageLimitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteUser invokes deleteUser operation.
 //
 // Delete user.
@@ -4900,6 +5469,148 @@ func (c *Client) sendDeleteUser(ctx context.Context, params DeleteUserParams) (r
 	return result, nil
 }
 
+// DeleteUserUsageLimitOverride invokes deleteUserUsageLimitOverride operation.
+//
+// Delete a user usage limit override.
+//
+// DELETE /access/user/{user_uuid}/usage-limits/{uuid}
+func (c *Client) DeleteUserUsageLimitOverride(ctx context.Context, params DeleteUserUsageLimitOverrideParams) (DeleteUserUsageLimitOverrideRes, error) {
+	res, err := c.sendDeleteUserUsageLimitOverride(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteUserUsageLimitOverride(ctx context.Context, params DeleteUserUsageLimitOverrideParams) (res DeleteUserUsageLimitOverrideRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteUserUsageLimitOverride"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/access/user/{user_uuid}/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteUserUsageLimitOverrideOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/access/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteUserUsageLimitOverrideOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteUserUsageLimitOverrideResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteWorkerEnrollmentToken invokes deleteWorkerEnrollmentToken operation.
 //
 // Delete worker enrollment token.
@@ -5016,6 +5727,148 @@ func (c *Client) sendDeleteWorkerEnrollmentToken(ctx context.Context, params Del
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteWorkerEnrollmentTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteWorkerUsageLimit invokes deleteWorkerUsageLimit operation.
+//
+// Delete a worker usage limit.
+//
+// DELETE /access/worker/{worker_uuid}/usage-limits/{uuid}
+func (c *Client) DeleteWorkerUsageLimit(ctx context.Context, params DeleteWorkerUsageLimitParams) (DeleteWorkerUsageLimitRes, error) {
+	res, err := c.sendDeleteWorkerUsageLimit(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteWorkerUsageLimit(ctx context.Context, params DeleteWorkerUsageLimitParams) (res DeleteWorkerUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteWorkerUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/access/worker/{worker_uuid}/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteWorkerUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/access/worker/"
+	{
+		// Encode "worker_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "worker_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.WorkerUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteWorkerUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteWorkerUsageLimitResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5812,6 +6665,294 @@ func (c *Client) sendGetRegisteredWorker(ctx context.Context, params GetRegister
 
 	stage = "DecodeResponse"
 	result, err := decodeGetRegisteredWorkerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetUsageLimit invokes getUsageLimit operation.
+//
+// Get a usage limit by UUID.
+//
+// GET /access/usage-limits/{uuid}
+func (c *Client) GetUsageLimit(ctx context.Context, params GetUsageLimitParams) (GetUsageLimitRes, error) {
+	res, err := c.sendGetUsageLimit(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetUsageLimit(ctx context.Context, params GetUsageLimitParams) (res GetUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/access/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/access/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetUsageLimitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetUsageStatus invokes getUsageStatus operation.
+//
+// Get combined usage status for user and worker.
+//
+// GET /access/usage-status
+func (c *Client) GetUsageStatus(ctx context.Context, params GetUsageStatusParams) (GetUsageStatusRes, error) {
+	res, err := c.sendGetUsageStatus(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetUsageStatus(ctx context.Context, params GetUsageStatusParams) (res GetUsageStatusRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getUsageStatus"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/access/usage-status"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetUsageStatusOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/access/usage-status"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "user_uuid" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "user_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "worker_uuid" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "worker_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.UUIDToString(params.WorkerUUID))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "workspace_slug" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "workspace_slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.WorkspaceSlug))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(string(params.LimitType)))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetUsageStatusOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetUsageStatusResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6707,6 +7848,277 @@ func (c *Client) sendListRegisteredWorkers(ctx context.Context) (res ListRegiste
 	return result, nil
 }
 
+// ListUsageLimits invokes listUsageLimits operation.
+//
+// List all usage limits on policy sets.
+//
+// GET /access/usage-limits
+func (c *Client) ListUsageLimits(ctx context.Context, params ListUsageLimitsParams) (ListUsageLimitsRes, error) {
+	res, err := c.sendListUsageLimits(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListUsageLimits(ctx context.Context, params ListUsageLimitsParams) (res ListUsageLimitsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listUsageLimits"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/access/usage-limits"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListUsageLimitsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/access/usage-limits"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "policy_set_name" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "policy_set_name",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.PolicySetName.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListUsageLimitsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListUsageLimitsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListUserUsageLimitOverrides invokes listUserUsageLimitOverrides operation.
+//
+// List user's usage limit overrides.
+//
+// GET /access/user/{user_uuid}/usage-limits
+func (c *Client) ListUserUsageLimitOverrides(ctx context.Context, params ListUserUsageLimitOverridesParams) (ListUserUsageLimitOverridesRes, error) {
+	res, err := c.sendListUserUsageLimitOverrides(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListUserUsageLimitOverrides(ctx context.Context, params ListUserUsageLimitOverridesParams) (res ListUserUsageLimitOverridesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listUserUsageLimitOverrides"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/access/user/{user_uuid}/usage-limits"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListUserUsageLimitOverridesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/access/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "workspace_slug" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "workspace_slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.WorkspaceSlug.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListUserUsageLimitOverridesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListUserUsageLimitOverridesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListUsers invokes listUsers operation.
 //
 // List all users.
@@ -6910,6 +8322,151 @@ func (c *Client) sendListWorkerEnrollmentTokens(ctx context.Context) (res ListWo
 
 	stage = "DecodeResponse"
 	result, err := decodeListWorkerEnrollmentTokensResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListWorkerUsageLimits invokes listWorkerUsageLimits operation.
+//
+// List worker's usage limits.
+//
+// GET /access/worker/{worker_uuid}/usage-limits
+func (c *Client) ListWorkerUsageLimits(ctx context.Context, params ListWorkerUsageLimitsParams) (ListWorkerUsageLimitsRes, error) {
+	res, err := c.sendListWorkerUsageLimits(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListWorkerUsageLimits(ctx context.Context, params ListWorkerUsageLimitsParams) (res ListWorkerUsageLimitsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listWorkerUsageLimits"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/access/worker/{worker_uuid}/usage-limits"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListWorkerUsageLimitsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/access/worker/"
+	{
+		// Encode "worker_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "worker_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.WorkerUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "workspace_slug" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "workspace_slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.WorkspaceSlug.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListWorkerUsageLimitsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListWorkerUsageLimitsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13725,6 +15282,132 @@ func (c *Client) sendUpdateRegisteredWorker(ctx context.Context, request *Regist
 	return result, nil
 }
 
+// UpdateUsageLimit invokes updateUsageLimit operation.
+//
+// Update a usage limit.
+//
+// PUT /access/usage-limits/{uuid}
+func (c *Client) UpdateUsageLimit(ctx context.Context, request *UsageLimit, params UpdateUsageLimitParams) (UpdateUsageLimitRes, error) {
+	res, err := c.sendUpdateUsageLimit(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateUsageLimit(ctx context.Context, request *UsageLimit, params UpdateUsageLimitParams) (res UpdateUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/access/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/access/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateUsageLimitRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateUsageLimitResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateUser invokes updateUser operation.
 //
 // Update user details.
@@ -13844,6 +15527,296 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *User, params Updat
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateUserUsageLimitOverride invokes updateUserUsageLimitOverride operation.
+//
+// Update a user usage limit override.
+//
+// PUT /access/user/{user_uuid}/usage-limits/{uuid}
+func (c *Client) UpdateUserUsageLimitOverride(ctx context.Context, request *UserUsageLimitOverride, params UpdateUserUsageLimitOverrideParams) (UpdateUserUsageLimitOverrideRes, error) {
+	res, err := c.sendUpdateUserUsageLimitOverride(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateUserUsageLimitOverride(ctx context.Context, request *UserUsageLimitOverride, params UpdateUserUsageLimitOverrideParams) (res UpdateUserUsageLimitOverrideRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateUserUsageLimitOverride"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/access/user/{user_uuid}/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateUserUsageLimitOverrideOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/access/user/"
+	{
+		// Encode "user_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "user_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UserUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateUserUsageLimitOverrideRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateUserUsageLimitOverrideOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateUserUsageLimitOverrideResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateWorkerUsageLimit invokes updateWorkerUsageLimit operation.
+//
+// Update a worker usage limit.
+//
+// PUT /access/worker/{worker_uuid}/usage-limits/{uuid}
+func (c *Client) UpdateWorkerUsageLimit(ctx context.Context, request *WorkerUsageLimit, params UpdateWorkerUsageLimitParams) (UpdateWorkerUsageLimitRes, error) {
+	res, err := c.sendUpdateWorkerUsageLimit(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateWorkerUsageLimit(ctx context.Context, request *WorkerUsageLimit, params UpdateWorkerUsageLimitParams) (res UpdateWorkerUsageLimitRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateWorkerUsageLimit"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/access/worker/{worker_uuid}/usage-limits/{uuid}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateWorkerUsageLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/access/worker/"
+	{
+		// Encode "worker_uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "worker_uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.WorkerUUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/usage-limits/"
+	{
+		// Encode "uuid" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "uuid",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.UUID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateWorkerUsageLimitRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateWorkerUsageLimitOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateWorkerUsageLimitResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

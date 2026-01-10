@@ -75,6 +75,31 @@ Ladon-based policy system with workspace-scoped policies. Middleware maps API op
 - Subjects use format `policy_set:<name>` in Ladon policies
 - Frontend: `front/src/app/access/` (PolicySets.tsx, PolicySetEdit.tsx)
 
+### Usage Limits
+
+Configurable limits on message processing with two dimensions:
+- **User limits** (per workspace): Policy set defaults + per-user overrides
+- **Worker limits** (per workspace): Per-worker limits
+
+Features:
+- Reset periods: `daily`, `weekly`, `monthly`, `rolling_24h`, `rolling_7d`, `rolling_30d`
+- `NULL` limit value means unlimited
+- Effective limit is the minimum of user and worker limits
+- Partial processing: processes up to remaining quota
+
+API endpoints:
+- `GET/POST /api/v1/access/usage-limits` - Policy set default limits
+- `GET/PUT/DELETE /api/v1/access/usage-limits/{uuid}`
+- `GET/POST /api/v1/access/user/{user_uuid}/usage-limits` - User overrides
+- `PUT/DELETE /api/v1/access/user/{user_uuid}/usage-limits/{uuid}`
+- `GET/POST /api/v1/access/worker/{worker_uuid}/usage-limits` - Worker limits
+- `PUT/DELETE /api/v1/access/worker/{worker_uuid}/usage-limits/{uuid}`
+- `GET /api/v1/access/usage-status` - Combined usage status
+
+Database tables: `usage_limit`, `user_usage_limit_override`, `worker_usage_limit`, `user_usage_tracking`, `worker_usage_tracking`
+
+Key file: `backend/internal/usagelimits/manager.go`
+
 ### Email
 
 | Environment | Service | Configuration |

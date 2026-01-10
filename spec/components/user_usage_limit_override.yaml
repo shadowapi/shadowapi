@@ -1,0 +1,52 @@
+# spec/components/user_usage_limit_override.yaml
+# Defines per-user usage limit overrides scoped to workspace
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the override
+    readOnly: true
+  user_uuid:
+    type: string
+    format: uuid
+    description: User this override applies to
+  workspace_slug:
+    type: string
+    description: Workspace this override is scoped to
+    minLength: 1
+    maxLength: 63
+  limit_type:
+    type: string
+    enum: [messages_fetch, messages_push]
+    description: Type of operation being limited
+  limit_value:
+    type: integer
+    format: int64
+    nullable: true
+    description: Override limit value. Null means unlimited.
+    minimum: 0
+  reset_period:
+    type: string
+    enum: [daily, weekly, monthly, rolling_24h, rolling_7d, rolling_30d]
+    nullable: true
+    description: Override reset period. Null inherits from policy set.
+  is_enabled:
+    type: boolean
+    default: true
+    description: Whether this override is currently active
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of creation
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - user_uuid
+  - workspace_slug
+  - limit_type

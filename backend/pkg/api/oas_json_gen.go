@@ -3286,6 +3286,106 @@ func (s *ListRegisteredWorkersOKApplicationJSON) UnmarshalJSON(data []byte) erro
 	return s.Decode(d)
 }
 
+// Encode encodes ListUsageLimitsOKApplicationJSON as json.
+func (s ListUsageLimitsOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []UsageLimit(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes ListUsageLimitsOKApplicationJSON from json.
+func (s *ListUsageLimitsOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ListUsageLimitsOKApplicationJSON to nil")
+	}
+	var unwrapped []UsageLimit
+	if err := func() error {
+		unwrapped = make([]UsageLimit, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem UsageLimit
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ListUsageLimitsOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ListUsageLimitsOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ListUsageLimitsOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ListUserUsageLimitOverridesOKApplicationJSON as json.
+func (s ListUserUsageLimitOverridesOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []UserUsageLimitOverride(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes ListUserUsageLimitOverridesOKApplicationJSON from json.
+func (s *ListUserUsageLimitOverridesOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ListUserUsageLimitOverridesOKApplicationJSON to nil")
+	}
+	var unwrapped []UserUsageLimitOverride
+	if err := func() error {
+		unwrapped = make([]UserUsageLimitOverride, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem UserUsageLimitOverride
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ListUserUsageLimitOverridesOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ListUserUsageLimitOverridesOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ListUserUsageLimitOverridesOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes ListUsersOKApplicationJSON as json.
 func (s ListUsersOKApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := []User(s)
@@ -3382,6 +3482,56 @@ func (s ListWorkerEnrollmentTokensOKApplicationJSON) MarshalJSON() ([]byte, erro
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ListWorkerEnrollmentTokensOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ListWorkerUsageLimitsOKApplicationJSON as json.
+func (s ListWorkerUsageLimitsOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []WorkerUsageLimit(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes ListWorkerUsageLimitsOKApplicationJSON from json.
+func (s *ListWorkerUsageLimitsOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ListWorkerUsageLimitsOKApplicationJSON to nil")
+	}
+	var unwrapped []WorkerUsageLimit
+	if err := func() error {
+		unwrapped = make([]WorkerUsageLimit, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem WorkerUsageLimit
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ListWorkerUsageLimitsOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ListWorkerUsageLimitsOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ListWorkerUsageLimitsOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -7224,6 +7374,57 @@ func (s *OptNilDateTime) UnmarshalJSON(data []byte) error {
 	return s.Decode(d, json.DecodeDateTime)
 }
 
+// Encode encodes int64 as json.
+func (o OptNilInt64) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Int64(int64(o.Value))
+}
+
+// Decode decodes int64 from json.
+func (o *OptNilInt64) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilInt64 to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v int64
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	v, err := d.Int64()
+	if err != nil {
+		return err
+	}
+	o.Value = int64(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilInt64) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilInt64) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes string as json.
 func (o OptNilString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -7271,6 +7472,55 @@ func (s OptNilString) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNilString) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UserUsageLimitOverrideResetPeriod as json.
+func (o OptNilUserUsageLimitOverrideResetPeriod) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes UserUsageLimitOverrideResetPeriod from json.
+func (o *OptNilUserUsageLimitOverrideResetPeriod) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilUserUsageLimitOverrideResetPeriod to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v UserUsageLimitOverrideResetPeriod
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilUserUsageLimitOverrideResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilUserUsageLimitOverrideResetPeriod) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -7779,6 +8029,171 @@ func (s *OptUUID) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes UsageLimitResetPeriod as json.
+func (o OptUsageLimitResetPeriod) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes UsageLimitResetPeriod from json.
+func (o *OptUsageLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUsageLimitResetPeriod to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUsageLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUsageLimitResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageStatusUserLimit as json.
+func (o OptUsageStatusUserLimit) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes UsageStatusUserLimit from json.
+func (o *OptUsageStatusUserLimit) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUsageStatusUserLimit to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUsageStatusUserLimit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUsageStatusUserLimit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageStatusUserLimitResetPeriod as json.
+func (o OptUsageStatusUserLimitResetPeriod) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes UsageStatusUserLimitResetPeriod from json.
+func (o *OptUsageStatusUserLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUsageStatusUserLimitResetPeriod to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUsageStatusUserLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUsageStatusUserLimitResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageStatusWorkerLimit as json.
+func (o OptUsageStatusWorkerLimit) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes UsageStatusWorkerLimit from json.
+func (o *OptUsageStatusWorkerLimit) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUsageStatusWorkerLimit to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUsageStatusWorkerLimit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUsageStatusWorkerLimit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageStatusWorkerLimitResetPeriod as json.
+func (o OptUsageStatusWorkerLimitResetPeriod) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes UsageStatusWorkerLimitResetPeriod from json.
+func (o *OptUsageStatusWorkerLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUsageStatusWorkerLimitResetPeriod to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUsageStatusWorkerLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUsageStatusWorkerLimitResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes UserCurrentWorkspace as json.
 func (o OptUserCurrentWorkspace) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -7876,6 +8291,39 @@ func (s OptWorkerJobsData) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptWorkerJobsData) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes WorkerUsageLimitResetPeriod as json.
+func (o OptWorkerUsageLimitResetPeriod) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes WorkerUsageLimitResetPeriod from json.
+func (o *OptWorkerUsageLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptWorkerUsageLimitResetPeriod to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptWorkerUsageLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptWorkerUsageLimitResetPeriod) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -15102,6 +15550,831 @@ func (s *UpdateWorkspaceMemberRoleReqRole) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *UsageLimit) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UsageLimit) encodeFields(e *jx.Encoder) {
+	{
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("policy_set_name")
+		e.Str(s.PolicySetName)
+	}
+	{
+		e.FieldStart("limit_type")
+		s.LimitType.Encode(e)
+	}
+	{
+		if s.LimitValue.Set {
+			e.FieldStart("limit_value")
+			s.LimitValue.Encode(e)
+		}
+	}
+	{
+		if s.ResetPeriod.Set {
+			e.FieldStart("reset_period")
+			s.ResetPeriod.Encode(e)
+		}
+	}
+	{
+		if s.IsEnabled.Set {
+			e.FieldStart("is_enabled")
+			s.IsEnabled.Encode(e)
+		}
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfUsageLimit = [8]string{
+	0: "uuid",
+	1: "policy_set_name",
+	2: "limit_type",
+	3: "limit_value",
+	4: "reset_period",
+	5: "is_enabled",
+	6: "created_at",
+	7: "updated_at",
+}
+
+// Decode decodes UsageLimit from json.
+func (s *UsageLimit) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageLimit to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			if err := func() error {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "policy_set_name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.PolicySetName = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"policy_set_name\"")
+			}
+		case "limit_type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.LimitType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_type\"")
+			}
+		case "limit_value":
+			if err := func() error {
+				s.LimitValue.Reset()
+				if err := s.LimitValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_value\"")
+			}
+		case "reset_period":
+			if err := func() error {
+				s.ResetPeriod.Reset()
+				if err := s.ResetPeriod.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reset_period\"")
+			}
+		case "is_enabled":
+			if err := func() error {
+				s.IsEnabled.Reset()
+				if err := s.IsEnabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_enabled\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "updated_at":
+			if err := func() error {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UsageLimit")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000110,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfUsageLimit) {
+					name = jsonFieldsNameOfUsageLimit[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UsageLimit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageLimit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageLimitLimitType as json.
+func (s UsageLimitLimitType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UsageLimitLimitType from json.
+func (s *UsageLimitLimitType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageLimitLimitType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UsageLimitLimitType(v) {
+	case UsageLimitLimitTypeMessagesFetch:
+		*s = UsageLimitLimitTypeMessagesFetch
+	case UsageLimitLimitTypeMessagesPush:
+		*s = UsageLimitLimitTypeMessagesPush
+	default:
+		*s = UsageLimitLimitType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UsageLimitLimitType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageLimitLimitType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageLimitResetPeriod as json.
+func (s UsageLimitResetPeriod) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UsageLimitResetPeriod from json.
+func (s *UsageLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageLimitResetPeriod to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UsageLimitResetPeriod(v) {
+	case UsageLimitResetPeriodDaily:
+		*s = UsageLimitResetPeriodDaily
+	case UsageLimitResetPeriodWeekly:
+		*s = UsageLimitResetPeriodWeekly
+	case UsageLimitResetPeriodMonthly:
+		*s = UsageLimitResetPeriodMonthly
+	case UsageLimitResetPeriodRolling24h:
+		*s = UsageLimitResetPeriodRolling24h
+	case UsageLimitResetPeriodRolling7d:
+		*s = UsageLimitResetPeriodRolling7d
+	case UsageLimitResetPeriodRolling30d:
+		*s = UsageLimitResetPeriodRolling30d
+	default:
+		*s = UsageLimitResetPeriod(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UsageLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageLimitResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UsageStatus) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UsageStatus) encodeFields(e *jx.Encoder) {
+	{
+		if s.UserLimit.Set {
+			e.FieldStart("user_limit")
+			s.UserLimit.Encode(e)
+		}
+	}
+	{
+		if s.WorkerLimit.Set {
+			e.FieldStart("worker_limit")
+			s.WorkerLimit.Encode(e)
+		}
+	}
+	{
+		if s.EffectiveRemaining.Set {
+			e.FieldStart("effective_remaining")
+			s.EffectiveRemaining.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUsageStatus = [3]string{
+	0: "user_limit",
+	1: "worker_limit",
+	2: "effective_remaining",
+}
+
+// Decode decodes UsageStatus from json.
+func (s *UsageStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageStatus to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "user_limit":
+			if err := func() error {
+				s.UserLimit.Reset()
+				if err := s.UserLimit.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_limit\"")
+			}
+		case "worker_limit":
+			if err := func() error {
+				s.WorkerLimit.Reset()
+				if err := s.WorkerLimit.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worker_limit\"")
+			}
+		case "effective_remaining":
+			if err := func() error {
+				s.EffectiveRemaining.Reset()
+				if err := s.EffectiveRemaining.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"effective_remaining\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UsageStatus")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UsageStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UsageStatusUserLimit) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UsageStatusUserLimit) encodeFields(e *jx.Encoder) {
+	{
+		if s.LimitValue.Set {
+			e.FieldStart("limit_value")
+			s.LimitValue.Encode(e)
+		}
+	}
+	{
+		if s.CurrentUsage.Set {
+			e.FieldStart("current_usage")
+			s.CurrentUsage.Encode(e)
+		}
+	}
+	{
+		if s.Remaining.Set {
+			e.FieldStart("remaining")
+			s.Remaining.Encode(e)
+		}
+	}
+	{
+		if s.ResetPeriod.Set {
+			e.FieldStart("reset_period")
+			s.ResetPeriod.Encode(e)
+		}
+	}
+	{
+		if s.PeriodStart.Set {
+			e.FieldStart("period_start")
+			s.PeriodStart.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.PeriodEnd.Set {
+			e.FieldStart("period_end")
+			s.PeriodEnd.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.IsLimited.Set {
+			e.FieldStart("is_limited")
+			s.IsLimited.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUsageStatusUserLimit = [7]string{
+	0: "limit_value",
+	1: "current_usage",
+	2: "remaining",
+	3: "reset_period",
+	4: "period_start",
+	5: "period_end",
+	6: "is_limited",
+}
+
+// Decode decodes UsageStatusUserLimit from json.
+func (s *UsageStatusUserLimit) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageStatusUserLimit to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "limit_value":
+			if err := func() error {
+				s.LimitValue.Reset()
+				if err := s.LimitValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_value\"")
+			}
+		case "current_usage":
+			if err := func() error {
+				s.CurrentUsage.Reset()
+				if err := s.CurrentUsage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"current_usage\"")
+			}
+		case "remaining":
+			if err := func() error {
+				s.Remaining.Reset()
+				if err := s.Remaining.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"remaining\"")
+			}
+		case "reset_period":
+			if err := func() error {
+				s.ResetPeriod.Reset()
+				if err := s.ResetPeriod.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reset_period\"")
+			}
+		case "period_start":
+			if err := func() error {
+				s.PeriodStart.Reset()
+				if err := s.PeriodStart.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"period_start\"")
+			}
+		case "period_end":
+			if err := func() error {
+				s.PeriodEnd.Reset()
+				if err := s.PeriodEnd.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"period_end\"")
+			}
+		case "is_limited":
+			if err := func() error {
+				s.IsLimited.Reset()
+				if err := s.IsLimited.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_limited\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UsageStatusUserLimit")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UsageStatusUserLimit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageStatusUserLimit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageStatusUserLimitResetPeriod as json.
+func (s UsageStatusUserLimitResetPeriod) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UsageStatusUserLimitResetPeriod from json.
+func (s *UsageStatusUserLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageStatusUserLimitResetPeriod to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UsageStatusUserLimitResetPeriod(v) {
+	case UsageStatusUserLimitResetPeriodDaily:
+		*s = UsageStatusUserLimitResetPeriodDaily
+	case UsageStatusUserLimitResetPeriodWeekly:
+		*s = UsageStatusUserLimitResetPeriodWeekly
+	case UsageStatusUserLimitResetPeriodMonthly:
+		*s = UsageStatusUserLimitResetPeriodMonthly
+	case UsageStatusUserLimitResetPeriodRolling24h:
+		*s = UsageStatusUserLimitResetPeriodRolling24h
+	case UsageStatusUserLimitResetPeriodRolling7d:
+		*s = UsageStatusUserLimitResetPeriodRolling7d
+	case UsageStatusUserLimitResetPeriodRolling30d:
+		*s = UsageStatusUserLimitResetPeriodRolling30d
+	default:
+		*s = UsageStatusUserLimitResetPeriod(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UsageStatusUserLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageStatusUserLimitResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UsageStatusWorkerLimit) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UsageStatusWorkerLimit) encodeFields(e *jx.Encoder) {
+	{
+		if s.LimitValue.Set {
+			e.FieldStart("limit_value")
+			s.LimitValue.Encode(e)
+		}
+	}
+	{
+		if s.CurrentUsage.Set {
+			e.FieldStart("current_usage")
+			s.CurrentUsage.Encode(e)
+		}
+	}
+	{
+		if s.Remaining.Set {
+			e.FieldStart("remaining")
+			s.Remaining.Encode(e)
+		}
+	}
+	{
+		if s.ResetPeriod.Set {
+			e.FieldStart("reset_period")
+			s.ResetPeriod.Encode(e)
+		}
+	}
+	{
+		if s.PeriodStart.Set {
+			e.FieldStart("period_start")
+			s.PeriodStart.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.PeriodEnd.Set {
+			e.FieldStart("period_end")
+			s.PeriodEnd.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.IsLimited.Set {
+			e.FieldStart("is_limited")
+			s.IsLimited.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUsageStatusWorkerLimit = [7]string{
+	0: "limit_value",
+	1: "current_usage",
+	2: "remaining",
+	3: "reset_period",
+	4: "period_start",
+	5: "period_end",
+	6: "is_limited",
+}
+
+// Decode decodes UsageStatusWorkerLimit from json.
+func (s *UsageStatusWorkerLimit) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageStatusWorkerLimit to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "limit_value":
+			if err := func() error {
+				s.LimitValue.Reset()
+				if err := s.LimitValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_value\"")
+			}
+		case "current_usage":
+			if err := func() error {
+				s.CurrentUsage.Reset()
+				if err := s.CurrentUsage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"current_usage\"")
+			}
+		case "remaining":
+			if err := func() error {
+				s.Remaining.Reset()
+				if err := s.Remaining.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"remaining\"")
+			}
+		case "reset_period":
+			if err := func() error {
+				s.ResetPeriod.Reset()
+				if err := s.ResetPeriod.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reset_period\"")
+			}
+		case "period_start":
+			if err := func() error {
+				s.PeriodStart.Reset()
+				if err := s.PeriodStart.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"period_start\"")
+			}
+		case "period_end":
+			if err := func() error {
+				s.PeriodEnd.Reset()
+				if err := s.PeriodEnd.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"period_end\"")
+			}
+		case "is_limited":
+			if err := func() error {
+				s.IsLimited.Reset()
+				if err := s.IsLimited.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_limited\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UsageStatusWorkerLimit")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UsageStatusWorkerLimit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageStatusWorkerLimit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UsageStatusWorkerLimitResetPeriod as json.
+func (s UsageStatusWorkerLimitResetPeriod) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UsageStatusWorkerLimitResetPeriod from json.
+func (s *UsageStatusWorkerLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UsageStatusWorkerLimitResetPeriod to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UsageStatusWorkerLimitResetPeriod(v) {
+	case UsageStatusWorkerLimitResetPeriodDaily:
+		*s = UsageStatusWorkerLimitResetPeriodDaily
+	case UsageStatusWorkerLimitResetPeriodWeekly:
+		*s = UsageStatusWorkerLimitResetPeriodWeekly
+	case UsageStatusWorkerLimitResetPeriodMonthly:
+		*s = UsageStatusWorkerLimitResetPeriodMonthly
+	case UsageStatusWorkerLimitResetPeriodRolling24h:
+		*s = UsageStatusWorkerLimitResetPeriodRolling24h
+	case UsageStatusWorkerLimitResetPeriodRolling7d:
+		*s = UsageStatusWorkerLimitResetPeriodRolling7d
+	case UsageStatusWorkerLimitResetPeriodRolling30d:
+		*s = UsageStatusWorkerLimitResetPeriodRolling30d
+	default:
+		*s = UsageStatusWorkerLimitResetPeriod(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UsageStatusWorkerLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UsageStatusWorkerLimitResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *User) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -16625,6 +17898,326 @@ func (s *UserSessionToken) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *UserUsageLimitOverride) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UserUsageLimitOverride) encodeFields(e *jx.Encoder) {
+	{
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("user_uuid")
+		json.EncodeUUID(e, s.UserUUID)
+	}
+	{
+		e.FieldStart("workspace_slug")
+		e.Str(s.WorkspaceSlug)
+	}
+	{
+		e.FieldStart("limit_type")
+		s.LimitType.Encode(e)
+	}
+	{
+		if s.LimitValue.Set {
+			e.FieldStart("limit_value")
+			s.LimitValue.Encode(e)
+		}
+	}
+	{
+		if s.ResetPeriod.Set {
+			e.FieldStart("reset_period")
+			s.ResetPeriod.Encode(e)
+		}
+	}
+	{
+		if s.IsEnabled.Set {
+			e.FieldStart("is_enabled")
+			s.IsEnabled.Encode(e)
+		}
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfUserUsageLimitOverride = [9]string{
+	0: "uuid",
+	1: "user_uuid",
+	2: "workspace_slug",
+	3: "limit_type",
+	4: "limit_value",
+	5: "reset_period",
+	6: "is_enabled",
+	7: "created_at",
+	8: "updated_at",
+}
+
+// Decode decodes UserUsageLimitOverride from json.
+func (s *UserUsageLimitOverride) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UserUsageLimitOverride to nil")
+	}
+	var requiredBitSet [2]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			if err := func() error {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "user_uuid":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.UserUUID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_uuid\"")
+			}
+		case "workspace_slug":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.WorkspaceSlug = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"workspace_slug\"")
+			}
+		case "limit_type":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.LimitType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_type\"")
+			}
+		case "limit_value":
+			if err := func() error {
+				s.LimitValue.Reset()
+				if err := s.LimitValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_value\"")
+			}
+		case "reset_period":
+			if err := func() error {
+				s.ResetPeriod.Reset()
+				if err := s.ResetPeriod.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reset_period\"")
+			}
+		case "is_enabled":
+			if err := func() error {
+				s.IsEnabled.Reset()
+				if err := s.IsEnabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_enabled\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "updated_at":
+			if err := func() error {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UserUsageLimitOverride")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00001110,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfUserUsageLimitOverride) {
+					name = jsonFieldsNameOfUserUsageLimitOverride[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UserUsageLimitOverride) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UserUsageLimitOverride) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UserUsageLimitOverrideLimitType as json.
+func (s UserUsageLimitOverrideLimitType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UserUsageLimitOverrideLimitType from json.
+func (s *UserUsageLimitOverrideLimitType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UserUsageLimitOverrideLimitType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UserUsageLimitOverrideLimitType(v) {
+	case UserUsageLimitOverrideLimitTypeMessagesFetch:
+		*s = UserUsageLimitOverrideLimitTypeMessagesFetch
+	case UserUsageLimitOverrideLimitTypeMessagesPush:
+		*s = UserUsageLimitOverrideLimitTypeMessagesPush
+	default:
+		*s = UserUsageLimitOverrideLimitType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UserUsageLimitOverrideLimitType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UserUsageLimitOverrideLimitType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UserUsageLimitOverrideResetPeriod as json.
+func (s UserUsageLimitOverrideResetPeriod) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UserUsageLimitOverrideResetPeriod from json.
+func (s *UserUsageLimitOverrideResetPeriod) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UserUsageLimitOverrideResetPeriod to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UserUsageLimitOverrideResetPeriod(v) {
+	case UserUsageLimitOverrideResetPeriodDaily:
+		*s = UserUsageLimitOverrideResetPeriodDaily
+	case UserUsageLimitOverrideResetPeriodWeekly:
+		*s = UserUsageLimitOverrideResetPeriodWeekly
+	case UserUsageLimitOverrideResetPeriodMonthly:
+		*s = UserUsageLimitOverrideResetPeriodMonthly
+	case UserUsageLimitOverrideResetPeriodRolling24h:
+		*s = UserUsageLimitOverrideResetPeriodRolling24h
+	case UserUsageLimitOverrideResetPeriodRolling7d:
+		*s = UserUsageLimitOverrideResetPeriodRolling7d
+	case UserUsageLimitOverrideResetPeriodRolling30d:
+		*s = UserUsageLimitOverrideResetPeriodRolling30d
+	default:
+		*s = UserUsageLimitOverrideResetPeriod(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UserUsageLimitOverrideResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UserUsageLimitOverrideResetPeriod) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *WorkerEnrollmentToken) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -17262,6 +18855,326 @@ func (s *WorkerJobsListOK) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *WorkerJobsListOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *WorkerUsageLimit) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *WorkerUsageLimit) encodeFields(e *jx.Encoder) {
+	{
+		if s.UUID.Set {
+			e.FieldStart("uuid")
+			s.UUID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("worker_uuid")
+		json.EncodeUUID(e, s.WorkerUUID)
+	}
+	{
+		e.FieldStart("workspace_slug")
+		e.Str(s.WorkspaceSlug)
+	}
+	{
+		e.FieldStart("limit_type")
+		s.LimitType.Encode(e)
+	}
+	{
+		if s.LimitValue.Set {
+			e.FieldStart("limit_value")
+			s.LimitValue.Encode(e)
+		}
+	}
+	{
+		if s.ResetPeriod.Set {
+			e.FieldStart("reset_period")
+			s.ResetPeriod.Encode(e)
+		}
+	}
+	{
+		if s.IsEnabled.Set {
+			e.FieldStart("is_enabled")
+			s.IsEnabled.Encode(e)
+		}
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfWorkerUsageLimit = [9]string{
+	0: "uuid",
+	1: "worker_uuid",
+	2: "workspace_slug",
+	3: "limit_type",
+	4: "limit_value",
+	5: "reset_period",
+	6: "is_enabled",
+	7: "created_at",
+	8: "updated_at",
+}
+
+// Decode decodes WorkerUsageLimit from json.
+func (s *WorkerUsageLimit) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode WorkerUsageLimit to nil")
+	}
+	var requiredBitSet [2]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "uuid":
+			if err := func() error {
+				s.UUID.Reset()
+				if err := s.UUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"uuid\"")
+			}
+		case "worker_uuid":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.WorkerUUID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"worker_uuid\"")
+			}
+		case "workspace_slug":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.WorkspaceSlug = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"workspace_slug\"")
+			}
+		case "limit_type":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.LimitType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_type\"")
+			}
+		case "limit_value":
+			if err := func() error {
+				s.LimitValue.Reset()
+				if err := s.LimitValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit_value\"")
+			}
+		case "reset_period":
+			if err := func() error {
+				s.ResetPeriod.Reset()
+				if err := s.ResetPeriod.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reset_period\"")
+			}
+		case "is_enabled":
+			if err := func() error {
+				s.IsEnabled.Reset()
+				if err := s.IsEnabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_enabled\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "updated_at":
+			if err := func() error {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode WorkerUsageLimit")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00001110,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfWorkerUsageLimit) {
+					name = jsonFieldsNameOfWorkerUsageLimit[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *WorkerUsageLimit) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *WorkerUsageLimit) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes WorkerUsageLimitLimitType as json.
+func (s WorkerUsageLimitLimitType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes WorkerUsageLimitLimitType from json.
+func (s *WorkerUsageLimitLimitType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode WorkerUsageLimitLimitType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch WorkerUsageLimitLimitType(v) {
+	case WorkerUsageLimitLimitTypeMessagesFetch:
+		*s = WorkerUsageLimitLimitTypeMessagesFetch
+	case WorkerUsageLimitLimitTypeMessagesPush:
+		*s = WorkerUsageLimitLimitTypeMessagesPush
+	default:
+		*s = WorkerUsageLimitLimitType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s WorkerUsageLimitLimitType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *WorkerUsageLimitLimitType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes WorkerUsageLimitResetPeriod as json.
+func (s WorkerUsageLimitResetPeriod) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes WorkerUsageLimitResetPeriod from json.
+func (s *WorkerUsageLimitResetPeriod) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode WorkerUsageLimitResetPeriod to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch WorkerUsageLimitResetPeriod(v) {
+	case WorkerUsageLimitResetPeriodDaily:
+		*s = WorkerUsageLimitResetPeriodDaily
+	case WorkerUsageLimitResetPeriodWeekly:
+		*s = WorkerUsageLimitResetPeriodWeekly
+	case WorkerUsageLimitResetPeriodMonthly:
+		*s = WorkerUsageLimitResetPeriodMonthly
+	case WorkerUsageLimitResetPeriodRolling24h:
+		*s = WorkerUsageLimitResetPeriodRolling24h
+	case WorkerUsageLimitResetPeriodRolling7d:
+		*s = WorkerUsageLimitResetPeriodRolling7d
+	case WorkerUsageLimitResetPeriodRolling30d:
+		*s = WorkerUsageLimitResetPeriodRolling30d
+	default:
+		*s = WorkerUsageLimitResetPeriod(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s WorkerUsageLimitResetPeriod) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *WorkerUsageLimitResetPeriod) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

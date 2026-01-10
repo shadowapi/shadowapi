@@ -112,6 +112,12 @@ type Handler interface {
 	//
 	// POST /access/policy-set
 	CreatePolicySet(ctx context.Context, req *PolicySet) (CreatePolicySetRes, error)
+	// CreateUsageLimit implements createUsageLimit operation.
+	//
+	// Create a new usage limit on a policy set.
+	//
+	// POST /access/usage-limits
+	CreateUsageLimit(ctx context.Context, req *UsageLimit) (CreateUsageLimitRes, error)
 	// CreateUser implements createUser operation.
 	//
 	// Create a new user.
@@ -124,12 +130,24 @@ type Handler interface {
 	//
 	// POST /user/session
 	CreateUserSession(ctx context.Context) (CreateUserSessionRes, error)
+	// CreateUserUsageLimitOverride implements createUserUsageLimitOverride operation.
+	//
+	// Create a user usage limit override.
+	//
+	// POST /access/user/{user_uuid}/usage-limits
+	CreateUserUsageLimitOverride(ctx context.Context, req *UserUsageLimitOverride, params CreateUserUsageLimitOverrideParams) (CreateUserUsageLimitOverrideRes, error)
 	// CreateWorkerEnrollmentToken implements createWorkerEnrollmentToken operation.
 	//
 	// Create worker enrollment token.
 	//
 	// POST /workers/enrollment-tokens
 	CreateWorkerEnrollmentToken(ctx context.Context, req *WorkerEnrollmentToken) (CreateWorkerEnrollmentTokenRes, error)
+	// CreateWorkerUsageLimit implements createWorkerUsageLimit operation.
+	//
+	// Create a worker usage limit.
+	//
+	// POST /access/worker/{worker_uuid}/usage-limits
+	CreateWorkerUsageLimit(ctx context.Context, req *WorkerUsageLimit, params CreateWorkerUsageLimitParams) (CreateWorkerUsageLimitRes, error)
 	// CreateWorkspace implements createWorkspace operation.
 	//
 	// Create a new workspace.
@@ -233,18 +251,36 @@ type Handler interface {
 	//
 	// DELETE /workers/{uuid}
 	DeleteRegisteredWorker(ctx context.Context, params DeleteRegisteredWorkerParams) (DeleteRegisteredWorkerRes, error)
+	// DeleteUsageLimit implements deleteUsageLimit operation.
+	//
+	// Delete a usage limit.
+	//
+	// DELETE /access/usage-limits/{uuid}
+	DeleteUsageLimit(ctx context.Context, params DeleteUsageLimitParams) (DeleteUsageLimitRes, error)
 	// DeleteUser implements deleteUser operation.
 	//
 	// Delete user.
 	//
 	// DELETE /user/{uuid}
 	DeleteUser(ctx context.Context, params DeleteUserParams) (DeleteUserRes, error)
+	// DeleteUserUsageLimitOverride implements deleteUserUsageLimitOverride operation.
+	//
+	// Delete a user usage limit override.
+	//
+	// DELETE /access/user/{user_uuid}/usage-limits/{uuid}
+	DeleteUserUsageLimitOverride(ctx context.Context, params DeleteUserUsageLimitOverrideParams) (DeleteUserUsageLimitOverrideRes, error)
 	// DeleteWorkerEnrollmentToken implements deleteWorkerEnrollmentToken operation.
 	//
 	// Delete worker enrollment token.
 	//
 	// DELETE /workers/enrollment-tokens/{uuid}
 	DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) (DeleteWorkerEnrollmentTokenRes, error)
+	// DeleteWorkerUsageLimit implements deleteWorkerUsageLimit operation.
+	//
+	// Delete a worker usage limit.
+	//
+	// DELETE /access/worker/{worker_uuid}/usage-limits/{uuid}
+	DeleteWorkerUsageLimit(ctx context.Context, params DeleteWorkerUsageLimitParams) (DeleteWorkerUsageLimitRes, error)
 	// DeleteWorkspace implements deleteWorkspace operation.
 	//
 	// Delete workspace.
@@ -287,6 +323,18 @@ type Handler interface {
 	//
 	// GET /workers/{uuid}
 	GetRegisteredWorker(ctx context.Context, params GetRegisteredWorkerParams) (GetRegisteredWorkerRes, error)
+	// GetUsageLimit implements getUsageLimit operation.
+	//
+	// Get a usage limit by UUID.
+	//
+	// GET /access/usage-limits/{uuid}
+	GetUsageLimit(ctx context.Context, params GetUsageLimitParams) (GetUsageLimitRes, error)
+	// GetUsageStatus implements getUsageStatus operation.
+	//
+	// Get combined usage status for user and worker.
+	//
+	// GET /access/usage-status
+	GetUsageStatus(ctx context.Context, params GetUsageStatusParams) (GetUsageStatusRes, error)
 	// GetUser implements getUser operation.
 	//
 	// Get user details.
@@ -329,6 +377,18 @@ type Handler interface {
 	//
 	// GET /workers
 	ListRegisteredWorkers(ctx context.Context) (ListRegisteredWorkersRes, error)
+	// ListUsageLimits implements listUsageLimits operation.
+	//
+	// List all usage limits on policy sets.
+	//
+	// GET /access/usage-limits
+	ListUsageLimits(ctx context.Context, params ListUsageLimitsParams) (ListUsageLimitsRes, error)
+	// ListUserUsageLimitOverrides implements listUserUsageLimitOverrides operation.
+	//
+	// List user's usage limit overrides.
+	//
+	// GET /access/user/{user_uuid}/usage-limits
+	ListUserUsageLimitOverrides(ctx context.Context, params ListUserUsageLimitOverridesParams) (ListUserUsageLimitOverridesRes, error)
 	// ListUsers implements listUsers operation.
 	//
 	// List all users.
@@ -341,6 +401,12 @@ type Handler interface {
 	//
 	// GET /workers/enrollment-tokens
 	ListWorkerEnrollmentTokens(ctx context.Context) (ListWorkerEnrollmentTokensRes, error)
+	// ListWorkerUsageLimits implements listWorkerUsageLimits operation.
+	//
+	// List worker's usage limits.
+	//
+	// GET /access/worker/{worker_uuid}/usage-limits
+	ListWorkerUsageLimits(ctx context.Context, params ListWorkerUsageLimitsParams) (ListWorkerUsageLimitsRes, error)
 	// ListWorkspaceInvites implements listWorkspaceInvites operation.
 	//
 	// List workspace invites.
@@ -679,12 +745,30 @@ type Handler interface {
 	//
 	// PUT /workers/{uuid}
 	UpdateRegisteredWorker(ctx context.Context, req *RegisteredWorker, params UpdateRegisteredWorkerParams) (UpdateRegisteredWorkerRes, error)
+	// UpdateUsageLimit implements updateUsageLimit operation.
+	//
+	// Update a usage limit.
+	//
+	// PUT /access/usage-limits/{uuid}
+	UpdateUsageLimit(ctx context.Context, req *UsageLimit, params UpdateUsageLimitParams) (UpdateUsageLimitRes, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// Update user details.
 	//
 	// PUT /user/{uuid}
 	UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (UpdateUserRes, error)
+	// UpdateUserUsageLimitOverride implements updateUserUsageLimitOverride operation.
+	//
+	// Update a user usage limit override.
+	//
+	// PUT /access/user/{user_uuid}/usage-limits/{uuid}
+	UpdateUserUsageLimitOverride(ctx context.Context, req *UserUsageLimitOverride, params UpdateUserUsageLimitOverrideParams) (UpdateUserUsageLimitOverrideRes, error)
+	// UpdateWorkerUsageLimit implements updateWorkerUsageLimit operation.
+	//
+	// Update a worker usage limit.
+	//
+	// PUT /access/worker/{worker_uuid}/usage-limits/{uuid}
+	UpdateWorkerUsageLimit(ctx context.Context, req *WorkerUsageLimit, params UpdateWorkerUsageLimitParams) (UpdateWorkerUsageLimitRes, error)
 	// UpdateWorkspace implements updateWorkspace operation.
 	//
 	// Update workspace.

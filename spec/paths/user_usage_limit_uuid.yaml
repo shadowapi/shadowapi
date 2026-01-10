@@ -1,0 +1,69 @@
+put:
+  summary: Update a user usage limit override
+  operationId: updateUserUsageLimitOverride
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Override UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UserUsageLimitOverride"
+  responses:
+    "200":
+      description: User usage limit override updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UserUsageLimitOverride"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+
+delete:
+  summary: Delete a user usage limit override
+  operationId: deleteUserUsageLimitOverride
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Override UUID
+  responses:
+    "204":
+      description: User usage limit override deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

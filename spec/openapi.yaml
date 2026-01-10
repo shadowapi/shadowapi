@@ -132,6 +132,15 @@ components:
     UserPolicySetAssignment:
       $ref: "components/user_policy_set_assignment.yaml"
 
+    UsageLimit:
+      $ref: "components/usage_limit.yaml"
+    UserUsageLimitOverride:
+      $ref: "components/user_usage_limit_override.yaml"
+    WorkerUsageLimit:
+      $ref: "components/worker_usage_limit.yaml"
+    UsageStatus:
+      $ref: "components/usage_status.yaml"
+
     MapperConfig:
       $ref: "components/mapper_config.yaml"
     MapperFieldMapping:
@@ -322,6 +331,21 @@ paths:
     $ref: "paths/user_policy_set.yaml"
   /access/check:
     $ref: "paths/access_check.yaml"
+
+  /access/usage-limits:
+    $ref: "paths/usage_limits.yaml"
+  /access/usage-limits/{uuid}:
+    $ref: "paths/usage_limits_uuid.yaml"
+  /access/user/{user_uuid}/usage-limits:
+    $ref: "paths/user_usage_limits.yaml"
+  /access/user/{user_uuid}/usage-limits/{uuid}:
+    $ref: "paths/user_usage_limit_uuid.yaml"
+  /access/worker/{worker_uuid}/usage-limits:
+    $ref: "paths/worker_usage_limits.yaml"
+  /access/worker/{worker_uuid}/usage-limits/{uuid}:
+    $ref: "paths/worker_usage_limit_uuid.yaml"
+  /access/usage-status:
+    $ref: "paths/usage_status.yaml"
 
   /mapper/source-fields:
     $ref: "paths/mapper_source_fields.yaml"

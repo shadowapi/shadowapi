@@ -1179,6 +1179,132 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/access/usage-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all usage limits on policy sets */
+        get: operations["listUsageLimits"];
+        put?: never;
+        /** Create a new usage limit on a policy set */
+        post: operations["createUsageLimit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/usage-limits/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a usage limit by UUID */
+        get: operations["getUsageLimit"];
+        /** Update a usage limit */
+        put: operations["updateUsageLimit"];
+        post?: never;
+        /** Delete a usage limit */
+        delete: operations["deleteUsageLimit"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/user/{user_uuid}/usage-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List user's usage limit overrides */
+        get: operations["listUserUsageLimitOverrides"];
+        put?: never;
+        /** Create a user usage limit override */
+        post: operations["createUserUsageLimitOverride"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/user/{user_uuid}/usage-limits/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update a user usage limit override */
+        put: operations["updateUserUsageLimitOverride"];
+        post?: never;
+        /** Delete a user usage limit override */
+        delete: operations["deleteUserUsageLimitOverride"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/worker/{worker_uuid}/usage-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List worker's usage limits */
+        get: operations["listWorkerUsageLimits"];
+        put?: never;
+        /** Create a worker usage limit */
+        post: operations["createWorkerUsageLimit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/worker/{worker_uuid}/usage-limits/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update a worker usage limit */
+        put: operations["updateWorkerUsageLimit"];
+        post?: never;
+        /** Delete a worker usage limit */
+        delete: operations["deleteWorkerUsageLimit"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/access/usage-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get combined usage status for user and worker */
+        get: operations["getUsageStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/mapper/source-fields": {
         parameters: {
             query?: never;
@@ -1406,6 +1532,10 @@ export interface components {
         PolicySet: components["schemas"]["policy_set"];
         Permission: components["schemas"]["permission"];
         UserPolicySetAssignment: components["schemas"]["user_policy_set_assignment"];
+        UsageLimit: components["schemas"]["usage_limit"];
+        UserUsageLimitOverride: components["schemas"]["user_usage_limit_override"];
+        WorkerUsageLimit: components["schemas"]["worker_usage_limit"];
+        UsageStatus: components["schemas"]["usage_status"];
         MapperConfig: components["schemas"]["mapper_config"];
         MapperFieldMapping: components["schemas"]["mapper_field_mapping"];
         MapperTransform: components["schemas"]["mapper_transform"];
@@ -2305,6 +2435,212 @@ export interface components {
              * @description Timestamp when the policy set was assigned
              */
             readonly assigned_at?: string;
+        };
+        usage_limit: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the usage limit
+             */
+            readonly uuid?: string;
+            /** @description Policy set this limit belongs to */
+            policy_set_name: string;
+            /**
+             * @description Type of operation being limited
+             * @enum {string}
+             */
+            limit_type: "messages_fetch" | "messages_push";
+            /**
+             * Format: int64
+             * @description Maximum allowed count per period. Null means unlimited.
+             */
+            limit_value?: number | null;
+            /**
+             * @description Period after which usage counter resets
+             * @default monthly
+             * @enum {string}
+             */
+            reset_period: "daily" | "weekly" | "monthly" | "rolling_24h" | "rolling_7d" | "rolling_30d";
+            /**
+             * @description Whether this limit is currently active
+             * @default true
+             */
+            is_enabled: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp of creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        user_usage_limit_override: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the override
+             */
+            readonly uuid?: string;
+            /**
+             * Format: uuid
+             * @description User this override applies to
+             */
+            user_uuid: string;
+            /** @description Workspace this override is scoped to */
+            workspace_slug: string;
+            /**
+             * @description Type of operation being limited
+             * @enum {string}
+             */
+            limit_type: "messages_fetch" | "messages_push";
+            /**
+             * Format: int64
+             * @description Override limit value. Null means unlimited.
+             */
+            limit_value?: number | null;
+            /**
+             * @description Override reset period. Null inherits from policy set.
+             * @enum {string|null}
+             */
+            reset_period?: "daily" | "weekly" | "monthly" | "rolling_24h" | "rolling_7d" | "rolling_30d" | null;
+            /**
+             * @description Whether this override is currently active
+             * @default true
+             */
+            is_enabled: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp of creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        worker_usage_limit: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the worker limit
+             */
+            readonly uuid?: string;
+            /**
+             * Format: uuid
+             * @description Worker this limit applies to
+             */
+            worker_uuid: string;
+            /** @description Workspace this limit is scoped to */
+            workspace_slug: string;
+            /**
+             * @description Type of operation being limited
+             * @enum {string}
+             */
+            limit_type: "messages_fetch" | "messages_push";
+            /**
+             * Format: int64
+             * @description Maximum allowed count per period. Null means unlimited.
+             */
+            limit_value?: number | null;
+            /**
+             * @description Period after which usage counter resets
+             * @default monthly
+             * @enum {string}
+             */
+            reset_period: "daily" | "weekly" | "monthly" | "rolling_24h" | "rolling_7d" | "rolling_30d";
+            /**
+             * @description Whether this limit is currently active
+             * @default true
+             */
+            is_enabled: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp of creation
+             */
+            readonly created_at?: string;
+            /**
+             * Format: date-time
+             * @description Timestamp of last update
+             */
+            readonly updated_at?: string;
+        };
+        usage_status: {
+            /** @description User's usage status in the workspace */
+            user_limit?: {
+                /**
+                 * Format: int64
+                 * @description Maximum allowed. Null means unlimited.
+                 */
+                limit_value?: number | null;
+                /**
+                 * Format: int64
+                 * @description Current usage in this period
+                 */
+                current_usage?: number;
+                /**
+                 * Format: int64
+                 * @description Remaining quota. Null means unlimited.
+                 */
+                remaining?: number | null;
+                /**
+                 * @description Reset period for this limit
+                 * @enum {string}
+                 */
+                reset_period?: "daily" | "weekly" | "monthly" | "rolling_24h" | "rolling_7d" | "rolling_30d";
+                /**
+                 * Format: date-time
+                 * @description Start of current period
+                 */
+                period_start?: string;
+                /**
+                 * Format: date-time
+                 * @description End of current period
+                 */
+                period_end?: string;
+                /** @description False if no limit applies (unlimited) */
+                is_limited?: boolean;
+            };
+            /** @description Worker's usage status in the workspace */
+            worker_limit?: {
+                /**
+                 * Format: int64
+                 * @description Maximum allowed. Null means unlimited.
+                 */
+                limit_value?: number | null;
+                /**
+                 * Format: int64
+                 * @description Current usage in this period
+                 */
+                current_usage?: number;
+                /**
+                 * Format: int64
+                 * @description Remaining quota. Null means unlimited.
+                 */
+                remaining?: number | null;
+                /**
+                 * @description Reset period for this limit
+                 * @enum {string}
+                 */
+                reset_period?: "daily" | "weekly" | "monthly" | "rolling_24h" | "rolling_7d" | "rolling_30d";
+                /**
+                 * Format: date-time
+                 * @description Start of current period
+                 */
+                period_start?: string;
+                /**
+                 * Format: date-time
+                 * @description End of current period
+                 */
+                period_end?: string;
+                /** @description False if no limit applies (unlimited) */
+                is_limited?: boolean;
+            };
+            /**
+             * Format: int64
+             * @description Minimum of user and worker remaining. Null means both are unlimited.
+             */
+            effective_remaining?: number | null;
         };
         /** @description Definition of a source field available for mapping */
         source_field_definition: {
@@ -6118,6 +6454,489 @@ export interface operations {
                         /** @description Whether the action is allowed */
                         allowed?: boolean;
                     };
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listUsageLimits: {
+        parameters: {
+            query?: {
+                /** @description Filter by policy set name */
+                policy_set_name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of usage limits */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["usage_limit"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["usage_limit"];
+            };
+        };
+        responses: {
+            /** @description Usage limit created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["usage_limit"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Usage limit UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Usage limit details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["usage_limit"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Usage limit UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["usage_limit"];
+            };
+        };
+        responses: {
+            /** @description Usage limit updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["usage_limit"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Usage limit UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Usage limit deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listUserUsageLimitOverrides: {
+        parameters: {
+            query?: {
+                /** @description Filter by workspace slug */
+                workspace_slug?: string;
+            };
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of user usage limit overrides */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_usage_limit_override"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createUserUsageLimitOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["user_usage_limit_override"];
+            };
+        };
+        responses: {
+            /** @description User usage limit override created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_usage_limit_override"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateUserUsageLimitOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+                /** @description Override UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["user_usage_limit_override"];
+            };
+        };
+        responses: {
+            /** @description User usage limit override updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["user_usage_limit_override"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteUserUsageLimitOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User UUID */
+                user_uuid: string;
+                /** @description Override UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User usage limit override deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    listWorkerUsageLimits: {
+        parameters: {
+            query?: {
+                /** @description Filter by workspace slug */
+                workspace_slug?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Worker UUID */
+                worker_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of worker usage limits */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_usage_limit"][];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    createWorkerUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Worker UUID */
+                worker_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["worker_usage_limit"];
+            };
+        };
+        responses: {
+            /** @description Worker usage limit created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_usage_limit"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    updateWorkerUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Worker UUID */
+                worker_uuid: string;
+                /** @description Limit UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["worker_usage_limit"];
+            };
+        };
+        responses: {
+            /** @description Worker usage limit updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["worker_usage_limit"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    deleteWorkerUsageLimit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Worker UUID */
+                worker_uuid: string;
+                /** @description Limit UUID */
+                uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Worker usage limit deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getUsageStatus: {
+        parameters: {
+            query: {
+                /** @description User UUID */
+                user_uuid: string;
+                /** @description Worker UUID */
+                worker_uuid: string;
+                /** @description Workspace slug */
+                workspace_slug: string;
+                /** @description Type of limit to check */
+                limit_type: "messages_fetch" | "messages_push";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Combined usage status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["usage_status"];
                 };
             };
             /** @description Error */

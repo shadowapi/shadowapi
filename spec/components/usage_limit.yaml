@@ -1,0 +1,47 @@
+# spec/components/usage_limit.yaml
+# Defines usage limit defaults on policy sets
+type: object
+additionalProperties: false
+properties:
+  uuid:
+    type: string
+    format: uuid
+    description: Unique identifier for the usage limit
+    readOnly: true
+  policy_set_name:
+    type: string
+    description: Policy set this limit belongs to
+    minLength: 2
+    maxLength: 100
+  limit_type:
+    type: string
+    enum: [messages_fetch, messages_push]
+    description: Type of operation being limited
+  limit_value:
+    type: integer
+    format: int64
+    nullable: true
+    description: Maximum allowed count per period. Null means unlimited.
+    minimum: 0
+  reset_period:
+    type: string
+    enum: [daily, weekly, monthly, rolling_24h, rolling_7d, rolling_30d]
+    default: monthly
+    description: Period after which usage counter resets
+  is_enabled:
+    type: boolean
+    default: true
+    description: Whether this limit is currently active
+  created_at:
+    type: string
+    format: date-time
+    description: Timestamp of creation
+    readOnly: true
+  updated_at:
+    type: string
+    format: date-time
+    description: Timestamp of last update
+    readOnly: true
+required:
+  - policy_set_name
+  - limit_type

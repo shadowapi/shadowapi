@@ -1003,15 +1003,30 @@ type DeleteRegisteredWorkerOK struct{}
 
 func (*DeleteRegisteredWorkerOK) deleteRegisteredWorkerRes() {}
 
+// DeleteUsageLimitNoContent is response for DeleteUsageLimit operation.
+type DeleteUsageLimitNoContent struct{}
+
+func (*DeleteUsageLimitNoContent) deleteUsageLimitRes() {}
+
 // DeleteUserOK is response for DeleteUser operation.
 type DeleteUserOK struct{}
 
 func (*DeleteUserOK) deleteUserRes() {}
 
+// DeleteUserUsageLimitOverrideNoContent is response for DeleteUserUsageLimitOverride operation.
+type DeleteUserUsageLimitOverrideNoContent struct{}
+
+func (*DeleteUserUsageLimitOverrideNoContent) deleteUserUsageLimitOverrideRes() {}
+
 // DeleteWorkerEnrollmentTokenOK is response for DeleteWorkerEnrollmentToken operation.
 type DeleteWorkerEnrollmentTokenOK struct{}
 
 func (*DeleteWorkerEnrollmentTokenOK) deleteWorkerEnrollmentTokenRes() {}
+
+// DeleteWorkerUsageLimitNoContent is response for DeleteWorkerUsageLimit operation.
+type DeleteWorkerUsageLimitNoContent struct{}
+
+func (*DeleteWorkerUsageLimitNoContent) deleteWorkerUsageLimitRes() {}
 
 // DeleteWorkspaceInviteNoContent is response for DeleteWorkspaceInvite operation.
 type DeleteWorkspaceInviteNoContent struct{}
@@ -1152,9 +1167,12 @@ func (*ErrorStatusCode) checkPermissionRes()                 {}
 func (*ErrorStatusCode) checkWorkspaceExistsRes()            {}
 func (*ErrorStatusCode) confirmPasswordResetRes()            {}
 func (*ErrorStatusCode) createPolicySetRes()                 {}
+func (*ErrorStatusCode) createUsageLimitRes()                {}
 func (*ErrorStatusCode) createUserRes()                      {}
 func (*ErrorStatusCode) createUserSessionRes()               {}
+func (*ErrorStatusCode) createUserUsageLimitOverrideRes()    {}
 func (*ErrorStatusCode) createWorkerEnrollmentTokenRes()     {}
+func (*ErrorStatusCode) createWorkerUsageLimitRes()          {}
 func (*ErrorStatusCode) createWorkspaceInviteRes()           {}
 func (*ErrorStatusCode) createWorkspaceRes()                 {}
 func (*ErrorStatusCode) datasourceEmailCreateRes()           {}
@@ -1172,8 +1190,11 @@ func (*ErrorStatusCode) datasourceListRes()                  {}
 func (*ErrorStatusCode) datasourceSetOAuth2ClientRes()       {}
 func (*ErrorStatusCode) deletePolicySetRes()                 {}
 func (*ErrorStatusCode) deleteRegisteredWorkerRes()          {}
+func (*ErrorStatusCode) deleteUsageLimitRes()                {}
 func (*ErrorStatusCode) deleteUserRes()                      {}
+func (*ErrorStatusCode) deleteUserUsageLimitOverrideRes()    {}
 func (*ErrorStatusCode) deleteWorkerEnrollmentTokenRes()     {}
+func (*ErrorStatusCode) deleteWorkerUsageLimitRes()          {}
 func (*ErrorStatusCode) deleteWorkspaceInviteRes()           {}
 func (*ErrorStatusCode) deleteWorkspaceRes()                 {}
 func (*ErrorStatusCode) getInviteByTokenRes()                {}
@@ -1181,6 +1202,8 @@ func (*ErrorStatusCode) getPasswordResetByTokenRes()         {}
 func (*ErrorStatusCode) getPolicySetRes()                    {}
 func (*ErrorStatusCode) getProfileRes()                      {}
 func (*ErrorStatusCode) getRegisteredWorkerRes()             {}
+func (*ErrorStatusCode) getUsageLimitRes()                   {}
+func (*ErrorStatusCode) getUsageStatusRes()                  {}
 func (*ErrorStatusCode) getUserPolicySetsRes()               {}
 func (*ErrorStatusCode) getUserRes()                         {}
 func (*ErrorStatusCode) getWorkerEnrollmentTokenRes()        {}
@@ -1188,8 +1211,11 @@ func (*ErrorStatusCode) getWorkspaceRes()                    {}
 func (*ErrorStatusCode) listPermissionsRes()                 {}
 func (*ErrorStatusCode) listPolicySetsRes()                  {}
 func (*ErrorStatusCode) listRegisteredWorkersRes()           {}
+func (*ErrorStatusCode) listUsageLimitsRes()                 {}
+func (*ErrorStatusCode) listUserUsageLimitOverridesRes()     {}
 func (*ErrorStatusCode) listUsersRes()                       {}
 func (*ErrorStatusCode) listWorkerEnrollmentTokensRes()      {}
+func (*ErrorStatusCode) listWorkerUsageLimitsRes()           {}
 func (*ErrorStatusCode) listWorkspaceInvitesRes()            {}
 func (*ErrorStatusCode) listWorkspaceMembersRes()            {}
 func (*ErrorStatusCode) listWorkspacesRes()                  {}
@@ -1242,13 +1268,57 @@ func (*ErrorStatusCode) testConnectionJobGetRes()            {}
 func (*ErrorStatusCode) updatePolicySetRes()                 {}
 func (*ErrorStatusCode) updateProfileRes()                   {}
 func (*ErrorStatusCode) updateRegisteredWorkerRes()          {}
+func (*ErrorStatusCode) updateUsageLimitRes()                {}
 func (*ErrorStatusCode) updateUserRes()                      {}
+func (*ErrorStatusCode) updateUserUsageLimitOverrideRes()    {}
+func (*ErrorStatusCode) updateWorkerUsageLimitRes()          {}
 func (*ErrorStatusCode) updateWorkspaceMemberRoleRes()       {}
 func (*ErrorStatusCode) updateWorkspaceRes()                 {}
 func (*ErrorStatusCode) workerJobsCancelRes()                {}
 func (*ErrorStatusCode) workerJobsDeleteRes()                {}
 func (*ErrorStatusCode) workerJobsGetRes()                   {}
 func (*ErrorStatusCode) workerJobsListRes()                  {}
+
+type GetUsageStatusLimitType string
+
+const (
+	GetUsageStatusLimitTypeMessagesFetch GetUsageStatusLimitType = "messages_fetch"
+	GetUsageStatusLimitTypeMessagesPush  GetUsageStatusLimitType = "messages_push"
+)
+
+// AllValues returns all GetUsageStatusLimitType values.
+func (GetUsageStatusLimitType) AllValues() []GetUsageStatusLimitType {
+	return []GetUsageStatusLimitType{
+		GetUsageStatusLimitTypeMessagesFetch,
+		GetUsageStatusLimitTypeMessagesPush,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetUsageStatusLimitType) MarshalText() ([]byte, error) {
+	switch s {
+	case GetUsageStatusLimitTypeMessagesFetch:
+		return []byte(s), nil
+	case GetUsageStatusLimitTypeMessagesPush:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetUsageStatusLimitType) UnmarshalText(data []byte) error {
+	switch GetUsageStatusLimitType(data) {
+	case GetUsageStatusLimitTypeMessagesFetch:
+		*s = GetUsageStatusLimitTypeMessagesFetch
+		return nil
+	case GetUsageStatusLimitTypeMessagesPush:
+		*s = GetUsageStatusLimitTypeMessagesPush
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type GetUserPolicySetsOK struct {
 	UserUUID   OptUUID                   `json:"user_uuid"`
@@ -1371,6 +1441,14 @@ type ListRegisteredWorkersOKApplicationJSON []RegisteredWorker
 
 func (*ListRegisteredWorkersOKApplicationJSON) listRegisteredWorkersRes() {}
 
+type ListUsageLimitsOKApplicationJSON []UsageLimit
+
+func (*ListUsageLimitsOKApplicationJSON) listUsageLimitsRes() {}
+
+type ListUserUsageLimitOverridesOKApplicationJSON []UserUsageLimitOverride
+
+func (*ListUserUsageLimitOverridesOKApplicationJSON) listUserUsageLimitOverridesRes() {}
+
 type ListUsersOKApplicationJSON []User
 
 func (*ListUsersOKApplicationJSON) listUsersRes() {}
@@ -1378,6 +1456,10 @@ func (*ListUsersOKApplicationJSON) listUsersRes() {}
 type ListWorkerEnrollmentTokensOKApplicationJSON []WorkerEnrollmentToken
 
 func (*ListWorkerEnrollmentTokensOKApplicationJSON) listWorkerEnrollmentTokensRes() {}
+
+type ListWorkerUsageLimitsOKApplicationJSON []WorkerUsageLimit
+
+func (*ListWorkerUsageLimitsOKApplicationJSON) listWorkerUsageLimitsRes() {}
 
 type ListWorkspaceInvitesOKApplicationJSON []UserInvite
 
@@ -3631,6 +3713,69 @@ func (o OptNilDateTime) Or(d time.Time) time.Time {
 	return d
 }
 
+// NewOptNilInt64 returns new OptNilInt64 with value set to v.
+func NewOptNilInt64(v int64) OptNilInt64 {
+	return OptNilInt64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilInt64 is optional nullable int64.
+type OptNilInt64 struct {
+	Value int64
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilInt64 was set.
+func (o OptNilInt64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilInt64) Reset() {
+	var v int64
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilInt64) SetTo(v int64) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o OptNilInt64) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilInt64) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v int64
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilInt64) Get() (v int64, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilString returns new OptNilString with value set to v.
 func NewOptNilString(v string) OptNilString {
 	return OptNilString{
@@ -3688,6 +3833,69 @@ func (o OptNilString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilUserUsageLimitOverrideResetPeriod returns new OptNilUserUsageLimitOverrideResetPeriod with value set to v.
+func NewOptNilUserUsageLimitOverrideResetPeriod(v UserUsageLimitOverrideResetPeriod) OptNilUserUsageLimitOverrideResetPeriod {
+	return OptNilUserUsageLimitOverrideResetPeriod{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilUserUsageLimitOverrideResetPeriod is optional nullable UserUsageLimitOverrideResetPeriod.
+type OptNilUserUsageLimitOverrideResetPeriod struct {
+	Value UserUsageLimitOverrideResetPeriod
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilUserUsageLimitOverrideResetPeriod was set.
+func (o OptNilUserUsageLimitOverrideResetPeriod) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilUserUsageLimitOverrideResetPeriod) Reset() {
+	var v UserUsageLimitOverrideResetPeriod
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilUserUsageLimitOverrideResetPeriod) SetTo(v UserUsageLimitOverrideResetPeriod) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsSet returns true if value is Null.
+func (o OptNilUserUsageLimitOverrideResetPeriod) IsNull() bool { return o.Null }
+
+// SetNull sets value to null.
+func (o *OptNilUserUsageLimitOverrideResetPeriod) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v UserUsageLimitOverrideResetPeriod
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilUserUsageLimitOverrideResetPeriod) Get() (v UserUsageLimitOverrideResetPeriod, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilUserUsageLimitOverrideResetPeriod) Or(d UserUsageLimitOverrideResetPeriod) UserUsageLimitOverrideResetPeriod {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4522,6 +4730,236 @@ func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
 	return d
 }
 
+// NewOptUsageLimitResetPeriod returns new OptUsageLimitResetPeriod with value set to v.
+func NewOptUsageLimitResetPeriod(v UsageLimitResetPeriod) OptUsageLimitResetPeriod {
+	return OptUsageLimitResetPeriod{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUsageLimitResetPeriod is optional UsageLimitResetPeriod.
+type OptUsageLimitResetPeriod struct {
+	Value UsageLimitResetPeriod
+	Set   bool
+}
+
+// IsSet returns true if OptUsageLimitResetPeriod was set.
+func (o OptUsageLimitResetPeriod) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUsageLimitResetPeriod) Reset() {
+	var v UsageLimitResetPeriod
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUsageLimitResetPeriod) SetTo(v UsageLimitResetPeriod) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUsageLimitResetPeriod) Get() (v UsageLimitResetPeriod, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUsageLimitResetPeriod) Or(d UsageLimitResetPeriod) UsageLimitResetPeriod {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUsageStatusUserLimit returns new OptUsageStatusUserLimit with value set to v.
+func NewOptUsageStatusUserLimit(v UsageStatusUserLimit) OptUsageStatusUserLimit {
+	return OptUsageStatusUserLimit{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUsageStatusUserLimit is optional UsageStatusUserLimit.
+type OptUsageStatusUserLimit struct {
+	Value UsageStatusUserLimit
+	Set   bool
+}
+
+// IsSet returns true if OptUsageStatusUserLimit was set.
+func (o OptUsageStatusUserLimit) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUsageStatusUserLimit) Reset() {
+	var v UsageStatusUserLimit
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUsageStatusUserLimit) SetTo(v UsageStatusUserLimit) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUsageStatusUserLimit) Get() (v UsageStatusUserLimit, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUsageStatusUserLimit) Or(d UsageStatusUserLimit) UsageStatusUserLimit {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUsageStatusUserLimitResetPeriod returns new OptUsageStatusUserLimitResetPeriod with value set to v.
+func NewOptUsageStatusUserLimitResetPeriod(v UsageStatusUserLimitResetPeriod) OptUsageStatusUserLimitResetPeriod {
+	return OptUsageStatusUserLimitResetPeriod{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUsageStatusUserLimitResetPeriod is optional UsageStatusUserLimitResetPeriod.
+type OptUsageStatusUserLimitResetPeriod struct {
+	Value UsageStatusUserLimitResetPeriod
+	Set   bool
+}
+
+// IsSet returns true if OptUsageStatusUserLimitResetPeriod was set.
+func (o OptUsageStatusUserLimitResetPeriod) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUsageStatusUserLimitResetPeriod) Reset() {
+	var v UsageStatusUserLimitResetPeriod
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUsageStatusUserLimitResetPeriod) SetTo(v UsageStatusUserLimitResetPeriod) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUsageStatusUserLimitResetPeriod) Get() (v UsageStatusUserLimitResetPeriod, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUsageStatusUserLimitResetPeriod) Or(d UsageStatusUserLimitResetPeriod) UsageStatusUserLimitResetPeriod {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUsageStatusWorkerLimit returns new OptUsageStatusWorkerLimit with value set to v.
+func NewOptUsageStatusWorkerLimit(v UsageStatusWorkerLimit) OptUsageStatusWorkerLimit {
+	return OptUsageStatusWorkerLimit{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUsageStatusWorkerLimit is optional UsageStatusWorkerLimit.
+type OptUsageStatusWorkerLimit struct {
+	Value UsageStatusWorkerLimit
+	Set   bool
+}
+
+// IsSet returns true if OptUsageStatusWorkerLimit was set.
+func (o OptUsageStatusWorkerLimit) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUsageStatusWorkerLimit) Reset() {
+	var v UsageStatusWorkerLimit
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUsageStatusWorkerLimit) SetTo(v UsageStatusWorkerLimit) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUsageStatusWorkerLimit) Get() (v UsageStatusWorkerLimit, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUsageStatusWorkerLimit) Or(d UsageStatusWorkerLimit) UsageStatusWorkerLimit {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUsageStatusWorkerLimitResetPeriod returns new OptUsageStatusWorkerLimitResetPeriod with value set to v.
+func NewOptUsageStatusWorkerLimitResetPeriod(v UsageStatusWorkerLimitResetPeriod) OptUsageStatusWorkerLimitResetPeriod {
+	return OptUsageStatusWorkerLimitResetPeriod{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUsageStatusWorkerLimitResetPeriod is optional UsageStatusWorkerLimitResetPeriod.
+type OptUsageStatusWorkerLimitResetPeriod struct {
+	Value UsageStatusWorkerLimitResetPeriod
+	Set   bool
+}
+
+// IsSet returns true if OptUsageStatusWorkerLimitResetPeriod was set.
+func (o OptUsageStatusWorkerLimitResetPeriod) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUsageStatusWorkerLimitResetPeriod) Reset() {
+	var v UsageStatusWorkerLimitResetPeriod
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUsageStatusWorkerLimitResetPeriod) SetTo(v UsageStatusWorkerLimitResetPeriod) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUsageStatusWorkerLimitResetPeriod) Get() (v UsageStatusWorkerLimitResetPeriod, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUsageStatusWorkerLimitResetPeriod) Or(d UsageStatusWorkerLimitResetPeriod) UsageStatusWorkerLimitResetPeriod {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptUserCurrentWorkspace returns new OptUserCurrentWorkspace with value set to v.
 func NewOptUserCurrentWorkspace(v UserCurrentWorkspace) OptUserCurrentWorkspace {
 	return OptUserCurrentWorkspace{
@@ -4654,6 +5092,52 @@ func (o OptWorkerJobsData) Get() (v WorkerJobsData, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptWorkerJobsData) Or(d WorkerJobsData) WorkerJobsData {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWorkerUsageLimitResetPeriod returns new OptWorkerUsageLimitResetPeriod with value set to v.
+func NewOptWorkerUsageLimitResetPeriod(v WorkerUsageLimitResetPeriod) OptWorkerUsageLimitResetPeriod {
+	return OptWorkerUsageLimitResetPeriod{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWorkerUsageLimitResetPeriod is optional WorkerUsageLimitResetPeriod.
+type OptWorkerUsageLimitResetPeriod struct {
+	Value WorkerUsageLimitResetPeriod
+	Set   bool
+}
+
+// IsSet returns true if OptWorkerUsageLimitResetPeriod was set.
+func (o OptWorkerUsageLimitResetPeriod) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWorkerUsageLimitResetPeriod) Reset() {
+	var v WorkerUsageLimitResetPeriod
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWorkerUsageLimitResetPeriod) SetTo(v WorkerUsageLimitResetPeriod) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWorkerUsageLimitResetPeriod) Get() (v WorkerUsageLimitResetPeriod, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWorkerUsageLimitResetPeriod) Or(d WorkerUsageLimitResetPeriod) WorkerUsageLimitResetPeriod {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8240,6 +8724,580 @@ func (s *UpdateWorkspaceMemberRoleReqRole) UnmarshalText(data []byte) error {
 }
 
 // Ref: #
+type UsageLimit struct {
+	// Unique identifier for the usage limit.
+	UUID OptUUID `json:"uuid"`
+	// Policy set this limit belongs to.
+	PolicySetName string `json:"policy_set_name"`
+	// Type of operation being limited.
+	LimitType UsageLimitLimitType `json:"limit_type"`
+	// Maximum allowed count per period. Null means unlimited.
+	LimitValue OptNilInt64 `json:"limit_value"`
+	// Period after which usage counter resets.
+	ResetPeriod OptUsageLimitResetPeriod `json:"reset_period"`
+	// Whether this limit is currently active.
+	IsEnabled OptBool `json:"is_enabled"`
+	// Timestamp of creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *UsageLimit) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetPolicySetName returns the value of PolicySetName.
+func (s *UsageLimit) GetPolicySetName() string {
+	return s.PolicySetName
+}
+
+// GetLimitType returns the value of LimitType.
+func (s *UsageLimit) GetLimitType() UsageLimitLimitType {
+	return s.LimitType
+}
+
+// GetLimitValue returns the value of LimitValue.
+func (s *UsageLimit) GetLimitValue() OptNilInt64 {
+	return s.LimitValue
+}
+
+// GetResetPeriod returns the value of ResetPeriod.
+func (s *UsageLimit) GetResetPeriod() OptUsageLimitResetPeriod {
+	return s.ResetPeriod
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *UsageLimit) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *UsageLimit) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *UsageLimit) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *UsageLimit) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetPolicySetName sets the value of PolicySetName.
+func (s *UsageLimit) SetPolicySetName(val string) {
+	s.PolicySetName = val
+}
+
+// SetLimitType sets the value of LimitType.
+func (s *UsageLimit) SetLimitType(val UsageLimitLimitType) {
+	s.LimitType = val
+}
+
+// SetLimitValue sets the value of LimitValue.
+func (s *UsageLimit) SetLimitValue(val OptNilInt64) {
+	s.LimitValue = val
+}
+
+// SetResetPeriod sets the value of ResetPeriod.
+func (s *UsageLimit) SetResetPeriod(val OptUsageLimitResetPeriod) {
+	s.ResetPeriod = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *UsageLimit) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *UsageLimit) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *UsageLimit) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+func (*UsageLimit) createUsageLimitRes() {}
+func (*UsageLimit) getUsageLimitRes()    {}
+func (*UsageLimit) updateUsageLimitRes() {}
+
+// Type of operation being limited.
+type UsageLimitLimitType string
+
+const (
+	UsageLimitLimitTypeMessagesFetch UsageLimitLimitType = "messages_fetch"
+	UsageLimitLimitTypeMessagesPush  UsageLimitLimitType = "messages_push"
+)
+
+// AllValues returns all UsageLimitLimitType values.
+func (UsageLimitLimitType) AllValues() []UsageLimitLimitType {
+	return []UsageLimitLimitType{
+		UsageLimitLimitTypeMessagesFetch,
+		UsageLimitLimitTypeMessagesPush,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UsageLimitLimitType) MarshalText() ([]byte, error) {
+	switch s {
+	case UsageLimitLimitTypeMessagesFetch:
+		return []byte(s), nil
+	case UsageLimitLimitTypeMessagesPush:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UsageLimitLimitType) UnmarshalText(data []byte) error {
+	switch UsageLimitLimitType(data) {
+	case UsageLimitLimitTypeMessagesFetch:
+		*s = UsageLimitLimitTypeMessagesFetch
+		return nil
+	case UsageLimitLimitTypeMessagesPush:
+		*s = UsageLimitLimitTypeMessagesPush
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Period after which usage counter resets.
+type UsageLimitResetPeriod string
+
+const (
+	UsageLimitResetPeriodDaily      UsageLimitResetPeriod = "daily"
+	UsageLimitResetPeriodWeekly     UsageLimitResetPeriod = "weekly"
+	UsageLimitResetPeriodMonthly    UsageLimitResetPeriod = "monthly"
+	UsageLimitResetPeriodRolling24h UsageLimitResetPeriod = "rolling_24h"
+	UsageLimitResetPeriodRolling7d  UsageLimitResetPeriod = "rolling_7d"
+	UsageLimitResetPeriodRolling30d UsageLimitResetPeriod = "rolling_30d"
+)
+
+// AllValues returns all UsageLimitResetPeriod values.
+func (UsageLimitResetPeriod) AllValues() []UsageLimitResetPeriod {
+	return []UsageLimitResetPeriod{
+		UsageLimitResetPeriodDaily,
+		UsageLimitResetPeriodWeekly,
+		UsageLimitResetPeriodMonthly,
+		UsageLimitResetPeriodRolling24h,
+		UsageLimitResetPeriodRolling7d,
+		UsageLimitResetPeriodRolling30d,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UsageLimitResetPeriod) MarshalText() ([]byte, error) {
+	switch s {
+	case UsageLimitResetPeriodDaily:
+		return []byte(s), nil
+	case UsageLimitResetPeriodWeekly:
+		return []byte(s), nil
+	case UsageLimitResetPeriodMonthly:
+		return []byte(s), nil
+	case UsageLimitResetPeriodRolling24h:
+		return []byte(s), nil
+	case UsageLimitResetPeriodRolling7d:
+		return []byte(s), nil
+	case UsageLimitResetPeriodRolling30d:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UsageLimitResetPeriod) UnmarshalText(data []byte) error {
+	switch UsageLimitResetPeriod(data) {
+	case UsageLimitResetPeriodDaily:
+		*s = UsageLimitResetPeriodDaily
+		return nil
+	case UsageLimitResetPeriodWeekly:
+		*s = UsageLimitResetPeriodWeekly
+		return nil
+	case UsageLimitResetPeriodMonthly:
+		*s = UsageLimitResetPeriodMonthly
+		return nil
+	case UsageLimitResetPeriodRolling24h:
+		*s = UsageLimitResetPeriodRolling24h
+		return nil
+	case UsageLimitResetPeriodRolling7d:
+		*s = UsageLimitResetPeriodRolling7d
+		return nil
+	case UsageLimitResetPeriodRolling30d:
+		*s = UsageLimitResetPeriodRolling30d
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #
+type UsageStatus struct {
+	// User's usage status in the workspace.
+	UserLimit OptUsageStatusUserLimit `json:"user_limit"`
+	// Worker's usage status in the workspace.
+	WorkerLimit OptUsageStatusWorkerLimit `json:"worker_limit"`
+	// Minimum of user and worker remaining. Null means both are unlimited.
+	EffectiveRemaining OptNilInt64 `json:"effective_remaining"`
+}
+
+// GetUserLimit returns the value of UserLimit.
+func (s *UsageStatus) GetUserLimit() OptUsageStatusUserLimit {
+	return s.UserLimit
+}
+
+// GetWorkerLimit returns the value of WorkerLimit.
+func (s *UsageStatus) GetWorkerLimit() OptUsageStatusWorkerLimit {
+	return s.WorkerLimit
+}
+
+// GetEffectiveRemaining returns the value of EffectiveRemaining.
+func (s *UsageStatus) GetEffectiveRemaining() OptNilInt64 {
+	return s.EffectiveRemaining
+}
+
+// SetUserLimit sets the value of UserLimit.
+func (s *UsageStatus) SetUserLimit(val OptUsageStatusUserLimit) {
+	s.UserLimit = val
+}
+
+// SetWorkerLimit sets the value of WorkerLimit.
+func (s *UsageStatus) SetWorkerLimit(val OptUsageStatusWorkerLimit) {
+	s.WorkerLimit = val
+}
+
+// SetEffectiveRemaining sets the value of EffectiveRemaining.
+func (s *UsageStatus) SetEffectiveRemaining(val OptNilInt64) {
+	s.EffectiveRemaining = val
+}
+
+func (*UsageStatus) getUsageStatusRes() {}
+
+// User's usage status in the workspace.
+type UsageStatusUserLimit struct {
+	// Maximum allowed. Null means unlimited.
+	LimitValue OptNilInt64 `json:"limit_value"`
+	// Current usage in this period.
+	CurrentUsage OptInt64 `json:"current_usage"`
+	// Remaining quota. Null means unlimited.
+	Remaining OptNilInt64 `json:"remaining"`
+	// Reset period for this limit.
+	ResetPeriod OptUsageStatusUserLimitResetPeriod `json:"reset_period"`
+	// Start of current period.
+	PeriodStart OptDateTime `json:"period_start"`
+	// End of current period.
+	PeriodEnd OptDateTime `json:"period_end"`
+	// False if no limit applies (unlimited).
+	IsLimited OptBool `json:"is_limited"`
+}
+
+// GetLimitValue returns the value of LimitValue.
+func (s *UsageStatusUserLimit) GetLimitValue() OptNilInt64 {
+	return s.LimitValue
+}
+
+// GetCurrentUsage returns the value of CurrentUsage.
+func (s *UsageStatusUserLimit) GetCurrentUsage() OptInt64 {
+	return s.CurrentUsage
+}
+
+// GetRemaining returns the value of Remaining.
+func (s *UsageStatusUserLimit) GetRemaining() OptNilInt64 {
+	return s.Remaining
+}
+
+// GetResetPeriod returns the value of ResetPeriod.
+func (s *UsageStatusUserLimit) GetResetPeriod() OptUsageStatusUserLimitResetPeriod {
+	return s.ResetPeriod
+}
+
+// GetPeriodStart returns the value of PeriodStart.
+func (s *UsageStatusUserLimit) GetPeriodStart() OptDateTime {
+	return s.PeriodStart
+}
+
+// GetPeriodEnd returns the value of PeriodEnd.
+func (s *UsageStatusUserLimit) GetPeriodEnd() OptDateTime {
+	return s.PeriodEnd
+}
+
+// GetIsLimited returns the value of IsLimited.
+func (s *UsageStatusUserLimit) GetIsLimited() OptBool {
+	return s.IsLimited
+}
+
+// SetLimitValue sets the value of LimitValue.
+func (s *UsageStatusUserLimit) SetLimitValue(val OptNilInt64) {
+	s.LimitValue = val
+}
+
+// SetCurrentUsage sets the value of CurrentUsage.
+func (s *UsageStatusUserLimit) SetCurrentUsage(val OptInt64) {
+	s.CurrentUsage = val
+}
+
+// SetRemaining sets the value of Remaining.
+func (s *UsageStatusUserLimit) SetRemaining(val OptNilInt64) {
+	s.Remaining = val
+}
+
+// SetResetPeriod sets the value of ResetPeriod.
+func (s *UsageStatusUserLimit) SetResetPeriod(val OptUsageStatusUserLimitResetPeriod) {
+	s.ResetPeriod = val
+}
+
+// SetPeriodStart sets the value of PeriodStart.
+func (s *UsageStatusUserLimit) SetPeriodStart(val OptDateTime) {
+	s.PeriodStart = val
+}
+
+// SetPeriodEnd sets the value of PeriodEnd.
+func (s *UsageStatusUserLimit) SetPeriodEnd(val OptDateTime) {
+	s.PeriodEnd = val
+}
+
+// SetIsLimited sets the value of IsLimited.
+func (s *UsageStatusUserLimit) SetIsLimited(val OptBool) {
+	s.IsLimited = val
+}
+
+// Reset period for this limit.
+type UsageStatusUserLimitResetPeriod string
+
+const (
+	UsageStatusUserLimitResetPeriodDaily      UsageStatusUserLimitResetPeriod = "daily"
+	UsageStatusUserLimitResetPeriodWeekly     UsageStatusUserLimitResetPeriod = "weekly"
+	UsageStatusUserLimitResetPeriodMonthly    UsageStatusUserLimitResetPeriod = "monthly"
+	UsageStatusUserLimitResetPeriodRolling24h UsageStatusUserLimitResetPeriod = "rolling_24h"
+	UsageStatusUserLimitResetPeriodRolling7d  UsageStatusUserLimitResetPeriod = "rolling_7d"
+	UsageStatusUserLimitResetPeriodRolling30d UsageStatusUserLimitResetPeriod = "rolling_30d"
+)
+
+// AllValues returns all UsageStatusUserLimitResetPeriod values.
+func (UsageStatusUserLimitResetPeriod) AllValues() []UsageStatusUserLimitResetPeriod {
+	return []UsageStatusUserLimitResetPeriod{
+		UsageStatusUserLimitResetPeriodDaily,
+		UsageStatusUserLimitResetPeriodWeekly,
+		UsageStatusUserLimitResetPeriodMonthly,
+		UsageStatusUserLimitResetPeriodRolling24h,
+		UsageStatusUserLimitResetPeriodRolling7d,
+		UsageStatusUserLimitResetPeriodRolling30d,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UsageStatusUserLimitResetPeriod) MarshalText() ([]byte, error) {
+	switch s {
+	case UsageStatusUserLimitResetPeriodDaily:
+		return []byte(s), nil
+	case UsageStatusUserLimitResetPeriodWeekly:
+		return []byte(s), nil
+	case UsageStatusUserLimitResetPeriodMonthly:
+		return []byte(s), nil
+	case UsageStatusUserLimitResetPeriodRolling24h:
+		return []byte(s), nil
+	case UsageStatusUserLimitResetPeriodRolling7d:
+		return []byte(s), nil
+	case UsageStatusUserLimitResetPeriodRolling30d:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UsageStatusUserLimitResetPeriod) UnmarshalText(data []byte) error {
+	switch UsageStatusUserLimitResetPeriod(data) {
+	case UsageStatusUserLimitResetPeriodDaily:
+		*s = UsageStatusUserLimitResetPeriodDaily
+		return nil
+	case UsageStatusUserLimitResetPeriodWeekly:
+		*s = UsageStatusUserLimitResetPeriodWeekly
+		return nil
+	case UsageStatusUserLimitResetPeriodMonthly:
+		*s = UsageStatusUserLimitResetPeriodMonthly
+		return nil
+	case UsageStatusUserLimitResetPeriodRolling24h:
+		*s = UsageStatusUserLimitResetPeriodRolling24h
+		return nil
+	case UsageStatusUserLimitResetPeriodRolling7d:
+		*s = UsageStatusUserLimitResetPeriodRolling7d
+		return nil
+	case UsageStatusUserLimitResetPeriodRolling30d:
+		*s = UsageStatusUserLimitResetPeriodRolling30d
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Worker's usage status in the workspace.
+type UsageStatusWorkerLimit struct {
+	// Maximum allowed. Null means unlimited.
+	LimitValue OptNilInt64 `json:"limit_value"`
+	// Current usage in this period.
+	CurrentUsage OptInt64 `json:"current_usage"`
+	// Remaining quota. Null means unlimited.
+	Remaining OptNilInt64 `json:"remaining"`
+	// Reset period for this limit.
+	ResetPeriod OptUsageStatusWorkerLimitResetPeriod `json:"reset_period"`
+	// Start of current period.
+	PeriodStart OptDateTime `json:"period_start"`
+	// End of current period.
+	PeriodEnd OptDateTime `json:"period_end"`
+	// False if no limit applies (unlimited).
+	IsLimited OptBool `json:"is_limited"`
+}
+
+// GetLimitValue returns the value of LimitValue.
+func (s *UsageStatusWorkerLimit) GetLimitValue() OptNilInt64 {
+	return s.LimitValue
+}
+
+// GetCurrentUsage returns the value of CurrentUsage.
+func (s *UsageStatusWorkerLimit) GetCurrentUsage() OptInt64 {
+	return s.CurrentUsage
+}
+
+// GetRemaining returns the value of Remaining.
+func (s *UsageStatusWorkerLimit) GetRemaining() OptNilInt64 {
+	return s.Remaining
+}
+
+// GetResetPeriod returns the value of ResetPeriod.
+func (s *UsageStatusWorkerLimit) GetResetPeriod() OptUsageStatusWorkerLimitResetPeriod {
+	return s.ResetPeriod
+}
+
+// GetPeriodStart returns the value of PeriodStart.
+func (s *UsageStatusWorkerLimit) GetPeriodStart() OptDateTime {
+	return s.PeriodStart
+}
+
+// GetPeriodEnd returns the value of PeriodEnd.
+func (s *UsageStatusWorkerLimit) GetPeriodEnd() OptDateTime {
+	return s.PeriodEnd
+}
+
+// GetIsLimited returns the value of IsLimited.
+func (s *UsageStatusWorkerLimit) GetIsLimited() OptBool {
+	return s.IsLimited
+}
+
+// SetLimitValue sets the value of LimitValue.
+func (s *UsageStatusWorkerLimit) SetLimitValue(val OptNilInt64) {
+	s.LimitValue = val
+}
+
+// SetCurrentUsage sets the value of CurrentUsage.
+func (s *UsageStatusWorkerLimit) SetCurrentUsage(val OptInt64) {
+	s.CurrentUsage = val
+}
+
+// SetRemaining sets the value of Remaining.
+func (s *UsageStatusWorkerLimit) SetRemaining(val OptNilInt64) {
+	s.Remaining = val
+}
+
+// SetResetPeriod sets the value of ResetPeriod.
+func (s *UsageStatusWorkerLimit) SetResetPeriod(val OptUsageStatusWorkerLimitResetPeriod) {
+	s.ResetPeriod = val
+}
+
+// SetPeriodStart sets the value of PeriodStart.
+func (s *UsageStatusWorkerLimit) SetPeriodStart(val OptDateTime) {
+	s.PeriodStart = val
+}
+
+// SetPeriodEnd sets the value of PeriodEnd.
+func (s *UsageStatusWorkerLimit) SetPeriodEnd(val OptDateTime) {
+	s.PeriodEnd = val
+}
+
+// SetIsLimited sets the value of IsLimited.
+func (s *UsageStatusWorkerLimit) SetIsLimited(val OptBool) {
+	s.IsLimited = val
+}
+
+// Reset period for this limit.
+type UsageStatusWorkerLimitResetPeriod string
+
+const (
+	UsageStatusWorkerLimitResetPeriodDaily      UsageStatusWorkerLimitResetPeriod = "daily"
+	UsageStatusWorkerLimitResetPeriodWeekly     UsageStatusWorkerLimitResetPeriod = "weekly"
+	UsageStatusWorkerLimitResetPeriodMonthly    UsageStatusWorkerLimitResetPeriod = "monthly"
+	UsageStatusWorkerLimitResetPeriodRolling24h UsageStatusWorkerLimitResetPeriod = "rolling_24h"
+	UsageStatusWorkerLimitResetPeriodRolling7d  UsageStatusWorkerLimitResetPeriod = "rolling_7d"
+	UsageStatusWorkerLimitResetPeriodRolling30d UsageStatusWorkerLimitResetPeriod = "rolling_30d"
+)
+
+// AllValues returns all UsageStatusWorkerLimitResetPeriod values.
+func (UsageStatusWorkerLimitResetPeriod) AllValues() []UsageStatusWorkerLimitResetPeriod {
+	return []UsageStatusWorkerLimitResetPeriod{
+		UsageStatusWorkerLimitResetPeriodDaily,
+		UsageStatusWorkerLimitResetPeriodWeekly,
+		UsageStatusWorkerLimitResetPeriodMonthly,
+		UsageStatusWorkerLimitResetPeriodRolling24h,
+		UsageStatusWorkerLimitResetPeriodRolling7d,
+		UsageStatusWorkerLimitResetPeriodRolling30d,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UsageStatusWorkerLimitResetPeriod) MarshalText() ([]byte, error) {
+	switch s {
+	case UsageStatusWorkerLimitResetPeriodDaily:
+		return []byte(s), nil
+	case UsageStatusWorkerLimitResetPeriodWeekly:
+		return []byte(s), nil
+	case UsageStatusWorkerLimitResetPeriodMonthly:
+		return []byte(s), nil
+	case UsageStatusWorkerLimitResetPeriodRolling24h:
+		return []byte(s), nil
+	case UsageStatusWorkerLimitResetPeriodRolling7d:
+		return []byte(s), nil
+	case UsageStatusWorkerLimitResetPeriodRolling30d:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UsageStatusWorkerLimitResetPeriod) UnmarshalText(data []byte) error {
+	switch UsageStatusWorkerLimitResetPeriod(data) {
+	case UsageStatusWorkerLimitResetPeriodDaily:
+		*s = UsageStatusWorkerLimitResetPeriodDaily
+		return nil
+	case UsageStatusWorkerLimitResetPeriodWeekly:
+		*s = UsageStatusWorkerLimitResetPeriodWeekly
+		return nil
+	case UsageStatusWorkerLimitResetPeriodMonthly:
+		*s = UsageStatusWorkerLimitResetPeriodMonthly
+		return nil
+	case UsageStatusWorkerLimitResetPeriodRolling24h:
+		*s = UsageStatusWorkerLimitResetPeriodRolling24h
+		return nil
+	case UsageStatusWorkerLimitResetPeriodRolling7d:
+		*s = UsageStatusWorkerLimitResetPeriodRolling7d
+		return nil
+	case UsageStatusWorkerLimitResetPeriodRolling30d:
+		*s = UsageStatusWorkerLimitResetPeriodRolling30d
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #
 type User struct {
 	// Unique identifier for the user.
 	UUID OptString `json:"uuid"`
@@ -8900,6 +9958,233 @@ func (s *UserSessionToken) SetExpiresIn(val int) {
 func (*UserSessionToken) createUserSessionRes() {}
 
 // Ref: #
+type UserUsageLimitOverride struct {
+	// Unique identifier for the override.
+	UUID OptUUID `json:"uuid"`
+	// User this override applies to.
+	UserUUID uuid.UUID `json:"user_uuid"`
+	// Workspace this override is scoped to.
+	WorkspaceSlug string `json:"workspace_slug"`
+	// Type of operation being limited.
+	LimitType UserUsageLimitOverrideLimitType `json:"limit_type"`
+	// Override limit value. Null means unlimited.
+	LimitValue OptNilInt64 `json:"limit_value"`
+	// Override reset period. Null inherits from policy set.
+	ResetPeriod OptNilUserUsageLimitOverrideResetPeriod `json:"reset_period"`
+	// Whether this override is currently active.
+	IsEnabled OptBool `json:"is_enabled"`
+	// Timestamp of creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *UserUsageLimitOverride) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetUserUUID returns the value of UserUUID.
+func (s *UserUsageLimitOverride) GetUserUUID() uuid.UUID {
+	return s.UserUUID
+}
+
+// GetWorkspaceSlug returns the value of WorkspaceSlug.
+func (s *UserUsageLimitOverride) GetWorkspaceSlug() string {
+	return s.WorkspaceSlug
+}
+
+// GetLimitType returns the value of LimitType.
+func (s *UserUsageLimitOverride) GetLimitType() UserUsageLimitOverrideLimitType {
+	return s.LimitType
+}
+
+// GetLimitValue returns the value of LimitValue.
+func (s *UserUsageLimitOverride) GetLimitValue() OptNilInt64 {
+	return s.LimitValue
+}
+
+// GetResetPeriod returns the value of ResetPeriod.
+func (s *UserUsageLimitOverride) GetResetPeriod() OptNilUserUsageLimitOverrideResetPeriod {
+	return s.ResetPeriod
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *UserUsageLimitOverride) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *UserUsageLimitOverride) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *UserUsageLimitOverride) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *UserUsageLimitOverride) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetUserUUID sets the value of UserUUID.
+func (s *UserUsageLimitOverride) SetUserUUID(val uuid.UUID) {
+	s.UserUUID = val
+}
+
+// SetWorkspaceSlug sets the value of WorkspaceSlug.
+func (s *UserUsageLimitOverride) SetWorkspaceSlug(val string) {
+	s.WorkspaceSlug = val
+}
+
+// SetLimitType sets the value of LimitType.
+func (s *UserUsageLimitOverride) SetLimitType(val UserUsageLimitOverrideLimitType) {
+	s.LimitType = val
+}
+
+// SetLimitValue sets the value of LimitValue.
+func (s *UserUsageLimitOverride) SetLimitValue(val OptNilInt64) {
+	s.LimitValue = val
+}
+
+// SetResetPeriod sets the value of ResetPeriod.
+func (s *UserUsageLimitOverride) SetResetPeriod(val OptNilUserUsageLimitOverrideResetPeriod) {
+	s.ResetPeriod = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *UserUsageLimitOverride) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *UserUsageLimitOverride) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *UserUsageLimitOverride) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+func (*UserUsageLimitOverride) createUserUsageLimitOverrideRes() {}
+func (*UserUsageLimitOverride) updateUserUsageLimitOverrideRes() {}
+
+// Type of operation being limited.
+type UserUsageLimitOverrideLimitType string
+
+const (
+	UserUsageLimitOverrideLimitTypeMessagesFetch UserUsageLimitOverrideLimitType = "messages_fetch"
+	UserUsageLimitOverrideLimitTypeMessagesPush  UserUsageLimitOverrideLimitType = "messages_push"
+)
+
+// AllValues returns all UserUsageLimitOverrideLimitType values.
+func (UserUsageLimitOverrideLimitType) AllValues() []UserUsageLimitOverrideLimitType {
+	return []UserUsageLimitOverrideLimitType{
+		UserUsageLimitOverrideLimitTypeMessagesFetch,
+		UserUsageLimitOverrideLimitTypeMessagesPush,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UserUsageLimitOverrideLimitType) MarshalText() ([]byte, error) {
+	switch s {
+	case UserUsageLimitOverrideLimitTypeMessagesFetch:
+		return []byte(s), nil
+	case UserUsageLimitOverrideLimitTypeMessagesPush:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UserUsageLimitOverrideLimitType) UnmarshalText(data []byte) error {
+	switch UserUsageLimitOverrideLimitType(data) {
+	case UserUsageLimitOverrideLimitTypeMessagesFetch:
+		*s = UserUsageLimitOverrideLimitTypeMessagesFetch
+		return nil
+	case UserUsageLimitOverrideLimitTypeMessagesPush:
+		*s = UserUsageLimitOverrideLimitTypeMessagesPush
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Override reset period. Null inherits from policy set.
+type UserUsageLimitOverrideResetPeriod string
+
+const (
+	UserUsageLimitOverrideResetPeriodDaily      UserUsageLimitOverrideResetPeriod = "daily"
+	UserUsageLimitOverrideResetPeriodWeekly     UserUsageLimitOverrideResetPeriod = "weekly"
+	UserUsageLimitOverrideResetPeriodMonthly    UserUsageLimitOverrideResetPeriod = "monthly"
+	UserUsageLimitOverrideResetPeriodRolling24h UserUsageLimitOverrideResetPeriod = "rolling_24h"
+	UserUsageLimitOverrideResetPeriodRolling7d  UserUsageLimitOverrideResetPeriod = "rolling_7d"
+	UserUsageLimitOverrideResetPeriodRolling30d UserUsageLimitOverrideResetPeriod = "rolling_30d"
+)
+
+// AllValues returns all UserUsageLimitOverrideResetPeriod values.
+func (UserUsageLimitOverrideResetPeriod) AllValues() []UserUsageLimitOverrideResetPeriod {
+	return []UserUsageLimitOverrideResetPeriod{
+		UserUsageLimitOverrideResetPeriodDaily,
+		UserUsageLimitOverrideResetPeriodWeekly,
+		UserUsageLimitOverrideResetPeriodMonthly,
+		UserUsageLimitOverrideResetPeriodRolling24h,
+		UserUsageLimitOverrideResetPeriodRolling7d,
+		UserUsageLimitOverrideResetPeriodRolling30d,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UserUsageLimitOverrideResetPeriod) MarshalText() ([]byte, error) {
+	switch s {
+	case UserUsageLimitOverrideResetPeriodDaily:
+		return []byte(s), nil
+	case UserUsageLimitOverrideResetPeriodWeekly:
+		return []byte(s), nil
+	case UserUsageLimitOverrideResetPeriodMonthly:
+		return []byte(s), nil
+	case UserUsageLimitOverrideResetPeriodRolling24h:
+		return []byte(s), nil
+	case UserUsageLimitOverrideResetPeriodRolling7d:
+		return []byte(s), nil
+	case UserUsageLimitOverrideResetPeriodRolling30d:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UserUsageLimitOverrideResetPeriod) UnmarshalText(data []byte) error {
+	switch UserUsageLimitOverrideResetPeriod(data) {
+	case UserUsageLimitOverrideResetPeriodDaily:
+		*s = UserUsageLimitOverrideResetPeriodDaily
+		return nil
+	case UserUsageLimitOverrideResetPeriodWeekly:
+		*s = UserUsageLimitOverrideResetPeriodWeekly
+		return nil
+	case UserUsageLimitOverrideResetPeriodMonthly:
+		*s = UserUsageLimitOverrideResetPeriodMonthly
+		return nil
+	case UserUsageLimitOverrideResetPeriodRolling24h:
+		*s = UserUsageLimitOverrideResetPeriodRolling24h
+		return nil
+	case UserUsageLimitOverrideResetPeriodRolling7d:
+		*s = UserUsageLimitOverrideResetPeriodRolling7d
+		return nil
+	case UserUsageLimitOverrideResetPeriodRolling30d:
+		*s = UserUsageLimitOverrideResetPeriodRolling30d
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #
 type WorkerEnrollmentToken struct {
 	// Unique identifier for the token.
 	UUID OptString `json:"uuid"`
@@ -9165,6 +10450,233 @@ func (s *WorkerJobsListOK) SetJobs(val []WorkerJobs) {
 }
 
 func (*WorkerJobsListOK) workerJobsListRes() {}
+
+// Ref: #
+type WorkerUsageLimit struct {
+	// Unique identifier for the worker limit.
+	UUID OptUUID `json:"uuid"`
+	// Worker this limit applies to.
+	WorkerUUID uuid.UUID `json:"worker_uuid"`
+	// Workspace this limit is scoped to.
+	WorkspaceSlug string `json:"workspace_slug"`
+	// Type of operation being limited.
+	LimitType WorkerUsageLimitLimitType `json:"limit_type"`
+	// Maximum allowed count per period. Null means unlimited.
+	LimitValue OptNilInt64 `json:"limit_value"`
+	// Period after which usage counter resets.
+	ResetPeriod OptWorkerUsageLimitResetPeriod `json:"reset_period"`
+	// Whether this limit is currently active.
+	IsEnabled OptBool `json:"is_enabled"`
+	// Timestamp of creation.
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of last update.
+	UpdatedAt OptDateTime `json:"updated_at"`
+}
+
+// GetUUID returns the value of UUID.
+func (s *WorkerUsageLimit) GetUUID() OptUUID {
+	return s.UUID
+}
+
+// GetWorkerUUID returns the value of WorkerUUID.
+func (s *WorkerUsageLimit) GetWorkerUUID() uuid.UUID {
+	return s.WorkerUUID
+}
+
+// GetWorkspaceSlug returns the value of WorkspaceSlug.
+func (s *WorkerUsageLimit) GetWorkspaceSlug() string {
+	return s.WorkspaceSlug
+}
+
+// GetLimitType returns the value of LimitType.
+func (s *WorkerUsageLimit) GetLimitType() WorkerUsageLimitLimitType {
+	return s.LimitType
+}
+
+// GetLimitValue returns the value of LimitValue.
+func (s *WorkerUsageLimit) GetLimitValue() OptNilInt64 {
+	return s.LimitValue
+}
+
+// GetResetPeriod returns the value of ResetPeriod.
+func (s *WorkerUsageLimit) GetResetPeriod() OptWorkerUsageLimitResetPeriod {
+	return s.ResetPeriod
+}
+
+// GetIsEnabled returns the value of IsEnabled.
+func (s *WorkerUsageLimit) GetIsEnabled() OptBool {
+	return s.IsEnabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WorkerUsageLimit) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *WorkerUsageLimit) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetUUID sets the value of UUID.
+func (s *WorkerUsageLimit) SetUUID(val OptUUID) {
+	s.UUID = val
+}
+
+// SetWorkerUUID sets the value of WorkerUUID.
+func (s *WorkerUsageLimit) SetWorkerUUID(val uuid.UUID) {
+	s.WorkerUUID = val
+}
+
+// SetWorkspaceSlug sets the value of WorkspaceSlug.
+func (s *WorkerUsageLimit) SetWorkspaceSlug(val string) {
+	s.WorkspaceSlug = val
+}
+
+// SetLimitType sets the value of LimitType.
+func (s *WorkerUsageLimit) SetLimitType(val WorkerUsageLimitLimitType) {
+	s.LimitType = val
+}
+
+// SetLimitValue sets the value of LimitValue.
+func (s *WorkerUsageLimit) SetLimitValue(val OptNilInt64) {
+	s.LimitValue = val
+}
+
+// SetResetPeriod sets the value of ResetPeriod.
+func (s *WorkerUsageLimit) SetResetPeriod(val OptWorkerUsageLimitResetPeriod) {
+	s.ResetPeriod = val
+}
+
+// SetIsEnabled sets the value of IsEnabled.
+func (s *WorkerUsageLimit) SetIsEnabled(val OptBool) {
+	s.IsEnabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WorkerUsageLimit) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *WorkerUsageLimit) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+func (*WorkerUsageLimit) createWorkerUsageLimitRes() {}
+func (*WorkerUsageLimit) updateWorkerUsageLimitRes() {}
+
+// Type of operation being limited.
+type WorkerUsageLimitLimitType string
+
+const (
+	WorkerUsageLimitLimitTypeMessagesFetch WorkerUsageLimitLimitType = "messages_fetch"
+	WorkerUsageLimitLimitTypeMessagesPush  WorkerUsageLimitLimitType = "messages_push"
+)
+
+// AllValues returns all WorkerUsageLimitLimitType values.
+func (WorkerUsageLimitLimitType) AllValues() []WorkerUsageLimitLimitType {
+	return []WorkerUsageLimitLimitType{
+		WorkerUsageLimitLimitTypeMessagesFetch,
+		WorkerUsageLimitLimitTypeMessagesPush,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WorkerUsageLimitLimitType) MarshalText() ([]byte, error) {
+	switch s {
+	case WorkerUsageLimitLimitTypeMessagesFetch:
+		return []byte(s), nil
+	case WorkerUsageLimitLimitTypeMessagesPush:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WorkerUsageLimitLimitType) UnmarshalText(data []byte) error {
+	switch WorkerUsageLimitLimitType(data) {
+	case WorkerUsageLimitLimitTypeMessagesFetch:
+		*s = WorkerUsageLimitLimitTypeMessagesFetch
+		return nil
+	case WorkerUsageLimitLimitTypeMessagesPush:
+		*s = WorkerUsageLimitLimitTypeMessagesPush
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Period after which usage counter resets.
+type WorkerUsageLimitResetPeriod string
+
+const (
+	WorkerUsageLimitResetPeriodDaily      WorkerUsageLimitResetPeriod = "daily"
+	WorkerUsageLimitResetPeriodWeekly     WorkerUsageLimitResetPeriod = "weekly"
+	WorkerUsageLimitResetPeriodMonthly    WorkerUsageLimitResetPeriod = "monthly"
+	WorkerUsageLimitResetPeriodRolling24h WorkerUsageLimitResetPeriod = "rolling_24h"
+	WorkerUsageLimitResetPeriodRolling7d  WorkerUsageLimitResetPeriod = "rolling_7d"
+	WorkerUsageLimitResetPeriodRolling30d WorkerUsageLimitResetPeriod = "rolling_30d"
+)
+
+// AllValues returns all WorkerUsageLimitResetPeriod values.
+func (WorkerUsageLimitResetPeriod) AllValues() []WorkerUsageLimitResetPeriod {
+	return []WorkerUsageLimitResetPeriod{
+		WorkerUsageLimitResetPeriodDaily,
+		WorkerUsageLimitResetPeriodWeekly,
+		WorkerUsageLimitResetPeriodMonthly,
+		WorkerUsageLimitResetPeriodRolling24h,
+		WorkerUsageLimitResetPeriodRolling7d,
+		WorkerUsageLimitResetPeriodRolling30d,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WorkerUsageLimitResetPeriod) MarshalText() ([]byte, error) {
+	switch s {
+	case WorkerUsageLimitResetPeriodDaily:
+		return []byte(s), nil
+	case WorkerUsageLimitResetPeriodWeekly:
+		return []byte(s), nil
+	case WorkerUsageLimitResetPeriodMonthly:
+		return []byte(s), nil
+	case WorkerUsageLimitResetPeriodRolling24h:
+		return []byte(s), nil
+	case WorkerUsageLimitResetPeriodRolling7d:
+		return []byte(s), nil
+	case WorkerUsageLimitResetPeriodRolling30d:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WorkerUsageLimitResetPeriod) UnmarshalText(data []byte) error {
+	switch WorkerUsageLimitResetPeriod(data) {
+	case WorkerUsageLimitResetPeriodDaily:
+		*s = WorkerUsageLimitResetPeriodDaily
+		return nil
+	case WorkerUsageLimitResetPeriodWeekly:
+		*s = WorkerUsageLimitResetPeriodWeekly
+		return nil
+	case WorkerUsageLimitResetPeriodMonthly:
+		*s = WorkerUsageLimitResetPeriodMonthly
+		return nil
+	case WorkerUsageLimitResetPeriodRolling24h:
+		*s = WorkerUsageLimitResetPeriodRolling24h
+		return nil
+	case WorkerUsageLimitResetPeriodRolling7d:
+		*s = WorkerUsageLimitResetPeriodRolling7d
+		return nil
+	case WorkerUsageLimitResetPeriodRolling30d:
+		*s = WorkerUsageLimitResetPeriodRolling30d
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #
 type Workspace struct {

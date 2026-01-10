@@ -1,0 +1,78 @@
+# spec/components/usage_status.yaml
+# Defines combined usage status for user and worker
+type: object
+additionalProperties: false
+properties:
+  user_limit:
+    type: object
+    additionalProperties: false
+    description: User's usage status in the workspace
+    properties:
+      limit_value:
+        type: integer
+        format: int64
+        nullable: true
+        description: Maximum allowed. Null means unlimited.
+      current_usage:
+        type: integer
+        format: int64
+        description: Current usage in this period
+      remaining:
+        type: integer
+        format: int64
+        nullable: true
+        description: Remaining quota. Null means unlimited.
+      reset_period:
+        type: string
+        enum: [daily, weekly, monthly, rolling_24h, rolling_7d, rolling_30d]
+        description: Reset period for this limit
+      period_start:
+        type: string
+        format: date-time
+        description: Start of current period
+      period_end:
+        type: string
+        format: date-time
+        description: End of current period
+      is_limited:
+        type: boolean
+        description: False if no limit applies (unlimited)
+  worker_limit:
+    type: object
+    additionalProperties: false
+    description: Worker's usage status in the workspace
+    properties:
+      limit_value:
+        type: integer
+        format: int64
+        nullable: true
+        description: Maximum allowed. Null means unlimited.
+      current_usage:
+        type: integer
+        format: int64
+        description: Current usage in this period
+      remaining:
+        type: integer
+        format: int64
+        nullable: true
+        description: Remaining quota. Null means unlimited.
+      reset_period:
+        type: string
+        enum: [daily, weekly, monthly, rolling_24h, rolling_7d, rolling_30d]
+        description: Reset period for this limit
+      period_start:
+        type: string
+        format: date-time
+        description: Start of current period
+      period_end:
+        type: string
+        format: date-time
+        description: End of current period
+      is_limited:
+        type: boolean
+        description: False if no limit applies (unlimited)
+  effective_remaining:
+    type: integer
+    format: int64
+    nullable: true
+    description: Minimum of user and worker remaining. Null means both are unlimited.

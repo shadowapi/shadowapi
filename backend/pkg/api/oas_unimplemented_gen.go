@@ -168,6 +168,15 @@ func (UnimplementedHandler) CreatePolicySet(ctx context.Context, req *PolicySet)
 	return r, ht.ErrNotImplemented
 }
 
+// CreateUsageLimit implements createUsageLimit operation.
+//
+// Create a new usage limit on a policy set.
+//
+// POST /access/usage-limits
+func (UnimplementedHandler) CreateUsageLimit(ctx context.Context, req *UsageLimit) (r CreateUsageLimitRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateUser implements createUser operation.
 //
 // Create a new user.
@@ -186,12 +195,30 @@ func (UnimplementedHandler) CreateUserSession(ctx context.Context) (r CreateUser
 	return r, ht.ErrNotImplemented
 }
 
+// CreateUserUsageLimitOverride implements createUserUsageLimitOverride operation.
+//
+// Create a user usage limit override.
+//
+// POST /access/user/{user_uuid}/usage-limits
+func (UnimplementedHandler) CreateUserUsageLimitOverride(ctx context.Context, req *UserUsageLimitOverride, params CreateUserUsageLimitOverrideParams) (r CreateUserUsageLimitOverrideRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateWorkerEnrollmentToken implements createWorkerEnrollmentToken operation.
 //
 // Create worker enrollment token.
 //
 // POST /workers/enrollment-tokens
 func (UnimplementedHandler) CreateWorkerEnrollmentToken(ctx context.Context, req *WorkerEnrollmentToken) (r CreateWorkerEnrollmentTokenRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateWorkerUsageLimit implements createWorkerUsageLimit operation.
+//
+// Create a worker usage limit.
+//
+// POST /access/worker/{worker_uuid}/usage-limits
+func (UnimplementedHandler) CreateWorkerUsageLimit(ctx context.Context, req *WorkerUsageLimit, params CreateWorkerUsageLimitParams) (r CreateWorkerUsageLimitRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -349,6 +376,15 @@ func (UnimplementedHandler) DeleteRegisteredWorker(ctx context.Context, params D
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteUsageLimit implements deleteUsageLimit operation.
+//
+// Delete a usage limit.
+//
+// DELETE /access/usage-limits/{uuid}
+func (UnimplementedHandler) DeleteUsageLimit(ctx context.Context, params DeleteUsageLimitParams) (r DeleteUsageLimitRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteUser implements deleteUser operation.
 //
 // Delete user.
@@ -358,12 +394,30 @@ func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserPar
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteUserUsageLimitOverride implements deleteUserUsageLimitOverride operation.
+//
+// Delete a user usage limit override.
+//
+// DELETE /access/user/{user_uuid}/usage-limits/{uuid}
+func (UnimplementedHandler) DeleteUserUsageLimitOverride(ctx context.Context, params DeleteUserUsageLimitOverrideParams) (r DeleteUserUsageLimitOverrideRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteWorkerEnrollmentToken implements deleteWorkerEnrollmentToken operation.
 //
 // Delete worker enrollment token.
 //
 // DELETE /workers/enrollment-tokens/{uuid}
 func (UnimplementedHandler) DeleteWorkerEnrollmentToken(ctx context.Context, params DeleteWorkerEnrollmentTokenParams) (r DeleteWorkerEnrollmentTokenRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DeleteWorkerUsageLimit implements deleteWorkerUsageLimit operation.
+//
+// Delete a worker usage limit.
+//
+// DELETE /access/worker/{worker_uuid}/usage-limits/{uuid}
+func (UnimplementedHandler) DeleteWorkerUsageLimit(ctx context.Context, params DeleteWorkerUsageLimitParams) (r DeleteWorkerUsageLimitRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -430,6 +484,24 @@ func (UnimplementedHandler) GetRegisteredWorker(ctx context.Context, params GetR
 	return r, ht.ErrNotImplemented
 }
 
+// GetUsageLimit implements getUsageLimit operation.
+//
+// Get a usage limit by UUID.
+//
+// GET /access/usage-limits/{uuid}
+func (UnimplementedHandler) GetUsageLimit(ctx context.Context, params GetUsageLimitParams) (r GetUsageLimitRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetUsageStatus implements getUsageStatus operation.
+//
+// Get combined usage status for user and worker.
+//
+// GET /access/usage-status
+func (UnimplementedHandler) GetUsageStatus(ctx context.Context, params GetUsageStatusParams) (r GetUsageStatusRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetUser implements getUser operation.
 //
 // Get user details.
@@ -493,6 +565,24 @@ func (UnimplementedHandler) ListRegisteredWorkers(ctx context.Context) (r ListRe
 	return r, ht.ErrNotImplemented
 }
 
+// ListUsageLimits implements listUsageLimits operation.
+//
+// List all usage limits on policy sets.
+//
+// GET /access/usage-limits
+func (UnimplementedHandler) ListUsageLimits(ctx context.Context, params ListUsageLimitsParams) (r ListUsageLimitsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUserUsageLimitOverrides implements listUserUsageLimitOverrides operation.
+//
+// List user's usage limit overrides.
+//
+// GET /access/user/{user_uuid}/usage-limits
+func (UnimplementedHandler) ListUserUsageLimitOverrides(ctx context.Context, params ListUserUsageLimitOverridesParams) (r ListUserUsageLimitOverridesRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListUsers implements listUsers operation.
 //
 // List all users.
@@ -508,6 +598,15 @@ func (UnimplementedHandler) ListUsers(ctx context.Context) (r ListUsersRes, _ er
 //
 // GET /workers/enrollment-tokens
 func (UnimplementedHandler) ListWorkerEnrollmentTokens(ctx context.Context) (r ListWorkerEnrollmentTokensRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWorkerUsageLimits implements listWorkerUsageLimits operation.
+//
+// List worker's usage limits.
+//
+// GET /access/worker/{worker_uuid}/usage-limits
+func (UnimplementedHandler) ListWorkerUsageLimits(ctx context.Context, params ListWorkerUsageLimitsParams) (r ListWorkerUsageLimitsRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1014,12 +1113,39 @@ func (UnimplementedHandler) UpdateRegisteredWorker(ctx context.Context, req *Reg
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateUsageLimit implements updateUsageLimit operation.
+//
+// Update a usage limit.
+//
+// PUT /access/usage-limits/{uuid}
+func (UnimplementedHandler) UpdateUsageLimit(ctx context.Context, req *UsageLimit, params UpdateUsageLimitParams) (r UpdateUsageLimitRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateUser implements updateUser operation.
 //
 // Update user details.
 //
 // PUT /user/{uuid}
 func (UnimplementedHandler) UpdateUser(ctx context.Context, req *User, params UpdateUserParams) (r UpdateUserRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateUserUsageLimitOverride implements updateUserUsageLimitOverride operation.
+//
+// Update a user usage limit override.
+//
+// PUT /access/user/{user_uuid}/usage-limits/{uuid}
+func (UnimplementedHandler) UpdateUserUsageLimitOverride(ctx context.Context, req *UserUsageLimitOverride, params UpdateUserUsageLimitOverrideParams) (r UpdateUserUsageLimitOverrideRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateWorkerUsageLimit implements updateWorkerUsageLimit operation.
+//
+// Update a worker usage limit.
+//
+// PUT /access/worker/{worker_uuid}/usage-limits/{uuid}
+func (UnimplementedHandler) UpdateWorkerUsageLimit(ctx context.Context, req *WorkerUsageLimit, params UpdateWorkerUsageLimitParams) (r UpdateWorkerUsageLimitRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

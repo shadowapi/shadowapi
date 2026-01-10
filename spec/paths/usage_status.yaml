@@ -1,0 +1,46 @@
+get:
+  summary: Get combined usage status for user and worker
+  operationId: getUsageStatus
+  tags:
+    - access
+  parameters:
+    - in: query
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+    - in: query
+      name: worker_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Worker UUID
+    - in: query
+      name: workspace_slug
+      required: true
+      schema:
+        type: string
+      description: Workspace slug
+    - in: query
+      name: limit_type
+      required: true
+      schema:
+        type: string
+        enum: [messages_fetch, messages_push]
+      description: Type of limit to check
+  responses:
+    "200":
+      description: Combined usage status
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UsageStatus"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

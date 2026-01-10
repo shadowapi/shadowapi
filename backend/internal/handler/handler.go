@@ -23,6 +23,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/queue"
 	"github.com/shadowapi/shadowapi/backend/internal/rbac"
 	"github.com/shadowapi/shadowapi/backend/internal/storages"
+	"github.com/shadowapi/shadowapi/backend/internal/usagelimits"
 	"github.com/shadowapi/shadowapi/backend/internal/worker"
 	"github.com/shadowapi/shadowapi/backend/internal/workerstore"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
@@ -43,6 +44,7 @@ type Handler struct {
 	enforcer       *rbac.Enforcer
 	storageManager *storages.Manager
 	emailService   *email.Service
+	usageLimits    *usagelimits.Manager
 }
 
 func (h *Handler) DB() *pgxpool.Pool {
@@ -209,6 +211,7 @@ func Provide(i do.Injector) (*Handler, error) {
 		enforcer:       do.MustInvoke[*rbac.Enforcer](i),
 		storageManager: storages.NewManager(log, dbp),
 		emailService:   do.MustInvoke[*email.Service](i),
+		usageLimits:    do.MustInvoke[*usagelimits.Manager](i),
 	}
 
 	// Initialize OAuth2 service if configured

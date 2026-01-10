@@ -1,0 +1,66 @@
+get:
+  summary: List worker's usage limits
+  operationId: listWorkerUsageLimits
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: worker_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Worker UUID
+    - in: query
+      name: workspace_slug
+      schema:
+        type: string
+      description: Filter by workspace slug
+  responses:
+    "200":
+      description: List of worker usage limits
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/WorkerUsageLimit"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+
+post:
+  summary: Create a worker usage limit
+  operationId: createWorkerUsageLimit
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: worker_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Worker UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/WorkerUsageLimit"
+  responses:
+    "201":
+      description: Worker usage limit created successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkerUsageLimit"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

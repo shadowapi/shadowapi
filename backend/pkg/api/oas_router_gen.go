@@ -202,15 +202,284 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						}
 
 						elem = origElem
-					case 'u': // Prefix: "user/"
+					case 'u': // Prefix: "us"
 						origElem := elem
-						if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
+						if l := len("us"); len(elem) >= l && elem[0:l] == "us" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "user_uuid"
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "age-"
+							origElem := elem
+							if l := len("age-"); len(elem) >= l && elem[0:l] == "age-" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'l': // Prefix: "limits"
+								origElem := elem
+								if l := len("limits"); len(elem) >= l && elem[0:l] == "limits" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleListUsageLimitsRequest([0]string{}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleCreateUsageLimitRequest([0]string{}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET,POST")
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "uuid"
+									// Leaf parameter
+									args[0] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "DELETE":
+											s.handleDeleteUsageLimitRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										case "GET":
+											s.handleGetUsageLimitRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										case "PUT":
+											s.handleUpdateUsageLimitRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "DELETE,GET,PUT")
+										}
+
+										return
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							case 's': // Prefix: "status"
+								origElem := elem
+								if l := len("status"); len(elem) >= l && elem[0:l] == "status" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetUsageStatusRequest([0]string{}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 'e': // Prefix: "er/"
+							origElem := elem
+							if l := len("er/"); len(elem) >= l && elem[0:l] == "er/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "user_uuid"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'p': // Prefix: "policy-sets"
+									origElem := elem
+									if l := len("policy-sets"); len(elem) >= l && elem[0:l] == "policy-sets" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch r.Method {
+										case "GET":
+											s.handleGetUserPolicySetsRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										case "POST":
+											s.handleAssignPolicySetToUserRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET,POST")
+										}
+
+										return
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+										origElem := elem
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										// Param: "policy_set_name"
+										// Leaf parameter
+										args[1] = elem
+										elem = ""
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "DELETE":
+												s.handleRemovePolicySetFromUserRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "DELETE")
+											}
+
+											return
+										}
+
+										elem = origElem
+									}
+
+									elem = origElem
+								case 'u': // Prefix: "usage-limits"
+									origElem := elem
+									if l := len("usage-limits"); len(elem) >= l && elem[0:l] == "usage-limits" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch r.Method {
+										case "GET":
+											s.handleListUserUsageLimitOverridesRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										case "POST":
+											s.handleCreateUserUsageLimitOverrideRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET,POST")
+										}
+
+										return
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+										origElem := elem
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										// Param: "uuid"
+										// Leaf parameter
+										args[1] = elem
+										elem = ""
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "DELETE":
+												s.handleDeleteUserUsageLimitOverrideRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											case "PUT":
+												s.handleUpdateUserUsageLimitOverrideRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, "DELETE,PUT")
+											}
+
+											return
+										}
+
+										elem = origElem
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'w': // Prefix: "worker/"
+						origElem := elem
+						if l := len("worker/"); len(elem) >= l && elem[0:l] == "worker/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "worker_uuid"
 						// Match until "/"
 						idx := strings.IndexByte(elem, '/')
 						if idx < 0 {
@@ -223,9 +492,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/policy-sets"
+						case '/': // Prefix: "/usage-limits"
 							origElem := elem
-							if l := len("/policy-sets"); len(elem) >= l && elem[0:l] == "/policy-sets" {
+							if l := len("/usage-limits"); len(elem) >= l && elem[0:l] == "/usage-limits" {
 								elem = elem[l:]
 							} else {
 								break
@@ -234,11 +503,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								switch r.Method {
 								case "GET":
-									s.handleGetUserPolicySetsRequest([1]string{
+									s.handleListWorkerUsageLimitsRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								case "POST":
-									s.handleAssignPolicySetToUserRequest([1]string{
+									s.handleCreateWorkerUsageLimitRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -256,7 +525,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									break
 								}
 
-								// Param: "policy_set_name"
+								// Param: "uuid"
 								// Leaf parameter
 								args[1] = elem
 								elem = ""
@@ -265,12 +534,17 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "DELETE":
-										s.handleRemovePolicySetFromUserRequest([2]string{
+										s.handleDeleteWorkerUsageLimitRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleUpdateWorkerUsageLimitRequest([2]string{
 											args[0],
 											args[1],
 										}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "DELETE")
+										s.notAllowed(w, r, "DELETE,PUT")
 									}
 
 									return
@@ -2581,15 +2855,325 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 
 						elem = origElem
-					case 'u': // Prefix: "user/"
+					case 'u': // Prefix: "us"
 						origElem := elem
-						if l := len("user/"); len(elem) >= l && elem[0:l] == "user/" {
+						if l := len("us"); len(elem) >= l && elem[0:l] == "us" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "user_uuid"
+						if len(elem) == 0 {
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "age-"
+							origElem := elem
+							if l := len("age-"); len(elem) >= l && elem[0:l] == "age-" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'l': // Prefix: "limits"
+								origElem := elem
+								if l := len("limits"); len(elem) >= l && elem[0:l] == "limits" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = ListUsageLimitsOperation
+										r.summary = "List all usage limits on policy sets"
+										r.operationID = "listUsageLimits"
+										r.pathPattern = "/access/usage-limits"
+										r.args = args
+										r.count = 0
+										return r, true
+									case "POST":
+										r.name = CreateUsageLimitOperation
+										r.summary = "Create a new usage limit on a policy set"
+										r.operationID = "createUsageLimit"
+										r.pathPattern = "/access/usage-limits"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+									origElem := elem
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "uuid"
+									// Leaf parameter
+									args[0] = elem
+									elem = ""
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "DELETE":
+											r.name = DeleteUsageLimitOperation
+											r.summary = "Delete a usage limit"
+											r.operationID = "deleteUsageLimit"
+											r.pathPattern = "/access/usage-limits/{uuid}"
+											r.args = args
+											r.count = 1
+											return r, true
+										case "GET":
+											r.name = GetUsageLimitOperation
+											r.summary = "Get a usage limit by UUID"
+											r.operationID = "getUsageLimit"
+											r.pathPattern = "/access/usage-limits/{uuid}"
+											r.args = args
+											r.count = 1
+											return r, true
+										case "PUT":
+											r.name = UpdateUsageLimitOperation
+											r.summary = "Update a usage limit"
+											r.operationID = "updateUsageLimit"
+											r.pathPattern = "/access/usage-limits/{uuid}"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							case 's': // Prefix: "status"
+								origElem := elem
+								if l := len("status"); len(elem) >= l && elem[0:l] == "status" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "GET":
+										r.name = GetUsageStatusOperation
+										r.summary = "Get combined usage status for user and worker"
+										r.operationID = "getUsageStatus"
+										r.pathPattern = "/access/usage-status"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						case 'e': // Prefix: "er/"
+							origElem := elem
+							if l := len("er/"); len(elem) >= l && elem[0:l] == "er/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "user_uuid"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[0] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+								origElem := elem
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'p': // Prefix: "policy-sets"
+									origElem := elem
+									if l := len("policy-sets"); len(elem) >= l && elem[0:l] == "policy-sets" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											r.name = GetUserPolicySetsOperation
+											r.summary = "Get policy sets for a user"
+											r.operationID = "getUserPolicySets"
+											r.pathPattern = "/access/user/{user_uuid}/policy-sets"
+											r.args = args
+											r.count = 1
+											return r, true
+										case "POST":
+											r.name = AssignPolicySetToUserOperation
+											r.summary = "Assign a policy set to a user"
+											r.operationID = "assignPolicySetToUser"
+											r.pathPattern = "/access/user/{user_uuid}/policy-sets"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+										origElem := elem
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										// Param: "policy_set_name"
+										// Leaf parameter
+										args[1] = elem
+										elem = ""
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "DELETE":
+												r.name = RemovePolicySetFromUserOperation
+												r.summary = "Remove a policy set from a user"
+												r.operationID = "removePolicySetFromUser"
+												r.pathPattern = "/access/user/{user_uuid}/policy-sets/{policy_set_name}"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+
+										elem = origElem
+									}
+
+									elem = origElem
+								case 'u': // Prefix: "usage-limits"
+									origElem := elem
+									if l := len("usage-limits"); len(elem) >= l && elem[0:l] == "usage-limits" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										switch method {
+										case "GET":
+											r.name = ListUserUsageLimitOverridesOperation
+											r.summary = "List user's usage limit overrides"
+											r.operationID = "listUserUsageLimitOverrides"
+											r.pathPattern = "/access/user/{user_uuid}/usage-limits"
+											r.args = args
+											r.count = 1
+											return r, true
+										case "POST":
+											r.name = CreateUserUsageLimitOverrideOperation
+											r.summary = "Create a user usage limit override"
+											r.operationID = "createUserUsageLimitOverride"
+											r.pathPattern = "/access/user/{user_uuid}/usage-limits"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+										origElem := elem
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										// Param: "uuid"
+										// Leaf parameter
+										args[1] = elem
+										elem = ""
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "DELETE":
+												r.name = DeleteUserUsageLimitOverrideOperation
+												r.summary = "Delete a user usage limit override"
+												r.operationID = "deleteUserUsageLimitOverride"
+												r.pathPattern = "/access/user/{user_uuid}/usage-limits/{uuid}"
+												r.args = args
+												r.count = 2
+												return r, true
+											case "PUT":
+												r.name = UpdateUserUsageLimitOverrideOperation
+												r.summary = "Update a user usage limit override"
+												r.operationID = "updateUserUsageLimitOverride"
+												r.pathPattern = "/access/user/{user_uuid}/usage-limits/{uuid}"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+
+										elem = origElem
+									}
+
+									elem = origElem
+								}
+
+								elem = origElem
+							}
+
+							elem = origElem
+						}
+
+						elem = origElem
+					case 'w': // Prefix: "worker/"
+						origElem := elem
+						if l := len("worker/"); len(elem) >= l && elem[0:l] == "worker/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "worker_uuid"
 						// Match until "/"
 						idx := strings.IndexByte(elem, '/')
 						if idx < 0 {
@@ -2602,9 +3186,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/policy-sets"
+						case '/': // Prefix: "/usage-limits"
 							origElem := elem
-							if l := len("/policy-sets"); len(elem) >= l && elem[0:l] == "/policy-sets" {
+							if l := len("/usage-limits"); len(elem) >= l && elem[0:l] == "/usage-limits" {
 								elem = elem[l:]
 							} else {
 								break
@@ -2613,18 +3197,18 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									r.name = GetUserPolicySetsOperation
-									r.summary = "Get policy sets for a user"
-									r.operationID = "getUserPolicySets"
-									r.pathPattern = "/access/user/{user_uuid}/policy-sets"
+									r.name = ListWorkerUsageLimitsOperation
+									r.summary = "List worker's usage limits"
+									r.operationID = "listWorkerUsageLimits"
+									r.pathPattern = "/access/worker/{worker_uuid}/usage-limits"
 									r.args = args
 									r.count = 1
 									return r, true
 								case "POST":
-									r.name = AssignPolicySetToUserOperation
-									r.summary = "Assign a policy set to a user"
-									r.operationID = "assignPolicySetToUser"
-									r.pathPattern = "/access/user/{user_uuid}/policy-sets"
+									r.name = CreateWorkerUsageLimitOperation
+									r.summary = "Create a worker usage limit"
+									r.operationID = "createWorkerUsageLimit"
+									r.pathPattern = "/access/worker/{worker_uuid}/usage-limits"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -2641,7 +3225,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									break
 								}
 
-								// Param: "policy_set_name"
+								// Param: "uuid"
 								// Leaf parameter
 								args[1] = elem
 								elem = ""
@@ -2650,10 +3234,18 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									// Leaf node.
 									switch method {
 									case "DELETE":
-										r.name = RemovePolicySetFromUserOperation
-										r.summary = "Remove a policy set from a user"
-										r.operationID = "removePolicySetFromUser"
-										r.pathPattern = "/access/user/{user_uuid}/policy-sets/{policy_set_name}"
+										r.name = DeleteWorkerUsageLimitOperation
+										r.summary = "Delete a worker usage limit"
+										r.operationID = "deleteWorkerUsageLimit"
+										r.pathPattern = "/access/worker/{worker_uuid}/usage-limits/{uuid}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "PUT":
+										r.name = UpdateWorkerUsageLimitOperation
+										r.summary = "Update a worker usage limit"
+										r.operationID = "updateWorkerUsageLimit"
+										r.pathPattern = "/access/worker/{worker_uuid}/usage-limits/{uuid}"
 										r.args = args
 										r.count = 2
 										return r, true

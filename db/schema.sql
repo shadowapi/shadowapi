@@ -592,3 +592,105 @@ CREATE INDEX IF NOT EXISTS idx_worker_enrollment_token_expires ON worker_enrollm
 ALTER TABLE pipeline ADD CONSTRAINT fk_pipeline_worker
     FOREIGN KEY (worker_uuid) REFERENCES registered_worker(uuid) ON DELETE SET NULL;
 
+-- ============================================================================
+-- Usage Limits
+-- ============================================================================
+
+-- User limits defined at policy set level (defaults)
+CREATE TABLE IF NOT EXISTS usage_limit (
+    uuid UUID PRIMARY KEY,
+    policy_set_name VARCHAR(100) NOT NULL REFERENCES policy_set(name) ON DELETE CASCADE,
+    limit_type VARCHAR(50) NOT NULL,  -- 'messages_fetch', 'messages_push'
+    limit_value BIGINT,  -- NULL = unlimited
+    reset_period VARCHAR(20) NOT NULL DEFAULT 'monthly',
+    is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT uq_usage_limit_policy_type UNIQUE(policy_set_name, limit_type),
+    CONSTRAINT chk_usage_limit_type CHECK (limit_type IN ('messages_fetch', 'messages_push')),
+    CONSTRAINT chk_usage_limit_period CHECK (reset_period IN ('daily', 'weekly', 'monthly', 'rolling_24h', 'rolling_7d', 'rolling_30d'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_limit_policy_set ON usage_limit(policy_set_name);
+
+-- Per-user limit overrides, scoped to workspace
+CREATE TABLE IF NOT EXISTS user_usage_limit_override (
+    uuid UUID PRIMARY KEY,
+    user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
+    workspace_slug VARCHAR(63) NOT NULL,
+    limit_type VARCHAR(50) NOT NULL,
+    limit_value BIGINT,  -- NULL = unlimited
+    reset_period VARCHAR(20),  -- NULL = inherit from policy set
+    is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT uq_user_usage_limit UNIQUE(user_uuid, workspace_slug, limit_type),
+    CONSTRAINT chk_user_limit_type CHECK (limit_type IN ('messages_fetch', 'messages_push')),
+    CONSTRAINT chk_user_limit_period CHECK (reset_period IS NULL OR reset_period IN ('daily', 'weekly', 'monthly', 'rolling_24h', 'rolling_7d', 'rolling_30d'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_usage_limit_user ON user_usage_limit_override(user_uuid);
+CREATE INDEX IF NOT EXISTS idx_user_usage_limit_workspace ON user_usage_limit_override(workspace_slug);
+
+-- Worker limits, scoped to workspace
+CREATE TABLE IF NOT EXISTS worker_usage_limit (
+    uuid UUID PRIMARY KEY,
+    worker_uuid UUID NOT NULL REFERENCES registered_worker(uuid) ON DELETE CASCADE,
+    workspace_slug VARCHAR(63) NOT NULL,
+    limit_type VARCHAR(50) NOT NULL,
+    limit_value BIGINT,  -- NULL = unlimited
+    reset_period VARCHAR(20) NOT NULL DEFAULT 'monthly',
+    is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT uq_worker_usage_limit UNIQUE(worker_uuid, workspace_slug, limit_type),
+    CONSTRAINT chk_worker_limit_type CHECK (limit_type IN ('messages_fetch', 'messages_push')),
+    CONSTRAINT chk_worker_limit_period CHECK (reset_period IN ('daily', 'weekly', 'monthly', 'rolling_24h', 'rolling_7d', 'rolling_30d'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_worker_usage_limit_worker ON worker_usage_limit(worker_uuid);
+CREATE INDEX IF NOT EXISTS idx_worker_usage_limit_workspace ON worker_usage_limit(workspace_slug);
+
+-- Tracks user usage per workspace
+CREATE TABLE IF NOT EXISTS user_usage_tracking (
+    uuid UUID PRIMARY KEY,
+    user_uuid UUID NOT NULL REFERENCES "user"(uuid) ON DELETE CASCADE,
+    workspace_slug VARCHAR(63) NOT NULL,
+    limit_type VARCHAR(50) NOT NULL,
+    period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+    period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    current_usage BIGINT NOT NULL DEFAULT 0,
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    CONSTRAINT uq_user_usage_tracking UNIQUE(user_uuid, workspace_slug, limit_type, period_start),
+    CONSTRAINT chk_user_tracking_limit_type CHECK (limit_type IN ('messages_fetch', 'messages_push'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_usage_tracking_user ON user_usage_tracking(user_uuid);
+CREATE INDEX IF NOT EXISTS idx_user_usage_tracking_workspace ON user_usage_tracking(workspace_slug);
+CREATE INDEX IF NOT EXISTS idx_user_usage_tracking_lookup ON user_usage_tracking(user_uuid, workspace_slug, limit_type, period_start);
+
+-- Tracks worker usage per workspace
+CREATE TABLE IF NOT EXISTS worker_usage_tracking (
+    uuid UUID PRIMARY KEY,
+    worker_uuid UUID NOT NULL REFERENCES registered_worker(uuid) ON DELETE CASCADE,
+    workspace_slug VARCHAR(63) NOT NULL,
+    limit_type VARCHAR(50) NOT NULL,
+    period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+    period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    current_usage BIGINT NOT NULL DEFAULT 0,
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    CONSTRAINT uq_worker_usage_tracking UNIQUE(worker_uuid, workspace_slug, limit_type, period_start),
+    CONSTRAINT chk_worker_tracking_limit_type CHECK (limit_type IN ('messages_fetch', 'messages_push'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_worker_usage_tracking_worker ON worker_usage_tracking(worker_uuid);
+CREATE INDEX IF NOT EXISTS idx_worker_usage_tracking_workspace ON worker_usage_tracking(workspace_slug);
+CREATE INDEX IF NOT EXISTS idx_worker_usage_tracking_lookup ON worker_usage_tracking(worker_uuid, workspace_slug, limit_type, period_start);
+

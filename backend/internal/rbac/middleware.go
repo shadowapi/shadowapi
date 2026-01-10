@@ -128,6 +128,28 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"createWorkerEnrollmentToken":  {ResourceWorker, ActionCreate},
 	"getWorkerEnrollmentToken":     {ResourceWorker, ActionRead},
 	"deleteWorkerEnrollmentToken":  {ResourceWorker, ActionDelete},
+
+	// Usage limit operations (policy set level)
+	"listUsageLimits":              {ResourcePolicySet, ActionRead},
+	"createUsageLimit":             {ResourcePolicySet, ActionWrite},
+	"getUsageLimit":                {ResourcePolicySet, ActionRead},
+	"updateUsageLimit":             {ResourcePolicySet, ActionWrite},
+	"deleteUsageLimit":             {ResourcePolicySet, ActionDelete},
+
+	// User usage limit overrides
+	"listUserUsageLimitOverrides":   {ResourcePolicySet, ActionRead},
+	"createUserUsageLimitOverride":  {ResourcePolicySet, ActionWrite},
+	"updateUserUsageLimitOverride":  {ResourcePolicySet, ActionWrite},
+	"deleteUserUsageLimitOverride":  {ResourcePolicySet, ActionDelete},
+
+	// Worker usage limits
+	"listWorkerUsageLimits":   {ResourceWorker, ActionRead},
+	"createWorkerUsageLimit":  {ResourceWorker, ActionWrite},
+	"updateWorkerUsageLimit":  {ResourceWorker, ActionWrite},
+	"deleteWorkerUsageLimit":  {ResourceWorker, ActionDelete},
+
+	// Usage status
+	"getUsageStatus": {ResourcePolicySet, ActionRead},
 }
 
 // Middleware provides RBAC enforcement for ogen handlers.

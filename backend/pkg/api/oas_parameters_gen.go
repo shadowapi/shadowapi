@@ -425,6 +425,138 @@ func decodeCheckWorkspaceExistsParams(args [0]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// CreateUserUsageLimitOverrideParams is parameters of createUserUsageLimitOverride operation.
+type CreateUserUsageLimitOverrideParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+}
+
+func unpackCreateUserUsageLimitOverrideParams(packed middleware.Parameters) (params CreateUserUsageLimitOverrideParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeCreateUserUsageLimitOverrideParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateUserUsageLimitOverrideParams, _ error) {
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateWorkerUsageLimitParams is parameters of createWorkerUsageLimit operation.
+type CreateWorkerUsageLimitParams struct {
+	// Worker UUID.
+	WorkerUUID uuid.UUID
+}
+
+func unpackCreateWorkerUsageLimitParams(packed middleware.Parameters) (params CreateWorkerUsageLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "worker_uuid",
+			In:   "path",
+		}
+		params.WorkerUUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeCreateWorkerUsageLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateWorkerUsageLimitParams, _ error) {
+	// Decode path: worker_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "worker_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WorkerUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "worker_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // CreateWorkspaceInviteParams is parameters of createWorkspaceInvite operation.
 type CreateWorkspaceInviteParams struct {
 	// Workspace UUID.
@@ -1501,6 +1633,72 @@ func decodeDeleteRegisteredWorkerParams(args [1]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
+// DeleteUsageLimitParams is parameters of deleteUsageLimit operation.
+type DeleteUsageLimitParams struct {
+	// Usage limit UUID.
+	UUID uuid.UUID
+}
+
+func unpackDeleteUsageLimitParams(packed middleware.Parameters) (params DeleteUsageLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteUsageLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteUsageLimitParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteUserParams is parameters of deleteUser operation.
 type DeleteUserParams struct {
 	UUID string
@@ -1566,6 +1764,126 @@ func decodeDeleteUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// DeleteUserUsageLimitOverrideParams is parameters of deleteUserUsageLimitOverride operation.
+type DeleteUserUsageLimitOverrideParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+	// Override UUID.
+	UUID uuid.UUID
+}
+
+func unpackDeleteUserUsageLimitOverrideParams(packed middleware.Parameters) (params DeleteUserUsageLimitOverrideParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteUserUsageLimitOverrideParams(args [2]string, argsEscaped bool, r *http.Request) (params DeleteUserUsageLimitOverrideParams, _ error) {
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteWorkerEnrollmentTokenParams is parameters of deleteWorkerEnrollmentToken operation.
 type DeleteWorkerEnrollmentTokenParams struct {
 	UUID string
@@ -1608,6 +1926,126 @@ func decodeDeleteWorkerEnrollmentTokenParams(args [1]string, argsEscaped bool, r
 				}
 
 				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteWorkerUsageLimitParams is parameters of deleteWorkerUsageLimit operation.
+type DeleteWorkerUsageLimitParams struct {
+	// Worker UUID.
+	WorkerUUID uuid.UUID
+	// Limit UUID.
+	UUID uuid.UUID
+}
+
+func unpackDeleteWorkerUsageLimitParams(packed middleware.Parameters) (params DeleteWorkerUsageLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "worker_uuid",
+			In:   "path",
+		}
+		params.WorkerUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeDeleteWorkerUsageLimitParams(args [2]string, argsEscaped bool, r *http.Request) (params DeleteWorkerUsageLimitParams, _ error) {
+	// Decode path: worker_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "worker_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WorkerUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "worker_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -2074,6 +2512,273 @@ func decodeGetRegisteredWorkerParams(args [1]string, argsEscaped bool, r *http.R
 		return params, &ogenerrors.DecodeParamError{
 			Name: "uuid",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetUsageLimitParams is parameters of getUsageLimit operation.
+type GetUsageLimitParams struct {
+	// Usage limit UUID.
+	UUID uuid.UUID
+}
+
+func unpackGetUsageLimitParams(packed middleware.Parameters) (params GetUsageLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeGetUsageLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params GetUsageLimitParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetUsageStatusParams is parameters of getUsageStatus operation.
+type GetUsageStatusParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+	// Worker UUID.
+	WorkerUUID uuid.UUID
+	// Workspace slug.
+	WorkspaceSlug string
+	// Type of limit to check.
+	LimitType GetUsageStatusLimitType
+}
+
+func unpackGetUsageStatusParams(packed middleware.Parameters) (params GetUsageStatusParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "query",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "worker_uuid",
+			In:   "query",
+		}
+		params.WorkerUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "workspace_slug",
+			In:   "query",
+		}
+		params.WorkspaceSlug = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit_type",
+			In:   "query",
+		}
+		params.LimitType = packed[key].(GetUsageStatusLimitType)
+	}
+	return params
+}
+
+func decodeGetUsageStatusParams(args [0]string, argsEscaped bool, r *http.Request) (params GetUsageStatusParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: user_uuid.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "user_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: worker_uuid.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "worker_uuid",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WorkerUUID = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "worker_uuid",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: workspace_slug.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "workspace_slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.WorkspaceSlug = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workspace_slug",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: limit_type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LimitType = GetUsageStatusLimitType(c)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := params.LimitType.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit_type",
+			In:   "query",
 			Err:  err,
 		}
 	}
@@ -2600,6 +3305,309 @@ func decodeListPolicySetsParams(args [0]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "scope",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListUsageLimitsParams is parameters of listUsageLimits operation.
+type ListUsageLimitsParams struct {
+	// Filter by policy set name.
+	PolicySetName OptString
+}
+
+func unpackListUsageLimitsParams(packed middleware.Parameters) (params ListUsageLimitsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "policy_set_name",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.PolicySetName = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeListUsageLimitsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListUsageLimitsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: policy_set_name.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "policy_set_name",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotPolicySetNameVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPolicySetNameVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.PolicySetName.SetTo(paramsDotPolicySetNameVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policy_set_name",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListUserUsageLimitOverridesParams is parameters of listUserUsageLimitOverrides operation.
+type ListUserUsageLimitOverridesParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+	// Filter by workspace slug.
+	WorkspaceSlug OptString
+}
+
+func unpackListUserUsageLimitOverridesParams(packed middleware.Parameters) (params ListUserUsageLimitOverridesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "workspace_slug",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.WorkspaceSlug = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeListUserUsageLimitOverridesParams(args [1]string, argsEscaped bool, r *http.Request) (params ListUserUsageLimitOverridesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: workspace_slug.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "workspace_slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotWorkspaceSlugVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotWorkspaceSlugVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.WorkspaceSlug.SetTo(paramsDotWorkspaceSlugVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workspace_slug",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListWorkerUsageLimitsParams is parameters of listWorkerUsageLimits operation.
+type ListWorkerUsageLimitsParams struct {
+	// Worker UUID.
+	WorkerUUID uuid.UUID
+	// Filter by workspace slug.
+	WorkspaceSlug OptString
+}
+
+func unpackListWorkerUsageLimitsParams(packed middleware.Parameters) (params ListWorkerUsageLimitsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "worker_uuid",
+			In:   "path",
+		}
+		params.WorkerUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "workspace_slug",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.WorkspaceSlug = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeListWorkerUsageLimitsParams(args [1]string, argsEscaped bool, r *http.Request) (params ListWorkerUsageLimitsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: worker_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "worker_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WorkerUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "worker_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: workspace_slug.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "workspace_slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotWorkspaceSlugVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotWorkspaceSlugVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.WorkspaceSlug.SetTo(paramsDotWorkspaceSlugVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "workspace_slug",
 			In:   "query",
 			Err:  err,
 		}
@@ -6579,6 +7587,72 @@ func decodeUpdateRegisteredWorkerParams(args [1]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
+// UpdateUsageLimitParams is parameters of updateUsageLimit operation.
+type UpdateUsageLimitParams struct {
+	// Usage limit UUID.
+	UUID uuid.UUID
+}
+
+func unpackUpdateUsageLimitParams(packed middleware.Parameters) (params UpdateUsageLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateUsageLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateUsageLimitParams, _ error) {
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateUserParams is parameters of updateUser operation.
 type UpdateUserParams struct {
 	UUID string
@@ -6621,6 +7695,246 @@ func decodeUpdateUserParams(args [1]string, argsEscaped bool, r *http.Request) (
 				}
 
 				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateUserUsageLimitOverrideParams is parameters of updateUserUsageLimitOverride operation.
+type UpdateUserUsageLimitOverrideParams struct {
+	// User UUID.
+	UserUUID uuid.UUID
+	// Override UUID.
+	UUID uuid.UUID
+}
+
+func unpackUpdateUserUsageLimitOverrideParams(packed middleware.Parameters) (params UpdateUserUsageLimitOverrideParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "user_uuid",
+			In:   "path",
+		}
+		params.UserUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateUserUsageLimitOverrideParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateUserUsageLimitOverrideParams, _ error) {
+	// Decode path: user_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "user_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "user_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.UUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateWorkerUsageLimitParams is parameters of updateWorkerUsageLimit operation.
+type UpdateWorkerUsageLimitParams struct {
+	// Worker UUID.
+	WorkerUUID uuid.UUID
+	// Limit UUID.
+	UUID uuid.UUID
+}
+
+func unpackUpdateWorkerUsageLimitParams(packed middleware.Parameters) (params UpdateWorkerUsageLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "worker_uuid",
+			In:   "path",
+		}
+		params.WorkerUUID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "uuid",
+			In:   "path",
+		}
+		params.UUID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeUpdateWorkerUsageLimitParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateWorkerUsageLimitParams, _ error) {
+	// Decode path: worker_uuid.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "worker_uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.WorkerUUID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "worker_uuid",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: uuid.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "uuid",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}

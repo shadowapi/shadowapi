@@ -1,0 +1,66 @@
+get:
+  summary: List user's usage limit overrides
+  operationId: listUserUsageLimitOverrides
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+    - in: query
+      name: workspace_slug
+      schema:
+        type: string
+      description: Filter by workspace slug
+  responses:
+    "200":
+      description: List of user usage limit overrides
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/UserUsageLimitOverride"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+
+post:
+  summary: Create a user usage limit override
+  operationId: createUserUsageLimitOverride
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/UserUsageLimitOverride"
+  responses:
+    "201":
+      description: User usage limit override created successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/UserUsageLimitOverride"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

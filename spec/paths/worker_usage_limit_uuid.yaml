@@ -1,0 +1,69 @@
+put:
+  summary: Update a worker usage limit
+  operationId: updateWorkerUsageLimit
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: worker_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Worker UUID
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Limit UUID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/WorkerUsageLimit"
+  responses:
+    "200":
+      description: Worker usage limit updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/WorkerUsageLimit"
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+
+delete:
+  summary: Delete a worker usage limit
+  operationId: deleteWorkerUsageLimit
+  tags:
+    - access
+  parameters:
+    - in: path
+      name: worker_uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Worker UUID
+    - in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Limit UUID
+  responses:
+    "204":
+      description: Worker usage limit deleted successfully
+    default:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"

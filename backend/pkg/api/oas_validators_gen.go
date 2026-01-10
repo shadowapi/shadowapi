@@ -85,6 +85,17 @@ func (s DatasourceListOKApplicationJSON) Validate() error {
 	return nil
 }
 
+func (s GetUsageStatusLimitType) Validate() error {
+	switch s {
+	case "messages_fetch":
+		return nil
+	case "messages_push":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GetUserPolicySetsOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -219,6 +230,56 @@ func (s ListRegisteredWorkersOKApplicationJSON) Validate() error {
 	return nil
 }
 
+func (s ListUsageLimitsOKApplicationJSON) Validate() error {
+	alias := ([]UsageLimit)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ListUserUsageLimitOverridesOKApplicationJSON) Validate() error {
+	alias := ([]UserUsageLimitOverride)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s ListUsersOKApplicationJSON) Validate() error {
 	alias := ([]User)(s)
 	if alias == nil {
@@ -248,6 +309,31 @@ func (s ListWorkerEnrollmentTokensOKApplicationJSON) Validate() error {
 	alias := ([]WorkerEnrollmentToken)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
+	}
+	return nil
+}
+
+func (s ListWorkerUsageLimitsOKApplicationJSON) Validate() error {
+	alias := ([]WorkerUsageLimit)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 	return nil
 }
@@ -2357,6 +2443,269 @@ func (s UpdateWorkspaceMemberRoleReqRole) Validate() error {
 	}
 }
 
+func (s *UsageLimit) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:    2,
+			MinLengthSet: true,
+			MaxLength:    100,
+			MaxLengthSet: true,
+			Email:        false,
+			Hostname:     false,
+			Regex:        nil,
+		}).Validate(string(s.PolicySetName)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "policy_set_name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.LimitType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.LimitValue.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit_value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.ResetPeriod.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "reset_period",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s UsageLimitLimitType) Validate() error {
+	switch s {
+	case "messages_fetch":
+		return nil
+	case "messages_push":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s UsageLimitResetPeriod) Validate() error {
+	switch s {
+	case "daily":
+		return nil
+	case "weekly":
+		return nil
+	case "monthly":
+		return nil
+	case "rolling_24h":
+		return nil
+	case "rolling_7d":
+		return nil
+	case "rolling_30d":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *UsageStatus) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.UserLimit.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "user_limit",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.WorkerLimit.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "worker_limit",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *UsageStatusUserLimit) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ResetPeriod.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "reset_period",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s UsageStatusUserLimitResetPeriod) Validate() error {
+	switch s {
+	case "daily":
+		return nil
+	case "weekly":
+		return nil
+	case "monthly":
+		return nil
+	case "rolling_24h":
+		return nil
+	case "rolling_7d":
+		return nil
+	case "rolling_30d":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *UsageStatusWorkerLimit) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.ResetPeriod.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "reset_period",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s UsageStatusWorkerLimitResetPeriod) Validate() error {
+	switch s {
+	case "daily":
+		return nil
+	case "weekly":
+		return nil
+	case "monthly":
+		return nil
+	case "rolling_24h":
+		return nil
+	case "rolling_7d":
+		return nil
+	case "rolling_30d":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *User) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -2556,6 +2905,123 @@ func (s *UserPolicySetAssignment) Validate() error {
 	return nil
 }
 
+func (s *UserUsageLimitOverride) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:    1,
+			MinLengthSet: true,
+			MaxLength:    63,
+			MaxLengthSet: true,
+			Email:        false,
+			Hostname:     false,
+			Regex:        nil,
+		}).Validate(string(s.WorkspaceSlug)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "workspace_slug",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.LimitType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.LimitValue.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit_value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.ResetPeriod.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "reset_period",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s UserUsageLimitOverrideLimitType) Validate() error {
+	switch s {
+	case "messages_fetch":
+		return nil
+	case "messages_push":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s UserUsageLimitOverrideResetPeriod) Validate() error {
+	switch s {
+	case "daily":
+		return nil
+	case "weekly":
+		return nil
+	case "monthly":
+		return nil
+	case "rolling_24h":
+		return nil
+	case "rolling_7d":
+		return nil
+	case "rolling_30d":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *WorkerJobsListOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -2577,6 +3043,123 @@ func (s *WorkerJobsListOK) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s *WorkerUsageLimit) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:    1,
+			MinLengthSet: true,
+			MaxLength:    63,
+			MaxLengthSet: true,
+			Email:        false,
+			Hostname:     false,
+			Regex:        nil,
+		}).Validate(string(s.WorkspaceSlug)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "workspace_slug",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.LimitType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.LimitValue.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           0,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "limit_value",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.ResetPeriod.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "reset_period",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s WorkerUsageLimitLimitType) Validate() error {
+	switch s {
+	case "messages_fetch":
+		return nil
+	case "messages_push":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s WorkerUsageLimitResetPeriod) Validate() error {
+	switch s {
+	case "daily":
+		return nil
+	case "weekly":
+		return nil
+	case "monthly":
+		return nil
+	case "rolling_24h":
+		return nil
+	case "rolling_7d":
+		return nil
+	case "rolling_30d":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *Workspace) Validate() error {

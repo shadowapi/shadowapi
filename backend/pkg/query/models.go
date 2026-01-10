@@ -441,6 +441,17 @@ type TgSessionsState struct {
 	Seq  int64 `json:"seq"`
 }
 
+type UsageLimit struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	PolicySetName string             `json:"policy_set_name"`
+	LimitType     string             `json:"limit_type"`
+	LimitValue    pgtype.Int8        `json:"limit_value"`
+	ResetPeriod   string             `json:"reset_period"`
+	IsEnabled     bool               `json:"is_enabled"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
 type User struct {
 	UUID      uuid.UUID          `json:"uuid"`
 	Email     string             `json:"email"`
@@ -473,6 +484,30 @@ type UserPolicySet struct {
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
+type UserUsageLimitOverride struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	UserUUID      *uuid.UUID         `json:"user_uuid"`
+	WorkspaceSlug string             `json:"workspace_slug"`
+	LimitType     string             `json:"limit_type"`
+	LimitValue    pgtype.Int8        `json:"limit_value"`
+	ResetPeriod   pgtype.Text        `json:"reset_period"`
+	IsEnabled     bool               `json:"is_enabled"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+type UserUsageTracking struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	UserUUID      *uuid.UUID         `json:"user_uuid"`
+	WorkspaceSlug string             `json:"workspace_slug"`
+	LimitType     string             `json:"limit_type"`
+	PeriodStart   pgtype.Timestamptz `json:"period_start"`
+	PeriodEnd     pgtype.Timestamptz `json:"period_end"`
+	CurrentUsage  int64              `json:"current_usage"`
+	LastUpdated   pgtype.Timestamptz `json:"last_updated"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+}
+
 type WorkerEnrollmentToken struct {
 	UUID              uuid.UUID          `json:"uuid"`
 	TokenHash         string             `json:"token_hash"`
@@ -495,6 +530,30 @@ type WorkerJob struct {
 	Data          []byte             `json:"data"`
 	StartedAt     pgtype.Timestamptz `json:"started_at"`
 	FinishedAt    pgtype.Timestamptz `json:"finished_at"`
+}
+
+type WorkerUsageLimit struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	WorkerUUID    *uuid.UUID         `json:"worker_uuid"`
+	WorkspaceSlug string             `json:"workspace_slug"`
+	LimitType     string             `json:"limit_type"`
+	LimitValue    pgtype.Int8        `json:"limit_value"`
+	ResetPeriod   string             `json:"reset_period"`
+	IsEnabled     bool               `json:"is_enabled"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+type WorkerUsageTracking struct {
+	UUID          uuid.UUID          `json:"uuid"`
+	WorkerUUID    *uuid.UUID         `json:"worker_uuid"`
+	WorkspaceSlug string             `json:"workspace_slug"`
+	LimitType     string             `json:"limit_type"`
+	PeriodStart   pgtype.Timestamptz `json:"period_start"`
+	PeriodEnd     pgtype.Timestamptz `json:"period_end"`
+	CurrentUsage  int64              `json:"current_usage"`
+	LastUpdated   pgtype.Timestamptz `json:"last_updated"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type WorkerWorkspace struct {

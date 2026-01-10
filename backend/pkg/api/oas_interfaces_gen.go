@@ -69,6 +69,10 @@ type CreatePolicySetRes interface {
 	createPolicySetRes()
 }
 
+type CreateUsageLimitRes interface {
+	createUsageLimitRes()
+}
+
 type CreateUserRes interface {
 	createUserRes()
 }
@@ -77,8 +81,16 @@ type CreateUserSessionRes interface {
 	createUserSessionRes()
 }
 
+type CreateUserUsageLimitOverrideRes interface {
+	createUserUsageLimitOverrideRes()
+}
+
 type CreateWorkerEnrollmentTokenRes interface {
 	createWorkerEnrollmentTokenRes()
+}
+
+type CreateWorkerUsageLimitRes interface {
+	createWorkerUsageLimitRes()
 }
 
 type CreateWorkspaceInviteRes interface {
@@ -149,12 +161,24 @@ type DeleteRegisteredWorkerRes interface {
 	deleteRegisteredWorkerRes()
 }
 
+type DeleteUsageLimitRes interface {
+	deleteUsageLimitRes()
+}
+
 type DeleteUserRes interface {
 	deleteUserRes()
 }
 
+type DeleteUserUsageLimitOverrideRes interface {
+	deleteUserUsageLimitOverrideRes()
+}
+
 type DeleteWorkerEnrollmentTokenRes interface {
 	deleteWorkerEnrollmentTokenRes()
+}
+
+type DeleteWorkerUsageLimitRes interface {
+	deleteWorkerUsageLimitRes()
 }
 
 type DeleteWorkspaceInviteRes interface {
@@ -185,6 +209,14 @@ type GetRegisteredWorkerRes interface {
 	getRegisteredWorkerRes()
 }
 
+type GetUsageLimitRes interface {
+	getUsageLimitRes()
+}
+
+type GetUsageStatusRes interface {
+	getUsageStatusRes()
+}
+
 type GetUserPolicySetsRes interface {
 	getUserPolicySetsRes()
 }
@@ -213,12 +245,24 @@ type ListRegisteredWorkersRes interface {
 	listRegisteredWorkersRes()
 }
 
+type ListUsageLimitsRes interface {
+	listUsageLimitsRes()
+}
+
+type ListUserUsageLimitOverridesRes interface {
+	listUserUsageLimitOverridesRes()
+}
+
 type ListUsersRes interface {
 	listUsersRes()
 }
 
 type ListWorkerEnrollmentTokensRes interface {
 	listWorkerEnrollmentTokensRes()
+}
+
+type ListWorkerUsageLimitsRes interface {
+	listWorkerUsageLimitsRes()
 }
 
 type ListWorkspaceInvitesRes interface {
@@ -441,8 +485,20 @@ type UpdateRegisteredWorkerRes interface {
 	updateRegisteredWorkerRes()
 }
 
+type UpdateUsageLimitRes interface {
+	updateUsageLimitRes()
+}
+
 type UpdateUserRes interface {
 	updateUserRes()
+}
+
+type UpdateUserUsageLimitOverrideRes interface {
+	updateUserUsageLimitOverrideRes()
+}
+
+type UpdateWorkerUsageLimitRes interface {
+	updateWorkerUsageLimitRes()
 }
 
 type UpdateWorkspaceMemberRoleRes interface {
