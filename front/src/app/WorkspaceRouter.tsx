@@ -15,6 +15,13 @@ import UserEdit from './users/UserEdit';
 import Invites from './invites/Invites';
 import PolicySets from './access/PolicySets';
 import PolicySetEdit from './access/PolicySetEdit';
+import UsageLimits from './access/UsageLimits';
+import UsageLimitEdit from './access/UsageLimitEdit';
+import UserUsageLimits from './access/UserUsageLimits';
+import UserUsageLimitEdit from './access/UserUsageLimitEdit';
+import WorkerUsageLimits from './access/WorkerUsageLimits';
+import WorkerUsageLimitEdit from './access/WorkerUsageLimitEdit';
+import UsageOverview from './access/UsageOverview';
 import Pipelines from './pipelines/Pipelines';
 import PipelineEdit from './pipelines/PipelineEdit';
 import RegisteredWorkers from './workers/RegisteredWorkers';
@@ -61,6 +68,16 @@ function WorkspaceRouter() {
         <Route path="access/policy-sets" element={<PolicySets />} />
         <Route path="access/policy-sets/new" element={<PolicySetEdit />} />
         <Route path="access/policy-sets/:uuid" element={<PolicySetEdit />} />
+        <Route path="access/usage-overview" element={<UsageOverview />} />
+        <Route path="access/usage-limits" element={<UsageLimits />} />
+        <Route path="access/usage-limits/new" element={<UsageLimitEdit />} />
+        <Route path="access/usage-limits/:uuid" element={<UsageLimitEdit />} />
+        <Route path="access/user-usage-limits" element={<UserUsageLimits />} />
+        <Route path="access/user-usage-limits/new" element={<UserUsageLimitEdit />} />
+        <Route path="access/user-usage-limits/:uuid" element={<UserUsageLimitEdit />} />
+        <Route path="access/worker-usage-limits" element={<WorkerUsageLimits />} />
+        <Route path="access/worker-usage-limits/new" element={<WorkerUsageLimitEdit />} />
+        <Route path="access/worker-usage-limits/:uuid" element={<WorkerUsageLimitEdit />} />
         <Route path="schedulers" element={<Schedulers />} />
         <Route path="schedulers/new" element={<SchedulerEdit />} />
         <Route path="schedulers/:uuid" element={<SchedulerEdit />} />

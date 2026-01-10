@@ -98,7 +98,16 @@ API endpoints:
 
 Database tables: `usage_limit`, `user_usage_limit_override`, `worker_usage_limit`, `user_usage_tracking`, `worker_usage_tracking`
 
-Key file: `backend/internal/usagelimits/manager.go`
+Key files:
+- Backend: `backend/internal/usagelimits/manager.go`
+- Frontend: `front/src/app/access/UsageLimits.tsx`, `UsageOverview.tsx`, `UserUsageLimits.tsx`, `WorkerUsageLimits.tsx`
+- Dashboard widget: `front/src/app/dashboard/UsageWidget.tsx`
+
+Frontend pages (under Access Control menu):
+- **Usage Overview** - Admin view of all users' usage statistics
+- **Usage Limits** - Manage policy set default limits
+- **User Overrides** - Per-user limit overrides
+- **Worker Limits** - Per-worker limits
 
 ### Email
 

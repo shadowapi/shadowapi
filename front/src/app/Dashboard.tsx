@@ -29,6 +29,7 @@ import { Link } from 'react-router';
 import client from '../api/client';
 import { useWorkspace } from '../lib/workspace/WorkspaceContext';
 import type { components } from '../api/v1';
+import UsageWidget from './dashboard/UsageWidget';
 
 const { Title, Text } = Typography;
 
@@ -187,6 +188,9 @@ function Dashboard() {
   return (
     <>
       <Title level={2}>Dashboard</Title>
+
+      {/* Usage Quota Widget */}
+      <UsageWidget />
 
       {/* Overview Statistics Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>

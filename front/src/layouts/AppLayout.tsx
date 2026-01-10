@@ -22,6 +22,8 @@ import {
   ThunderboltOutlined,
   KeyOutlined,
   LockOutlined,
+  BarChartOutlined,
+  PercentageOutlined,
 } from '@ant-design/icons';
 
 import { uiColors } from '../theme';
@@ -148,6 +150,26 @@ function getMenuItems(basePath: string): MenuItem[] {
           icon: <CrownOutlined />,
           label: <Link to={`${basePath}/access/policy-sets`}>Policy Sets</Link>,
         },
+        {
+          key: '/access/usage-overview',
+          icon: <BarChartOutlined />,
+          label: <Link to={`${basePath}/access/usage-overview`}>Usage Overview</Link>,
+        },
+        {
+          key: '/access/usage-limits',
+          icon: <PercentageOutlined />,
+          label: <Link to={`${basePath}/access/usage-limits`}>Usage Limits</Link>,
+        },
+        {
+          key: '/access/user-usage-limits',
+          icon: <UserOutlined />,
+          label: <Link to={`${basePath}/access/user-usage-limits`}>User Overrides</Link>,
+        },
+        {
+          key: '/access/worker-usage-limits',
+          icon: <RobotOutlined />,
+          label: <Link to={`${basePath}/access/worker-usage-limits`}>Worker Limits</Link>,
+        },
       ],
     },
     { type: 'divider' },
@@ -177,6 +199,13 @@ const routeConfig: Record<string, RouteConfig> = {
   '/invites': { title: 'Invites' },
   '/access/policy-sets': { title: 'Policy Sets' },
   '/access/policy-sets/new': { title: 'Create', parent: '/access/policy-sets' },
+  '/access/usage-overview': { title: 'Usage Overview' },
+  '/access/usage-limits': { title: 'Usage Limits' },
+  '/access/usage-limits/new': { title: 'Create', parent: '/access/usage-limits' },
+  '/access/user-usage-limits': { title: 'User Overrides' },
+  '/access/user-usage-limits/new': { title: 'Create', parent: '/access/user-usage-limits' },
+  '/access/worker-usage-limits': { title: 'Worker Limits' },
+  '/access/worker-usage-limits/new': { title: 'Create', parent: '/access/worker-usage-limits' },
   '/datasources': { title: 'Data Sources' },
   '/datasources/new': { title: 'Add', parent: '/datasources' },
   '/oauth2/credentials': { title: 'OAuth2 Credentials', parent: '/datasources' },
@@ -211,6 +240,10 @@ const menuParentMap: Record<string, string> = {
   '/users': '/access',
   '/invites': '/access',
   '/access/policy-sets': '/access',
+  '/access/usage-overview': '/access',
+  '/access/usage-limits': '/access',
+  '/access/user-usage-limits': '/access',
+  '/access/worker-usage-limits': '/access',
   '/pipelines': '/automation-menu',
   '/schedulers': '/automation-menu',
   '/workers': '/workers-menu',
@@ -230,6 +263,12 @@ function getOpenKeys(relativePath: string): string[] {
     normalizedPath = '/users';
   } else if (relativePath.match(/^\/access\/policy-sets\/[0-9a-f-]+$/i) || relativePath === '/access/policy-sets/new') {
     normalizedPath = '/access/policy-sets';
+  } else if (relativePath.match(/^\/access\/usage-limits\/[0-9a-f-]+$/i) || relativePath === '/access/usage-limits/new') {
+    normalizedPath = '/access/usage-limits';
+  } else if (relativePath.match(/^\/access\/user-usage-limits\/[0-9a-f-]+$/i) || relativePath === '/access/user-usage-limits/new') {
+    normalizedPath = '/access/user-usage-limits';
+  } else if (relativePath.match(/^\/access\/worker-usage-limits\/[0-9a-f-]+$/i) || relativePath === '/access/worker-usage-limits/new') {
+    normalizedPath = '/access/worker-usage-limits';
   } else if (relativePath.match(/^\/storages\/[0-9a-f-]+$/i) || relativePath === '/storages/new') {
     normalizedPath = '/storages';
   } else if (relativePath.match(/^\/pipelines\/[0-9a-f-]+$/i) || relativePath === '/pipelines/new') {
@@ -253,10 +292,13 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
   const oauth2UuidMatch = relativePath.match(/^\/oauth2\/credentials\/([0-9a-f-]+)$/i);
   const usersUuidMatch = relativePath.match(/^\/users\/([0-9a-f-]+)$/i);
   const rbacPolicySetsUuidMatch = relativePath.match(/^\/access\/policy-sets\/([0-9a-f-]+)$/i);
+  const usageLimitsUuidMatch = relativePath.match(/^\/access\/usage-limits\/([0-9a-f-]+)$/i);
+  const userUsageLimitsUuidMatch = relativePath.match(/^\/access\/user-usage-limits\/([0-9a-f-]+)$/i);
+  const workerUsageLimitsUuidMatch = relativePath.match(/^\/access\/worker-usage-limits\/([0-9a-f-]+)$/i);
   const storagesUuidMatch = relativePath.match(/^\/storages\/([0-9a-f-]+)$/i);
   const pipelinesUuidMatch = relativePath.match(/^\/pipelines\/([0-9a-f-]+)$/i);
   const schedulersUuidMatch = relativePath.match(/^\/schedulers\/([0-9a-f-]+)$/i);
-  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacPolicySetsUuidMatch || storagesUuidMatch || pipelinesUuidMatch || schedulersUuidMatch;
+  const uuidMatch = datasourcesUuidMatch || oauth2UuidMatch || usersUuidMatch || rbacPolicySetsUuidMatch || usageLimitsUuidMatch || userUsageLimitsUuidMatch || workerUsageLimitsUuidMatch || storagesUuidMatch || pipelinesUuidMatch || schedulersUuidMatch;
 
   // Determine effective path for breadcrumb chain
   let effectivePath = relativePath;
@@ -268,6 +310,12 @@ function getBreadcrumbItems(relativePath: string, basePath: string): { title: Re
     effectivePath = '/users';
   } else if (rbacPolicySetsUuidMatch) {
     effectivePath = '/access/policy-sets';
+  } else if (usageLimitsUuidMatch) {
+    effectivePath = '/access/usage-limits';
+  } else if (userUsageLimitsUuidMatch) {
+    effectivePath = '/access/user-usage-limits';
+  } else if (workerUsageLimitsUuidMatch) {
+    effectivePath = '/access/worker-usage-limits';
   } else if (storagesUuidMatch) {
     effectivePath = '/storages';
   } else if (pipelinesUuidMatch) {
@@ -365,6 +413,12 @@ function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
     menuSelectedPath = '/users';
   } else if (relativePath.match(/^\/access\/policy-sets\/[0-9a-f-]+$/i) || relativePath === '/access/policy-sets/new') {
     menuSelectedPath = '/access/policy-sets';
+  } else if (relativePath.match(/^\/access\/usage-limits\/[0-9a-f-]+$/i) || relativePath === '/access/usage-limits/new') {
+    menuSelectedPath = '/access/usage-limits';
+  } else if (relativePath.match(/^\/access\/user-usage-limits\/[0-9a-f-]+$/i) || relativePath === '/access/user-usage-limits/new') {
+    menuSelectedPath = '/access/user-usage-limits';
+  } else if (relativePath.match(/^\/access\/worker-usage-limits\/[0-9a-f-]+$/i) || relativePath === '/access/worker-usage-limits/new') {
+    menuSelectedPath = '/access/worker-usage-limits';
   } else if (relativePath.match(/^\/storages\/[0-9a-f-]+$/i) || relativePath === '/storages/new') {
     menuSelectedPath = '/storages';
   } else if (relativePath.match(/^\/pipelines\/[0-9a-f-]+$/i) || relativePath === '/pipelines/new') {
