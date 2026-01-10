@@ -14,6 +14,8 @@ import {
   Switch,
   Card,
   Spin,
+  Row,
+  Col,
 } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import client from '../../api/client';
@@ -21,7 +23,7 @@ import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import { useAuth, isAdmin } from '../../lib/auth';
 import type { components } from '../../api/v1';
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 
 type UsageLimit = components['schemas']['usage_limit'];
 
@@ -168,78 +170,115 @@ function UsageLimitEdit() {
         )}
       </Space>
 
-      <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={{
-            limit_type: 'messages_fetch',
-            reset_period: 'monthly',
-            is_enabled: true,
-            limit_value: 1000,
-          }}
-          style={{ maxWidth: 600 }}
-        >
-          <Form.Item
-            name="policy_set_name"
-            label="Policy Set Name"
-            rules={[{ required: true, message: 'Please enter policy set name' }]}
-            extra="The policy set this limit applies to (e.g., workspace_member)"
-          >
-            <Input placeholder="e.g., workspace_member" />
-          </Form.Item>
+      <Row gutter={24}>
+        <Col xs={24} lg={16}>
+          <Card>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              initialValues={{
+                limit_type: 'messages_fetch',
+                reset_period: 'monthly',
+                is_enabled: true,
+                limit_value: 1000,
+              }}
+            >
+              <Form.Item
+                name="policy_set_name"
+                label="Policy Set Name"
+                rules={[{ required: true, message: 'Please enter policy set name' }]}
+              >
+                <Input placeholder="e.g., workspace_member" />
+              </Form.Item>
 
-          <Form.Item
-            name="limit_type"
-            label="Limit Type"
-            rules={[{ required: true, message: 'Please select limit type' }]}
-          >
-            <Select options={limitTypeOptions} />
-          </Form.Item>
+              <Form.Item
+                name="limit_type"
+                label="Limit Type"
+                rules={[{ required: true, message: 'Please select limit type' }]}
+              >
+                <Select options={limitTypeOptions} />
+              </Form.Item>
 
-          <Form.Item label="Limit Value">
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Switch
-                checked={unlimited}
-                onChange={setUnlimited}
-                checkedChildren="Unlimited"
-                unCheckedChildren="Limited"
-              />
-              {!unlimited && (
-                <Form.Item name="limit_value" noStyle>
-                  <InputNumber
-                    min={0}
-                    style={{ width: '100%' }}
-                    placeholder="Maximum allowed count per period"
+              <Form.Item label="Limit Value">
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Switch
+                    checked={unlimited}
+                    onChange={setUnlimited}
+                    checkedChildren="Unlimited"
+                    unCheckedChildren="Limited"
                   />
-                </Form.Item>
-              )}
-            </Space>
-          </Form.Item>
+                  {!unlimited && (
+                    <Form.Item name="limit_value" noStyle>
+                      <InputNumber
+                        min={0}
+                        style={{ width: '100%' }}
+                        placeholder="Maximum allowed count per period"
+                      />
+                    </Form.Item>
+                  )}
+                </Space>
+              </Form.Item>
 
-          <Form.Item
-            name="reset_period"
-            label="Reset Period"
-            rules={[{ required: true, message: 'Please select reset period' }]}
-          >
-            <Select options={resetPeriodOptions} />
-          </Form.Item>
+              <Form.Item
+                name="reset_period"
+                label="Reset Period"
+                rules={[{ required: true, message: 'Please select reset period' }]}
+              >
+                <Select options={resetPeriodOptions} />
+              </Form.Item>
 
-          <Form.Item name="is_enabled" label="Enabled" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+              <Form.Item name="is_enabled" label="Enabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={saving}>
-                {isNew ? 'Create' : 'Update'}
-              </Button>
-              <Button onClick={() => navigate(`/w/${slug}/access/usage-limits`)}>Cancel</Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit" loading={saving}>
+                    {isNew ? 'Create' : 'Update'}
+                  </Button>
+                  <Button onClick={() => navigate(`/w/${slug}/access/usage-limits`)}>Cancel</Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card title="About Usage Limits" size="small">
+            <Paragraph>
+              Usage limits control how many messages can be processed per policy set.
+              All users with this policy set will share this default limit.
+            </Paragraph>
+            <Title level={5}>Policy Set Name</Title>
+            <Paragraph type="secondary">
+              The name of the policy set this limit applies to (e.g., workspace_member,
+              workspace_admin). Users assigned to this policy set will inherit this limit.
+            </Paragraph>
+            <Title level={5}>Limit Type</Title>
+            <Paragraph type="secondary">
+              <strong>Messages Fetch</strong> - limits incoming/received messages.
+              <br />
+              <strong>Messages Push</strong> - limits outgoing/sent messages.
+            </Paragraph>
+            <Title level={5}>Limit Value</Title>
+            <Paragraph type="secondary">
+              Maximum number of messages allowed per reset period. Toggle to "Unlimited"
+              for no restrictions.
+            </Paragraph>
+            <Title level={5}>Reset Period</Title>
+            <Paragraph type="secondary">
+              When the usage counter resets. Fixed periods (daily, weekly, monthly) reset
+              at midnight UTC. Rolling periods count from each message timestamp.
+            </Paragraph>
+            <Title level={5}>Enabled</Title>
+            <Paragraph type="secondary">
+              When disabled, this limit is ignored and users have no restrictions from
+              this policy set.
+            </Paragraph>
+          </Card>
+        </Col>
+      </Row>
     </>
   );
 }

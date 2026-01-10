@@ -13,6 +13,8 @@ import {
   Switch,
   Card,
   Spin,
+  Row,
+  Col,
 } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import client from '../../api/client';
@@ -20,7 +22,7 @@ import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import { useAuth, isAdmin } from '../../lib/auth';
 import type { components } from '../../api/v1';
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 
 type WorkerUsageLimit = components['schemas']['worker_usage_limit'];
 type RegisteredWorker = components['schemas']['registered_worker'];
@@ -204,82 +206,120 @@ function WorkerUsageLimitEdit() {
         )}
       </Space>
 
-      <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={{
-            limit_type: 'messages_fetch',
-            reset_period: 'monthly',
-            is_enabled: true,
-            limit_value: 1000,
-          }}
-          style={{ maxWidth: 600 }}
-        >
-          <Form.Item
-            label="Worker"
-            rules={[{ required: true, message: 'Please select a worker' }]}
-          >
-            <Select
-              value={selectedWorkerUuid}
-              onChange={setSelectedWorkerUuid}
-              options={workerOptions}
-              placeholder="Select worker"
-              disabled={!isNew}
-            />
-          </Form.Item>
+      <Row gutter={24}>
+        <Col xs={24} lg={16}>
+          <Card>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              initialValues={{
+                limit_type: 'messages_fetch',
+                reset_period: 'monthly',
+                is_enabled: true,
+                limit_value: 1000,
+              }}
+            >
+              <Form.Item
+                label="Worker"
+                rules={[{ required: true, message: 'Please select a worker' }]}
+              >
+                <Select
+                  value={selectedWorkerUuid}
+                  onChange={setSelectedWorkerUuid}
+                  options={workerOptions}
+                  placeholder="Select worker"
+                  disabled={!isNew}
+                />
+              </Form.Item>
 
-          <Form.Item
-            name="limit_type"
-            label="Limit Type"
-            rules={[{ required: true, message: 'Please select limit type' }]}
-          >
-            <Select options={limitTypeOptions} />
-          </Form.Item>
+              <Form.Item
+                name="limit_type"
+                label="Limit Type"
+                rules={[{ required: true, message: 'Please select limit type' }]}
+              >
+                <Select options={limitTypeOptions} />
+              </Form.Item>
 
-          <Form.Item label="Limit Value">
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Switch
-                checked={unlimited}
-                onChange={setUnlimited}
-                checkedChildren="Unlimited"
-                unCheckedChildren="Limited"
-              />
-              {!unlimited && (
-                <Form.Item name="limit_value" noStyle>
-                  <InputNumber
-                    min={0}
-                    style={{ width: '100%' }}
-                    placeholder="Maximum allowed count per period"
+              <Form.Item label="Limit Value">
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Switch
+                    checked={unlimited}
+                    onChange={setUnlimited}
+                    checkedChildren="Unlimited"
+                    unCheckedChildren="Limited"
                   />
-                </Form.Item>
-              )}
-            </Space>
-          </Form.Item>
+                  {!unlimited && (
+                    <Form.Item name="limit_value" noStyle>
+                      <InputNumber
+                        min={0}
+                        style={{ width: '100%' }}
+                        placeholder="Maximum allowed count per period"
+                      />
+                    </Form.Item>
+                  )}
+                </Space>
+              </Form.Item>
 
-          <Form.Item
-            name="reset_period"
-            label="Reset Period"
-            rules={[{ required: true, message: 'Please select reset period' }]}
-          >
-            <Select options={resetPeriodOptions} />
-          </Form.Item>
+              <Form.Item
+                name="reset_period"
+                label="Reset Period"
+                rules={[{ required: true, message: 'Please select reset period' }]}
+              >
+                <Select options={resetPeriodOptions} />
+              </Form.Item>
 
-          <Form.Item name="is_enabled" label="Enabled" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+              <Form.Item name="is_enabled" label="Enabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={saving}>
-                {isNew ? 'Create' : 'Update'}
-              </Button>
-              <Button onClick={() => navigate(`/w/${slug}/access/worker-usage-limits`)}>Cancel</Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit" loading={saving}>
+                    {isNew ? 'Create' : 'Update'}
+                  </Button>
+                  <Button onClick={() => navigate(`/w/${slug}/access/worker-usage-limits`)}>Cancel</Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card title="About Worker Limits" size="small">
+            <Paragraph>
+              Worker limits control how many messages a specific worker can process,
+              regardless of user policies. Use this to balance load across workers.
+            </Paragraph>
+            <Title level={5}>Worker</Title>
+            <Paragraph type="secondary">
+              The worker instance this limit applies to. Workers are identified by
+              their registered name or UUID.
+            </Paragraph>
+            <Title level={5}>Limit Type</Title>
+            <Paragraph type="secondary">
+              <strong>Messages Fetch</strong> - limits incoming/received messages.
+              <br />
+              <strong>Messages Push</strong> - limits outgoing/sent messages.
+            </Paragraph>
+            <Title level={5}>Limit Value</Title>
+            <Paragraph type="secondary">
+              Maximum number of messages this worker can process per reset period.
+              Toggle to "Unlimited" for no restrictions.
+            </Paragraph>
+            <Title level={5}>Reset Period</Title>
+            <Paragraph type="secondary">
+              When the usage counter resets. Fixed periods (daily, weekly, monthly) reset
+              at midnight UTC. Rolling periods count from each message timestamp.
+            </Paragraph>
+            <Title level={5}>Enabled</Title>
+            <Paragraph type="secondary">
+              When disabled, this limit is ignored and the worker has no processing
+              restrictions from this configuration.
+            </Paragraph>
+          </Card>
+        </Col>
+      </Row>
     </>
   );
 }

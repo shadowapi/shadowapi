@@ -13,6 +13,8 @@ import {
   Switch,
   Card,
   Spin,
+  Row,
+  Col,
 } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import client from '../../api/client';
@@ -20,7 +22,7 @@ import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import { useAuth, isAdmin } from '../../lib/auth';
 import type { components } from '../../api/v1';
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 
 type UserUsageLimitOverride = components['schemas']['user_usage_limit_override'];
 type User = components['schemas']['user'];
@@ -206,86 +208,123 @@ function UserUsageLimitEdit() {
         )}
       </Space>
 
-      <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={{
-            limit_type: 'messages_fetch',
-            reset_period: null,
-            is_enabled: true,
-            limit_value: 1000,
-          }}
-          style={{ maxWidth: 600 }}
-        >
-          <Form.Item
-            label="User"
-            rules={[{ required: true, message: 'Please select a user' }]}
-          >
-            <Select
-              value={selectedUserUuid}
-              onChange={setSelectedUserUuid}
-              options={userOptions}
-              placeholder="Select user"
-              showSearch
-              filterOption={(input, option) =>
-                (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
-              }
-              disabled={!isNew}
-            />
-          </Form.Item>
+      <Row gutter={24}>
+        <Col xs={24} lg={16}>
+          <Card>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              initialValues={{
+                limit_type: 'messages_fetch',
+                reset_period: null,
+                is_enabled: true,
+                limit_value: 1000,
+              }}
+            >
+              <Form.Item
+                label="User"
+                rules={[{ required: true, message: 'Please select a user' }]}
+              >
+                <Select
+                  value={selectedUserUuid}
+                  onChange={setSelectedUserUuid}
+                  options={userOptions}
+                  placeholder="Select user"
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                  }
+                  disabled={!isNew}
+                />
+              </Form.Item>
 
-          <Form.Item
-            name="limit_type"
-            label="Limit Type"
-            rules={[{ required: true, message: 'Please select limit type' }]}
-          >
-            <Select options={limitTypeOptions} />
-          </Form.Item>
+              <Form.Item
+                name="limit_type"
+                label="Limit Type"
+                rules={[{ required: true, message: 'Please select limit type' }]}
+              >
+                <Select options={limitTypeOptions} />
+              </Form.Item>
 
-          <Form.Item label="Limit Value">
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Switch
-                checked={unlimited}
-                onChange={setUnlimited}
-                checkedChildren="Unlimited"
-                unCheckedChildren="Limited"
-              />
-              {!unlimited && (
-                <Form.Item name="limit_value" noStyle>
-                  <InputNumber
-                    min={0}
-                    style={{ width: '100%' }}
-                    placeholder="Override limit value"
+              <Form.Item label="Limit Value">
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Switch
+                    checked={unlimited}
+                    onChange={setUnlimited}
+                    checkedChildren="Unlimited"
+                    unCheckedChildren="Limited"
                   />
-                </Form.Item>
-              )}
-            </Space>
-          </Form.Item>
+                  {!unlimited && (
+                    <Form.Item name="limit_value" noStyle>
+                      <InputNumber
+                        min={0}
+                        style={{ width: '100%' }}
+                        placeholder="Override limit value"
+                      />
+                    </Form.Item>
+                  )}
+                </Space>
+              </Form.Item>
 
-          <Form.Item
-            name="reset_period"
-            label="Reset Period"
-            extra="Leave as 'Inherit' to use the policy set's reset period"
-          >
-            <Select options={resetPeriodOptions} />
-          </Form.Item>
+              <Form.Item
+                name="reset_period"
+                label="Reset Period"
+              >
+                <Select options={resetPeriodOptions} />
+              </Form.Item>
 
-          <Form.Item name="is_enabled" label="Enabled" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+              <Form.Item name="is_enabled" label="Enabled" valuePropName="checked">
+                <Switch />
+              </Form.Item>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={saving}>
-                {isNew ? 'Create' : 'Update'}
-              </Button>
-              <Button onClick={() => navigate(`/w/${slug}/access/user-usage-limits`)}>Cancel</Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit" loading={saving}>
+                    {isNew ? 'Create' : 'Update'}
+                  </Button>
+                  <Button onClick={() => navigate(`/w/${slug}/access/user-usage-limits`)}>Cancel</Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card title="About User Overrides" size="small">
+            <Paragraph>
+              User overrides allow you to set custom limits for specific users,
+              different from their policy set defaults.
+            </Paragraph>
+            <Title level={5}>User</Title>
+            <Paragraph type="secondary">
+              The user who will receive this custom limit. Overrides apply to
+              this specific user in the current workspace only.
+            </Paragraph>
+            <Title level={5}>Limit Type</Title>
+            <Paragraph type="secondary">
+              <strong>Messages Fetch</strong> - limits incoming/received messages.
+              <br />
+              <strong>Messages Push</strong> - limits outgoing/sent messages.
+            </Paragraph>
+            <Title level={5}>Limit Value</Title>
+            <Paragraph type="secondary">
+              Override the default limit from the policy set. Toggle to "Unlimited"
+              for no restrictions on this user.
+            </Paragraph>
+            <Title level={5}>Reset Period</Title>
+            <Paragraph type="secondary">
+              Choose "Inherit" to use the same reset period as the policy set,
+              or select a different period for this user.
+            </Paragraph>
+            <Title level={5}>Enabled</Title>
+            <Paragraph type="secondary">
+              When disabled, this override is ignored and the user falls back
+              to their policy set defaults.
+            </Paragraph>
+          </Card>
+        </Col>
+      </Row>
     </>
   );
 }
