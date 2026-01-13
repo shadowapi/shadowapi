@@ -24,6 +24,7 @@ import WorkerUsageLimitEdit from './access/WorkerUsageLimitEdit';
 import UsageOverview from './access/UsageOverview';
 import Pipelines from './pipelines/Pipelines';
 import PipelineEdit from './pipelines/PipelineEdit';
+import PipelineFlowEdit from './pipelines/PipelineFlowEdit';
 import RegisteredWorkers from './workers/RegisteredWorkers';
 import ActiveJobs from './workers/ActiveJobs';
 import EnrollmentTokens from './workers/EnrollmentTokens';
@@ -55,6 +56,7 @@ function WorkspaceRouter() {
         <Route path="pipelines" element={<Pipelines />} />
         <Route path="pipelines/new" element={<PipelineEdit />} />
         <Route path="pipelines/:uuid" element={<PipelineEdit />} />
+        <Route path="pipelines/:uuid/flow" element={<PipelineFlowEdit />} />
         <Route path="workers" element={<RegisteredWorkers />} />
         <Route path="workers/jobs" element={<ActiveJobs />} />
         <Route path="workers/tokens" element={<EnrollmentTokens />} />

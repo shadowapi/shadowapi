@@ -17,6 +17,7 @@
   "dependencies": {
     "@ant-design/cssinjs": "^1.23.0",
     "@types/js-yaml": "^4.0.9",
+    "@xyflow/react": "^12.10.0",
     "antd": "^6.0.0",
     "express": "^4.21.0",
     "js-yaml": "^4.1.1",

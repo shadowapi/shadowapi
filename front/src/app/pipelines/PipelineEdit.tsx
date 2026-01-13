@@ -17,12 +17,11 @@ import {
   Divider,
   Alert,
 } from 'antd';
-import { DeleteOutlined, SettingOutlined } from '@ant-design/icons';
+import { DeleteOutlined, SettingOutlined, NodeIndexOutlined } from '@ant-design/icons';
 import { Link } from 'react-router';
 import client from '../../api/client';
 import { useWorkspace } from '../../lib/workspace/WorkspaceContext';
 import type { components } from '../../api/v1';
-import MapperTable from './components/MapperTable';
 import TestConnectionModal from './components/TestConnectionModal';
 import { useConnectionTest } from './components/useConnectionTest';
 
@@ -54,21 +53,12 @@ function PipelineEdit() {
   const [storages, setStorages] = useState<Storage[]>([]);
   const [workers, setWorkers] = useState<RegisteredWorker[]>([]);
   const [mapperMappings, setMapperMappings] = useState<MapperFieldMapping[]>([]);
-  const [selectedStorageUuid, setSelectedStorageUuid] = useState<string | undefined>();
-  const [selectedDatasourceUuid, setSelectedDatasourceUuid] = useState<string | undefined>();
   const [testModalOpen, setTestModalOpen] = useState(false);
   const [pendingFormValues, setPendingFormValues] = useState<FormValues | null>(null);
   const { state: testState, startTest, cancelTest, reset: resetTest } = useConnectionTest();
   const isNew = !uuid;
   const hasWorkers = workers.length > 0;
 
-  // Get selected storage type
-  const selectedStorage = storages.find((s) => s.uuid === selectedStorageUuid);
-  const isPostgresStorage = selectedStorage?.type === 'postgres';
-
-  // Get selected datasource type for mapper field filtering
-  const selectedDatasource = datasources.find((ds) => ds.uuid === selectedDatasourceUuid);
-  const selectedDatasourceType = selectedDatasource?.type;
 
   // Load datasources, storages, and workers for dropdowns
   const loadOptions = useCallback(async () => {
@@ -118,10 +108,6 @@ function PipelineEdit() {
       worker_uuid: data.worker_uuid ?? null,
       is_enabled: data.is_enabled ?? false,
     });
-
-    // Set selected datasource and storage for MapperTable
-    setSelectedDatasourceUuid(data.datasource_uuid);
-    setSelectedStorageUuid(data.storage_uuid);
 
     // Extract mapper config from flow nodes if present
     const flow = data.flow as Pipeline['flow'];
@@ -375,8 +361,7 @@ function PipelineEdit() {
               filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
-              onChange={(value) => {
-                setSelectedDatasourceUuid(value);
+              onChange={() => {
                 // Clear mappings when datasource changes to avoid invalid field selections
                 setMapperMappings([]);
               }}
@@ -395,7 +380,6 @@ function PipelineEdit() {
               filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
-              onChange={(value) => setSelectedStorageUuid(value)}
             />
           </Form.Item>
 
@@ -415,18 +399,23 @@ function PipelineEdit() {
             />
           </Form.Item>
 
-          {selectedStorageUuid && isPostgresStorage && (
-            <Card title="Field Mappings" size="small" style={{ marginBottom: 16 }}>
-              <Paragraph type="secondary" style={{ marginBottom: 16 }}>
-                Map fields from the data source to columns in your storage tables.
-              </Paragraph>
-              <MapperTable
-                storageUuid={selectedStorageUuid}
-                datasourceType={selectedDatasourceType}
-                mappings={mapperMappings}
-                onChange={setMapperMappings}
-              />
-            </Card>
+          {!isNew && (
+            <Form.Item label="Pipeline Flow">
+              <Space>
+                <Button
+                  type="default"
+                  icon={<NodeIndexOutlined />}
+                  onClick={() => navigate(`/w/${slug}/pipelines/${uuid}/flow`)}
+                >
+                  Edit Flow
+                </Button>
+                {mapperMappings.length > 0 && (
+                  <Typography.Text type="secondary">
+                    {mapperMappings.length} mapping{mapperMappings.length !== 1 ? 's' : ''} configured
+                  </Typography.Text>
+                )}
+              </Space>
+            </Form.Item>
           )}
 
           <Divider />
