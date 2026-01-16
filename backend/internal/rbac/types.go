@@ -44,8 +44,6 @@ const (
 	ResourceDatasource Resource = "datasource"
 	ResourcePipeline   Resource = "pipeline"
 	ResourceStorage    Resource = "storage"
-	ResourceContact    Resource = "contact"
-	ResourceMessage    Resource = "message"
 	ResourceScheduler  Resource = "scheduler"
 	ResourceMember     Resource = "member"
 )

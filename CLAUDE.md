@@ -33,7 +33,7 @@ MeshPump is a unified messaging platform (Gmail, Telegram, WhatsApp, LinkedIn) w
 |--------|---------|
 | `spec/*.yaml` (OpenAPI) | `make api-gen` |
 | `backend/proto/*.proto` | `make proto-gen` |
-| `db/schema.sql` or `db/tg.sql` | `make sqlc-gen && make sync-db` |
+| `db/schema.sql` or `db/tg.sql` | `pg_format -i db/schema.sql && make sqlc-gen && make sync-db` |
 
 Generated directories (do not edit):
 - `backend/pkg/api/` - ogen HTTP server
@@ -154,8 +154,9 @@ devops/              # Docker, compose files, Ory config
 ### New Database Table
 
 1. Add to `db/schema.sql`
-2. Add queries in `db/sql/*.sql`
-3. Run `make sqlc-gen && make sync-db`
+2. Format the schema: `pg_format -i db/schema.sql`
+3. Add queries in `db/sql/*.sql`
+4. Run `make sqlc-gen && make sync-db`
 
 ### New Frontend Page
 
@@ -271,6 +272,7 @@ Check `devops/uncloud/DEPLOYMENT.md` for full instructions.
 
 - **Ask first** before creating predefined objects (datasources, OAuth2 clients, pipelines)
 - **Spec first**: Update OpenAPI/SQL schema before implementing
+- **Format SQL**: Always run `pg_format -i db/schema.sql` after modifying schema files
 - **DI**: Wire services through `samber/do`, don't instantiate directly
 - **Secrets**: Use SOPS encryption (see above); never commit plaintext secrets
 - Keep diffs tight; don't refactor beyond scope

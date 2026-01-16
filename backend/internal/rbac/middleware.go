@@ -88,18 +88,6 @@ var OperationPermissionMap = map[string]OperationPermission{
 	"storageUpdate": {ResourceStorage, ActionWrite},
 	"storageDelete": {ResourceStorage, ActionDelete},
 
-	// Contact operations
-	"contactList":   {ResourceContact, ActionRead},
-	"contactCreate": {ResourceContact, ActionCreate},
-	"contactGet":    {ResourceContact, ActionRead},
-	"contactUpdate": {ResourceContact, ActionWrite},
-	"contactDelete": {ResourceContact, ActionDelete},
-
-	// Message operations
-	"messageList":   {ResourceMessage, ActionRead},
-	"messageGet":    {ResourceMessage, ActionRead},
-	"messageSearch": {ResourceMessage, ActionRead},
-
 	// Scheduler operations
 	"schedulerList":   {ResourceScheduler, ActionRead},
 	"schedulerCreate": {ResourceScheduler, ActionCreate},

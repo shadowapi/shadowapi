@@ -74,81 +74,6 @@ var datasourceMessageFields = map[DatasourceType][]string{
 	},
 }
 
-// datasourceContactFields maps datasource types to available contact field names.
-var datasourceContactFields = map[DatasourceType][]string{
-	DatasourceTypeEmail: {
-		// Core identifiers
-		"uuid", "user_uuid", "instance_uuid", "status",
-		// Names
-		"first", "last", "middle", "names", "names_search",
-		// Emails (primary contact method for email sources)
-		"email1", "email1_type", "email2", "email2_type",
-		"email3", "email4", "email5", "emails", "email_search",
-		// Timestamps
-		"entry_date", "edit_date",
-	},
-	DatasourceTypeEmailOAuth: {
-		// Same as email
-		"uuid", "user_uuid", "instance_uuid", "status",
-		"first", "last", "middle", "names", "names_search",
-		"email1", "email1_type", "email2", "email2_type",
-		"email3", "email4", "email5", "emails", "email_search",
-		"entry_date", "edit_date",
-	},
-	DatasourceTypeTelegram: {
-		// Core identifiers
-		"uuid", "user_uuid", "instance_uuid", "status",
-		// Names
-		"first", "last", "middle", "names", "names_search",
-		// Telegram-specific
-		"telegram", "telegram_uuid",
-		// Phone (Telegram contacts often have phone)
-		"phone1", "phone1_country", "phones", "phone_search",
-		// Messengers
-		"messengers", "messengers_search",
-		// Profile image
-		"cached_img", "cached_img_data",
-		// Timestamps
-		"entry_date", "edit_date",
-	},
-	DatasourceTypeWhatsapp: {
-		// Core identifiers
-		"uuid", "user_uuid", "instance_uuid", "status",
-		// Names
-		"first", "last", "middle", "names", "names_search",
-		// WhatsApp-specific
-		"whatsapp", "whatsapp_uuid",
-		// Phone (WhatsApp is phone-based)
-		"phone1", "phone1_type", "phone1_country", "phones", "phone_search",
-		// Messengers
-		"messengers", "messengers_search",
-		// Profile image
-		"cached_img", "cached_img_data",
-		// Timestamps
-		"entry_date", "edit_date",
-	},
-	DatasourceTypeLinkedin: {
-		// Core identifiers
-		"uuid", "user_uuid", "instance_uuid", "status",
-		// Names
-		"first", "last", "middle", "names", "names_search",
-		// LinkedIn-specific
-		"linkedin_uuid", "linkedin_url",
-		// Email (LinkedIn provides email)
-		"email1", "email1_type", "emails", "email_search",
-		// Position/Employment (LinkedIn specializes in this)
-		"last_position_id", "last_position_company_id", "last_position_company_name",
-		"last_position_title", "last_position_start_date", "last_position_end_date",
-		"last_position_description", "last_positions",
-		// Socials
-		"socials", "socials_search",
-		// Profile image
-		"cached_img", "cached_img_data",
-		// Timestamps
-		"entry_date", "edit_date",
-	},
-}
-
 // Message source fields - derived from spec/components/message.yaml
 var messageFields = []api.SourceFieldDefinition{
 	// Core identifiers
@@ -192,104 +117,9 @@ var messageFields = []api.SourceFieldDefinition{
 	{Name: "meta.is_incoming", Entity: api.SourceFieldDefinitionEntityMessage, Type: api.SourceFieldDefinitionTypeBoolean, Description: api.NewOptString("Whether message is inbound"), IsNested: api.NewOptBool(true), Path: api.NewOptString("meta.is_incoming")},
 }
 
-// Contact source fields - derived from spec/components/contact.yaml
-var contactFields = []api.SourceFieldDefinition{
-	// Core identifiers
-	{Name: "uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Unique contact identifier")},
-	{Name: "user_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Owner user UUID")},
-	{Name: "instance_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Instance UUID")},
-	{Name: "status", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Contact status")},
-
-	// Names
-	{Name: "first", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("First name")},
-	{Name: "last", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Last name")},
-	{Name: "middle", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Middle name")},
-	{Name: "names", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("Names object with all name fields")},
-	{Name: "names_search", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Searchable names string")},
-
-	// Emails
-	{Name: "email1", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Primary email address")},
-	{Name: "email1_type", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Primary email type")},
-	{Name: "email2", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Secondary email address")},
-	{Name: "email2_type", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Secondary email type")},
-	{Name: "email3", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Tertiary email address")},
-	{Name: "email4", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Fourth email address")},
-	{Name: "email5", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Fifth email address")},
-	{Name: "emails", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("All emails object")},
-	{Name: "email_search", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Searchable emails string")},
-
-	// Phones
-	{Name: "phone1", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Primary phone number")},
-	{Name: "phone1_type", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Primary phone type")},
-	{Name: "phone1_country", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Primary phone country code")},
-	{Name: "phone2", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Secondary phone number")},
-	{Name: "phone3", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Tertiary phone number")},
-	{Name: "phone4", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Fourth phone number")},
-	{Name: "phone5", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Fifth phone number")},
-	{Name: "phones", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("All phones object")},
-	{Name: "phone_search", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Searchable phones string")},
-
-	// Messengers
-	{Name: "skype", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Skype username")},
-	{Name: "skype_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Skype UUID")},
-	{Name: "whatsapp", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("WhatsApp number")},
-	{Name: "whatsapp_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("WhatsApp UUID")},
-	{Name: "telegram", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Telegram username")},
-	{Name: "telegram_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Telegram UUID")},
-	{Name: "wechat", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("WeChat ID")},
-	{Name: "wechat_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("WeChat UUID")},
-	{Name: "line", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("LINE ID")},
-	{Name: "line_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("LINE UUID")},
-	{Name: "messengers", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("All messengers object")},
-	{Name: "messengers_search", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Searchable messengers string")},
-
-	// Social profiles
-	{Name: "linkedin_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("LinkedIn UUID")},
-	{Name: "linkedin_url", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("LinkedIn profile URL")},
-	{Name: "facebook_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Facebook UUID")},
-	{Name: "facebook_url", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Facebook profile URL")},
-	{Name: "twitter_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Twitter UUID")},
-	{Name: "twitter_url", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Twitter profile URL")},
-	{Name: "github_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("GitHub UUID")},
-	{Name: "github_url", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("GitHub profile URL")},
-	{Name: "instagram_uuid", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Instagram UUID")},
-	{Name: "instagram_url", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Instagram profile URL")},
-	{Name: "socials", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("All social profiles object")},
-	{Name: "socials_search", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Searchable socials string")},
-
-	// Position/Employment
-	{Name: "last_position_id", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Last position ID")},
-	{Name: "last_position_company_id", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Last position company ID")},
-	{Name: "last_position_company_name", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Last position company name")},
-	{Name: "last_position_title", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Last position job title")},
-	{Name: "last_position_start_date", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeDatetime, Description: api.NewOptString("Last position start date")},
-	{Name: "last_position_end_date", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeDatetime, Description: api.NewOptString("Last position end date")},
-	{Name: "last_position_description", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Last position description")},
-	{Name: "last_positions", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("All positions object")},
-
-	// Other
-	{Name: "birthday", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeDatetime, Description: api.NewOptString("Birthday date")},
-	{Name: "birthday_type", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Birthday type")},
-	{Name: "salary", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Salary value")},
-	{Name: "salary_data", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("Salary data object")},
-	{Name: "note_search", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Searchable notes string")},
-	{Name: "tracking_source", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Contact tracking source")},
-	{Name: "tracking_slug", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Contact tracking slug")},
-	{Name: "cached_img", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeString, Description: api.NewOptString("Cached image URL")},
-	{Name: "cached_img_data", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("Cached image data")},
-	{Name: "crawl", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeObject, Description: api.NewOptString("Crawl data object")},
-
-	// Timestamps
-	{Name: "entry_date", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeDatetime, Description: api.NewOptString("Contact entry date")},
-	{Name: "edit_date", Entity: api.SourceFieldDefinitionEntityContact, Type: api.SourceFieldDefinitionTypeDatetime, Description: api.NewOptString("Last edit date")},
-}
-
 // GetAllSourceFields returns all available source fields for mapping.
 func GetAllSourceFields() []api.SourceFieldDefinition {
-	all := make([]api.SourceFieldDefinition, 0, len(messageFields)+len(contactFields))
-	all = append(all, messageFields...)
-	all = append(all, contactFields...)
-	return all
+	return messageFields
 }
 
 // FilterByEntity filters source fields by entity type.
@@ -298,8 +128,6 @@ func FilterByEntity(fields []api.SourceFieldDefinition, entity api.MapperSourceF
 	switch entity {
 	case api.MapperSourceFieldsListEntityMessage:
 		entityType = api.SourceFieldDefinitionEntityMessage
-	case api.MapperSourceFieldsListEntityContact:
-		entityType = api.SourceFieldDefinitionEntityContact
 	default:
 		return fields
 	}
@@ -362,9 +190,8 @@ func FilterByDatasourceType(fields []api.SourceFieldDefinition, dsType string) [
 
 	dt := DatasourceType(dsType)
 
-	// Build lookup sets of allowed field names for messages and contacts
+	// Build lookup set of allowed field names for messages
 	allowedMessageFields := make(map[string]bool)
-	allowedContactFields := make(map[string]bool)
 
 	if msgFields, ok := datasourceMessageFields[dt]; ok {
 		for _, f := range msgFields {
@@ -372,14 +199,8 @@ func FilterByDatasourceType(fields []api.SourceFieldDefinition, dsType string) [
 		}
 	}
 
-	if ctxFields, ok := datasourceContactFields[dt]; ok {
-		for _, f := range ctxFields {
-			allowedContactFields[f] = true
-		}
-	}
-
 	// If unknown datasource type, return all fields
-	if len(allowedMessageFields) == 0 && len(allowedContactFields) == 0 {
+	if len(allowedMessageFields) == 0 {
 		return fields
 	}
 
@@ -387,10 +208,6 @@ func FilterByDatasourceType(fields []api.SourceFieldDefinition, dsType string) [
 	for _, f := range fields {
 		if f.Entity == api.SourceFieldDefinitionEntityMessage {
 			if allowedMessageFields[f.Name] {
-				result = append(result, f)
-			}
-		} else if f.Entity == api.SourceFieldDefinitionEntityContact {
-			if allowedContactFields[f.Name] {
 				result = append(result, f)
 			}
 		}
