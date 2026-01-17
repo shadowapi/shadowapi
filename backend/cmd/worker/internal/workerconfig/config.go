@@ -27,6 +27,9 @@ type Config struct {
 	// LogLevel is the logging level
 	LogLevel string `env:"WORKER_LOG_LEVEL" envDefault:"info"`
 
+	// LogFormat is the log format ("console" or "json")
+	LogFormat string `env:"WORKER_LOG_FORMAT" envDefault:"console"`
+
 	// HeartbeatInterval is the interval between heartbeats in seconds
 	HeartbeatInterval int `env:"WORKER_HEARTBEAT_INTERVAL" envDefault:"30"`
 
@@ -81,7 +84,12 @@ func ProvideLogger(i do.Injector) (*slog.Logger, error) {
 	}
 
 	opts := &slog.HandlerOptions{Level: level}
-	handler := slog.NewTextHandler(os.Stdout, opts)
+	var handler slog.Handler
+	if strings.ToLower(cfg.LogFormat) == "json" {
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	} else {
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	}
 	return slog.New(handler), nil
 }
 

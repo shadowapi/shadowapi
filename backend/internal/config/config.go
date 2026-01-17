@@ -32,6 +32,8 @@ type Config struct {
 	Log struct {
 		// Level is the log level. Valid values are "debug", "info", "warn", "error".
 		Level string `json:"level" yaml:"level" env:"BE_LOG_LEVEL"`
+		// Format is the log format. Valid values are "console" (human-readable) and "json".
+		Format string `json:"format" yaml:"format" env:"BE_LOG_FORMAT" envDefault:"console"`
 	} `json:"log" yaml:"log"`
 
 	// Server configuration for local UI and API requests

@@ -364,23 +364,30 @@ func (h *Handler) mapWorkerToAPI(ctx context.Context, q *query.Queries, w query.
 		IsGlobal: api.NewOptBool(w.IsGlobal),
 	}
 
-	// Map status
-	switch w.Status {
+	// Determine actual status from KV store (source of truth for connection state)
+	actualStatus := w.Status
+	if h.workerStore != nil {
+		state, err := h.workerStore.Get(ctx, w.UUID.String())
+		if err != nil || state == nil {
+			// Worker not in KV store = not actually connected
+			if w.Status == "online" {
+				actualStatus = "offline"
+			}
+		} else {
+			// Worker is in KV store = actually connected
+			apiWorker.ActiveJobs = api.NewOptInt(int(state.ActiveJobs))
+			apiWorker.Capacity = api.NewOptInt(int(state.Capacity))
+		}
+	}
+
+	// Map status using actual status
+	switch actualStatus {
 	case "online":
 		apiWorker.Status = api.NewOptRegisteredWorkerStatus(api.RegisteredWorkerStatusOnline)
 	case "offline":
 		apiWorker.Status = api.NewOptRegisteredWorkerStatus(api.RegisteredWorkerStatusOffline)
 	case "draining":
 		apiWorker.Status = api.NewOptRegisteredWorkerStatus(api.RegisteredWorkerStatusDraining)
-	}
-
-	// Get active jobs and capacity from KV store (if worker is online)
-	if w.Status == "online" && h.workerStore != nil {
-		state, err := h.workerStore.Get(ctx, w.UUID.String())
-		if err == nil && state != nil {
-			apiWorker.ActiveJobs = api.NewOptInt(int(state.ActiveJobs))
-			apiWorker.Capacity = api.NewOptInt(int(state.Capacity))
-		}
 	}
 
 	// Map version

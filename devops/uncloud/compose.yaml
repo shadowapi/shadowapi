@@ -41,6 +41,7 @@ services:
       - BE_HOST=0.0.0.0
       - BE_PORT=8080
       - BE_LOG_LEVEL=${BE_LOG_LEVEL:-INFO}
+      - BE_LOG_FORMAT=json
       # External PostgreSQL (managed)
       - BE_DB_URI=${BE_DB_URI}
       # External NATS
@@ -117,6 +118,7 @@ services:
       - G2N_GRPC_HOST=0.0.0.0
       - G2N_GRPC_PORT=9090
       - G2N_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+      - G2N_LOG_FORMAT=json
     restart: always
 
   # Worker on olymp machine
@@ -134,6 +136,7 @@ services:
       - WORKER_NAME=olymp
       - ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN_OLYMP}
       - WORKER_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+      - WORKER_LOG_FORMAT=json
     depends_on:
       mp-grpc2nats:
         condition: service_started
@@ -154,6 +157,7 @@ services:
       - WORKER_NAME=shkhara
       - ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN_SHKHARA}
       - WORKER_LOG_LEVEL=${BE_LOG_LEVEL:-info}
+      - WORKER_LOG_FORMAT=json
     depends_on:
       mp-grpc2nats:
         condition: service_started

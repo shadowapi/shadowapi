@@ -16,7 +16,8 @@ type Config struct {
 
 	// Log settings
 	Log struct {
-		Level string `env:"G2N_LOG_LEVEL" envDefault:"info"`
+		Level  string `env:"G2N_LOG_LEVEL" envDefault:"info"`
+		Format string `env:"G2N_LOG_FORMAT" envDefault:"console"`
 	}
 
 	// GRPC server settings

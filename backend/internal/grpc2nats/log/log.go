@@ -3,6 +3,7 @@ package log
 import (
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/phsym/console-slog"
 	"github.com/samber/do/v2"
@@ -18,7 +19,14 @@ func Provide(i do.Injector) (*slog.Logger, error) {
 		logLevel.Set(slog.LevelError)
 	}
 
-	l := slog.New(console.NewHandler(os.Stderr, &console.HandlerOptions{Level: logLevel.Level()}))
-	slog.Info("set default log level", "set_level", logLevel.String())
+	var handler slog.Handler
+	if strings.ToLower(c.Log.Format) == "json" {
+		handler = slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel.Level()})
+	} else {
+		handler = console.NewHandler(os.Stderr, &console.HandlerOptions{Level: logLevel.Level()})
+	}
+
+	l := slog.New(handler)
+	slog.Info("set default log level", "set_level", logLevel.String(), "format", c.Log.Format)
 	return l, nil
 }
