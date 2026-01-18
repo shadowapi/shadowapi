@@ -33,7 +33,6 @@ services:
       dockerfile: devops/docker/backend/prod.Dockerfile
     x-ports:
       - api.meshpump.com:8080/https
-      - rpc.meshpump.com:9090/https
     depends_on:
       mp-hydra:
         condition: service_healthy
@@ -105,12 +104,14 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # gRPC to NATS bridge for distributed workers (internal service)
+  # gRPC to NATS bridge for distributed workers
   mp-grpc2nats:
     platform: linux/amd64
     build:
       context: ../..
       dockerfile: devops/docker/grpc2nats/Dockerfile
+    x-ports:
+      - rpc.meshpump.com:9090/https
     environment:
       - G2N_DB_URI=${BE_DB_URI}
       - G2N_NATS_URL=${BE_QUEUE_URL}
