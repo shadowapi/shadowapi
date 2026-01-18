@@ -110,8 +110,10 @@ services:
     build:
       context: ../..
       dockerfile: devops/docker/grpc2nats/Dockerfile
-    x-ports:
-      - rpc.meshpump.com:9090/https
+    x-caddy: |
+      rpc.meshpump.com {
+        reverse_proxy h2c://mp-grpc2nats.internal:9090
+      }
     environment:
       - G2N_DB_URI=${BE_DB_URI}
       - G2N_NATS_URL=${BE_QUEUE_URL}
