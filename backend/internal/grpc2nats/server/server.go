@@ -72,8 +72,12 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 	s.listener = listener
 
+	// Wrap listener to handle HTTP/1.1 browser requests gracefully
+	// instead of dropping the connection with a 502 error
+	wrappedListener := wrapListenerWithHTTPFallback(listener, s.log)
+
 	s.log.Info("gRPC server starting", "address", addr)
-	return s.grpcSrv.Serve(listener)
+	return s.grpcSrv.Serve(wrappedListener)
 }
 
 // Shutdown gracefully stops the gRPC server
