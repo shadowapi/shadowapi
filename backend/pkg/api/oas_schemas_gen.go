@@ -72,23 +72,6 @@ func (s *AssignPolicySetToUserReq) SetDomain(val string) {
 	s.Domain = val
 }
 
-// AuthConsentFound is response for AuthConsent operation.
-type AuthConsentFound struct {
-	Location OptString
-}
-
-// GetLocation returns the value of Location.
-func (s *AuthConsentFound) GetLocation() OptString {
-	return s.Location
-}
-
-// SetLocation sets the value of Location.
-func (s *AuthConsentFound) SetLocation(val OptString) {
-	s.Location = val
-}
-
-func (*AuthConsentFound) authConsentRes() {}
-
 // AuthLoginFound is response for AuthLogin operation.
 type AuthLoginFound struct {
 	Location OptString
@@ -124,19 +107,17 @@ func (s *AuthLoginSubmitOK) SetRedirectTo(val string) {
 func (*AuthLoginSubmitOK) authLoginSubmitRes() {}
 
 type AuthLoginSubmitReq struct {
-	// The login challenge from Hydra.
-	LoginChallenge string `json:"login_challenge"`
+	// The auth request ID from the OIDC provider.
+	AuthRequestID string `json:"auth_request_id"`
 	// User email address.
 	Email string `json:"email"`
 	// User password.
 	Password string `json:"password"`
-	// Whether to remember the login session.
-	Remember OptBool `json:"remember"`
 }
 
-// GetLoginChallenge returns the value of LoginChallenge.
-func (s *AuthLoginSubmitReq) GetLoginChallenge() string {
-	return s.LoginChallenge
+// GetAuthRequestID returns the value of AuthRequestID.
+func (s *AuthLoginSubmitReq) GetAuthRequestID() string {
+	return s.AuthRequestID
 }
 
 // GetEmail returns the value of Email.
@@ -149,14 +130,9 @@ func (s *AuthLoginSubmitReq) GetPassword() string {
 	return s.Password
 }
 
-// GetRemember returns the value of Remember.
-func (s *AuthLoginSubmitReq) GetRemember() OptBool {
-	return s.Remember
-}
-
-// SetLoginChallenge sets the value of LoginChallenge.
-func (s *AuthLoginSubmitReq) SetLoginChallenge(val string) {
-	s.LoginChallenge = val
+// SetAuthRequestID sets the value of AuthRequestID.
+func (s *AuthLoginSubmitReq) SetAuthRequestID(val string) {
+	s.AuthRequestID = val
 }
 
 // SetEmail sets the value of Email.
@@ -167,11 +143,6 @@ func (s *AuthLoginSubmitReq) SetEmail(val string) {
 // SetPassword sets the value of Password.
 func (s *AuthLoginSubmitReq) SetPassword(val string) {
 	s.Password = val
-}
-
-// SetRemember sets the value of Remember.
-func (s *AuthLoginSubmitReq) SetRemember(val OptBool) {
-	s.Remember = val
 }
 
 type AuthOAuth2AuthorizeOK struct {
@@ -370,21 +341,59 @@ type AuthWorkspaceSwitchNotFound Error
 func (*AuthWorkspaceSwitchNotFound) authWorkspaceSwitchRes() {}
 
 type AuthWorkspaceSwitchOK struct {
-	// The URL to redirect to for completing the workspace switch.
-	AuthorizationURL string `json:"authorization_url"`
+	// The UUID of the workspace.
+	WorkspaceUUID string `json:"workspace_uuid"`
+	// The slug of the workspace.
+	WorkspaceSlug string `json:"workspace_slug"`
 }
 
-// GetAuthorizationURL returns the value of AuthorizationURL.
-func (s *AuthWorkspaceSwitchOK) GetAuthorizationURL() string {
-	return s.AuthorizationURL
+// GetWorkspaceUUID returns the value of WorkspaceUUID.
+func (s *AuthWorkspaceSwitchOK) GetWorkspaceUUID() string {
+	return s.WorkspaceUUID
 }
 
-// SetAuthorizationURL sets the value of AuthorizationURL.
-func (s *AuthWorkspaceSwitchOK) SetAuthorizationURL(val string) {
-	s.AuthorizationURL = val
+// GetWorkspaceSlug returns the value of WorkspaceSlug.
+func (s *AuthWorkspaceSwitchOK) GetWorkspaceSlug() string {
+	return s.WorkspaceSlug
 }
 
-func (*AuthWorkspaceSwitchOK) authWorkspaceSwitchRes() {}
+// SetWorkspaceUUID sets the value of WorkspaceUUID.
+func (s *AuthWorkspaceSwitchOK) SetWorkspaceUUID(val string) {
+	s.WorkspaceUUID = val
+}
+
+// SetWorkspaceSlug sets the value of WorkspaceSlug.
+func (s *AuthWorkspaceSwitchOK) SetWorkspaceSlug(val string) {
+	s.WorkspaceSlug = val
+}
+
+// AuthWorkspaceSwitchOKHeaders wraps AuthWorkspaceSwitchOK with response headers.
+type AuthWorkspaceSwitchOKHeaders struct {
+	SetCookie OptString
+	Response  AuthWorkspaceSwitchOK
+}
+
+// GetSetCookie returns the value of SetCookie.
+func (s *AuthWorkspaceSwitchOKHeaders) GetSetCookie() OptString {
+	return s.SetCookie
+}
+
+// GetResponse returns the value of Response.
+func (s *AuthWorkspaceSwitchOKHeaders) GetResponse() AuthWorkspaceSwitchOK {
+	return s.Response
+}
+
+// SetSetCookie sets the value of SetCookie.
+func (s *AuthWorkspaceSwitchOKHeaders) SetSetCookie(val OptString) {
+	s.SetCookie = val
+}
+
+// SetResponse sets the value of Response.
+func (s *AuthWorkspaceSwitchOKHeaders) SetResponse(val AuthWorkspaceSwitchOK) {
+	s.Response = val
+}
+
+func (*AuthWorkspaceSwitchOKHeaders) authWorkspaceSwitchRes() {}
 
 type AuthWorkspaceSwitchReq struct {
 	// The slug of the workspace to switch to.
@@ -1153,7 +1162,6 @@ func (s *ErrorStatusCode) SetResponse(val Error) {
 func (*ErrorStatusCode) acceptInviteRes()                    {}
 func (*ErrorStatusCode) addWorkspaceMemberRes()              {}
 func (*ErrorStatusCode) assignPolicySetToUserRes()           {}
-func (*ErrorStatusCode) authConsentRes()                     {}
 func (*ErrorStatusCode) authLoginRes()                       {}
 func (*ErrorStatusCode) authLoginSubmitRes()                 {}
 func (*ErrorStatusCode) authOAuth2AuthorizeRes()             {}

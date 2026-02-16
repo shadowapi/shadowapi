@@ -1,17 +1,17 @@
 get:
-  description: Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+  description: Handle OIDC login redirect. Redirects to frontend login page with auth_request_id.
   operationId: auth-login
   security: []
   parameters:
-    - name: login_challenge
+    - name: auth_request_id
       in: query
       required: true
       schema:
         type: string
-      description: The login challenge from Hydra
+      description: The auth request ID from the OIDC provider
   responses:
     "302":
-      description: Redirect to login page or Hydra
+      description: Redirect to login page
       headers:
         Location:
           schema:
@@ -27,7 +27,7 @@ get:
     - auth
 
 post:
-  description: Submit login credentials for Hydra authentication flow
+  description: Submit login credentials for OIDC authentication flow
   operationId: auth-login-submit
   security: []
   requestBody:
@@ -37,21 +37,17 @@ post:
           type: object
           additionalProperties: false
           properties:
-            login_challenge:
+            auth_request_id:
               type: string
-              description: The login challenge from Hydra
+              description: The auth request ID from the OIDC provider
             email:
               type: string
               description: User email address
             password:
               type: string
               description: User password
-            remember:
-              type: boolean
-              description: Whether to remember the login session
-              default: false
           required:
-            - login_challenge
+            - auth_request_id
             - email
             - password
     required: true

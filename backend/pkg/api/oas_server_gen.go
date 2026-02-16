@@ -26,21 +26,15 @@ type Handler interface {
 	//
 	// POST /access/user/{user_uuid}/policy-sets
 	AssignPolicySetToUser(ctx context.Context, req *AssignPolicySetToUserReq, params AssignPolicySetToUserParams) (AssignPolicySetToUserRes, error)
-	// AuthConsent implements auth-consent operation.
-	//
-	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
-	//
-	// GET /auth/consent
-	AuthConsent(ctx context.Context, params AuthConsentParams) (AuthConsentRes, error)
 	// AuthLogin implements auth-login operation.
 	//
-	// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+	// Handle OIDC login redirect. Redirects to frontend login page with auth_request_id.
 	//
 	// GET /auth/login
 	AuthLogin(ctx context.Context, params AuthLoginParams) (AuthLoginRes, error)
 	// AuthLoginSubmit implements auth-login-submit operation.
 	//
-	// Submit login credentials for Hydra authentication flow.
+	// Submit login credentials for OIDC authentication flow.
 	//
 	// POST /auth/login
 	AuthLoginSubmit(ctx context.Context, req *AuthLoginSubmitReq) (AuthLoginSubmitRes, error)
@@ -76,8 +70,7 @@ type Handler interface {
 	AuthOAuth2Session(ctx context.Context) (AuthOAuth2SessionRes, error)
 	// AuthWorkspaceSwitch implements auth-workspace-switch operation.
 	//
-	// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
-	// the workspace in the new JWT.
+	// Switch to a different workspace. Sets a workspace cookie and returns workspace info.
 	//
 	// POST /auth/workspace/switch
 	AuthWorkspaceSwitch(ctx context.Context, req *AuthWorkspaceSwitchReq) (AuthWorkspaceSwitchRes, error)

@@ -47,21 +47,15 @@ type Invoker interface {
 	//
 	// POST /access/user/{user_uuid}/policy-sets
 	AssignPolicySetToUser(ctx context.Context, request *AssignPolicySetToUserReq, params AssignPolicySetToUserParams) (AssignPolicySetToUserRes, error)
-	// AuthConsent invokes auth-consent operation.
-	//
-	// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
-	//
-	// GET /auth/consent
-	AuthConsent(ctx context.Context, params AuthConsentParams) (AuthConsentRes, error)
 	// AuthLogin invokes auth-login operation.
 	//
-	// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+	// Handle OIDC login redirect. Redirects to frontend login page with auth_request_id.
 	//
 	// GET /auth/login
 	AuthLogin(ctx context.Context, params AuthLoginParams) (AuthLoginRes, error)
 	// AuthLoginSubmit invokes auth-login-submit operation.
 	//
-	// Submit login credentials for Hydra authentication flow.
+	// Submit login credentials for OIDC authentication flow.
 	//
 	// POST /auth/login
 	AuthLoginSubmit(ctx context.Context, request *AuthLoginSubmitReq) (AuthLoginSubmitRes, error)
@@ -97,8 +91,7 @@ type Invoker interface {
 	AuthOAuth2Session(ctx context.Context) (AuthOAuth2SessionRes, error)
 	// AuthWorkspaceSwitch invokes auth-workspace-switch operation.
 	//
-	// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
-	// the workspace in the new JWT.
+	// Switch to a different workspace. Sets a workspace cookie and returns workspace info.
 	//
 	// POST /auth/workspace/switch
 	AuthWorkspaceSwitch(ctx context.Context, request *AuthWorkspaceSwitchReq) (AuthWorkspaceSwitchRes, error)
@@ -1202,99 +1195,9 @@ func (c *Client) sendAssignPolicySetToUser(ctx context.Context, request *AssignP
 	return result, nil
 }
 
-// AuthConsent invokes auth-consent operation.
-//
-// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
-//
-// GET /auth/consent
-func (c *Client) AuthConsent(ctx context.Context, params AuthConsentParams) (AuthConsentRes, error) {
-	res, err := c.sendAuthConsent(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendAuthConsent(ctx context.Context, params AuthConsentParams) (res AuthConsentRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("auth-consent"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/auth/consent"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, AuthConsentOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/auth/consent"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "consent_challenge" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "consent_challenge",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.ConsentChallenge))
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeAuthConsentResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // AuthLogin invokes auth-login operation.
 //
-// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+// Handle OIDC login redirect. Redirects to frontend login page with auth_request_id.
 //
 // GET /auth/login
 func (c *Client) AuthLogin(ctx context.Context, params AuthLoginParams) (AuthLoginRes, error) {
@@ -1345,15 +1248,15 @@ func (c *Client) sendAuthLogin(ctx context.Context, params AuthLoginParams) (res
 	stage = "EncodeQueryParams"
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "login_challenge" parameter.
+		// Encode "auth_request_id" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "login_challenge",
+			Name:    "auth_request_id",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			return e.EncodeValue(conv.StringToString(params.LoginChallenge))
+			return e.EncodeValue(conv.StringToString(params.AuthRequestID))
 		}); err != nil {
 			return res, errors.Wrap(err, "encode query")
 		}
@@ -1384,7 +1287,7 @@ func (c *Client) sendAuthLogin(ctx context.Context, params AuthLoginParams) (res
 
 // AuthLoginSubmit invokes auth-login-submit operation.
 //
-// Submit login credentials for Hydra authentication flow.
+// Submit login credentials for OIDC authentication flow.
 //
 // POST /auth/login
 func (c *Client) AuthLoginSubmit(ctx context.Context, request *AuthLoginSubmitReq) (AuthLoginSubmitRes, error) {
@@ -1854,8 +1757,7 @@ func (c *Client) sendAuthOAuth2Session(ctx context.Context) (res AuthOAuth2Sessi
 
 // AuthWorkspaceSwitch invokes auth-workspace-switch operation.
 //
-// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
-// the workspace in the new JWT.
+// Switch to a different workspace. Sets a workspace cookie and returns workspace info.
 //
 // POST /auth/workspace/switch
 func (c *Client) AuthWorkspaceSwitch(ctx context.Context, request *AuthWorkspaceSwitchReq) (AuthWorkspaceSwitchRes, error) {

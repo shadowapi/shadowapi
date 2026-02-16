@@ -4,7 +4,7 @@ import type { MenuProps } from 'antd';
 import { SwapOutlined, AppstoreOutlined, DownOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router';
 import client from '../api/client';
-import { switchWorkspaceAndRedirect } from '../lib/auth/oauth2-client';
+import { switchWorkspace } from '../lib/auth/oauth2-client';
 import type { components } from '../api/v1';
 
 type Workspace = components['schemas']['workspace'];
@@ -45,9 +45,11 @@ export default function WorkspaceSwitcher({ currentWorkspaceSlug }: WorkspaceSwi
     if (slug === activeSlug || isSwitching) return;
     setIsSwitching(true);
     try {
-      await switchWorkspaceAndRedirect(slug);
+      await switchWorkspace(slug);
+      navigate(`/w/${slug}`);
     } catch (err) {
       console.error('Failed to switch workspace:', err);
+    } finally {
       setIsSwitching(false);
     }
   };

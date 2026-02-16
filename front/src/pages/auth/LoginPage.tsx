@@ -19,25 +19,25 @@ function LoginPage() {
   const [form] = Form.useForm();
   const redirectInitiated = useRef(false);
 
-  // Get login_challenge from URL if present (OAuth2 flow from Hydra)
-  const loginChallenge = searchParams.get("login_challenge");
+  // Get auth_request_id from URL if present (OIDC login flow)
+  const authRequestID = searchParams.get("auth_request_id");
 
   const from =
     (location.state as { from?: { pathname: string } })?.from?.pathname ||
     "/workspaces";
 
   useEffect(() => {
-    // Only redirect if authenticated AND there's no login_challenge
-    // (when there's a login_challenge, we need to complete the OAuth2 flow)
-    if (isAuthenticated && !loginChallenge) {
+    // Only redirect if authenticated AND there's no auth_request_id
+    // (when there's a auth_request_id, we need to complete the OAuth2 flow)
+    if (isAuthenticated && !authRequestID) {
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, from, loginChallenge]);
+  }, [isAuthenticated, navigate, from, authRequestID]);
 
-  // Auto-initiate OAuth2 flow when no login_challenge is present
+  // Auto-initiate OAuth2 flow when no auth_request_id is present
   useEffect(() => {
     if (
-      !loginChallenge &&
+      !authRequestID &&
       !isAuthenticated &&
       !isLoading &&
       !redirectInitiated.current
@@ -49,20 +49,20 @@ function LoginPage() {
         redirectInitiated.current = false;
       });
     }
-  }, [loginChallenge, isAuthenticated, isLoading, login]);
+  }, [authRequestID, isAuthenticated, isLoading, login]);
 
   const handleSubmit = async (values: LoginFormValues) => {
     clearError();
     try {
-      await login(values.email, values.password, loginChallenge || undefined);
+      await login(values.email, values.password, authRequestID || undefined);
     } catch {
       // Error is handled by auth context
     }
   };
 
-  // Show spinner when no login_challenge (redirecting to OAuth2 flow)
+  // Show spinner when no auth_request_id (redirecting to OAuth2 flow)
   // Only show error if OAuth2 initiation fails
-  if (!loginChallenge) {
+  if (!authRequestID) {
     if (error) {
       return (
         <Card style={{ width: 400, maxWidth: "100%" }}>

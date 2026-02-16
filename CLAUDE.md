@@ -22,7 +22,7 @@ MeshPump is a unified messaging platform (Gmail, Telegram, WhatsApp, LinkedIn) w
 |-----------|-------|
 | Backend | Go 1.24, ogen, SQLC, NATS JetStream, samber/do DI |
 | Frontend | React 19, Vite, Ant Design v6, React Router v7 |
-| Auth | Ory Hydra (OAuth2/OIDC), backend handles login/consent |
+| Auth | oxoauth.com OIDC, backend is login provider |
 | Database | PostgreSQL 16, Atlas migrations |
 
 ## Code Generation (Critical)
@@ -50,7 +50,7 @@ Generated directories (do not edit):
 | `localtest.me` | Frontend (3000) | All pages (SSR + CSR unified) |
 | `api.localtest.me` | Backend (8080) | REST API |
 | `rpc.localtest.me` | Backend (9090) | gRPC for workers |
-| `oidc.localtest.me` | Hydra (4444) | OAuth2/OIDC |
+| `oidc.localtest.me` | oxoauth.com (external) | OIDC |
 | `mail.localtest.me` | Mailpit (8025) | Email testing UI |
 | `spec.localtest.me` | Nginx (80) | API documentation (RapiDoc) |
 
@@ -58,8 +58,8 @@ Generated directories (do not edit):
 
 Path-based multi-tenancy: `/w/{slug}/*`
 
-- JWT tokens contain `workspace_id` and `workspace_slug` in `ext` field
-- Switching workspaces requires OAuth2 flow (`POST /api/v1/auth/workspace/switch`)
+- Workspace context is stored in `shadowapi_workspace` cookie (not JWT)
+- Switching workspaces sets cookie (`POST /api/v1/auth/workspace/switch`)
 - Roles: `owner`, `admin`, `member`
 - Default workspaces: `internal`, `demo`
 
@@ -139,7 +139,7 @@ front/
   src/lib/           # Shared utilities (auth, workspace, SmartLink)
   src/layouts/       # Layout components (AppLayout, AuthLayout, LandingLayout)
   src/theme.ts       # Ant Design theme config
-devops/              # Docker, compose files, Ory config
+devops/              # Docker, compose files
 ```
 
 ## Adding Features

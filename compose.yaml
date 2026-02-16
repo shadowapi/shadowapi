@@ -1,6 +1,5 @@
 include:
   - devops/compose/infra/compose.yaml
-  - devops/compose/auth/compose.yaml
   - devops/compose/tools/compose.yaml
 
 services:
@@ -44,17 +43,17 @@ services:
       - BE_LOG_LEVEL=${BE_LOG_LEVEL}
       - BE_QUEUE_URL=${BE_QUEUE_URL}
       - BE_QUEUE_PREFIX=${BE_QUEUE_PREFIX}
-      - BE_HYDRA_PUBLIC_URL=${BE_HYDRA_PUBLIC_URL}
-      - BE_HYDRA_ADMIN_URL=${BE_HYDRA_ADMIN_URL}
-      - BE_OAUTH2_SPA_CLIENT_ID=${BE_OAUTH2_SPA_CLIENT_ID}
+      - BE_OIDC_ISSUER=${BE_OIDC_ISSUER}
+      - BE_OIDC_CALLBACK_SECRET=${BE_OIDC_CALLBACK_SECRET}
+      - BE_OIDC_CLIENT_ID=${BE_OIDC_CLIENT_ID}
       - BE_JWKS_CACHE_DURATION=${BE_JWKS_CACHE_DURATION}
+      - BE_OIDC_COOKIE_DOMAIN=${BE_OIDC_COOKIE_DOMAIN}
       - BE_INIT_ADMIN_EMAIL=${BE_INIT_ADMIN_EMAIL}
       - BE_INIT_ADMIN_PASSWORD=${BE_INIT_ADMIN_PASSWORD}
       - BE_BASE_URL=http://${BE_DOMAIN}
       - BE_API_BASE_URL=http://${BE_API_SUBDOMAIN}.${BE_DOMAIN}
       - BE_CSR_BASE_URL=http://${BE_DOMAIN}
       - BE_CORS_ALLOWED_ORIGINS=${BE_CORS_ALLOWED_ORIGINS}
-      - BE_OAUTH2_COOKIE_DOMAIN=${BE_OAUTH2_COOKIE_DOMAIN}
     develop:
       watch:
         - action: rebuild

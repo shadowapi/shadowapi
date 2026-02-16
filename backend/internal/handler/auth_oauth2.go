@@ -8,78 +8,47 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
+	"github.com/shadowapi/shadowapi/backend/internal/authstate"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // OAuth2Service provides OAuth2 functionality for the handlers
 type OAuth2Service struct {
-	hydraClient  *oauth2.HydraClient
+	oidcClient   *oauth2.OIDCClient
 	jwtValidator *oauth2.JWTValidator
 	cookieConfig oauth2.CookieConfig
 	clientID     string
 	redirectURI  string
 	baseURL      string
 
-	// In-memory state storage (for production, use Redis or DB)
-	stateMu    sync.RWMutex
-	stateStore map[string]*oauth2AuthState
-}
-
-type oauth2AuthState struct {
-	CodeVerifier  string
-	RedirectURI   string
-	CreatedAt     time.Time
-	WorkspaceUUID string // Set during workspace switch
-	WorkspaceSlug string // Set during workspace switch
+	stateStore *authstate.Store
 }
 
 // NewOAuth2Service creates a new OAuth2 service
 // baseURL is the frontend URL (for login page redirects)
 // apiBaseURL is the API URL (for OAuth2 callback)
 func NewOAuth2Service(
-	hydraClient *oauth2.HydraClient,
+	oidcClient *oauth2.OIDCClient,
 	jwtValidator *oauth2.JWTValidator,
 	cookieConfig oauth2.CookieConfig,
 	clientID, baseURL, apiBaseURL string,
+	stateStore *authstate.Store,
 ) *OAuth2Service {
-	svc := &OAuth2Service{
-		hydraClient:  hydraClient,
+	return &OAuth2Service{
+		oidcClient:   oidcClient,
 		jwtValidator: jwtValidator,
 		cookieConfig: cookieConfig,
 		clientID:     clientID,
 		redirectURI:  apiBaseURL + "/api/v1/auth/oauth2/callback",
 		baseURL:      baseURL,
-		stateStore:   make(map[string]*oauth2AuthState),
-	}
-
-	// Start cleanup goroutine for expired states
-	go svc.cleanupExpiredStates()
-
-	return svc
-}
-
-// cleanupExpiredStates removes states older than 10 minutes
-func (s *OAuth2Service) cleanupExpiredStates() {
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		s.stateMu.Lock()
-		now := time.Now()
-		for state, data := range s.stateStore {
-			if now.Sub(data.CreatedAt) > 10*time.Minute {
-				delete(s.stateStore, state)
-			}
-		}
-		s.stateMu.Unlock()
+		stateStore:   stateStore,
 	}
 }
 
@@ -125,17 +94,16 @@ func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2Au
 		return nil, fmt.Errorf("generate PKCE: %w", err)
 	}
 
-	// Store state and verifier
-	h.oauth2Svc.stateMu.Lock()
-	h.oauth2Svc.stateStore[state] = &oauth2AuthState{
+	// Store state and verifier in NATS KV
+	if err := h.oauth2Svc.stateStore.Put(ctx, state, &authstate.State{
 		CodeVerifier: verifier,
 		RedirectURI:  req.RedirectURI,
-		CreatedAt:    time.Now(),
+	}); err != nil {
+		return nil, fmt.Errorf("store auth state: %w", err)
 	}
-	h.oauth2Svc.stateMu.Unlock()
 
 	// Build authorization URL
-	authURL := h.oauth2Svc.hydraClient.BuildAuthorizationURL(
+	authURL := h.oauth2Svc.oidcClient.BuildAuthorizationURL(
 		h.oauth2Svc.clientID,
 		h.oauth2Svc.redirectURI,
 		state,
@@ -154,31 +122,20 @@ func (h *Handler) AuthOAuth2Authorize(ctx context.Context, req *api.AuthOAuth2Au
 	}, nil
 }
 
-// AuthOAuth2Callback handles the OAuth2 callback from Hydra
+// AuthOAuth2Callback handles the OAuth2 callback from the OIDC provider
 func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2CallbackParams) (api.AuthOAuth2CallbackRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
 	}
 
-	// Validate and retrieve state
-	h.oauth2Svc.stateMu.Lock()
-	stateData, ok := h.oauth2Svc.stateStore[params.State]
-	if ok {
-		delete(h.oauth2Svc.stateStore, params.State)
-	}
-	h.oauth2Svc.stateMu.Unlock()
-
-	if !ok {
+	// Validate and retrieve state from NATS KV (atomic get + delete)
+	stateData, err := h.oauth2Svc.stateStore.GetAndDelete(ctx, params.State)
+	if err != nil {
 		return nil, ErrWithCode(http.StatusBadRequest, fmt.Errorf("invalid or expired state"))
 	}
 
-	// Check state age
-	if time.Since(stateData.CreatedAt) > 10*time.Minute {
-		return nil, ErrWithCode(http.StatusBadRequest, fmt.Errorf("state expired"))
-	}
-
 	// Exchange code for tokens
-	tokenResp, err := h.oauth2Svc.hydraClient.ExchangeCode(
+	tokenResp, err := h.oauth2Svc.oidcClient.ExchangeCode(
 		ctx,
 		params.Code,
 		h.oauth2Svc.redirectURI,
@@ -195,9 +152,9 @@ func (h *Handler) AuthOAuth2Callback(ctx context.Context, params api.AuthOAuth2C
 		"has_refresh_token", tokenResp.RefreshToken != "",
 	)
 
-	// Build cookie headers (single domain, no cross-subdomain session needed)
+	// Build cookie headers
 	accessTTL := time.Duration(tokenResp.ExpiresIn) * time.Second
-	refreshTTL := 720 * time.Hour // Match Hydra's refresh token TTL
+	refreshTTL := 720 * time.Hour
 
 	cookieHeaders := buildCookieHeaders(
 		h.oauth2Svc.cookieConfig,
@@ -239,7 +196,7 @@ func (h *Handler) AuthOAuth2Refresh(ctx context.Context) (api.AuthOAuth2RefreshR
 	}
 
 	// Exchange refresh token for new tokens
-	tokenResp, err := h.oauth2Svc.hydraClient.RefreshToken(ctx, refreshToken, h.oauth2Svc.clientID)
+	tokenResp, err := h.oauth2Svc.oidcClient.RefreshToken(ctx, refreshToken, h.oauth2Svc.clientID)
 	if err != nil {
 		h.log.Error("token refresh failed", "error", err)
 		return nil, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("token refresh failed"))
@@ -317,25 +274,15 @@ func (h *Handler) AuthOAuth2Logout(ctx context.Context) (api.AuthOAuth2LogoutRes
 	// Get refresh token from context to revoke it
 	refreshToken, _ := ctx.Value(auth.RefreshTokenContextKey).(string)
 	if refreshToken != "" {
-		if err := h.oauth2Svc.hydraClient.RevokeToken(ctx, refreshToken, h.oauth2Svc.clientID); err != nil {
+		if err := h.oauth2Svc.oidcClient.RevokeToken(ctx, refreshToken, h.oauth2Svc.clientID); err != nil {
 			h.log.Warn("failed to revoke token", "error", err)
 			// Continue with logout even if revocation fails
 		}
 	}
 
-	// Get user claims to extract subject for session revocation
-	if claims, ok := ctx.Value(auth.UserClaimsContextKey).(*oauth2.Claims); ok && claims != nil {
-		// Revoke Hydra login session to prevent auto-re-authentication
-		if claims.Subject != "" {
-			if err := h.oauth2Svc.hydraClient.RevokeLoginSession(ctx, claims.Subject); err != nil {
-				h.log.Warn("failed to revoke login session", "error", err)
-				// Continue with logout even if session revocation fails
-			}
-		}
-	}
-
-	// Build cookie headers to clear all cookies (separate headers for each cookie)
+	// Build cookie headers to clear all cookies (token cookies + workspace cookie)
 	cookieHeaders := buildClearCookieHeaders(h.oauth2Svc.cookieConfig)
+	cookieHeaders = append(cookieHeaders, oauth2.BuildClearWorkspaceCookieHeader(h.oauth2Svc.cookieConfig))
 
 	return &api.AuthOAuth2LogoutOKHeaders{
 		SetCookie: cookieHeaders,
@@ -393,10 +340,8 @@ func buildClearCookieHeaders(cfg oauth2.CookieConfig) []string {
 	return []string{accessCookie, refreshCookie}
 }
 
-// AuthWorkspaceSwitch initiates a workspace switch by starting a new OAuth2 flow
-// with workspace information embedded in the state. The user's existing session
-// will cause Hydra to skip the login step, and the consent handler will include
-// the workspace claims in the new access token.
+// AuthWorkspaceSwitch switches to a different workspace by setting a cookie.
+// No OAuth2 redirect needed — just validates membership and sets the workspace cookie.
 func (h *Handler) AuthWorkspaceSwitch(ctx context.Context, req *api.AuthWorkspaceSwitchReq) (api.AuthWorkspaceSwitchRes, error) {
 	if h.oauth2Svc == nil {
 		return nil, fmt.Errorf("OAuth2 service not configured")
@@ -451,46 +396,20 @@ func (h *Handler) AuthWorkspaceSwitch(ctx context.Context, req *api.AuthWorkspac
 		return nil, ErrWithCode(http.StatusInternalServerError, fmt.Errorf("failed to check membership"))
 	}
 
-	// Generate state and PKCE for the new OAuth2 flow
-	state, err := generateState()
-	if err != nil {
-		return nil, fmt.Errorf("generate state: %w", err)
-	}
-
-	verifier, challenge, err := generatePKCE()
-	if err != nil {
-		return nil, fmt.Errorf("generate PKCE: %w", err)
-	}
-
-	// Store state with workspace info
-	h.oauth2Svc.stateMu.Lock()
-	h.oauth2Svc.stateStore[state] = &oauth2AuthState{
-		CodeVerifier:  verifier,
-		RedirectURI:   h.oauth2Svc.baseURL + "/w/" + workspace.Slug,
-		CreatedAt:     time.Now(),
-		WorkspaceUUID: workspace.UUID.String(),
-		WorkspaceSlug: workspace.Slug,
-	}
-	h.oauth2Svc.stateMu.Unlock()
-
-	// Build authorization URL - since user has a remembered session,
-	// Hydra will skip the login step and go directly to consent
-	authURL := h.oauth2Svc.hydraClient.BuildAuthorizationURL(
-		h.oauth2Svc.clientID,
-		h.oauth2Svc.redirectURI,
-		state,
-		challenge,
-		"openid offline_access profile email",
-	)
-
-	h.log.Debug("workspace switch initiated",
+	h.log.Debug("workspace switch",
 		"workspace_slug", workspace.Slug,
 		"workspace_uuid", workspace.UUID.String(),
 		"user_uuid", userUUID,
-		"state", state[:8]+"...",
 	)
 
-	return &api.AuthWorkspaceSwitchOK{
-		AuthorizationURL: authURL,
+	// Build workspace cookie header
+	workspaceCookieHeader := oauth2.BuildWorkspaceCookieHeader(h.oauth2Svc.cookieConfig, workspace.Slug)
+
+	return &api.AuthWorkspaceSwitchOKHeaders{
+		SetCookie: api.NewOptString(workspaceCookieHeader),
+		Response: api.AuthWorkspaceSwitchOK{
+			WorkspaceUUID: workspace.UUID.String(),
+			WorkspaceSlug: workspace.Slug,
+		},
 	}, nil
 }

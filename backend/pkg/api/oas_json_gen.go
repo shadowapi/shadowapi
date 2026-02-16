@@ -410,8 +410,8 @@ func (s *AuthLoginSubmitReq) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *AuthLoginSubmitReq) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("login_challenge")
-		e.Str(s.LoginChallenge)
+		e.FieldStart("auth_request_id")
+		e.Str(s.AuthRequestID)
 	}
 	{
 		e.FieldStart("email")
@@ -421,19 +421,12 @@ func (s *AuthLoginSubmitReq) encodeFields(e *jx.Encoder) {
 		e.FieldStart("password")
 		e.Str(s.Password)
 	}
-	{
-		if s.Remember.Set {
-			e.FieldStart("remember")
-			s.Remember.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfAuthLoginSubmitReq = [4]string{
-	0: "login_challenge",
+var jsonFieldsNameOfAuthLoginSubmitReq = [3]string{
+	0: "auth_request_id",
 	1: "email",
 	2: "password",
-	3: "remember",
 }
 
 // Decode decodes AuthLoginSubmitReq from json.
@@ -442,21 +435,20 @@ func (s *AuthLoginSubmitReq) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode AuthLoginSubmitReq to nil")
 	}
 	var requiredBitSet [1]uint8
-	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "login_challenge":
+		case "auth_request_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.LoginChallenge = string(v)
+				s.AuthRequestID = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"login_challenge\"")
+				return errors.Wrap(err, "decode field \"auth_request_id\"")
 			}
 		case "email":
 			requiredBitSet[0] |= 1 << 1
@@ -481,16 +473,6 @@ func (s *AuthLoginSubmitReq) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"password\"")
-			}
-		case "remember":
-			if err := func() error {
-				s.Remember.Reset()
-				if err := s.Remember.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"remember\"")
 			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
@@ -1148,13 +1130,18 @@ func (s *AuthWorkspaceSwitchOK) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *AuthWorkspaceSwitchOK) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("authorization_url")
-		e.Str(s.AuthorizationURL)
+		e.FieldStart("workspace_uuid")
+		e.Str(s.WorkspaceUUID)
+	}
+	{
+		e.FieldStart("workspace_slug")
+		e.Str(s.WorkspaceSlug)
 	}
 }
 
-var jsonFieldsNameOfAuthWorkspaceSwitchOK = [1]string{
-	0: "authorization_url",
+var jsonFieldsNameOfAuthWorkspaceSwitchOK = [2]string{
+	0: "workspace_uuid",
+	1: "workspace_slug",
 }
 
 // Decode decodes AuthWorkspaceSwitchOK from json.
@@ -1166,17 +1153,29 @@ func (s *AuthWorkspaceSwitchOK) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "authorization_url":
+		case "workspace_uuid":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.AuthorizationURL = string(v)
+				s.WorkspaceUUID = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"authorization_url\"")
+				return errors.Wrap(err, "decode field \"workspace_uuid\"")
+			}
+		case "workspace_slug":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.WorkspaceSlug = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"workspace_slug\"")
 			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
@@ -1188,7 +1187,7 @@ func (s *AuthWorkspaceSwitchOK) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

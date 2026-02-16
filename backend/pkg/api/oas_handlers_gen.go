@@ -562,147 +562,9 @@ func (s *Server) handleAssignPolicySetToUserRequest(args [1]string, argsEscaped 
 	}
 }
 
-// handleAuthConsentRequest handles auth-consent operation.
-//
-// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
-//
-// GET /auth/consent
-func (s *Server) handleAuthConsentRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("auth-consent"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/auth/consent"),
-	}
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), AuthConsentOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code >= 100 && code < 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: AuthConsentOperation,
-			ID:   "auth-consent",
-		}
-	)
-	params, err := decodeAuthConsentParams(args, argsEscaped, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	var response AuthConsentRes
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    AuthConsentOperation,
-			OperationSummary: "",
-			OperationID:      "auth-consent",
-			Body:             nil,
-			Params: middleware.Parameters{
-				{
-					Name: "consent_challenge",
-					In:   "query",
-				}: params.ConsentChallenge,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = AuthConsentParams
-			Response = AuthConsentRes
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackAuthConsentParams,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.AuthConsent(ctx, params)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.AuthConsent(ctx, params)
-	}
-	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	if err := encodeAuthConsentResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
 // handleAuthLoginRequest handles auth-login operation.
 //
-// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+// Handle OIDC login redirect. Redirects to frontend login page with auth_request_id.
 //
 // GET /auth/login
 func (s *Server) handleAuthLoginRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -795,9 +657,9 @@ func (s *Server) handleAuthLoginRequest(args [0]string, argsEscaped bool, w http
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
-					Name: "login_challenge",
+					Name: "auth_request_id",
 					In:   "query",
-				}: params.LoginChallenge,
+				}: params.AuthRequestID,
 			},
 			Raw: r,
 		}
@@ -840,7 +702,7 @@ func (s *Server) handleAuthLoginRequest(args [0]string, argsEscaped bool, w http
 
 // handleAuthLoginSubmitRequest handles auth-login-submit operation.
 //
-// Submit login credentials for Hydra authentication flow.
+// Submit login credentials for OIDC authentication flow.
 //
 // POST /auth/login
 func (s *Server) handleAuthLoginSubmitRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1615,8 +1477,7 @@ func (s *Server) handleAuthOAuth2SessionRequest(args [0]string, argsEscaped bool
 
 // handleAuthWorkspaceSwitchRequest handles auth-workspace-switch operation.
 //
-// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
-// the workspace in the new JWT.
+// Switch to a different workspace. Sets a workspace cookie and returns workspace info.
 //
 // POST /auth/workspace/switch
 func (s *Server) handleAuthWorkspaceSwitchRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

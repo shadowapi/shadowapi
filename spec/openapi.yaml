@@ -299,8 +299,6 @@ paths:
     $ref: "paths/auth_oauth2_session.yaml"
   /auth/login:
     $ref: "paths/auth_login.yaml"
-  /auth/consent:
-    $ref: "paths/auth_consent.yaml"
   /auth/workspace/switch:
     $ref: "paths/auth_workspace_switch.yaml"
 

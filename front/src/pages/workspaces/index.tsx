@@ -5,7 +5,7 @@ import { FolderOutlined, PlusOutlined, LogoutOutlined } from '@ant-design/icons'
 import client from '../../api/client';
 import { uiColors } from '../../theme';
 import { useAuth } from '../../lib/auth';
-import { switchWorkspaceAndRedirect, OAuth2Error } from '../../lib/auth/oauth2-client';
+import { switchWorkspace, OAuth2Error } from '../../lib/auth/oauth2-client';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -51,10 +51,12 @@ function WorkspaceSelectionPage() {
       } else if (response.data) {
         setWorkspaces(response.data);
 
-        // If user has exactly one workspace, auto-redirect using workspace switch
+        // If user has exactly one workspace, auto-switch and navigate
         if (response.data.length === 1) {
           try {
-            await switchWorkspaceAndRedirect(response.data[0].slug);
+            await switchWorkspace(response.data[0].slug);
+            navigate(`/w/${response.data[0].slug}`);
+            return true;
           } catch {
             // If switch fails, still show the workspace list
             console.error('Auto-switch failed, showing workspace list');
@@ -91,14 +93,12 @@ function WorkspaceSelectionPage() {
     navigate('/');
   };
 
-  // Switch to a workspace (initiates OAuth2 flow to get workspace-scoped JWT)
+  // Switch to a workspace (sets cookie and navigates)
   const handleWorkspaceSelect = async (slug: string) => {
     setSwitchingWorkspace(slug);
     try {
-      // This will redirect through the OAuth2 flow
-      // The user will be redirected back to /w/{slug} after getting new tokens
-      await switchWorkspaceAndRedirect(slug);
-      // Note: Page will redirect, so this code won't execute
+      await switchWorkspace(slug);
+      navigate(`/w/${slug}`);
     } catch (err) {
       setSwitchingWorkspace(null);
       if (err instanceof OAuth2Error) {

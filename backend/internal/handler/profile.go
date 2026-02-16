@@ -9,6 +9,7 @@ import (
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/converter"
+	"github.com/shadowapi/shadowapi/backend/internal/workspace"
 	"github.com/shadowapi/shadowapi/backend/pkg/api"
 	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
@@ -46,11 +47,13 @@ func (h *Handler) GetProfile(ctx context.Context) (api.GetProfileRes, error) {
 	// Convert policy sets map to API format (still uses "roles" field in API for compatibility)
 	user.Roles = convertPolicySetsToAPI(policySetsMap)
 
-	// Add current workspace info from JWT claims if present
-	if claims.WorkspaceID != "" && claims.WorkspaceSlug != "" {
+	// Add current workspace info from context (set by workspace middleware from cookie)
+	workspaceSlug := workspace.GetWorkspaceSlug(ctx)
+	workspaceUUID := workspace.GetWorkspaceUUID(ctx)
+	if workspaceSlug != "" {
 		user.CurrentWorkspace = api.NewOptUserCurrentWorkspace(api.UserCurrentWorkspace{
-			UUID: api.NewOptString(claims.WorkspaceID),
-			Slug: api.NewOptString(claims.WorkspaceSlug),
+			UUID: api.NewOptString(workspaceUUID),
+			Slug: api.NewOptString(workspaceSlug),
 		})
 	}
 

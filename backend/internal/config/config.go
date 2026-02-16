@@ -69,6 +69,9 @@ type Config struct {
 	Auth struct {
 		// IgnoreHttpsError disables logging OAuth2 HTTPS errors. Useful for development
 		IgnoreHttpsError bool `yaml:"ignore_https_error" json:"ignore_https_error" env:"BE_AUTH_IGNORE_HTTPS_ERROR"`
+		// DevMode allows accepting any bearer token when JWT validator is not configured.
+		// MUST NOT be enabled in production.
+		DevMode bool `yaml:"dev_mode" json:"dev_mode" env:"BE_AUTH_DEV_MODE" envDefault:"false"`
 	} `yaml:"auth" json:"auth"`
 
 	// Worker settings
@@ -103,21 +106,24 @@ type Config struct {
 		Port int    `yaml:"port" json:"port" env:"BE_GRPC_PORT" envDefault:"9090"`
 	} `yaml:"grpc" json:"grpc"`
 
-	// OAuth2 settings for Hydra integration
-	OAuth2 struct {
-		// HydraPublicURL is the URL to Hydra's public endpoints (token, authorize)
-		HydraPublicURL string `yaml:"hydra_public_url" json:"hydra_public_url" env:"BE_HYDRA_PUBLIC_URL" envDefault:"http://hydra:4444"`
-		// HydraAdminURL is the URL to Hydra's admin endpoints (introspection, revocation)
-		HydraAdminURL string `yaml:"hydra_admin_url" json:"hydra_admin_url" env:"BE_HYDRA_ADMIN_URL" envDefault:"http://hydra:4445"`
+	// OIDC settings for external OIDC provider (oxoauth.com)
+	OIDC struct {
+		// IssuerURL is the OIDC issuer URL (e.g. https://meshpump.oidc.oxoauth.com)
+		IssuerURL string `yaml:"issuer_url" json:"issuer_url" env:"BE_OIDC_ISSUER"`
+		// CallbackSecret is the HMAC secret for signing login callbacks
+		CallbackSecret string `yaml:"callback_secret" json:"callback_secret" env:"BE_OIDC_CALLBACK_SECRET"`
 		// SPAClientID is the OAuth2 client ID for the SPA frontend
-		SPAClientID string `yaml:"spa_client_id" json:"spa_client_id" env:"BE_OAUTH2_SPA_CLIENT_ID" envDefault:"shadowapi-spa"`
+		SPAClientID string `yaml:"spa_client_id" json:"spa_client_id" env:"BE_OIDC_CLIENT_ID" envDefault:"shadowapi-spa"`
 		// JWKSCacheDuration is how long to cache JWKS keys in seconds
 		JWKSCacheDuration int `yaml:"jwks_cache_duration" json:"jwks_cache_duration" env:"BE_JWKS_CACHE_DURATION" envDefault:"300"`
 		// CookieDomain is the domain for auth cookies
-		CookieDomain string `yaml:"cookie_domain" json:"cookie_domain" env:"BE_OAUTH2_COOKIE_DOMAIN" envDefault:"localtest.me"`
+		CookieDomain string `yaml:"cookie_domain" json:"cookie_domain" env:"BE_OIDC_COOKIE_DOMAIN" envDefault:"localtest.me"`
 		// CookieSecure sets the Secure flag on cookies (should be true in production)
-		CookieSecure bool `yaml:"cookie_secure" json:"cookie_secure" env:"BE_OAUTH2_COOKIE_SECURE" envDefault:"false"`
-	} `yaml:"oauth2" json:"oauth2"`
+		CookieSecure bool `yaml:"cookie_secure" json:"cookie_secure" env:"BE_OIDC_COOKIE_SECURE" envDefault:"false"`
+		// JWKSURL overrides the default JWKS endpoint ({IssuerURL}/keys).
+		// Set this if the OIDC provider uses a non-standard JWKS path.
+		JWKSURL string `yaml:"jwks_url" json:"jwks_url" env:"BE_OIDC_JWKS_URL"`
+	} `yaml:"oidc" json:"oidc"`
 
 	// SMTP settings for sending emails
 	SMTP struct {

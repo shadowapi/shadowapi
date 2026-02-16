@@ -59,8 +59,7 @@ func Provide(i do.Injector) (*Auth, error) {
 			"/ready":                          http.MethodGet,
 			"/api/v1/user":                    http.MethodPost,
 			"/api/v1/user/session":            http.MethodPost,
-			"/api/v1/auth/login":              "*", // Allow both GET and POST for OAuth2 login flow
-			"/api/v1/auth/consent":            http.MethodGet,
+			"/api/v1/auth/login":              "*", // Allow both GET and POST for OIDC login flow
 			"/api/v1/auth/callback":           http.MethodGet,
 			"/api/v1/auth/logout":             http.MethodPost,
 			"/auth/callback":                  http.MethodGet,
@@ -76,15 +75,18 @@ func Provide(i do.Injector) (*Auth, error) {
 		},
 	}
 
-	// Initialize JWT validator if OAuth2 is configured
-	if cfg.OAuth2.SPAClientID != "" {
-		jwksURL := cfg.OAuth2.HydraPublicURL + "/.well-known/jwks.json"
+	// Initialize JWT validator if OIDC is configured
+	if cfg.OIDC.SPAClientID != "" && cfg.OIDC.IssuerURL != "" {
+		jwksURL := cfg.OIDC.IssuerURL + "/keys"
+		if cfg.OIDC.JWKSURL != "" {
+			jwksURL = cfg.OIDC.JWKSURL
+		}
 		jwksCache := oauth2.NewJWKSCache(
 			jwksURL,
-			time.Duration(cfg.OAuth2.JWKSCacheDuration)*time.Second,
+			time.Duration(cfg.OIDC.JWKSCacheDuration)*time.Second,
 			log,
 		)
-		auth.jwtValidator = oauth2.NewJWTValidator(jwksCache, cfg.OAuth2.HydraPublicURL, log)
+		auth.jwtValidator = oauth2.NewJWTValidator(jwksCache, cfg.OIDC.IssuerURL, log)
 		log.Info("JWT validator initialized", "jwks_url", jwksURL)
 	}
 
@@ -124,9 +126,14 @@ func (a *Auth) HandleBearerAuth(
 		return ctx, nil
 	}
 
-	// Fallback: accept any non-empty bearer token (for development)
-	a.log.Debug("accepting bearer token (no JWT validator)", "token_prefix", token[:min(len(token), 20)])
-	return ctx, nil
+	// Fallback: accept any non-empty bearer token only in dev mode
+	if a.cfg.Auth.DevMode {
+		a.log.Warn("accepting bearer token without validation (dev mode)", "token_prefix", token[:min(len(token), 20)])
+		return ctx, nil
+	}
+
+	a.log.Debug("JWT validator not configured, rejecting token")
+	return nil, errResult
 }
 
 func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
@@ -150,7 +157,7 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 			}
 			if cookie, err := req.Raw.Cookie(oauth2.AccessTokenCookie); err == nil {
 				ctx = context.WithValue(ctx, AccessTokenContextKey, cookie.Value)
-				// For logout endpoint, also extract user claims so we can revoke Hydra login session
+				// For logout endpoint, also extract user claims for token revocation
 				if req.Raw.URL.Path == "/api/v1/auth/oauth2/logout" && a.jwtValidator != nil {
 					if claims, err := a.jwtValidator.Validate(req.Context, cookie.Value); err == nil {
 						ctx = context.WithValue(ctx, UserClaimsContextKey, claims)
@@ -217,9 +224,14 @@ func (a *Auth) OgenMiddleware(req middleware.Request, next middleware.Next) (mid
 		return next(req)
 	}
 
-	// Fallback: accept any non-empty bearer token (for development)
-	a.log.Debug("accepting bearer token (no JWT validator)", "token_prefix", token[:min(len(token), 20)])
-	return next(req)
+	// Fallback: accept any non-empty bearer token only in dev mode
+	if a.cfg.Auth.DevMode {
+		a.log.Warn("accepting bearer token without validation in middleware (dev mode)", "token_prefix", token[:min(len(token), 20)])
+		return next(req)
+	}
+
+	a.log.Debug("JWT validator not configured, rejecting token")
+	return middleware.Response{}, ErrWithCode(http.StatusUnauthorized, fmt.Errorf("authentication not configured"))
 }
 
 type errWithCode struct {

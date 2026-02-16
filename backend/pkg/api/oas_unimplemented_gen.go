@@ -40,18 +40,9 @@ func (UnimplementedHandler) AssignPolicySetToUser(ctx context.Context, req *Assi
 	return r, ht.ErrNotImplemented
 }
 
-// AuthConsent implements auth-consent operation.
-//
-// Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra.
-//
-// GET /auth/consent
-func (UnimplementedHandler) AuthConsent(ctx context.Context, params AuthConsentParams) (r AuthConsentRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // AuthLogin implements auth-login operation.
 //
-// Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists.
+// Handle OIDC login redirect. Redirects to frontend login page with auth_request_id.
 //
 // GET /auth/login
 func (UnimplementedHandler) AuthLogin(ctx context.Context, params AuthLoginParams) (r AuthLoginRes, _ error) {
@@ -60,7 +51,7 @@ func (UnimplementedHandler) AuthLogin(ctx context.Context, params AuthLoginParam
 
 // AuthLoginSubmit implements auth-login-submit operation.
 //
-// Submit login credentials for Hydra authentication flow.
+// Submit login credentials for OIDC authentication flow.
 //
 // POST /auth/login
 func (UnimplementedHandler) AuthLoginSubmit(ctx context.Context, req *AuthLoginSubmitReq) (r AuthLoginSubmitRes, _ error) {
@@ -114,8 +105,7 @@ func (UnimplementedHandler) AuthOAuth2Session(ctx context.Context) (r AuthOAuth2
 
 // AuthWorkspaceSwitch implements auth-workspace-switch operation.
 //
-// Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes
-// the workspace in the new JWT.
+// Switch to a different workspace. Sets a workspace cookie and returns workspace info.
 //
 // POST /auth/workspace/switch
 func (UnimplementedHandler) AuthWorkspaceSwitch(ctx context.Context, req *AuthWorkspaceSwitchReq) (r AuthWorkspaceSwitchRes, _ error) {

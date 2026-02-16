@@ -8,7 +8,7 @@ get:
       required: true
       schema:
         type: string
-      description: The authorization code from Hydra
+      description: The authorization code from the OIDC server
     - name: state
       in: query
       required: true

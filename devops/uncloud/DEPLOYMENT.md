@@ -8,8 +8,7 @@ This directory contains the configuration for deploying MeshPump to [uncloud.run
 |-------------|-------------------|-----------------------|
 | `mp-ssr`      | `meshpump.com`      | Unified frontend (SSR + CSR) |
 | `mp-backend`  | `api.meshpump.com`  | Go API server         |
-| `mp-hydra`    | `oidc.meshpump.com` | Ory Hydra OAuth2/OIDC |
-| `mp-grpc2nats` | (internal)        | gRPC to NATS bridge   |
+| `mp-grpc2nats` | `rpc.meshpump.com` | gRPC to NATS bridge   |
 | `mp-worker-olymp` | (internal, x-node: olymp) | Distributed worker |
 | `mp-worker-shkhara` | (internal, x-node: shkhara) | Distributed worker |
 
@@ -17,12 +16,15 @@ The frontend uses a unified architecture where all routes are served by the SSR 
 - Public pages (landing, docs) are server-rendered for SEO
 - App pages (`/w/{slug}/*`) hydrate as a client-side SPA
 
+Authentication is handled by an external OIDC provider at `meshpump.oidc.oxoauth.com`.
+
 ## Prerequisites
 
 1. **Uncloud CLI** - Install from [uncloud.run](https://uncloud.run)
 2. **Domain Configuration** - Point `*.meshpump.com` to your uncloud cluster
 3. **External PostgreSQL** - Managed database (Supabase, Neon, AWS RDS, etc.)
 4. **External NATS** - NATS JetStream instance
+5. **OIDC Tenant** - Configured at `meshpump.oidc.oxoauth.com`
 
 ## Deployment Steps
 
@@ -40,10 +42,15 @@ cp .env.example .env
 Create two databases on your managed PostgreSQL:
 - `meshpump` - Main application database
 - `meshpump_dev` - Dev database for Atlas migrations
-- `meshpump_hydra` - Ory Hydra OAuth2 database
 
 #### NATS
 Ensure your NATS instance has JetStream enabled.
+
+#### OIDC
+Configure your tenant at `meshpump.oidc.oxoauth.com` with:
+- A registered client (SPA, `auth_method=none`, PKCE required)
+- Redirect URI: `https://api.meshpump.com/api/v1/auth/oauth2/callback`
+- Callback secret for the login provider
 
 ### 3. Run Database Migrations
 
@@ -69,40 +76,14 @@ Or manually:
 uc deploy -f compose.yaml --yes
 ```
 
-### 5. Create OAuth2 Client
-
-After Hydra is running, create the SPA OAuth2 client:
-
-```bash
-uc exec mp-hydra -- hydra create client \
-  --endpoint http://localhost:4445 \
-  --grant-type authorization_code,refresh_token \
-  --response-type code \
-  --scope openid,offline_access \
-  --redirect-uri https://api.meshpump.com/api/v1/auth/oauth2/callback \
-  --name "MeshPump SPA" \
-  --token-endpoint-auth-method none \
-  --format json
-```
-
-Copy the `client_id` from the output and update `.env`:
-```
-BE_OAUTH2_SPA_CLIENT_ID=<client_id>
-```
-
-Then redeploy to apply the change:
-```bash
-./deploy.py
-```
-
-### 6. Verify Deployment
+### 5. Verify Deployment
 
 ```bash
 # Check service health
 uc ps
 
 # Check OIDC discovery
-curl https://oidc.meshpump.com/.well-known/openid-configuration
+curl https://meshpump.oidc.oxoauth.com/.well-known/openid-configuration
 
 # Check API health
 curl https://api.meshpump.com/api/v1/health
@@ -116,7 +97,7 @@ Add the following DNS records pointing to your uncloud cluster:
 |------|------|-------|
 | A | `meshpump.com` | `<uncloud-ip>` |
 | A | `api.meshpump.com` | `<uncloud-ip>` |
-| A | `oidc.meshpump.com` | `<uncloud-ip>` |
+| A | `rpc.meshpump.com` | `<uncloud-ip>` |
 
 Or use a wildcard:
 
@@ -129,7 +110,7 @@ Or use a wildcard:
 
 Services communicate internally using uncloud's `.internal` DNS:
 
-- Backend → Hydra Admin: `http://mp-hydra.internal:4445`
+- Workers → gRPC bridge: `mp-grpc2nats.internal:9090`
 - All services are isolated from external access except through `x-ports`
 
 ## Updating the Deployment

@@ -13,10 +13,6 @@ type AssignPolicySetToUserRes interface {
 	assignPolicySetToUserRes()
 }
 
-type AuthConsentRes interface {
-	authConsentRes()
-}
-
 type AuthLoginRes interface {
 	authLoginRes()
 }

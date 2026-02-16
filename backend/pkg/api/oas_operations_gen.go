@@ -9,7 +9,6 @@ const (
 	AcceptInviteOperation                    OperationName = "AcceptInvite"
 	AddWorkspaceMemberOperation              OperationName = "AddWorkspaceMember"
 	AssignPolicySetToUserOperation           OperationName = "AssignPolicySetToUser"
-	AuthConsentOperation                     OperationName = "AuthConsent"
 	AuthLoginOperation                       OperationName = "AuthLogin"
 	AuthLoginSubmitOperation                 OperationName = "AuthLoginSubmit"
 	AuthOAuth2AuthorizeOperation             OperationName = "AuthOAuth2Authorize"

@@ -572,27 +572,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
-					case 'c': // Prefix: "consent"
-						origElem := elem
-						if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleAuthConsentRequest([0]string{}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
-						}
-
-						elem = origElem
 					case 'l': // Prefix: "login"
 						origElem := elem
 						if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
@@ -3276,31 +3255,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
-					case 'c': // Prefix: "consent"
-						origElem := elem
-						if l := len("consent"); len(elem) >= l && elem[0:l] == "consent" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = AuthConsentOperation
-								r.summary = ""
-								r.operationID = "auth-consent"
-								r.pathPattern = "/auth/consent"
-								r.args = args
-								r.count = 0
-								return r, true
-							default:
-								return
-							}
-						}
-
-						elem = origElem
 					case 'l': // Prefix: "login"
 						origElem := elem
 						if l := len("login"); len(elem) >= l && elem[0:l] == "login" {

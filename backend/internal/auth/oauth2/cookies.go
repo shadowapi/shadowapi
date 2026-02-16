@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 const (
 	AccessTokenCookie  = "shadowapi_access_token"
 	RefreshTokenCookie = "shadowapi_refresh_token"
+	WorkspaceCookie    = "shadowapi_workspace"
 )
 
 // CookieConfig holds configuration for auth cookies
@@ -86,5 +88,70 @@ func GetRefreshTokenFromCookie(r *http.Request) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
+}
+
+// SetWorkspaceCookie sets the workspace slug cookie (not HttpOnly so frontend can read it)
+func SetWorkspaceCookie(w http.ResponseWriter, cfg CookieConfig, slug string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     WorkspaceCookie,
+		Value:    slug,
+		Path:     "/",
+		Domain:   cfg.Domain,
+		MaxAge:   30 * 24 * 3600, // 30 days
+		HttpOnly: false,          // Frontend needs to read this
+		Secure:   cfg.Secure,
+		SameSite: cfg.SameSite,
+	})
+}
+
+// ClearWorkspaceCookie expires the workspace cookie
+func ClearWorkspaceCookie(w http.ResponseWriter, cfg CookieConfig) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     WorkspaceCookie,
+		Value:    "",
+		Path:     "/",
+		Domain:   cfg.Domain,
+		MaxAge:   -1,
+		HttpOnly: false,
+		Secure:   cfg.Secure,
+		SameSite: cfg.SameSite,
+	})
+}
+
+// GetWorkspaceSlugFromCookie reads the workspace slug from the request cookie
+func GetWorkspaceSlugFromCookie(r *http.Request) (string, error) {
+	cookie, err := r.Cookie(WorkspaceCookie)
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
+}
+
+// BuildWorkspaceCookieHeader builds a Set-Cookie header string for the workspace cookie
+func BuildWorkspaceCookieHeader(cfg CookieConfig, slug string) string {
+	secure := ""
+	if cfg.Secure {
+		secure = "; Secure"
+	}
+	return fmt.Sprintf("%s=%s; Path=/; Domain=%s; Max-Age=%d; SameSite=Lax%s",
+		WorkspaceCookie,
+		slug,
+		cfg.Domain,
+		30*24*3600,
+		secure,
+	)
+}
+
+// BuildClearWorkspaceCookieHeader builds a Set-Cookie header string to clear the workspace cookie
+func BuildClearWorkspaceCookieHeader(cfg CookieConfig) string {
+	secure := ""
+	if cfg.Secure {
+		secure = "; Secure"
+	}
+	return fmt.Sprintf("%s=; Path=/; Domain=%s; Max-Age=0; SameSite=Lax%s",
+		WorkspaceCookie,
+		cfg.Domain,
+		secure,
+	)
 }
 

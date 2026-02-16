@@ -140,13 +140,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkSession();
   }, [checkSession]);
 
-  const login = useCallback(async (email: string, password: string, loginChallenge?: string) => {
+  const login = useCallback(async (email: string, password: string, authRequestID?: string) => {
     setError(null);
     setIsLoading(true);
 
     try {
-      if (loginChallenge) {
-        // OAuth2 flow: Submit credentials to backend's /auth/login endpoint
+      if (authRequestID) {
+        // OIDC flow: Submit credentials to backend's /auth/login endpoint
         const response = await fetch(AUTH_LOGIN_URL, {
           method: 'POST',
           credentials: 'include',
@@ -155,10 +155,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             Accept: 'application/json',
           },
           body: JSON.stringify({
-            login_challenge: loginChallenge,
+            auth_request_id: authRequestID,
             email,
             password,
-            remember: false,
           }),
         });
 
@@ -173,7 +172,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         const data: LoginSubmitResponse = await response.json();
 
-        // Redirect to Hydra consent (which auto-approves and returns tokens)
+        // Redirect to OIDC callback (which completes the auth flow)
         window.location.href = data.redirect_to;
         return;
       }

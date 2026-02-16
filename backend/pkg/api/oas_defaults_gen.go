@@ -3,14 +3,6 @@
 package api
 
 // setDefaults set default value of fields.
-func (s *AuthLoginSubmitReq) setDefaults() {
-	{
-		val := bool(false)
-		s.Remember.SetTo(val)
-	}
-}
-
-// setDefaults set default value of fields.
 func (s *MapperConfig) setDefaults() {
 	{
 		val := string("1.0")

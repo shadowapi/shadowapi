@@ -12,6 +12,7 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/dbauth"
+	"github.com/shadowapi/shadowapi/backend/internal/authstate"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/db"
 	"github.com/shadowapi/shadowapi/backend/internal/email"
@@ -71,6 +72,7 @@ func LoadDefault(cmd *cobra.Command, modify func(cfg *config.Config)) {
 		do.Provide(injector, queue.Provide)
 		do.Provide(injector, jobstore.Provide)    // KV store for temporary job results
 		do.Provide(injector, workerstore.Provide) // KV store for worker state (read from grpc2nats)
+		do.Provide(injector, authstate.Provide)   // KV store for OAuth2 PKCE state
 		do.Provide(injector, auth.Provide)
 		do.Provide(injector, workspace.Provide) // Workspace middleware
 		do.Provide(injector, rbac.Provide)      // RBAC enforcer

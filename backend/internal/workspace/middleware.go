@@ -5,12 +5,13 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/samber/do/v2"
 
-	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
+	"github.com/shadowapi/shadowapi/backend/pkg/query"
 )
 
 // Context key for workspace data
@@ -21,40 +22,45 @@ const (
 	WorkspaceUUIDContextKey contextKey = "workspace_uuid"
 )
 
-// Middleware handles workspace context extraction from URL path
+// Middleware handles workspace context extraction from cookie or URL path
 type Middleware struct {
 	cfg *config.Config
 	log *slog.Logger
+	dbp *pgxpool.Pool
 }
 
 // Provide creates a new workspace middleware for the dependency injector
 func Provide(i do.Injector) (*Middleware, error) {
 	cfg := do.MustInvoke[*config.Config](i)
 	log := do.MustInvoke[*slog.Logger](i)
+	dbp := do.MustInvoke[*pgxpool.Pool](i)
 
 	return &Middleware{
 		cfg: cfg,
 		log: log,
+		dbp: dbp,
 	}, nil
 }
 
-// OgenMiddleware extracts workspace context from JWT claims first, falling back to URL path.
-// When workspace is present in JWT claims, that takes precedence over URL path.
+// OgenMiddleware extracts workspace context from cookie first, falling back to URL path.
 func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
 	ctx := req.Context
 
-	// First, check if workspace info is in JWT claims
-	if claims, ok := ctx.Value(auth.UserClaimsContextKey).(*oauth2.Claims); ok && claims != nil {
-		if claims.WorkspaceSlug != "" {
-			ctx = context.WithValue(ctx, WorkspaceSlugContextKey, claims.WorkspaceSlug)
-			ctx = context.WithValue(ctx, WorkspaceUUIDContextKey, claims.WorkspaceID)
+	// First, check if workspace slug is in the cookie
+	if slug, err := oauth2.GetWorkspaceSlugFromCookie(req.Raw); err == nil && slug != "" {
+		// Look up workspace UUID from DB
+		ws, err := query.New(m.dbp).GetWorkspaceBySlug(ctx, slug)
+		if err == nil {
+			ctx = context.WithValue(ctx, WorkspaceSlugContextKey, slug)
+			ctx = context.WithValue(ctx, WorkspaceUUIDContextKey, ws.UUID.String())
 			req.SetContext(ctx)
-			m.log.Debug("workspace context set from JWT claims",
-				"slug", claims.WorkspaceSlug,
-				"uuid", claims.WorkspaceID,
+			m.log.Debug("workspace context set from cookie",
+				"slug", slug,
+				"uuid", ws.UUID.String(),
 			)
 			return next(req)
 		}
+		m.log.Debug("workspace cookie slug not found in DB", "slug", slug, "error", err)
 	}
 
 	// Fall back to extracting workspace slug from URL path like /api/v1/w/{slug}/...
@@ -89,7 +95,7 @@ func GetWorkspaceSlug(ctx context.Context) string {
 	return ""
 }
 
-// GetWorkspaceUUID retrieves the workspace UUID from context (only available when set from JWT claims)
+// GetWorkspaceUUID retrieves the workspace UUID from context
 func GetWorkspaceUUID(ctx context.Context) string {
 	if uuid, ok := ctx.Value(WorkspaceUUIDContextKey).(string); ok {
 		return uuid

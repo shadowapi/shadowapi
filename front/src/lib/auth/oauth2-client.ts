@@ -26,7 +26,8 @@ export interface OAuth2LogoutResponse {
 }
 
 export interface WorkspaceSwitchResponse {
-  authorization_url: string;
+  workspace_uuid: string;
+  workspace_slug: string;
 }
 
 export class OAuth2Error extends Error {
@@ -183,9 +184,8 @@ export function clearCallbackParams(): void {
 
 /**
  * Switch to a different workspace.
- * This initiates a new OAuth2 flow with workspace info that will be embedded in the new JWT.
- * The user will be redirected through Hydra, which will auto-skip login (user has session),
- * and then back to the workspace dashboard with new tokens.
+ * Sets a workspace cookie on the server and returns the workspace info.
+ * No redirect needed — the cookie is set via Set-Cookie header.
  */
 export async function switchWorkspace(
   workspaceSlug: string
@@ -212,15 +212,4 @@ export async function switchWorkspace(
   }
 
   return response.json();
-}
-
-/**
- * Switch to a workspace and redirect to complete the OAuth2 flow.
- * This is the main entry point for workspace switching from the UI.
- */
-export async function switchWorkspaceAndRedirect(
-  workspaceSlug: string
-): Promise<void> {
-  const result = await switchWorkspace(workspaceSlug);
-  window.location.href = result.authorization_url;
 }

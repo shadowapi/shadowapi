@@ -17,6 +17,7 @@ import (
 
 	"github.com/shadowapi/shadowapi/backend/internal/auth"
 	"github.com/shadowapi/shadowapi/backend/internal/auth/oauth2"
+	"github.com/shadowapi/shadowapi/backend/internal/authstate"
 	"github.com/shadowapi/shadowapi/backend/internal/config"
 	"github.com/shadowapi/shadowapi/backend/internal/email"
 	"github.com/shadowapi/shadowapi/backend/internal/jobstore"
@@ -214,45 +215,52 @@ func Provide(i do.Injector) (*Handler, error) {
 		usageLimits:    do.MustInvoke[*usagelimits.Manager](i),
 	}
 
-	// Initialize OAuth2 service if configured
-	if cfg.OAuth2.SPAClientID != "" {
-		jwksURL := cfg.OAuth2.HydraPublicURL + "/.well-known/jwks.json"
+	// Initialize OIDC/OAuth2 service if configured
+	if cfg.OIDC.SPAClientID != "" && cfg.OIDC.IssuerURL != "" {
+		jwksURL := cfg.OIDC.IssuerURL + "/keys"
+		if cfg.OIDC.JWKSURL != "" {
+			jwksURL = cfg.OIDC.JWKSURL
+		}
 		jwksCache := oauth2.NewJWKSCache(
 			jwksURL,
-			time.Duration(cfg.OAuth2.JWKSCacheDuration)*time.Second,
+			time.Duration(cfg.OIDC.JWKSCacheDuration)*time.Second,
 			log,
 		)
 
 		jwtValidator := oauth2.NewJWTValidator(
 			jwksCache,
-			cfg.OAuth2.HydraPublicURL, // Issuer matches Hydra's self.issuer URL
+			cfg.OIDC.IssuerURL,
 			log,
 		)
 
-		hydraClient := oauth2.NewHydraClient(
-			cfg.OAuth2.HydraPublicURL,
-			cfg.OAuth2.HydraAdminURL,
+		oidcClient := oauth2.NewOIDCClient(
+			cfg.OIDC.IssuerURL,
+			cfg.OIDC.SPAClientID,
+			cfg.OIDC.CallbackSecret,
 			log,
 		)
 
 		cookieConfig := oauth2.CookieConfig{
-			Domain:   cfg.OAuth2.CookieDomain,
-			Secure:   cfg.OAuth2.CookieSecure,
+			Domain:   cfg.OIDC.CookieDomain,
+			Secure:   cfg.OIDC.CookieSecure,
 			SameSite: http.SameSiteLaxMode,
 		}
 
+		authStateStore := do.MustInvoke[*authstate.Store](i)
+
 		h.oauth2Svc = NewOAuth2Service(
-			hydraClient,
+			oidcClient,
 			jwtValidator,
 			cookieConfig,
-			cfg.OAuth2.SPAClientID,
-			cfg.CSRBaseURL, // Login page is on app subdomain
+			cfg.OIDC.SPAClientID,
+			cfg.CSRBaseURL,
 			cfg.APIBaseURL,
+			authStateStore,
 		)
 
-		log.Info("OAuth2 service initialized",
-			"client_id", cfg.OAuth2.SPAClientID,
-			"hydra_url", cfg.OAuth2.HydraPublicURL,
+		log.Info("OIDC service initialized",
+			"client_id", cfg.OIDC.SPAClientID,
+			"issuer_url", cfg.OIDC.IssuerURL,
 		)
 	}
 

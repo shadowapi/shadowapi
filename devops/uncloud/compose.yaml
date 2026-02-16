@@ -4,10 +4,6 @@
 # Deploy with: uncloud deploy -f compose.yaml
 # External dependencies: PostgreSQL (managed), NATS (external)
 
-configs:
-  hydra_config:
-    file: ./hydra.yaml
-
 services:
   # SSR Server handles all frontend routes (both SSR and CSR)
   # SSR pages get server-rendered for SEO, CSR pages hydrate on client
@@ -18,7 +14,7 @@ services:
       dockerfile: devops/docker/ssr/prod.Dockerfile
       args:
         - VITE_API_BASE_URL=https://api.meshpump.com/api/v1
-        - VITE_OIDC_URL=https://oidc.meshpump.com
+        - VITE_OIDC_URL=https://meshpump.oidc.oxoauth.com
         - VITE_ROOT_URL=https://meshpump.com
         - VITE_APP_URL=https://meshpump.com
     x-ports:
@@ -33,9 +29,6 @@ services:
       dockerfile: devops/docker/backend/prod.Dockerfile
     x-ports:
       - api.meshpump.com:8080/https
-    depends_on:
-      mp-hydra:
-        condition: service_healthy
     environment:
       - BE_HOST=0.0.0.0
       - BE_PORT=8080
@@ -46,14 +39,14 @@ services:
       # External NATS
       - BE_QUEUE_URL=${BE_QUEUE_URL}
       - BE_QUEUE_PREFIX=${BE_QUEUE_PREFIX:-shadowapi}
-      # Hydra OAuth2 configuration
-      - BE_HYDRA_PUBLIC_URL=https://oidc.meshpump.com
-      - BE_HYDRA_ADMIN_URL=http://mp-hydra.internal:4445
-      - BE_OAUTH2_SPA_CLIENT_ID=${BE_OAUTH2_SPA_CLIENT_ID}
+      # OIDC configuration (oxoauth.com)
+      - BE_OIDC_ISSUER=https://meshpump.oidc.oxoauth.com
+      - BE_OIDC_CALLBACK_SECRET=${BE_OIDC_CALLBACK_SECRET}
+      - BE_OIDC_CLIENT_ID=${BE_OIDC_CLIENT_ID}
       - BE_JWKS_CACHE_DURATION=${BE_JWKS_CACHE_DURATION:-300}
-      # OAuth2 cookie configuration (leading dot for cross-subdomain)
-      - BE_OAUTH2_COOKIE_DOMAIN=.meshpump.com
-      - BE_OAUTH2_COOKIE_SECURE=true
+      # Cookie configuration (leading dot for cross-subdomain)
+      - BE_OIDC_COOKIE_DOMAIN=.meshpump.com
+      - BE_OIDC_COOKIE_SECURE=true
       # Initial admin user
       - BE_INIT_ADMIN_EMAIL=${BE_INIT_ADMIN_EMAIL}
       - BE_INIT_ADMIN_PASSWORD=${BE_INIT_ADMIN_PASSWORD}
@@ -76,33 +69,6 @@ services:
       retries: 5
       start_period: 10s
     restart: always
-
-  # Hydra OAuth2/OIDC Server
-  # Note: Migrations run inline at startup via entrypoint script
-  mp-hydra:
-    image: oryd/hydra:v2.2.0
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        hydra migrate sql -e --yes && hydra serve all --config /hydra.yaml
-    x-ports:
-      - oidc.meshpump.com:4444/https
-    environment:
-      - DSN=${HYDRA_DSN}
-      - SECRETS_SYSTEM=${HYDRA_SECRETS_SYSTEM}
-      - LOG_LEVEL=${HYDRA_LOG_LEVEL:-info}
-      - OIDC_PAIRWISE_SALT=${OIDC_PAIRWISE_SALT}
-    configs:
-      - source: hydra_config
-        target: /hydra.yaml
-        mode: 0644
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4445/health/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
 
   # gRPC to NATS bridge for distributed workers
   mp-grpc2nats:

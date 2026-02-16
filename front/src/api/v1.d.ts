@@ -903,28 +903,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Handle Hydra login redirect. Redirects to frontend login page or back to Hydra if session exists. */
+        /** @description Handle OIDC login redirect. Redirects to frontend login page with auth_request_id. */
         get: operations["auth-login"];
         put?: never;
-        /** @description Submit login credentials for Hydra authentication flow */
+        /** @description Submit login credentials for OIDC authentication flow */
         post: operations["auth-login-submit"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/consent": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Handle Hydra consent redirect. Auto-approves consent and redirects back to Hydra. */
-        get: operations["auth-consent"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -940,7 +923,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes the workspace in the new JWT. */
+        /** @description Switch to a different workspace. Sets a workspace cookie and returns workspace info. */
         post: operations["auth-workspace-switch"];
         delete?: never;
         options?: never;
@@ -5360,7 +5343,7 @@ export interface operations {
     "auth-oauth2-callback": {
         parameters: {
             query: {
-                /** @description The authorization code from Hydra */
+                /** @description The authorization code from the OIDC server */
                 code: string;
                 /** @description The state parameter for CSRF validation */
                 state: string;
@@ -5498,8 +5481,8 @@ export interface operations {
     "auth-login": {
         parameters: {
             query: {
-                /** @description The login challenge from Hydra */
-                login_challenge: string;
+                /** @description The auth request ID from the OIDC provider */
+                auth_request_id: string;
             };
             header?: never;
             path?: never;
@@ -5507,7 +5490,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Redirect to login page or Hydra */
+            /** @description Redirect to login page */
             302: {
                 headers: {
                     /** @description Redirect URL */
@@ -5537,17 +5520,12 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The login challenge from Hydra */
-                    login_challenge: string;
+                    /** @description The auth request ID from the OIDC provider */
+                    auth_request_id: string;
                     /** @description User email address */
                     email: string;
                     /** @description User password */
                     password: string;
-                    /**
-                     * @description Whether to remember the login session
-                     * @default false
-                     */
-                    remember?: boolean;
                 };
             };
         };
@@ -5563,38 +5541,6 @@ export interface operations {
                         redirect_to: string;
                     };
                 };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["error"];
-                };
-            };
-        };
-    };
-    "auth-consent": {
-        parameters: {
-            query: {
-                /** @description The consent challenge from Hydra */
-                consent_challenge: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Redirect to Hydra after auto-approving consent */
-            302: {
-                headers: {
-                    /** @description Redirect URL */
-                    Location?: string;
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Error */
             default: {
@@ -5623,15 +5569,19 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Workspace switch initiated successfully */
+            /** @description Workspace switched successfully */
             200: {
                 headers: {
+                    /** @description Workspace cookie */
+                    "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description The URL to redirect to for completing the workspace switch */
-                        authorization_url: string;
+                        /** @description The UUID of the workspace */
+                        workspace_uuid: string;
+                        /** @description The slug of the workspace */
+                        workspace_slug: string;
                     };
                 };
             };

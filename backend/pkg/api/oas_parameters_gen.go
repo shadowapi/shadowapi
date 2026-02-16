@@ -148,87 +148,29 @@ func decodeAssignPolicySetToUserParams(args [1]string, argsEscaped bool, r *http
 	return params, nil
 }
 
-// AuthConsentParams is parameters of auth-consent operation.
-type AuthConsentParams struct {
-	// The consent challenge from Hydra.
-	ConsentChallenge string
-}
-
-func unpackAuthConsentParams(packed middleware.Parameters) (params AuthConsentParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "consent_challenge",
-			In:   "query",
-		}
-		params.ConsentChallenge = packed[key].(string)
-	}
-	return params
-}
-
-func decodeAuthConsentParams(args [0]string, argsEscaped bool, r *http.Request) (params AuthConsentParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: consent_challenge.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "consent_challenge",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.ConsentChallenge = c
-				return nil
-			}); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "consent_challenge",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // AuthLoginParams is parameters of auth-login operation.
 type AuthLoginParams struct {
-	// The login challenge from Hydra.
-	LoginChallenge string
+	// The auth request ID from the OIDC provider.
+	AuthRequestID string
 }
 
 func unpackAuthLoginParams(packed middleware.Parameters) (params AuthLoginParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "login_challenge",
+			Name: "auth_request_id",
 			In:   "query",
 		}
-		params.LoginChallenge = packed[key].(string)
+		params.AuthRequestID = packed[key].(string)
 	}
 	return params
 }
 
 func decodeAuthLoginParams(args [0]string, argsEscaped bool, r *http.Request) (params AuthLoginParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode query: login_challenge.
+	// Decode query: auth_request_id.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "login_challenge",
+			Name:    "auth_request_id",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
@@ -245,7 +187,7 @@ func decodeAuthLoginParams(args [0]string, argsEscaped bool, r *http.Request) (p
 					return err
 				}
 
-				params.LoginChallenge = c
+				params.AuthRequestID = c
 				return nil
 			}); err != nil {
 				return err
@@ -256,7 +198,7 @@ func decodeAuthLoginParams(args [0]string, argsEscaped bool, r *http.Request) (p
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "login_challenge",
+			Name: "auth_request_id",
 			In:   "query",
 			Err:  err,
 		}
@@ -266,7 +208,7 @@ func decodeAuthLoginParams(args [0]string, argsEscaped bool, r *http.Request) (p
 
 // AuthOAuth2CallbackParams is parameters of auth-oauth2-callback operation.
 type AuthOAuth2CallbackParams struct {
-	// The authorization code from Hydra.
+	// The authorization code from the OIDC server.
 	Code string
 	// The state parameter for CSRF validation.
 	State string

@@ -1,5 +1,5 @@
 post:
-  description: Switch to a different workspace. Initiates a silent OAuth2 re-authentication flow that includes the workspace in the new JWT.
+  description: Switch to a different workspace. Sets a workspace cookie and returns workspace info.
   operationId: auth-workspace-switch
   requestBody:
     content:
@@ -22,12 +22,21 @@ post:
             type: object
             additionalProperties: false
             properties:
-              authorization_url:
+              workspace_uuid:
                 type: string
-                description: The URL to redirect to for completing the workspace switch
+                description: The UUID of the workspace
+              workspace_slug:
+                type: string
+                description: The slug of the workspace
             required:
-              - authorization_url
-      description: Workspace switch initiated successfully
+              - workspace_uuid
+              - workspace_slug
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+          description: Workspace cookie
+      description: Workspace switched successfully
     "403":
       content:
         application/json:

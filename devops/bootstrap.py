@@ -4,13 +4,10 @@ MeshPump Bootstrap Script
 
 Initializes the development environment by:
 1. Generating secrets and creating .env from template
-2. Generating hydra.yaml from template
-3. Starting and initializing the database
-4. Configuring OAuth2 client in Hydra
-5. Enrolling the distributed worker
+2. Starting and initializing the database
+3. Enrolling the distributed worker
 """
 
-import json
 import logging
 import os
 import re
@@ -35,8 +32,7 @@ logger = logging.getLogger(__name__)
 class EnvSecrets:
     """Secrets that are preserved across bootstrap runs."""
 
-    hydra_secrets_system: str
-    oidc_pairwise_salt: str
+    oidc_callback_secret: str
     worker_id: str
     worker_secret: str
 
@@ -49,8 +45,6 @@ class Config:
     be_domain: str = "localtest.me"
     be_api_subdomain: str = "api"
     be_app_subdomain: str = "app"
-    be_oidc_subdomain: str = "oidc"
-    be_ssr_subdomain: str = "www"
     be_rpc_subdomain: str = "rpc"
     be_init_admin_email: str = ""
     be_init_admin_password: str = ""
@@ -114,8 +108,7 @@ def extract_preserved_secrets(env_path: Path) -> EnvSecrets:
     """Extract secrets from existing .env file for preservation."""
     env_vars = parse_env_file(env_path)
     return EnvSecrets(
-        hydra_secrets_system=env_vars.get("HYDRA_SECRETS_SYSTEM", ""),
-        oidc_pairwise_salt=env_vars.get("OIDC_PAIRWISE_SALT", ""),
+        oidc_callback_secret=env_vars.get("BE_OIDC_CALLBACK_SECRET", ""),
         worker_id=env_vars.get("WORKER_ID", ""),
         worker_secret=env_vars.get("WORKER_SECRET", ""),
     )
@@ -129,8 +122,6 @@ def load_config(env_path: Path) -> Config:
         be_domain=env_vars.get("BE_DOMAIN", "localtest.me"),
         be_api_subdomain=env_vars.get("BE_API_SUBDOMAIN", "api"),
         be_app_subdomain=env_vars.get("BE_APP_SUBDOMAIN", "app"),
-        be_oidc_subdomain=env_vars.get("BE_OIDC_SUBDOMAIN", "oidc"),
-        be_ssr_subdomain=env_vars.get("BE_SSR_SUBDOMAIN", "www"),
         be_rpc_subdomain=env_vars.get("BE_RPC_SUBDOMAIN", "rpc"),
         be_init_admin_email=env_vars.get("BE_INIT_ADMIN_EMAIL", ""),
         be_init_admin_password=env_vars.get("BE_INIT_ADMIN_PASSWORD", ""),
@@ -149,34 +140,29 @@ def update_env_value(env_path: Path, key: str, value: str) -> None:
 def create_env_file(
     project_root: Path,
     preserved: EnvSecrets,
-) -> tuple[str, str]:
+) -> None:
     """Create .env file from template with generated/preserved secrets."""
     template_path = project_root / ".env.template"
     env_path = project_root / ".env"
 
     logger.info("Generating secrets...")
 
-    # Use preserved secrets if available, otherwise generate new ones
-    if preserved.hydra_secrets_system:
-        hydra_secret = preserved.hydra_secrets_system
-        logger.info("  - Preserving existing HYDRA_SECRETS_SYSTEM")
+    # Use preserved OIDC callback secret if available, otherwise generate new one
+    if preserved.oidc_callback_secret:
+        oidc_callback_secret = preserved.oidc_callback_secret
+        logger.info("  - Preserving existing BE_OIDC_CALLBACK_SECRET")
     else:
-        hydra_secret = generate_secret(32)
-        logger.info("  - Generated new HYDRA_SECRETS_SYSTEM")
+        oidc_callback_secret = generate_secret(32)
+        logger.info("  - Generated new BE_OIDC_CALLBACK_SECRET")
 
-    if preserved.oidc_pairwise_salt:
-        oidc_salt = preserved.oidc_pairwise_salt
-        logger.info("  - Preserving existing OIDC_PAIRWISE_SALT")
-    else:
-        oidc_salt = generate_secret(16)
-        logger.info("  - Generated new OIDC_PAIRWISE_SALT")
+    # Generate a client ID placeholder
+    oidc_client_id = "meshpump-spa"
 
     # Read template and substitute placeholders
     logger.info("Creating .env from template...")
     template_content = template_path.read_text()
-    env_content = template_content.replace("__HYDRA_SECRETS_SYSTEM__", hydra_secret)
-    env_content = env_content.replace("__OIDC_PAIRWISE_SALT__", oidc_salt)
-    env_content = env_content.replace("__OAUTH2_CLIENT_ID__", "pending-creation")
+    env_content = template_content.replace("__OIDC_CALLBACK_SECRET__", oidc_callback_secret)
+    env_content = env_content.replace("__OIDC_CLIENT_ID__", oidc_client_id)
 
     # Remove existing .env if present
     if env_path.exists():
@@ -193,32 +179,6 @@ def create_env_file(
         logger.info("Worker credentials preserved from previous .env")
 
     logger.info(".env created successfully")
-    return hydra_secret, oidc_salt
-
-
-def generate_hydra_config(project_root: Path) -> None:
-    """Generate hydra.yaml from template using environment variables."""
-    logger.info("Generating hydra.yaml from template...")
-
-    template_path = project_root / "devops" / "ory" / "hydra" / "hydra.template.yaml"
-    output_path = project_root / "devops" / "ory" / "hydra" / "hydra.yaml"
-    env_path = project_root / ".env"
-
-    # Load environment variables from .env
-    env_vars = parse_env_file(env_path)
-
-    # Read template
-    template_content = template_path.read_text()
-
-    # Substitute ${VAR} placeholders
-    def replace_var(match: re.Match) -> str:
-        var_name = match.group(1)
-        return env_vars.get(var_name, "")
-
-    output_content = re.sub(r"\$\{(\w+)\}", replace_var, template_content)
-    output_path.write_text(output_content)
-
-    logger.info("hydra.yaml created successfully")
 
 
 def wait_for_database(max_attempts: int = 30, interval: float = 2.0) -> bool:
@@ -235,25 +195,6 @@ def wait_for_database(max_attempts: int = 30, interval: float = 2.0) -> bool:
         if result.returncode == 0:
             return True
         logger.info(f"Waiting for database... ({attempt}/{max_attempts})")
-        time.sleep(interval)
-
-    return False
-
-
-def wait_for_hydra(max_attempts: int = 30, interval: float = 2.0) -> bool:
-    """Wait for Hydra to be ready."""
-    logger.info("Waiting for Hydra...")
-
-    for attempt in range(1, max_attempts + 1):
-        result = docker_compose(
-            "exec", "-T", "hydra",
-            "hydra", "version",
-            capture_output=True,
-            check=False,
-        )
-        if result.returncode == 0:
-            return True
-        logger.info(f"Waiting for Hydra... ({attempt}/{max_attempts})")
         time.sleep(interval)
 
     return False
@@ -276,92 +217,6 @@ def wait_for_backend(max_attempts: int = 30, interval: float = 2.0) -> bool:
         time.sleep(interval)
 
     return False
-
-
-def get_existing_oauth2_client(client_name: str) -> Optional[str]:
-    """Check if an OAuth2 client with the given name already exists."""
-    result = docker_compose(
-        "exec", "-T", "hydra",
-        "hydra", "list", "oauth2-clients",
-        "--endpoint", "http://localhost:4445",
-        "--format", "json",
-        capture_output=True,
-        check=False,
-    )
-
-    if result.returncode != 0:
-        return None
-
-    try:
-        data = json.loads(result.stdout)
-        items = data.get("items", [])
-        for item in items:
-            if item.get("client_name") == client_name:
-                return item.get("client_id")
-    except (json.JSONDecodeError, KeyError):
-        pass
-
-    return None
-
-
-def create_oauth2_client(redirect_uri: str, client_name: str) -> Optional[str]:
-    """Create a new OAuth2 client in Hydra."""
-    result = docker_compose(
-        "exec", "-T", "hydra",
-        "hydra", "create", "oauth2-client",
-        "--endpoint", "http://localhost:4445",
-        "--name", client_name,
-        "--grant-type", "authorization_code,refresh_token",
-        "--response-type", "code",
-        "--scope", "openid,offline_access,profile,email",
-        "--redirect-uri", redirect_uri,
-        "--token-endpoint-auth-method", "none",
-        "--format", "json",
-        capture_output=True,
-        check=False,
-    )
-
-    if result.returncode != 0:
-        logger.error(f"Failed to create OAuth2 client: {result.stderr}")
-        return None
-
-    try:
-        data = json.loads(result.stdout)
-        return data.get("client_id")
-    except json.JSONDecodeError:
-        logger.error(f"Failed to parse OAuth2 client response: {result.stdout}")
-        return None
-
-
-def setup_oauth2_client(project_root: Path, config: Config) -> Optional[str]:
-    """Create or retrieve existing OAuth2 client."""
-    logger.info("Creating OAuth2 client...")
-
-    redirect_uri = (
-        f"{config.be_protocol}://{config.be_api_subdomain}.{config.be_domain}"
-        f"/api/v1/auth/oauth2/callback"
-    )
-    client_name = "ShadowAPI SPA"
-
-    # Check if client already exists
-    existing_client_id = get_existing_oauth2_client(client_name)
-    if existing_client_id:
-        logger.info(f"OAuth2 client already exists: {existing_client_id}")
-        client_id = existing_client_id
-    else:
-        client_id = create_oauth2_client(redirect_uri, client_name)
-        if client_id:
-            logger.info(f"OAuth2 client created: {client_id}")
-        else:
-            logger.error("Failed to create OAuth2 client")
-            return None
-
-    # Update .env with client ID
-    env_path = project_root / ".env"
-    update_env_value(env_path, "BE_OAUTH2_SPA_CLIENT_ID", client_id)
-    logger.info(f"Updated .env with client ID: {client_id}")
-
-    return client_id
 
 
 def check_worker_exists(worker_id: str) -> bool:
@@ -484,13 +339,11 @@ def setup_distributed_worker(project_root: Path) -> Optional[str]:
     return worker_id
 
 
-def print_completion_message(config: Config, client_id: str, worker_id: Optional[str]) -> None:
+def print_completion_message(config: Config, worker_id: Optional[str]) -> None:
     """Print the bootstrap completion message."""
     proto = config.be_protocol
     domain = config.be_domain
     api_sub = config.be_api_subdomain
-    oidc_sub = config.be_oidc_subdomain
-    ssr_sub = config.be_ssr_subdomain
     rpc_sub = config.be_rpc_subdomain
 
     logger.info("")
@@ -500,15 +353,12 @@ def print_completion_message(config: Config, client_id: str, worker_id: Optional
     logger.info(f"  - Frontend (SPA):  {proto}://{domain}")
     logger.info(f"  - API:             {proto}://{api_sub}.{domain}")
     logger.info(f"  - gRPC (workers):  {proto}://{rpc_sub}.{domain}:9090")
-    logger.info(f"  - OIDC:            {proto}://{oidc_sub}.{domain}")
-    logger.info(f"  - SSR (www):       {proto}://{ssr_sub}.{domain}")
     logger.info("")
     logger.info("Workspaces:")
     logger.info(f"  - Internal: {proto}://{domain}/w/internal")
     logger.info(f"  - Demo:     {proto}://{domain}/w/demo")
     logger.info("")
     logger.info(f"Test login:       {config.be_init_admin_email} / {config.be_init_admin_password}")
-    logger.info(f"OAuth2 Client ID: {client_id}")
     if worker_id:
         logger.info(f"Worker ID:        {worker_id}")
     logger.info("")
@@ -529,9 +379,6 @@ def main() -> int:
     preserved = extract_preserved_secrets(env_path)
     create_env_file(project_root, preserved)
 
-    # Step 1.5: Generate hydra.yaml
-    generate_hydra_config(project_root)
-
     # Step 2: Start database
     logger.info("Starting database...")
     docker_compose("up", "-d", "db")
@@ -545,38 +392,24 @@ def main() -> int:
     logger.info("Running database migrations...")
     run_command(["make", "sync-db"])
 
-    # Step 4: Start Hydra
-    logger.info("Starting Hydra...")
-    docker_compose("up", "-d", "hydra")
-
-    if not wait_for_hydra():
-        logger.error("Hydra did not become ready in time")
-        return 1
-
-    # Step 5: Create OAuth2 client
-    config = load_config(env_path)
-    client_id = setup_oauth2_client(project_root, config)
-    if not client_id:
-        return 1
-
-    # Step 6: Start all services
+    # Step 4: Start all services
     logger.info("Starting all services...")
     docker_compose("up", "-d")
 
-    # Step 7: Enroll distributed worker
+    # Step 5: Enroll distributed worker
     worker_id = setup_distributed_worker(project_root)
 
     # Reload config to get test credentials
     config = load_config(env_path)
 
-    # Step 8: Recreate services to pick up latest .env
+    # Step 6: Recreate services to pick up latest .env
     logger.info("")
     logger.info("Recreating services with updated configuration...")
     docker_compose("up", "-d", "--force-recreate")
     logger.info("All services recreated.")
 
     # Print completion message
-    print_completion_message(config, client_id, worker_id)
+    print_completion_message(config, worker_id)
 
     return 0
 
