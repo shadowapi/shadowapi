@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "meshpump.fullname" . }}-worker
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  serviceName: {{ include "meshpump.fullname" . }}-worker
+  selector:
+    matchLabels:
+      {{- include "meshpump.workerSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshpump.workerSelectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "meshpump.serviceAccountName" . }}
+      containers:
+        - name: worker
+          image: "{{ .Values.images.registry }}/shadowapi-worker:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "meshpump.fullname" . }}-config
+          env:
+            - name: WORKER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: WORKER_SERVER
+              value: {{ .Values.worker.server | quote }}
+            - name: ENROLLMENT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.existingSecret }}
+                  key: ENROLLMENT_TOKEN
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            {{- toYaml .Values.resources.worker | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.worker.storage.storageClassName }}
+        storageClassName: {{ .Values.worker.storage.storageClassName | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.worker.storage.size }}

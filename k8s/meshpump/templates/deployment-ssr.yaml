@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meshpump.fullname" . }}-ssr
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.ssr.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "meshpump.ssrSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshpump.ssrSelectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "meshpump.serviceAccountName" . }}
+      containers:
+        - name: ssr
+          image: "{{ .Values.images.registry }}/shadowapi-ssr:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources.ssr | nindent 12 }}

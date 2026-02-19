@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meshpump.fullname" . }}-backend
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "meshpump.backendSelectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meshpump.fullname" . }}-ssr
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "meshpump.ssrSelectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meshpump.fullname" . }}-grpc2nats
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+  selector:
+    {{- include "meshpump.grpc2natsSelectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meshpump.fullname" . }}-worker
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: grpc
+  selector:
+    {{- include "meshpump.workerSelectorLabels" . | nindent 4 }}

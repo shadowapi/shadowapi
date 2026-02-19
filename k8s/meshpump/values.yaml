@@ -1,0 +1,116 @@
+replicaCount: 1
+
+images:
+  registry: git.devinlab.com/shadowapi
+  tag: main
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Existing Kubernetes secrets containing sensitive credentials
+database:
+  existingSecret: meshpump-db-credentials  # key: DATABASE_URL
+
+nats:
+  existingSecret: meshpump-nats-credentials  # key: NATS_URL
+
+migrate:
+  existingSecret: meshpump-migrate-credentials  # key: DEV_DATABASE_URL (Atlas scratch DB)
+
+app:
+  existingSecret: meshpump-app-secrets
+  # keys: BE_OIDC_CALLBACK_SECRET, BE_OIDC_CLIENT_ID, BE_INIT_ADMIN_PASSWORD,
+  #        BE_SMTP_HOST, BE_SMTP_PORT, BE_SMTP_USERNAME, BE_SMTP_PASSWORD, ENROLLMENT_TOKEN
+
+# Non-sensitive configuration loaded into a ConfigMap (envFrom for all components)
+config:
+  BE_HOST: "0.0.0.0"
+  BE_PORT: "8080"
+  BE_LOG_LEVEL: "INFO"
+  BE_LOG_FORMAT: "json"
+  BE_QUEUE_PREFIX: "shadowapi"
+  BE_OIDC_ISSUER: "https://meshpump.oidc.oxoauth.com"
+  BE_JWKS_CACHE_DURATION: "300"
+  BE_OIDC_COOKIE_DOMAIN: ".meshpump.com"
+  BE_OIDC_COOKIE_SECURE: "true"
+  BE_INIT_ADMIN_EMAIL: "admin@meshpump.com"
+  BE_BASE_URL: "https://meshpump.com"
+  BE_CSR_BASE_URL: "https://meshpump.com"
+  BE_API_BASE_URL: "https://api.meshpump.com"
+  BE_CORS_ALLOWED_ORIGINS: "https://meshpump.com"
+  BE_SMTP_FROM: "noreply@meshpump.com"
+  BE_SMTP_FROM_NAME: "MeshPump"
+  G2N_NATS_PREFIX: "shadowapi"
+  G2N_GRPC_HOST: "0.0.0.0"
+  G2N_GRPC_PORT: "9090"
+  G2N_LOG_LEVEL: "info"
+  G2N_LOG_FORMAT: "json"
+  WORKER_TLS: "false"
+  WORKER_LOG_LEVEL: "info"
+  WORKER_LOG_FORMAT: "json"
+
+worker:
+  server: "meshpump-grpc2nats:9090"
+  replicaCount: 1
+  storage:
+    size: 1Gi
+    storageClassName: ""
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    ssr: meshpump.com
+    api: api.meshpump.com
+    grpc: rpc.meshpump.com
+  tls:
+    enabled: true
+    clusterIssuer: letsencrypt-prod
+
+autoscaling:
+  backend:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+  ssr:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+resources:
+  backend:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ssr:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  grpc2nats:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  worker:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

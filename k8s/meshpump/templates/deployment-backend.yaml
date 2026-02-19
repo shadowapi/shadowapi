@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meshpump.fullname" . }}-backend
+  labels:
+    {{- include "meshpump.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.backend.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "meshpump.backendSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshpump.backendSelectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "meshpump.serviceAccountName" . }}
+      containers:
+        - name: backend
+          image: "{{ .Values.images.registry }}/shadowapi-backend:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "meshpump.fullname" . }}-config
+            - secretRef:
+                name: {{ .Values.app.existingSecret }}
+          env:
+            - name: BE_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: DATABASE_URL
+            - name: BE_QUEUE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.nats.existingSecret }}
+                  key: NATS_URL
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources.backend | nindent 12 }}

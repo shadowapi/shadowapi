@@ -1,0 +1,40 @@
+ShadowAPI (MeshPump) has been deployed!
+
+Access your application:
+  Frontend: https://{{ .Values.ingress.hosts.ssr }}
+  API:      https://{{ .Values.ingress.hosts.api }}/api/v1
+  gRPC:     https://{{ .Values.ingress.hosts.grpc }}
+
+Before first deploy, create the required secrets in the shadowapi namespace:
+
+  kubectl create namespace shadowapi
+
+  kubectl create secret generic shadowapi-db-credentials \
+    --from-literal=DATABASE_URL='postgres://user:pass@host:5432/shadowapi?sslmode=require' \
+    -n shadowapi
+
+  kubectl create secret generic shadowapi-migrate-credentials \
+    --from-literal=DEV_DATABASE_URL='postgres://user:pass@host:5432/shadowapi_schema?sslmode=require' \
+    -n shadowapi
+
+  kubectl create secret generic shadowapi-nats-credentials \
+    --from-literal=NATS_URL='nats://user:pass@host:4222' \
+    -n shadowapi
+
+  kubectl create secret generic shadowapi-app-secrets \
+    --from-literal=BE_OIDC_CALLBACK_SECRET='<secret>' \
+    --from-literal=BE_OIDC_CLIENT_ID='<client-id>' \
+    --from-literal=BE_INIT_ADMIN_PASSWORD='<password>' \
+    --from-literal=BE_SMTP_HOST='<smtp-host>' \
+    --from-literal=BE_SMTP_PORT='587' \
+    --from-literal=BE_SMTP_USERNAME='<username>' \
+    --from-literal=BE_SMTP_PASSWORD='<password>' \
+    --from-literal=ENROLLMENT_TOKEN='<token>' \
+    -n shadowapi
+
+Note: In production, secrets are managed via FluxCD + SOPS encryption.
+      See flux-config/apps/shadowapi/ for encrypted secret manifests.
+
+Atlas migration note: DEV_DATABASE_URL should point to a separate scratch
+database (e.g. shadowapi_schema) on the same Postgres server, used by Atlas
+for schema diffing. This database will be created/reset by Atlas automatically.
