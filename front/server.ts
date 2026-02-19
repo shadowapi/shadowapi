@@ -8,7 +8,7 @@ import { fetchDataForRoute } from './src/lib/data-fetching.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Routes that should be purely client-side rendered (no SSR)
-const csrOnlyPaths = ['/login', '/invite', '/forgot-password', '/reset-password', '/workspaces', '/w/'];
+const csrOnlyPaths = ['/', '/login', '/invite', '/forgot-password', '/reset-password', '/workspaces', '/w/'];
 
 async function createServer() {
   const app = express();
@@ -21,6 +21,11 @@ async function createServer() {
 
   // Use Vite's connect instance as middleware
   app.use(vite.middlewares);
+
+  // Health check endpoint (must be before the catch-all)
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', mode: 'ssr' });
+  });
 
   // Handle all routes with SSR
   // SSR pages (e.g., /start, /documentation) get server-rendered for SEO
@@ -84,11 +89,6 @@ async function createServer() {
       console.error(e);
       res.status(500).end((e as Error).message);
     }
-  });
-
-  // Health check endpoint
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', mode: 'ssr' });
   });
 
   const port = process.env.PORT || 3000;
