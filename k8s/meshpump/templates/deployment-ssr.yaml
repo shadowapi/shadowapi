@@ -17,6 +17,10 @@ spec:
         {{- include "meshpump.ssrSelectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "meshpump.serviceAccountName" . }}
+      {{- with .Values.images.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: ssr
           image: "{{ .Values.images.registry }}/shadowapi-ssr:{{ .Values.images.tag }}"

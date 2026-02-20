@@ -4,6 +4,7 @@ images:
   registry: git.devinlab.com/shadowapi
   tag: main
   pullPolicy: IfNotPresent
+  pullSecrets: []
 
 nameOverride: ""
 fullnameOverride: ""

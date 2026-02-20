@@ -16,6 +16,10 @@ spec:
         {{- include "meshpump.selectorLabels" . | nindent 8 }}
     spec:
       restartPolicy: OnFailure
+      {{- with .Values.images.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: migrate
           image: "{{ .Values.images.registry }}/shadowapi-migrate:{{ .Values.images.tag }}"

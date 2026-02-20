@@ -15,6 +15,10 @@ spec:
         {{- include "meshpump.grpc2natsSelectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "meshpump.serviceAccountName" . }}
+      {{- with .Values.images.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: grpc2nats
           image: "{{ .Values.images.registry }}/shadowapi-grpc2nats:{{ .Values.images.tag }}"

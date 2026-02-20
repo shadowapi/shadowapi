@@ -173,10 +173,17 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
+          kubectl create secret docker-registry gitea-registry \
+            --docker-server=git.devinlab.com \
+            --docker-username=${{ github.repository_owner }} \
+            --docker-password=${{ secrets.GITEATOKEN }} \
+            -n meshpump \
+            --dry-run=client -o yaml | kubectl apply -f -
           IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/^v//')
           helm upgrade --install meshpump ./k8s/meshpump \
             -n meshpump \
             -f ./k8s/meshpump/values/production.yaml \
             --set images.tag=${IMAGE_TAG} \
+            --set "images.pullSecrets[0].name=gitea-registry" \
             --atomic \
             --timeout 10m
