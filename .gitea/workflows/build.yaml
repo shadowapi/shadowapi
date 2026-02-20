@@ -21,7 +21,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: git.devinlab.com
-          username: ${{ gitea.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITEATOKEN }}
 
       - name: Extract metadata for backend
@@ -167,11 +167,10 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Deploy with Helm
-        env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
         run: |
-          echo "$KUBECONFIG_B64" | base64 -d > /tmp/kubeconfig
-          export KUBECONFIG=/tmp/kubeconfig
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
           IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/^v//')
           helm upgrade --install meshpump ./k8s/meshpump \
             -n meshpump \
