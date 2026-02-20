@@ -68,7 +68,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
         try {
           const result = await switchWorkspace(slug);
           // Cookie is now set - re-fetch profile to confirm
-          const { data: updatedProfile } = await client.GET('/profile');
+          await client.GET('/profile');
           setWorkspace({
             uuid: result.workspace_uuid,
             slug,
