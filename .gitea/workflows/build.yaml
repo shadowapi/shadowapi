@@ -2,10 +2,10 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, v3]
     tags: ['v*']
   pull_request:
-    branches: [main]
+    branches: [main, v3]
 
 jobs:
   build:
@@ -172,9 +172,10 @@ jobs:
         run: |
           echo "$KUBECONFIG_B64" | base64 -d > /tmp/kubeconfig
           export KUBECONFIG=/tmp/kubeconfig
+          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/^v//')
           helm upgrade --install meshpump ./k8s/meshpump \
             -n meshpump \
             -f ./k8s/meshpump/values/production.yaml \
-            --set images.tag=${{ github.ref_name }} \
+            --set images.tag=${IMAGE_TAG} \
             --atomic \
             --timeout 10m
