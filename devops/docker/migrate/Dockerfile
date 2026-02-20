@@ -1,4 +1,8 @@
-FROM arigaio/atlas:1.1.0
+FROM arigaio/atlas:1.1.0 AS atlas-bin
+
+FROM alpine:3.21
+
+COPY --from=atlas-bin /atlas /usr/local/bin/atlas
 
 COPY db/schema.sql /db/schema.sql
 COPY db/tg.sql /db/tg.sql
