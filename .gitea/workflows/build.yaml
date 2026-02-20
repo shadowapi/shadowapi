@@ -162,9 +162,11 @@ jobs:
       image: dtzar/helm-kubectl:latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+        run: |
+          git clone --depth 1 \
+            --branch "${{ github.ref_name }}" \
+            "https://x-token:${{ github.token }}@git.devinlab.com/${{ github.repository }}.git" \
+            .
 
       - name: Deploy with Helm
         run: |
