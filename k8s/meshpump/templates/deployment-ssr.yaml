@@ -25,6 +25,10 @@ spec:
         - name: ssr
           image: "{{ .Values.images.registry }}/shadowapi-ssr:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: meshpump-app-secrets
+                optional: true
           ports:
             - name: http
               containerPort: 3000

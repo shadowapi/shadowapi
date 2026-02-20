@@ -1,10 +1,13 @@
 /**
  * OAuth2 client for communicating with the backend OAuth2 endpoints
  */
+import { getRuntimeConfig } from '../runtime-config'
 
-// OAuth2 base URL - use environment variable or fallback to default
-const API_BASE_URL =
+// OAuth2 base URL - runtime config (from SSR env) takes precedence over build-time value
+const API_BASE_URL = getRuntimeConfig(
+  'VITE_API_BASE_URL',
   import.meta.env.VITE_API_BASE_URL || 'http://api.localtest.me/api/v1'
+)
 const OAUTH2_BASE_URL = `${API_BASE_URL}/auth/oauth2`
 
 export interface OAuth2AuthorizeResponse {

@@ -33,6 +33,15 @@ async function createServer() {
     res.redirect(301, '/start');
   });
 
+  // Build runtime config from environment variables (overrides baked-in build-time values)
+  const runtimeConfig = {
+    VITE_API_BASE_URL: process.env.VITE_API_BASE_URL || '',
+    VITE_OIDC_URL: process.env.VITE_OIDC_URL || '',
+    VITE_ROOT_URL: process.env.VITE_ROOT_URL || '',
+    VITE_APP_URL: process.env.VITE_APP_URL || '',
+  };
+  const runtimeConfigScript = `<script>window.__RUNTIME_CONFIG__=${JSON.stringify(runtimeConfig)}</script>`;
+
   // Load the production template and server render module
   const template = fs.readFileSync(
     path.resolve(__dirname, 'dist/client/index.html'),
@@ -55,6 +64,7 @@ async function createServer() {
 
       // Inject rendered content into template
       const html = template
+        .replace('<!--ssr-config-->', runtimeConfigScript)
         .replace('<!--ssr-styles-->', styles)
         .replace('<!--ssr-outlet-->', appHtml)
         .replace(
