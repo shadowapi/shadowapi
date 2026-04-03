@@ -1,9 +1,0 @@
-services:
-  frontend:
-    labels:
-      - traefik.http.routers.shadowapi-front.tls.certResolver=letsencrypt
-      - traefik.http.routers.shadowapi-front.tls.domains.0.main=${DOMAIN}
-  backend:
-    labels:
-      - traefik.http.routers.shadowapi-api.tls.certResolver=letsencrypt
-      - traefik.http.routers.shadowapi-api.tls.domains.0.main=${DOMAIN}

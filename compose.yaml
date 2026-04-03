@@ -1,128 +1,62 @@
 services:
-  traefik:
-    image: traefik:v3.1
-    container_name: sa-traefik
-    command:
-      - --log.level=DEBUG
-      - --accesslog=true
-      - --accesslog.fields.defaultmode=keep
-      - --accesslog.fields.names.StartUTC=keep
-      - --accesslog.fields.names.Duration=keep
-      - --accesslog.fields.names.ResponseStatus=keep
-      - --accesslog.fields.names.RequestMethod=keep
-      - --accesslog.fields.names.RequestPath=keep
-      - --api.insecure=true
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entryPoints.web.address=:80
-    ports:
-      - 80:80
-      - 8800:8080
-    depends_on:
-      - frontend
-    networks:
-      - shadowapi
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
   frontend:
     build:
-      context: front
-      dockerfile: ../devops/frontend.dev.Dockerfile
+      context: frontend
+      dockerfile: ../devops/Dockerfile.frontend
     container_name: sa-frontend
+    ports:
+      - "5174:5174"
     networks:
       - shadowapi
-#    volumes:
-#      - ./front:/app
-#      - /app/node_modules
     develop:
       watch:
         - action: sync
-          path: ./front
+          path: ./frontend
           target: /app
           ignore:
             - node_modules
         - action: rebuild
-          path: ./front/package.json
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.shadowapi-front.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.shadowapi-front.entrypoints=${TRAEFIK_ENTRYPOINT}
-      - traefik.http.services.shadowapi-front.loadbalancer.server.port=5173
+          path: ./frontend/package.json
+
   backend:
     build:
       context: .
-      dockerfile: devops/backend.dev.Dockerfile
+      dockerfile: devops/Dockerfile.dev
     container_name: sa-backend
     working_dir: /app
+    ports:
+      - "8090:8090"
     depends_on:
       db:
         condition: service_healthy
-      db-migrate:
-        condition: service_completed_successfully
+      nats:
+        condition: service_started
     environment:
       - SA_CONFIG_PATH=/app/config.yaml
     networks:
       - shadowapi
     volumes:
       - ./backend:/app/
-      - ./spec:/spec/
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.shadowapi-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/assets/`) || PathPrefix(`/auth/`) || PathPrefix(`/login`) || PathPrefix(`/logout`))
-      - traefik.http.routers.shadowapi-api.entrypoints=${TRAEFIK_ENTRYPOINT}
-      - traefik.http.services.shadowapi-api.loadbalancer.server.port=8080
-
-  backend-loader:
-    build:
-      context: .
-      dockerfile: devops/backend-loader.Dockerfile
-    container_name: sa-backend-loader
-    environment:
-      - SA_HOST=0.0.0.0
-      - SA_DB_URI=postgres://shadowapi:shadowapi@db/shadowapi
-      - SA_LOG_LEVEL=DEBUG
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - shadowapi
+      - ./db:/db/
 
   db:
     image: postgres:16-alpine
     container_name: sa-db
     restart: always
-    command: ["postgres", "-c", "log_statement=all"]
     networks:
       - shadowapi
     volumes:
-      - ./devops/db-init.sh:/docker-entrypoint-initdb.d/init-user-db.sh
       - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=shadowapi
       - POSTGRES_USER=shadowapi
       - POSTGRES_DB=shadowapi
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "shadowapi"]
-      interval: "10s"
-      timeout: "30s"
+      test: ["CMD-SHELL", "pg_isready -U shadowapi"]
+      interval: 5s
+      timeout: 5s
       retries: 5
-      start_period: "20s"
-  db-migrate:
-    container_name: sa-db-migrate
-    image: arigaio/atlas:0.30.0
-    networks:
-      - shadowapi
-    command: >
-      schema apply
-      --url postgres://shadowapi:shadowapi@db:5432/shadowapi?sslmode=disable
-      --dev-url postgres://shadowapi:shadowapi@db:5432/shadowapi_schema?sslmode=disable
-      --to file://schema.sql
-      --auto-approve
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./db/schema.sql:/schema.sql
+
   nats:
     image: nats:2.11.1
     container_name: sa-nats
@@ -135,8 +69,6 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  node_modules:
-    driver: local
+
 networks:
   shadowapi:

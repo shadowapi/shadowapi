@@ -40,7 +40,11 @@ templates/**/*.txt
 package-lock.json
 yarn.lock
 backend/config.yaml
+backend/config.local.yaml
 ./config.yaml
-/localtest.me.crt
-/localtest.me.key
-front/.env
+/certs/localtest.me.crt
+/certs/localtest.me.key
+frontend/.env
+spec/openapi-bundled.yaml
+devops/nginx/mkcert/
+backend/mock-oidc

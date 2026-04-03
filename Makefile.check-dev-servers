@@ -1,0 +1,96 @@
+##########################
+# Dev Servers Health Check
+# Checks all local development dependencies
+# Usage: make check-dev-servers
+##########################
+
+docker-ensure: ## Ensure Docker Desktop is running (starts it if needed)
+	@if docker info >/dev/null 2>&1; then \
+		echo "Docker already running"; \
+	else \
+		echo "Starting Docker Desktop..."; \
+		open -a Docker; \
+		echo "Waiting for Docker to be ready..."; \
+		for i in $$(seq 1 30); do \
+			if docker info >/dev/null 2>&1; then \
+				echo "Docker is ready"; \
+				break; \
+			fi; \
+			printf "."; \
+			sleep 2; \
+		done; \
+		if ! docker info >/dev/null 2>&1; then \
+			echo ""; \
+			echo "Docker failed to start within 60s"; \
+			exit 1; \
+		fi; \
+	fi
+
+check-dev-servers: ## Check status of all ShadowAPI dev services
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  ShadowAPI Dev Servers Status"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "── Backend (Go + Air) — port 8090 ──"
+	@if lsof -iTCP:8090 -sTCP:LISTEN -P -n 2>/dev/null | grep -q LISTEN; then \
+		pid=$$(lsof -iTCP:8090 -sTCP:LISTEN -P -n -t 2>/dev/null | head -1); \
+		echo "  ✅ Running (PID $$pid)"; \
+		curl -s --max-time 3 http://127.0.0.1:8090/api/v1/health 2>/dev/null | grep -q . && echo "  ✅ API responding" || echo "  ⚠️  API not responding"; \
+	else \
+		echo "  ❌ Not running (make up)"; \
+	fi
+	@echo ""
+	@echo "── Frontend (Vite) — port 5174 ──"
+	@if lsof -iTCP:5174 -sTCP:LISTEN -P -n 2>/dev/null | grep -q LISTEN; then \
+		pid=$$(lsof -iTCP:5174 -sTCP:LISTEN -P -n -t 2>/dev/null | head -1); \
+		echo "  ✅ Running (PID $$pid)"; \
+	else \
+		echo "  ❌ Not running (make up)"; \
+	fi
+	@echo ""
+	@echo "── PostgreSQL — port 5432 ──"
+	@if lsof -iTCP:5432 -sTCP:LISTEN -P -n 2>/dev/null | grep -q LISTEN; then \
+		pid=$$(lsof -iTCP:5432 -sTCP:LISTEN -P -n -t 2>/dev/null | head -1); \
+		echo "  ✅ Running (PID $$pid)"; \
+		pg_isready -h 127.0.0.1 -p 5432 -q 2>/dev/null && echo "  ✅ Accepting connections" || echo "  ⚠️  Not accepting connections"; \
+	else \
+		echo "  ❌ Not running (docker compose up db)"; \
+	fi
+	@echo ""
+	@echo "── NATS JetStream — port 4222 (client) / 8222 (monitor) ──"
+	@if lsof -iTCP:4222 -sTCP:LISTEN -P -n 2>/dev/null | grep -q LISTEN; then \
+		pid=$$(lsof -iTCP:4222 -sTCP:LISTEN -P -n -t 2>/dev/null | head -1); \
+		echo "  ✅ Client running on :4222 (PID $$pid)"; \
+	else \
+		echo "  ❌ Client not running (docker compose up nats)"; \
+	fi
+	@if lsof -iTCP:8222 -sTCP:LISTEN -P -n 2>/dev/null | grep -q LISTEN; then \
+		echo "  ✅ Monitor running — http://127.0.0.1:8222"; \
+		curl -s --max-time 3 http://127.0.0.1:8222/healthz 2>/dev/null | grep -q ok && echo "  ✅ Healthy" || echo "  ⚠️  Health check failed"; \
+	else \
+		echo "  ⚠️  Monitor not running on :8222"; \
+	fi
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  Docker Containers"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo ""
+	@docker ps --format "  {{.Status}}\t{{.Names}}\t{{.Ports}}" --filter "name=sa-" 2>/dev/null || echo "  ⚠️  Docker not running or no sa- containers"
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  Quick Start Commands"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "  Dev:        make up              (docker compose watch)"
+	@echo "  Stop:       make down            (docker compose down)"
+	@echo "  Clean:      make clean           (remove volumes + images)"
+	@echo "  DB shell:   make db-shell        (psql)"
+	@echo "  Backend:    make shell           (bash in backend container)"
+	@echo "  Schema:     make sync-db         (apply schema.sql + tg.sql)"
+	@echo "  API gen:    make api-gen         (regenerate from OpenAPI)"
+	@echo "  Tests:      make test            (Go tests)"
+	@echo "  Prod build: make build-prod      (single Docker image)"
+	@echo ""
+	@echo "  Logs:       docker compose logs -f backend"
+	@echo "  All:        docker compose logs -f"
+	@echo ""
