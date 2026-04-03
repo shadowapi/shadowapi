@@ -12,7 +12,7 @@ RUN go mod download
 RUN go build -v -o /go/bin/shadowapi ./cmd/shadowapi
 
 # Stage 2: Build Node frontend
-FROM node:20.10.0-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 
 WORKDIR /app
 COPY frontend/package*.json ./
