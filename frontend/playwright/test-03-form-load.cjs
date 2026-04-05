@@ -254,9 +254,9 @@ async function testProfileFormLoad(page) {
 
   recordTest('Profile page loads', page.url().includes('/profile'))
 
-  const email = await readField(page, 'Email').catch(() => '')
   const firstName = await readField(page, 'First Name').catch(() => '')
-  recordTest('Profile fields populated', email.length > 0 || firstName.length > 0)
+  const lastName = await readField(page, 'Last Name').catch(() => '')
+  recordTest('Profile fields populated', firstName.length > 0 || lastName.length > 0)
 }
 
 // ================================================================

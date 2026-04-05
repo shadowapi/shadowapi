@@ -69,6 +69,9 @@ test-crud: ## Run CRUD Playwright test (non-headless)
 test-form-load: ## Run form data loading Playwright test (non-headless)
 	node frontend/playwright/test-03-form-load.cjs
 
+test-get-10-messages: ## Run Gmail fetch pipeline test (non-headless)
+	node frontend/playwright/test-04-get-10-messages.cjs
+
 test-pw: ## Run Playwright tests
 	cd frontend && npx playwright test
 
