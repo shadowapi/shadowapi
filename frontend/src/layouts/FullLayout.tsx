@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layout, Menu, Dropdown, Button, Typography, theme } from 'antd'
+import { Layout, Menu, Dropdown, Button, theme } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   HomeOutlined,
@@ -100,46 +100,49 @@ export function FullLayout({ children }: { children: React.ReactNode }) {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider
-        collapsible
         collapsed={collapsed}
-        onCollapse={setCollapsed}
         breakpoint="lg"
+        onBreakpoint={(broken) => setCollapsed(broken)}
+        trigger={null}
         style={{ background: colorBgContainer }}
       >
         <div
           style={{
-            height: 32,
-            margin: 16,
+            height: 56,
+            padding: '0 8px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 4,
           }}
         >
+          <img src="/logo.png" alt="ShadowAPI" style={{ width: 40, height: 40 }} />
           {!collapsed && (
-            <Typography.Title level={4} style={{ margin: 0 }}>
-              ShadowAPI
-            </Typography.Title>
+            <span style={{ fontWeight: 600, fontSize: 16 }}>ShadowAPI</span>
           )}
+          <div style={{ flex: 1 }} />
+          <Button
+            type="text"
+            size="small"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={() => setCollapsed(!collapsed)}
+          />
         </div>
         <Menu mode="inline" selectedKeys={[location.pathname]} defaultOpenKeys={allGroupKeys} items={menuItems} onClick={onMenuClick} />
       </Sider>
       <Layout>
         <Header
           style={{
-            padding: '0 24px',
+            padding: '0 16px',
             background: colorBgContainer,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
+            height: 40,
+            lineHeight: '40px',
           }}
         >
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-          />
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Button type="text" icon={<UserOutlined />}>
+            <Button type="text" size="small" icon={<UserOutlined />}>
               {session?.email ?? 'User'}
             </Button>
           </Dropdown>

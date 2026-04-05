@@ -60,7 +60,7 @@ func CreateEmailPipelines(ctx context.Context, log *slog.Logger, dbp *pgxpool.Po
 		OrderDirection: "asc",
 		Offset:         0,
 		Limit:          100,
-		Type:           "email",
+		Type:           "",  // load all types: email, email_oauth, outlook, etc.
 		UUID:           pgtype.UUID{Valid: false},
 		IsEnabled:      1,
 		Name:           "",

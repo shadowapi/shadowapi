@@ -104,5 +104,6 @@ versions: ## Check versions of host packages
 # ---------- Includes ----------
 
 include Makefile.check-dev-servers
+include Makefile.cli
 
 .DEFAULT_GOAL := help

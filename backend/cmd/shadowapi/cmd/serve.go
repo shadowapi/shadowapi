@@ -14,7 +14,7 @@ import (
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "starts UI and RESTfull API servers",
+	Short: "starts UI and RESTful API servers",
 	Run: func(cmd *cobra.Command, args []string) {
 		// DI must know all modules
 		// injector - DI god-like object, instance of all modules

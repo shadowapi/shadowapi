@@ -481,6 +481,8 @@ export type DatasourceEmailOauthList200Item = {
   provider: string
   /** Identifier of the OAuth2 client bound to this datasource. */
   oauth2_client_uuid: string
+  /** Identifier of the linked OAuth2 token (set after successful auth flow). */
+  oauth2_token_uuid?: string
   readonly created_at?: string
   readonly updated_at?: string
 }
@@ -515,6 +517,8 @@ export type DatasourceEmailOauthCreateBody = {
   provider: string
   /** Identifier of the OAuth2 client bound to this datasource. */
   oauth2_client_uuid: string
+  /** Identifier of the linked OAuth2 token (set after successful auth flow). */
+  oauth2_token_uuid?: string
   readonly created_at?: string
   readonly updated_at?: string
 }
@@ -531,6 +535,8 @@ export type DatasourceEmailOauthCreate201 = {
   provider: string
   /** Identifier of the OAuth2 client bound to this datasource. */
   oauth2_client_uuid: string
+  /** Identifier of the linked OAuth2 token (set after successful auth flow). */
+  oauth2_token_uuid?: string
   readonly created_at?: string
   readonly updated_at?: string
 }
@@ -565,6 +571,8 @@ export type DatasourceEmailOauthGet200 = {
   provider: string
   /** Identifier of the OAuth2 client bound to this datasource. */
   oauth2_client_uuid: string
+  /** Identifier of the linked OAuth2 token (set after successful auth flow). */
+  oauth2_token_uuid?: string
   readonly created_at?: string
   readonly updated_at?: string
 }
@@ -599,6 +607,8 @@ export type DatasourceEmailOauthUpdateBody = {
   provider: string
   /** Identifier of the OAuth2 client bound to this datasource. */
   oauth2_client_uuid: string
+  /** Identifier of the linked OAuth2 token (set after successful auth flow). */
+  oauth2_token_uuid?: string
   readonly created_at?: string
   readonly updated_at?: string
 }
@@ -615,6 +625,8 @@ export type DatasourceEmailOauthUpdate200 = {
   provider: string
   /** Identifier of the OAuth2 client bound to this datasource. */
   oauth2_client_uuid: string
+  /** Identifier of the linked OAuth2 token (set after successful auth flow). */
+  oauth2_token_uuid?: string
   readonly created_at?: string
   readonly updated_at?: string
 }

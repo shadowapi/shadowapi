@@ -1,0 +1,14 @@
+# ShadowAPI CLI commands
+# Include in main Makefile via: include Makefile.cli
+
+CLI_ENV = SA_ENV=dev SA_CONFIG_PATH=config.local.yaml
+CLI_RUN = cd backend && $(CLI_ENV) go run ./cmd/shadowapi
+
+cli-check: ## Run health checks (db, storages, tokens, pipelines)
+	$(CLI_RUN) check
+
+cli-pipelines: ## List all pipelines
+	$(CLI_RUN) pipeline list
+
+cli-run-pipeline: ## Run pipeline fetch (usage: make cli-run-pipeline UUID=xxx LIMIT=10)
+	$(CLI_RUN) pipeline run $(UUID) --limit $(or $(LIMIT),10)

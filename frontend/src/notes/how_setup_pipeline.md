@@ -30,3 +30,11 @@ Once you have at least one storage and one data source, create a pipeline to con
 - Configure field mappings and processing options
 
 Go to **Pipelines → Add Pipeline** to get started.
+
+## 4. Run Your Pipeline
+
+After creating a pipeline, trigger a run to start pulling and processing data:
+
+- Go to **Pipelines** and click **Run** on your pipeline
+- Monitor progress in the **Workers** section
+- Once your first job completes, you're all set!

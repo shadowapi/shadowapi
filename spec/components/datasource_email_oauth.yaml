@@ -19,6 +19,9 @@ properties:
   oauth2_client_uuid:
     type: string
     description: Identifier of the OAuth2 client bound to this datasource.
+  oauth2_token_uuid:
+    type: string
+    description: Identifier of the linked OAuth2 token (set after successful auth flow).
   created_at:
     type: string
     format: date-time

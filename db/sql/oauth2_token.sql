@@ -34,7 +34,7 @@ WHERE
 SELECT
     sqlc.embed(oauth2_token)
 FROM oauth2_token
-WHERE client_uuid = sqlc.arg('uuid')::uuid;
+WHERE uuid = sqlc.arg('uuid')::uuid;
 
 -- name: GetOauth2ClientTokens :many
 SELECT
@@ -66,8 +66,6 @@ OFFSET sqlc.arg('offset')::int;
 
 -- name: UpdateOauth2Token :exec
 UPDATE oauth2_token SET
-                        client_uuid = sqlc.arg('client_uuid')::uuid,
-    user_uuid = sqlc.arg('user_uuid')::uuid,
     token = sqlc.arg('token'),
     updated_at = NOW()
 WHERE uuid = sqlc.arg('uuid')::uuid;

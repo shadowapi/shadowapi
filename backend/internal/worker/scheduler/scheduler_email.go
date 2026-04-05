@@ -149,7 +149,7 @@ func (s *MultiEmailScheduler) run(ctx context.Context) {
 		// Calculate the next run time.
 		nextRun := s.nextRunTime(sched, now)
 		// Update the scheduler record with the new run time.
-		s.updateSchedulerRun(ctx, queries, converter.UuidToPgUUID(sched.UUID), now, nextRun)
+		s.updateSchedulerRun(ctx, queries, converter.UuidToPgUUID(sched.UUID), now, nextRun, sched)
 		// Increase the scheduled jobs metric.
 		metrics.JobScheduledTotal.WithLabelValues(sched.PipelineUuid.String(), "").Inc()
 	}
@@ -165,15 +165,15 @@ func (s *MultiEmailScheduler) nextRunTime(sch query.GetSchedulersRow, now time.T
 	return now.Add(24 * time.Hour)
 }
 
-func (s *MultiEmailScheduler) updateSchedulerRun(ctx context.Context, queries *query.Queries, id pgtype.UUID, lastRun, nextRun time.Time) {
+func (s *MultiEmailScheduler) updateSchedulerRun(ctx context.Context, queries *query.Queries, id pgtype.UUID, lastRun, nextRun time.Time, sch query.GetSchedulersRow) {
 	err := queries.UpdateScheduler(ctx, query.UpdateSchedulerParams{
-		CronExpression: pgtype.Text{String: "", Valid: false},
-		RunAt:          pgtype.Timestamptz{Time: lastRun, Valid: true},
-		Timezone:       "UTC",
+		CronExpression: sch.CronExpression,
+		RunAt:          sch.RunAt,
+		Timezone:       sch.Timezone,
 		NextRun:        pgtype.Timestamptz{Time: nextRun, Valid: true},
 		LastRun:        pgtype.Timestamptz{Time: lastRun, Valid: true},
-		IsEnabled:      true,
-		IsPaused:       false,
+		IsEnabled:      sch.IsEnabled,
+		IsPaused:       sch.IsPaused,
 		UUID:           id,
 	})
 	if err != nil {

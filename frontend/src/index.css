@@ -8,3 +8,52 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Compact sidebar menu */
+.ant-layout-sider .ant-menu-inline {
+  padding: 0 4px;
+}
+.ant-layout-sider .ant-menu-inline .ant-menu-item,
+.ant-layout-sider .ant-menu-inline .ant-menu-submenu-title {
+  margin-inline: 0;
+  padding-inline: 12px !important;
+  border-radius: 4px;
+  height: 36px;
+  line-height: 36px;
+}
+.ant-layout-sider .ant-menu-inline .ant-menu-sub .ant-menu-item {
+  padding-left: 36px !important;
+}
+
+/* Compact Quick Start markdown guide */
+/* Compact table cell padding */
+.ant-table-cell {
+  padding: 8px 10px !important;
+}
+
+.markdown-guide {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.markdown-guide h1 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.markdown-guide h2 {
+  font-size: 15px;
+  margin: 12px 0 4px;
+}
+.markdown-guide h3 {
+  font-size: 14px;
+  margin: 10px 0 4px;
+}
+.markdown-guide p {
+  margin: 0 0 6px;
+}
+.markdown-guide ul {
+  margin: 0 0 6px;
+  padding-left: 20px;
+}
+.markdown-guide li {
+  margin-bottom: 2px;
+}

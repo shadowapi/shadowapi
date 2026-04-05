@@ -3237,6 +3237,12 @@ func (s *DatasourceEmailOAuth) encodeFields(e *jx.Encoder) {
 		e.Str(s.OAuth2ClientUUID)
 	}
 	{
+		if s.OAuth2TokenUUID.Set {
+			e.FieldStart("oauth2_token_uuid")
+			s.OAuth2TokenUUID.Encode(e)
+		}
+	}
+	{
 		if s.CreatedAt.Set {
 			e.FieldStart("created_at")
 			s.CreatedAt.Encode(e, json.EncodeDateTime)
@@ -3250,7 +3256,7 @@ func (s *DatasourceEmailOAuth) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDatasourceEmailOAuth = [9]string{
+var jsonFieldsNameOfDatasourceEmailOAuth = [10]string{
 	0: "uuid",
 	1: "user_uuid",
 	2: "email",
@@ -3258,8 +3264,9 @@ var jsonFieldsNameOfDatasourceEmailOAuth = [9]string{
 	4: "is_enabled",
 	5: "provider",
 	6: "oauth2_client_uuid",
-	7: "created_at",
-	8: "updated_at",
+	7: "oauth2_token_uuid",
+	8: "created_at",
+	9: "updated_at",
 }
 
 // Decode decodes DatasourceEmailOAuth from json.
@@ -3350,6 +3357,16 @@ func (s *DatasourceEmailOAuth) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"oauth2_client_uuid\"")
+			}
+		case "oauth2_token_uuid":
+			if err := func() error {
+				s.OAuth2TokenUUID.Reset()
+				if err := s.OAuth2TokenUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"oauth2_token_uuid\"")
 			}
 		case "created_at":
 			if err := func() error {
