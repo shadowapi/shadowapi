@@ -18,6 +18,8 @@ properties:
     type: string
   oauth2_client_id:
     type: string
+  oauth2_client_uuid:
+    type: string
   oauth2_token_uuid:
     type: string
   imap_server:

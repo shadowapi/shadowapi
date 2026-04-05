@@ -58,8 +58,9 @@ func (m *Middleware) OgenMiddleware(req middleware.Request, next middleware.Next
 		req.SetContext(context.WithValue(req.Context, "auth_reason", "session cookie miss"))
 	}
 
-	// 3) anonymous `/session` probe is allowed so front-end can learn the reason
-	if req.OperationID == "session-status" {
+	// 3) public endpoints that don't require auth
+	switch req.OperationID {
+	case "session-status", "oauth2-client-callback":
 		return next(req)
 	}
 

@@ -1,6 +1,7 @@
 get:
   description: Serve OAuth2 client callback
   operationId: oauth2-client-callback
+  security: []  # No auth — Google redirects here; validated via state UUID
   parameters:
     - description: State UUID.
       explode: false

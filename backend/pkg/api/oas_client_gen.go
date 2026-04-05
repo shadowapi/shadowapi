@@ -7695,63 +7695,6 @@ func (c *Client) sendOAuth2ClientCallback(ctx context.Context, params OAuth2Clie
 		return res, errors.Wrap(err, "create request")
 	}
 
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:ZitadelCookieAuth"
-			switch err := c.securityZitadelCookieAuth(ctx, OAuth2ClientCallbackOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"ZitadelCookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, OAuth2ClientCallbackOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:PlainCookieAuth"
-			switch err := c.securityPlainCookieAuth(ctx, OAuth2ClientCallbackOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"PlainCookieAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-				{0b00000100},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
 	stage = "SendRequest"
 	resp, err := c.cfg.Client.Do(r)
 	if err != nil {

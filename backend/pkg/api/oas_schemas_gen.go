@@ -1523,20 +1523,21 @@ func (s *Datasource) SetUpdatedAt(val OptDateTime) {
 
 // Ref: #
 type DatasourceEmail struct {
-	UUID            OptString   `json:"uuid"`
-	UserUUID        string      `json:"user_uuid"`
-	Email           string      `json:"email"`
-	Name            string      `json:"name"`
-	IsEnabled       OptBool     `json:"is_enabled"`
-	Provider        string      `json:"provider"`
-	OAuth2ClientID  OptString   `json:"oauth2_client_id"`
-	OAuth2TokenUUID OptString   `json:"oauth2_token_uuid"`
-	ImapServer      string      `json:"imap_server"`
-	SMTPServer      string      `json:"smtp_server"`
-	SMTPTLS         OptBool     `json:"smtp_tls"`
-	Password        string      `json:"password"`
-	CreatedAt       OptDateTime `json:"created_at"`
-	UpdatedAt       OptDateTime `json:"updated_at"`
+	UUID             OptString   `json:"uuid"`
+	UserUUID         string      `json:"user_uuid"`
+	Email            string      `json:"email"`
+	Name             string      `json:"name"`
+	IsEnabled        OptBool     `json:"is_enabled"`
+	Provider         string      `json:"provider"`
+	OAuth2ClientID   OptString   `json:"oauth2_client_id"`
+	OAuth2ClientUUID OptString   `json:"oauth2_client_uuid"`
+	OAuth2TokenUUID  OptString   `json:"oauth2_token_uuid"`
+	ImapServer       string      `json:"imap_server"`
+	SMTPServer       string      `json:"smtp_server"`
+	SMTPTLS          OptBool     `json:"smtp_tls"`
+	Password         string      `json:"password"`
+	CreatedAt        OptDateTime `json:"created_at"`
+	UpdatedAt        OptDateTime `json:"updated_at"`
 }
 
 // GetUUID returns the value of UUID.
@@ -1572,6 +1573,11 @@ func (s *DatasourceEmail) GetProvider() string {
 // GetOAuth2ClientID returns the value of OAuth2ClientID.
 func (s *DatasourceEmail) GetOAuth2ClientID() OptString {
 	return s.OAuth2ClientID
+}
+
+// GetOAuth2ClientUUID returns the value of OAuth2ClientUUID.
+func (s *DatasourceEmail) GetOAuth2ClientUUID() OptString {
+	return s.OAuth2ClientUUID
 }
 
 // GetOAuth2TokenUUID returns the value of OAuth2TokenUUID.
@@ -1642,6 +1648,11 @@ func (s *DatasourceEmail) SetProvider(val string) {
 // SetOAuth2ClientID sets the value of OAuth2ClientID.
 func (s *DatasourceEmail) SetOAuth2ClientID(val OptString) {
 	s.OAuth2ClientID = val
+}
+
+// SetOAuth2ClientUUID sets the value of OAuth2ClientUUID.
+func (s *DatasourceEmail) SetOAuth2ClientUUID(val OptString) {
+	s.OAuth2ClientUUID = val
 }
 
 // SetOAuth2TokenUUID sets the value of OAuth2TokenUUID.

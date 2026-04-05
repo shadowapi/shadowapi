@@ -47,4 +47,11 @@ backend/config.local.yaml
 frontend/.env
 spec/openapi-bundled.yaml
 devops/nginx/mkcert/
+devops/nginx/shadowapi.local.conf
+devops/nginx
 backend/mock-oidc
+
+# Google credentials
+z/google/
+
+backend/shadowapi

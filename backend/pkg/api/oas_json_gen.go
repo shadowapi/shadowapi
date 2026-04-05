@@ -2904,6 +2904,12 @@ func (s *DatasourceEmail) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.OAuth2ClientUUID.Set {
+			e.FieldStart("oauth2_client_uuid")
+			s.OAuth2ClientUUID.Encode(e)
+		}
+	}
+	{
 		if s.OAuth2TokenUUID.Set {
 			e.FieldStart("oauth2_token_uuid")
 			s.OAuth2TokenUUID.Encode(e)
@@ -2941,7 +2947,7 @@ func (s *DatasourceEmail) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDatasourceEmail = [14]string{
+var jsonFieldsNameOfDatasourceEmail = [15]string{
 	0:  "uuid",
 	1:  "user_uuid",
 	2:  "email",
@@ -2949,13 +2955,14 @@ var jsonFieldsNameOfDatasourceEmail = [14]string{
 	4:  "is_enabled",
 	5:  "provider",
 	6:  "oauth2_client_id",
-	7:  "oauth2_token_uuid",
-	8:  "imap_server",
-	9:  "smtp_server",
-	10: "smtp_tls",
-	11: "password",
-	12: "created_at",
-	13: "updated_at",
+	7:  "oauth2_client_uuid",
+	8:  "oauth2_token_uuid",
+	9:  "imap_server",
+	10: "smtp_server",
+	11: "smtp_tls",
+	12: "password",
+	13: "created_at",
+	14: "updated_at",
 }
 
 // Decode decodes DatasourceEmail from json.
@@ -3045,6 +3052,16 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"oauth2_client_id\"")
 			}
+		case "oauth2_client_uuid":
+			if err := func() error {
+				s.OAuth2ClientUUID.Reset()
+				if err := s.OAuth2ClientUUID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"oauth2_client_uuid\"")
+			}
 		case "oauth2_token_uuid":
 			if err := func() error {
 				s.OAuth2TokenUUID.Reset()
@@ -3056,7 +3073,7 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"oauth2_token_uuid\"")
 			}
 		case "imap_server":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.ImapServer = string(v)
@@ -3068,7 +3085,7 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"imap_server\"")
 			}
 		case "smtp_server":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.SMTPServer = string(v)
@@ -3090,7 +3107,7 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"smtp_tls\"")
 			}
 		case "password":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.Password = string(v)
@@ -3132,7 +3149,7 @@ func (s *DatasourceEmail) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00101110,
-		0b00001011,
+		0b00010110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

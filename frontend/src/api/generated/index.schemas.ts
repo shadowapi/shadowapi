@@ -268,6 +268,7 @@ export type DatasourceEmailList200Item = {
   is_enabled?: boolean
   provider: string
   oauth2_client_id?: string
+  oauth2_client_uuid?: string
   oauth2_token_uuid?: string
   imap_server: string
   smtp_server: string
@@ -303,6 +304,7 @@ export type DatasourceEmailCreateBody = {
   is_enabled?: boolean
   provider: string
   oauth2_client_id?: string
+  oauth2_client_uuid?: string
   oauth2_token_uuid?: string
   imap_server: string
   smtp_server: string
@@ -320,6 +322,7 @@ export type DatasourceEmailCreate201 = {
   is_enabled?: boolean
   provider: string
   oauth2_client_id?: string
+  oauth2_client_uuid?: string
   oauth2_token_uuid?: string
   imap_server: string
   smtp_server: string
@@ -355,6 +358,7 @@ export type DatasourceEmailGet200 = {
   is_enabled?: boolean
   provider: string
   oauth2_client_id?: string
+  oauth2_client_uuid?: string
   oauth2_token_uuid?: string
   imap_server: string
   smtp_server: string
@@ -390,6 +394,7 @@ export type DatasourceEmailUpdateBody = {
   is_enabled?: boolean
   provider: string
   oauth2_client_id?: string
+  oauth2_client_uuid?: string
   oauth2_token_uuid?: string
   imap_server: string
   smtp_server: string
@@ -407,6 +412,7 @@ export type DatasourceEmailUpdate200 = {
   is_enabled?: boolean
   provider: string
   oauth2_client_id?: string
+  oauth2_client_uuid?: string
   oauth2_token_uuid?: string
   imap_server: string
   smtp_server: string
