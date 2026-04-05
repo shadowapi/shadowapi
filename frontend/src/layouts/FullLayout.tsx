@@ -108,25 +108,39 @@ export function FullLayout({ children }: { children: React.ReactNode }) {
       >
         <div
           style={{
-            height: 56,
-            padding: '0 8px',
+            height: 48,
+            padding: collapsed ? '0' : '0 12px 0 10px',
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            gap: 8,
           }}
         >
-          <img src="/logo.png" alt="ShadowAPI" style={{ width: 40, height: 40 }} />
+          <img src="/logo.png" alt="ShadowAPI" style={{ width: 32, height: 32, flexShrink: 0 }} />
           {!collapsed && (
-            <span style={{ fontWeight: 600, fontSize: 16 }}>ShadowAPI</span>
+            <>
+              <span style={{ fontWeight: 600, fontSize: 15, color: '#262626', letterSpacing: '-0.3px', flex: 1 }}>ShadowAPI</span>
+              <Button
+                type="text"
+                size="small"
+                icon={<MenuFoldOutlined />}
+                onClick={() => setCollapsed(true)}
+                style={{ color: '#8c8c8c' }}
+              />
+            </>
           )}
-          <div style={{ flex: 1 }} />
-          <Button
-            type="text"
-            size="small"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-          />
         </div>
+        {collapsed && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '6px 0' }}>
+            <Button
+              type="text"
+              size="small"
+              icon={<MenuUnfoldOutlined />}
+              onClick={() => setCollapsed(false)}
+              style={{ color: '#8c8c8c' }}
+            />
+          </div>
+        )}
         <Menu mode="inline" selectedKeys={[location.pathname]} defaultOpenKeys={allGroupKeys} items={menuItems} onClick={onMenuClick} />
       </Sider>
       <Layout>

@@ -93,7 +93,7 @@ export function Messages() {
       title: 'Sender',
       dataIndex: 'sender',
       key: 'sender',
-      width: 240,
+      width: 200,
       render: (val: string) => {
         const { name, email } = parseSender(val)
         return (
