@@ -1,4 +1,4 @@
-.PHONY: help up down clean build shell db-shell sync-db sqlc sqlc-vet api-gen test
+.PHONY: help up down clean build shell db-shell sync-db test-init-test-tables test-destroy-test-tables sqlc sqlc-vet api-gen test
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -37,6 +37,12 @@ ssl-cert: ## Generate and install local SSL certs for shadowapi.local
 sync-db: ## Apply schema changes via psql
 	cat ./db/schema.sql ./db/tg.sql | docker compose exec -T db psql -U shadowapi shadowapi
 
+test-init-test-tables: ## Create test_ tables and register "Test Internal" storage
+	cat ./db/test_storage_tables.sql ./db/test_storage_register.sql | docker compose exec -T db psql -U shadowapi shadowapi
+
+test-destroy-test-tables: ## Drop test_ tables and remove "Test Internal" storage
+	cat ./db/test_storage_destroy.sql | docker compose exec -T db psql -U shadowapi shadowapi
+
 # ---------- Code Generation ----------
 
 sqlc-gen: ## Regenerate SQLC queries
@@ -59,6 +65,9 @@ test-login: ## Run login Playwright test (non-headless)
 
 test-crud: ## Run CRUD Playwright test (non-headless)
 	node frontend/playwright/test-02-crud.cjs
+
+test-form-load: ## Run form data loading Playwright test (non-headless)
+	node frontend/playwright/test-03-form-load.cjs
 
 test-pw: ## Run Playwright tests
 	cd frontend && npx playwright test

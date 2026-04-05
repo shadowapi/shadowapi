@@ -162,34 +162,49 @@ func (h *Handler) DatasourceEmailOAuthUpdate(ctx context.Context, req *api.Datas
 	})
 }
 
+// datasourceEmailOAuthSettings holds only the fields stored in the settings JSON column.
+// Using a plain struct avoids the strict ogen decoder that rejects unknown fields.
+type datasourceEmailOAuthSettings struct {
+	Email            string `json:"email"`
+	OAuth2ClientUUID string `json:"oauth2_client_uuid"`
+}
+
 // QToDatasourceEmailOAuthRow converts a single GetDatasourceRow into an api.DatasourceEmailOAuth.
 func QToDatasourceEmailOAuthRow(dse query.GetDatasourceRow) (*api.DatasourceEmailOAuth, error) {
-	var out api.DatasourceEmailOAuth
-	if err := json.Unmarshal(dse.Datasource.Settings, &out); err != nil {
+	var s datasourceEmailOAuthSettings
+	if err := json.Unmarshal(dse.Datasource.Settings, &s); err != nil {
 		return nil, err
 	}
-	out.UUID = api.NewOptString(dse.Datasource.UUID.String())
+	out := &api.DatasourceEmailOAuth{
+		UUID:             api.NewOptString(dse.Datasource.UUID.String()),
+		Name:             dse.Datasource.Name,
+		Provider:         dse.Datasource.Provider,
+		IsEnabled:        api.NewOptBool(dse.Datasource.IsEnabled),
+		Email:            s.Email,
+		OAuth2ClientUUID: s.OAuth2ClientUUID,
+	}
 	if dse.Datasource.UserUUID != nil {
 		out.UserUUID = dse.Datasource.UserUUID.String()
 	}
-	out.Name = dse.Datasource.Name
-	out.Provider = dse.Datasource.Provider
-	out.IsEnabled = api.NewOptBool(dse.Datasource.IsEnabled)
-	return &out, nil
+	return out, nil
 }
 
 // QToDatasourceEmailOAuthRowMany converts a GetDatasourcesRow into an api.DatasourceEmailOAuth.
 func QToDatasourceEmailOAuthRowMany(r query.GetDatasourcesRow) (*api.DatasourceEmailOAuth, error) {
-	var out api.DatasourceEmailOAuth
-	if err := json.Unmarshal(r.Settings, &out); err != nil {
+	var s datasourceEmailOAuthSettings
+	if err := json.Unmarshal(r.Settings, &s); err != nil {
 		return nil, err
 	}
-	out.UUID = api.NewOptString(r.UUID.String())
+	out := &api.DatasourceEmailOAuth{
+		UUID:             api.NewOptString(r.UUID.String()),
+		Name:             r.Name,
+		Provider:         r.Provider,
+		IsEnabled:        api.NewOptBool(r.IsEnabled),
+		Email:            s.Email,
+		OAuth2ClientUUID: s.OAuth2ClientUUID,
+	}
 	if r.UserUUID != nil {
 		out.UserUUID = r.UserUUID.String()
 	}
-	out.Name = r.Name
-	out.Provider = r.Provider
-	out.IsEnabled = api.NewOptBool(r.IsEnabled)
-	return &out, nil
+	return out, nil
 }

@@ -62,7 +62,7 @@ export function DataSourceForm({ datasourceUUID }: { datasourceUUID: string }): 
     datasourceUUID !== 'add' ? '/datasource' : null
   )
   const genericData = allDatasources?.find((ds) => ds.uuid === datasourceUUID)
-  const dsKind = datasourceUUID === 'add' ? undefined : ((genericData?.type || 'email') as DataSourceKind)
+  const dsKind = datasourceUUID === 'add' ? undefined : (genericData?.type as DataSourceKind | undefined)
   const currentType = datasourceUUID === 'add' ? watchedType : dsKind || watchedType
 
   // Fetch detailed datasource data for editing
