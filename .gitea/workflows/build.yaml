@@ -1,189 +1,201 @@
 name: Build and Deploy
 
-on:
-  push:
-    branches: [main, v3]
-    tags: ['v*']
-  pull_request:
-    branches: [main, v3]
+# ---------------------------------------------------------------------------
+# DISABLED 2026-04-24: production k8s deployment is decommissioned and the
+# `meshpump` namespace has been torn down. Both the `build` job (image push
+# to git.devinlab.com) and the `deploy` job (helm upgrade on v* tags) are
+# commented out below. The `on:` triggers are also commented out so the
+# workflow never starts.
+#
+# To revive: uncomment everything from `on:` downwards. Note that the
+# `meshpump` namespace, secrets (db/nats/migrate/app credentials), and PVCs
+# referenced by the chart no longer exist and would need to be recreated.
+# ---------------------------------------------------------------------------
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Gitea Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: git.devinlab.com
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITEATOKEN }}
-
-      - name: Extract metadata for backend
-        id: meta-backend
-        uses: docker/metadata-action@v5
-        with:
-          images: git.devinlab.com/shadowapi/shadowapi-backend
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Extract metadata for ssr
-        id: meta-ssr
-        uses: docker/metadata-action@v5
-        with:
-          images: git.devinlab.com/shadowapi/shadowapi-ssr
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Extract metadata for grpc2nats
-        id: meta-grpc2nats
-        uses: docker/metadata-action@v5
-        with:
-          images: git.devinlab.com/shadowapi/shadowapi-grpc2nats
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Extract metadata for worker
-        id: meta-worker
-        uses: docker/metadata-action@v5
-        with:
-          images: git.devinlab.com/shadowapi/shadowapi-worker
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Extract metadata for migrate
-        id: meta-migrate
-        uses: docker/metadata-action@v5
-        with:
-          images: git.devinlab.com/shadowapi/shadowapi-migrate
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push backend
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: devops/docker/backend/prod.Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
-          cache-from: type=gha,scope=backend
-          cache-to: type=gha,scope=backend,mode=max
-
-      - name: Build and push ssr
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: devops/docker/ssr/prod.Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-ssr.outputs.tags }}
-          labels: ${{ steps.meta-ssr.outputs.labels }}
-          build-args: |
-            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
-            VITE_OIDC_URL=${{ secrets.VITE_OIDC_URL }}
-            VITE_ROOT_URL=${{ secrets.VITE_ROOT_URL }}
-            VITE_APP_URL=${{ secrets.VITE_APP_URL }}
-          cache-from: type=gha,scope=ssr
-          cache-to: type=gha,scope=ssr,mode=max
-
-      - name: Build and push grpc2nats
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: devops/docker/grpc2nats/Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-grpc2nats.outputs.tags }}
-          labels: ${{ steps.meta-grpc2nats.outputs.labels }}
-          cache-from: type=gha,scope=grpc2nats
-          cache-to: type=gha,scope=grpc2nats,mode=max
-
-      - name: Build and push worker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: devops/docker/worker/Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-worker.outputs.tags }}
-          labels: ${{ steps.meta-worker.outputs.labels }}
-          cache-from: type=gha,scope=worker
-          cache-to: type=gha,scope=worker,mode=max
-
-      - name: Build and push migrate
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: devops/docker/migrate/Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-migrate.outputs.tags }}
-          labels: ${{ steps.meta-migrate.outputs.labels }}
-          cache-from: type=gha,scope=migrate
-          cache-to: type=gha,scope=migrate,mode=max
-
-  deploy:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    container:
-      image: dtzar/helm-kubectl:latest
-    steps:
-      - name: Checkout code
-        run: |
-          git clone --depth 1 \
-            --branch "${{ github.ref_name }}" \
-            "https://x-token:${{ github.token }}@git.devinlab.com/${{ github.repository }}.git" \
-            .
-
-      - name: Deploy with Helm
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          kubectl create secret docker-registry gitea-registry \
-            --docker-server=git.devinlab.com \
-            --docker-username=${{ github.repository_owner }} \
-            --docker-password=${{ secrets.GITEATOKEN }} \
-            -n meshpump \
-            --dry-run=client -o yaml | kubectl apply -f -
-          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          helm upgrade --install meshpump ./k8s/meshpump \
-            -n meshpump \
-            -f ./k8s/meshpump/values/production.yaml \
-            --set images.tag=${IMAGE_TAG} \
-            --set "images.pullSecrets[0].name=gitea-registry" \
-            --atomic \
-            --timeout 10m
+# on:
+#   push:
+#     branches: [main, v3]
+#     tags: ['v*']
+#   pull_request:
+#     branches: [main, v3]
+#
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+#
+#       - name: Log in to Gitea Container Registry
+#         uses: docker/login-action@v3
+#         with:
+#           registry: git.devinlab.com
+#           username: ${{ github.repository_owner }}
+#           password: ${{ secrets.GITEATOKEN }}
+#
+#       - name: Extract metadata for backend
+#         id: meta-backend
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: git.devinlab.com/shadowapi/shadowapi-backend
+#           tags: |
+#             type=ref,event=branch
+#             type=ref,event=pr
+#             type=semver,pattern={{version}}
+#             type=semver,pattern={{major}}.{{minor}}
+#             type=sha
+#             type=raw,value=latest,enable={{is_default_branch}}
+#
+#       - name: Extract metadata for ssr
+#         id: meta-ssr
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: git.devinlab.com/shadowapi/shadowapi-ssr
+#           tags: |
+#             type=ref,event=branch
+#             type=ref,event=pr
+#             type=semver,pattern={{version}}
+#             type=semver,pattern={{major}}.{{minor}}
+#             type=sha
+#             type=raw,value=latest,enable={{is_default_branch}}
+#
+#       - name: Extract metadata for grpc2nats
+#         id: meta-grpc2nats
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: git.devinlab.com/shadowapi/shadowapi-grpc2nats
+#           tags: |
+#             type=ref,event=branch
+#             type=ref,event=pr
+#             type=semver,pattern={{version}}
+#             type=semver,pattern={{major}}.{{minor}}
+#             type=sha
+#             type=raw,value=latest,enable={{is_default_branch}}
+#
+#       - name: Extract metadata for worker
+#         id: meta-worker
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: git.devinlab.com/shadowapi/shadowapi-worker
+#           tags: |
+#             type=ref,event=branch
+#             type=ref,event=pr
+#             type=semver,pattern={{version}}
+#             type=semver,pattern={{major}}.{{minor}}
+#             type=sha
+#             type=raw,value=latest,enable={{is_default_branch}}
+#
+#       - name: Extract metadata for migrate
+#         id: meta-migrate
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: git.devinlab.com/shadowapi/shadowapi-migrate
+#           tags: |
+#             type=ref,event=branch
+#             type=ref,event=pr
+#             type=semver,pattern={{version}}
+#             type=semver,pattern={{major}}.{{minor}}
+#             type=sha
+#             type=raw,value=latest,enable={{is_default_branch}}
+#
+#       - name: Build and push backend
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: devops/docker/backend/prod.Dockerfile
+#           platforms: linux/amd64
+#           push: ${{ github.event_name != 'pull_request' }}
+#           tags: ${{ steps.meta-backend.outputs.tags }}
+#           labels: ${{ steps.meta-backend.outputs.labels }}
+#           cache-from: type=gha,scope=backend
+#           cache-to: type=gha,scope=backend,mode=max
+#
+#       - name: Build and push ssr
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: devops/docker/ssr/prod.Dockerfile
+#           platforms: linux/amd64
+#           push: ${{ github.event_name != 'pull_request' }}
+#           tags: ${{ steps.meta-ssr.outputs.tags }}
+#           labels: ${{ steps.meta-ssr.outputs.labels }}
+#           build-args: |
+#             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+#             VITE_OIDC_URL=${{ secrets.VITE_OIDC_URL }}
+#             VITE_ROOT_URL=${{ secrets.VITE_ROOT_URL }}
+#             VITE_APP_URL=${{ secrets.VITE_APP_URL }}
+#           cache-from: type=gha,scope=ssr
+#           cache-to: type=gha,scope=ssr,mode=max
+#
+#       - name: Build and push grpc2nats
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: devops/docker/grpc2nats/Dockerfile
+#           platforms: linux/amd64
+#           push: ${{ github.event_name != 'pull_request' }}
+#           tags: ${{ steps.meta-grpc2nats.outputs.tags }}
+#           labels: ${{ steps.meta-grpc2nats.outputs.labels }}
+#           cache-from: type=gha,scope=grpc2nats
+#           cache-to: type=gha,scope=grpc2nats,mode=max
+#
+#       - name: Build and push worker
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: devops/docker/worker/Dockerfile
+#           platforms: linux/amd64
+#           push: ${{ github.event_name != 'pull_request' }}
+#           tags: ${{ steps.meta-worker.outputs.tags }}
+#           labels: ${{ steps.meta-worker.outputs.labels }}
+#           cache-from: type=gha,scope=worker
+#           cache-to: type=gha,scope=worker,mode=max
+#
+#       - name: Build and push migrate
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: devops/docker/migrate/Dockerfile
+#           platforms: linux/amd64
+#           push: ${{ github.event_name != 'pull_request' }}
+#           tags: ${{ steps.meta-migrate.outputs.tags }}
+#           labels: ${{ steps.meta-migrate.outputs.labels }}
+#           cache-from: type=gha,scope=migrate
+#           cache-to: type=gha,scope=migrate,mode=max
+#
+#   deploy:
+#     needs: build
+#     if: startsWith(github.ref, 'refs/tags/v')
+#     runs-on: ubuntu-latest
+#     container:
+#       image: dtzar/helm-kubectl:latest
+#     steps:
+#       - name: Checkout code
+#         run: |
+#           git clone --depth 1 \
+#             --branch "${{ github.ref_name }}" \
+#             "https://x-token:${{ github.token }}@git.devinlab.com/${{ github.repository }}.git" \
+#             .
+#
+#       - name: Deploy with Helm
+#         run: |
+#           mkdir -p ~/.kube
+#           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+#           chmod 600 ~/.kube/config
+#           kubectl create secret docker-registry gitea-registry \
+#             --docker-server=git.devinlab.com \
+#             --docker-username=${{ github.repository_owner }} \
+#             --docker-password=${{ secrets.GITEATOKEN }} \
+#             -n meshpump \
+#             --dry-run=client -o yaml | kubectl apply -f -
+#           IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+#           helm upgrade --install meshpump ./k8s/meshpump \
+#             -n meshpump \
+#             -f ./k8s/meshpump/values/production.yaml \
+#             --set images.tag=${IMAGE_TAG} \
+#             --set "images.pullSecrets[0].name=gitea-registry" \
+#             --atomic \
+#             --timeout 10m
